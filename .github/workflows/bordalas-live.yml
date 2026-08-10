@@ -1,4 +1,4 @@
-name: Bordalas IA Observer
+name: Bordalas IA Live
 
 on:
   workflow_dispatch:
@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  observer:
-    name: Bordalas observer cycle
+  live:
+    name: Bordalas live controlled cycle
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -68,10 +68,10 @@ jobs:
           test -n "$BIWENGER_PASSWORD" || (echo "Falta BIWENGER_PASSWORD" && exit 1)
           test -n "$API_FOOTBALL_KEY" || (echo "Falta API_FOOTBALL_KEY" && exit 1)
 
-      - name: Run Bordalas observer
+      - name: Run Bordalas LIVE
         shell: bash
         run: |
-          python -m src.autopilot --once
+          python -m src.autopilot --once --live
 
       - name: Prune persisted state
         if: always()
@@ -83,7 +83,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bordalas-observer-diagnostics-${{ github.run_id }}
+          name: bordalas-live-diagnostics-${{ github.run_id }}
           path: |
             data/autopilot/autopilot_log.jsonl
             data/lineup_monitor/state.json
