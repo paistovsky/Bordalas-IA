@@ -5,3 +5,4 @@ pydantic==2.13.4
 polars==1.43.2
 retry==0.9.2
 rich==14.3.4
+beautifulsoup4==4.13.4

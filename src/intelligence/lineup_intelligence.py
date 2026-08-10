@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from src.analysis.calendar_state import (
+    build_calendar_state,
+)
+
 from src.intelligence.jornada_perfecta_adapter import (
     STATUS_BENCH,
     STATUS_DOUBT,
@@ -8,7 +12,12 @@ from src.intelligence.jornada_perfecta_adapter import (
     STATUS_STARTER,
     STATUS_UNKNOWN,
     build_jornada_perfecta_lookup,
+    clear_jornada_perfecta_cache,
     get_jornada_perfecta_player_signal,
+)
+
+from src.intelligence.jornada_perfecta_provider import (
+    refresh_jornada_perfecta_data,
 )
 
 
@@ -125,19 +134,15 @@ def evaluate_lineup_signal(
         * effective_confidence
     )
 
-    # ========================================================
-    # BLOQUEO EXTERNO
-    # ========================================================
-    #
-    # Solo NO_CONVOCADO muy fiable y fresco bloquea.
-    #
-    # SUPLENTE nunca es bloqueo absoluto.
-    # ========================================================
-
     external_block = bool(
-        status == STATUS_OUT
-        and confidence >= 85
-        and freshness_factor >= 0.85
+        status
+        == STATUS_OUT
+
+        and
+        confidence >= 85
+
+        and
+        freshness_factor >= 0.85
     )
 
     return {
@@ -171,6 +176,94 @@ def evaluate_lineup_signal(
 
 
 # ============================================================
+# REFRESCO AUTOMATICO
+# ============================================================
+
+
+def refresh_external_lineup_source(
+    snapshot: dict,
+) -> dict:
+
+    try:
+
+        calendar = (
+            build_calendar_state(
+                snapshot
+            )
+        )
+
+        target_matchday = (
+            calendar.get(
+                "target_matchday"
+            )
+        )
+
+        seconds_to_deadline = (
+            calendar.get(
+                "seconds_to_deadline"
+            )
+        )
+
+        result = (
+            refresh_jornada_perfecta_data(
+                snapshot=
+                    snapshot,
+
+                target_matchday=
+                    target_matchday,
+
+                seconds_to_deadline=
+                    seconds_to_deadline,
+
+                force=
+                    False,
+            )
+        )
+
+        # El adapter mantiene cache por mtime.
+        # Si el provider acaba de reemplazar el fichero,
+        # limpiamos cache interna para leer la nueva version.
+        if result.get(
+            "refreshed",
+            False,
+        ):
+
+            clear_jornada_perfecta_cache()
+
+        return {
+            "ok":
+                True,
+
+            "status":
+                result.get(
+                    "status"
+                ),
+
+            "error":
+                None,
+        }
+
+    except Exception as error:
+
+        # IMPORTANTE:
+        # Un fallo externo NO debe tumbar el Autopilot.
+        # Si existe una cache anterior, el adapter la seguira
+        # usando y su freshness reducira progresivamente el peso.
+        return {
+            "ok":
+                False,
+
+            "status":
+                "ERROR",
+
+            "error": (
+                f"{type(error).__name__}: "
+                f"{error}"
+            ),
+        }
+
+
+# ============================================================
 # BOARD
 # ============================================================
 
@@ -178,6 +271,12 @@ def evaluate_lineup_signal(
 def build_lineup_intelligence(
     snapshot: dict,
 ) -> dict:
+
+    provider = (
+        refresh_external_lineup_source(
+            snapshot
+        )
+    )
 
     lookup = (
         build_jornada_perfecta_lookup()
@@ -266,6 +365,21 @@ def build_lineup_intelligence(
             data.get(
                 "available",
                 False,
+            ),
+
+        "provider_ok":
+            provider.get(
+                "ok"
+            ),
+
+        "provider_status":
+            provider.get(
+                "status"
+            ),
+
+        "provider_error":
+            provider.get(
+                "error"
             ),
 
         "updated_at":

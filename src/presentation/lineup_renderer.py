@@ -1,6 +1,3 @@
-# src/presentation/lineup_renderer.py
-
-
 POSITION_NAMES = {
     1: "PORTERO",
     2: "DEFENSA",
@@ -50,35 +47,32 @@ def get_player_state(
 
         return "NO DISP"
 
-    if (
-        player.get(
-            "has_game",
-            False,
-        )
-        and
-        player.get(
-            "automatic_lineup",
-            True,
-        )
-    ):
-
-        return "PARTIDO"
-
-    if (
-        player.get(
-            "has_game",
-            False,
-        )
-        and
-        not player.get(
-            "automatic_lineup",
-            True,
-        )
+    if not player.get(
+        "automatic_lineup",
+        True,
     ):
 
         return "DUDA"
 
-    return "SIN PARTIDO"
+    external = str(
+        player.get(
+            "external_lineup_status",
+            "UNKNOWN",
+        )
+        or "UNKNOWN"
+    )
+
+    if external in {
+        "TITULAR",
+        "PROBABLE",
+        "DUDA",
+        "SUPLENTE",
+        "NO_CONVOCADO",
+    }:
+
+        return external
+
+    return "VALIDO"
 
 
 def field_line(
@@ -311,12 +305,6 @@ def render_player_states(
             22,
         )
 
-        state = (
-            get_player_state(
-                player
-            )
-        )
-
         position = (
             POSITION_NAMES.get(
                 int(
@@ -330,10 +318,38 @@ def render_player_states(
             )
         )
 
+        state = get_player_state(
+            player
+        )
+
+        confidence = player.get(
+            "external_lineup_confidence",
+            0,
+        )
+
+        confidence_text = ""
+
+        if (
+            state
+            in {
+                "TITULAR",
+                "PROBABLE",
+                "DUDA",
+                "SUPLENTE",
+                "NO_CONVOCADO",
+            }
+            and confidence
+        ):
+
+            confidence_text = (
+                f"  conf:{float(confidence):.0f}%"
+            )
+
         lines.append(
             f"  {name:<23}"
             f"{position:<17}"
-            f"{state}"
+            f"{state:<15}"
+            f"{confidence_text}"
         )
 
     return lines
@@ -365,6 +381,14 @@ def render_lineup_field(
     playable = int(
         lineup.get(
             "playable_count",
+            0,
+        )
+        or 0
+    )
+
+    probable_starters = int(
+        lineup.get(
+            "probable_starter_count",
             0,
         )
         or 0
@@ -437,8 +461,9 @@ def render_lineup_field(
         horizontal_line(),
         "",
         f"Formacion:           {formation}",
-        f"Jugadores elegidos: {selected_count}/11",
-        f"Con partido:         {playable}/11",
+        f"Jugadores elegidos:  {selected_count}/11",
+        f"XI valido:           {playable}/11",
+        f"Titular/Probable JP: {probable_starters}/11",
         (
             "Huecos jornada:      "
             + format_shortages(

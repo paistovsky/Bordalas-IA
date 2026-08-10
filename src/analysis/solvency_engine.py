@@ -11,11 +11,6 @@ from src.analysis.sales_analyzer import (
 )
 
 
-# ======================================================
-# CONFIGURACIÓN
-# ======================================================
-
-
 SAFE_LIQUIDITY_BUFFER = 500_000
 
 
@@ -32,11 +27,11 @@ def get_current_balance(
         snapshot
         .get(
             "market",
-            {}
+            {},
         )
         .get(
             "status",
-            {}
+            {},
         )
         .get(
             "balance",
@@ -54,17 +49,6 @@ def get_current_balance(
 def calculate_liquidatable_assets(
     snapshot: dict,
 ) -> dict:
-    """
-    Patrimonio que potencialmente podemos convertir
-    en liquidez.
-
-    IMPORTANTE:
-    esto NO es saldo confirmado.
-
-    Solo usamos jugadores que el Sales Analyzer
-    considera razonablemente prescindibles:
-    Sale Score >= 50.
-    """
 
     sales = (
         analyze_sales(
@@ -101,10 +85,14 @@ def calculate_liquidatable_assets(
         players.append(
             {
                 "id":
-                    player["id"],
+                    player[
+                        "id"
+                    ],
 
                 "name":
-                    player["name"],
+                    player[
+                        "name"
+                    ],
 
                 "value":
                     value,
@@ -118,6 +106,7 @@ def calculate_liquidatable_assets(
         player[
             "value"
         ]
+
         for player in players
     )
 
@@ -131,20 +120,13 @@ def calculate_liquidatable_assets(
 
 
 # ======================================================
-# OFERTAS RECIBIDAS
+# OFERTAS
 # ======================================================
 
 
 def calculate_incoming_offer_liquidity(
     snapshot: dict,
 ) -> dict:
-    """
-    Dinero potencial procedente de ofertas
-    recibidas.
-
-    Sigue sin ser saldo confirmado mientras no
-    aceptemos y comprobemos el nuevo balance.
-    """
 
     board = (
         build_offer_board(
@@ -176,6 +158,7 @@ def calculate_incoming_offer_liquidity(
                 "amount"
             ]
         )
+
         for offer in offers
     )
 
@@ -189,7 +172,7 @@ def calculate_incoming_offer_liquidity(
 
 
 # ======================================================
-# RIESGO DE SOLVENCIA
+# RIESGO
 # ======================================================
 
 
@@ -197,11 +180,8 @@ def classify_solvency_risk(
     balance: int,
     recoverable_cash: int,
     seconds_to_deadline: int | None,
+    phase: str,
 ) -> str:
-
-    # --------------------------------------------------
-    # SALDO POSITIVO
-    # --------------------------------------------------
 
     if balance >= 0:
 
@@ -209,10 +189,6 @@ def classify_solvency_risk(
             return "BAJO"
 
         return "CONTROLAR"
-
-    # --------------------------------------------------
-    # SALDO NEGATIVO
-    # --------------------------------------------------
 
     deficit = abs(
         balance
@@ -223,40 +199,56 @@ def classify_solvency_risk(
         >= deficit
     )
 
+    if phase in {
+        "HARD_SAFETY",
+        "FINALIZATION",
+    }:
+
+        return (
+            "MUY_ALTO"
+            if covered
+            else "CRITICO"
+        )
+
+    if phase in {
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
+
+        # La jornada ya esta cerrada.
+        # El saldo negativo se evaluara para la siguiente
+        # jornada tras el desbloqueo.
+        return "BLOQUEADO"
+
+    if phase == "HIGH_ATTENTION":
+
+        return (
+            "ALTO"
+            if covered
+            else "MUY_ALTO"
+        )
+
+    if phase == "PREPARATION":
+
+        return (
+            "MODERADO"
+            if covered
+            else "ALTO"
+        )
+
     if seconds_to_deadline is None:
 
-        if covered:
-            return "MODERADO"
+        return (
+            "MODERADO"
+            if covered
+            else "ALTO"
+        )
 
-        return "ALTO"
-
-    hours = max(
-        seconds_to_deadline
-        / 3600,
-        0,
+    return (
+        "MODERADO"
+        if covered
+        else "ALTO"
     )
-
-    if hours <= 6:
-        return "CRITICO"
-
-    if hours <= 24:
-
-        if covered:
-            return "MUY_ALTO"
-
-        return "CRITICO"
-
-    if hours <= 48:
-
-        if covered:
-            return "ALTO"
-
-        return "MUY_ALTO"
-
-    if covered:
-        return "MODERADO"
-
-    return "ALTO"
 
 
 # ======================================================
@@ -269,14 +261,8 @@ def calculate_temporary_debt_permission(
     recoverable_cash: int,
     seconds_to_deadline: int | None,
     lineup_risk: str,
+    phase: str,
 ) -> dict:
-    """
-    Determina si mantener saldo negativo de forma
-    temporal es razonablemente aceptable.
-
-    Esta función NO autoriza sacrificar una jornada.
-    Ese futuro modo excepcional será independiente.
-    """
 
     if balance >= 0:
 
@@ -286,6 +272,36 @@ def calculate_temporary_debt_permission(
 
             "reason":
                 "El saldo actual no es negativo.",
+        }
+
+    if phase in {
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
+
+        return {
+            "allowed":
+                False,
+
+            "reason": (
+                "La jornada esta temporalmente bloqueada. "
+                "No se evalua nueva deuda hasta el desbloqueo."
+            ),
+        }
+
+    if phase in {
+        "HARD_SAFETY",
+        "FINALIZATION",
+    }:
+
+        return {
+            "allowed":
+                False,
+
+            "reason": (
+                "Estamos en fase de cierre de jornada. "
+                "Bordalas IA exige recuperar saldo >= 0."
+            ),
         }
 
     deficit = abs(
@@ -299,26 +315,8 @@ def calculate_temporary_debt_permission(
                 False,
 
             "reason": (
-                "No conocemos el deadline de jornada "
-                "y no podemos autorizar deuda temporal."
-            ),
-        }
-
-    hours = (
-        seconds_to_deadline
-        / 3600
-    )
-
-    if hours <= 24:
-
-        return {
-            "allowed":
-                False,
-
-            "reason": (
-                "Quedan menos de 24 horas para el "
-                "deadline. Bordalás IA bloquea nueva "
-                "deuda temporal."
+                "No conocemos el deadline real y no podemos "
+                "autorizar deuda temporal."
             ),
         }
 
@@ -332,8 +330,8 @@ def calculate_temporary_debt_permission(
                 False,
 
             "reason": (
-                "El riesgo de XI es demasiado alto "
-                "para mantener saldo negativo."
+                "El riesgo del XI es demasiado alto para "
+                "mantener saldo negativo."
             ),
         }
 
@@ -344,8 +342,8 @@ def calculate_temporary_debt_permission(
                 False,
 
             "reason": (
-                "La liquidez recuperable detectada "
-                "no cubre el déficit actual."
+                "La liquidez recuperable detectada no cubre "
+                "el deficit actual."
             ),
         }
 
@@ -354,7 +352,6 @@ def calculate_temporary_debt_permission(
         / deficit
     )
 
-    # Exigimos cierto colchón.
     if coverage_ratio < 1.25:
 
         return {
@@ -362,9 +359,8 @@ def calculate_temporary_debt_permission(
                 False,
 
             "reason": (
-                "Existe cobertura teórica, pero el "
-                "margen es demasiado pequeño para "
-                "asumir el riesgo."
+                "Existe cobertura teorica, pero el margen "
+                "es demasiado pequeno."
             ),
         }
 
@@ -373,9 +369,8 @@ def calculate_temporary_debt_permission(
             True,
 
         "reason": (
-            "El déficit está cubierto por activos "
-            "liquidables y queda margen temporal "
-            "suficiente antes de la jornada."
+            "El deficit esta cubierto con margen y la fase "
+            f"{phase} permite deuda temporal antes del cierre."
         ),
     }
 
@@ -387,54 +382,91 @@ def calculate_temporary_debt_permission(
 
 def determine_hard_safety(
     balance: int,
-    seconds_to_deadline: int | None,
+    deadline: dict,
     lineup_risk: str,
 ) -> dict:
 
+    phase = str(
+        deadline.get(
+            "phase",
+            "CALENDAR_UNKNOWN",
+        )
+    )
+
     reasons = []
-    active = False
 
-    if seconds_to_deadline is not None:
+    active = bool(
+        phase
+        in {
+            "HARD_SAFETY",
+            "ROUND_LOCKED",
+            "ROUND_TRANSITION_LOCK",
+        }
+    )
 
-        # A menos de 24h:
-        # saldo negativo ya se convierte en situación
-        # de emergencia.
-        if (
-            seconds_to_deadline
-            <= 24 * 3600
-            and balance < 0
-        ):
+    if phase == "HARD_SAFETY":
 
-            active = True
+        reasons.append(
+            "Ventana T-90 a T-15 activa."
+        )
 
-            reasons.append(
-                "Saldo negativo a menos de 24h."
-            )
+    if phase in {
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
 
-        # A menos de 6h entramos en Safety Mode
-        # aunque el saldo sea positivo.
-        if (
-            seconds_to_deadline
-            <= 6 * 3600
-        ):
+        reasons.append(
+            "Jornada temporalmente bloqueada."
+        )
 
-            active = True
-
-            reasons.append(
-                "Menos de 6h para el deadline."
-            )
-
-    if lineup_risk == "CRITICO":
+    if (
+        balance < 0
+        and
+        phase
+        in {
+            "FINALIZATION",
+            "HARD_SAFETY",
+        }
+    ):
 
         active = True
 
         reasons.append(
-            "Riesgo crítico de XI."
+            "Saldo negativo en fase de cierre."
+        )
+
+    if (
+        lineup_risk
+        == "CRITICO"
+        and
+        phase
+        not in {
+            "NORMAL",
+            "ROUND_LOCKED",
+            "ROUND_TRANSITION_LOCK",
+        }
+    ):
+
+        active = True
+
+        reasons.append(
+            "Riesgo critico de XI."
         )
 
     return {
         "active":
             active,
+
+        "phase":
+            phase,
+
+        "operations_locked":
+            bool(
+                deadline.get(
+                    "operations_locked",
+                    False,
+                )
+            ),
 
         "reasons":
             reasons,
@@ -442,7 +474,7 @@ def determine_hard_safety(
 
 
 # ======================================================
-# COBERTURA DE UNA DEUDA HIPOTÉTICA
+# DEUDA HIPOTETICA
 # ======================================================
 
 
@@ -451,16 +483,8 @@ def evaluate_projected_debt(
     recoverable_cash: int,
     seconds_to_deadline: int | None,
     lineup_risk: str,
+    phase: str = "NORMAL",
 ) -> dict:
-    """
-    Permite que otros motores pregunten:
-
-    "Si esta operación me dejara X euros en negativo,
-    ¿sería razonablemente saneable?"
-
-    Así Solvency Engine sigue siendo independiente
-    de Yamal, Franchise, Speculation, etc.
-    """
 
     debt = max(
         int(
@@ -485,7 +509,7 @@ def evaluate_projected_debt(
                 True,
 
             "reason":
-                "La operación no generaría deuda.",
+                "La operacion no generaria deuda.",
         }
 
     covered = (
@@ -497,6 +521,35 @@ def evaluate_projected_debt(
         recoverable_cash
         / debt
     )
+
+    if phase in {
+        "FINALIZATION",
+        "HARD_SAFETY",
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
+
+        return {
+            "debt":
+                debt,
+
+            "covered":
+                covered,
+
+            "coverage_ratio":
+                round(
+                    coverage_ratio,
+                    2,
+                ),
+
+            "allowed":
+                False,
+
+            "reason": (
+                f"La fase {phase} no permite asumir "
+                "nueva deuda."
+            ),
+        }
 
     if seconds_to_deadline is None:
 
@@ -517,37 +570,8 @@ def evaluate_projected_debt(
                 False,
 
             "reason": (
-                "No conocemos el deadline y no podemos "
+                "No conocemos el deadline real y no podemos "
                 "validar deuda futura con seguridad."
-            ),
-        }
-
-    hours = (
-        seconds_to_deadline
-        / 3600
-    )
-
-    if hours <= 24:
-
-        return {
-            "debt":
-                debt,
-
-            "covered":
-                covered,
-
-            "coverage_ratio":
-                round(
-                    coverage_ratio,
-                    2,
-                ),
-
-            "allowed":
-                False,
-
-            "reason": (
-                "No autorizamos una nueva deuda a menos "
-                "de 24 horas del deadline."
             ),
         }
 
@@ -573,8 +597,8 @@ def evaluate_projected_debt(
                 False,
 
             "reason": (
-                "El riesgo de alineación es demasiado "
-                "alto para asumir deuda adicional."
+                "El riesgo de alineacion es demasiado alto "
+                "para asumir deuda adicional."
             ),
         }
 
@@ -621,8 +645,8 @@ def evaluate_projected_debt(
                 False,
 
             "reason": (
-                "La deuda está cubierta, pero no existe "
-                "un colchón de liquidez suficiente."
+                "La deuda esta cubierta, pero no existe "
+                "un colchon suficiente."
             ),
         }
 
@@ -643,9 +667,8 @@ def evaluate_projected_debt(
             True,
 
         "reason": (
-            "La deuda proyectada está cubierta con "
-            "margen y queda tiempo suficiente para "
-            "sanearla antes del deadline."
+            f"La fase {phase} permite deuda temporal y "
+            "la deuda proyectada esta cubierta con margen."
         ),
     }
 
@@ -683,18 +706,6 @@ def build_solvency_state(
         )
     )
 
-    # ==================================================
-    # LIQUIDEZ RECUPERABLE
-    # ==================================================
-    #
-    # No sumamos ambos bloques porque una oferta
-    # recibida podría corresponder al mismo jugador
-    # que ya estamos contando como activo liquidable.
-    #
-    # Hasta validar ofertas recibidas reales,
-    # usamos el mayor de los dos valores.
-    # ==================================================
-
     recoverable_cash = max(
         liquidatable[
             "total"
@@ -705,17 +716,22 @@ def build_solvency_state(
     )
 
     seconds_to_deadline = (
-        deadline[
-            "calendar"
-        ][
-            "seconds_to_lineup_lock"
-        ]
+        deadline.get(
+            "seconds_to_deadline"
+        )
     )
 
     lineup_risk = (
         deadline[
             "lineup_risk"
         ]
+    )
+
+    phase = str(
+        deadline.get(
+            "phase",
+            "CALENDAR_UNKNOWN",
+        )
     )
 
     risk = (
@@ -728,6 +744,9 @@ def build_solvency_state(
 
             seconds_to_deadline=
                 seconds_to_deadline,
+
+            phase=
+                phase,
         )
     )
 
@@ -744,6 +763,9 @@ def build_solvency_state(
 
             lineup_risk=
                 lineup_risk,
+
+            phase=
+                phase,
         )
     )
 
@@ -752,8 +774,8 @@ def build_solvency_state(
             balance=
                 balance,
 
-            seconds_to_deadline=
-                seconds_to_deadline,
+            deadline=
+                deadline,
 
             lineup_risk=
                 lineup_risk,
@@ -766,6 +788,17 @@ def build_solvency_state(
 
         "is_negative":
             balance < 0,
+
+        "phase":
+            phase,
+
+        "operations_locked":
+            bool(
+                deadline.get(
+                    "operations_locked",
+                    False,
+                )
+            ),
 
         "liquidatable_assets":
             liquidatable,

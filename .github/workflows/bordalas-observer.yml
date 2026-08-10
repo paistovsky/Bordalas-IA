@@ -1,7 +1,12 @@
-name: Bordalas IA Observer
+name: Bordalas IA Live
 
 on:
   workflow_dispatch:
+
+  schedule:
+    # GitHub cron usa UTC. Ejecutamos cada 30 minutos en :07 y :37
+    # para evitar los picos habituales de :00 y :30.
+    - cron: "7,37 * * * *"
 
 permissions:
   contents: read
@@ -12,8 +17,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  observer:
-    name: Bordalas observer cycle
+  live:
+    name: Bordalas live controlled cycle
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -40,6 +45,7 @@ jobs:
           mkdir -p data/autopilot
           mkdir -p data/lineup_monitor
           mkdir -p data/intelligence
+          mkdir -p data/calendar
 
       - name: Restore Bordalas state
         uses: actions/cache@v4
@@ -48,6 +54,7 @@ jobs:
             data/autopilot
             data/lineup_monitor
             data/intelligence
+            data/calendar
             data/external_status_cache.json
             data/player_mapping_cache.json
             data/snapshot_*.json
@@ -68,10 +75,10 @@ jobs:
           test -n "$BIWENGER_PASSWORD" || (echo "Falta BIWENGER_PASSWORD" && exit 1)
           test -n "$API_FOOTBALL_KEY" || (echo "Falta API_FOOTBALL_KEY" && exit 1)
 
-      - name: Run Bordalas observer
+      - name: Run Bordalas LIVE
         shell: bash
         run: |
-          python -m src.autopilot --once
+          python -m src.autopilot --once --live
 
       - name: Prune persisted state
         if: always()
@@ -83,9 +90,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bordalas-observer-diagnostics-${{ github.run_id }}
+          name: bordalas-live-diagnostics-${{ github.run_id }}
           path: |
             data/autopilot/autopilot_log.jsonl
             data/lineup_monitor/state.json
+            data/calendar/laliga_calendar.json
+            data/calendar/calendar_changes.jsonl
+            data/intelligence/jornada_perfecta_lineups.json
           if-no-files-found: ignore
           retention-days: 2

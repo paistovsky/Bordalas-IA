@@ -135,13 +135,6 @@ def save_lineup_monitor_state(
                         or 0
                     ),
 
-                "has_game":
-                    bool(
-                        player.get(
-                            "has_game",
-                            False,
-                        )
-                    ),
 
                 "automatic_lineup":
                     bool(
@@ -426,19 +419,6 @@ def compare_lineups(
             )
         )
 
-        previous_has_game = bool(
-            previous.get(
-                "has_game",
-                False,
-            )
-        )
-
-        current_has_game = bool(
-            current.get(
-                "has_game",
-                False,
-            )
-        )
 
         previous_auto = bool(
             previous.get(
@@ -471,10 +451,6 @@ def compare_lineups(
         )
 
         if (
-            previous_has_game
-            != current_has_game
-
-            or
             previous_auto
             != current_auto
 
@@ -496,11 +472,6 @@ def compare_lineups(
                             ),
                         ),
 
-                    "previous_has_game":
-                        previous_has_game,
-
-                    "current_has_game":
-                        current_has_game,
 
                     "previous_automatic":
                         previous_auto,
@@ -592,13 +563,6 @@ def compare_lineups(
 
                 significant_change = True
 
-        if (
-            previous_has_game
-            and
-            not current_has_game
-        ):
-
-            significant_change = True
 
         if (
             previous_auto

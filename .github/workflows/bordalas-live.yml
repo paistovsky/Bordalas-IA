@@ -3,6 +3,12 @@ name: Bordalas IA Live
 on:
   workflow_dispatch:
 
+  schedule:
+    # GitHub cron usa UTC.
+    # Se ejecuta cada 30 minutos, en los minutos 07 y 37.
+    # Elegimos estos minutos para evitar los picos tipicos de :00 y :30.
+    - cron: "7,37 * * * *"
+
 permissions:
   contents: read
   actions: read
@@ -21,6 +27,7 @@ jobs:
       TZ: Europe/Madrid
       PYTHONUNBUFFERED: "1"
       PYTHONIOENCODING: "utf-8"
+
       BIWENGER_USERNAME: ${{ secrets.BIWENGER_USERNAME }}
       BIWENGER_PASSWORD: ${{ secrets.BIWENGER_PASSWORD }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}

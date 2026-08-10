@@ -1,9 +1,5 @@
 from itertools import combinations
 
-from src.analysis.fixture_analyzer import (
-    get_team_fixture,
-)
-
 from src.analysis.player_availability import (
     analyze_player_availability,
 )
@@ -44,7 +40,18 @@ FORMATIONS = {
 
 
 # ============================================================
-# FIXTURES
+# JORNADA
+# ============================================================
+#
+# La pertenencia a la jornada la gobierna el calendario dinamico.
+# No usamos team.nextGames para decidir si un jugador puede entrar
+# en el XI. Un partido aplazado sigue perteneciendo a su jornada
+# original y usa el XI fijado antes del primer kickoff.
+# ============================================================
+
+
+# ============================================================
+# COMPATIBILIDAD CON MODULOS ANTIGUOS
 # ============================================================
 
 
@@ -52,30 +59,34 @@ def player_has_current_round_game(
     snapshot: dict,
     player: dict,
 ) -> bool:
+    """
+    Shim de compatibilidad.
 
-    team_id = (
+    Algunos motores antiguos (por ejemplo, el de impacto de
+    reestructuración/Franchise) todavía importan esta función.
+
+    En la arquitectura V3 ya NO consultamos team.nextGames para
+    decidir si un jugador pertenece a la jornada. El calendario
+    dinámico gobierna la jornada completa y un aplazamiento no
+    elimina al jugador de ella.
+
+    Por tanto, para esos consumidores antiguos, "tener partido
+    en la jornada" significa simplemente "pertenecer a la
+    plantilla/competición de la jornada objetivo".
+
+    `snapshot` se conserva en la firma para no romper imports y
+    llamadas existentes.
+    """
+
+    del snapshot
+
+    return bool(
+        player
+        and
         player.get(
             "teamID"
         )
-    )
-
-    if team_id is None:
-        return False
-
-    fixture = (
-        get_team_fixture(
-            snapshot,
-            team_id,
-            current_round_only=True,
-        )
-    )
-
-    return bool(
-        fixture
-        and fixture.get(
-            "has_current_round_game",
-            False,
-        )
+        is not None
     )
 
 
@@ -125,11 +136,29 @@ def get_player_positions(
 
 
 def calculate_lineup_score(
-    snapshot: dict,
     player: dict,
-    has_game: bool | None = None,
     availability: dict | None = None,
 ) -> float:
+    """
+    Score del XI de la JORNADA COMPLETA.
+
+    NO se premia ni penaliza a un jugador porque su partido
+    aparezca o no en team.nextGames.
+
+    Esa lista puede omitir partidos aplazados de la jornada
+    actual, por lo que usarla para +1000/-1000 distorsionaba
+    gravemente el XI.
+
+    Factores actuales:
+    - puntos temporada anterior;
+    - valor de mercado como proxy suave de calidad;
+    - disponibilidad real;
+    - status;
+    - ajuste externo de Jornada Perfecta (se suma despues).
+
+    Franchise/Strategic Score se integraran como capa adicional,
+    pero no son necesarios para corregir el bug temporal.
+    """
 
     score = 0.0
 
@@ -154,7 +183,7 @@ def calculate_lineup_score(
         or 0
     )
 
-    score += (
+    score += float(
         last_points
     )
 
@@ -167,36 +196,25 @@ def calculate_lineup_score(
     )
 
     score += (
-        price
+        float(
+            price
+        )
         / 1_000_000
     )
 
-    if has_game is None:
-
-        has_game = (
-            player_has_current_round_game(
-                snapshot,
-                player,
-            )
-        )
-
-    if has_game:
-
-        score += 1000
-
-    else:
-
-        score -= 1000
-
+    # Automatic lineup representa si el motor de disponibilidad
+    # considera seguro alinearlo. No lo bloqueamos aqui porque
+    # search_best_lineup_for_formation ya tiene modo normal y
+    # modo emergencia, pero sí penalizamos si entra como warning.
     if availability[
         "automatic_lineup"
     ]:
 
-        score += 20
+        score += 20.0
 
     else:
 
-        score -= 500
+        score -= 500.0
 
     if (
         availability[
@@ -205,7 +223,7 @@ def calculate_lineup_score(
         == "ok"
     ):
 
-        score += 10
+        score += 10.0
 
     return score
 
@@ -253,26 +271,20 @@ def prepare_players(
             )
         )
 
-        has_game = (
-            player_has_current_round_game(
-                snapshot,
-                player,
-            )
-        )
-
         base_score = (
             calculate_lineup_score(
-                snapshot,
-                player,
-                has_game=has_game,
-                availability=availability,
+                player=
+                    player,
+
+                availability=
+                    availability,
             )
         )
 
         external = (
             intelligence_lookup.get(
                 player_id,
-                {}
+                {},
             )
             or {}
         )
@@ -343,8 +355,22 @@ def prepare_players(
                         player
                     ),
 
-                "has_game":
-                    has_game,
+                # ------------------------------------------------
+                # JORNADA FANTASY
+                # ------------------------------------------------
+                # Todos los jugadores disponibles de la plantilla
+                # pertenecen al target matchday. Un aplazamiento no
+                # los saca de la jornada.
+
+                "counts_for_round":
+                    True,
+
+                "round_scoring_eligible":
+                    lineup_eligible,
+
+                # ------------------------------------------------
+                # DISPONIBILIDAD
+                # ------------------------------------------------
 
                 "availability":
                     availability,
@@ -364,6 +390,10 @@ def prepare_players(
 
                 "lineup_eligible":
                     lineup_eligible,
+
+                # ------------------------------------------------
+                # SCORE
+                # ------------------------------------------------
 
                 "base_lineup_score":
                     base_score,
@@ -827,15 +857,22 @@ def build_lineup(
 
         if (
             not player[
-                "has_game"
-            ]
-
-            or
-            not player[
                 "automatic_lineup"
             ]
         )
     ]
+
+    # ========================================================
+    # PLAYABLE COUNT
+    # ========================================================
+    #
+    # Ahora "playable" significa:
+    # - pertenece al XI;
+    # - esta disponible;
+    # - el motor considera seguro alinearlo.
+    #
+    # NO depende de que team.nextGames contenga el partido.
+    # ========================================================
 
     playable_count = sum(
         1
@@ -844,7 +881,7 @@ def build_lineup(
 
         if (
             player[
-                "has_game"
+                "lineup_eligible"
             ]
 
             and
@@ -879,7 +916,7 @@ def build_lineup(
 
                 and
                 player[
-                    "has_game"
+                    "lineup_eligible"
                 ]
 
                 and
@@ -924,6 +961,7 @@ def build_lineup(
             "PROBABLE",
         }
     )
+
 
     return {
         "formation":

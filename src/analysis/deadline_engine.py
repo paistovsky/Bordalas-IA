@@ -9,14 +9,33 @@ from src.analysis.lineup_engine import (
 )
 
 
+# ============================================================
+# TIEMPO
+# ============================================================
+
+
 def classify_time_risk(
     seconds_remaining: int | None,
+    phase: str | None = None,
 ) -> str:
 
+    if phase in {
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
+
+        return "BLOQUEADO"
+
+    if phase == "HARD_SAFETY":
+
+        return "CRITICO"
+
     if seconds_remaining is None:
+
         return "DESCONOCIDO"
 
     if seconds_remaining <= 0:
+
         return "BLOQUEADO"
 
     hours = (
@@ -24,10 +43,10 @@ def classify_time_risk(
         / 3600
     )
 
-    if hours <= 6:
+    if hours <= 2:
         return "CRITICO"
 
-    if hours <= 24:
+    if hours <= 12:
         return "MUY_ALTO"
 
     if hours <= 48:
@@ -39,9 +58,15 @@ def classify_time_risk(
     return "BAJO"
 
 
+# ============================================================
+# RIESGO DEL XI
+# ============================================================
+
+
 def classify_lineup_risk(
     playable_count: int,
     seconds_remaining: int | None,
+    phase: str | None = None,
 ) -> str:
 
     missing = max(
@@ -51,12 +76,29 @@ def classify_lineup_risk(
     )
 
     if missing == 0:
+
+        if phase in {
+            "ROUND_LOCKED",
+            "ROUND_TRANSITION_LOCK",
+        }:
+
+            return "BLOQUEADO"
+
         return "BAJO"
 
+    if phase in {
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
+
+        return "CRITICO"
+
     if seconds_remaining is None:
+
         return "DESCONOCIDO"
 
     if seconds_remaining <= 0:
+
         return "CRITICO"
 
     hours = (
@@ -64,9 +106,9 @@ def classify_lineup_risk(
         / 3600
     )
 
-    # ----------------------------------------------
-    # QUEDAN MUCHOS DÍAS
-    # ----------------------------------------------
+    # --------------------------------------------------------
+    # MAS DE 5 DIAS
+    # --------------------------------------------------------
 
     if hours > 120:
 
@@ -75,9 +117,9 @@ def classify_lineup_risk(
 
         return "MODERADO"
 
-    # ----------------------------------------------
-    # 2-5 DÍAS
-    # ----------------------------------------------
+    # --------------------------------------------------------
+    # 2-5 DIAS
+    # --------------------------------------------------------
 
     if hours > 48:
 
@@ -89,11 +131,11 @@ def classify_lineup_risk(
 
         return "ALTO"
 
-    # ----------------------------------------------
-    # 24-48H
-    # ----------------------------------------------
+    # --------------------------------------------------------
+    # 12-48H
+    # --------------------------------------------------------
 
-    if hours > 24:
+    if hours > 12:
 
         if missing == 1:
             return "MODERADO"
@@ -103,19 +145,22 @@ def classify_lineup_risk(
 
         return "MUY_ALTO"
 
-    # ----------------------------------------------
-    # MENOS DE 24H
-    # ----------------------------------------------
+    # --------------------------------------------------------
+    # MENOS DE 12H
+    # --------------------------------------------------------
 
-    if missing >= 1:
-        return "CRITICO"
+    return "CRITICO"
 
-    return "BAJO"
+
+# ============================================================
+# PRESION DEL XI
+# ============================================================
 
 
 def calculate_lineup_pressure_score(
     playable_count: int,
     seconds_remaining: int | None,
+    phase: str | None = None,
 ) -> int:
 
     missing = max(
@@ -127,7 +172,23 @@ def calculate_lineup_pressure_score(
     if missing == 0:
         return 0
 
+    if phase in {
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
+
+        return 100
+
+    if phase == "HARD_SAFETY":
+
+        return min(
+            80
+            + missing * 10,
+            100,
+        )
+
     if seconds_remaining is None:
+
         return min(
             missing * 15,
             100,
@@ -139,21 +200,24 @@ def calculate_lineup_pressure_score(
         0,
     )
 
-    # Factor tiempo:
-    # cuanto más cerca, más pesa cada hueco.
-    if hours <= 6:
-        time_factor = 30
+    if hours <= 2:
 
-    elif hours <= 24:
+        time_factor = 35
+
+    elif hours <= 12:
+
         time_factor = 25
 
     elif hours <= 48:
+
         time_factor = 18
 
     elif hours <= 120:
+
         time_factor = 10
 
     else:
+
         time_factor = 5
 
     return min(
@@ -163,16 +227,34 @@ def calculate_lineup_pressure_score(
     )
 
 
+# ============================================================
+# LIBERTAD PREMIUM
+# ============================================================
+
+
 def calculate_premium_freedom_bonus(
     playable_count: int,
     seconds_remaining: int | None,
+    phase: str | None = None,
 ) -> int:
     """
-    Cuanto más tiempo queda, más libertad permitimos
-    para estrategias premium aunque el XI no esté cerrado.
+    Cuanto mas lejos estamos del deadline real,
+    mayor libertad para Franchise/premium.
+
+    Durante HARD_SAFETY o locks:
+        libertad = 0.
     """
 
+    if phase in {
+        "HARD_SAFETY",
+        "ROUND_LOCKED",
+        "ROUND_TRANSITION_LOCK",
+    }:
+
+        return 0
+
     if seconds_remaining is None:
+
         return 0
 
     hours = (
@@ -208,12 +290,19 @@ def calculate_premium_freedom_bonus(
     return 0
 
 
+# ============================================================
+# OPORTUNIDADES FUTURAS
+# ============================================================
+
+
 def calculate_expected_future_market_opportunities(
     calendar: dict,
 ) -> dict:
 
-    cycles = calendar.get(
-        "estimated_market_cycles"
+    cycles = (
+        calendar.get(
+            "estimated_market_cycles"
+        )
     )
 
     if cycles is None:
@@ -247,6 +336,11 @@ def calculate_expected_future_market_opportunities(
     }
 
 
+# ============================================================
+# DEADLINE STATE
+# ============================================================
+
+
 def build_deadline_state(
     snapshot: dict,
     now_ts: int | None = None,
@@ -259,14 +353,18 @@ def build_deadline_state(
         )
     )
 
-    lineup = build_lineup(
-        snapshot
+    lineup = (
+        build_lineup(
+            snapshot
+        )
     )
 
     playable_count = int(
-        lineup[
-            "playable_count"
-        ]
+        lineup.get(
+            "playable_count",
+            0,
+        )
+        or 0
     )
 
     missing = max(
@@ -276,14 +374,22 @@ def build_deadline_state(
     )
 
     seconds_remaining = (
-        calendar[
+        calendar.get(
             "seconds_to_lineup_lock"
-        ]
+        )
+    )
+
+    phase = (
+        calendar.get(
+            "phase",
+            "CALENDAR_UNKNOWN",
+        )
     )
 
     time_risk = (
         classify_time_risk(
-            seconds_remaining
+            seconds_remaining,
+            phase=phase,
         )
     )
 
@@ -291,6 +397,7 @@ def build_deadline_state(
         classify_lineup_risk(
             playable_count,
             seconds_remaining,
+            phase=phase,
         )
     )
 
@@ -298,6 +405,7 @@ def build_deadline_state(
         calculate_lineup_pressure_score(
             playable_count,
             seconds_remaining,
+            phase=phase,
         )
     )
 
@@ -305,6 +413,7 @@ def build_deadline_state(
         calculate_premium_freedom_bonus(
             playable_count,
             seconds_remaining,
+            phase=phase,
         )
     )
 
@@ -314,23 +423,82 @@ def build_deadline_state(
         )
     )
 
-    hard_safety_mode = (
-        time_risk
-        in {
-            "CRITICO",
-            "BLOQUEADO",
-        }
+    hard_safety_mode = bool(
+        calendar.get(
+            "hard_safety",
+            False,
+        )
+    )
+
+    operations_locked = bool(
+        calendar.get(
+            "operations_locked",
+            False,
+        )
     )
 
     return {
+        # ----------------------------------------------------
+        # CALENDARIO
+        # ----------------------------------------------------
+
         "calendar":
             calendar,
+
+        "target_matchday":
+            calendar.get(
+                "target_matchday"
+            ),
+
+        "next_matchday":
+            calendar.get(
+                "next_matchday"
+            ),
+
+        "phase":
+            phase,
+
+        "first_match":
+            calendar.get(
+                "first_match"
+            ),
+
+        "first_kickoff":
+            calendar.get(
+                "first_kickoff"
+            ),
+
+        "safety_deadline":
+            calendar.get(
+                "safety_deadline"
+            ),
+
+        "real_deadline":
+            calendar.get(
+                "real_deadline"
+            ),
+
+        "next_round_unlock":
+            calendar.get(
+                "next_round_unlock"
+            ),
+
+        "seconds_to_deadline":
+            seconds_remaining,
+
+        # ----------------------------------------------------
+        # XI
+        # ----------------------------------------------------
 
         "playable_count":
             playable_count,
 
         "missing_playable":
             missing,
+
+        # ----------------------------------------------------
+        # RIESGO
+        # ----------------------------------------------------
 
         "time_risk":
             time_risk,
@@ -347,6 +515,21 @@ def build_deadline_state(
         "future_market_opportunities":
             future_markets,
 
+        # ----------------------------------------------------
+        # SAFETY
+        # ----------------------------------------------------
+
         "hard_safety_mode":
             hard_safety_mode,
+
+        "operations_locked":
+            operations_locked,
+
+        "round_transition_lock":
+            bool(
+                calendar.get(
+                    "transition_locked",
+                    False,
+                )
+            ),
     }
