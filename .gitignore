@@ -21,6 +21,12 @@ data/
 logs/
 *.log
 
+# Archivos temporales de despliegue
+github_deploy_info.txt
+bordalas_deploy_info.txt
+bordalas_tree.txt
+bordalas_files.txt
+
 # VS Code
 .vscode/
 

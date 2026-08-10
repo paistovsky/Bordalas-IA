@@ -1,0 +1,95 @@
+name: Bordalas IA Observer
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Evitamos :00 y :30 porque GitHub advierte de posibles
+    # retrasos de los workflows programados en horas de alta carga.
+    - cron: "7,37 * * * *"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: bordalas-autopilot
+  cancel-in-progress: false
+
+jobs:
+  observer:
+    name: Bordalas observer cycle
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      PYTHONIOENCODING: "utf-8"
+      BIWENGER_USERNAME: ${{ secrets.BIWENGER_USERNAME }}
+      BIWENGER_PASSWORD: ${{ secrets.BIWENGER_PASSWORD }}
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Prepare persistent directories
+        shell: bash
+        run: |
+          mkdir -p data/autopilot
+          mkdir -p data/lineup_monitor
+          mkdir -p data/intelligence
+
+      - name: Restore Bordalas state
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/autopilot
+            data/lineup_monitor
+            data/intelligence
+            data/external_status_cache.json
+            data/player_mapping_cache.json
+            data/snapshot_*.json
+          key: bordalas-state-${{ github.run_id }}
+          restore-keys: |
+            bordalas-state-
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate secrets
+        shell: bash
+        run: |
+          test -n "$BIWENGER_USERNAME" || (echo "Falta BIWENGER_USERNAME" && exit 1)
+          test -n "$BIWENGER_PASSWORD" || (echo "Falta BIWENGER_PASSWORD" && exit 1)
+          test -n "$API_FOOTBALL_KEY" || (echo "Falta API_FOOTBALL_KEY" && exit 1)
+
+      - name: Run Bordalas observer
+        shell: bash
+        run: |
+          python -m src.autopilot --once
+
+      - name: Prune persisted state
+        if: always()
+        shell: bash
+        run: |
+          python scripts/prune_github_state.py
+
+      - name: Upload diagnostic log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bordalas-diagnostics-${{ github.run_id }}
+          path: |
+            data/autopilot/autopilot_log.jsonl
+            data/lineup_monitor/state.json
+          if-no-files-found: ignore
+          retention-days: 2
