@@ -1,3 +1,8 @@
+from src.intelligence.jornada_perfecta_market_intelligence import (
+    intelligence_by_biwenger_id,
+    refresh_jp_market_intelligence,
+)
+
 from src.analysis.market_trend_engine import (
     build_market_trend_board,
 )
@@ -16,12 +21,19 @@ from src.analysis.strategic_target_engine import (
 
 
 # ======================================================
-# CONFIGURACIÓN
+# CONFIGURACIÃƒâ€œN
 # ======================================================
 
 
 MAX_SPECULATION_BUDGET_PERCENT = 0.15
 MAX_SINGLE_SPECULATION_PERCENT = 0.40
+
+# Cuando el saldo es negativo no usamos todo el margen de
+# MAX_SAFE_DEBT. Conservamos parte como colchon adicional.
+MAX_DEBT_SPECULATION_PERCENT = 0.60
+
+# Evita micro-operaciones irrelevantes.
+MIN_SPECULATION_BUDGET = 150_000
 
 BUY_THRESHOLD = 72
 WATCH_THRESHOLD = 55
@@ -29,6 +41,12 @@ HOLD_THRESHOLD = 55
 SELL_THRESHOLD = 35
 
 FRANCHISE_THRESHOLD = 70
+
+# Jornada Perfecta Market Intelligence no sustituye a nuestras
+# señales internas: las confirma/corrige.
+JP_MARKET_NEUTRAL_SCORE = 50.0
+JP_MARKET_MAX_ADJUSTMENT = 14.0
+JP_MARKET_WEIGHT = 0.38
 
 
 # ======================================================
@@ -70,7 +88,7 @@ def get_market_status(
 
 
 # ======================================================
-# CONFIANZA HISTÓRICA
+# CONFIANZA HISTÃƒâ€œRICA
 # ======================================================
 
 
@@ -449,35 +467,109 @@ def calculate_availability_risk(
 
 def get_external_speculation_signal(
     player: dict,
+    jp_lookup: dict[int, dict] | None = None,
 ) -> dict:
     """
-    Interfaz preparada para la siguiente fase.
+    Señal externa V4 basada en Jornada Perfecta Market Intelligence.
 
-    Aquí añadiremos:
+    El jp_market_score (0..100) se centra en 50:
+        50 -> ajuste 0
+        >50 -> bonus
+        <50 -> penalizacion
 
-    - noticias
-    - Jornada Perfecta
-    - titularidad probable
-    - lesiones de compañeros
-    - cambios de rol
-    - calendario
-    - hype fantasy
+    El ajuste esta capado para que JP ayude a decidir, pero no
+    pueda sobreescribir por sí sola momentum, solvencia o riesgo.
     """
+    if not jp_lookup:
+        return {
+            "score": 0.0,
+            "confidence": 0.0,
+            "sources": [],
+            "status": "NOT_CONNECTED",
+            "jp_market_score": None,
+            "jp_action": None,
+        }
+
+    player_id = player.get("id")
+
+    try:
+        player_id = int(player_id)
+    except (TypeError, ValueError):
+        player_id = None
+
+    if player_id is None:
+        return {
+            "score": 0.0,
+            "confidence": 0.0,
+            "sources": ["JORNADA_PERFECTA_MARKET"],
+            "status": "NO_PLAYER_ID",
+            "jp_market_score": None,
+            "jp_action": None,
+        }
+
+    jp = jp_lookup.get(player_id)
+
+    if jp is None:
+        return {
+            "score": 0.0,
+            "confidence": 0.0,
+            "sources": ["JORNADA_PERFECTA_MARKET"],
+            "status": "NO_MATCH",
+            "jp_market_score": None,
+            "jp_action": None,
+        }
+
+    jp_score = float(
+        jp.get("jp_market_score", JP_MARKET_NEUTRAL_SCORE)
+        or JP_MARKET_NEUTRAL_SCORE
+    )
+
+    centered = jp_score - JP_MARKET_NEUTRAL_SCORE
+
+    adjustment = centered * JP_MARKET_WEIGHT
+    adjustment = max(
+        -JP_MARKET_MAX_ADJUSTMENT,
+        min(
+            JP_MARKET_MAX_ADJUSTMENT,
+            adjustment,
+        ),
+    )
+
+    # Señales de disponibilidad/caída reciente reducen confianza.
+    availability_score = float(
+        jp.get("availability_score", 100)
+        or 0
+    )
+
+    confidence = 100.0
+
+    if availability_score < 50:
+        confidence = 75.0
+
+    if jp.get("outlier"):
+        confidence = min(
+            confidence,
+            70.0,
+        )
 
     return {
-        "score":
-            0.0,
-
-        "confidence":
-            0.0,
-
-        "sources":
-            [],
-
-        "status":
-            "NOT_CONNECTED",
+        "score": round(adjustment, 2),
+        "confidence": round(confidence, 1),
+        "sources": ["JORNADA_PERFECTA_MARKET"],
+        "status": "CONNECTED",
+        "jp_market_score": round(jp_score, 2),
+        "jp_action": jp.get("intelligence_action"),
+        "jp_market_score_raw": jp.get("market_score"),
+        "jp_tip": jp.get("tip"),
+        "jp_tip_desc": jp.get("tip_desc"),
+        "jp_editorial_score": jp.get("editorial_score"),
+        "jp_editorial": jp.get("latest_relevant_editorial"),
+        "jp_daily_returns_pct": jp.get("daily_returns_pct"),
+        "jp_returns_pct": jp.get("returns_pct"),
+        "jp_outlier": jp.get("outlier", False),
+        "jp_outlier_reasons": jp.get("outlier_reasons", []),
+        "jp_availability_score": jp.get("availability_score"),
     }
-
 
 # ======================================================
 # LOOKUP DE TREND
@@ -505,7 +597,7 @@ def build_trend_lookup() -> dict[int, dict]:
 
 
 # ======================================================
-# COMPONENTE HISTÓRICO
+# COMPONENTE HISTÃƒâ€œRICO
 # ======================================================
 
 
@@ -663,6 +755,7 @@ def calculate_historical_component(
 def calculate_speculation_score(
     player: dict,
     trend: dict | None,
+    jp_lookup: dict[int, dict] | None = None,
 ) -> dict:
 
     momentum = (
@@ -697,20 +790,10 @@ def calculate_speculation_score(
 
     external = (
         get_external_speculation_signal(
-            player
+            player,
+            jp_lookup=jp_lookup,
         )
     )
-
-    # ==================================================
-    # V2
-    # ==================================================
-    #
-    # El momentum actual ya no puede disparar por sí
-    # solo un 100/100.
-    #
-    # La tendencia histórica aumenta su peso a medida
-    # que crece la confianza.
-    # ==================================================
 
     current_component = (
         momentum[
@@ -778,7 +861,6 @@ def calculate_speculation_score(
             external,
     }
 
-
 # ======================================================
 # FINALIDAD DOMINANTE
 # ======================================================
@@ -825,7 +907,7 @@ def classify_dominant_role(
 
 
 # ======================================================
-# DECISIÓN
+# DECISIÃƒâ€œN
 # ======================================================
 
 
@@ -897,7 +979,7 @@ def classify_speculation_action(
     if ownership == "MI_EQUIPO":
 
         # Lesiones/estados graves no necesitan
-        # histórico para justificar riesgo.
+        # histÃƒÂ³rico para justificar riesgo.
         if not availability[
             "available"
         ]:
@@ -938,7 +1020,7 @@ def classify_speculation_action(
             return "AVOID"
 
         # No autorizamos compra especulativa fuerte
-        # con una simple fotografía.
+        # con una simple fotografÃƒÂ­a.
         if (
             score >= BUY_THRESHOLD
             and history_confidence >= 40
@@ -984,6 +1066,7 @@ def classify_speculation_action(
 def analyze_speculation_player(
     player: dict,
     trend: dict | None,
+    jp_lookup: dict[int, dict] | None = None,
 ) -> dict:
 
     analysis = (
@@ -993,6 +1076,9 @@ def analyze_speculation_player(
 
             trend=
                 trend,
+
+            jp_lookup=
+                jp_lookup,
         )
     )
 
@@ -1019,7 +1105,6 @@ def analyze_speculation_player(
         "speculation_action":
             action,
     }
-
 
 # ======================================================
 # PUJA FRANCHISE ACTIVA
@@ -1095,11 +1180,24 @@ def calculate_speculation_budget(
     solvency: dict,
     active_franchise_bid: dict | None,
 ) -> dict:
+    """
+    Presupuesto especulativo V3.
 
-    status = (
-        get_market_status(
-            snapshot
-        )
+    Ya NO aplica:
+        balance < 0 -> bloqueo absoluto.
+
+    Con saldo negativo solo permite especular si:
+    - SOLVENCY_GUARANTEE esta garantizada;
+    - MAX_SAFE_DEBT deja margen adicional;
+    - la ventana temporal de deuda sigue abierta;
+    - no estamos en Hard Safety;
+    - no hay puja Franchise activa.
+
+    Incluso entonces solo usa una fraccion del headroom.
+    """
+
+    status = get_market_status(
+        snapshot
     )
 
     balance = int(
@@ -1126,6 +1224,30 @@ def calculate_speculation_budget(
         or {}
     )
 
+    guarantee = (
+        solvency.get(
+            "solvency_guarantee",
+            {},
+        )
+        or {}
+    )
+
+    safe_debt = (
+        solvency.get(
+            "max_safe_debt",
+            {},
+        )
+        or {}
+    )
+
+    temporary_debt = (
+        solvency.get(
+            "temporary_debt",
+            {},
+        )
+        or {}
+    )
+
     # ==================================================
     # FRANCHISE ACTIVO
     # ==================================================
@@ -1139,25 +1261,18 @@ def calculate_speculation_budget(
         )
 
         return {
-            "enabled":
-                False,
-
-            "total_budget":
-                0,
-
-            "single_operation_limit":
-                0,
-
-            "reason":
-                (
-                    "Existe una puja Franchise activa "
-                    f"por {player['name']}. "
-                    "La especulación queda congelada "
-                    "hasta la resolución del mercado."
-                ),
-
-            "blocked_by":
-                "FRANCHISE_ACTIVE_BID",
+            "enabled": False,
+            "total_budget": 0,
+            "single_operation_limit": 0,
+            "reason": (
+                "Existe una puja Franchise activa "
+                f"por {player['name']}. "
+                "La especulacion queda congelada "
+                "hasta la resolucion del mercado."
+            ),
+            "blocked_by": "FRANCHISE_ACTIVE_BID",
+            "balance": balance,
+            "mode": "BLOCKED",
         }
 
     # ==================================================
@@ -1170,47 +1285,157 @@ def calculate_speculation_budget(
     ):
 
         return {
-            "enabled":
-                False,
-
-            "total_budget":
-                0,
-
-            "single_operation_limit":
-                0,
-
-            "reason":
-                "Hard Safety activo.",
-
-            "blocked_by":
-                "HARD_SAFETY",
+            "enabled": False,
+            "total_budget": 0,
+            "single_operation_limit": 0,
+            "reason": "Hard Safety activo.",
+            "blocked_by": "HARD_SAFETY",
+            "balance": balance,
+            "mode": "BLOCKED",
         }
 
     # ==================================================
-    # SALDO NEGATIVO
+    # SALDO NEGATIVO: DEUDA CONTROLADA
     # ==================================================
 
     if balance < 0:
 
-        return {
-            "enabled":
+        guaranteed = bool(
+            guarantee.get(
+                "guaranteed",
                 False,
+            )
+        )
 
-            "total_budget":
+        headroom = int(
+            safe_debt.get(
+                "additional_debt_headroom",
                 0,
+            )
+            or 0
+        )
 
-            "single_operation_limit":
-                0,
+        debt_window_open = bool(
+            safe_debt.get(
+                "debt_window_open",
+                False,
+            )
+        )
 
-            "reason":
-                (
-                    "Saldo negativo. La prioridad es "
-                    "sanear deuda, no especular."
+        debt_allowed = bool(
+            temporary_debt.get(
+                "allowed",
+                False,
+            )
+        )
+
+        if not guaranteed:
+
+            return {
+                "enabled": False,
+                "total_budget": 0,
+                "single_operation_limit": 0,
+                "reason": (
+                    "Saldo negativo y SOLVENCY_GUARANTEE "
+                    "no esta garantizada."
                 ),
+                "blocked_by": "SOLVENCY_NOT_GUARANTEED",
+                "balance": balance,
+                "mode": "DEBT",
+                "safe_debt_headroom": headroom,
+            }
 
-            "blocked_by":
-                "NEGATIVE_BALANCE",
+        if (
+            not debt_window_open
+            or not debt_allowed
+        ):
+
+            return {
+                "enabled": False,
+                "total_budget": 0,
+                "single_operation_limit": 0,
+                "reason": (
+                    "Existe garantia de solvencia, pero "
+                    "la ventana temporal no permite nueva deuda."
+                ),
+                "blocked_by": "DEBT_WINDOW_CLOSED",
+                "balance": balance,
+                "mode": "DEBT",
+                "safe_debt_headroom": headroom,
+            }
+
+        if headroom <= 0:
+
+            return {
+                "enabled": False,
+                "total_budget": 0,
+                "single_operation_limit": 0,
+                "reason": (
+                    "MAX_SAFE_DEBT no deja margen "
+                    "para deuda especulativa adicional."
+                ),
+                "blocked_by": "NO_SAFE_DEBT_HEADROOM",
+                "balance": balance,
+                "mode": "DEBT",
+                "safe_debt_headroom": 0,
+            }
+
+        total_budget = int(
+            headroom
+            * MAX_DEBT_SPECULATION_PERCENT
+        )
+
+        # Nunca superar la capacidad real de puja de Biwenger.
+        if maximum_bid > 0:
+            total_budget = min(
+                total_budget,
+                maximum_bid,
+            )
+
+        single_limit = int(
+            total_budget
+            * MAX_SINGLE_SPECULATION_PERCENT
+        )
+
+        if total_budget < MIN_SPECULATION_BUDGET:
+
+            return {
+                "enabled": False,
+                "total_budget": 0,
+                "single_operation_limit": 0,
+                "raw_authorized_budget": total_budget,
+                "reason": (
+                    "Hay margen de deuda segura, pero es "
+                    "demasiado pequeno para una operacion "
+                    "especulativa relevante."
+                ),
+                "blocked_by": "LOW_SAFE_DEBT_HEADROOM",
+                "balance": balance,
+                "mode": "DEBT",
+                "safe_debt_headroom": headroom,
+            }
+
+        return {
+            "enabled": True,
+            "total_budget": total_budget,
+            "single_operation_limit": single_limit,
+            "reason": (
+                "Saldo negativo permitido: SOLVENCY_GUARANTEE "
+                "esta cubierta y existe margen dentro de "
+                "MAX_SAFE_DEBT."
+            ),
+            "blocked_by": None,
+            "balance": balance,
+            "mode": "DEBT",
+            "safe_debt_headroom": headroom,
+            "guarantee_state": guarantee.get(
+                "state"
+            ),
         }
+
+    # ==================================================
+    # SALDO POSITIVO
+    # ==================================================
 
     usable_capital = min(
         balance,
@@ -1227,48 +1452,33 @@ def calculate_speculation_budget(
         * MAX_SINGLE_SPECULATION_PERCENT
     )
 
-    if total_budget < 150_000:
+    if total_budget < MIN_SPECULATION_BUDGET:
 
         return {
-            "enabled":
-                False,
-
-            "total_budget":
-                0,
-
-            "single_operation_limit":
-                0,
-
-            "reason":
-                (
-                    "No existe capacidad suficiente "
-                    "para especulación actualmente."
-                ),
-
-            "blocked_by":
-                "LOW_LIQUIDITY",
+            "enabled": False,
+            "total_budget": 0,
+            "single_operation_limit": 0,
+            "reason": (
+                "No existe capacidad suficiente "
+                "para especulacion actualmente."
+            ),
+            "blocked_by": "LOW_LIQUIDITY",
+            "balance": balance,
+            "mode": "CASH",
         }
 
     return {
-        "enabled":
-            True,
-
-        "total_budget":
-            total_budget,
-
-        "single_operation_limit":
-            single_limit,
-
-        "reason":
-            (
-                "Existe margen de liquidez para "
-                "operaciones especulativas."
-            ),
-
-        "blocked_by":
-            None,
+        "enabled": True,
+        "total_budget": total_budget,
+        "single_operation_limit": single_limit,
+        "reason": (
+            "Existe margen de liquidez para "
+            "operaciones especulativas."
+        ),
+        "blocked_by": None,
+        "balance": balance,
+        "mode": "CASH",
     }
-
 
 # ======================================================
 # BOARD COMPLETO V2
@@ -1308,6 +1518,22 @@ def build_speculation_board(
 
     trend_lookup = (
         build_trend_lookup()
+    )
+
+    # ==================================================
+    # JORNADA PERFECTA MARKET INTELLIGENCE
+    # ==================================================
+
+    jp_payload = (
+        refresh_jp_market_intelligence(
+            force_provider_refresh=False,
+        )
+    )
+
+    jp_lookup = (
+        intelligence_by_biwenger_id(
+            jp_payload
+        )
     )
 
     # ==================================================
@@ -1354,6 +1580,8 @@ def build_speculation_board(
 
     analyzed = []
 
+    jp_matches = 0
+
     for player in strategic_board:
 
         trend = (
@@ -1366,14 +1594,34 @@ def build_speculation_board(
             )
         )
 
-        analyzed.append(
+        analyzed_player = (
             analyze_speculation_player(
                 player=
                     player,
 
                 trend=
                     trend,
+
+                jp_lookup=
+                    jp_lookup,
             )
+        )
+
+        if (
+            analyzed_player
+            .get(
+                "external_signal",
+                {},
+            )
+            .get(
+                "status"
+            )
+            == "CONNECTED"
+        ):
+            jp_matches += 1
+
+        analyzed.append(
+            analyzed_player
         )
 
     # ==================================================
@@ -1404,6 +1652,17 @@ def build_speculation_board(
             ][
                 "confidence"
             ],
+            (
+                player
+                .get(
+                    "external_signal",
+                    {},
+                )
+                .get(
+                    "jp_market_score"
+                )
+                or 0
+            ),
             player[
                 "trend_score"
             ],
@@ -1591,4 +1850,36 @@ def build_speculation_board(
 
         "watchlist":
             watchlist,
+
+        "jp_market_intelligence": {
+            "provider_status":
+                jp_payload.get(
+                    "provider_status"
+                ),
+
+            "updated_at":
+                jp_payload.get(
+                    "updated_at"
+                ),
+
+            "age_hours":
+                jp_payload.get(
+                    "age_hours"
+                ),
+
+            "players":
+                jp_payload.get(
+                    "player_count",
+                    0,
+                ),
+
+            "matched_strategic_players":
+                jp_matches,
+
+            "lookup_size":
+                len(
+                    jp_lookup
+                ),
+        },
     }
+

@@ -2,6 +2,10 @@ from src.actions.franchise_autopilot import (
     build_franchise_autopilot_state,
 )
 
+from src.analysis.computer_offer_reroll_engine import (
+    build_computer_offer_reroll_board,
+)
+
 from src.analysis.lineup_monitor import (
     build_lineup_monitor_state,
 )
@@ -52,6 +56,7 @@ PRIORITY = {
     "LINEUP_UPDATE_LOW": 760,
     "LINEUP_LOW": 700,
     "INCOMING_OFFERS": 650,
+    "COMPUTER_OFFER_REROLL_WATCH": 670,
     "PLAYER_RISK_EXIT": 600,
     "LIQUIDITY_MAINTENANCE": 550,
     "SOLVENCY_NORMAL": 500,
@@ -59,6 +64,15 @@ PRIORITY = {
     "SPECULATION_WATCH": 300,
     "IDLE": 0,
 }
+
+
+# ============================================================
+# FEATURE FLAGS
+# ============================================================
+
+# Todavia permanece desactivado hasta terminar la validacion
+# del Orchestrator corregido.
+ENABLE_LIVE_COMPUTER_REROLL = True
 
 
 LOCK_PHASES = {
@@ -545,6 +559,18 @@ def build_global_decision(
     offers = (
         build_offer_board(
             snapshot
+        )
+    )
+
+    offer_reroll = (
+        build_computer_offer_reroll_board(
+            snapshot=
+                snapshot,
+
+            # Observer integration:
+            # NO persistimos historial ni ejecutamos escrituras.
+            persist_history=
+                False,
         )
     )
 
@@ -1279,6 +1305,174 @@ def build_global_decision(
             }
         )
 
+
+    # ========================================================
+    # COMPUTER OFFER INTELLIGENCE - OBSERVER
+    # ========================================================
+    #
+    # IMPORTANTE:
+    # - Esta capa NO ejecuta rechazo ni relistado.
+    # - Solo incorpora la inteligencia de Reroll Engine
+    #   al Orchestrator y a la telemetria.
+    # ========================================================
+
+    reroll_candidates = (
+        offer_reroll.get(
+            "reroll_candidates",
+            [],
+        )
+        or []
+    )
+
+    accept_before_expiry = (
+        offer_reroll.get(
+            "accept_before_expiry",
+            [],
+        )
+        or []
+    )
+
+    if (
+        reroll_candidates
+        and
+        not operations_locked
+    ):
+
+        best_reroll = (
+            reroll_candidates[
+                0
+            ]
+        )
+
+        player_names = ", ".join(
+            player.get(
+                "name",
+                "?"
+            )
+
+            for player
+            in best_reroll.get(
+                "players",
+                [],
+            )
+        )
+
+        candidates.append(
+            {
+                "type":
+                    "COMPUTER_OFFER_REROLL_WATCH",
+
+                "priority":
+                    PRIORITY[
+                        "COMPUTER_OFFER_REROLL_WATCH"
+                    ],
+
+                "action":
+                    (
+                        "REROLL_COMPUTER_OFFER"
+                        if ENABLE_LIVE_COMPUTER_REROLL
+                        else "REROLL_CANDIDATE"
+                    ),
+
+                "executable":
+                    bool(
+                        ENABLE_LIVE_COMPUTER_REROLL
+                    ),
+
+                "executor":
+                    (
+                        "AUTOPILOT"
+                        if ENABLE_LIVE_COMPUTER_REROLL
+                        else None
+                    ),
+
+                "reason": (
+                    f"Reroll Engine considera mejorable la "
+                    f"oferta Computer de {player_names}. "
+                    "La simulacion mantiene SOLVENCY_GUARANTEE. "
+                    + (
+                        "Reroll LIVE habilitado: el executor volvera "
+                        "a revalidar con snapshot fresco antes de escribir."
+                        if ENABLE_LIVE_COMPUTER_REROLL
+                        else
+                        "El rechazo automatico sigue desactivado."
+                    )
+                ),
+
+                "data": {
+                    "offer":
+                        best_reroll,
+
+                    "offer_reroll":
+                        offer_reroll,
+                },
+            }
+        )
+
+    if (
+        accept_before_expiry
+        and
+        not operations_locked
+    ):
+
+        urgent_offer = (
+            accept_before_expiry[
+                0
+            ]
+        )
+
+        player_names = ", ".join(
+            player.get(
+                "name",
+                "?"
+            )
+
+            for player
+            in urgent_offer.get(
+                "players",
+                [],
+            )
+        )
+
+        candidates.append(
+            {
+                "type":
+                    "COMPUTER_OFFER_EXPIRY_WATCH",
+
+                # La dejamos por encima del simple watcher de reroll,
+                # pero NO es ejecutable en esta integracion.
+                "priority":
+                    PRIORITY[
+                        "INCOMING_OFFERS"
+                    ]
+                    + 5,
+
+                "action":
+                    "ACCEPT_BEFORE_EXPIRY",
+
+                "executable":
+                    False,
+
+                "executor":
+                    None,
+
+                "reason": (
+                    f"La oferta Computer de {player_names} "
+                    "es necesaria para solvencia y se acerca "
+                    "a su caducidad. Observer recomienda aceptar "
+                    "antes de perderla, sin ejecutar automaticamente."
+                ),
+
+                "data": {
+                    "offer":
+                        urgent_offer,
+
+                    "offer_reroll":
+                        offer_reroll,
+                },
+            }
+        )
+
     # ========================================================
     # RIESGO DE CARTERA
     # ========================================================
@@ -1593,6 +1787,9 @@ def build_global_decision(
 
             "offers":
                 offers,
+
+            "offer_reroll":
+                offer_reroll,
 
             "portfolio":
                 portfolio,

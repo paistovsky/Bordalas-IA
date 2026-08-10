@@ -6,7 +6,7 @@ on:
   schedule:
     # GitHub cron usa UTC. Ejecutamos cada 30 minutos en :07 y :37
     # para evitar los picos habituales de :00 y :30.
-    - cron: "*/5 * * * *"
+    - cron: "7,37 * * * *"
 
 permissions:
   contents: read

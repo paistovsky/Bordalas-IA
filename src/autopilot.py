@@ -209,6 +209,14 @@ def append_log(
         or {}
     )
 
+    offer_reroll = (
+        state.get(
+            "offer_reroll",
+            {},
+        )
+        or {}
+    )
+
     deadline = (
         state.get(
             "deadline",
@@ -355,6 +363,94 @@ def append_log(
             recovery.get(
                 "deficit"
             ),
+
+        "computer_offer_count":
+            offer_reroll.get(
+                "offer_count"
+            ),
+
+        "computer_reroll_candidate_count":
+            len(
+                offer_reroll.get(
+                    "reroll_candidates",
+                    [],
+                )
+                or []
+            ),
+
+        "computer_accept_before_expiry_count":
+            len(
+                offer_reroll.get(
+                    "accept_before_expiry",
+                    [],
+                )
+                or []
+            ),
+
+        "computer_offer_intelligence":
+            [
+                {
+                    "offer_id":
+                        offer.get(
+                            "offer_id"
+                        ),
+
+                    "players":
+                        [
+                            player.get(
+                                "name"
+                            )
+
+                            for player
+                            in offer.get(
+                                "players",
+                                [],
+                            )
+                        ],
+
+                    "amount":
+                        offer.get(
+                            "amount"
+                        ),
+
+                    "premium_percent":
+                        offer.get(
+                            "premium_percent"
+                        ),
+
+                    "solvency_reserved":
+                        offer.get(
+                            "solvency_reserved"
+                        ),
+
+                    "reroll_safe":
+                        offer.get(
+                            "reroll_safe"
+                        ),
+
+                    "projected_surplus":
+                        (
+                            offer.get(
+                                "simulation",
+                                {},
+                            )
+                            or {}
+                        ).get(
+                            "projected_surplus"
+                        ),
+
+                    "action":
+                        offer.get(
+                            "action"
+                        ),
+                }
+
+                for offer
+                in offer_reroll.get(
+                    "offers",
+                    [],
+                )
+            ],
 
         "decision_type":
             decision.get(
@@ -573,6 +669,14 @@ def print_cycle_result(
         or {}
     )
 
+    offer_reroll = (
+        state.get(
+            "offer_reroll",
+            {},
+        )
+        or {}
+    )
+
     target = (
         franchise.get(
             "target"
@@ -777,6 +881,106 @@ def print_cycle_result(
         print(
             f"Bloqueada por:           "
             f"{budget.get('blocked_by')}"
+        )
+
+    # --------------------------------------------------------
+    # COMPUTER OFFER INTELLIGENCE
+    # --------------------------------------------------------
+
+    print()
+
+    print(
+        "COMPUTER OFFER INTELLIGENCE"
+    )
+
+    print(
+        f"Ofertas Computer:        "
+        f"{offer_reroll.get('offer_count', 0)}"
+    )
+
+    print(
+        f"Reroll candidatos:       "
+        f"{len(offer_reroll.get('reroll_candidates', []) or [])}"
+    )
+
+    print(
+        f"Expiry watch:            "
+        f"{len(offer_reroll.get('accept_before_expiry', []) or [])}"
+    )
+
+    for offer in (
+        offer_reroll.get(
+            "offers",
+            [],
+        )
+        or []
+    ):
+
+        player_names = ", ".join(
+            player.get(
+                "name",
+                "?"
+            )
+
+            for player
+            in offer.get(
+                "players",
+                [],
+            )
+        )
+
+        simulation = (
+            offer.get(
+                "simulation",
+                {},
+            )
+            or {}
+        )
+
+        print()
+
+        print(
+            f"{player_names}"
+        )
+
+        print(
+            f"  Oferta:                "
+            f"{money(offer.get('amount'))}"
+        )
+
+        print(
+            f"  Premium:               "
+            f"{float(offer.get('premium_percent', 0) or 0):+.2f}%"
+        )
+
+        print(
+            f"  Reserved solvencia:    "
+            f"{'SI' if offer.get('solvency_reserved') else 'NO'}"
+        )
+
+        print(
+            f"  Otro ciclo seguro:     "
+            f"{'SI' if offer.get('replacement_cycle_available') else 'NO'}"
+        )
+
+        print(
+            f"  Garantia tras reroll:  "
+            f"{'SI' if simulation.get('guaranteed_after_reroll') else 'NO'}"
+        )
+
+        print(
+            f"  Margen tras reroll:    "
+            f"{money(simulation.get('projected_surplus'))}"
+        )
+
+        print(
+            f"  Caduca en:             "
+            f"{offer.get('hours_to_expiry')} h"
+        )
+
+        print(
+            f"  Decision Pepe:         "
+            f"{offer.get('action')}"
         )
 
     print()

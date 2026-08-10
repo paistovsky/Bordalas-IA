@@ -1,3 +1,17 @@
+from src.analysis.computer_offer_reroll_engine import (
+    record_reroll,
+    revalidate_reroll_offer,
+)
+
+from src.analysis.market_analyzer import (
+    get_latest_snapshot,
+    load_snapshot,
+)
+
+from src.collectors.league_collector import (
+    collect_league_snapshot,
+)
+
 from src.analysis.lineup_monitor import (
     save_lineup_monitor_state,
 )
@@ -12,6 +26,29 @@ HARD_SAFETY_ALLOWED_ACTIONS = {
     "ACCEPT_RECOVERY_OFFER",
     "SAVE_LINEUP",
 }
+
+# Reroll nunca se autoriza dentro de Hard Safety.
+REROLL_ACTION = "REROLL_COMPUTER_OFFER"
+
+
+def refresh_snapshot_for_write_revalidation() -> tuple[str, dict]:
+    """
+    Read-before-write obligatorio para operaciones delicadas.
+
+    Refresca Biwenger y carga un snapshot nuevo justo antes
+    de decidir si se permite la escritura.
+    """
+    collect_league_snapshot()
+
+    snapshot_file = get_latest_snapshot()
+    snapshot = load_snapshot(
+        snapshot_file
+    )
+
+    return (
+        snapshot_file,
+        snapshot,
+    )
 
 
 def build_noop_result(
@@ -516,6 +553,237 @@ def execute_autopilot_decision(
 
             "offer":
                 offer,
+        }
+
+    # ========================================================
+    # REROLL COMPUTER OFFER
+    # ========================================================
+
+    if action == REROLL_ACTION:
+
+        data = (
+            decision.get(
+                "data",
+                {},
+            )
+            or {}
+        )
+
+        requested_offer = (
+            data.get(
+                "offer",
+                {},
+            )
+            or {}
+        )
+
+        offer_id = (
+            requested_offer.get(
+                "offer_id"
+            )
+        )
+
+        if offer_id is None:
+
+            return build_noop_result(
+                decision=decision,
+                status="INVALID_OFFER_ID",
+                reason=(
+                    "Reroll bloqueado: la decision no contiene "
+                    "un offer_id valido."
+                ),
+                success=False,
+            )
+
+        # ----------------------------------------------------
+        # READ-BEFORE-WRITE
+        # ----------------------------------------------------
+
+        try:
+
+            (
+                fresh_snapshot_file,
+                fresh_snapshot,
+            ) = (
+                refresh_snapshot_for_write_revalidation()
+            )
+
+        except Exception as error:
+
+            return build_noop_result(
+                decision=decision,
+                status="REVALIDATION_REFRESH_FAILED",
+                reason=(
+                    "No se pudo obtener un snapshot fresco antes "
+                    f"del reroll: {type(error).__name__}: {error}"
+                ),
+                success=False,
+            )
+
+        validation = (
+            revalidate_reroll_offer(
+                snapshot=
+                    fresh_snapshot,
+
+                offer_id=
+                    int(
+                        offer_id
+                    ),
+            )
+        )
+
+        if not validation.get(
+            "authorized",
+            False,
+        ):
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status=validation.get(
+                        "status",
+                        "REROLL_BLOCKED",
+                    ),
+                    reason=validation.get(
+                        "reason",
+                        "Reroll bloqueado por Safety Gate.",
+                    ),
+                    success=True,
+                ),
+
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+
+                "revalidation":
+                    validation,
+            }
+
+        fresh_offer = (
+            validation.get(
+                "offer",
+                {},
+            )
+            or {}
+        )
+
+        player_ids = (
+            fresh_offer.get(
+                "player_ids",
+                [],
+            )
+            or []
+        )
+
+        if len(player_ids) != 1:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="INVALID_REROLL_PLAYER",
+                    reason=(
+                        "Reroll bloqueado: la oferta fresca no "
+                        "contiene exactamente un jugador."
+                    ),
+                    success=False,
+                ),
+
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+            }
+
+        player_id = int(
+            player_ids[
+                0
+            ]
+        )
+
+        # ----------------------------------------------------
+        # UNICA ESCRITURA REAL DEL CICLO
+        # ----------------------------------------------------
+
+        writer = (
+            BiwengerWriteClient()
+        )
+
+        result = (
+            writer.reject_offer(
+                offer_id=
+                    int(
+                        offer_id
+                    ),
+
+                execute=
+                    True,
+            )
+        )
+
+        success = bool(
+            result.get(
+                "success",
+                False,
+            )
+        )
+
+        if success:
+
+            record_reroll(
+                player_id=
+                    player_id,
+
+                offer_id=
+                    int(
+                        offer_id
+                    ),
+            )
+
+        return {
+            "action":
+                action,
+
+            "status":
+                (
+                    "OFFER_REROLLED"
+                    if success
+                    else "FAILED"
+                ),
+
+            "reason":
+                (
+                    "Oferta Computer rechazada tras revalidacion "
+                    "fresca. El jugador permanece publicado y "
+                    "esperara un nuevo ciclo Computer."
+                    if success
+                    else
+                    "Biwenger no confirmo el rechazo de la oferta."
+                ),
+
+            "write_performed":
+                True,
+
+            "success":
+                success,
+
+            "http_status":
+                result.get(
+                    "http_status"
+                ),
+
+            "response":
+                result.get(
+                    "response"
+                ),
+
+            "offer":
+                fresh_offer,
+
+            "player_id":
+                player_id,
+
+            "revalidation_snapshot":
+                fresh_snapshot_file,
+
+            "revalidation":
+                validation,
         }
 
     # ========================================================

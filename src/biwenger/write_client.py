@@ -5,10 +5,10 @@ from src.biwenger.client import BiwengerClient
 
 class BiwengerWriteClient:
     """
-    Cliente de escritura de Bordalás IA.
+    Cliente de escritura de BordalÃ¡s IA.
 
     Todas las operaciones son DRY-RUN salvo que
-    se utilice explícitamente execute=True.
+    se utilice explÃ­citamente execute=True.
     """
 
     SUCCESS_CODES = {
@@ -402,6 +402,124 @@ class BiwengerWriteClient:
         }
 
     # ==================================================
+    # RECHAZAR OFERTA RECIBIDA
+    # ==================================================
+
+    def build_reject_offer_request(
+        self,
+        offer_id: int,
+    ) -> dict[str, Any]:
+        """
+        Rechaza una oferta recibida.
+
+        Endpoint validado manualmente en Biwenger:
+
+            PUT /api/v2/offers/{offer_id}
+
+        Payload:
+
+            {"status": "rejected"}
+
+        IMPORTANTE:
+        offer_id es el ID de la oferta,
+        no el ID del jugador.
+        """
+
+        if offer_id <= 0:
+            raise ValueError(
+                "El offer_id debe ser mayor que 0."
+            )
+
+        endpoint = (
+            f"{self.client.BASE_URL}"
+            f"/offers/{offer_id}"
+        )
+
+        payload = {
+            "status":
+                "rejected",
+        }
+
+        return {
+            "operation":
+                "REJECT_OFFER",
+
+            "method":
+                "PUT",
+
+            "url":
+                endpoint,
+
+            "headers":
+                self.get_headers_preview(),
+
+            "json":
+                payload,
+
+            "offer_id":
+                offer_id,
+
+            "execute":
+                False,
+        }
+
+    def reject_offer(
+        self,
+        offer_id: int,
+        execute: bool = False,
+    ) -> dict:
+        """
+        Rechaza una oferta recibida.
+
+        DRY-RUN por defecto.
+        """
+
+        request = (
+            self.build_reject_offer_request(
+                offer_id=offer_id,
+            )
+        )
+
+        if not execute:
+            return {
+                **request,
+
+                "sent":
+                    False,
+
+                "success":
+                    True,
+            }
+
+        response = (
+            self.client.session.put(
+                request["url"],
+                json=request["json"],
+                timeout=30,
+            )
+        )
+
+        return {
+            **request,
+
+            "sent":
+                True,
+
+            "http_status":
+                response.status_code,
+
+            "response":
+                self._safe_response(
+                    response
+                ),
+
+            "success":
+                self._is_success(
+                    response.status_code
+                ),
+        }
+
+    # ==================================================
     # MERCADO / VENTA
     # ==================================================
 
@@ -500,7 +618,7 @@ class BiwengerWriteClient:
         }
 
     # ==================================================
-    # ALINEACIÓN
+    # ALINEACIÃ“N
     # ==================================================
 
     def build_lineup_request(
@@ -512,7 +630,7 @@ class BiwengerWriteClient:
 
         if len(player_ids) != 11:
             raise ValueError(
-                "La alineación debe contener "
+                "La alineaciÃ³n debe contener "
                 "exactamente 11 jugadores."
             )
 
