@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
 
   schedule:
-    # GitHub cron usa UTC.
-    # Se ejecuta cada 30 minutos, en los minutos 07 y 37.
-    # Elegimos estos minutos para evitar los picos tipicos de :00 y :30.
+    # GitHub cron usa UTC. Ejecutamos cada 30 minutos en :07 y :37
+    # para evitar los picos habituales de :00 y :30.
     - cron: "7,37 * * * *"
 
 permissions:
@@ -27,7 +26,6 @@ jobs:
       TZ: Europe/Madrid
       PYTHONUNBUFFERED: "1"
       PYTHONIOENCODING: "utf-8"
-
       BIWENGER_USERNAME: ${{ secrets.BIWENGER_USERNAME }}
       BIWENGER_PASSWORD: ${{ secrets.BIWENGER_PASSWORD }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -47,6 +45,7 @@ jobs:
           mkdir -p data/autopilot
           mkdir -p data/lineup_monitor
           mkdir -p data/intelligence
+          mkdir -p data/calendar
 
       - name: Restore Bordalas state
         uses: actions/cache@v4
@@ -55,6 +54,7 @@ jobs:
             data/autopilot
             data/lineup_monitor
             data/intelligence
+            data/calendar
             data/external_status_cache.json
             data/player_mapping_cache.json
             data/snapshot_*.json
@@ -94,5 +94,8 @@ jobs:
           path: |
             data/autopilot/autopilot_log.jsonl
             data/lineup_monitor/state.json
+            data/calendar/laliga_calendar.json
+            data/calendar/calendar_changes.jsonl
+            data/intelligence/jornada_perfecta_lineups.json
           if-no-files-found: ignore
           retention-days: 2
