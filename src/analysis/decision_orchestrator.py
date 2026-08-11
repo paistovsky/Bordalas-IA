@@ -6,6 +6,10 @@ from src.analysis.computer_offer_reroll_engine import (
     build_computer_offer_reroll_board,
 )
 
+from src.analysis.accept_before_expiry_safety_engine import (
+    build_accept_before_expiry_safety_board,
+)
+
 from src.analysis.market_listing_lifecycle_engine import (
     build_market_listing_lifecycle_board,
 )
@@ -66,6 +70,8 @@ PRIORITY = {
     "MARKET_LISTING_RENEW": 660,
     "INCOMING_OFFERS": 650,
     "COMPUTER_OFFER_REROLL_WATCH": 670,
+    "ACCEPT_EXPIRY_WATCH": 665,
+    "ACCEPT_EXPIRY_URGENT": 680,
     "PLAYER_RISK_EXIT": 600,
     "LIQUIDITY_MAINTENANCE": 550,
     "SOLVENCY_NORMAL": 500,
@@ -590,6 +596,12 @@ def build_global_decision(
             # NO persistimos historial ni ejecutamos escrituras.
             persist_history=
                 False,
+        )
+    )
+
+    accept_expiry_safety = (
+        build_accept_before_expiry_safety_board(
+            snapshot
         )
     )
 
@@ -1375,7 +1387,7 @@ def build_global_decision(
                     f"{len(solvency_reserves)} reservas de solvencia, "
                     f"{len(good_offers)} buenas para conservar, "
                     f"{len(hold_offers)} en espera y "
-                    f"{len(actionable)} con señal accionable. "
+                    f"{len(actionable)} con seÃ±al accionable. "
                     "Observer: la inteligencia general de ofertas "
                     "no ejecuta escrituras."
                 ),
@@ -1419,14 +1431,6 @@ def build_global_decision(
     reroll_candidates = (
         offer_reroll.get(
             "reroll_candidates",
-            [],
-        )
-        or []
-    )
-
-    accept_before_expiry = (
-        offer_reroll.get(
-            "accept_before_expiry",
             [],
         )
         or []
@@ -1509,27 +1513,51 @@ def build_global_decision(
             }
         )
 
+
+
+    # ========================================================
+    # ACCEPT-BEFORE-EXPIRY SAFETY V2.1 - OBSERVER
+    # ========================================================
+    #
+    # Esta capa sustituye al watcher legacy de caducidad.
+    # La necesidad de aceptar se decide simulando la pérdida
+    # simultánea de clusters de ofertas y recalculando
+    # SOLVENCY_GUARANTEE desde cero.
+    #
+    # Aún NO ejecuta ACCEPT_OFFER automáticamente.
+    # ========================================================
+
+    urgent_expiry_clusters = (
+        accept_expiry_safety.get(
+            "urgent_clusters",
+            [],
+        )
+        or []
+    )
+
+    watch_expiry_clusters = (
+        accept_expiry_safety.get(
+            "watch_clusters",
+            [],
+        )
+        or []
+    )
+
     if (
-        accept_before_expiry
+        urgent_expiry_clusters
         and
         not operations_locked
     ):
 
-        urgent_offer = (
-            accept_before_expiry[
+        urgent_cluster = (
+            urgent_expiry_clusters[
                 0
             ]
         )
 
         player_names = ", ".join(
-            player.get(
-                "name",
-                "?"
-            )
-
-            for player
-            in urgent_offer.get(
-                "players",
+            urgent_cluster.get(
+                "player_names",
                 [],
             )
         )
@@ -1537,18 +1565,15 @@ def build_global_decision(
         candidates.append(
             {
                 "type":
-                    "COMPUTER_OFFER_EXPIRY_WATCH",
+                    "ACCEPT_BEFORE_EXPIRY_SAFETY",
 
-                # La dejamos por encima del simple watcher de reroll,
-                # pero NO es ejecutable en esta integracion.
                 "priority":
                     PRIORITY[
-                        "INCOMING_OFFERS"
-                    ]
-                    + 5,
+                        "ACCEPT_EXPIRY_URGENT"
+                    ],
 
                 "action":
-                    "ACCEPT_BEFORE_EXPIRY",
+                    "ACCEPT_CLUSTER_BEFORE_EXPIRY",
 
                 "executable":
                     False,
@@ -1557,22 +1582,76 @@ def build_global_decision(
                     None,
 
                 "reason": (
-                    f"La oferta Computer de {player_names} "
-                    "es necesaria para solvencia y se acerca "
-                    "a su caducidad. Observer recomienda aceptar "
-                    "antes de perderla, sin ejecutar automaticamente."
+                    f"Cluster crítico de ofertas: {player_names}. "
+                    "Perderlo rompe SOLVENCY_GUARANTEE y el límite "
+                    "efectivo ya está dentro del margen operativo. "
+                    "Observer: aceptación LIVE todavía desactivada."
                 ),
 
                 "data": {
-                    "offer":
-                        urgent_offer,
+                    "cluster":
+                        urgent_cluster,
 
-                    "offer_reroll":
-                        offer_reroll,
+                    "accept_expiry_safety":
+                        accept_expiry_safety,
                 },
             }
         )
 
+    elif (
+        watch_expiry_clusters
+        and
+        not operations_locked
+    ):
+
+        watch_cluster = (
+            watch_expiry_clusters[
+                0
+            ]
+        )
+
+        player_names = ", ".join(
+            watch_cluster.get(
+                "player_names",
+                [],
+            )
+        )
+
+        candidates.append(
+            {
+                "type":
+                    "ACCEPT_BEFORE_EXPIRY_WATCH",
+
+                "priority":
+                    PRIORITY[
+                        "ACCEPT_EXPIRY_WATCH"
+                    ],
+
+                "action":
+                    "WATCH_CRITICAL_EXPIRY_CLUSTER",
+
+                "executable":
+                    False,
+
+                "executor":
+                    None,
+
+                "reason": (
+                    f"Cluster crítico de ofertas: {player_names}. "
+                    "Perderlo rompería SOLVENCY_GUARANTEE, pero "
+                    "todavía no estamos dentro del margen operativo "
+                    "de aceptación. Debe conservarse y vigilarse."
+                ),
+
+                "data": {
+                    "cluster":
+                        watch_cluster,
+
+                    "accept_expiry_safety":
+                        accept_expiry_safety,
+                },
+            }
+        )
 
     # ========================================================
     # MARKET LISTING LIFECYCLE
@@ -1968,6 +2047,9 @@ def build_global_decision(
             "offer_reroll":
                 offer_reroll,
 
+            "accept_expiry_safety":
+                accept_expiry_safety,
+
             "listing_lifecycle":
                 listing_lifecycle,
 
@@ -1978,3 +2060,5 @@ def build_global_decision(
                 speculation,
         },
     }
+
+
