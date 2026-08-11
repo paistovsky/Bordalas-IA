@@ -1,3 +1,7 @@
+from src.analysis.market_listing_lifecycle_engine import (
+    build_market_listing_lifecycle_board,
+)
+
 from src.analysis.computer_offer_reroll_engine import (
     record_reroll,
     revalidate_reroll_offer,
@@ -29,6 +33,7 @@ HARD_SAFETY_ALLOWED_ACTIONS = {
 
 # Reroll nunca se autoriza dentro de Hard Safety.
 REROLL_ACTION = "REROLL_COMPUTER_OFFER"
+RENEW_LISTING_ACTION = "RENEW_MARKET_LISTING"
 
 
 def refresh_snapshot_for_write_revalidation() -> tuple[str, dict]:
@@ -784,6 +789,200 @@ def execute_autopilot_decision(
 
             "revalidation":
                 validation,
+        }
+
+    # ========================================================
+    # RENOVAR PUBLICACION DE MERCADO
+    # ========================================================
+
+    if action == RENEW_LISTING_ACTION:
+
+        data = (
+            decision.get(
+                "data",
+                {},
+            )
+            or {}
+        )
+
+        requested = (
+            data.get(
+                "listing",
+                {},
+            )
+            or {}
+        )
+
+        player_id = (
+            requested.get(
+                "player_id"
+            )
+        )
+
+        if player_id is None:
+
+            return build_noop_result(
+                decision=decision,
+                status="INVALID_LISTING_PLAYER",
+                reason="Renovacion bloqueada: falta player_id.",
+                success=False,
+            )
+
+        try:
+            (
+                fresh_snapshot_file,
+                fresh_snapshot,
+            ) = refresh_snapshot_for_write_revalidation()
+
+        except Exception as error:
+
+            return build_noop_result(
+                decision=decision,
+                status="RENEW_REVALIDATION_REFRESH_FAILED",
+                reason=(
+                    "No se pudo refrescar Biwenger antes de renovar: "
+                    f"{type(error).__name__}: {error}"
+                ),
+                success=False,
+            )
+
+        lifecycle = (
+            build_market_listing_lifecycle_board(
+                fresh_snapshot
+            )
+        )
+
+        fresh_listing = next(
+            (
+                item
+                for item in lifecycle.get(
+                    "renew_required",
+                    [],
+                )
+                if int(
+                    item.get(
+                        "player_id",
+                        0,
+                    )
+                    or 0
+                )
+                == int(
+                    player_id
+                )
+            ),
+            None,
+        )
+
+        if fresh_listing is None:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="RENEW_NO_LONGER_REQUIRED",
+                    reason=(
+                        "La publicacion ya no necesita renovacion "
+                        "en el snapshot fresco."
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+            }
+
+        listed_price = int(
+            fresh_listing.get(
+                "listed_price",
+                0,
+            )
+            or 0
+        )
+
+        if listed_price <= 0:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="INVALID_LISTING_PRICE",
+                    reason=(
+                        "Renovacion bloqueada: precio de publicacion invalido."
+                    ),
+                    success=False,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+            }
+
+        writer = BiwengerWriteClient()
+
+        result = (
+            writer.list_player_for_sale(
+                player_id=
+                    int(
+                        player_id
+                    ),
+
+                price=
+                    listed_price,
+
+                execute=True,
+            )
+        )
+
+        success = bool(
+            result.get(
+                "success",
+                False,
+            )
+        )
+
+        return {
+            "action":
+                action,
+
+            "status":
+                (
+                    "LISTING_RENEWED"
+                    if success
+                    else "FAILED"
+                ),
+
+            "reason":
+                (
+                    "Publicacion renovada usando POST /market."
+                    if success
+                    else
+                    "Biwenger no confirmo la renovacion."
+                ),
+
+            "write_performed":
+                True,
+
+            "success":
+                success,
+
+            "http_status":
+                result.get(
+                    "http_status"
+                ),
+
+            "response":
+                result.get(
+                    "response"
+                ),
+
+            "player_id":
+                int(
+                    player_id
+                ),
+
+            "listed_price":
+                listed_price,
+
+            "revalidation_snapshot":
+                fresh_snapshot_file,
+
+            "listing":
+                fresh_listing,
         }
 
     # ========================================================

@@ -6,6 +6,10 @@ from src.analysis.computer_offer_reroll_engine import (
     build_computer_offer_reroll_board,
 )
 
+from src.analysis.market_listing_lifecycle_engine import (
+    build_market_listing_lifecycle_board,
+)
+
 from src.analysis.lineup_monitor import (
     build_lineup_monitor_state,
 )
@@ -16,6 +20,10 @@ from src.analysis.liquidity_manager import (
 
 from src.analysis.offer_analyzer import (
     build_offer_board,
+)
+
+from src.analysis.offer_decision_engine import (
+    build_offer_decision_board,
 )
 
 from src.analysis.portfolio_roi_engine import (
@@ -55,6 +63,7 @@ PRIORITY = {
     "SOLVENCY_PREPARATION": 780,
     "LINEUP_UPDATE_LOW": 760,
     "LINEUP_LOW": 700,
+    "MARKET_LISTING_RENEW": 660,
     "INCOMING_OFFERS": 650,
     "COMPUTER_OFFER_REROLL_WATCH": 670,
     "PLAYER_RISK_EXIT": 600,
@@ -73,6 +82,10 @@ PRIORITY = {
 # Todavia permanece desactivado hasta terminar la validacion
 # del Orchestrator corregido.
 ENABLE_LIVE_COMPUTER_REROLL = True
+
+# Renovacion automatica de publicaciones del mercado.
+# Observer hasta validar el lifecycle completo.
+ENABLE_LIVE_MARKET_LISTING_RENEW = True
 
 
 LOCK_PHASES = {
@@ -562,6 +575,12 @@ def build_global_decision(
         )
     )
 
+    offer_decisions = (
+        build_offer_decision_board(
+            snapshot
+        )
+    )
+
     offer_reroll = (
         build_computer_offer_reroll_board(
             snapshot=
@@ -571,6 +590,12 @@ def build_global_decision(
             # NO persistimos historial ni ejecutamos escrituras.
             persist_history=
                 False,
+        )
+    )
+
+    listing_lifecycle = (
+        build_market_listing_lifecycle_board(
+            snapshot
         )
     )
 
@@ -808,43 +833,36 @@ def build_global_decision(
             )
         ):
 
-            next_offer = (
-                recovery[
-                    "selected"
-                ][
-                    0
-                ]
-            )
-
+            # Offer Decision Engine V2 es la unica autoridad
+            # para decidir si una oferta concreta debe aceptarse.
+            # El recovery clasico sigue calculando si el plan es
+            # financiable, pero ya NO genera ACCEPT_RECOVERY_OFFER.
             candidates.append(
                 {
                     "type":
-                        "SOLVENCY_RECOVERY",
+                        "SOLVENCY_GUARANTEE",
 
                     "priority":
                         solvency_priority,
 
                     "action":
-                        "ACCEPT_RECOVERY_OFFER",
+                        "MONITOR_SOLVENCY",
 
                     "executable":
-                        True,
+                        False,
 
                     "executor":
-                        "AUTOPILOT",
+                        None,
 
                     "reason": (
                         f"Saldo negativo: {balance:,.0f} EUR. "
                         f"Fase: {phase}. "
-                        "Existe una combinacion completa de ofertas "
-                        "capaz de recuperar solvencia. Se aceptara "
-                        "como maximo una oferta en este ciclo."
+                        "Existe liquidez suficiente para garantizar "
+                        "la recuperacion, pero las ofertas concretas "
+                        "son gobernadas por Offer Decision Engine V2."
                     ),
 
                     "data": {
-                        "offer":
-                            next_offer,
-
                         "recovery":
                             recovery,
                     },
@@ -1260,31 +1278,89 @@ def build_global_decision(
         )
 
     # ========================================================
-    # OFERTAS RECIBIDAS
+    # OFFER DECISION ENGINE V2 - OBSERVER
     # ========================================================
 
-    incoming = (
-        offers.get(
-            "incoming",
+    evaluated_offers = (
+        offer_decisions.get(
+            "decisions",
             [],
         )
         or []
     )
 
-    if incoming:
+    if evaluated_offers:
+
+        protections = [
+            item
+            for item in evaluated_offers
+            if item.get("decision")
+            == "NEVER_SELL"
+        ]
+
+        solvency_reserves = [
+            item
+            for item in evaluated_offers
+            if item.get("decision")
+            == "HOLD_SOLVENCY_RESERVED"
+        ]
+
+        good_offers = [
+            item
+            for item in evaluated_offers
+            if item.get("decision")
+            == "KEEP_GOOD_OFFER"
+        ]
+
+        hold_offers = [
+            item
+            for item in evaluated_offers
+            if item.get("decision")
+            == "HOLD_OFFER"
+        ]
+
+        actionable = [
+            item
+            for item in evaluated_offers
+            if item.get("decision")
+            in {
+                "ACCEPT_FOR_SOLVENCY",
+                "ACCEPT_NOW",
+                "REROLL_CANDIDATE",
+            }
+        ]
+
+        summary_counts = {
+            "PROTECTIONS":
+                len(protections),
+
+            "SOLVENCY_RESERVES":
+                len(solvency_reserves),
+
+            "GOOD_OFFERS":
+                len(good_offers),
+
+            "HOLD_OFFERS":
+                len(hold_offers),
+
+            "ACTIONABLE":
+                len(actionable),
+        }
 
         candidates.append(
             {
                 "type":
-                    "INCOMING_OFFERS",
+                    "OFFER_DECISION_INTELLIGENCE",
 
                 "priority":
                     PRIORITY[
                         "INCOMING_OFFERS"
                     ],
 
+                # Las protecciones y reservas son ESTADO,
+                # no acciones globales.
                 "action":
-                    "EVALUATE_OFFERS",
+                    "MONITOR_OFFERS",
 
                 "executable":
                     False,
@@ -1292,15 +1368,39 @@ def build_global_decision(
                 "executor":
                     None,
 
-                "reason":
-                    (
-                        f"Hay {len(incoming)} "
-                        "ofertas recibidas pendientes."
-                    ),
+                "reason": (
+                    f"Offer Decision Engine V2 controla "
+                    f"{len(evaluated_offers)} ofertas: "
+                    f"{len(protections)} protegidas, "
+                    f"{len(solvency_reserves)} reservas de solvencia, "
+                    f"{len(good_offers)} buenas para conservar, "
+                    f"{len(hold_offers)} en espera y "
+                    f"{len(actionable)} con señal accionable. "
+                    "Observer: la inteligencia general de ofertas "
+                    "no ejecuta escrituras."
+                ),
 
                 "data": {
-                    "offers":
-                        incoming,
+                    "protections":
+                        protections,
+
+                    "solvency_reserves":
+                        solvency_reserves,
+
+                    "good_offers":
+                        good_offers,
+
+                    "hold_offers":
+                        hold_offers,
+
+                    "actionable":
+                        actionable,
+
+                    "summary_counts":
+                        summary_counts,
+
+                    "offer_decisions":
+                        offer_decisions,
                 },
             }
         )
@@ -1469,6 +1569,80 @@ def build_global_decision(
 
                     "offer_reroll":
                         offer_reroll,
+                },
+            }
+        )
+
+
+    # ========================================================
+    # MARKET LISTING LIFECYCLE
+    # ========================================================
+
+    renewal_candidates = (
+        listing_lifecycle.get(
+            "renew_required",
+            [],
+        )
+        or []
+    )
+
+    if (
+        renewal_candidates
+        and
+        not operations_locked
+    ):
+
+        # Solo una renovacion por ciclo.
+        renewal = (
+            renewal_candidates[
+                0
+            ]
+        )
+
+        candidates.append(
+            {
+                "type":
+                    "MARKET_LISTING_RENEW",
+
+                "priority":
+                    PRIORITY[
+                        "MARKET_LISTING_RENEW"
+                    ],
+
+                "action":
+                    (
+                        "RENEW_MARKET_LISTING"
+                        if ENABLE_LIVE_MARKET_LISTING_RENEW
+                        else "RENEW_MARKET_LISTING_WATCH"
+                    ),
+
+                "executable":
+                    bool(
+                        ENABLE_LIVE_MARKET_LISTING_RENEW
+                    ),
+
+                "executor":
+                    (
+                        "AUTOPILOT"
+                        if ENABLE_LIVE_MARKET_LISTING_RENEW
+                        else None
+                    ),
+
+                "reason": (
+                    f"La publicacion de {renewal.get('name')} "
+                    "caduca antes de terminar el siguiente ciclo "
+                    "Computer. "
+                    + (
+                        "Renovacion LIVE habilitada."
+                        if ENABLE_LIVE_MARKET_LISTING_RENEW
+                        else
+                        "Observer: renovacion automatica desactivada."
+                    )
+                ),
+
+                "data": {
+                    "listing":
+                        renewal,
                 },
             }
         )
@@ -1788,8 +1962,14 @@ def build_global_decision(
             "offers":
                 offers,
 
+            "offer_decisions":
+                offer_decisions,
+
             "offer_reroll":
                 offer_reroll,
+
+            "listing_lifecycle":
+                listing_lifecycle,
 
             "portfolio":
                 portfolio,

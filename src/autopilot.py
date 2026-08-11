@@ -217,6 +217,14 @@ def append_log(
         or {}
     )
 
+    listing_lifecycle = (
+        state.get(
+            "listing_lifecycle",
+            {},
+        )
+        or {}
+    )
+
     deadline = (
         state.get(
             "deadline",
@@ -386,6 +394,53 @@ def append_log(
                 )
                 or []
             ),
+
+        "listing_count":
+            listing_lifecycle.get(
+                "listing_count"
+            ),
+
+        "listing_renew_required_count":
+            listing_lifecycle.get(
+                "renew_required_count"
+            ),
+
+        "listing_renew_required":
+            [
+                {
+                    "player_id":
+                        item.get(
+                            "player_id"
+                        ),
+
+                    "name":
+                        item.get(
+                            "name"
+                        ),
+
+                    "expires_at":
+                        str(
+                            item.get(
+                                "expires_at"
+                            )
+                        ),
+
+                    "hours_to_expiry":
+                        item.get(
+                            "hours_to_expiry"
+                        ),
+
+                    "listed_price":
+                        item.get(
+                            "listed_price"
+                        ),
+                }
+
+                for item in listing_lifecycle.get(
+                    "renew_required",
+                    [],
+                )
+            ],
 
         "computer_offer_intelligence":
             [
@@ -672,6 +727,14 @@ def print_cycle_result(
     offer_reroll = (
         state.get(
             "offer_reroll",
+            {},
+        )
+        or {}
+    )
+
+    listing_lifecycle = (
+        state.get(
+            "listing_lifecycle",
             {},
         )
         or {}
@@ -981,6 +1044,36 @@ def print_cycle_result(
         print(
             f"  Decision Pepe:         "
             f"{offer.get('action')}"
+        )
+
+    print()
+
+    print(
+        "MARKET LISTING LIFECYCLE"
+    )
+
+    print(
+        f"Publicaciones:           "
+        f"{listing_lifecycle.get('listing_count', 0)}"
+    )
+
+    print(
+        f"Renovacion requerida:    "
+        f"{listing_lifecycle.get('renew_required_count', 0)}"
+    )
+
+    for listing in (
+        listing_lifecycle.get(
+            "renew_required",
+            [],
+        )
+        or []
+    ):
+
+        print(
+            f"  {listing.get('name')}: "
+            f"caduca en {listing.get('hours_to_expiry')} h "
+            f"-> RENEW_MARKET_LISTING"
         )
 
     print()
