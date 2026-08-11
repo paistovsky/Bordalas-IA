@@ -1396,7 +1396,7 @@ def build_global_decision(
                     f"{len(solvency_reserves)} reservas de solvencia, "
                     f"{len(good_offers)} buenas para conservar, "
                     f"{len(hold_offers)} en espera y "
-                    f"{len(actionable)} con seÃƒÆ’Ã‚Â±al accionable. "
+                    f"{len(actionable)} con signal accionable. "
                     "Observer: la inteligencia general de ofertas "
                     "no ejecuta escrituras."
                 ),
