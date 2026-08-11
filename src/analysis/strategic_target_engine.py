@@ -2,6 +2,10 @@ from src.analysis.player_availability import (
     analyze_player_availability,
 )
 
+from src.analysis.position_policy import (
+    get_effective_positions,
+)
+
 
 POSITION_NAMES = {
     1: "Portero",
@@ -757,27 +761,9 @@ def get_player_positions(
     player: dict,
 ) -> list[int]:
 
-    positions = [
-        player[
-            "position"
-        ]
-    ]
-
-    for alt_position in player.get(
-        "altPositions",
-        [],
-    ):
-
-        if (
-            alt_position
-            not in positions
-        ):
-
-            positions.append(
-                alt_position
-            )
-
-    return positions
+    return get_effective_positions(
+        player
+    )
 
 
 def calculate_squad_need_bonus(

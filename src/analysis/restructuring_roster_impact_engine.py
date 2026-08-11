@@ -9,6 +9,10 @@ from src.analysis.lineup_engine import (
     player_has_current_round_game,
 )
 
+from src.analysis.position_policy import (
+    get_effective_positions,
+)
+
 
 # ======================================================
 # POSICIONES
@@ -85,39 +89,9 @@ def get_player_positions(
         )
     )
 
-    position = player.get(
-        "position"
+    return get_effective_positions(
+        player
     )
-
-    positions = []
-
-    if position is not None:
-
-        positions.append(
-            int(
-                position
-            )
-        )
-
-    for alt_position in player.get(
-        "altPositions",
-        [],
-    ):
-
-        alt_position = int(
-            alt_position
-        )
-
-        if (
-            alt_position
-            not in positions
-        ):
-
-            positions.append(
-                alt_position
-            )
-
-    return positions
 
 
 # ======================================================
@@ -182,9 +156,9 @@ def calculate_best_shortage_coverage(
     Calcula cuántos huecos actuales del XI podrían
     cubrir las pujas que mantenemos.
 
-    Un jugador con posiciones alternativas puede
-    cubrir distintos slots, por lo que usamos
-    backtracking.
+    Cada jugador solo puede cubrir su posicion principal.
+    Mantenemos backtracking porque varias pujas pueden
+    competir por los mismos huecos.
 
     IMPORTANTE:
     esto mide cobertura POTENCIAL.

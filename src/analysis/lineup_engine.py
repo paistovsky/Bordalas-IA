@@ -4,6 +4,20 @@ from src.analysis.player_availability import (
     analyze_player_availability,
 )
 
+from src.analysis.home_away_intelligence import (
+    build_home_away_context,
+)
+
+from src.intelligence.penalty_intelligence import (
+    get_penalty_context,
+)
+
+from src.analysis.position_policy import (
+    POSITION_POLICY,
+    assert_lineup_position_integrity,
+    get_effective_positions,
+)
+
 from src.intelligence.lineup_intelligence import (
     build_lineup_intelligence,
 )
@@ -22,20 +36,17 @@ FORMATION = {
 }
 
 
+# Formaciones que Pepe evalua automaticamente.
+# No existe bonus por formacion: gana el XI legal completo
+# con mejor lineup_score.
 FORMATIONS = {
-    "4-3-3": {
-        1: 1,
-        2: 4,
-        3: 3,
-        4: 3,
-    },
-
-    "4-4-2": {
-        1: 1,
-        2: 4,
-        3: 4,
-        4: 2,
-    },
+    "3-4-3": {1: 1, 2: 3, 3: 4, 4: 3},
+    "3-5-2": {1: 1, 2: 3, 3: 5, 4: 2},
+    "4-3-3": {1: 1, 2: 4, 3: 3, 4: 3},
+    "4-4-2": {1: 1, 2: 4, 3: 4, 4: 2},
+    "4-5-1": {1: 1, 2: 4, 3: 5, 4: 1},
+    "5-3-2": {1: 1, 2: 5, 3: 3, 4: 2},
+    "5-4-1": {1: 1, 2: 5, 3: 4, 4: 1},
 }
 
 
@@ -98,36 +109,18 @@ def player_has_current_round_game(
 def get_player_positions(
     player: dict,
 ) -> list[int]:
+    """
+    Compatibilidad publica con consumidores existentes.
 
-    positions = []
+    Position Policy V1:
+    Pepe usa exclusivamente la posicion principal de Biwenger.
+    altPositions se conserva como metadata, pero no permite ocupar
+    otro slot del XI ni cubrir necesidades tacticas.
+    """
 
-    main_position = (
-        player.get(
-            "position"
-        )
+    return get_effective_positions(
+        player
     )
-
-    if main_position is not None:
-
-        positions.append(
-            main_position
-        )
-
-    for position in (
-        player.get(
-            "altPositions",
-            [],
-        )
-        or []
-    ):
-
-        if position not in positions:
-
-            positions.append(
-                position
-            )
-
-    return positions
 
 
 # ============================================================
@@ -312,11 +305,43 @@ def prepare_players(
             or 0.0
         )
 
+        home_away_context = (
+            build_home_away_context(
+                snapshot,
+                player,
+            )
+        )
+
+        penalty_context = (
+            get_penalty_context(
+                snapshot,
+                player,
+            )
+        )
+
+        home_away_adjustment = float(
+            home_away_context.get(
+                "bonus",
+                0.0,
+            )
+            or 0.0
+        )
+
+        penalty_adjustment = float(
+            penalty_context.get(
+                "bonus",
+                0.0,
+            )
+            or 0.0
+        )
+
         if lineup_eligible:
 
             final_score = (
                 base_score
                 + external_adjustment
+                + home_away_adjustment
+                + penalty_adjustment
             )
 
         else:
@@ -415,6 +440,33 @@ def prepare_players(
 
                 "external_lineup_block":
                     external_block,
+
+                "home_away_context":
+                    home_away_context,
+
+                "home_away_adjustment":
+                    home_away_adjustment,
+
+                "penalty_context":
+                    penalty_context,
+
+                "penalty_adjustment":
+                    penalty_adjustment,
+
+                "lineup_score_components":
+                    {
+                        "base":
+                            base_score,
+
+                        "jornada_perfecta":
+                            external_adjustment,
+
+                        "home_away":
+                            home_away_adjustment,
+
+                        "penalty":
+                            penalty_adjustment,
+                    },
 
                 "lineup_score":
                     final_score,
@@ -833,6 +885,11 @@ def build_lineup(
         )
     )
 
+    # Hard Safety: ningun jugador puede salir de su posicion.
+    assert_lineup_position_integrity(
+        best_lineup
+    )
+
     blocked_players = [
         player
 
@@ -964,6 +1021,9 @@ def build_lineup(
 
 
     return {
+        "position_policy":
+            POSITION_POLICY,
+
         "formation":
             selected_formation,
 

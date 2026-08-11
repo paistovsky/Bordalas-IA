@@ -33,3 +33,5 @@ bordalas_files.txt
 # Sistema
 .DS_Store
 Thumbs.db
+
+.wrangler/
