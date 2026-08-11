@@ -93,6 +93,15 @@ ENABLE_LIVE_COMPUTER_REROLL = True
 # Observer hasta validar el lifecycle completo.
 ENABLE_LIVE_MARKET_LISTING_RENEW = True
 
+# Aceptacion automatica SOLO para clusters criticos y urgentes.
+# El executor hace read-before-write y revalidacion completa.
+ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY = True
+
+# Compra especulativa LIVE conservadora:
+# solo con saldo positivo y candidato ejecutable.
+# El executor refresca y recalcula antes de pujar.
+ENABLE_LIVE_SPECULATION_BUY = True
+
 
 LOCK_PHASES = {
     "ROUND_LOCKED",
@@ -1387,7 +1396,7 @@ def build_global_decision(
                     f"{len(solvency_reserves)} reservas de solvencia, "
                     f"{len(good_offers)} buenas para conservar, "
                     f"{len(hold_offers)} en espera y "
-                    f"{len(actionable)} con seÃ±al accionable. "
+                    f"{len(actionable)} con seÃƒÆ’Ã‚Â±al accionable. "
                     "Observer: la inteligencia general de ofertas "
                     "no ejecuta escrituras."
                 ),
@@ -1520,11 +1529,11 @@ def build_global_decision(
     # ========================================================
     #
     # Esta capa sustituye al watcher legacy de caducidad.
-    # La necesidad de aceptar se decide simulando la pérdida
-    # simultánea de clusters de ofertas y recalculando
+    # La necesidad de aceptar se decide simulando la pÃƒÂ©rdida
+    # simultÃƒÂ¡nea de clusters de ofertas y recalculando
     # SOLVENCY_GUARANTEE desde cero.
     #
-    # Aún NO ejecuta ACCEPT_OFFER automáticamente.
+    # AÃƒÂºn NO ejecuta ACCEPT_OFFER automÃƒÂ¡ticamente.
     # ========================================================
 
     urgent_expiry_clusters = (
@@ -1576,16 +1585,29 @@ def build_global_decision(
                     "ACCEPT_CLUSTER_BEFORE_EXPIRY",
 
                 "executable":
-                    False,
+                    bool(
+                        ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY
+                    ),
 
                 "executor":
-                    None,
+                    (
+                        "AUTOPILOT"
+                        if ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY
+                        else None
+                    ),
 
                 "reason": (
-                    f"Cluster crítico de ofertas: {player_names}. "
-                    "Perderlo rompe SOLVENCY_GUARANTEE y el límite "
-                    "efectivo ya está dentro del margen operativo. "
-                    "Observer: aceptación LIVE todavía desactivada."
+                    f"Cluster crÃƒÂ­tico de ofertas: {player_names}. "
+                    "Perderlo rompe SOLVENCY_GUARANTEE y el lÃƒÂ­mite "
+                    "efectivo ya estÃƒÂ¡ dentro del margen operativo. "
+                    + (
+                        "Aceptacion LIVE habilitada: el executor "
+                        "refrescara Biwenger y revalidara TODO antes "
+                        "de aceptar una sola oferta."
+                        if ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY
+                        else
+                        "Observer: aceptacion LIVE desactivada."
+                    )
                 ),
 
                 "data": {
@@ -1637,10 +1659,10 @@ def build_global_decision(
                     None,
 
                 "reason": (
-                    f"Cluster crítico de ofertas: {player_names}. "
-                    "Perderlo rompería SOLVENCY_GUARANTEE, pero "
-                    "todavía no estamos dentro del margen operativo "
-                    "de aceptación. Debe conservarse y vigilarse."
+                    f"Cluster crÃƒÂ­tico de ofertas: {player_names}. "
+                    "Perderlo romperÃƒÂ­a SOLVENCY_GUARANTEE, pero "
+                    "todavÃƒÂ­a no estamos dentro del margen operativo "
+                    "de aceptaciÃƒÂ³n. Debe conservarse y vigilarse."
                 ),
 
                 "data": {
@@ -1856,14 +1878,27 @@ def build_global_decision(
                     "BUY_SPECULATION",
 
                 "executable":
-                    False,
+                    bool(
+                        ENABLE_LIVE_SPECULATION_BUY
+                    ),
 
                 "executor":
-                    None,
+                    (
+                        "AUTOPILOT"
+                        if ENABLE_LIVE_SPECULATION_BUY
+                        else None
+                    ),
 
                 "reason": (
                     "Existe una oportunidad especulativa "
-                    "dentro del presupuesto autorizado."
+                    "dentro del presupuesto autorizado. "
+                    + (
+                        "Compra LIVE habilitada con read-before-write "
+                        "y revalidacion completa."
+                        if ENABLE_LIVE_SPECULATION_BUY
+                        else
+                        "Observer: compra automatica desactivada."
+                    )
                 ),
 
                 "data": {
@@ -2060,5 +2095,3 @@ def build_global_decision(
                 speculation,
         },
     }
-
-

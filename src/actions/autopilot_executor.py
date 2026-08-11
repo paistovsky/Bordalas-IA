@@ -1,3 +1,11 @@
+from src.analysis.accept_before_expiry_live_selector import (
+    select_emergency_accept_offer,
+)
+
+from src.analysis.speculation_engine import (
+    build_speculation_board,
+)
+
 from src.analysis.market_listing_lifecycle_engine import (
     build_market_listing_lifecycle_board,
 )
@@ -28,12 +36,15 @@ from src.biwenger.write_client import (
 HARD_SAFETY_ALLOWED_ACTIONS = {
     "LIST_FOR_LIQUIDITY",
     "ACCEPT_RECOVERY_OFFER",
+    "ACCEPT_CLUSTER_BEFORE_EXPIRY",
     "SAVE_LINEUP",
 }
 
 # Reroll nunca se autoriza dentro de Hard Safety.
 REROLL_ACTION = "REROLL_COMPUTER_OFFER"
 RENEW_LISTING_ACTION = "RENEW_MARKET_LISTING"
+ACCEPT_EXPIRY_ACTION = "ACCEPT_CLUSTER_BEFORE_EXPIRY"
+SPECULATION_BUY_ACTION = "BUY_SPECULATION"
 
 
 def refresh_snapshot_for_write_revalidation() -> tuple[str, dict]:
@@ -186,6 +197,10 @@ def execute_autopilot_decision(
     Acciones LIVE soportadas:
     - LIST_FOR_LIQUIDITY
     - ACCEPT_RECOVERY_OFFER
+    - ACCEPT_CLUSTER_BEFORE_EXPIRY
+    - REROLL_COMPUTER_OFFER
+    - RENEW_MARKET_LISTING
+    - BUY_SPECULATION
     - SAVE_LINEUP
 
     El flujo Franchise existente permanece fuera hasta
@@ -558,6 +573,271 @@ def execute_autopilot_decision(
 
             "offer":
                 offer,
+        }
+
+    # ========================================================
+    # ACCEPT BEFORE EXPIRY - LIVE CONTROLADO
+    # ========================================================
+
+    if action == ACCEPT_EXPIRY_ACTION:
+
+        data = (
+            decision.get(
+                "data",
+                {},
+            )
+            or {}
+        )
+
+        requested_cluster = (
+            data.get(
+                "cluster",
+                {},
+            )
+            or {}
+        )
+
+        requested_offer_ids = (
+            requested_cluster.get(
+                "offer_ids",
+                [],
+            )
+            or []
+        )
+
+        if not requested_offer_ids:
+
+            return build_noop_result(
+                decision=decision,
+                status="INVALID_EXPIRY_CLUSTER",
+                reason=(
+                    "Aceptacion bloqueada: la decision no contiene "
+                    "offer_ids del cluster."
+                ),
+                success=False,
+            )
+
+        # ----------------------------------------------------
+        # READ-BEFORE-WRITE
+        # ----------------------------------------------------
+
+        try:
+
+            (
+                fresh_snapshot_file,
+                fresh_snapshot,
+            ) = (
+                refresh_snapshot_for_write_revalidation()
+            )
+
+        except Exception as error:
+
+            return build_noop_result(
+                decision=decision,
+                status="ACCEPT_REVALIDATION_REFRESH_FAILED",
+                reason=(
+                    "No se pudo obtener un snapshot fresco antes "
+                    f"de aceptar: {type(error).__name__}: {error}"
+                ),
+                success=False,
+            )
+
+        selection = (
+            select_emergency_accept_offer(
+                snapshot=
+                    fresh_snapshot,
+
+                offer_ids=
+                    requested_offer_ids,
+            )
+        )
+
+        if not selection.get(
+            "ready",
+            False,
+        ):
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status=selection.get(
+                        "status",
+                        "ACCEPT_BLOCKED",
+                    ),
+                    reason=selection.get(
+                        "reason",
+                        "Aceptacion bloqueada por Safety Gate.",
+                    ),
+                    success=True,
+                ),
+
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+
+                "selection":
+                    selection,
+            }
+
+        selected = (
+            selection.get(
+                "selected",
+                {},
+            )
+            or {}
+        )
+
+        offer_decision = (
+            selected.get(
+                "offer_decision",
+                {},
+            )
+            or {}
+        )
+
+        # Barrera explicita adicional: nunca vendemos protegidos.
+        if (
+            offer_decision.get(
+                "decision"
+            )
+            == "NEVER_SELL"
+            or
+            offer_decision.get(
+                "protection"
+            )
+            == "NEVER_AUTO_SELL"
+        ):
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="BLOCKED_PROTECTED_PLAYER",
+                    reason=(
+                        "Accept-Before-Expiry bloqueado: "
+                        "el selector ha devuelto un jugador protegido."
+                    ),
+                    success=False,
+                ),
+
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+
+                "selection":
+                    selection,
+            }
+
+        offer_id = (
+            selected.get(
+                "offer_id"
+            )
+        )
+
+        player_id = (
+            selected.get(
+                "player_id"
+            )
+        )
+
+        if (
+            offer_id is None
+            or
+            player_id is None
+        ):
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="INVALID_SELECTED_OFFER",
+                    reason=(
+                        "Accept-Before-Expiry bloqueado: "
+                        "la oferta seleccionada no es valida."
+                    ),
+                    success=False,
+                ),
+
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+
+                "selection":
+                    selection,
+            }
+
+        # ----------------------------------------------------
+        # UNICA ESCRITURA REAL DEL CICLO
+        # ----------------------------------------------------
+
+        writer = (
+            BiwengerWriteClient()
+        )
+
+        result = (
+            writer.accept_offer(
+                offer_id=
+                    int(
+                        offer_id
+                    ),
+
+                execute=
+                    True,
+            )
+        )
+
+        success = bool(
+            result.get(
+                "success",
+                False,
+            )
+        )
+
+        return {
+            "action":
+                action,
+
+            "status":
+                (
+                    "EXPIRY_OFFER_ACCEPTED"
+                    if success
+                    else "FAILED"
+                ),
+
+            "reason":
+                (
+                    f"Oferta de {selected.get('player_name')} aceptada "
+                    "tras revalidacion fresca de solvencia. "
+                    "No se ejecutara otra venta en este ciclo."
+                    if success
+                    else
+                    "Biwenger no confirmo la aceptacion de la oferta."
+                ),
+
+            "write_performed":
+                True,
+
+            "success":
+                success,
+
+            "http_status":
+                result.get(
+                    "http_status"
+                ),
+
+            "response":
+                result.get(
+                    "response"
+                ),
+
+            "offer":
+                selected,
+
+            "player_id":
+                int(
+                    player_id
+                ),
+
+            "revalidation_snapshot":
+                fresh_snapshot_file,
+
+            "selection":
+                selection,
         }
 
     # ========================================================
@@ -983,6 +1263,427 @@ def execute_autopilot_decision(
 
             "listing":
                 fresh_listing,
+        }
+
+    # ========================================================
+    # COMPRA ESPECULATIVA - LIVE CONTROLADO
+    # ========================================================
+
+    if action == SPECULATION_BUY_ACTION:
+
+        data = (
+            decision.get(
+                "data",
+                {},
+            )
+            or {}
+        )
+
+        requested_player = (
+            data.get(
+                "player",
+                {},
+            )
+            or {}
+        )
+
+        requested_player_id = (
+            requested_player.get(
+                "id"
+            )
+        )
+
+        if requested_player_id is None:
+
+            return build_noop_result(
+                decision=decision,
+                status="INVALID_SPECULATION_PLAYER",
+                reason=(
+                    "Compra especulativa bloqueada: "
+                    "falta player_id."
+                ),
+                success=False,
+            )
+
+        # ----------------------------------------------------
+        # READ-BEFORE-WRITE
+        # ----------------------------------------------------
+
+        try:
+
+            (
+                fresh_snapshot_file,
+                fresh_snapshot,
+            ) = refresh_snapshot_for_write_revalidation()
+
+        except Exception as error:
+
+            return build_noop_result(
+                decision=decision,
+                status="SPECULATION_REVALIDATION_REFRESH_FAILED",
+                reason=(
+                    "No se pudo obtener snapshot fresco antes "
+                    f"de pujar: {type(error).__name__}: {error}"
+                ),
+                success=False,
+            )
+
+        fresh_board = (
+            build_speculation_board(
+                fresh_snapshot
+            )
+        )
+
+        fresh_budget = (
+            fresh_board.get(
+                "budget",
+                {},
+            )
+            or {}
+        )
+
+        # V1 LIVE deliberadamente conservadora:
+        # aunque el engine soporte deuda segura,
+        # aqui exigimos saldo positivo.
+        fresh_balance = int(
+            fresh_budget.get(
+                "balance",
+                0,
+            )
+            or 0
+        )
+
+        if fresh_balance < 0:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_NEGATIVE_BALANCE_BLOCK",
+                    reason=(
+                        "Compra especulativa LIVE bloqueada: "
+                        "V1 exige saldo positivo."
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+                "speculation":
+                    fresh_board,
+            }
+
+        if not fresh_budget.get(
+            "enabled",
+            False,
+        ):
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_BUDGET_DISABLED",
+                    reason=(
+                        fresh_budget.get(
+                            "reason",
+                            "El presupuesto especulativo ya no esta habilitado.",
+                        )
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+                "speculation":
+                    fresh_board,
+            }
+
+        fresh_player = next(
+            (
+                player
+                for player in (
+                    fresh_board.get(
+                        "executable_buys",
+                        [],
+                    )
+                    or []
+                )
+                if int(
+                    player.get(
+                        "id",
+                        0,
+                    )
+                    or 0
+                )
+                == int(
+                    requested_player_id
+                )
+            ),
+            None,
+        )
+
+        if fresh_player is None:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_NO_LONGER_EXECUTABLE",
+                    reason=(
+                        "El jugador ya no figura entre los "
+                        "executable_buys del snapshot fresco."
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+                "speculation":
+                    fresh_board,
+            }
+
+        if fresh_player.get(
+            "ownership_state"
+        ) != "EN_MERCADO":
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_PLAYER_NOT_ON_MARKET",
+                    reason=(
+                        "El objetivo especulativo ya no esta "
+                        "disponible en el mercado."
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+                "speculation":
+                    fresh_board,
+            }
+
+        market_sales = (
+            fresh_snapshot.get(
+                "market",
+                {},
+            ).get(
+                "sales",
+                [],
+            )
+            or []
+        )
+
+        fresh_sale = next(
+            (
+                sale
+                for sale in market_sales
+                if int(
+                    (
+                        sale.get(
+                            "player",
+                            {},
+                        )
+                        or {}
+                    ).get(
+                        "id",
+                        0,
+                    )
+                    or 0
+                )
+                == int(
+                    requested_player_id
+                )
+            ),
+            None,
+        )
+
+        if fresh_sale is None:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_MARKET_SALE_NOT_FOUND",
+                    reason=(
+                        "El jugador parece estar en mercado, "
+                        "pero no se encontro su venta fresca."
+                    ),
+                    success=False,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+            }
+
+        bid_amount = int(
+            fresh_player.get(
+                "price",
+                0,
+            )
+            or 0
+        )
+
+        if bid_amount <= 0:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_INVALID_BID_AMOUNT",
+                    reason=(
+                        "El precio fresco del jugador no es valido."
+                    ),
+                    success=False,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+            }
+
+        single_limit = int(
+            fresh_budget.get(
+                "single_operation_limit",
+                0,
+            )
+            or 0
+        )
+
+        total_budget = int(
+            fresh_budget.get(
+                "total_budget",
+                0,
+            )
+            or 0
+        )
+
+        if (
+            bid_amount > single_limit
+            or
+            bid_amount > total_budget
+        ):
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_BUDGET_CHANGED",
+                    reason=(
+                        "El precio fresco ya no cabe dentro "
+                        "del presupuesto especulativo."
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+                "speculation":
+                    fresh_board,
+            }
+
+        seller = (
+            fresh_sale.get(
+                "user",
+                {},
+            )
+            or {}
+        )
+
+        seller_user_id = (
+            seller.get(
+                "id"
+            )
+        )
+
+        # Computer / mercado general puede no tener seller id.
+        if seller_user_id is not None:
+
+            try:
+                seller_user_id = int(
+                    seller_user_id
+                )
+            except (
+                TypeError,
+                ValueError,
+            ):
+                seller_user_id = None
+
+        writer = (
+            BiwengerWriteClient()
+        )
+
+        result = (
+            writer.place_bid(
+                player_id=
+                    int(
+                        requested_player_id
+                    ),
+
+                amount=
+                    int(
+                        bid_amount
+                    ),
+
+                seller_user_id=
+                    seller_user_id,
+
+                execute=
+                    True,
+            )
+        )
+
+        success = bool(
+            result.get(
+                "success",
+                False,
+            )
+        )
+
+        return {
+            "action":
+                action,
+
+            "status":
+                (
+                    "SPECULATION_BID_PLACED"
+                    if success
+                    else "FAILED"
+                ),
+
+            "reason":
+                (
+                    f"Puja especulativa por "
+                    f"{fresh_player.get('name')} tras "
+                    "revalidacion fresca."
+                    if success
+                    else
+                    "Biwenger no confirmo la puja especulativa."
+                ),
+
+            "write_performed":
+                True,
+
+            "success":
+                success,
+
+            "http_status":
+                result.get(
+                    "http_status"
+                ),
+
+            "response":
+                result.get(
+                    "response"
+                ),
+
+            "player":
+                fresh_player,
+
+            "player_id":
+                int(
+                    requested_player_id
+                ),
+
+            "bid_amount":
+                int(
+                    bid_amount
+                ),
+
+            "seller_user_id":
+                seller_user_id,
+
+            "revalidation_snapshot":
+                fresh_snapshot_file,
+
+            "speculation":
+                fresh_board,
         }
 
     # ========================================================
