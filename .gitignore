@@ -35,3 +35,10 @@ bordalas_files.txt
 Thumbs.db
 
 .wrangler/
+.wrangler/
+Bordalas_IA_Dashboard_V3/
+apply_*.py
+*_para_chatgpt.txt
+bordalas-live.backup.txt
+jp_*_probe.py
+jp_*_probe_output.txt
