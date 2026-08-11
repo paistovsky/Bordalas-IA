@@ -4,13 +4,15 @@ on:
   workflow_dispatch:
 
   schedule:
-    # GitHub cron usa UTC. Ejecutamos cada 30 minutos en :07 y :37
-    # para evitar los picos habituales de :00 y :30.
+    # Respaldo interno de GitHub.
+    # El cron-job externo despierta a Pepe cada 15 minutos.
     - cron: "7,37 * * * *"
 
 permissions:
   contents: read
   actions: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: bordalas-autopilot
@@ -46,6 +48,8 @@ jobs:
           mkdir -p data/lineup_monitor
           mkdir -p data/intelligence
           mkdir -p data/calendar
+          mkdir -p data/rival_intelligence
+          mkdir -p dashboard/data
 
       - name: Restore Bordalas state
         uses: actions/cache@v4
@@ -55,6 +59,7 @@ jobs:
             data/lineup_monitor
             data/intelligence
             data/calendar
+            data/rival_intelligence
             data/external_status_cache.json
             data/player_mapping_cache.json
             data/snapshot_*.json
@@ -80,6 +85,27 @@ jobs:
         run: |
           python -m src.autopilot --once --live
 
+      - name: Build Sala de Operaciones telemetry
+        shell: bash
+        run: |
+          python -m src.telemetry.build_dashboard
+
+          echo ""
+          echo "========================================"
+          echo " BORDALAS IA - DASHBOARD GENERATED"
+          echo "========================================"
+
+          test -f dashboard/data/status.json
+          ls -lh dashboard/data/status.json
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Sala de Operaciones
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard
+
       - name: Prune persisted state
         if: always()
         shell: bash
@@ -97,5 +123,21 @@ jobs:
             data/calendar/laliga_calendar.json
             data/calendar/calendar_changes.jsonl
             data/intelligence/jornada_perfecta_lineups.json
+            data/rival_intelligence/rival_intelligence.json
+            dashboard/data/status.json
           if-no-files-found: ignore
           retention-days: 2
+
+  deploy-dashboard:
+    name: Deploy Sala de Operaciones
+    needs: live
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

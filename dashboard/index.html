@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#06110b">
+  <title>Bordalás IA · Sala de Operaciones</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main id="app">
+  <header class="topbar panel">
+    <div>
+      <div class="brand">BORDALÁS IA · SALA DE OPERACIONES</div>
+      <div class="muted" id="metaLine">Cargando telemetría…</div>
+    </div>
+    <div class="statusbox">
+      <strong id="pepeStatus">● PEPE —</strong>
+      <span id="mode">AUTOPILOT</span>
+    </div>
+  </header>
+
+  <section id="summary" class="summary panel"></section>
+
+  <section class="triple">
+    <article class="panel" id="decision"></article>
+    <article class="panel" id="solvency"></article>
+    <article class="panel" id="franchise"></article>
+  </section>
+
+  <section class="midgrid">
+    <article class="panel">
+      <h2>⚽ XI PARA LA JORNADA</h2>
+      <div id="lineupMeta" class="subline"></div>
+      <div class="pitch">
+        <div class="pitch-markings">
+          <div class="halfway"></div>
+          <div class="center-circle"></div>
+          <div class="center-dot"></div>
+          <div class="penalty-box penalty-top"></div>
+          <div class="goal-box goal-top"></div>
+          <div class="penalty-arc arc-top"></div>
+          <div class="penalty-box penalty-bottom"></div>
+          <div class="goal-box goal-bottom"></div>
+          <div class="penalty-arc arc-bottom"></div>
+          <div class="corner c1"></div><div class="corner c2"></div>
+          <div class="corner c3"></div><div class="corner c4"></div>
+        </div>
+        <div id="pitchPlayers" class="pitch-players"></div>
+      </div>
+      <div id="lineupFooter" class="compact-footer"></div>
+    </article>
+
+    <article class="panel">
+      <h2>🕵️ NUESTROS RIVALES</h2>
+      <div class="tablewrap">
+        <table class="rival-table">
+          <thead>
+          <tr>
+            <th>#</th><th>Manager</th><th>Pts</th><th>Saldo</th><th>Plantilla</th>
+            <th>Patrimonio</th><th>Puja máx.</th><th>Mayor puja</th><th>Actividad</th><th>Amenaza</th>
+          </tr>
+          </thead>
+          <tbody id="rivals"></tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="bottomgrid">
+    <article class="panel"><h2>🖥 OFERTAS DE COMPUTER</h2><div id="offers"></div></article>
+    <article class="panel"><h2>🔮 RADAR DE ESPECULACIÓN</h2><div id="speculation"></div></article>
+    <article class="panel"><h2>🏷 JUGADORES PUESTOS EN VENTA</h2><div id="listings"></div></article>
+    <article class="panel"><h2>⚡ QUÉ ESTÁ VALORANDO PEPE</h2><div id="priorities"></div></article>
+  </section>
+
+  <section class="panel">
+    <h2>📜 ÚLTIMOS MOVIMIENTOS DE PEPE</h2>
+    <div id="activity"></div>
+  </section>
+
+  <footer class="footer">BORDALÁS IA · AUTOPILOT LIVE · CICLO PRINCIPAL 15 MIN</footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
