@@ -11,8 +11,6 @@ on:
 permissions:
   contents: read
   actions: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: bordalas-autopilot
@@ -28,9 +26,13 @@ jobs:
       TZ: Europe/Madrid
       PYTHONUNBUFFERED: "1"
       PYTHONIOENCODING: "utf-8"
+
       BIWENGER_USERNAME: ${{ secrets.BIWENGER_USERNAME }}
       BIWENGER_PASSWORD: ${{ secrets.BIWENGER_PASSWORD }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
     steps:
       - name: Checkout
@@ -40,6 +42,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+
+      - name: Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
 
       - name: Prepare persistent directories
         shell: bash
@@ -79,6 +86,8 @@ jobs:
           test -n "$BIWENGER_USERNAME" || (echo "Falta BIWENGER_USERNAME" && exit 1)
           test -n "$BIWENGER_PASSWORD" || (echo "Falta BIWENGER_PASSWORD" && exit 1)
           test -n "$API_FOOTBALL_KEY" || (echo "Falta API_FOOTBALL_KEY" && exit 1)
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "Falta CLOUDFLARE_API_TOKEN" && exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "Falta CLOUDFLARE_ACCOUNT_ID" && exit 1)
 
       - name: Run Bordalas LIVE
         shell: bash
@@ -98,13 +107,19 @@ jobs:
           test -f dashboard/data/status.json
           ls -lh dashboard/data/status.json
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Update Cloudflare dashboard
+        shell: bash
+        run: |
+          npx --yes wrangler@4.120.1 kv key put \
+            "status.json" \
+            --path "dashboard/data/status.json" \
+            --namespace-id "dbb7542f31b34d8ab0590bf774538b21" \
+            --remote
 
-      - name: Upload Sala de Operaciones
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dashboard
+          echo ""
+          echo "========================================"
+          echo " BORDALAS IA - CLOUDFLARE KV UPDATED"
+          echo "========================================"
 
       - name: Prune persisted state
         if: always()
@@ -127,17 +142,3 @@ jobs:
             dashboard/data/status.json
           if-no-files-found: ignore
           retention-days: 2
-
-  deploy-dashboard:
-    name: Deploy Sala de Operaciones
-    needs: live
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
