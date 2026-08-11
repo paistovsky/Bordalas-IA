@@ -56,6 +56,7 @@ jobs:
           mkdir -p data/intelligence
           mkdir -p data/calendar
           mkdir -p data/rival_intelligence
+          mkdir -p data/league_center
           mkdir -p dashboard/data
 
       - name: Restore Bordalas state
@@ -67,6 +68,7 @@ jobs:
             data/intelligence
             data/calendar
             data/rival_intelligence
+            data/league_center
             data/external_status_cache.json
             data/player_mapping_cache.json
             data/snapshot_*.json

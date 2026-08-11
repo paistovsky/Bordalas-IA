@@ -29,3 +29,65 @@ tr.us{background:linear-gradient(90deg,rgba(33,105,58,.45),rgba(13,52,29,.18))}.
 .feed{display:grid;grid-template-columns:70px 1fr 110px;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid #123420;font-size:10px}.footer{text-align:center;color:#48ba78;font-size:9px;padding:2px}
 @media(max-width:1250px){.midgrid{grid-template-columns:1fr}.bottomgrid{grid-template-columns:1fr 1fr}.pitch{min-height:470px}}
 @media(max-width:850px){#app{width:calc(100% - 8px)}.summary{grid-template-columns:repeat(3,1fr)}.triple,.bottomgrid{grid-template-columns:1fr}.pitch{min-height:520px}.player{width:100px}.brand{font-size:15px}}
+
+/* DASHBOARD V3 - CENTRO DE LA LIGA */
+.league-center-title{
+  margin-top:7px;border-color:#266943;
+  background:linear-gradient(90deg,rgba(14,74,41,.78),rgba(4,18,11,.98))
+}
+.league-center-title h2{margin:0 0 2px;color:#7af0a3}
+.league-center-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:7px}
+.league-small-table{max-height:380px}
+.manager-cell,.team-cell{display:flex;align-items:center;gap:7px}
+.manager-avatar{
+  width:24px;height:24px;border-radius:50%;object-fit:cover;
+  border:1px solid #397954;background:#0c2517;flex:0 0 auto
+}
+.manager-dot,.team-shield-fallback{
+  width:25px;height:25px;border-radius:6px;border:1px solid #397954;
+  display:grid;place-items:center;flex:0 0 auto;background:#0c2517;
+  font-size:8px;font-weight:900;color:#9ef2b8
+}
+.manager-dot{border-radius:50%}
+.league-market-feed{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px
+}
+.market-movement{
+  display:grid;grid-template-columns:80px minmax(180px,1fr) auto;
+  gap:9px;align-items:center;min-height:40px;padding:5px 2px;
+  border-bottom:1px solid #123420;font-size:10px
+}
+.market-time{color:#7cad8a;font-variant-numeric:tabular-nums}
+.market-action strong{color:#f3fff6}
+.market-action small{display:block;color:#8fc2a0;margin-top:1px}
+.market-amount{color:#79e7a0;font-weight:900;text-align:right;white-space:nowrap}
+.laliga-heading{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:5px
+}
+.laliga-legend{display:flex;gap:5px;flex-wrap:wrap;font-size:8px;font-weight:900}
+.laliga-legend span{padding:3px 6px;border-radius:4px;border:1px solid #214b31}
+.legend-ucl{color:#76a8ff}.legend-europe{color:#ffc26a}.legend-down{color:#ff777c}
+.laliga-wrap{max-height:none}
+.laliga-table{font-size:10px}
+.laliga-table th:nth-child(2),.laliga-table td:nth-child(2){text-align:left}
+.laliga-table td{padding-top:5px;padding-bottom:5px}
+.team-logo{
+  width:25px;height:25px;object-fit:contain;flex:0 0 auto;
+  filter:drop-shadow(0 2px 2px #0008)
+}
+.laliga-table tr.zone-ucl{box-shadow:inset 3px 0 0 #4f8cff}
+.laliga-table tr.zone-europe{box-shadow:inset 3px 0 0 #ff9f43}
+.laliga-table tr.zone-relegation{
+  box-shadow:inset 3px 0 0 #ff5f62;background:rgba(100,20,25,.10)
+}
+@media(max-width:1100px){
+  .league-center-grid{grid-template-columns:1fr}
+  .league-market-feed{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .laliga-heading{align-items:flex-start;flex-direction:column}
+  .laliga-table{font-size:9px}
+  .laliga-table th,.laliga-table td{padding-left:4px;padding-right:4px}
+  .market-movement{grid-template-columns:65px minmax(0,1fr)}
+  .market-amount{grid-column:2;text-align:left}
+}

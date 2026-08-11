@@ -76,6 +76,25 @@ const threatClass=l=>
   String(l).includes("MEDIUM")?"threat-medium":
   "threat-low";
 
+
+function leagueInitials(name){
+  const parts=String(name||"?").trim().split(/\s+/).filter(Boolean);
+  return parts.length?parts.slice(0,2).map(x=>x[0]?.toUpperCase()||"").join(""):"?";
+}
+function biwengerIconUrl(icon){
+  if(!icon)return null;
+  const value=String(icon);
+  if(/^https?:\/\//i.test(value))return value;
+  return `https://biwenger.as.com/${value.replace(/^\/+/, "")}`;
+}
+function marketMovementText(m){
+  if(m.type==="BUY_FROM_COMPUTER")
+    return `<strong>${esc(m.buyer)}</strong> compró a <strong>${esc(m.player_name)}</strong>`;
+  if(m.type==="SELL_TO_COMPUTER")
+    return `<strong>${esc(m.seller)}</strong> vendió a <strong>${esc(m.player_name)}</strong>`;
+  return `<strong>${esc(m.seller)}</strong> → <strong>${esc(m.buyer)}</strong> · ${esc(m.player_name)}`;
+}
+
 function kv(obj){
   return `<div class="kv">${
     Object.entries(obj)
@@ -399,6 +418,100 @@ function render(d){
       </tr>`
 
     ).join("");
+
+
+  // CENTRO DE LA LIGA - DASHBOARD V3
+  const lc=d.league_center||{};
+
+  const fantasyRows=lc.fantasy_standings||[];
+  document.getElementById("fantasyStandings").innerHTML=fantasyRows.length
+    ?fantasyRows.map(row=>{
+      const icon=biwengerIconUrl(row.icon);
+      return `<tr class="${row.is_us?"us":""}">
+        <td>${row.rank}</td>
+        <td><div class="manager-cell">
+          ${icon
+            ?`<img class="manager-avatar" src="${esc(icon)}" alt="">`
+            :`<span class="manager-dot">${row.is_us?"⭐":esc(leagueInitials(row.name))}</span>`}
+          <strong>${row.is_us?"⭐ ":""}${esc(row.name)}</strong>
+        </div></td>
+        <td><strong>${row.points}</strong></td>
+        <td>${fmtMoney(row.net_worth)}</td>
+      </tr>`;
+    }).join("")
+    :`<tr><td colspan="4" class="muted">Sin clasificación disponible.</td></tr>`;
+
+  const topRows=lc.top_players||[];
+  document.getElementById("topPlayers").innerHTML=topRows.length
+    ?topRows.map(row=>`<tr>
+      <td>${row.rank}</td>
+      <td><strong>${esc(row.name)}</strong></td>
+      <td><strong>${row.points}</strong>
+        ${Number(row.points)===0&&Number(row.points_last_season)>0
+          ?`<small class="muted"> · ant. ${row.points_last_season}</small>`:""}
+      </td>
+      <td>${fmtMoney(row.price)}
+        <small class="${Number(row.price_increment||0)>=0?"good":"bad"}">
+          ${Number(row.price_increment||0)>=0?"▲":"▼"}${fmtMoney(Math.abs(row.price_increment||0))}
+        </small>
+      </td>
+      <td>${row.owner?.is_us?"⭐ ":""}${esc(row.owner?.name||"Computer / libre")}</td>
+    </tr>`).join("")
+    :`<tr><td colspan="5" class="muted">Aún no hay ranking de jugadores.</td></tr>`;
+
+  const marketRows=lc.market_feed||[];
+  document.getElementById("leagueMarketFeed").innerHTML=marketRows.length
+    ?marketRows.map(m=>{
+      const dt=m.timestamp?new Date(Number(m.timestamp)*1000):null;
+      const when=dt?dt.toLocaleString("es-ES",{
+        day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"
+      }):"—";
+      let premium=null;
+      if(Number(m.current_price||0)>0&&Number(m.amount||0)>0)
+        premium=((Number(m.amount)-Number(m.current_price))/Number(m.current_price))*100;
+      return `<div class="market-movement">
+        <span class="market-time">${esc(when)}</span>
+        <div class="market-action">${marketMovementText(m)}
+          <small>${m.type==="BUY_FROM_COMPUTER"?"Compra al Computer":
+            m.type==="SELL_TO_COMPUTER"?"Venta al Computer":"Traspaso entre managers"}
+            ${premium===null?"":` · vs VM actual ${premium>=0?"+":""}${premium.toFixed(1)}%`}
+          </small>
+        </div>
+        <span class="market-amount">${fmtMoney(m.amount)}</span>
+      </div>`;
+    }).join("")
+    :`<div class="muted">Todavía no hay movimientos de mercado registrados.</div>`;
+
+  const ll=lc.laliga||{};
+  document.getElementById("laligaMeta").textContent=
+    `${ll.season||"2026/27"} · ${ll.source||"—"} · ${ll.cache_status||"—"}${
+      ll.fetched_at?` · actualizado ${ago(ll.fetched_at)}`:""}`;
+
+  const llRows=ll.standings||[];
+  document.getElementById("laligaStandings").innerHTML=llRows.length
+    ?llRows.map(row=>{
+      const zone=row.rank<=4?"zone-ucl":row.rank<=7?"zone-europe":
+        row.rank>=18?"zone-relegation":"";
+      const initials=leagueInitials(row.team);
+      return `<tr class="${zone}">
+        <td><strong>${row.rank}</strong></td>
+        <td><div class="team-cell">
+          ${row.logo
+            ?`<img class="team-logo" src="${esc(row.logo)}" alt="">`
+            :`<span class="team-shield-fallback">${esc(initials)}</span>`}
+          <strong>${esc(row.team)}</strong>
+        </div></td>
+        <td>${row.played}</td><td>${row.win}</td><td>${row.draw}</td><td>${row.lose}</td>
+        <td>${row.goals_for}</td><td>${row.goals_against}</td>
+        <td class="${Number(row.goals_diff)>=0?"good":"bad"}">
+          ${Number(row.goals_diff)>0?"+":""}${row.goals_diff}
+        </td>
+        <td><strong>${row.points}</strong></td>
+      </tr>`;
+    }).join("")
+    :`<tr><td colspan="10" class="muted">${
+      esc(ll.message||"La clasificación real todavía no está disponible.")
+    }</td></tr>`;
 
   const ofs=d.offers||[];
 

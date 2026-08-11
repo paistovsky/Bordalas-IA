@@ -11,6 +11,7 @@ from src.analysis.rival_intelligence_engine import (
     save_rival_intelligence,
 )
 from src.collectors.board_history_collector import collect_board_history
+from src.telemetry.league_center import build_league_center
 
 
 AUTOPILOT_LOG = Path("data") / "autopilot" / "autopilot_log.jsonl"
@@ -370,6 +371,12 @@ def build_dashboard_state() -> dict:
 
     save_rival_intelligence(rival_intelligence)
 
+    league_center = build_league_center(
+        snapshot=snapshot,
+        board=board,
+        rival_intelligence=rival_intelligence,
+    )
+
     deadline = state.get("deadline", {}) or {}
     temporal_gate = state.get("temporal_gate", {}) or {}
     liquidity = state.get("liquidity", {}) or {}
@@ -462,6 +469,7 @@ def build_dashboard_state() -> dict:
                 board.get("current_user_id"),
             ),
         },
+        "league_center": league_center,
         "offers": compact_offers(state),
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
