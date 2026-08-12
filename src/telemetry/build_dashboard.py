@@ -7,7 +7,7 @@ from src.telemetry.dashboard_state import (
 def main() -> None:
     print()
     print("=" * 78)
-    print("BORDALAS IA - SALA DE OPERACIONES - TELEMETRIA V0.1")
+    print("BORDALAS IA - SALA DE OPERACIONES - TELEMETRIA V2.0")
     print("=" * 78)
 
     state = build_dashboard_state()
@@ -33,7 +33,7 @@ def main() -> None:
         f"{state.get('decision', {}).get('label')}"
     )
     print()
-    print("# DASHBOARD TELEMETRY V0.1: OK")
+    print("# DASHBOARD TELEMETRY V2.0: OK")
     print("=" * 78)
 
 

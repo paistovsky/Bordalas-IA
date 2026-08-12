@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
+import unicodedata
 from datetime import datetime
 from pathlib import Path
+
+import requests
 
 from src.analysis.decision_orchestrator import build_global_decision
 from src.analysis.market_analyzer import get_latest_snapshot, load_snapshot
@@ -15,7 +19,10 @@ from src.telemetry.league_center import build_league_center
 
 
 AUTOPILOT_LOG = Path("data") / "autopilot" / "autopilot_log.jsonl"
+COMPETITIVE_LOG = Path("data") / "autopilot" / "competitive_observer_log.jsonl"
 DASHBOARD_STATUS = Path("dashboard") / "data" / "status.json"
+PLAYER_MAPPING_CACHE = Path("data") / "player_mapping_cache.json"
+PLAYER_PHOTO_CACHE = Path("data") / "dashboard_player_photo_cache.json"
 
 
 ACTION_LABELS = {
@@ -99,16 +106,423 @@ def human_candidate(candidate: dict) -> dict:
     }
 
 
-def compact_lineup(lineup_state: dict) -> dict:
+
+def load_player_mapping_cache() -> dict:
+    if not PLAYER_MAPPING_CACHE.exists():
+        return {}
+
+    try:
+        payload = json.loads(
+            PLAYER_MAPPING_CACHE.read_text(
+                encoding="utf-8"
+            )
+        )
+    except Exception:
+        return {}
+
+    if isinstance(payload, dict):
+        # Algunas versiones guardan directamente el lookup;
+        # otras pueden envolverlo.
+        for key in (
+            "mappings",
+            "players",
+            "data",
+        ):
+            nested = payload.get(key)
+            if isinstance(nested, dict):
+                return nested
+
+        return payload
+
+    return {}
+
+
+def get_external_player_id(
+    mapping_cache: dict,
+    biwenger_id: int,
+) -> int | None:
+    entry = (
+        mapping_cache.get(str(biwenger_id))
+        or mapping_cache.get(biwenger_id)
+        or {}
+    )
+
+    if not isinstance(entry, dict):
+        return None
+
+    value = (
+        entry.get("external_id")
+        or entry.get("api_football_id")
+        or entry.get("api_id")
+    )
+
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        return None
+
+    return value if value > 0 else None
+
+
+def api_football_photo_url(
+    external_id: int | None,
+) -> str | None:
+    if not external_id:
+        return None
+
+    return (
+        "https://media.api-sports.io/"
+        f"football/players/{external_id}.png"
+    )
+
+
+
+def _normalize_name(value: str) -> str:
+    text = unicodedata.normalize(
+        "NFKD",
+        str(value or ""),
+    )
+    text = "".join(
+        ch
+        for ch in text
+        if not unicodedata.combining(ch)
+    )
+    return " ".join(
+        text.lower().strip().split()
+    )
+
+
+def load_dashboard_player_photo_cache() -> dict:
+    if not PLAYER_PHOTO_CACHE.exists():
+        return {}
+
+    try:
+        payload = json.loads(
+            PLAYER_PHOTO_CACHE.read_text(
+                encoding="utf-8"
+            )
+        )
+    except Exception:
+        return {}
+
+    return (
+        payload
+        if isinstance(payload, dict)
+        else {}
+    )
+
+
+def save_dashboard_player_photo_cache(
+    cache: dict,
+) -> None:
+    try:
+        PLAYER_PHOTO_CACHE.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+        PLAYER_PHOTO_CACHE.write_text(
+            json.dumps(
+                cache,
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
+
+
+def fetch_api_football_player_photo(
+    player_name: str,
+) -> dict:
+    """
+    Fallback de telemetría para fotos.
+    Se usa únicamente cuando no existe mapping previo.
+    El resultado se cachea para no consumir API en cada ciclo.
+    """
+    api_key = os.getenv(
+        "API_FOOTBALL_KEY"
+    )
+
+    if not api_key:
+        return {}
+
+    name = str(player_name or "").strip()
+
+    if len(name) < 3:
+        return {}
+
+    try:
+        response = requests.get(
+            "https://v3.football.api-sports.io/players",
+            headers={
+                "x-apisports-key": api_key,
+            },
+            params={
+                "search": name,
+            },
+            timeout=4,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except Exception:
+        return {}
+
+    rows = payload.get("response") or []
+
+    if not isinstance(rows, list):
+        return {}
+
+    target = _normalize_name(name)
+    best = None
+    best_score = -1
+
+    for row in rows:
+        player = (
+            row.get("player")
+            if isinstance(row, dict)
+            else None
+        ) or {}
+
+        candidate_name = (
+            player.get("name")
+            or ""
+        )
+
+        candidate = _normalize_name(
+            candidate_name
+        )
+
+        if not candidate:
+            continue
+
+        score = 0
+
+        if candidate == target:
+            score = 100
+        elif (
+            candidate in target
+            or target in candidate
+        ):
+            score = 70
+        else:
+            target_tokens = set(
+                target.split()
+            )
+            candidate_tokens = set(
+                candidate.split()
+            )
+            score = len(
+                target_tokens
+                & candidate_tokens
+            ) * 20
+
+        if score > best_score:
+            best_score = score
+            best = player
+
+    if not best or best_score <= 0:
+        return {}
+
+    external_id = safe_int(
+        best.get("id")
+    )
+
+    photo_url = best.get("photo")
+
+    if not photo_url and external_id:
+        photo_url = (
+            "https://media.api-sports.io/"
+            f"football/players/{external_id}.png"
+        )
+
+    return {
+        "api_football_id": (
+            external_id or None
+        ),
+        "photo_url": photo_url,
+        "api_name": best.get("name"),
+    }
+
+
+def build_player_photo_lookup(
+    snapshot: dict,
+) -> dict[int, dict]:
+    mapping_cache = (
+        load_player_mapping_cache()
+    )
+    fallback_cache = (
+        load_dashboard_player_photo_cache()
+    )
+
+    result = {}
+
+    my_team = (
+        snapshot.get("my_team", [])
+        or []
+    )
+    catalog = (
+        snapshot.get("catalog", {})
+        .get("data", {})
+        .get("players", {})
+        or {}
+    )
+
+    players = list(my_team)
+
+    if isinstance(catalog, dict):
+        players.extend(
+            catalog.values()
+        )
+    elif isinstance(catalog, list):
+        players.extend(catalog)
+
+    seen = set()
+    cache_changed = False
+
+    # Only resolve current squad automatically.
+    current_ids = {
+        safe_int(player.get("id"))
+        for player in my_team
+    }
+
+    for player in players:
+        player_id = safe_int(
+            player.get("id")
+        )
+
+        if (
+            player_id <= 0
+            or player_id in seen
+        ):
+            continue
+
+        seen.add(player_id)
+
+        external_id = (
+            get_external_player_id(
+                mapping_cache,
+                player_id,
+            )
+        )
+
+        cached = (
+            fallback_cache.get(
+                str(player_id)
+            )
+            or {}
+        )
+
+        photo_url = (
+            cached.get("photo_url")
+        )
+
+        if (
+            not photo_url
+            and external_id
+        ):
+            photo_url = (
+                api_football_photo_url(
+                    external_id
+                )
+            )
+
+        # Only current squad, only when unresolved, and cached afterwards.
+        if (
+            not photo_url
+            and player_id in current_ids
+        ):
+            resolved = (
+                fetch_api_football_player_photo(
+                    player.get("name")
+                    or ""
+                )
+            )
+
+            if resolved.get("photo_url"):
+                fallback_cache[
+                    str(player_id)
+                ] = resolved
+                cached = resolved
+                photo_url = (
+                    resolved.get(
+                        "photo_url"
+                    )
+                )
+                external_id = (
+                    resolved.get(
+                        "api_football_id"
+                    )
+                    or external_id
+                )
+                cache_changed = True
+
+        result[player_id] = {
+            "api_football_id": (
+                external_id
+                or cached.get(
+                    "api_football_id"
+                )
+            ),
+            "photo_url": photo_url,
+            "icon_hero": (
+                player.get("iconHero")
+            ),
+        }
+
+    if cache_changed:
+        save_dashboard_player_photo_cache(
+            fallback_cache
+        )
+
+    return result
+
+def compact_lineup(
+    lineup_state: dict,
+    snapshot: dict,
+    photo_lookup: dict[int, dict] | None = None,
+) -> dict:
     lineup = lineup_state.get("lineup", {}) or {}
     selected = lineup.get("selected", []) or []
+    photo_lookup = photo_lookup or {}
+
+    my_team_by_id = {
+        safe_int(player.get("id")): player
+        for player in snapshot.get("my_team", []) or []
+    }
+
+    catalog_players = (
+        snapshot.get("catalog", {})
+        .get("data", {})
+        .get("players", {})
+        or {}
+    )
 
     players = []
 
     for player in selected:
+        player_id = safe_int(player.get("id"))
+
+        source = (
+            my_team_by_id.get(player_id)
+            or catalog_players.get(str(player_id))
+            or {}
+        )
+
+        photo = (
+            photo_lookup.get(player_id)
+            or {}
+        )
+
+        icon_hero = (
+            player.get("iconHero")
+            or source.get("iconHero")
+            or photo.get("icon_hero")
+        )
+
         players.append(
             {
-                "id": safe_int(player.get("id")),
+                "id": player_id,
                 "name": player.get("name", "?"),
                 "position": safe_int(
                     player.get(
@@ -119,7 +533,6 @@ def compact_lineup(lineup_state: dict) -> dict:
                 "price": safe_int(player.get("price")),
                 "price_increment": safe_int(player.get("priceIncrement")),
                 "points": safe_int(player.get("points")),
-                # Es un score INTERNO de selección, no puntos fantasy esperados.
                 "lineup_score": round(
                     safe_float(player.get("lineup_score")),
                     2,
@@ -129,6 +542,25 @@ def compact_lineup(lineup_state: dict) -> dict:
                 "jp_confidence": round(
                     safe_float(player.get("external_lineup_confidence")),
                     1,
+                ),
+                "icon_hero": icon_hero,
+                "api_football_id": photo.get(
+                    "api_football_id"
+                ),
+                "photo_url": photo.get(
+                    "photo_url"
+                ),
+                "team_id": safe_int(
+                    player.get(
+                        "teamID",
+                        source.get("teamID"),
+                    )
+                ),
+                "number": safe_int(
+                    player.get(
+                        "number",
+                        source.get("number"),
+                    )
                 ),
             }
         )
@@ -341,6 +773,469 @@ def load_activity_feed(limit: int = 8) -> list[dict]:
     return rows
 
 
+
+def load_latest_jsonl(path: Path) -> dict:
+    if not path.exists():
+        return {}
+
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return {}
+
+    for line in reversed(lines):
+        if not line.strip():
+            continue
+        try:
+            return json.loads(line)
+        except json.JSONDecodeError:
+            continue
+
+    return {}
+
+
+def compact_portfolio_recommendation(item: dict | None) -> dict | None:
+    if not item:
+        return None
+
+    sporting = item.get("sporting_opportunity_cost", {}) or {}
+
+    return {
+        "player_names": item.get("player_names", []) or [],
+        "sold_count": safe_int(item.get("sold_count")),
+        "total_amount": safe_int(item.get("total_amount")),
+        "post_balance": safe_int(item.get("post_balance")),
+        "restores_solvency": bool(item.get("restores_solvency")),
+        "playable_count": safe_int(item.get("playable_count")),
+        "missing": safe_int(item.get("missing")),
+        "lineup_complete": bool(item.get("lineup_complete")),
+        "formation_before": item.get("formation_before"),
+        "formation_after": item.get("formation_after"),
+        "incoming_players": item.get("incoming_players", []) or [],
+        "competitive_damage": round(
+            safe_float(item.get("competitive_damage")),
+            1,
+        ),
+        "lineup_score_before": round(
+            safe_float(
+                item.get(
+                    "lineup_score_before",
+                    sporting.get("lineup_score_before"),
+                )
+            ),
+            2,
+        ),
+        "lineup_score_after": round(
+            safe_float(
+                item.get(
+                    "lineup_score_after",
+                    sporting.get("lineup_score_after"),
+                )
+            ),
+            2,
+        ),
+        "lineup_score_loss": round(
+            safe_float(
+                item.get(
+                    "lineup_score_loss",
+                    sporting.get("lineup_score_loss"),
+                )
+            ),
+            2,
+        ),
+        "lineup_score_loss_percent": round(
+            safe_float(
+                item.get(
+                    "lineup_score_loss_percent",
+                    sporting.get("lineup_score_loss_percent"),
+                )
+            ),
+            2,
+        ),
+    }
+
+
+def compact_competitive_offer(item: dict) -> dict:
+    negotiation = item.get("negotiation", {}) or {}
+    replacement = item.get("replacement_detail", {}) or {}
+    sporting = item.get("sporting_opportunity_cost", {}) or {}
+
+    incoming = [
+        player.get("name") or str(player.get("id"))
+        for player in replacement.get("incoming_players", []) or []
+    ]
+
+    return {
+        "offer_id": item.get("offer_id"),
+        "player_id": safe_int(item.get("player_id")),
+        "player_name": item.get("player_name") or "?",
+        "rival_name": item.get("rival_name") or "Rival",
+        "amount": safe_int(item.get("amount")),
+        "decision_authority": item.get("decision_authority"),
+        "authoritative_decision": item.get("authoritative_decision"),
+        "authoritative_counter_amount": safe_int(
+            item.get("authoritative_counter_amount")
+            or item.get("counter_amount")
+        ),
+        "strategic_sell_price": safe_int(item.get("strategic_sell_price")),
+        "competitive_premium_percent": round(
+            safe_float(item.get("competitive_premium_percent")),
+            2,
+        ),
+        "temporal_premium_percent": round(
+            safe_float(item.get("temporal_premium_percent")),
+            2,
+        ),
+        "sporting_premium_percent": round(
+            safe_float(item.get("sporting_premium_percent")),
+            2,
+        ),
+        "solvency_discount_percent": round(
+            safe_float(item.get("solvency_discount_percent")),
+            2,
+        ),
+        "rival_reinforcement_score": round(
+            safe_float(item.get("rival_reinforcement_score")),
+            1,
+        ),
+        "sporting_cost_score": round(
+            safe_float(item.get("sporting_cost_score")),
+            1,
+        ),
+        "negotiation_event": negotiation.get("event"),
+        "action_gate": negotiation.get("action_gate"),
+        "negotiation_round": safe_int(negotiation.get("negotiation_round")),
+        "should_respond": bool(negotiation.get("should_respond")),
+        "negotiation_status": negotiation.get("status"),
+        "replacement_status": (
+            replacement.get("replacement_status")
+            or (item.get("replacement", {}) or {}).get("replacement_status")
+        ),
+        "replacement_source": replacement.get("replacement_source"),
+        "pre_sale_playable_count": safe_int(
+            replacement.get("pre_sale_playable_count")
+        ),
+        "post_sale_playable_count": safe_int(
+            replacement.get("post_sale_playable_count")
+        ),
+        "formation_before": replacement.get("formation_before"),
+        "formation_after": replacement.get("formation_after"),
+        "incoming_players": incoming,
+        "lineup_score_before": round(
+            safe_float(sporting.get("lineup_score_before")),
+            2,
+        ),
+        "lineup_score_after": round(
+            safe_float(sporting.get("lineup_score_after")),
+            2,
+        ),
+        "lineup_score_loss": round(
+            safe_float(sporting.get("lineup_score_loss")),
+            2,
+        ),
+        "lineup_score_loss_percent": round(
+            safe_float(sporting.get("lineup_score_loss_percent")),
+            2,
+        ),
+    }
+
+
+def load_competitive_dashboard_state() -> dict:
+    record = load_latest_jsonl(COMPETITIVE_LOG)
+
+    if not record:
+        return {
+            "available": False,
+            "live_enabled": True,
+            "status": "SIN_TELEMETRIA",
+            "status_label": "SIN TELEMETRÍA COMPETITIVE",
+            "message": "Aún no existe competitive_observer_log.jsonl.",
+            "offers": [],
+            "portfolio": {},
+        }
+
+    offers = [
+        compact_competitive_offer(item)
+        for item in record.get("manager_offers", []) or []
+    ]
+
+    responding = [item for item in offers if item.get("should_respond")]
+    waiting = [
+        item
+        for item in offers
+        if item.get("action_gate") == "NO_ACTION_WAITING_RIVAL"
+    ]
+
+    if responding:
+        status = "ACTIONABLE"
+        status_label = "PEPE TIENE RESPUESTA PENDIENTE"
+        message = (
+            f"{len(responding)} negociación(es) requieren recalcular/responder. "
+            "La ejecución real sigue dependiendo del Safety Gate del ciclo."
+        )
+    elif offers and len(waiting) == len(offers):
+        status = "WAITING_RIVAL"
+        status_label = "PEPE ESPERANDO AL RIVAL"
+        message = "Las ofertas observadas no han cambiado desde la última respuesta."
+    elif offers:
+        status = "MONITORING"
+        status_label = "PEPE VIGILANDO NEGOCIACIONES"
+        message = "Competitive V2.0 está siguiendo ofertas activas de managers."
+    else:
+        status = "IDLE"
+        status_label = "SIN OFERTAS DE MANAGERS"
+        message = "Competitive V2.0 está activo y no hay negociaciones de managers."
+
+    portfolio = record.get("competitive_portfolio", {}) or {}
+
+    current = (
+        (portfolio.get("current", {}) or {}).get("recommended")
+        or {}
+    )
+    strategic = (
+        (portfolio.get("strategic", {}) or {}).get("recommended")
+        or {}
+    )
+
+    return {
+        "available": bool(record.get("available", True)),
+        "live_enabled": True,
+        "source_timestamp": record.get("timestamp"),
+        "snapshot": record.get("snapshot"),
+        "status": status,
+        "status_label": status_label,
+        "message": message,
+        "offer_count": len(offers),
+        "responding_count": len(responding),
+        "waiting_count": len(waiting),
+        "offers": offers,
+        "portfolio": {
+            "balance": safe_int(portfolio.get("balance")),
+            "deficit": safe_int(portfolio.get("deficit")),
+            "current": compact_portfolio_recommendation(current),
+            "strategic": compact_portfolio_recommendation(strategic),
+        },
+        # El log Competitive V2.0 actual persiste ofertas + portfolio, pero no
+        # el Safety Gate ni competitive_execution. No inventamos esos datos.
+        "safety_gate_persisted": False,
+        "execution_persisted": False,
+    }
+
+
+def _normalize_display_text(value) -> str:
+    text = str(value or "")
+    try:
+        repaired = text.encode("latin1").decode("utf-8")
+        if repaired:
+            return repaired
+    except Exception:
+        pass
+    return text
+
+
+def load_recent_competitive_closed(
+    hours: float = 12.0,
+) -> list[dict]:
+    """
+    Reconstruye cierres recientes comparando manager_offers
+    entre snapshots consecutivos del observer.
+
+    Si una oferta existía en N y desaparece en N+1:
+    RETIRADA POR RIVAL.
+    """
+    if not COMPETITIVE_LOG.exists():
+        return []
+
+    try:
+        raw_lines = COMPETITIVE_LOG.read_text(
+            encoding="utf-8"
+        ).splitlines()
+    except OSError:
+        return []
+
+    records = []
+
+    for line in raw_lines[-500:]:
+        try:
+            record = json.loads(line)
+        except Exception:
+            continue
+
+        timestamp = record.get("timestamp")
+        manager_offers = (
+            record.get("manager_offers")
+            or []
+        )
+
+        if timestamp and isinstance(
+            manager_offers,
+            list,
+        ):
+            records.append(
+                (timestamp, manager_offers)
+            )
+
+    if len(records) < 2:
+        return []
+
+    now = datetime.now()
+    closed_by_key = {}
+
+    for index in range(
+        1,
+        len(records),
+    ):
+        previous_ts, previous_offers = (
+            records[index - 1]
+        )
+        current_ts, current_offers = (
+            records[index]
+        )
+
+        previous_map = {}
+
+        for offer in previous_offers:
+            player_id = safe_int(
+                offer.get("player_id")
+            )
+
+            rival_name = (
+                _normalize_display_text(
+                    offer.get("rival_name")
+                    or "Rival"
+                )
+            )
+
+            if player_id <= 0:
+                continue
+
+            previous_map[
+                (player_id, rival_name)
+            ] = offer
+
+        current_keys = set()
+
+        for offer in current_offers:
+            player_id = safe_int(
+                offer.get("player_id")
+            )
+
+            rival_name = (
+                _normalize_display_text(
+                    offer.get("rival_name")
+                    or "Rival"
+                )
+            )
+
+            if player_id <= 0:
+                continue
+
+            current_keys.add(
+                (player_id, rival_name)
+            )
+
+        try:
+            closed_dt = datetime.fromisoformat(
+                str(current_ts)
+            )
+            age_hours = (
+                now - closed_dt
+            ).total_seconds() / 3600.0
+        except Exception:
+            continue
+
+        if not (
+            0 <= age_hours <= hours
+        ):
+            continue
+
+        for key, old_offer in (
+            previous_map.items()
+        ):
+            if key in current_keys:
+                continue
+
+            player_id, rival_name = key
+
+            closed_by_key[key] = {
+                "player_id": player_id,
+                "player_name": (
+                    _normalize_display_text(
+                        old_offer.get(
+                            "player_name"
+                        )
+                        or "?"
+                    )
+                ),
+                "rival_name": rival_name,
+                "amount": safe_int(
+                    old_offer.get("amount")
+                ),
+                "authoritative_counter_amount": (
+                    safe_int(
+                        old_offer.get(
+                            "authoritative_counter_amount"
+                        )
+                        or old_offer.get(
+                            "counter_amount"
+                        )
+                        or old_offer.get(
+                            "strategic_amount"
+                        )
+                    )
+                ),
+                "closed_at": current_ts,
+                "closed_status": (
+                    "RIVAL_WITHDREW"
+                ),
+                "closed_label": (
+                    "RETIRADA POR RIVAL"
+                ),
+                "previous_snapshot_timestamp": (
+                    previous_ts
+                ),
+            }
+
+    # HARD TELEMETRY SAFETY:
+    # anything still present in the latest observer snapshot
+    # is ACTIVE and must never be reported as withdrawn/rejected.
+    latest_active_keys = set()
+
+    if records:
+        _, latest_offers = records[-1]
+
+        for offer in latest_offers:
+            player_id = safe_int(
+                offer.get("player_id")
+            )
+
+            rival_name = (
+                _normalize_display_text(
+                    offer.get("rival_name")
+                    or "Rival"
+                )
+            )
+
+            if player_id > 0:
+                latest_active_keys.add(
+                    (player_id, rival_name)
+                )
+
+    safe_closed = [
+        item
+        for key, item in closed_by_key.items()
+        if key not in latest_active_keys
+    ]
+
+    return sorted(
+        safe_closed,
+        key=lambda item: (
+            item.get("closed_at")
+            or ""
+        ),
+        reverse=True,
+    )
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -389,6 +1284,101 @@ def build_dashboard_state() -> dict:
         for candidate in result.get("candidates", [])[:7]
     ]
 
+    photo_lookup = build_player_photo_lookup(
+        snapshot
+    )
+
+    competitive = load_competitive_dashboard_state()
+
+    for offer in competitive.get("offers", []) or []:
+        player_id = safe_int(
+            offer.get("player_id")
+        )
+        photo = photo_lookup.get(
+            player_id,
+            {}
+        )
+        offer["api_football_id"] = (
+            photo.get("api_football_id")
+        )
+        offer["photo_url"] = (
+            photo.get("photo_url")
+        )
+        offer["icon_hero"] = (
+            photo.get("icon_hero")
+        )
+
+    recent_closed = load_recent_competitive_closed()
+    for closed in recent_closed:
+        photo = photo_lookup.get(safe_int(closed.get("player_id")), {})
+        closed["photo_url"] = photo.get("photo_url")
+        closed["icon_hero"] = photo.get("icon_hero")
+    competitive["recent_closed"] = recent_closed
+
+    competitive_status = competitive.get("status")
+
+    if competitive_status == "ACTIONABLE":
+        pepe_now = {
+            "level": "ACTION",
+            "title": "Pepe tiene una respuesta competitiva pendiente",
+            "detail": (
+                f"{safe_int(competitive.get('responding_count'))} negociación(es) "
+                "requieren recalcular y pasar Safety Gate."
+            ),
+        }
+    elif competitive_status == "WAITING_RIVAL":
+        recent_closed = (
+            competitive.get(
+                "recent_closed",
+                [],
+            )
+            or []
+        )
+
+        if recent_closed:
+            latest_closed = (
+                recent_closed[0]
+            )
+
+            pepe_now = {
+                "level": "WAIT",
+                "title": (
+                    "Movimiento rival detectado"
+                ),
+                "detail": (
+                    f"{latest_closed.get('rival_name', 'El rival')} "
+                    f"retiró su oferta por "
+                    f"{latest_closed.get('player_name', 'un jugador')}. "
+                    "Bordalás lo ha registrado y mantiene abiertas "
+                    "las negociaciones restantes."
+                ),
+            }
+        else:
+            pepe_now = {
+                "level": "WAIT",
+                "title": "Esperar al rival",
+                "detail": (
+                    "No hay nuevos movimientos desde la última respuesta. "
+                    "Bordalás no repetirá contraofertas mientras espera al rival."
+                ),
+            }
+
+    elif bool(recovery.get("needed")):
+        pepe_now = {
+            "level": "SOLVENCY",
+            "title": "Prioridad: recuperar solvencia",
+            "detail": (
+                f"Déficit actual de {safe_int(recovery.get('deficit')):,} EUR. "
+                "Pepe mantiene el XI válido mientras busca la salida más eficiente."
+            ),
+        }
+    else:
+        pepe_now = {
+            "level": "OK",
+            "title": human_action(decision.get("action")),
+            "detail": decision.get("reason") or "Sin urgencias críticas.",
+        }
+
     dashboard = {
         "meta": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -424,6 +1414,7 @@ def build_dashboard_state() -> dict:
                 )
             ),
         },
+        "pepe_now": pepe_now,
         "decision": {
             "type": decision.get("type"),
             "action": decision.get("action"),
@@ -457,7 +1448,9 @@ def build_dashboard_state() -> dict:
             ),
         },
         "lineup": compact_lineup(
-            state.get("lineup", {}) or {}
+            state.get("lineup", {}) or {},
+            snapshot,
+            photo_lookup,
         ),
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),
@@ -475,6 +1468,7 @@ def build_dashboard_state() -> dict:
         "listings": compact_listings(state),
         "priorities": candidates,
         "activity": load_activity_feed(),
+        "competitive": competitive,
     }
 
     return dashboard
