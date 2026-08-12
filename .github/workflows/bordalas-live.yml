@@ -57,6 +57,7 @@ jobs:
           mkdir -p data/calendar
           mkdir -p data/rival_intelligence
           mkdir -p data/league_center
+          mkdir -p data/competitive_negotiations
           mkdir -p dashboard/data
 
       - name: Restore Bordalas state
@@ -69,6 +70,7 @@ jobs:
             data/calendar
             data/rival_intelligence
             data/league_center
+            data/competitive_negotiations
             data/external_status_cache.json
             data/player_mapping_cache.json
             data/snapshot_*.json
@@ -141,6 +143,7 @@ jobs:
             data/calendar/calendar_changes.jsonl
             data/intelligence/jornada_perfecta_lineups.json
             data/rival_intelligence/rival_intelligence.json
+            data/competitive_negotiations/state.json
             dashboard/data/status.json
           if-no-files-found: ignore
           retention-days: 2
