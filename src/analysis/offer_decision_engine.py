@@ -3,6 +3,21 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from src.analysis.competitive_transaction_engine import (
+    evaluate_sale_to_rival,
+    extract_counterparty_from_offer,
+)
+
+from src.analysis.competitive_offer_portfolio_engine import (
+    build_competitive_offer_portfolio,
+    build_offer_replacement_lookup,
+)
+
+from src.analysis.negotiation_state_engine import (
+    assess_incoming_offer_event,
+    empty_state,
+)
+
 from src.analysis.computer_offer_reroll_engine import (
     build_computer_offer_reroll_board,
 )
@@ -190,6 +205,8 @@ def decide_incoming_offer(
     speculation: dict,
     reroll_offer: dict | None,
     recovery_selected_offer_ids: set[int],
+    rival_intelligence: dict | None = None,
+    competitive_context: dict | None = None,
 ) -> dict:
 
     offer_id = offer.get("offer_id")
@@ -296,8 +313,8 @@ def decide_incoming_offer(
         )
     )
 
-    # El recovery plan clasico sirve para saber qué ofertas
-    # podrían cubrir saldo, pero NO significa que debamos aceptar
+    # El recovery plan clasico sirve para saber quÃ© ofertas
+    # podrÃ­an cubrir saldo, pero NO significa que debamos aceptar
     # ahora. La fuente de verdad temporal para Computer es
     # computer_offer_reroll_engine / solvency_guarantee.
     recovery_selected = (
@@ -332,24 +349,69 @@ def decide_incoming_offer(
     )
 
     counterparty = (
-        (
-            offer.get(
-                "raw_offer",
-                {},
-            )
-            or {}
+        extract_counterparty_from_offer(
+            offer
         )
-        .get(
-            "counterparty",
-            {},
-        )
-        or {}
     )
 
     counterparty_type = (
         counterparty.get(
             "type",
             "UNKNOWN",
+        )
+    )
+
+    counterparty_id = (
+        counterparty.get(
+            "id"
+        )
+    )
+
+    competitive_context = (
+        competitive_context
+        or {}
+    )
+
+    current_balance = (
+        competitive_context.get(
+            "current_balance"
+        )
+    )
+
+    deadline_context = (
+        competitive_context.get(
+            "deadline_context",
+            {},
+        )
+        or {}
+    )
+
+    replacement_status = (
+        competitive_context.get(
+            "replacement_status",
+            "UNKNOWN",
+        )
+    )
+
+    replacement_detail = (
+        competitive_context.get(
+            "replacement_detail",
+            {},
+        )
+        or {}
+    )
+
+    sporting_opportunity_cost = (
+        replacement_detail.get(
+            "sporting_opportunity_cost",
+            {},
+        )
+        or {}
+    )
+
+    empty_slot_penalty_points = (
+        competitive_context.get(
+            "empty_slot_penalty_points"
         )
     )
 
@@ -390,7 +452,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta Computer necesaria para solvencia "
-                "y próxima a caducar."
+                "y prÃ³xima a caducar."
             )
 
         elif solvency_reserved:
@@ -400,7 +462,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta marcada SOLVENCY_RESERVED. "
-                "Se conserva como garantía de liquidez y "
+                "Se conserva como garantÃ­a de liquidez y "
                 "no se acepta ni rerollea mientras siga reservada."
             )
 
@@ -430,7 +492,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta Computer buena; conservar opcionalidad "
-                "sin vender automáticamente."
+                "sin vender automÃ¡ticamente."
             )
 
         elif reroll_action == "KEEP_OFFER":
@@ -440,7 +502,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Computer Reroll Engine considera que el reroll "
-                "no compensa con la información actual."
+                "no compensa con la informaciÃ³n actual."
             )
 
         else:
@@ -449,8 +511,8 @@ def decide_incoming_offer(
             confidence = 80
 
             reasons.append(
-                "Oferta Computer sin señal ejecutable específica; "
-                "se conserva en observación."
+                "Oferta Computer sin seÃ±al ejecutable especÃ­fica; "
+                "se conserva en observaciÃ³n."
             )
 
     # ========================================================
@@ -470,7 +532,7 @@ def decide_incoming_offer(
         confidence = 85
 
         reasons.append(
-            "El activo mantiene una señal especulativa positiva."
+            "El activo mantiene una seÃ±al especulativa positiva."
         )
 
     elif (
@@ -514,7 +576,7 @@ def decide_incoming_offer(
         confidence = 80
 
         reasons.append(
-            "Oferta favorable; se conserva sin vender automáticamente."
+            "Oferta favorable; se conserva sin vender automÃ¡ticamente."
         )
 
     else:
@@ -527,13 +589,82 @@ def decide_incoming_offer(
         )
 
     # ========================================================
+    # COMPETITIVE TRANSACTION ENGINE V1 - OBSERVER
+    # ========================================================
+    #
+    # IMPORTANTE:
+    # - NO cambia `action`.
+    # - NO ejecuta aceptar/rechazar/contraofertar.
+    # - Solo calcula que haria Pepe si el comprador es un manager.
+    # ========================================================
+
+    competitive_observer = None
+
+    if (
+        counterparty_type == "MANAGER"
+        and
+        counterparty_id is not None
+        and
+        rival_intelligence is not None
+    ):
+
+        competitive_observer = (
+            evaluate_sale_to_rival(
+                amount=
+                    amount,
+
+                market_value=
+                    market_value,
+
+                rival_user_id=
+                    counterparty_id,
+
+                rival_intelligence=
+                    rival_intelligence,
+
+                franchise_score=
+                    franchise_score,
+
+                strategic_score=
+                    strategic_score,
+
+                sale_score=
+                    sale_score,
+
+                speculation_score=
+                    speculation_score,
+
+                in_lineup=
+                    in_lineup,
+
+                price_increment=
+                    price_increment,
+
+                current_balance=
+                    current_balance,
+
+                deadline_context=
+                    deadline_context,
+
+                replacement_status=
+                    replacement_status,
+
+                empty_slot_penalty_points=
+                    empty_slot_penalty_points,
+
+                sporting_opportunity_cost=
+                    sporting_opportunity_cost,
+            )
+        )
+
+    # ========================================================
     # CONTEXTO EXPLICATIVO
     # ========================================================
 
     if recovery_selected:
         reasons.append(
-            "El recovery plan clásico la incluye como posible "
-            "fuente de caja, pero eso NO fuerza aceptación inmediata."
+            "El recovery plan clÃ¡sico la incluye como posible "
+            "fuente de caja, pero eso NO fuerza aceptaciÃ³n inmediata."
         )
 
     if solvency_reserved:
@@ -573,6 +704,83 @@ def decide_incoming_offer(
 
         "counterparty_type":
             counterparty_type,
+
+        "counterparty_id":
+            counterparty_id,
+
+        "counterparty_name":
+            (
+                (
+                    competitive_observer.get(
+                        "rival",
+                        {},
+                    )
+                    or {}
+                ).get(
+                    "name"
+                )
+                if competitive_observer
+                else counterparty.get(
+                    "name"
+                )
+            ),
+
+        "competitive_observer":
+            competitive_observer,
+
+        "competitive_observer_decision":
+            (
+                competitive_observer.get(
+                    "decision"
+                )
+                if competitive_observer
+                else None
+            ),
+
+        "competitive_counter_amount":
+            (
+                competitive_observer.get(
+                    "counter_amount"
+                )
+                if competitive_observer
+                else None
+            ),
+
+        # V1.7: Competitive es la autoridad de DECISION para
+        # ofertas de managers, pero sigue siendo OBSERVER ONLY.
+        # Estos campos NO se conectan al executor todavia.
+        "decision_authority":
+            (
+                "COMPETITIVE"
+                if (
+                    counterparty_type == "MANAGER"
+                    and competitive_observer is not None
+                )
+                else "LEGACY"
+            ),
+
+        "authoritative_decision":
+            (
+                competitive_observer.get("decision")
+                if (
+                    counterparty_type == "MANAGER"
+                    and competitive_observer is not None
+                )
+                else action
+            ),
+
+        "authoritative_counter_amount":
+            (
+                competitive_observer.get("counter_amount")
+                if (
+                    counterparty_type == "MANAGER"
+                    and competitive_observer is not None
+                )
+                else None
+            ),
+
+        "authority_observer_only":
+            True,
 
         "amount":
             amount,
@@ -655,6 +863,8 @@ def decide_incoming_offer(
 
 def build_offer_decision_board(
     snapshot: dict,
+    rival_intelligence: dict | None = None,
+    negotiation_state: dict | None = None,
 ) -> dict:
 
     offer_board = (
@@ -663,11 +873,69 @@ def build_offer_decision_board(
         )
     )
 
+    negotiation_state = (
+        negotiation_state
+        or
+        empty_state()
+    )
+
     liquidity = (
         build_liquidity_state(
             snapshot
         )
     )
+
+    offer_liquidity = (
+        offer_board.get(
+            "liquidity",
+            {},
+        )
+        or {}
+    )
+
+    deadline_context = (
+        offer_liquidity.get(
+            "deadline",
+            {},
+        )
+        or {}
+    )
+
+    current_balance = int(
+        (
+            snapshot.get(
+                "market",
+                {},
+            )
+            .get(
+                "status",
+                {},
+            )
+            or {}
+        ).get(
+            "balance",
+            0,
+        )
+        or 0
+    )
+
+    competitive_context = {
+        "current_balance":
+            current_balance,
+
+        "deadline_context":
+            deadline_context,
+
+        # V1.2 no inventa sustitutos.
+        # Cuando integremos roster/lineup replacement planner,
+        # este valor se refinara por jugador.
+        "replacement_status":
+            "UNKNOWN",
+
+        # No hardcodeamos -4 hasta validar configuracion concreta.
+        "empty_slot_penalty_points":
+            None,
+    }
 
     strategic_board = (
         build_strategic_target_board(
@@ -775,6 +1043,16 @@ def build_offer_decision_board(
         or []
     )
 
+    replacement_lookup = (
+        build_offer_replacement_lookup(
+            snapshot=
+                snapshot,
+
+            offers=
+                incoming_candidates,
+        )
+    )
+
     decisions = []
 
     for incoming in incoming_candidates:
@@ -787,7 +1065,7 @@ def build_offer_decision_board(
             or 0
         )
 
-        decisions.append(
+        decision = (
             decide_incoming_offer(
                 offer=
                     incoming,
@@ -817,9 +1095,100 @@ def build_offer_decision_board(
 
                 recovery_selected_offer_ids=
                     recovery_selected_offer_ids,
+
+                rival_intelligence=
+                    rival_intelligence,
+
+                competitive_context=
+                    {
+                        **competitive_context,
+
+                        "replacement_status":
+                            (
+                                replacement_lookup.get(
+                                    player_id,
+                                    {},
+                                )
+                                or {}
+                            ).get(
+                                "replacement_status",
+                                "UNKNOWN",
+                            ),
+
+                        "replacement_detail":
+                            replacement_lookup.get(
+                                player_id,
+                                {},
+                            ),
+                    },
             )
         )
 
+
+        competitive = (
+            decision.get(
+                "competitive_observer"
+            )
+            or {}
+        )
+
+        if (
+            decision.get(
+                "counterparty_type"
+            )
+            ==
+            "MANAGER"
+        ):
+
+            negotiation_observer = (
+                assess_incoming_offer_event(
+                    state=
+                        negotiation_state,
+
+                    offer_id=
+                        decision.get(
+                            "offer_id"
+                        ),
+
+                    player_id=
+                        decision.get(
+                            "player_id"
+                        ),
+
+                    rival_user_id=
+                        decision.get(
+                            "counterparty_id"
+                        ),
+
+                    rival_amount=
+                        decision.get(
+                            "amount",
+                            0,
+                        ),
+
+                    proposed_decision=
+                        competitive.get(
+                            "decision"
+                        ),
+
+                    proposed_counter_amount=
+                        competitive.get(
+                            "counter_amount"
+                        ),
+                )
+            )
+
+        else:
+
+            negotiation_observer = None
+
+        decision[
+            "negotiation_observer"
+        ] = negotiation_observer
+
+        decisions.append(
+            decision
+        )
     decision_priority = {
         "NEVER_SELL": 100,
         "ACCEPT_FOR_SOLVENCY": 95,
@@ -854,6 +1223,16 @@ def build_offer_decision_board(
             decision
         )
 
+    competitive_portfolio = (
+        build_competitive_offer_portfolio(
+            snapshot=
+                snapshot,
+
+            decisions=
+                decisions,
+        )
+    )
+
     return {
         "observer_only":
             OBSERVER_ONLY,
@@ -862,6 +1241,15 @@ def build_offer_decision_board(
             len(
                 decisions
             ),
+
+        "replacement_lookup":
+            replacement_lookup,
+
+        "competitive_portfolio":
+            competitive_portfolio,
+
+        "negotiation_observer_state":
+            negotiation_state,
 
         "decisions":
             decisions,
