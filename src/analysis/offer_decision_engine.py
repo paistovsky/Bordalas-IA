@@ -3,6 +3,11 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from src.analysis.competitive_transaction_engine import (
+    evaluate_sale_to_rival,
+    extract_counterparty_from_offer,
+)
+
 from src.analysis.computer_offer_reroll_engine import (
     build_computer_offer_reroll_board,
 )
@@ -190,6 +195,7 @@ def decide_incoming_offer(
     speculation: dict,
     reroll_offer: dict | None,
     recovery_selected_offer_ids: set[int],
+    rival_intelligence: dict | None = None,
 ) -> dict:
 
     offer_id = offer.get("offer_id")
@@ -296,8 +302,8 @@ def decide_incoming_offer(
         )
     )
 
-    # El recovery plan clasico sirve para saber qué ofertas
-    # podrían cubrir saldo, pero NO significa que debamos aceptar
+    # El recovery plan clasico sirve para saber quÃ© ofertas
+    # podrÃ­an cubrir saldo, pero NO significa que debamos aceptar
     # ahora. La fuente de verdad temporal para Computer es
     # computer_offer_reroll_engine / solvency_guarantee.
     recovery_selected = (
@@ -332,24 +338,21 @@ def decide_incoming_offer(
     )
 
     counterparty = (
-        (
-            offer.get(
-                "raw_offer",
-                {},
-            )
-            or {}
+        extract_counterparty_from_offer(
+            offer
         )
-        .get(
-            "counterparty",
-            {},
-        )
-        or {}
     )
 
     counterparty_type = (
         counterparty.get(
             "type",
             "UNKNOWN",
+        )
+    )
+
+    counterparty_id = (
+        counterparty.get(
+            "id"
         )
     )
 
@@ -390,7 +393,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta Computer necesaria para solvencia "
-                "y próxima a caducar."
+                "y prÃ³xima a caducar."
             )
 
         elif solvency_reserved:
@@ -400,7 +403,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta marcada SOLVENCY_RESERVED. "
-                "Se conserva como garantía de liquidez y "
+                "Se conserva como garantÃ­a de liquidez y "
                 "no se acepta ni rerollea mientras siga reservada."
             )
 
@@ -430,7 +433,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta Computer buena; conservar opcionalidad "
-                "sin vender automáticamente."
+                "sin vender automÃ¡ticamente."
             )
 
         elif reroll_action == "KEEP_OFFER":
@@ -440,7 +443,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Computer Reroll Engine considera que el reroll "
-                "no compensa con la información actual."
+                "no compensa con la informaciÃ³n actual."
             )
 
         else:
@@ -449,8 +452,8 @@ def decide_incoming_offer(
             confidence = 80
 
             reasons.append(
-                "Oferta Computer sin señal ejecutable específica; "
-                "se conserva en observación."
+                "Oferta Computer sin seÃ±al ejecutable especÃ­fica; "
+                "se conserva en observaciÃ³n."
             )
 
     # ========================================================
@@ -470,7 +473,7 @@ def decide_incoming_offer(
         confidence = 85
 
         reasons.append(
-            "El activo mantiene una señal especulativa positiva."
+            "El activo mantiene una seÃ±al especulativa positiva."
         )
 
     elif (
@@ -514,7 +517,7 @@ def decide_incoming_offer(
         confidence = 80
 
         reasons.append(
-            "Oferta favorable; se conserva sin vender automáticamente."
+            "Oferta favorable; se conserva sin vender automÃ¡ticamente."
         )
 
     else:
@@ -527,13 +530,67 @@ def decide_incoming_offer(
         )
 
     # ========================================================
+    # COMPETITIVE TRANSACTION ENGINE V1 - OBSERVER
+    # ========================================================
+    #
+    # IMPORTANTE:
+    # - NO cambia `action`.
+    # - NO ejecuta aceptar/rechazar/contraofertar.
+    # - Solo calcula que haria Pepe si el comprador es un manager.
+    # ========================================================
+
+    competitive_observer = None
+
+    if (
+        counterparty_type == "MANAGER"
+        and
+        counterparty_id is not None
+        and
+        rival_intelligence is not None
+    ):
+
+        competitive_observer = (
+            evaluate_sale_to_rival(
+                amount=
+                    amount,
+
+                market_value=
+                    market_value,
+
+                rival_user_id=
+                    counterparty_id,
+
+                rival_intelligence=
+                    rival_intelligence,
+
+                franchise_score=
+                    franchise_score,
+
+                strategic_score=
+                    strategic_score,
+
+                sale_score=
+                    sale_score,
+
+                speculation_score=
+                    speculation_score,
+
+                in_lineup=
+                    in_lineup,
+
+                price_increment=
+                    price_increment,
+            )
+        )
+
+    # ========================================================
     # CONTEXTO EXPLICATIVO
     # ========================================================
 
     if recovery_selected:
         reasons.append(
-            "El recovery plan clásico la incluye como posible "
-            "fuente de caja, pero eso NO fuerza aceptación inmediata."
+            "El recovery plan clÃ¡sico la incluye como posible "
+            "fuente de caja, pero eso NO fuerza aceptaciÃ³n inmediata."
         )
 
     if solvency_reserved:
@@ -573,6 +630,30 @@ def decide_incoming_offer(
 
         "counterparty_type":
             counterparty_type,
+
+        "counterparty_id":
+            counterparty_id,
+
+        "competitive_observer":
+            competitive_observer,
+
+        "competitive_observer_decision":
+            (
+                competitive_observer.get(
+                    "decision"
+                )
+                if competitive_observer
+                else None
+            ),
+
+        "competitive_counter_amount":
+            (
+                competitive_observer.get(
+                    "counter_amount"
+                )
+                if competitive_observer
+                else None
+            ),
 
         "amount":
             amount,
@@ -655,6 +736,7 @@ def decide_incoming_offer(
 
 def build_offer_decision_board(
     snapshot: dict,
+    rival_intelligence: dict | None = None,
 ) -> dict:
 
     offer_board = (
@@ -817,6 +899,9 @@ def build_offer_decision_board(
 
                 recovery_selected_offer_ids=
                     recovery_selected_offer_ids,
+
+                rival_intelligence=
+                    rival_intelligence,
             )
         )
 
