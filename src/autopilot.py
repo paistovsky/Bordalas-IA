@@ -30,6 +30,41 @@ from src.presentation.lineup_renderer import (
     print_lineup_field,
 )
 
+from src.analysis.intelligent_bid_engine import (
+    calculate_intelligent_bids,
+)
+
+from src.analysis.offer_decision_engine import (
+    build_offer_decision_board,
+)
+
+from src.analysis.rival_intelligence_engine import (
+    build_rival_intelligence,
+)
+
+from src.analysis.negotiation_state_engine import (
+    apply_observer_response,
+    load_negotiation_state,
+    save_negotiation_state,
+)
+
+from src.analysis.competitive_safety_gate import (
+    select_single_competitive_action,
+)
+
+from src.analysis.competitive_execution_shadow import (
+    build_competitive_shadow_decision,
+    execute_competitive_shadow,
+)
+
+from src.analysis.competitive_live_executor import (
+    execute_competitive_live_action,
+)
+
+from src.collectors.board_history_collector import (
+    collect_board_history,
+)
+
 
 DEFAULT_INTERVAL_MINUTES = 30
 
@@ -41,6 +76,11 @@ LOG_DIRECTORY = (
 LOG_FILE = (
     LOG_DIRECTORY
     / "autopilot_log.jsonl"
+)
+
+COMPETITIVE_LOG_FILE = (
+    LOG_DIRECTORY
+    / "competitive_observer_log.jsonl"
 )
 
 
@@ -587,6 +627,1170 @@ def append_log(
         )
 
 
+
+# ============================================================
+# COMPETITIVE INTELLIGENCE V2.0 - CONTROLLED LIVE
+# ============================================================
+
+
+def safe_int(
+    value,
+    default: int = 0,
+) -> int:
+
+    try:
+        return int(
+            value
+            or 0
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return default
+
+
+def safe_float(
+    value,
+    default: float = 0.0,
+) -> float:
+
+    try:
+        return float(
+            value
+            or 0.0
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return default
+
+
+def build_competitive_observer(
+    snapshot: dict,
+    temporal_gate: dict | None = None,
+    current_balance: int | None = None,
+) -> dict:
+    """
+    V1.8.1 SAFETY GATE DRY RUN.
+
+    Calcula inteligencia competitiva en paralelo a la decision
+    legacy. No ejecuta escrituras en Biwenger.
+    """
+
+    temporal_gate = (
+        temporal_gate
+        or {}
+    )
+
+    try:
+
+        board = (
+            collect_board_history()
+        )
+
+        market_status = (
+            snapshot.get(
+                "market",
+                {},
+            )
+            .get(
+                "status",
+                {},
+            )
+            or {}
+        )
+
+        current_user_id = (
+            board.get(
+                "current_user_id"
+            )
+        )
+
+        rival_intelligence = (
+            build_rival_intelligence(
+                events=
+                    board.get(
+                        "events",
+                        [],
+                    ),
+
+                users=
+                    board.get(
+                        "users",
+                        [],
+                    ),
+
+                profiles=
+                    board.get(
+                        "profiles",
+                        [],
+                    ),
+
+                catalog=
+                    snapshot.get(
+                        "catalog",
+                        {},
+                    ),
+
+                current_user_id=
+                    current_user_id,
+
+                own_finances=
+                    board.get(
+                        "own_finances",
+                        {},
+                    ),
+
+                own_balance=
+                    market_status.get(
+                        "balance"
+                    ),
+
+                own_maximum_bid=
+                    market_status.get(
+                        "maximumBid"
+                    ),
+            )
+        )
+
+        negotiation_state = (
+            load_negotiation_state()
+        )
+
+        offer_decisions = (
+            build_offer_decision_board(
+                snapshot=
+                    snapshot,
+
+                rival_intelligence=
+                    rival_intelligence,
+
+                negotiation_state=
+                    negotiation_state,
+            )
+        )
+
+        intelligent_bids = (
+            calculate_intelligent_bids(
+                snapshot=
+                    snapshot,
+
+                rival_intelligence=
+                    rival_intelligence,
+            )
+        )
+
+        manager_offers = []
+
+        updated_negotiation_state = (
+            negotiation_state
+        )
+
+        for decision in (
+            offer_decisions.get(
+                "decisions",
+                [],
+            )
+            or []
+        ):
+
+            if (
+                decision.get(
+                    "counterparty_type"
+                )
+                !=
+                "MANAGER"
+            ):
+                continue
+
+            competitive = (
+                decision.get(
+                    "competitive_observer",
+                    {},
+                )
+                or {}
+            )
+
+            negotiation = (
+                decision.get(
+                    "negotiation_observer",
+                    {},
+                )
+                or {}
+            )
+
+            manager_offers.append(
+                {
+                    "offer_id":
+                        decision.get(
+                            "offer_id"
+                        ),
+
+                    "player_id":
+                        decision.get(
+                            "player_id"
+                        ),
+
+                    "player_name":
+                        decision.get(
+                            "player_name"
+                        )
+                        or
+                        decision.get(
+                            "name"
+                        ),
+
+                    "rival_user_id":
+                        decision.get(
+                            "counterparty_id"
+                        ),
+
+                    "rival_name":
+                        (
+                            decision.get(
+                                "counterparty_name"
+                            )
+                            or
+                            (
+                                competitive.get(
+                                    "rival",
+                                    {},
+                                )
+                                or {}
+                            ).get(
+                                "name"
+                            )
+                        ),
+
+                    "amount":
+                        decision.get(
+                            "amount"
+                        ),
+
+                    "legacy_decision":
+                        decision.get(
+                            "decision"
+                        ),
+
+                    "competitive_decision":
+                        competitive.get(
+                            "decision"
+                        ),
+
+                    "decision_authority":
+                        decision.get(
+                            "decision_authority",
+                            "LEGACY",
+                        ),
+
+                    "authoritative_decision":
+                        decision.get(
+                            "authoritative_decision"
+                        ),
+
+                    "authoritative_counter_amount":
+                        decision.get(
+                            "authoritative_counter_amount"
+                        ),
+
+                    "authority_observer_only":
+                        decision.get(
+                            "authority_observer_only",
+                            True,
+                        ),
+
+                    "base_sell_price":
+                        competitive.get(
+                            "base_sell_price"
+                        ),
+
+                    "strategic_sell_price":
+                        competitive.get(
+                            "strategic_sell_price"
+                        ),
+
+                    "competitive_premium_percent":
+                        competitive.get(
+                            "competitive_premium_percent"
+                        ),
+
+                    "temporal_premium_percent":
+                        competitive.get(
+                            "temporal_premium_percent"
+                        ),
+
+                    "sporting_premium_percent":
+                        competitive.get(
+                            "sporting_premium_percent"
+                        ),
+
+                    "sporting_cost_score":
+                        competitive.get(
+                            "sporting_cost_score"
+                        ),
+
+                    "sporting_opportunity_cost":
+                        competitive.get(
+                            "sporting_opportunity_cost",
+                            {},
+                        ),
+
+                    "solvency_discount_percent":
+                        competitive.get(
+                            "solvency_discount_percent"
+                        ),
+
+                    "counter_amount":
+                        competitive.get(
+                            "counter_amount"
+                        ),
+
+                    "speculation_score":
+                        competitive.get(
+                            "speculation_score"
+                        ),
+
+                    "rival_reinforcement_score":
+                        competitive.get(
+                            "rival_reinforcement_score"
+                        ),
+
+                    "replacement":
+                        competitive.get(
+                            "replacement"
+                        ),
+
+                    "replacement_detail":
+                        (
+                            (
+                                offer_decisions.get(
+                                    "replacement_lookup",
+                                    {},
+                                )
+                                or {}
+                            ).get(
+                                safe_int(
+                                    decision.get(
+                                        "player_id"
+                                    )
+                                ),
+                                {},
+                            )
+                            or {}
+                        ),
+
+                    "negotiation":
+                        negotiation,
+
+                    "legacy_differs":
+                        (
+                            decision.get(
+                                "decision"
+                            )
+                            !=
+                            decision.get(
+                                "authoritative_decision"
+                            )
+                        ),
+                }
+            )
+
+            if (
+                negotiation.get(
+                    "should_respond"
+                )
+            ):
+
+                updated_negotiation_state = (
+                    apply_observer_response(
+                        state=
+                            updated_negotiation_state,
+
+                        assessment=
+                            negotiation,
+
+                        player_id=
+                            decision.get(
+                                "player_id"
+                            ),
+
+                        rival_user_id=
+                            decision.get(
+                                "counterparty_id"
+                            ),
+
+                        player_name=
+                            (
+                                decision.get(
+                                    "player_name"
+                                )
+                                or
+                                decision.get(
+                                    "name"
+                                )
+                            ),
+                    )
+                )
+
+        save_negotiation_state(
+            updated_negotiation_state
+        )
+
+        portfolio = (
+            offer_decisions.get(
+                "competitive_portfolio",
+                {},
+            )
+            or {}
+        )
+
+        safety_gate = (
+            select_single_competitive_action(
+                offers=
+                    manager_offers,
+
+                temporal_gate=
+                    temporal_gate,
+
+                current_balance=
+                    current_balance,
+            )
+        )
+
+        execution_shadow = (
+            build_competitive_shadow_decision(
+                manager_offers=
+                    manager_offers,
+
+                temporal_gate=
+                    temporal_gate,
+
+                current_balance=
+                    current_balance,
+            )
+        )
+
+        shadow_execution = (
+            execute_competitive_shadow(
+                execution_shadow
+            )
+        )
+
+        return {
+            "observer_only":
+                True,
+
+            "available":
+                True,
+
+            "error":
+                None,
+
+            "rival_intelligence":
+                rival_intelligence,
+
+            "manager_offers":
+                manager_offers,
+
+            "competitive_portfolio":
+                portfolio,
+
+            "competitive_safety_gate":
+                safety_gate,
+
+            "competitive_execution_shadow":
+                execution_shadow,
+
+            "competitive_shadow_execution":
+                shadow_execution,
+
+            "intelligent_bids":
+                intelligent_bids,
+        }
+
+    except Exception as error:
+
+        return {
+            "observer_only":
+                True,
+
+            "available":
+                False,
+
+            "error":
+                (
+                    f"{type(error).__name__}: "
+                    f"{error}"
+                ),
+
+            "rival_intelligence":
+                {},
+
+            "manager_offers":
+                [],
+
+            "competitive_portfolio":
+                {},
+
+            "intelligent_bids":
+                {},
+        }
+
+
+def append_competitive_log(
+    snapshot_file: str,
+    observer: dict,
+) -> None:
+
+    ensure_log_directory()
+
+    record = {
+        "timestamp":
+            datetime.now().isoformat(
+                timespec=
+                    "seconds"
+            ),
+
+        "snapshot":
+            snapshot_file,
+
+        "observer_only":
+            True,
+
+        "available":
+            observer.get(
+                "available"
+            ),
+
+        "error":
+            observer.get(
+                "error"
+            ),
+
+        "manager_offers":
+            observer.get(
+                "manager_offers",
+                [],
+            ),
+
+        "competitive_portfolio":
+            observer.get(
+                "competitive_portfolio",
+                {},
+            ),
+    }
+
+    with open(
+        COMPETITIVE_LOG_FILE,
+        "a",
+        encoding="utf-8",
+    ) as file:
+
+        file.write(
+            json.dumps(
+                record,
+                ensure_ascii=False,
+            )
+        )
+
+        file.write(
+            "\n"
+        )
+
+
+def print_competitive_observer(
+    observer: dict,
+) -> None:
+
+    print()
+    print(
+        "-"
+        * 100
+    )
+
+    print(
+        "COMPETITIVE INTELLIGENCE V2.0 - CONTROLLED LIVE"
+    )
+
+    print(
+        "-"
+        * 100
+    )
+
+    if not observer.get(
+        "available"
+    ):
+
+        print()
+        print(
+            "Competitive Observer no disponible."
+        )
+
+        print(
+            observer.get(
+                "error"
+            )
+        )
+
+        print()
+        print(
+            "La decision legacy NO se modifica."
+        )
+
+        return
+
+    offers = (
+        observer.get(
+            "manager_offers",
+            [],
+        )
+        or []
+    )
+
+    print()
+    print(
+        f"Ofertas de managers:     "
+        f"{len(offers)}"
+    )
+
+    legacy_differences = sum(
+        1
+
+        for item
+        in offers
+
+        if item.get(
+            "legacy_differs"
+        )
+    )
+
+    print(
+        f"Diferencias legacy:      "
+        f"{legacy_differences}"
+    )
+
+    for item in offers:
+
+        negotiation = (
+            item.get(
+                "negotiation",
+                {},
+            )
+            or {}
+        )
+
+        replacement = (
+            item.get(
+                "replacement",
+                {},
+            )
+            or {}
+        )
+
+        replacement_detail = (
+            item.get(
+                "replacement_detail",
+                {},
+            )
+            or {}
+        )
+
+        print()
+        print(
+            f"{item.get('player_name') or '?'} "
+            f"<- {item.get('rival_name') or 'RIVAL'}"
+        )
+
+        print(
+            f"  Oferta rival:          "
+            f"{money(item.get('amount'))}"
+        )
+
+        print(
+            f"  Legacy:                "
+            f"{item.get('legacy_decision')}"
+        )
+
+        print(
+            f"  Competitive:           "
+            f"{item.get('competitive_decision')}"
+        )
+
+        print(
+            f"  Authority:             "
+            f"{item.get('decision_authority') or 'LEGACY'}"
+        )
+
+        print(
+            f"  Final autoritativo:    "
+            f"{item.get('authoritative_decision')}"
+        )
+
+        print(
+            f"  Final ejecutable:      NO (OBSERVER)"
+        )
+
+        print(
+            f"  Precio base:           "
+            f"{money(item.get('base_sell_price'))}"
+        )
+
+        print(
+            f"  Precio estrategico:    "
+            f"{money(item.get('strategic_sell_price'))}"
+        )
+
+        print(
+            f"  Prima competitiva:     "
+            f"{safe_float(item.get('competitive_premium_percent')):+.2f}%"
+        )
+
+        print(
+            f"  Prima deadline:        "
+            f"{safe_float(item.get('temporal_premium_percent')):+.2f}%"
+        )
+
+        print(
+            f"  Prima deportiva:       "
+            f"{safe_float(item.get('sporting_premium_percent')):+.2f}%"
+        )
+
+        print(
+            f"  Descuento solvencia:   "
+            f"{-safe_float(item.get('solvency_discount_percent')):+.2f}%"
+        )
+
+        print(
+            f"  Contraoferta:          "
+            f"{money(item.get('counter_amount'))}"
+        )
+
+        print(
+            f"  Speculation:           "
+            f"{safe_float(item.get('speculation_score')):.1f}/100"
+        )
+
+        print(
+            f"  Refuerzo rival:        "
+            f"{safe_float(item.get('rival_reinforcement_score')):.1f}/100"
+        )
+
+        replacement_status = (
+            replacement_detail.get(
+                "replacement_status"
+            )
+            or
+            replacement.get(
+                "replacement_status"
+            )
+            or
+            "UNKNOWN"
+        )
+
+        print(
+            f"  Replacement:           "
+            f"{replacement_status}"
+        )
+
+        if replacement_detail:
+
+            print(
+                f"  XI antes/despues:      "
+                f"{safe_int(replacement_detail.get('pre_sale_playable_count'))}/11"
+                f" -> "
+                f"{safe_int(replacement_detail.get('post_sale_playable_count'))}/11"
+            )
+
+            print(
+                f"  Fuente reemplazo:      "
+                f"{replacement_detail.get('replacement_source') or 'UNKNOWN'}"
+            )
+
+            incoming_names = ", ".join(
+                str(
+                    player.get(
+                        "name"
+                    )
+                    or
+                    player.get(
+                        "id"
+                    )
+                )
+
+                for player
+                in (
+                    replacement_detail.get(
+                        "incoming_players",
+                        [],
+                    )
+                    or []
+                )
+            )
+
+            print(
+                f"  Entra al XI:           "
+                f"{incoming_names or 'NINGUNO'}"
+            )
+
+            print(
+                f"  Formacion:             "
+                f"{replacement_detail.get('formation_before') or '?'}"
+                f" -> "
+                f"{replacement_detail.get('formation_after') or '?'}"
+            )
+
+            sporting = (
+                item.get(
+                    "sporting_opportunity_cost",
+                    {},
+                )
+                or {}
+            )
+
+            if sporting:
+
+                before_score = (
+                    sporting.get("lineup_score_before")
+                    if sporting.get("lineup_score_before") is not None
+                    else sporting.get("pre_sale_lineup_score")
+                )
+                after_score = (
+                    sporting.get("lineup_score_after")
+                    if sporting.get("lineup_score_after") is not None
+                    else sporting.get("post_sale_lineup_score")
+                )
+                loss_score = (
+                    sporting.get("lineup_score_loss")
+                    if sporting.get("lineup_score_loss") is not None
+                    else sporting.get("sporting_cost")
+                )
+                loss_percent = (
+                    sporting.get("lineup_score_loss_percent")
+                    if sporting.get("lineup_score_loss_percent") is not None
+                    else sporting.get("sporting_cost_percent")
+                )
+
+                print(
+                    f"  Lineup score:          "
+                    f"{safe_float(before_score):.2f}"
+                    f" -> "
+                    f"{safe_float(after_score):.2f}"
+                )
+
+                print(
+                    f"  Perdida deportiva:     "
+                    f"{safe_float(loss_score):.2f}"
+                    f" | "
+                    f"{safe_float(loss_percent):.2f}%"
+                )
+
+                print(
+                    f"  Sporting cost score:   "
+                    f"{safe_float(item.get('sporting_cost_score')):.1f}/100"
+                )
+
+            else:
+
+                quality_loss = (
+                    replacement_detail.get(
+                        "quality_loss_score"
+                    )
+                )
+
+                print(
+                    f"  Calidad legacy:        "
+                    f"{'NO CALCULABLE' if quality_loss is None else f'{safe_float(quality_loss):.1f} (escala interna)'}"
+                )
+
+        print(
+            f"  Negotiation event:     "
+            f"{negotiation.get('event') or 'SIN ESTADO'}"
+        )
+
+        print(
+            f"  Action gate:           "
+            f"{negotiation.get('action_gate') or 'SIN ESTADO'}"
+        )
+
+        print(
+            f"  Ronda:                 "
+            f"{safe_int(negotiation.get('negotiation_round'))}"
+        )
+
+        print(
+            f"  Responderia ahora:     "
+            f"{'SI' if negotiation.get('should_respond') else 'NO'}"
+        )
+
+        gate_item = next(
+            (
+                row
+                for row in (
+                    observer.get(
+                        "competitive_safety_gate",
+                        {},
+                    ).get(
+                        "evaluations",
+                        [],
+                    )
+                    or []
+                )
+                if (
+                    row.get("offer_id") == item.get("offer_id")
+                    and row.get("player_id") == item.get("player_id")
+                )
+            ),
+            None,
+        )
+
+        gate = (
+            (gate_item or {}).get(
+                "gate",
+                {},
+            )
+            or {}
+        )
+
+        print(
+            f"  Safety Gate V1.8:      "
+            f"{gate.get('status', 'UNKNOWN')}"
+        )
+
+        print(
+            f"  Gate autorizado:       "
+            f"{'SI' if gate.get('authorized') else 'NO'}"
+        )
+
+        print(
+            "  Would execute:         NO (DRY RUN)"
+        )
+
+        print(
+            f"  Gate reason:           "
+            f"{gate.get('reason', '-')}"
+        )
+
+        if item.get(
+            "legacy_differs"
+        ):
+
+            print(
+                "  >>> AUDIT: LEGACY DIFIERE DE LA AUTORIDAD COMPETITIVE"
+            )
+
+    safety_gate = (
+        observer.get(
+            "competitive_safety_gate",
+            {},
+        )
+        or {}
+    )
+
+    print()
+    print(
+        "SAFETY GATE V1.8"
+    )
+    print()
+
+    print(
+        f"  Evaluadas:             "
+        f"{safety_gate.get('evaluated_count', 0)}"
+    )
+
+    print(
+        f"  Autorizadas dry-run:   "
+        f"{safety_gate.get('authorized_count', 0)}"
+    )
+
+    print(
+        f"  Seleccionadas max:     "
+        f"{safety_gate.get('selected_count', 0)}"
+    )
+
+    print(
+        "  Regla por ciclo:       MAXIMO 1 ACCION"
+    )
+
+    print(
+        "  Escritura competitiva: NO"
+    )
+
+    execution_shadow = (
+        observer.get(
+            "competitive_execution_shadow",
+            {},
+        )
+        or {}
+    )
+
+    shadow_execution = (
+        observer.get(
+            "competitive_shadow_execution",
+            {},
+        )
+        or {}
+    )
+
+    print()
+    print(
+        "EXECUTION SHADOW V1.9"
+    )
+    print()
+
+    selected_shadow = (
+        execution_shadow.get(
+            "selected"
+        )
+        or {}
+    )
+
+    print(
+        f"  Estado:                "
+        f"{execution_shadow.get('status', 'UNKNOWN')}"
+    )
+
+    print(
+        f"  Seleccion:             "
+        f"{selected_shadow.get('player_name') or 'NINGUNA'}"
+    )
+
+    print(
+        f"  Accion:                "
+        f"{shadow_execution.get('action') or 'NINGUNA'}"
+    )
+
+    print(
+        f"  Llegaria al executor:  "
+        f"{'SI' if execution_shadow.get('would_reach_executor') else 'NO'}"
+    )
+
+    print(
+        f"  Would write:           "
+        f"{'SI' if shadow_execution.get('would_write') else 'NO'}"
+    )
+
+    print(
+        f"  Shadow status:         "
+        f"{shadow_execution.get('status', 'UNKNOWN')}"
+    )
+
+    print(
+        f"  Escritura realizada:   "
+        f"{'SI' if shadow_execution.get('write_performed') else 'NO'}"
+    )
+
+    print(
+        f"  Shadow reason:         "
+        f"{shadow_execution.get('reason', '-')}"
+    )
+
+    portfolio = (
+        observer.get(
+            "competitive_portfolio",
+            {},
+        )
+        or {}
+    )
+
+    print()
+    print(
+        "PORTFOLIO COMPETITIVO"
+    )
+
+    for mode in (
+        "current",
+        "strategic",
+    ):
+
+        scenario = (
+            portfolio.get(
+                mode,
+                {},
+            )
+            or {}
+        )
+
+        recommended = (
+            scenario.get(
+                "recommended"
+            )
+            or {}
+        )
+
+        print()
+
+        print(
+            f"  {mode.upper()}: "
+            f"{', '.join(recommended.get('player_names', []) or []) or 'SIN RECOMENDACION'}"
+        )
+
+        if recommended:
+
+            print(
+                f"    Caja:                "
+                f"{money(recommended.get('total_amount'))}"
+            )
+
+            print(
+                f"    Saldo post:          "
+                f"{money(recommended.get('post_balance'))}"
+            )
+
+            print(
+                f"    XI post:             "
+                f"{safe_int(recommended.get('playable_count'))}/11"
+            )
+
+            portfolio_incoming = ", ".join(
+                str(
+                    player.get(
+                        "name"
+                    )
+                    or
+                    player.get(
+                        "id"
+                    )
+                )
+
+                for player
+                in (
+                    recommended.get(
+                        "incoming_players",
+                        [],
+                    )
+                    or []
+                )
+            )
+
+            print(
+                f"    Entran al XI:        "
+                f"{portfolio_incoming or 'NINGUNO'}"
+            )
+
+            print(
+                f"    Formacion:           "
+                f"{recommended.get('formation_before') or '?'}"
+                f" -> "
+                f"{recommended.get('formation_after') or '?'}"
+            )
+
+            print(
+                f"    Solvencia:           "
+                f"{'SI' if recommended.get('restores_solvency') else 'NO'}"
+            )
+
+    print()
+    print(
+        "V1.7 AUTHORITY OBSERVER: Competitive manda conceptualmente "
+        "en ofertas de managers, pero ninguna decision autoritativa "
+        "se envia todavia al executor de Biwenger."
+    )
+
+
 # ============================================================
 # SNAPSHOT
 # ============================================================
@@ -761,7 +1965,7 @@ def print_cycle_result(
     )
 
     print(
-        "                       BORDALAS IA - AUTOPILOT V3"
+        "                       BORDALAS IA - AUTOPILOT V3 + COMPETITIVE V2.0 CONTROLLED LIVE"
     )
 
     print(
@@ -1315,6 +2519,7 @@ def ensure_lineup_baseline(
 
 def run_cycle(
     live: bool = False,
+    competitive_live: bool = False,
 ) -> dict:
 
     (
@@ -1334,6 +2539,25 @@ def run_cycle(
     result = (
         build_global_decision(
             snapshot
+        )
+    )
+
+    competitive_observer = (
+        build_competitive_observer(
+            snapshot,
+            temporal_gate=(
+                result.get(
+                    "temporal_gate",
+                    {},
+                )
+                or {}
+            ),
+            current_balance=(
+                result.get(
+                    "balance",
+                    0,
+                )
+            ),
         )
     )
 
@@ -1359,6 +2583,18 @@ def run_cycle(
             result,
     )
 
+    print_competitive_observer(
+        competitive_observer
+    )
+
+    append_competitive_log(
+        snapshot_file=
+            snapshot_file,
+
+        observer=
+            competitive_observer,
+    )
+
     ensure_lineup_baseline(
         result
     )
@@ -1379,9 +2615,182 @@ def run_cycle(
         )
     )
 
+    competitive_execution = {
+        "action":
+            None,
+
+        "status":
+            "COMPETITIVE_LIVE_DISABLED",
+
+        "reason":
+            "Competitive LIVE requiere --live y --competitive-live.",
+
+        "write_performed":
+            False,
+
+        "success":
+            True,
+    }
+
+    # Regla global: nunca permitimos una segunda escritura en el ciclo.
+    if (
+        competitive_live
+        and
+        live
+        and
+        not execution.get(
+            "write_performed",
+            False,
+        )
+    ):
+
+        selected_gate = (
+            (
+                competitive_observer.get(
+                    "competitive_safety_gate",
+                    {},
+                )
+                or {}
+            ).get(
+                "selected"
+            )
+        )
+
+        selected_offer = None
+
+        if selected_gate:
+
+            selected_offer = next(
+                (
+                    item
+
+                    for item
+                    in (
+                        competitive_observer.get(
+                            "manager_offers",
+                            [],
+                        )
+                        or []
+                    )
+
+                    if (
+                        item.get(
+                            "offer_id"
+                        )
+                        ==
+                        selected_gate.get(
+                            "offer_id"
+                        )
+                        and
+                        item.get(
+                            "player_id"
+                        )
+                        ==
+                        selected_gate.get(
+                            "player_id"
+                        )
+                    )
+                ),
+                None,
+            )
+
+        competitive_execution = (
+            execute_competitive_live_action(
+                selected_offer=
+                    selected_offer,
+
+                rival_intelligence=
+                    (
+                        competitive_observer.get(
+                            "rival_intelligence",
+                            {},
+                        )
+                        or {}
+                    ),
+
+                execute=
+                    True,
+            )
+        )
+
+    elif (
+        competitive_live
+        and
+        live
+        and
+        execution.get(
+            "write_performed",
+            False,
+        )
+    ):
+
+        competitive_execution = {
+            "action":
+                None,
+
+            "status":
+                "BLOCKED_LEGACY_ALREADY_WROTE",
+
+            "reason":
+                "Legacy ya realizo la unica escritura permitida del ciclo.",
+
+            "write_performed":
+                False,
+
+            "success":
+                True,
+        }
+
     print_execution_result(
         execution
     )
+
+    if competitive_live:
+
+        print()
+        print(
+            "-"
+            * 100
+        )
+
+        print(
+            "COMPETITIVE V2.0 EXECUTION"
+        )
+
+        print(
+            "-"
+            * 100
+        )
+
+        print()
+
+        print(
+            f"Accion:                  "
+            f"{competitive_execution.get('action') or 'NINGUNA'}"
+        )
+
+        print(
+            f"Estado:                  "
+            f"{competitive_execution.get('status')}"
+        )
+
+        print(
+            f"Escritura realizada:     "
+            f"{'SI' if competitive_execution.get('write_performed') else 'NO'}"
+        )
+
+        print(
+            f"Exito:                   "
+            f"{'SI' if competitive_execution.get('success') else 'NO'}"
+        )
+
+        print()
+
+        print(
+            competitive_execution.get(
+                "reason"
+            )
+        )
 
     append_log(
         snapshot_file=
@@ -1399,18 +2808,36 @@ def run_cycle(
 
     post_action = None
 
+    write_happened = (
+        (
+            execution.get(
+                "write_performed",
+                False,
+            )
+            and
+            execution.get(
+                "success",
+                False,
+            )
+        )
+        or
+        (
+            competitive_execution.get(
+                "write_performed",
+                False,
+            )
+            and
+            competitive_execution.get(
+                "success",
+                False,
+            )
+        )
+    )
+
     if (
         live
         and
-        execution.get(
-            "write_performed",
-            False,
-        )
-        and
-        execution.get(
-            "success",
-            False,
-        )
+        write_happened
     ):
 
         print()
@@ -1503,6 +2930,12 @@ def run_cycle(
 
         "analysis_seconds":
             elapsed,
+
+        "competitive_observer":
+            competitive_observer,
+
+        "competitive_execution":
+            competitive_execution,
     }
 
 
@@ -1516,7 +2949,7 @@ def main() -> None:
     parser = (
         argparse.ArgumentParser(
             description=
-                "Autopilot v3 de Bordalas IA."
+                "Autopilot V3 + Competitive Intelligence V2.0 CONTROLLED LIVE de Bordalas IA."
         )
     )
 
@@ -1542,6 +2975,17 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--competitive-live",
+        action=
+            "store_true",
+
+        help=(
+            "Segundo opt-in obligatorio para permitir "
+            "escrituras Competitive V2.0. Requiere tambien --live."
+        ),
+    )
+
+    parser.add_argument(
         "--interval-minutes",
         type=
             int,
@@ -1557,6 +3001,16 @@ def main() -> None:
         parser.parse_args()
     )
 
+    if (
+        args.competitive_live
+        and
+        not args.live
+    ):
+
+        parser.error(
+            "--competitive-live requiere tambien --live."
+        )
+
     interval_minutes = max(
         int(
             args.interval_minutes
@@ -1571,7 +3025,7 @@ def main() -> None:
     )
 
     print(
-        "                     BORDALAS IA - AUTOPILOT V3"
+        "                     BORDALAS IA - AUTOPILOT V3 + COMPETITIVE V2.0 CONTROLLED LIVE"
     )
 
     print(
@@ -1595,6 +3049,20 @@ def main() -> None:
             "Los locks temporales pueden bloquear "
             "cualquier escritura."
         )
+
+        if args.competitive_live:
+
+            print(
+                "Competitive V2.0 LIVE: HABILITADO "
+                "(doble opt-in confirmado)."
+            )
+
+        else:
+
+            print(
+                "Competitive V2.0 LIVE: DESHABILITADO. "
+                "Falta --competitive-live."
+            )
 
     else:
 
@@ -1633,7 +3101,10 @@ def main() -> None:
 
             run_cycle(
                 live=
-                    args.live
+                    args.live,
+
+                competitive_live=
+                    args.competitive_live,
             )
 
         except KeyboardInterrupt:

@@ -204,6 +204,155 @@ class BiwengerWriteClient:
                 ),
         }
 
+
+    # ==================================================
+    # CONTRAOFERTA A OFERTA RECIBIDA
+    # ==================================================
+
+    def build_counter_offer_request(
+        self,
+        offer_id: int,
+        amount: int,
+    ) -> dict[str, Any]:
+        """
+        Contraoferta validada manualmente en Biwenger.
+
+        POST /api/v2/offers
+
+        Payload observado:
+            {
+                "type": "counterOffer",
+                "to": <offer_id>,
+                "amount": <importe>
+            }
+
+        `to` identifica la oferta concreta a la que respondemos.
+        """
+
+        if offer_id <= 0:
+            raise ValueError(
+                "El offer_id debe ser mayor que 0."
+            )
+
+        if amount <= 0:
+            raise ValueError(
+                "La contraoferta debe ser mayor que 0."
+            )
+
+        endpoint = (
+            f"{self.client.BASE_URL}/offers"
+        )
+
+        payload = {
+            "type":
+                "counterOffer",
+
+            "to":
+                int(
+                    offer_id
+                ),
+
+            "amount":
+                int(
+                    amount
+                ),
+        }
+
+        return {
+            "operation":
+                "COUNTER_OFFER",
+
+            "method":
+                "POST",
+
+            "url":
+                endpoint,
+
+            "headers":
+                self.get_headers_preview(),
+
+            "json":
+                payload,
+
+            "offer_id":
+                int(
+                    offer_id
+                ),
+
+            "amount":
+                int(
+                    amount
+                ),
+
+            "execute":
+                False,
+        }
+
+    def counter_offer(
+        self,
+        offer_id: int,
+        amount: int,
+        execute: bool = False,
+    ) -> dict:
+        """
+        Envia una contraoferta.
+
+        DRY-RUN por defecto.
+        """
+
+        request = (
+            self.build_counter_offer_request(
+                offer_id=
+                    offer_id,
+
+                amount=
+                    amount,
+            )
+        )
+
+        if not execute:
+
+            return {
+                **request,
+
+                "sent":
+                    False,
+
+                "success":
+                    True,
+            }
+
+        response = (
+            self.client.session.post(
+                request["url"],
+                json=
+                    request["json"],
+                timeout=
+                    30,
+            )
+        )
+
+        return {
+            **request,
+
+            "sent":
+                True,
+
+            "http_status":
+                response.status_code,
+
+            "response":
+                self._safe_response(
+                    response
+                ),
+
+            "success":
+                self._is_success(
+                    response.status_code
+                ),
+        }
+
+
     # ==================================================
     # CANCELAR PUJAS
     # ==================================================
