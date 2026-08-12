@@ -1,791 +1,168 @@
-const fmtMoney=n=>{
-  n=Number(n||0);
-  const a=Math.abs(n);
-  if(a>=1e6)return `${(n/1e6).toFixed(2)}M€`;
-  if(a>=1e3)return `${(n/1e3).toFixed(0)}k€`;
-  return `${n.toLocaleString("es-ES")}€`;
-};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"—").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const money=n=>{n=Number(n||0);if(Math.abs(n)>=1e6)return`${(n/1e6).toFixed(2)}M€`;if(Math.abs(n)>=1e3)return`${(n/1e3).toFixed(0)}k€`;return`${n.toLocaleString("es-ES")}€`};
+const ago=iso=>{if(!iso)return"—";const m=(Date.now()-new Date(iso).getTime())/60000;if(m<1)return"ahora";if(m<60)return`hace ${Math.floor(m)} min`;return`hace ${(m/60).toFixed(1)} h`};
+const gate=v=>({NO_ACTION_WAITING_RIVAL:"ESPERANDO RIVAL",ALLOW_SINGLE_RESPONSE:"RESPONDER",RECALCULATE:"RECALCULAR"}[v]||String(v||"—").replaceAll("_"," "));
+const posLabel=p=>({1:"POR",2:"DEF",3:"MC",4:"DEL"}[Number(p)]||"JUG");
 
-const num=n=>Number(n||0).toLocaleString("es-ES");
-
-const esc=s=>String(s??"—").replace(/[&<>"']/g,m=>({
-  "&":"&amp;",
-  "<":"&lt;",
-  ">":"&gt;",
-  '"':"&quot;",
-  "'":"&#39;"
-}[m]));
-
-const ago=iso=>{
-  if(!iso)return "—";
-  const d=(Date.now()-new Date(iso).getTime())/60000;
-  if(d<1)return "ahora";
-  if(d<60)return `hace ${Math.floor(d)} min`;
-  return `hace ${(d/60).toFixed(1)} h`;
-};
-
-const actionIcon=a=>
-  a?.includes("OFFER")?"👁":
-  a?.includes("LINEUP")?"⚽":
-  a?.includes("RENEW")?"♻️":
-  a?.includes("SPECULATION")?"📈":"🧠";
-
-const humanActivity=v=>({
-  VERY_HIGH:"MUY ALTA",
-  HIGH:"ALTA",
-  MEDIUM:"MEDIA",
-  LOW:"BAJA",
-  NONE:"NULA"
-}[v]||v||"—");
-
-const humanThreat=v=>({
-  VERY_HIGH:"MUY ALTA",
-  HIGH:"ALTA",
-  MEDIUM:"MEDIA",
-  LOW:"BAJA",
-  VERY_LOW:"MUY BAJA",
-  US:"—"
-}[v]||v||"—");
-
-const humanPhase=v=>({
-  NORMAL:"NORMAL",
-  HARD_SAFETY:"SEGURIDAD",
-  ROUND_LOCKED:"JORNADA BLOQUEADA",
-  ROUND_TRANSITION_LOCK:"TRANSICIÓN"
-}[v]||v||"—");
-
-const humanFranchise=v=>({
-  NO_FRANCHISE:"SIN JUGADOR FRANQUICIA ACTIVO",
-  IN_TEAM:"EN PLANTILLA",
-  TARGET_FOUND:"OBJETIVO DETECTADO",
-  ACTIVE:"ACTIVO"
-}[v]||v||"SIN JUGADOR FRANQUICIA ACTIVO");
-
-const humanAction=v=>({
-  KEEP_PROTECTED:"NO VENDER",
-  KEEP_OFFER:"CONSERVAR OFERTA",
-  KEEP_GOOD_OFFER:"CONSERVAR BUENA OFERTA",
-  HOLD_SOLVENCY_RESERVED:"RESERVADA",
-  NEVER_SELL:"NO VENDER",
-  MONITOR_OFFERS:"VIGILAR OFERTAS",
-  SAVE_LINEUP:"GUARDAR XI"
-}[v]||String(v||"—").replaceAll("_"," "));
-
-const threatClass=l=>
-  String(l).includes("HIGH")?"threat-high":
-  String(l).includes("MEDIUM")?"threat-medium":
-  "threat-low";
-
-
-function leagueInitials(name){
-  const parts=String(name||"?").trim().split(/\s+/).filter(Boolean);
-  return parts.length?parts.slice(0,2).map(x=>x[0]?.toUpperCase()||"").join(""):"?";
-}
-function biwengerIconUrl(icon){
-  if(!icon)return null;
-  const value=String(icon);
-  if(/^https?:\/\//i.test(value))return value;
-  return `https://biwenger.as.com/${value.replace(/^\/+/, "")}`;
-}
-function marketMovementText(m){
-  if(m.type==="BUY_FROM_COMPUTER")
-    return `<strong>${esc(m.buyer)}</strong> compró a <strong>${esc(m.player_name)}</strong>`;
-  if(m.type==="SELL_TO_COMPUTER")
-    return `<strong>${esc(m.seller)}</strong> vendió a <strong>${esc(m.player_name)}</strong>`;
-  return `<strong>${esc(m.seller)}</strong> → <strong>${esc(m.buyer)}</strong> · ${esc(m.player_name)}`;
-}
-
-function kv(obj){
-  return `<div class="kv">${
-    Object.entries(obj)
-      .map(([k,v])=>`<span>${esc(k)}</span><strong>${v}</strong>`)
-      .join("")
-  }</div>`;
-}
-
-function getPitchCoordinates(players){
-  const by={1:[],2:[],3:[],4:[]};
-
-  players.forEach(p=>{
-    (by[p.position]||by[4]).push(p);
+function coords(ps){
+  const by={1:[],2:[],3:[],4:[]},out=[];
+  ps.forEach(p=>(by[p.position]||by[4]).push(p));
+  [[4,13],[3,38],[2,68],[1,91]].forEach(([pos,y])=>{
+    by[pos].forEach((p,i)=>out.push({...p,x:(i+1)*100/(by[pos].length+1),y}));
   });
-
-  const out=[];
-
-  const add=(items,y)=>{
-    const n=items.length;
-    if(!n)return;
-
-    items.forEach((p,i)=>{
-      out.push({
-        ...p,
-        x:(i+1)*100/(n+1),
-        y
-      });
-    });
-  };
-
-  // Delanteros arriba, portero abajo.
-  add(by[4],13);
-  add(by[3],37);
-  add(by[2],67);
-  add(by[1],91);
-
   return out;
 }
 
+function planCard(title,desc,p,alt=false){
+  if(!p)return`<div class="plan ${alt?"alt":""}"><div class="plan-title">${title}</div><div class="plan-desc">Sin alternativa adicional calculada.</div></div>`;
+  return `<div class="plan ${alt?"alt":""}">
+    <div class="plan-title">${title}</div>
+    <div class="plan-desc">${esc(desc)}<br><b>${esc((p.player_names||[]).join(" + ")||"—")}</b></div>
+    <div class="plan-kv">
+      <span>Ingreso estimado</span><b>${money(p.total_amount)}</b>
+      <span>Saldo posterior</span><b class="${Number(p.post_balance)>=0?"good":"danger"}">${money(p.post_balance)}</b>
+      <span>XI posterior</span><b>${p.playable_count||0}/11</b>
+      <span>Formación posterior</span><b>${esc(p.formation_after||"—")}</b>
+      <span>Coste deportivo</span><b>-${Number(p.lineup_score_loss_percent||0).toFixed(1)}%</b>
+    </div>
+    <div class="plan-foot">${p.restores_solvency?"SOLVENCIA RECUPERADA":"NO RECUPERA SOLVENCIA"}</div>
+  </div>`;
+}
+
+function showTip(card,html){
+  const t=$("playerTooltip");
+  t.innerHTML=html;t.hidden=false;
+  const r=card.getBoundingClientRect(),w=t.offsetWidth,h=t.offsetHeight;
+  let left=r.right+10,top=r.top+r.height/2-h/2;
+  if(left+w>innerWidth-10)left=r.left-w-10;
+  if(top<10)top=10;
+  if(top+h>innerHeight-10)top=innerHeight-h-10;
+  t.style.left=`${left}px`;t.style.top=`${top}px`;
+}
+function hideTip(){$("playerTooltip").hidden=true}
+
 function render(d){
+  const m=d.meta||{},s=d.summary||{},li=d.lineup||{},c=d.competitive||{},n=d.pepe_now||{},lc=d.league_center||{};
 
-  const m=d.meta||{};
-  const s=d.summary||{};
-  const dec=d.decision||{};
-  const sol=d.solvency||{};
-  const fr=d.franchise||{};
-  const li=d.lineup||{};
+  $("metaLine").textContent=`Jornada ${s.target_matchday??"—"} · ${ago(m.generated_at)} · ${String(m.snapshot||"").split(/[\\/]/).pop()||"—"} · ciclo ${m.cycle_minutes||15} min`;
+  $("pepeStatus").textContent="● PEPE ONLINE";$("pepeStatus").className="good";
+  $("mode").textContent=`AUTOPILOT ${m.mode||"—"}`;
 
-  const age=(Date.now()-new Date(m.generated_at).getTime())/60000;
-
-  const health=
-    age<20
-      ?["🟢 PEPE ONLINE","good"]
-      :age<40
-        ?["🟠 PEPE STALE","warn"]
-        :["🔴 PEPE OFFLINE","bad"];
-
-  document.getElementById("pepeStatus").textContent=health[0];
-  document.getElementById("pepeStatus").className=health[1];
-
-  document.getElementById("mode").textContent=
-    `AUTOPILOT ${m.mode||"—"}`;
-
-  document.getElementById("metaLine").textContent=
-    `Jornada ${s.target_matchday??"—"} · ${ago(m.generated_at)} · ${
-      String(m.snapshot||"").split(/[\\/]/).pop()||"—"
-    } · ciclo principal ${m.cycle_minutes||15} min`;
-
-  const metrics=[
-    [fmtMoney(s.balance),"SALDO"],
-    [`${li.playable||0}/11`,"XI VÁLIDO"],
-    [`${Number(s.hours_to_deadline||0).toFixed(1)}h`,"CIERRE JORNADA"],
-    [humanPhase(s.phase),"FASE"],
-    [dec.priority||0,"PRIORIDAD"],
-    [s.hard_safety?"🔴 BLOQUEADO":"🟢 SEGURO","HARD SAFETY"]
+  const mode=s.phase==="NORMAL"?"SIN URGENCIA":s.operations_locked?"BLOQUEADO":"ATENTO";
+  const ops=s.operations_locked||s.hard_safety?"BLOQUEADAS":"PROTEGIDAS";
+  const kpis=[
+    ["SALDO",money(s.balance),s.balance<0?"DÉFICIT":"POSITIVO",s.balance<0?"danger":"good"],
+    ["LINEUP",`${li.playable||0}/11`,li.playable===11?"COMPLETO":"INCOMPLETO",li.playable===11?"good":"danger"],
+    ["PRÓXIMO CIERRE",`${Number(s.hours_to_deadline||0).toFixed(1)}h`,"PARA LA JORNADA","warn"],
+    ["MODO DE BORDALÁS",mode,"TRANQUILO","good"],
+    ["OPERACIONES",ops,s.operations_locked?"NO PUEDE OPERAR":"PUEDE OPERAR",s.operations_locked?"danger":"good"]
   ];
+  $("summary").innerHTML=kpis.map(([a,b,c2,cls])=>`<div class="kpi"><small>${a}</small><b class="${cls}">${b}</b><em>${c2}</em></div>`).join("");
 
-  document.getElementById("summary").innerHTML=
-    metrics.map(x=>
-      `<div class="metric">
-        <b>${esc(x[0])}</b>
-        <span>${esc(x[1])}</span>
-      </div>`
-    ).join("");
-
-  document.getElementById("decision").innerHTML=
-    `<h2>🧠 PEPE HA DECIDIDO</h2>
-
-    <div class="big good">
-      ${esc(dec.label||humanAction(dec.action))}
-    </div>
-
-    ${kv({
-      "Prioridad":dec.priority,
-      "Escritura":dec.executable?"PODRÍA EJECUTAR":"NO",
-      "Motivo":esc(dec.reason||"—")
-    })}`;
-
-  document.getElementById("solvency").innerHTML=
-    `<h2>💰 SOLVENCIA</h2>
-
-    <div class="big ${
-      sol.needed
-        ?(sol.possible?"warn":"bad")
-        :"good"
-    }">
-
-      ${
-        sol.needed
-          ?(sol.possible
-              ?"🟠 PLAN FINANCIABLE"
-              :"🔴 NO GARANTIZADA")
-          :"🟢 GARANTIZADA"
-      }
-
-    </div>
-
-    ${kv({
-      "Déficit":fmtMoney(sol.deficit),
-      "Ofertas disponibles":num(sol.incoming_offers),
-      "Jugadores publicados":num(sol.listed),
-      "Pendientes publicar":num(sol.to_list)
-    })}`;
-
-  // Jugadores franquicia: todos los jugadores que Pepe protege activamente.
-  // Est? preparado para 0, 1, 2 o m?s franquicias.
-  const protectedOffers=(d.offers||[]).filter(o=>
-    ["KEEP_PROTECTED","NEVER_SELL"].includes(o.action)
-  );
-
-  const protectedNames=[
-    ...new Set(
-      protectedOffers.flatMap(o=>o.players||[])
-    )
+  $("nowTitle").textContent=n.title||"—";
+  $("nowDetail").textContent=(n.detail||"—").replaceAll("Pepe","Bordalás");
+  const deficit=Math.max(0,-Number(s.balance||0));
+  const intel=[
+    ["↗","Estrategia actual",deficit>0?"Recuperar solvencia":"Conservar ventaja"],
+    ["▥","Riesgo de venta",s.lineup_risk||"—"],
+    ["⌖","Objetivo de saldo",deficit?money(deficit):"POSITIVO"],
+    ["◷","Presión de tiempo",Number(s.hours_to_deadline||0)<6?"ALTA":"BAJA"]
   ];
+  $("nowIntel").innerHTML=intel.map(([i,l,v])=>`<div class="intel-row"><span class="intel-icon">${i}</span><span>${l}</span><b>${v}</b></div>`).join("");
+  $("riskLabel").textContent=s.lineup_risk||"BAJO";
 
-  const protectedPlayers=
-    protectedNames.map(name=>{
-      const player=(li.players||[]).find(p=>p.name===name);
+  const active=c.offers||[];
+  const activeKeys=new Set(active.map(o=>`${o.player_id}|${o.rival_name}`));
+  const recent=(c.recent_closed||[]).filter(o=>!activeKeys.has(`${o.player_id}|${o.rival_name}`));
+  $("competitiveBadge").textContent="● LIVE";
+  const row=o=>`<div class="neg-row ${o.closed_status?"neg-closed":""}">
+      <div><strong>${esc(o.player_name)}</strong><small>→ ${esc(o.rival_name)}</small></div>
+      <div><small>OFERTA RIVAL</small><b>${money(o.amount)}</b></div>
+      <div><small>${o.closed_status?"MEJOR OFERTA":"CONTRAOFERTA"}</small><b>${money(o.authoritative_counter_amount||o.strategic_sell_price)}</b></div>
+      <span class="neg-state">${o.closed_status?"RETIRADA POR RIVAL":gate(o.action_gate)}${o.closed_at?`<small>${ago(o.closed_at)}</small>`:""}</span>
+    </div>`;
+  $("competitiveOffers").innerHTML=
+    `<div class="neg-section">ACTIVAS</div>${active.map(row).join("")}`+
+    (recent.length?`<div class="neg-section recent">CIERRES RECIENTES · ÚLTIMAS 12H</div>${recent.slice(0,3).map(row).join("")}`:"");
 
-      return {
-        name,
-        price:player?.price,
-        price_increment:player?.price_increment
-      };
-    });
+  $("lineupMeta").textContent=`Formación ${li.formation||"—"} · Score XI ${li.score||0} · Riesgo ${s.lineup_risk||"—"} · Presión ${s.lineup_pressure||0}/100`;
+  const offerMap=new Map(active.map(o=>[Number(o.player_id),o]));
+  $("pitchPlayers").innerHTML=coords(li.players||[]).map(p=>`
+    <div class="player ${offerMap.has(Number(p.id))?"watch":""}" data-id="${p.id}" style="left:${p.x}%;top:${p.y}%">
+      <span class="pos">${posLabel(p.position)}</span>
+      <strong>${esc(p.name)}</strong>
+      <small>${money(p.price)} · ${Number(p.price_increment||0)>=0?"▲":"▼"}${money(Math.abs(p.price_increment||0))}</small>
+      <small>${esc(p.jp_status||"—")} ${p.jp_confidence?`${p.jp_confidence}%`:""}</small>
+    </div>`).join("");
 
-  const marketFranchiseTarget=
-    fr.target||null;
-
-  const franchisePlural=
-    protectedPlayers.length>1;
-
-  const franchiseTitle=
-    protectedPlayers.length===0
-      ?"NUESTRA FRANQUICIA"
-      :franchisePlural
-        ?"NUESTRAS FRANQUICIAS"
-        :"NUESTRA FRANQUICIA";
-
-  const franchiseNames=
-    protectedPlayers.length
-      ?protectedPlayers
-          .map(p=>`\u2B50 ${esc(p.name)}`)
-          .join(" &nbsp;&nbsp; ")
-      :"NINGUNA FRANQUICIA PROTEGIDA";
-
-  const franchiseValues=
-    protectedPlayers.length
-      ?protectedPlayers
-          .map(p=>`${esc(p.name)} ${p.price!=null?fmtMoney(p.price):"?"}`)
-          .join(" ? ")
-      :"?";
-
-  const franchiseTrends=
-    protectedPlayers.length
-      ?protectedPlayers
-          .map(p=>{
-            if(p.price_increment==null){
-              return `${esc(p.name)} ?`;
-            }
-
-            return `${esc(p.name)} ${
-              Number(p.price_increment)>=0?"+":""
-            }${fmtMoney(p.price_increment)}`;
-          })
-          .join(" ? ")
-      :"?";
-
-  document.getElementById("franchise").innerHTML=
-    `<h2>\u2B50 ${franchiseTitle}</h2>
-
-    <div class="big">
-      ${franchiseNames}
-    </div>
-
-    ${kv({
-      "Estado":
-        protectedPlayers.length
-          ?"PROTEGIDO ? NO VENDER"
-          :"?",
-
-      "Valor":
-        franchiseValues,
-
-      "Tendencia":
-        franchiseTrends,
-
-      "Objetivo en mercado":
-        marketFranchiseTarget
-          ?esc(marketFranchiseTarget)
-          :"NINGUNO"
-    })}`;
-
-  document.getElementById("lineupMeta").textContent=
-    `Formación ${li.formation||"—"} · `+
-    `score interno XI ${li.score||0} · `+
-    `riesgo ${s.lineup_risk||"—"} · `+
-    `presión ${s.lineup_pressure||0}/100`;
-
-  const positioned=
-    getPitchCoordinates(li.players||[]);
-
-  document.getElementById("pitchPlayers").innerHTML=
-    positioned.map(p=>
-
-      `<div
-        class="player"
-        style="left:${p.x}%;top:${p.y}%"
-        title="Score interno de selección: ${p.lineup_score}"
-      >
-
-        <strong>
-          ${esc(p.name)} · ${p.points} pts
-        </strong>
-
-        <small>
-          ${fmtMoney(p.price)}
-          ·
-          ${Number(p.price_increment||0)>=0?"↑":"↓"}
-          ${fmtMoney(Math.abs(p.price_increment||0))}
-        </small>
-
-        <small class="jp">
-          JP ${esc(p.jp_status||"—")}
-          ${p.jp_confidence?`${p.jp_confidence}%`:""}
-        </small>
-
-        <small class="scoreline">
-          Pepe score ${p.lineup_score}
-        </small>
-
-      </div>`
-
-    ).join("");
-
-  document.getElementById("lineupFooter").textContent=
-    `XI ${li.playable||0}/11 · `+
-    `huecos ${li.missing||0}. `+
-    `“pts” = puntos fantasy actuales; `+
-    `“Pepe score” = score interno para elegir XI, `+
-    `no predicción de puntos.`;
-
-  const managers=
-    d.rival_intelligence?.managers||[];
-
-  const ordered=[...managers].sort((a,b)=>{
-
-    if(a.is_us)return -1;
-    if(b.is_us)return 1;
-
-    return Number(b.threat_score||0)-
-           Number(a.threat_score||0);
-
+  document.querySelectorAll(".player.watch").forEach(card=>{
+    const id=Number(card.dataset.id);
+    const p=(li.players||[]).find(x=>Number(x.id)===id);
+    const o=offerMap.get(id);
+    const html=`<strong>${esc(p.name)}</strong><div class="tip-grid">
+      <span>Oferta</span><b>${money(o.amount)}</b>
+      <span>Precio Bordalás</span><b>${money(o.authoritative_counter_amount||o.strategic_sell_price)}</b>
+      <span>Entra</span><b>${esc((o.incoming_players||[]).join(", ")||"—")}</b>
+      <span>Formación</span><b>${esc(o.formation_after||"—")}</b>
+      <span>XI posterior</span><b>${o.post_sale_playable_count||"—"}/11</b>
+      <span>Coste deportivo</span><b>-${Number(o.lineup_score_loss_percent||0).toFixed(1)}%</b>
+    </div>`;
+    card.onmouseenter=()=>showTip(card,html);
+    card.onmouseleave=hideTip;
   });
 
-  document.getElementById("rivals").innerHTML=
-    ordered.map((r,i)=>
+  $("lineupFooter").textContent=`XI ${li.playable||0}/11 · Huecos ${li.missing||0}`;
 
-      `<tr class="${r.is_us?"us":""}">
+  const pf=c.portfolio||{};
+  const A=pf.strategic||null;
+  const B=(pf.current&&JSON.stringify(pf.current)!==JSON.stringify(pf.strategic))?pf.current:null;
+  $("solvencyDeficit").textContent=Number(pf.deficit||0)>0?`DÉFICIT ACTUAL ${money(pf.deficit)}`:"SOLVENTE";
+  $("competitivePortfolio").innerHTML=
+    planCard("PLAN A · PREFERIDO","Salida estratégica preferida por Bordalás",A)+
+    planCard("PLAN B · ALTERNATIVA","Siguiente plan si el Plan A no se cumple",B,true);
 
-        <td>${i+1}</td>
-
-        <td>
-          ${r.is_us?"⭐ ":""}
-          ${esc(r.name)}
-          ${r.is_us
-            ?''
-            :""
-          }
-        </td>
-
-        <td>${r.points}</td>
-
-        <td>${fmtMoney(r.balance)}</td>
-
-        <td>${fmtMoney(r.roster_value)}</td>
-
-        <td>${fmtMoney(r.net_worth)}</td>
-
-        <td>${fmtMoney(r.maximum_bid)}</td>
-
-        <td>${fmtMoney(r.max_observed_bid)}</td>
-
-        <td>
-          ${esc(humanActivity(r.activity))}
-        </td>
-
-        <td class="${threatClass(r.threat_level)}">
-
-          ${
-            r.is_us
-              ?"—"
-              :`${r.threat_score??0} · ${
-                  humanThreat(r.threat_level)
-                }`
-          }
-
-        </td>
-
-      </tr>`
-
-    ).join("");
-
-
-  // CENTRO DE LA LIGA - DASHBOARD V3
-  const lc=d.league_center||{};
-
-  const fantasyRows=lc.fantasy_standings||[];
-  document.getElementById("fantasyStandings").innerHTML=fantasyRows.length
-    ?fantasyRows.map(row=>{
-      const icon=biwengerIconUrl(row.icon);
-      return `<tr class="${row.is_us?"us":""}">
-        <td>${row.rank}</td>
-        <td><div class="manager-cell">
-          ${icon
-            ?`<img class="manager-avatar" src="${esc(icon)}" alt="">`
-            :`<span class="manager-dot">${row.is_us?"⭐":esc(leagueInitials(row.name))}</span>`}
-          <strong>${row.is_us?"⭐ ":""}${esc(row.name)}</strong>
-        </div></td>
-        <td><strong>${row.points}</strong></td>
-        <td>${fmtMoney(row.net_worth)}</td>
-      </tr>`;
-    }).join("")
-    :`<tr><td colspan="4" class="muted">Sin clasificación disponible.</td></tr>`;
-
-  const topRows=lc.top_players||[];
-  document.getElementById("topPlayers").innerHTML=topRows.length
-    ?topRows.map(row=>`<tr>
-      <td>${row.rank}</td>
-      <td><strong>${esc(row.name)}</strong></td>
-      <td><strong>${row.points}</strong>
-        ${Number(row.points)===0&&Number(row.points_last_season)>0
-          ?`<small class="muted"> · ant. ${row.points_last_season}</small>`:""}
-      </td>
-      <td>${fmtMoney(row.price)}
-        <small class="${Number(row.price_increment||0)>=0?"good":"bad"}">
-          ${Number(row.price_increment||0)>=0?"▲":"▼"}${fmtMoney(Math.abs(row.price_increment||0))}
-        </small>
-      </td>
-      <td>${row.owner?.is_us?"⭐ ":""}${esc(row.owner?.name||"Computer / libre")}</td>
-    </tr>`).join("")
-    :`<tr><td colspan="5" class="muted">Aún no hay ranking de jugadores.</td></tr>`;
-
-  const marketRows=lc.market_feed||[];
-  document.getElementById("leagueMarketFeed").innerHTML=marketRows.length
-    ?marketRows.map(m=>{
-      const dt=m.timestamp?new Date(Number(m.timestamp)*1000):null;
-      const when=dt?dt.toLocaleString("es-ES",{
-        day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"
-      }):"—";
-      let premium=null;
-      if(Number(m.current_price||0)>0&&Number(m.amount||0)>0)
-        premium=((Number(m.amount)-Number(m.current_price))/Number(m.current_price))*100;
-      return `<div class="market-movement">
-        <span class="market-time">${esc(when)}</span>
-        <div class="market-action">${marketMovementText(m)}
-          <small>${m.type==="BUY_FROM_COMPUTER"?"Compra al Computer":
-            m.type==="SELL_TO_COMPUTER"?"Venta al Computer":"Traspaso entre managers"}
-            ${premium===null?"":` · vs VM actual ${premium>=0?"+":""}${premium.toFixed(1)}%`}
-          </small>
-        </div>
-        <span class="market-amount">${fmtMoney(m.amount)}</span>
-      </div>`;
-    }).join("")
-    :`<div class="muted">Todavía no hay movimientos de mercado registrados.</div>`;
-
-  const ll=lc.laliga||{};
-  document.getElementById("laligaMeta").textContent=
-    `${ll.season||"2026/27"} · ${ll.source||"—"} · ${ll.cache_status||"—"}${
-      ll.fetched_at?` · actualizado ${ago(ll.fetched_at)}`:""}`;
-
-  const llRows=ll.standings||[];
-  document.getElementById("laligaStandings").innerHTML=llRows.length
-    ?llRows.map(row=>{
-      const zone=row.rank<=4?"zone-ucl":row.rank<=7?"zone-europe":
-        row.rank>=18?"zone-relegation":"";
-      const initials=leagueInitials(row.team);
-      return `<tr class="${zone}">
-        <td><strong>${row.rank}</strong></td>
-        <td><div class="team-cell">
-          ${row.logo
-            ?`<img class="team-logo" src="${esc(row.logo)}" alt="">`
-            :`<span class="team-shield-fallback">${esc(initials)}</span>`}
-          <strong>${esc(row.team)}</strong>
-        </div></td>
-        <td>${row.played}</td><td>${row.win}</td><td>${row.draw}</td><td>${row.lose}</td>
-        <td>${row.goals_for}</td><td>${row.goals_against}</td>
-        <td class="${Number(row.goals_diff)>=0?"good":"bad"}">
-          ${Number(row.goals_diff)>0?"+":""}${row.goals_diff}
-        </td>
-        <td><strong>${row.points}</strong></td>
-      </tr>`;
-    }).join("")
-    :`<tr><td colspan="10" class="muted">${
-      esc(ll.message||"La clasificación real todavía no está disponible.")
-    }</td></tr>`;
+  const alerts=[];
+  if(recent[0])alerts.push(["red","●",recent[0].player_name,`${recent[0].rival_name} retiró su oferta de ${money(recent[0].amount)}.`]);
+  if(active[0])alerts.push(["yellow","●",active[0].player_name,`${active[0].rival_name} ofrece ${money(active[0].amount)}. Bordalás espera ${money(active[0].authoritative_counter_amount||active[0].strategic_sell_price)}.`]);
+  alerts.push(["green","●","XI cubierto",`Tenemos ${li.playable}/11 con el plan recomendado.`]);
+  alerts.push(["orange","●","Solvencia",`Déficit de ${money(pf.deficit)}. ${A?.restores_solvency?"Hay solución calculada.":"Sin solución garantizada."}`]);
+  alerts.push(["green","●","Deadline",`Quedan ${Number(s.hours_to_deadline||0).toFixed(1)}h para el cierre.`]);
+  $("alerts").innerHTML=alerts.slice(0,5).map(a=>`<div class="alert-row ${a[0]}"><span>${a[1]}</span><b>${esc(a[2])}</b><span>${esc(a[3])}</span></div>`).join("");
 
   const ofs=d.offers||[];
-
-  document.getElementById("offers").innerHTML=
-    ofs.length
-
-    ?ofs.slice(0,8).map(o=>
-
-      `<div class="row">
-
-        <strong>
-          ${esc(o.players.join(", "))}
-        </strong>
-
-        <span>
-          ${fmtMoney(o.amount)}
-        </span>
-
-        <span>
-          ${Number(o.premium_percent||0)>=0?"+":""}
-          ${o.premium_percent}%
-        </span>
-
-        <span>
-          ${
-            o.solvency_reserved
-              ?"🛡 RESERVADA"
-              :esc(
-                  humanAction(o.action)||
-                  o.action_label
-                )
-          }
-        </span>
-
-      </div>`
-
-    ).join("")+
-
-    `<div class="compact-footer">
-      ${ofs.length} ofertas disponibles
-    </div>`
-
-    :`<div class="muted">
-       Sin ofertas.
-     </div>`;
-
-  const sp=d.speculation||{};
-
-  document.getElementById("speculation").innerHTML=
-
-    `${kv({
-      "Motor":
-        sp.enabled
-          ?"🟢 ACTIVO"
-          :"🔒 BLOQUEADO",
-
-      "Modo":
-        esc(sp.mode||"—"),
-
-      "Oportunidades":
-        sp.candidate_count,
-
-      "Ejecutables":
-        sp.executable_count
-    })}
-
-    <div style="margin-top:6px">
-
-      ${
-        (sp.candidates||[])
-        .slice(0,4)
-        .map(x=>
-
-          `<div class="row">
-
-            <strong>
-              ${esc(x.name)}
-            </strong>
-
-            <span>
-              score ${x.score}
-            </span>
-
-            <span>
-              ${fmtMoney(x.price)}
-            </span>
-
-            <span>
-              ${
-                Number(x.price_increment||0)>=0
-                  ?"↑"
-                  :"↓"
-              }
-              ${
-                fmtMoney(
-                  Math.abs(
-                    x.price_increment||0
-                  )
-                )
-              }
-            </span>
-
-          </div>`
-
-        ).join("")
-      }
-
-    </div>`;
+  $("offers").innerHTML=ofs.length
+    ?ofs.slice(0,4).map(o=>`<div class="data-row"><strong>${esc((o.players||[]).join(", "))}</strong><span>${money(o.amount)}</span><span>${o.premium_percent}%</span><span>${esc(o.action_label||"")}</span></div>`).join("")
+    :`<div class="stat-big">0 nuevas</div><div class="muted">No hay ofertas nuevas de Computer.</div>`;
 
   const ls=d.listings||{};
+  $("listings").innerHTML=`<div class="stat-big">${ls.listing_count||0} publicados</div>`+
+    (ls.renew_required||[]).slice(0,4).map(x=>`<div class="data-row"><strong>${esc(x.name)}</strong><span>${money(x.listed_price)}</span><span>${x.hours_to_expiry}h</span><span>♻</span></div>`).join("");
 
-  document.getElementById("listings").innerHTML=
+  const sp=d.speculation||{};
+  const cand=(sp.candidates||[]).slice().sort((a,b)=>Number(b.score||0)-Number(a.score||0));
+  $("speculation").innerHTML=`<div class="stat-big">${sp.candidate_count||0} oportunidades</div>`+
+    cand.slice(0,4).map(x=>`<div class="data-row"><strong>${esc(x.name)}</strong><span>${x.score}</span><span>${money(x.price)}</span><span>${Number(x.price_increment||0)>=0?"▲":"▼"}${money(Math.abs(x.price_increment||0))}</span></div>`).join("");
 
-    kv({
-      "En venta":
-        ls.listing_count,
+  $("topPlayers").innerHTML=(lc.top_players||[]).slice(0,5).map(x=>`<div class="mini-row"><b>${x.rank}</b><strong>${esc(x.name)}</strong><span>${x.points} pts</span></div>`).join("");
+  $("leagueMarketFeed").innerHTML=(lc.market_feed||[]).slice(0,5).map(x=>`<div class="market-row"><strong>${esc(x.seller||x.buyer||"Mercado")} → ${esc(x.buyer||"Computer")}</strong><small>${esc(x.player_name)} · ${money(x.amount)}</small></div>`).join("");
+  $("activity").innerHTML=(d.activity||[]).slice(0,7).map(a=>`<div class="audit-row"><span>${a.timestamp?new Date(a.timestamp).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}):"—"}</span><span>${esc((a.label||"").replaceAll("Pepe","Bordalás"))}</span><strong>${a.write_performed?"HECHO":"VISTO"}</strong></div>`).join("");
 
-      "Necesitan renovar":
-        ls.renew_required_count,
-
-      "Próxima acción":
-        ls.renew_required_count
-          ?"RENOVAR"
-          :"NINGUNA"
-    })
-
-    +
-
-    (ls.renew_required||[])
-    .slice(0,4)
-    .map(x=>
-
-      `<div class="row">
-
-        <strong>
-          ${esc(x.name)}
-        </strong>
-
-        <span>
-          ${fmtMoney(x.listed_price)}
-        </span>
-
-        <span>
-          ${x.hours_to_expiry}h
-        </span>
-
-        <span>
-          ♻️ RENOVAR
-        </span>
-
-      </div>`
-
-    ).join("");
-
-  document.getElementById("priorities").innerHTML=
-
-    (d.priorities||[])
-    .slice(0,6)
-    .map((p,i)=>
-
-      `<div class="priority">
-
-        <b>${i+1}</b>
-
-        <span>
-          ${esc(p.label)}
-        </span>
-
-        <strong>
-          ${esc(p.status)}
-        </strong>
-
-        <span>
-          prioridad ${p.priority}
-        </span>
-
-      </div>`
-
-    ).join("");
-
-  document.getElementById("activity").innerHTML=
-
-    (d.activity||[]).length
-
-    ?(d.activity||[])
-      .slice(0,8)
-      .map(a=>
-
-        `<div class="feed">
-
-          <span>
-            ${
-              a.timestamp
-                ?new Date(a.timestamp)
-                  .toLocaleTimeString(
-                    "es-ES",
-                    {
-                      hour:"2-digit",
-                      minute:"2-digit"
-                    }
-                  )
-                :"—"
-            }
-          </span>
-
-          <span>
-            ${actionIcon(a.action)}
-            ${esc(a.label)}
-          </span>
-
-          <strong class="${
-            a.write_performed
-              ?(
-                  a.success===false
-                    ?"bad"
-                    :"good"
-                )
-              :"muted"
-          }">
-
-            ${
-              a.write_performed
-                ?"EJECUTADO"
-                :"OBSERVADO"
-            }
-
-          </strong>
-
-        </div>`
-
-      ).join("")
-
-    :`<div class="muted">
-       Aún no hay histórico disponible.
-     </div>`;
+  const ll=lc.laliga||{};
+  $("laligaMeta").textContent=`${ll.season||"2026/27"} · ${ll.source||"—"}${ll.fetched_at?` · ${ago(ll.fetched_at)}`:""}`;
+  $("laligaStandings").innerHTML=(ll.standings||[]).map(r=>`
+    <tr class="${r.rank<=4?"ucl-row":r.rank<=7?"eu-row":r.rank>=18?"rel-row":""}">
+      <td>${r.rank}</td>
+      <td><div class="team-name">${r.logo?`<img class="team-logo" src="${esc(r.logo)}" alt="">`:""}<strong>${esc(r.team)}</strong></div></td>
+      <td>${r.played}</td><td>${r.win}</td><td>${r.draw}</td><td>${r.lose}</td>
+      <td>${r.goals_for}</td><td>${r.goals_against}</td><td>${Number(r.goals_diff)>0?"+":""}${r.goals_diff}</td>
+      <td><strong>${r.points}</strong></td>
+    </tr>`).join("");
 }
 
 fetch(`data/status.json?t=${Date.now()}`)
-
-  .then(r=>{
-
-    if(!r.ok){
-      throw new Error(
-        `HTTP ${r.status}`
-      );
-    }
-
-    return r.json();
-
-  })
-
+  .then(r=>{if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json()})
   .then(render)
-
-  .catch(err=>{
-
-    document.getElementById("app").innerHTML=
-
-      `<section class="panel bad">
-
-        <h2>
-          No se pudo cargar la telemetría
-        </h2>
-
-        <p>
-          ${esc(err.message)}
-        </p>
-
-        <p>
-          Genera dashboard/data/status.json con
-          <code>
-            python -m src.telemetry.build_dashboard
-          </code>
-        </p>
-
-      </section>`;
-
+  .catch(e=>{
+    $("app").innerHTML=`<section class="panel danger"><h2>No se pudo cargar la telemetría</h2><p>${esc(e.message)}</p></section>`;
   });

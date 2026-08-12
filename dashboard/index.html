@@ -3,149 +3,159 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#06110b">
-  <title>Bordalás IA · Sala de Operaciones</title>
+  <meta name="theme-color" content="#020806">
+  <title>Bordalás IA · Sala de Operaciones V6</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <main id="app">
-  <header class="topbar panel">
-    <div>
+  <header class="topbar">
+    <section class="identity">
       <div class="brand">BORDALÁS IA · SALA DE OPERACIONES</div>
-      <div class="muted" id="metaLine">Cargando telemetría…</div>
-    </div>
-    <div class="statusbox">
-      <strong id="pepeStatus">● PEPE —</strong>
-      <span id="mode">AUTOPILOT</span>
-    </div>
+      <div id="metaLine" class="meta">Cargando telemetría…</div>
+      <div class="health">
+        <strong id="pepeStatus">● PEPE —</strong>
+        <span id="mode">AUTOPILOT</span>
+      </div>
+    </section>
+
+    <section id="summary" class="kpi-grid"></section>
   </header>
 
-  <section id="summary" class="summary panel"></section>
-
-  <section class="triple">
-    <article class="panel" id="decision"></article>
-    <article class="panel" id="solvency"></article>
-    <article class="panel" id="franchise"></article>
-  </section>
-
-  <section class="midgrid">
-    <article class="panel">
-      <h2>⚽ XI PARA LA JORNADA</h2>
-      <div id="lineupMeta" class="subline"></div>
-      <div class="pitch">
-        <div class="pitch-markings">
-          <div class="halfway"></div>
-          <div class="center-circle"></div>
-          <div class="center-dot"></div>
-          <div class="penalty-box penalty-top"></div>
-          <div class="goal-box goal-top"></div>
-          <div class="penalty-arc arc-top"></div>
-          <div class="penalty-box penalty-bottom"></div>
-          <div class="goal-box goal-bottom"></div>
-          <div class="penalty-arc arc-bottom"></div>
-          <div class="corner c1"></div><div class="corner c2"></div>
-          <div class="corner c3"></div><div class="corner c4"></div>
-        </div>
-        <div id="pitchPlayers" class="pitch-players"></div>
+  <section class="hero-grid">
+    <article class="panel command-panel">
+      <div class="command-icon">♞</div>
+      <div class="command-main">
+        <div class="eyebrow">QUÉ ESTÁ HACIENDO BORDALÁS AHORA</div>
+        <div id="nowTitle" class="command-title">—</div>
+        <div id="nowDetail" class="command-detail">—</div>
       </div>
-      <div id="lineupFooter" class="compact-footer"></div>
+      <div id="nowIntel" class="command-intel"></div>
+      <div class="risk-meter">
+        <div class="meter-arc"><span></span></div>
+        <small>Riesgo general</small>
+        <strong id="riskLabel">BAJO</strong>
+      </div>
     </article>
 
-    <article class="panel">
-      <h2>🕵️ NUESTROS RIVALES</h2>
-      <div class="tablewrap">
-        <table class="rival-table">
-          <thead>
-          <tr>
-            <th>#</th><th>Manager</th><th>Pts</th><th>Saldo</th><th>Plantilla</th>
-            <th>Patrimonio</th><th>Puja máx.</th><th>Mayor puja</th><th>Actividad</th><th>Amenaza</th>
-          </tr>
-          </thead>
-          <tbody id="rivals"></tbody>
-        </table>
+    <article class="panel negotiations-panel">
+      <div class="panel-head">
+        <h2>⚔ NEGOCIACIONES</h2>
+        <span id="competitiveBadge" class="live-badge">LIVE</span>
       </div>
+      <div id="competitiveOffers"></div>
     </article>
   </section>
 
-
-    <section class="league-center-title panel">
-      <div>
-        <h2>⚽ CENTRO DE LA LIGA</h2>
-        <span class="muted">Nuestra liga · jugadores · mercado · clasificación real</span>
-      </div>
-    </section>
-
-    <section class="league-center-grid">
-      <article class="panel">
-        <h2>🏆 CLASIFICACIÓN BIWENGER</h2>
-        <div class="tablewrap league-small-table">
-          <table>
-            <thead>
-              <tr><th>#</th><th>Manager</th><th>Pts</th><th>Patrimonio</th></tr>
-            </thead>
-            <tbody id="fantasyStandings"></tbody>
-          </table>
-        </div>
-      </article>
-
-      <article class="panel">
-        <h2>⭐ TOP 10 JUGADORES</h2>
-        <div class="tablewrap league-small-table">
-          <table>
-            <thead>
-              <tr><th>#</th><th>Jugador</th><th>Pts</th><th>Valor</th><th>Propietario</th></tr>
-            </thead>
-            <tbody id="topPlayers"></tbody>
-          </table>
-        </div>
-      </article>
-    </section>
-
-    <section class="panel">
-      <h2>🔄 ÚLTIMOS MOVIMIENTOS DEL MERCADO</h2>
-      <div id="leagueMarketFeed" class="league-market-feed"></div>
-    </section>
-
-    <section class="panel laliga-panel">
-      <div class="laliga-heading">
+  <section class="middle-grid">
+    <article class="panel lineup-panel">
+      <div class="panel-head">
         <div>
-          <h2>🇪🇸 LALIGA EA SPORTS · CLASIFICACIÓN</h2>
-          <div id="laligaMeta" class="subline"></div>
+          <h2>⚽ XI PARA LA JORNADA</h2>
+          <div id="lineupMeta" class="subline"></div>
         </div>
-        <div class="laliga-legend">
-          <span class="legend-ucl">CHAMPIONS</span>
-          <span class="legend-europe">EUROPA</span>
-          <span class="legend-down">DESCENSO</span>
-        </div>
+        <span class="tag">XI DE BORDALÁS</span>
       </div>
 
-      <div class="tablewrap laliga-wrap">
-        <table class="laliga-table">
-          <thead>
-            <tr>
-              <th>POS</th><th>EQUIPO</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
-              <th>GF</th><th>GC</th><th>DG</th><th>PTS</th>
-            </tr>
-          </thead>
-          <tbody id="laligaStandings"></tbody>
-        </table>
+      <div class="pitch">
+        <div class="pitch-border"></div>
+        <div class="halfway"></div>
+        <div class="center-circle"></div>
+        <div class="penalty penalty-top"></div>
+        <div class="penalty penalty-bottom"></div>
+        <div id="pitchPlayers"></div>
       </div>
+
+      <div class="pitch-foot">
+        <span class="legend-dot yellow-dot"></span>
+        <span>En negociación / Bordalás contempla vender</span>
+        <span id="lineupFooter"></span>
+      </div>
+    </article>
+
+    <section class="right-stack">
+      <article class="panel solvency-panel">
+        <div class="panel-head">
+          <h2>💰 PLAN DE SOLVENCIA</h2>
+          <strong id="solvencyDeficit" class="danger"></strong>
+        </div>
+        <div id="competitivePortfolio" class="plans"></div>
+      </article>
+
+      <article class="panel alerts-panel">
+        <h2>🔥 ALERTAS Y OPORTUNIDADES</h2>
+        <div id="alerts"></div>
+      </article>
     </section>
-
-  <section class="bottomgrid">
-    <article class="panel"><h2>🖥 OFERTAS DE COMPUTER</h2><div id="offers"></div></article>
-    <article class="panel"><h2>🔮 RADAR DE ESPECULACIÓN</h2><div id="speculation"></div></article>
-    <article class="panel"><h2>🏷 JUGADORES PUESTOS EN VENTA</h2><div id="listings"></div></article>
-    <article class="panel"><h2>⚡ QUÉ ESTÁ VALORANDO PEPE</h2><div id="priorities"></div></article>
   </section>
 
-  <section class="panel">
-    <h2>📜 ÚLTIMOS MOVIMIENTOS DE PEPE</h2>
-    <div id="activity"></div>
+  <section class="info-grid">
+    <article class="panel info-card">
+      <h2>🖥 OFERTAS DE COMPUTER</h2>
+      <div id="offers"></div>
+    </article>
+
+    <article class="panel info-card">
+      <h2>🏷 JUGADORES PUESTOS EN VENTA</h2>
+      <div id="listings"></div>
+    </article>
+
+    <article class="panel info-card">
+      <h2>🔮 RADAR DE ESPECULACIÓN</h2>
+      <div id="speculation"></div>
+    </article>
+
+    <article class="panel info-card league-card">
+      <h2>📊 CENTRO DE LA LIGA</h2>
+      <div class="league-columns">
+        <div>
+          <h3>TOP JUGADORES</h3>
+          <div id="topPlayers"></div>
+        </div>
+        <div>
+          <h3>ÚLTIMOS MOVIMIENTOS</h3>
+          <div id="leagueMarketFeed"></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel info-card">
+      <h2>📋 AUDITORÍA DE BORDALÁS</h2>
+      <div id="activity"></div>
+    </article>
   </section>
 
-  <footer class="footer">BORDALÁS IA · AUTOPILOT LIVE · CICLO PRINCIPAL 15 MIN</footer>
+  <section class="panel laliga-panel">
+    <div class="panel-head">
+      <div>
+        <h2>🇪🇸 LALIGA EA SPORTS · CLASIFICACIÓN</h2>
+        <div id="laligaMeta" class="subline"></div>
+      </div>
+      <div class="zone-legend">
+        <span class="zone ucl">CHAMPIONS</span>
+        <span class="zone europa">EUROPA</span>
+        <span class="zone descenso">DESCENSO</span>
+      </div>
+    </div>
+
+    <div class="standings-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>POS</th><th>EQUIPO</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
+            <th>GF</th><th>GC</th><th>DG</th><th>PTS</th>
+          </tr>
+        </thead>
+        <tbody id="laligaStandings"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div id="playerTooltip" class="floating-tooltip" hidden></div>
+
+  <footer>BORDALÁS IA · AUTOPILOT LIVE · DASHBOARD V6</footer>
 </main>
+
 <script src="app.js"></script>
 </body>
 </html>
