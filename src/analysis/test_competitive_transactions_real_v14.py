@@ -326,6 +326,28 @@ def print_incoming_manager_offers(
                 f"{viable_names}"
             )
 
+        negotiation = (
+            item.get(
+                "negotiation_observer"
+            )
+            or {}
+        )
+
+        print(
+            f"Negotiation event:       "
+            f"{negotiation.get('event') or 'SIN ESTADO'}"
+        )
+
+        print(
+            f"Action gate:             "
+            f"{negotiation.get('action_gate') or 'SIN ESTADO'}"
+        )
+
+        print(
+            f"Ronda negociacion:       "
+            f"{safe_int(negotiation.get('negotiation_round'), 0)}"
+        )
+
         print(
             f"Decision legacy actual:  "
             f"{item.get('decision')}"
@@ -350,7 +372,7 @@ def print_offer_portfolio(
 ) -> None:
 
     print()
-    print("## SIMULACION CONJUNTA DE OFERTAS RIVALES")
+    print("## SIMULACION CONJUNTA DE OFERTAS RIVALES - V1.4")
     print()
 
     portfolio = (
@@ -361,13 +383,9 @@ def print_offer_portfolio(
         or {}
     )
 
-    recommended = (
-        portfolio.get(
-            "recommended"
-        )
-    )
-
-    if not recommended:
+    if not portfolio.get(
+        "offer_count"
+    ):
 
         print(
             "No hay combinaciones de ofertas de managers para simular."
@@ -389,71 +407,117 @@ def print_offer_portfolio(
         f"{safe_int(portfolio.get('offer_count'))}"
     )
 
-    print()
-    print("MEJORES COMBINACIONES")
-    print()
+    for scenario_name in (
+        "current",
+        "strategic",
+    ):
 
-    combos = (
-        portfolio.get(
-            "combinations",
-            [],
+        scenario = (
+            portfolio.get(
+                scenario_name,
+                {},
+            )
+            or {}
         )
-        or []
-    )
 
-    for combo in combos[:10]:
+        print()
+        print(
+            f"### PORTFOLIO {scenario_name.upper()}"
+        )
+        print()
+
+        combos = (
+            scenario.get(
+                "combinations",
+                [],
+            )
+            or []
+        )
+
+        if not combos:
+            print("Sin combinaciones.")
+            continue
+
+        for combo in combos[:10]:
+
+            print(
+                "- "
+                +
+                ", ".join(
+                    combo.get(
+                        "player_names",
+                        [],
+                    )
+                )
+            )
+
+            print(
+                f"  Caja usada: {money(combo.get('total_amount'))} | "
+                f"Oferta actual: {money(combo.get('current_total'))} | "
+                f"Precio estrategico: {money(combo.get('strategic_total'))} | "
+                f"Saldo post: {money(combo.get('post_balance'))} | "
+                f"XI: {safe_int(combo.get('playable_count'))}/11 | "
+                f"Solvencia: {'SI' if combo.get('restores_solvency') else 'NO'} | "
+                f"Dano rival: {safe_float(combo.get('competitive_damage')):.1f}"
+            )
+
+        recommended = (
+            scenario.get(
+                "recommended"
+            )
+        )
+
+        print()
+        print(
+            f"RECOMENDACION {scenario_name.upper()}"
+        )
+
+        if not recommended:
+
+            print("SIN RECOMENDACION")
+            continue
 
         print(
-            "- "
-            +
             ", ".join(
-                combo.get(
+                recommended.get(
                     "player_names",
                     [],
                 )
             )
+            or
+            "SIN DATOS"
         )
 
         print(
-            f"  Caja: {money(combo.get('total_amount'))} | "
-            f"Saldo post: {money(combo.get('post_balance'))} | "
-            f"XI: {safe_int(combo.get('playable_count'))}/11 | "
-            f"Solvencia: {'SI' if combo.get('restores_solvency') else 'NO'} | "
-            f"Dano rival agregado: {safe_float(combo.get('competitive_damage')):.1f}"
+            f"Caja:                    "
+            f"{money(recommended.get('total_amount'))}"
         )
 
-    print()
-    print("RECOMENDACION PORTFOLIO")
-    print(
-        ", ".join(
-            recommended.get(
-                "player_names",
-                [],
-            )
+        print(
+            f"Oferta actual total:      "
+            f"{money(recommended.get('current_total'))}"
         )
-        or
-        "SIN DATOS"
-    )
 
-    print(
-        f"Caja total:              "
-        f"{money(recommended.get('total_amount'))}"
-    )
+        print(
+            f"Precio estrategico total: "
+            f"{money(recommended.get('strategic_total'))}"
+        )
 
-    print(
-        f"Saldo posterior:         "
-        f"{money(recommended.get('post_balance'))}"
-    )
+        print(
+            f"Saldo posterior:          "
+            f"{money(recommended.get('post_balance'))}"
+        )
 
-    print(
-        f"XI posterior:            "
-        f"{safe_int(recommended.get('playable_count'))}/11"
-    )
+        print(
+            f"XI posterior:             "
+            f"{safe_int(recommended.get('playable_count'))}/11"
+        )
 
-    print(
-        f"Recupera solvencia:      "
-        f"{'SI' if recommended.get('restores_solvency') else 'NO'}"
-    )
+        print(
+            f"Recupera solvencia:       "
+            f"{'SI' if recommended.get('restores_solvency') else 'NO'}"
+        )
+
 
 def print_rival_market_players(
     intelligent_bids: list[dict],
@@ -466,10 +530,17 @@ def print_rival_market_players(
     rival_players = [
         item
         for item in intelligent_bids
-        if item.get(
-            "seller_user_id"
+        if (
+            item.get(
+                "seller_user_id"
+            )
+            is not None
+            and
+            not item.get(
+                "own_player",
+                False,
+            )
         )
-        is not None
     ]
 
     if not rival_players:
@@ -687,7 +758,7 @@ def main() -> None:
     )
 
     print_rivals(
-        rival_intelligence=
+        intelligence=
             rival_intelligence,
         current_user_id=
             current_user_id,

@@ -687,7 +687,7 @@ def main() -> None:
     )
 
     print_rivals(
-        rival_intelligence=
+        intelligence=
             rival_intelligence,
         current_user_id=
             current_user_id,

@@ -466,10 +466,17 @@ def print_rival_market_players(
     rival_players = [
         item
         for item in intelligent_bids
-        if item.get(
-            "seller_user_id"
+        if (
+            item.get(
+                "seller_user_id"
+            )
+            is not None
+            and
+            not item.get(
+                "own_player",
+                False,
+            )
         )
-        is not None
     ]
 
     if not rival_players:
@@ -687,7 +694,7 @@ def main() -> None:
     )
 
     print_rivals(
-        rival_intelligence=
+        intelligence=
             rival_intelligence,
         current_user_id=
             current_user_id,
