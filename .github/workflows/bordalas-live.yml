@@ -96,7 +96,7 @@ jobs:
       - name: Run Bordalas LIVE
         shell: bash
         run: |
-          python -m src.autopilot --once --live
+          python -m src.autopilot --once --live --competitive-live
 
       - name: Build Sala de Operaciones telemetry
         shell: bash
