@@ -111,9 +111,9 @@ jobs:
           echo "========================================"
 
           test -f data/trading/v10_full_autonomous_status.json
-            dashboard/data/status.json
+          test -f dashboard/data/status.json
           ls -lh data/trading/v10_full_autonomous_status.json
-            dashboard/data/status.json
+          ls -lh dashboard/data/status.json
 
       - name: Update Cloudflare dashboard
         shell: bash
