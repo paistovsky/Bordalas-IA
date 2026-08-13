@@ -18,9 +18,15 @@ from src.collectors.board_history_collector import collect_board_history
 from src.telemetry.league_center import build_league_center
 
 
+from src.telemetry.player_photo_resolver import (
+    build_player_photo_lookup as build_player_photo_lookup_v3,
+    display_name as display_player_name,
+)
+
 AUTOPILOT_LOG = Path("data") / "autopilot" / "autopilot_log.jsonl"
 COMPETITIVE_LOG = Path("data") / "autopilot" / "competitive_observer_log.jsonl"
 DASHBOARD_STATUS = Path("dashboard") / "data" / "status.json"
+REACT_DASHBOARD_STATUS = Path("dashboard-v8") / "public" / "data" / "status.json"
 PLAYER_MAPPING_CACHE = Path("data") / "player_mapping_cache.json"
 PLAYER_PHOTO_CACHE = Path("data") / "dashboard_player_photo_cache.json"
 
@@ -348,134 +354,7 @@ def fetch_api_football_player_photo(
 def build_player_photo_lookup(
     snapshot: dict,
 ) -> dict[int, dict]:
-    mapping_cache = (
-        load_player_mapping_cache()
-    )
-    fallback_cache = (
-        load_dashboard_player_photo_cache()
-    )
-
-    result = {}
-
-    my_team = (
-        snapshot.get("my_team", [])
-        or []
-    )
-    catalog = (
-        snapshot.get("catalog", {})
-        .get("data", {})
-        .get("players", {})
-        or {}
-    )
-
-    players = list(my_team)
-
-    if isinstance(catalog, dict):
-        players.extend(
-            catalog.values()
-        )
-    elif isinstance(catalog, list):
-        players.extend(catalog)
-
-    seen = set()
-    cache_changed = False
-
-    # Only resolve current squad automatically.
-    current_ids = {
-        safe_int(player.get("id"))
-        for player in my_team
-    }
-
-    for player in players:
-        player_id = safe_int(
-            player.get("id")
-        )
-
-        if (
-            player_id <= 0
-            or player_id in seen
-        ):
-            continue
-
-        seen.add(player_id)
-
-        external_id = (
-            get_external_player_id(
-                mapping_cache,
-                player_id,
-            )
-        )
-
-        cached = (
-            fallback_cache.get(
-                str(player_id)
-            )
-            or {}
-        )
-
-        photo_url = (
-            cached.get("photo_url")
-        )
-
-        if (
-            not photo_url
-            and external_id
-        ):
-            photo_url = (
-                api_football_photo_url(
-                    external_id
-                )
-            )
-
-        # Only current squad, only when unresolved, and cached afterwards.
-        if (
-            not photo_url
-            and player_id in current_ids
-        ):
-            resolved = (
-                fetch_api_football_player_photo(
-                    player.get("name")
-                    or ""
-                )
-            )
-
-            if resolved.get("photo_url"):
-                fallback_cache[
-                    str(player_id)
-                ] = resolved
-                cached = resolved
-                photo_url = (
-                    resolved.get(
-                        "photo_url"
-                    )
-                )
-                external_id = (
-                    resolved.get(
-                        "api_football_id"
-                    )
-                    or external_id
-                )
-                cache_changed = True
-
-        result[player_id] = {
-            "api_football_id": (
-                external_id
-                or cached.get(
-                    "api_football_id"
-                )
-            ),
-            "photo_url": photo_url,
-            "icon_hero": (
-                player.get("iconHero")
-            ),
-        }
-
-    if cache_changed:
-        save_dashboard_player_photo_cache(
-            fallback_cache
-        )
-
-    return result
+    return build_player_photo_lookup_v3(snapshot)
 
 def compact_lineup(
     lineup_state: dict,
@@ -503,16 +382,16 @@ def compact_lineup(
     for player in selected:
         player_id = safe_int(player.get("id"))
 
-        source = (
-            my_team_by_id.get(player_id)
-            or catalog_players.get(str(player_id))
-            or {}
-        )
+        catalog_source = {}
+        if isinstance(catalog_players, dict):
+            catalog_source = (
+                catalog_players.get(str(player_id))
+                or catalog_players.get(player_id)
+                or {}
+            )
 
-        photo = (
-            photo_lookup.get(player_id)
-            or {}
-        )
+        source = my_team_by_id.get(player_id) or catalog_source or {}
+        photo = photo_lookup.get(player_id) or {}
 
         icon_hero = (
             player.get("iconHero")
@@ -520,19 +399,48 @@ def compact_lineup(
             or photo.get("icon_hero")
         )
 
+        raw_name = (
+            player.get("name")
+            or source.get("name")
+            or photo.get("name")
+            or "?"
+        )
+
+        fixed_name = display_player_name(raw_name)
+
+        price = safe_int(
+            player.get(
+                "price",
+                source.get("price"),
+            )
+        )
+
         players.append(
             {
                 "id": player_id,
-                "name": player.get("name", "?"),
+                "name": fixed_name,
                 "position": safe_int(
                     player.get(
                         "lineup_position",
-                        player.get("position"),
+                        player.get(
+                            "position",
+                            source.get("position"),
+                        ),
                     )
                 ),
-                "price": safe_int(player.get("price")),
-                "price_increment": safe_int(player.get("priceIncrement")),
-                "points": safe_int(player.get("points")),
+                "price": price,
+                "price_increment": safe_int(
+                    player.get(
+                        "priceIncrement",
+                        source.get("priceIncrement"),
+                    )
+                ),
+                "points": safe_int(
+                    player.get(
+                        "points",
+                        source.get("points"),
+                    )
+                ),
                 "lineup_score": round(
                     safe_float(player.get("lineup_score")),
                     2,
@@ -544,12 +452,11 @@ def compact_lineup(
                     1,
                 ),
                 "icon_hero": icon_hero,
-                "api_football_id": photo.get(
-                    "api_football_id"
-                ),
-                "photo_url": photo.get(
-                    "photo_url"
-                ),
+                "biwenger_photo_url": photo.get("biwenger_photo_url"),
+                "api_football_id": photo.get("api_football_id"),
+                "api_photo_url": photo.get("api_photo_url"),
+                "photo_url": photo.get("photo_url"),
+                "photo_source": photo.get("photo_source"),
                 "team_id": safe_int(
                     player.get(
                         "teamID",
@@ -570,9 +477,9 @@ def compact_lineup(
         "playable": safe_int(lineup_state.get("playable_count")),
         "missing": safe_int(lineup_state.get("missing")),
         "score": round(safe_float(lineup.get("score")), 2),
+        "total_value": sum(safe_int(item.get("price")) for item in players),
         "players": players,
     }
-
 
 def compact_rivals(intelligence: dict, current_user_id: int | None) -> list[dict]:
     rows = []
@@ -730,7 +637,7 @@ def compact_listings(state: dict) -> dict:
     }
 
 
-def load_activity_feed(limit: int = 8) -> list[dict]:
+def load_activity_feed(limit: int = 100) -> list[dict]:
     if not AUTOPILOT_LOG.exists():
         return []
 
@@ -772,6 +679,81 @@ def load_activity_feed(limit: int = 8) -> list[dict]:
 
     return rows
 
+
+
+def compact_roster(
+    snapshot: dict,
+    lineup_state: dict,
+    photo_lookup: dict[int, dict] | None = None,
+) -> dict:
+    photo_lookup = photo_lookup or {}
+    selected = (
+        (lineup_state.get("lineup", {}) or {}).get("selected", [])
+        or []
+    )
+    starter_ids = {
+        safe_int(player.get("id"))
+        for player in selected
+        if isinstance(player, dict)
+    }
+
+    players = []
+
+    for player in snapshot.get("my_team", []) or []:
+        if not isinstance(player, dict):
+            continue
+
+        player_id = safe_int(player.get("id"))
+        if player_id <= 0:
+            continue
+
+        photo = photo_lookup.get(player_id, {}) or {}
+
+        players.append(
+            {
+                "id": player_id,
+                "name": display_player_name(
+                    player.get("name")
+                    or photo.get("name")
+                    or "?"
+                ),
+                "position": safe_int(player.get("position")),
+                "price": safe_int(player.get("price")),
+                "price_increment": safe_int(
+                    player.get("priceIncrement")
+                ),
+                "points": safe_int(player.get("points")),
+                "status": player.get("status"),
+                "number": safe_int(player.get("number")),
+                "is_starter": player_id in starter_ids,
+                "photo_url": (
+                    photo.get("photo_url")
+                    or (
+                        f"https://cdn.biwenger.com/cdn-cgi/image/"
+                        f"f=avif/i/p/{player_id}.png"
+                    )
+                ),
+                "photo_source": photo.get("photo_source") or "BIWENGER",
+            }
+        )
+
+    players.sort(
+        key=lambda item: (
+            not item["is_starter"],
+            safe_int(item.get("position")),
+            -safe_int(item.get("price")),
+        )
+    )
+
+    starters = [p for p in players if p["is_starter"]]
+    substitutes = [p for p in players if not p["is_starter"]]
+
+    return {
+        "count": len(players),
+        "starters": starters,
+        "substitutes": substitutes,
+        "players": players,
+    }
 
 
 def load_latest_jsonl(path: Path) -> dict:
@@ -860,10 +842,43 @@ def compact_competitive_offer(item: dict) -> dict:
     replacement = item.get("replacement_detail", {}) or {}
     sporting = item.get("sporting_opportunity_cost", {}) or {}
 
-    incoming = [
-        player.get("name") or str(player.get("id"))
-        for player in replacement.get("incoming_players", []) or []
-    ]
+    incoming = []
+
+    for player in replacement.get("incoming_players", []) or []:
+        if not isinstance(player, dict):
+            continue
+
+        player_id = safe_int(player.get("id"))
+
+        incoming.append(
+            {
+                "id": player_id,
+                "name": display_player_name(
+                    player.get("name")
+                    or (
+                        f"Player {player_id}"
+                        if player_id > 0
+                        else "?"
+                    )
+                ),
+                "position": safe_int(player.get("position")),
+                "lineup_score": round(
+                    safe_float(
+                        player.get(
+                            "lineup_score",
+                            player.get("quality_score"),
+                        )
+                    ),
+                    2,
+                ),
+                "photo_url": (
+                    f"https://cdn.biwenger.com/cdn-cgi/image/"
+                    f"f=avif/i/p/{player_id}.png"
+                    if player_id > 0
+                    else None
+                ),
+            }
+        )
 
     return {
         "offer_id": item.get("offer_id"),
@@ -988,14 +1003,29 @@ def load_competitive_dashboard_state() -> dict:
 
     portfolio = record.get("competitive_portfolio", {}) or {}
 
-    current = (
-        (portfolio.get("current", {}) or {}).get("recommended")
-        or {}
-    )
-    strategic = (
-        (portfolio.get("strategic", {}) or {}).get("recommended")
-        or {}
-    )
+    current_state = portfolio.get("current", {}) or {}
+    strategic_state = portfolio.get("strategic", {}) or {}
+
+    current = current_state.get("recommended") or {}
+    strategic = strategic_state.get("recommended") or {}
+
+    strategic_alternatives = [
+        compact_portfolio_recommendation(item)
+        for item in (
+            strategic_state.get("solvency_combinations", [])
+            or []
+        )[:5]
+        if item
+    ]
+
+    current_alternatives = [
+        compact_portfolio_recommendation(item)
+        for item in (
+            current_state.get("solvency_combinations", [])
+            or []
+        )[:5]
+        if item
+    ]
 
     return {
         "available": bool(record.get("available", True)),
@@ -1014,6 +1044,8 @@ def load_competitive_dashboard_state() -> dict:
             "deficit": safe_int(portfolio.get("deficit")),
             "current": compact_portfolio_recommendation(current),
             "strategic": compact_portfolio_recommendation(strategic),
+            "strategic_alternatives": strategic_alternatives,
+            "current_alternatives": current_alternatives,
         },
         # El log Competitive V2.0 actual persiste ofertas + portfolio, pero no
         # el Safety Gate ni competitive_execution. No inventamos esos datos.
@@ -1236,6 +1268,73 @@ def load_recent_competitive_closed(
         reverse=True,
     )
 
+
+def compact_biwenger_competition(
+    snapshot: dict,
+    current_user_id=None,
+) -> dict:
+    """Expose the fantasy competition standings already returned by Biwenger.
+
+    Source in the snapshot:
+        rounds.data.league.standings
+
+    Observer-only: this reads existing snapshot data and performs no writes.
+    """
+    league = (
+        snapshot.get("rounds", {})
+        .get("data", {})
+        .get("league", {})
+        or {}
+    )
+
+    rows = league.get("standings", []) or []
+    current_user_id = safe_int(current_user_id, default=0)
+
+    standings = []
+    for index, row in enumerate(rows, start=1):
+        if not isinstance(row, dict):
+            continue
+
+        user_id = safe_int(row.get("id"))
+        rank = safe_int(row.get("position"), default=index)
+
+        standings.append({
+            "rank": rank or index,
+            "user_id": user_id,
+            "name": str(row.get("name") or f"Mánager {index}"),
+            "points": safe_int(row.get("points")),
+            "team_value": safe_int(row.get("teamValue")),
+            "team_value_inc": safe_int(row.get("teamValueInc")),
+            "icon": row.get("icon"),
+            "is_current_user": bool(
+                current_user_id
+                and user_id
+                and user_id == current_user_id
+            ),
+        })
+
+    standings.sort(key=lambda item: item.get("rank", 9999))
+
+    current_row = next(
+        (item for item in standings if item.get("is_current_user")),
+        None,
+    )
+
+    return {
+        "id": safe_int(league.get("id")),
+        "name": league.get("name") or "Biwenger",
+        "competition": league.get("competition"),
+        "mode": league.get("mode"),
+        "type": league.get("type"),
+        "standings": standings,
+        "current_user_rank": (
+            current_row.get("rank") if current_row else None
+        ),
+        "current_user_points": (
+            current_row.get("points") if current_row else None
+        ),
+    }
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -1270,6 +1369,11 @@ def build_dashboard_state() -> dict:
         snapshot=snapshot,
         board=board,
         rival_intelligence=rival_intelligence,
+    )
+
+    competition = compact_biwenger_competition(
+        snapshot=snapshot,
+        current_user_id=board.get("current_user_id"),
     )
 
     deadline = state.get("deadline", {}) or {}
@@ -1452,6 +1556,11 @@ def build_dashboard_state() -> dict:
             snapshot,
             photo_lookup,
         ),
+        "roster": compact_roster(
+            snapshot,
+            state.get("lineup", {}) or {},
+            photo_lookup,
+        ),
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),
             "maximum_bid_calibration": rival_intelligence.get(
@@ -1463,6 +1572,7 @@ def build_dashboard_state() -> dict:
             ),
         },
         "league_center": league_center,
+        "competition": competition,
         "offers": compact_offers(state),
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
@@ -1478,15 +1588,28 @@ def save_dashboard_state(
     state: dict,
     path: Path = DASHBOARD_STATUS,
 ) -> Path:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    """Persist one canonical dashboard payload for production and local React.
 
-    path.write_text(
-        json.dumps(
-            state,
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
+    Production/legacy Cloudflare assets read dashboard/data/status.json.
+    Vite local development reads dashboard-v8/public/data/status.json.
+    Keeping both mirrors in this single write path prevents the React UI from
+    silently displaying stale telemetry after backend fields are added.
+    """
+    payload = json.dumps(
+        state,
+        ensure_ascii=False,
+        indent=2,
     )
+
+    targets = [path]
+
+    # Only mirror the default dashboard status.  Explicit custom paths used by
+    # tests/tools remain isolated and retain the old behavior.
+    if Path(path) == DASHBOARD_STATUS:
+        targets.append(REACT_DASHBOARD_STATUS)
+
+    for target in targets:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(payload, encoding="utf-8")
 
     return path

@@ -1,0 +1,1521 @@
+@import "tailwindcss";
+
+:root{
+  --bg:#07111b;
+  --bg-2:#081522;
+  --surface:#0b1825;
+  --surface-2:#0d1d2d;
+  --surface-3:#102235;
+  --border:#1c3144;
+  --border-strong:#29445c;
+  --text:#f5f8fb;
+  --muted:#8393a7;
+  --green:#36e37d;
+  --green-soft:#7af0aa;
+  --red:#ff5159;
+  --yellow:#f5c542;
+  --blue:#4f8cff;
+  --cyan:#56c7ff;
+}
+
+*{box-sizing:border-box}
+html,body,#root{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:14px;
+  line-height:1.45;
+  background:
+    radial-gradient(circle at 45% -20%,rgba(30,86,130,.17),transparent 35%),
+    linear-gradient(180deg,#08131e 0,#061019 45%,#050c13 100%);
+}
+button{font:inherit}
+.app-shell{min-height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr)}
+.sidebar{
+  position:sticky;top:0;height:100vh;
+  background:linear-gradient(180deg,#091522,#07111b);
+  border-right:1px solid #192c3d;
+  padding:22px 18px;
+  display:flex;flex-direction:column;
+}
+.brand-block{display:flex;align-items:center;gap:12px;padding:0 4px 22px}
+.brand-shield{
+  width:44px;height:50px;display:grid;place-items:center;border-radius:10px 10px 16px 16px;
+  background:linear-gradient(145deg,#d3ad3e,#7d641e);
+  color:#08131d;font-weight:950;font-size:20px;border:2px solid #e7c759
+}
+.brand-block strong{display:block;font-size:20px;letter-spacing:.02em}
+.brand-block small{display:block;color:#d9dee5;font-size:9px;font-weight:700;letter-spacing:.06em;margin-top:2px}
+.sidebar-nav{display:grid;gap:6px}
+.sidebar-link{
+  border:0;background:transparent;color:#aab5c3;
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;border-radius:7px;text-align:left;cursor:pointer;
+  font-size:13px;font-weight:700;letter-spacing:.01em
+}
+.sidebar-link:hover{background:#0d1d2c;color:white}
+.sidebar-link.active{
+  color:white;background:linear-gradient(90deg,#2f58cd,#16336e);
+  box-shadow:inset 0 0 0 1px #3565dc
+}
+.sidebar-footer{
+  margin-top:auto;border-top:1px solid #1b2e40;padding-top:18px;
+  display:flex;align-items:center;gap:11px
+}
+.manager-avatar{
+  width:48px;height:48px;border-radius:50%;display:grid;place-items:center;
+  background:#12273a;border:1px solid #2b4963;color:#e6c860;font-weight:900;font-size:18px
+}
+.sidebar-footer strong{display:block}.sidebar-footer small{display:block;color:#6ba0d8;font-size:8px;margin-top:2px}
+
+.main-workspace{min-width:0;padding:18px 20px 12px}
+.top-header{display:grid;grid-template-columns:220px minmax(0,1fr);gap:14px;align-items:stretch}
+.matchday-title{padding:7px 0}
+.matchday-title span{display:block;color:var(--green);font-size:12px;font-weight:900}
+.matchday-title strong{display:block;font-size:17px;margin-top:3px}
+.matchday-title small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#0a1724}
+.kpi{display:flex;gap:11px;align-items:center;padding:13px 14px;min-width:0;border-right:1px solid var(--border)}
+.kpi:last-child{border-right:0}
+.kpi-icon{width:38px;height:38px;flex:0 0 38px;border-radius:50%;display:grid;place-items:center;background:#15293b;color:#d7e2eb}
+.kpi-icon-success{background:#123722;color:var(--green)}
+.kpi-icon-danger{background:#37171c;color:var(--red)}
+.kpi-icon-warning{background:#382f16;color:var(--yellow)}
+.kpi-copy{min-width:0}.kpi-copy span{display:block;color:#aab6c3;font-size:9px;font-weight:800}.kpi-copy strong{display:block;font-size:21px;line-height:1.05;margin-top:3px;white-space:nowrap}.kpi-copy small{display:block;color:#dce2e8;font-size:9px;margin-top:3px}
+.tone-success,.success-text{color:var(--green)!important}.tone-danger{color:var(--red)!important}.tone-warning{color:var(--yellow)!important}.tone-info{color:var(--blue)!important}
+
+.page-content{margin-top:14px}.home-layout{display:grid;grid-template-columns:minmax(700px,1.65fr) minmax(470px,1fr);gap:10px}
+.home-lineup{min-height:610px}.home-right{display:grid;grid-template-rows:auto auto auto;gap:10px}
+.home-bottom{grid-column:1/-1;display:grid;grid-template-columns:1.05fr 1.05fr .9fr .72fr;gap:10px}
+.card{
+  background:linear-gradient(180deg,rgba(11,24,37,.98),rgba(8,19,29,.98));
+  border:1px solid var(--border);border-radius:9px;
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
+  padding:14px;min-width:0;overflow:hidden
+}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.card-title{font-size:15px;line-height:1.1;margin:0;font-weight:900;letter-spacing:.01em}
+.section-subtitle{margin:5px 0 0;color:#8796a8;font-size:10px;font-weight:700}
+.badge{display:inline-flex;align-items:center;justify-content:center;padding:4px 8px;border-radius:5px;border:1px solid var(--border-strong);font-size:8px;font-weight:900;white-space:nowrap}
+.badge-success{color:var(--green);border-color:#1b6d43;background:#0b2719}.badge-warning{color:var(--yellow);border-color:#715b1c;background:#241d0a}.badge-danger{color:var(--red);border-color:#743139;background:#271014}
+.ghost-button{border:1px solid #253d53;background:#0b1927;color:#e1e8ee;border-radius:6px;padding:7px 10px;font-size:9px;font-weight:800;cursor:pointer}
+
+.football-pitch{
+  position:relative;height:500px;border-radius:8px;overflow:hidden;
+  border:1px solid #406e51;
+  background:repeating-linear-gradient(90deg,#154629 0,#154629 12.5%,#103d24 12.5%,#103d24 25%)
+}
+.football-pitch.large{height:690px}
+.pitch-inner{position:absolute;inset:12px;border:1px solid rgba(220,242,225,.55)}
+.pitch-half{position:absolute;left:12px;right:12px;top:50%;border-top:1px solid rgba(220,242,225,.55)}
+.pitch-center{position:absolute;width:112px;height:112px;border:1px solid rgba(220,242,225,.55);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+.pitch-box{position:absolute;width:38%;height:18%;left:31%;border:1px solid rgba(220,242,225,.55)}.pitch-box-top{top:12px}.pitch-box-bottom{bottom:12px}
+
+.pitch-player{
+  position:absolute;transform:translate(-50%,-50%);
+  width:132px;min-height:84px;
+  display:grid;grid-template-columns:50px minmax(0,1fr);gap:8px;align-items:center;
+  background:linear-gradient(180deg,#0d1d2b,#09151f);
+  border:1px solid #315a42;border-radius:8px;padding:7px;
+  box-shadow:0 7px 16px rgba(0,0,0,.30)
+}
+.pitch-player.watched{border:2px solid var(--yellow);box-shadow:0 0 0 2px rgba(245,197,66,.08),0 7px 16px rgba(0,0,0,.32)}
+.pitch-player.watched:after{content:"";position:absolute;right:5px;top:5px;width:7px;height:7px;background:var(--yellow);border-radius:50%}
+.player-avatar{width:50px;height:66px;border-radius:6px;overflow:hidden;background:#173149;display:grid;place-items:center}
+.player-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.player-avatar-fallback{color:#8facbf;font-weight:900;font-size:14px;background:linear-gradient(145deg,#173149,#122437)}
+.pitch-player-info{min-width:0}.player-topline{display:flex;gap:5px;align-items:center}.shirt-number{color:white;font-weight:900;font-size:11px}.player-topline strong{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-finance{display:flex;align-items:center;justify-content:space-between;margin-top:7px;font-size:9px;color:#b9c3cd}.player-finance b{color:var(--green);font-size:10px}
+.lineup-footer{display:flex;justify-content:space-between;color:#9daab7;font-size:10px;margin-top:7px}
+
+.decision-panel{padding:0}.decision-panel .card-header{padding:14px 14px 0}.decision-body{display:grid;grid-template-columns:126px 1fr;align-items:stretch;min-height:145px}.decision-manager{display:grid;place-items:center;background:radial-gradient(circle,#173044,transparent 67%)}.manager-silhouette{width:88px;height:112px;border-radius:42px 42px 20px 20px;background:linear-gradient(180deg,#19354a,#0e2231);display:grid;place-items:center;color:#d2b74b;font-size:36px;font-weight:900;border:1px solid #29475e}
+.decision-message{padding:23px 20px 15px}.decision-message strong{display:block;color:var(--green);font-size:22px;line-height:1.08;text-transform:uppercase}.decision-message p{margin:10px 0 0;color:#eef3f6;font-size:13px;line-height:1.5}
+.decision-stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}.decision-stat{display:flex;gap:9px;align-items:center;padding:10px 13px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}.decision-stat:nth-child(2n){border-right:0}.decision-stat:nth-last-child(-n+2){border-bottom:0}.decision-stat svg{color:#7790a6}.decision-stat span{display:block;color:#76879a;font-size:8px;font-weight:800}.decision-stat b{display:block;font-size:10px;margin-top:2px}
+
+.negotiations-list{display:grid}.negotiation-row{display:grid;grid-template-columns:38px minmax(100px,1fr) 95px 105px 112px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.negotiation-row.closed{background:linear-gradient(90deg,rgba(79,22,28,.16),transparent)}
+.negotiation-avatar{width:34px;height:42px}.negotiation-player strong{display:block;font-size:11px}.negotiation-player span{display:block;color:#8a9aac;font-size:9px}.negotiation-metric span{display:block;color:#718398;font-size:7px;font-weight:800}.negotiation-metric b{display:block;margin-top:2px;font-size:11px}.negotiation-time{color:#a58c62;font-size:8px}.negotiations-divider{color:#a8b2bd;font-size:8px;font-weight:900;padding:8px 0 3px;border-bottom:1px solid #4e3136}.empty-state{color:#8090a1;padding:18px 4px;font-size:11px}
+
+.alerts-list{display:grid}.alert-row{display:grid;grid-template-columns:24px 135px 1fr;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}.alert-row:last-child{border-bottom:0}.alert-icon{width:22px;height:22px;border-radius:50%;display:grid;place-items:center}.alert-danger{background:#3a171b;color:var(--red)}.alert-warning{background:#3a3016;color:var(--yellow)}.alert-success{background:#113521;color:var(--green)}.alert-info{background:#122d44;color:var(--blue)}.alert-row strong{font-size:9px}.alert-row span:last-child{color:#d0d7de;font-size:10px}
+
+.solvency-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.solvency-plan{min-height:145px;border:1px solid #1f6040;border-radius:7px;background:linear-gradient(180deg,#0b2117,#091a13);padding:12px;display:grid;grid-template-columns:1fr 70px;gap:8px;align-items:center}.solvency-plan.alternate{border-color:#5f4d1b;background:linear-gradient(180deg,#221d0c,#171408)}.solvency-plan span{display:block;color:var(--green);font-size:12px;font-weight:900}.solvency-plan.alternate span{color:var(--yellow)}.solvency-plan strong{display:block;font-size:10px;margin-top:9px}.solvency-plan small{display:block;color:#9eabb7;font-size:8px;margin-top:12px}.probability-ring{width:64px;height:64px;border-radius:50%;border:7px solid #173826;border-top-color:var(--green);display:grid;place-items:center}.alternate .probability-ring{border-color:#3f371d;border-top-color:var(--yellow)}.probability-ring b{font-size:13px}
+
+.speculation-content{display:grid;grid-template-columns:1.15fr .85fr;gap:8px;height:145px}.radar-wrap{min-width:0;min-height:0}.speculation-list{display:grid;align-content:center;gap:7px}.speculation-row{display:grid;grid-template-columns:20px 1fr 35px;gap:5px;align-items:center;font-size:9px}.speculation-row span{width:18px;height:18px;border-radius:50%;background:#183722;color:var(--green);display:grid;place-items:center}.speculation-row b{color:#cfd8df;text-align:right}
+
+.league-mini{display:grid}.league-row{display:grid;grid-template-columns:28px 1fr 55px 30px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:9px}.league-team{display:flex;align-items:center;gap:7px;min-width:0}.league-team img{width:22px;height:22px;object-fit:contain}.league-team strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.league-row small{color:#70cb91}
+
+.next-matchday{display:grid;gap:4px}.next-matchday span{color:#74869a;font-size:8px;margin-top:8px}.next-matchday strong{font-size:10px}
+
+.page-stack{display:grid;gap:12px}.two-column{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}.three-column{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.squad-table{display:grid}.squad-table-row{display:grid;grid-template-columns:42px minmax(150px,1.3fr) 75px 100px 100px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:10px}.table-avatar{width:36px;height:44px}.simple-list{display:grid}.simple-row{display:grid;grid-template-columns:minmax(120px,1.5fr) 90px minmax(90px,.8fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:10px}.simple-row small{color:#8495a7}.league-table-wrap{max-height:650px;overflow:auto}.league-table{width:100%;border-collapse:collapse;font-size:10px}.league-table th,.league-table td{padding:9px;border-bottom:1px solid var(--border);text-align:center}.league-table th{position:sticky;top:0;background:#0b1825;color:#8293a5;z-index:1}.league-table th:nth-child(2),.league-table td:nth-child(2){text-align:left}.audit-list{display:grid}.audit-item{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:10px}.audit-item span{color:#8293a5}.audit-item b{color:#71b990}
+
+.tooltip-card{z-index:9999;width:240px;background:#07131d;border:1px solid #47627a;border-radius:7px;padding:10px;box-shadow:0 18px 40px rgba(0,0,0,.55);font-size:10px}.tooltip-card>strong{font-size:11px}.tooltip-grid{display:grid;grid-template-columns:1fr auto;gap:5px 8px;margin-top:8px}.tooltip-grid span{color:#8293a5}
+
+.soft-error{margin-top:10px;padding:8px 10px;border:1px solid #674c22;background:#21190b;color:#e3bd67;border-radius:6px;font-size:9px}.fatal-error,.loading-screen{min-height:100vh;display:grid;place-items:center;color:#c8d4de;font-size:16px}.fatal-error{color:var(--red)}
+.status-footer{display:flex;gap:14px;color:#6f8193;font-size:8px;margin-top:12px}.online-dot{color:var(--green)}
+.empty-page{padding:40px;border:1px dashed var(--border-strong);border-radius:8px;color:#8293a5;text-align:center}
+
+@media(max-width:1500px){
+  .app-shell{grid-template-columns:210px minmax(0,1fr)}
+  .home-layout{grid-template-columns:minmax(600px,1.4fr) minmax(420px,1fr)}
+  .home-bottom{grid-template-columns:1fr 1fr}
+  .kpi-copy strong{font-size:18px}
+}
+@media(max-width:1180px){
+  .app-shell{grid-template-columns:76px minmax(0,1fr)}
+  .brand-block div:last-child,.sidebar-link span,.sidebar-footer div:last-child{display:none}
+  .sidebar-link{justify-content:center}
+  .brand-block{justify-content:center}.sidebar-footer{justify-content:center}
+  .top-header{grid-template-columns:1fr}.home-layout{grid-template-columns:1fr}.home-right{grid-column:1}.home-bottom{grid-template-columns:1fr 1fr}
+}
+
+
+/* =========================================================
+   BORDALÁS IA V9 — COMMERCIAL UI PASS
+   Overrides only: preserves V8 component contracts.
+   ========================================================= */
+
+:root{
+  --surface:#0a1723;
+  --surface-2:#0c1b29;
+  --border:#20384c;
+  --border-strong:#31526b;
+}
+
+body{
+  font-size:15px;
+  letter-spacing:.005em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+.main-workspace{padding:16px 18px 14px}
+.card{
+  border-radius:11px;
+  border-color:#20384c;
+  box-shadow:0 12px 34px rgba(0,0,0,.22);
+}
+.card-title{font-size:16px}
+.section-subtitle{font-size:10px;color:#9aabba}
+.ghost-button{font-size:9px;padding:8px 12px}
+
+.home-layout{
+  grid-template-columns:minmax(720px,1.62fr) minmax(500px,.98fr);
+  gap:12px
+}
+.home-right{gap:12px}
+.home-bottom{gap:12px}
+.home-lineup{min-height:640px}
+
+.football-pitch{
+  height:520px;
+  border-color:#46775a;
+  background:
+    linear-gradient(rgba(10,38,22,.08),rgba(10,38,22,.08)),
+    repeating-linear-gradient(
+      90deg,
+      #154a2c 0,#154a2c 12.5%,
+      #103f26 12.5%,#103f26 25%
+    );
+  box-shadow:inset 0 0 60px rgba(0,0,0,.16);
+}
+.pitch-vignette{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 48%,transparent 48%,rgba(2,18,10,.18) 100%)
+}
+.pitch-player{
+  width:144px;
+  min-height:88px;
+  grid-template-columns:54px minmax(0,1fr);
+  gap:9px;
+  padding:7px;
+  border-radius:9px;
+  border-color:#315b45;
+  background:linear-gradient(180deg,#0d1d2b,#09151f);
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease;
+}
+.pitch-player:hover{
+  transform:translate(-50%,-50%) translateY(-2px);
+  border-color:#52758c;
+  box-shadow:0 12px 25px rgba(0,0,0,.38)
+}
+.pitch-player.watched:hover{border-color:var(--yellow)}
+.player-avatar{width:54px;height:70px}
+.player-topline strong{font-size:11px}
+.shirt-number{font-size:11px}
+.player-finance{font-size:9.5px;margin-top:8px}
+.player-finance b{font-size:10.5px}
+.lineup-footer{font-size:10.5px;margin-top:9px}
+
+.decision-body{grid-template-columns:132px 1fr;min-height:154px}
+.decision-manager{background:radial-gradient(circle,#163247 0,#0b1c29 55%,transparent 72%)}
+.manager-silhouette{
+  width:92px;height:92px;border-radius:50%;
+  background:
+    radial-gradient(circle at center,rgba(229,190,55,.08),transparent 48%),
+    #10283a;
+  border:1px solid #31516a;
+  position:relative;
+}
+.manager-silhouette:before{
+  content:"";position:absolute;inset:13px;border:1px solid rgba(245,197,66,.28);border-radius:50%
+}
+.manager-silhouette span{position:relative;z-index:1}
+.decision-message strong{font-size:21px}
+.decision-message p{font-size:12.5px}
+.decision-stat span{font-size:8.5px}
+.decision-stat b{font-size:10.5px}
+
+.negotiation-row{
+  grid-template-columns:42px minmax(120px,1fr) 100px 110px 120px;
+  padding:10px 0
+}
+.negotiation-avatar{width:38px;height:46px}
+.negotiation-player strong{font-size:11.5px}
+.negotiation-player span{font-size:9px}
+.negotiation-metric span{font-size:7.5px}
+.negotiation-metric b{font-size:11.5px}
+
+.alert-row{grid-template-columns:26px 145px 1fr;padding:10px 0}
+.alert-row strong{font-size:9.5px}
+.alert-row span:last-child{font-size:10.5px}
+
+.sidebar{padding:20px 16px}
+.brand-block strong{font-size:19px}
+.sidebar-link{font-size:13.5px;padding:13px 14px}
+.sidebar-method{
+  margin-top:auto;
+  border:1px solid #20384c;
+  border-radius:10px;
+  padding:12px;
+  background:linear-gradient(180deg,#0b1a27,#08131d);
+}
+.method-title{display:flex;gap:9px;align-items:center}
+.method-title .manager-avatar{width:38px;height:38px;font-size:15px}
+.method-title strong{display:block;font-size:10px}
+.method-title small{display:block;color:#718ca2;font-size:7.5px;margin-top:2px}
+.method-values{display:grid;gap:4px;margin-top:10px;color:#9fb0bf;font-size:8.5px}
+.method-values span::first-letter{color:var(--green)}
+
+.tooltip-card.player-impact-tooltip{
+  width:280px;
+  padding:13px;
+  border-color:#45647b;
+  border-radius:9px;
+  background:linear-gradient(180deg,#091824,#07131d);
+  box-shadow:0 22px 55px rgba(0,0,0,.62);
+  font-size:11px;
+}
+.tooltip-player-head{
+  display:grid;
+  grid-template-columns:44px 1fr;
+  gap:10px;
+  align-items:center;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border)
+}
+.tooltip-player-head .tooltip-avatar{
+  width:44px;height:52px;border-radius:6px
+}
+.tooltip-player-head strong{display:block;font-size:13px}
+.tooltip-player-head small{display:block;color:#90a2b2;font-size:9px;margin-top:2px}
+.tooltip-grid{gap:6px 10px;margin-top:10px}
+.tooltip-grid span{font-size:10px}
+.tooltip-grid b{font-size:10.5px}
+.replacement-block{
+  margin:12px -3px -3px;
+  padding:11px;
+  border:1px solid #1f5137;
+  border-radius:7px;
+  background:linear-gradient(180deg,rgba(18,54,37,.56),rgba(8,28,20,.72))
+}
+.replacement-kicker{
+  display:block;color:var(--green);font-size:8px;font-weight:900;letter-spacing:.05em
+}
+.replacement-title{
+  display:block!important;
+  margin-top:3px;
+  color:#eaf5ee;
+  font-size:10px!important
+}
+.replacement-player{
+  display:grid;
+  grid-template-columns:38px 1fr auto;
+  gap:8px;
+  align-items:center;
+  margin-top:8px;
+  padding:7px;
+  border-radius:6px;
+  background:#091822;
+  border:1px solid #244459
+}
+.replacement-avatar{width:38px;height:46px}
+.replacement-player b{display:block;font-size:11px}
+.replacement-player small{display:block;color:#8da1b2;font-size:8.5px;margin-top:2px}
+.replacement-player em{font-style:normal;color:var(--green);font-weight:900;font-size:10px}
+.replacement-note{display:block;color:#8fa39a;font-size:8.5px;line-height:1.4;margin-top:7px}
+.tooltip-arrow{fill:#45647b}
+
+.solvency-plan{min-height:155px}
+.speculation-content{height:155px}
+.league-row{font-size:9.5px}
+.next-matchday strong{font-size:10.5px}
+
+@media(max-width:1500px){
+  .home-layout{grid-template-columns:minmax(620px,1.4fr) minmax(440px,1fr)}
+  .pitch-player{width:132px}
+}
+
+
+/* SALE IMPACT V9.2 — Tactical context inside player hover */
+.tactical-impact{
+  margin-top:9px;
+  padding-top:8px;
+  border-top:1px solid rgba(97,139,116,.28);
+  display:grid;
+  gap:5px;
+}
+.tactical-impact-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  align-items:center;
+}
+.tactical-impact-row span{
+  color:#809a8b;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+.tactical-impact-row b{
+  color:#e8f2ec;
+  font-size:9px;
+  white-space:nowrap;
+}
+.tactical-impact-row .impact-good{color:#36e37d}
+.tactical-impact-row .impact-warning{color:#f5c542}
+.tactical-impact-row .impact-danger{color:#ff626a}
+
+
+/* =========================================================
+   BORDALÁS IA V9.3 — PREPRODUCTION
+   ========================================================= */
+
+.home-layout{align-items:start}
+.home-lineup{
+  min-height:0!important;
+  align-self:start;
+}
+.home-lineup .football-pitch{height:470px}
+.home-lineup .lineup-footer{margin-bottom:0}
+
+.status-footer .autopilot-live{color:var(--green);font-weight:800}
+
+.sidebar-method{
+  padding:0!important;
+  overflow:hidden;
+  display:block!important;
+}
+.method-photo{
+  display:block;
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  object-position:center 18%;
+  border-bottom:1px solid var(--border);
+  filter:saturate(.88) contrast(1.03);
+}
+.method-copy{padding:11px 12px 12px}
+.method-copy>strong{display:block;font-size:10px;letter-spacing:.03em}
+.method-values{
+  grid-template-columns:1fr 1fr;
+  gap:4px 8px!important;
+  margin-top:8px!important
+}
+.method-copy blockquote{
+  margin:10px 0 3px;
+  color:var(--green);
+  font-size:9px;
+  line-height:1.45;
+  font-style:italic
+}
+.method-copy>small{color:#657c90;font-size:7.5px}
+
+.decision-manager{
+  overflow:hidden;
+  position:relative;
+  background:#0a1823!important;
+}
+.decision-manager img{
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:center 20%;
+  display:block;
+}
+.decision-state-dot{
+  position:absolute;right:9px;bottom:9px;
+  width:10px;height:10px;border-radius:50%;
+  border:2px solid #07131d;
+  background:var(--green);
+  box-shadow:0 0 14px currentColor
+}
+.state-watch .decision-state-dot{background:#f5c542}
+.state-alert .decision-state-dot{background:#ff8a3d}
+.state-critical .decision-state-dot{background:#ff5159}
+.state-critical img{filter:contrast(1.08) saturate(.9)}
+.state-alert img{filter:contrast(1.05)}
+.state-watch img{filter:saturate(.92)}
+.state-calm img{filter:saturate(.88)}
+
+.squad-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(420px,1fr);
+  gap:12px;
+  align-items:start
+}
+.squad-pitch-card .football-pitch{height:610px}
+.roster-card{height:674px}
+.roster-scroll{
+  max-height:610px;
+  overflow-y:auto;
+  padding-right:5px
+}
+.roster-section-title{
+  position:sticky;top:0;z-index:2;
+  display:flex;justify-content:space-between;
+  padding:8px 9px;
+  background:#0b1a27;
+  border:1px solid var(--border);
+  border-radius:6px;
+  color:var(--green);
+  font-size:9px;font-weight:900;
+  letter-spacing:.04em
+}
+.bench-title{margin-top:12px;color:#9db0bf}
+.roster-row{
+  display:grid;
+  grid-template-columns:44px minmax(120px,1fr) 105px 70px;
+  gap:9px;
+  align-items:center;
+  padding:8px 4px;
+  border-bottom:1px solid var(--border)
+}
+.roster-avatar{width:40px;height:48px}
+.roster-name strong{display:block;font-size:11px}
+.roster-name span{display:block;color:#7f91a4;font-size:8.5px;margin-top:2px}
+.roster-value{text-align:right}
+.roster-value b{display:block;font-size:10px}
+.roster-value span{font-size:8px}
+.price-up{color:var(--green)}
+.price-down{color:var(--red)}
+.starter-chip,.bench-chip{
+  justify-self:end;
+  padding:4px 6px;border-radius:4px;
+  font-size:7.5px;font-weight:900;
+  border:1px solid #24573c;
+  color:var(--green);
+  background:#0b2418
+}
+.bench-chip{
+  color:#9fb0be;border-color:#2d4052;background:#101c28
+}
+
+.market-tabs,.audit-filters{
+  display:flex;gap:6px;
+  padding:5px;
+  border:1px solid var(--border);
+  background:#081521;
+  border-radius:8px;
+  width:max-content
+}
+.market-tab,.audit-filter{
+  border:0;
+  border-radius:5px;
+  background:transparent;
+  color:#8799aa;
+  padding:8px 12px;
+  cursor:pointer;
+  font-size:9px;
+  font-weight:900
+}
+.market-tab.active,.audit-filter.active{
+  color:white;
+  background:#17345e;
+  box-shadow:inset 0 0 0 1px #2d5ca6
+}
+.market-overview-grid{
+  display:grid;
+  grid-template-columns:1fr 1.35fr;
+  gap:12px
+}
+.market-scroll{max-height:300px;overflow-y:auto}
+.market-offer-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid var(--border)
+}
+.market-offer-row strong{display:block;font-size:10.5px}
+.market-offer-row small{display:block;color:#8394a6;font-size:8.5px;margin-top:2px}
+.market-offer-row>b{font-size:11px}
+
+.solvency-grid-v93{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px
+}
+.solvency-grid-v93 .solvency-plan{
+  min-height:185px;
+  grid-template-columns:1fr;
+  align-content:space-between
+}
+.plan-a{border-color:#1f6842!important;background:linear-gradient(180deg,#0b2117,#081812)!important}
+.plan-b{border-color:#6b571d!important;background:linear-gradient(180deg,#211c0b,#171407)!important}
+.plan-c{border-color:#6a3740!important;background:linear-gradient(180deg,#251116,#190b0e)!important}
+.plan-copy>span{font-size:13px!important}
+.plan-subtitle{color:#8296a8!important;margin-top:2px!important}
+.plan-copy>strong{font-size:11px!important;min-height:31px}
+.plan-metrics{
+  margin-top:12px;
+  padding-top:9px;
+  border-top:1px solid rgba(122,145,155,.18);
+  display:grid;gap:5px
+}
+.plan-metrics>div{
+  display:grid;grid-template-columns:1fr auto;gap:8px
+}
+.plan-metrics span{font-size:7.5px!important;color:#8194a5!important}
+.plan-metrics b{font-size:9px}
+.plan-status{
+  justify-self:stretch;
+  padding-top:8px;
+  border-top:1px solid rgba(122,145,155,.18);
+  text-align:center
+}
+.plan-status b{font-size:8px;color:var(--green)}
+.plan-b .plan-status b{color:var(--yellow)}
+.plan-c .plan-status b{color:#ff7b83}
+
+.audit-card-v93{min-height:690px}
+.audit-scroll{
+  max-height:610px;
+  overflow-y:auto;
+  padding-right:6px;
+  margin-top:10px
+}
+.audit-item-v93{
+  grid-template-columns:150px minmax(180px,1fr) 120px 80px!important;
+  align-items:center
+}
+.audit-item-v93 small{color:#6f8496;font-size:8px}
+.audit-write{color:var(--green)!important}
+.audit-seen{color:#7d91a2!important}
+
+@media(max-width:1350px){
+  .squad-layout{grid-template-columns:1fr}
+  .roster-card{height:auto}
+  .roster-scroll{max-height:520px}
+  .market-overview-grid{grid-template-columns:1fr}
+  .solvency-grid-v93{grid-template-columns:1fr}
+}
+
+
+/* =========================================================
+   BORDALÁS IA V9.4 — LAYOUT & TYPE FIX
+   ========================================================= */
+
+/* Use the user's installed Expressway font without bundling font files. */
+@font-face{
+  font-family:"Expressway";
+  src:local("Expressway"),
+      local("Expressway Regular"),
+      local("ExpresswayRg-Regular");
+  font-style:normal;
+  font-weight:400;
+}
+@font-face{
+  font-family:"Expressway";
+  src:local("Expressway Bold"),
+      local("ExpresswayBd-Regular"),
+      local("Expressway Bold Regular");
+  font-style:normal;
+  font-weight:700 900;
+}
+
+html,body,#root,
+button,input,select,textarea{
+  font-family:"Expressway","Arial Narrow","Segoe UI",Arial,sans-serif!important;
+}
+
+body{
+  font-size:15px!important;
+  letter-spacing:0!important;
+}
+.card-title{font-size:18px!important}
+.section-subtitle{font-size:11px!important}
+.sidebar-link{font-size:15px!important}
+.brand-block strong{font-size:22px!important}
+.brand-block small{font-size:9px!important}
+
+/* Bordalás photos: imported through Vite; sizes tuned here. */
+.method-photo{
+  height:175px!important;
+  object-position:center 22%!important;
+}
+.decision-manager{
+  width:132px!important;
+  min-width:132px!important;
+  height:158px!important;
+  border-radius:10px!important;
+}
+.decision-manager img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center 19%!important;
+}
+.decision-body{
+  grid-template-columns:145px minmax(0,1fr)!important;
+  min-height:170px!important;
+}
+
+/* PLANTILLA: force left/right. Only stack on genuinely small screens. */
+.squad-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(440px,1fr)!important;
+  gap:14px!important;
+  align-items:stretch!important;
+}
+.squad-pitch-card,
+.roster-card{
+  min-width:0!important;
+  height:720px!important;
+}
+.squad-pitch-card .football-pitch{
+  height:650px!important;
+}
+.roster-scroll{
+  height:650px!important;
+  max-height:650px!important;
+  overflow-y:auto!important;
+}
+.roster-row{
+  grid-template-columns:48px minmax(0,1fr) 110px 76px!important;
+}
+.roster-name strong{font-size:13px!important}
+.roster-name span{font-size:10px!important}
+.roster-value b{font-size:12px!important}
+.roster-value span{font-size:9px!important}
+.roster-section-title{font-size:10px!important}
+
+/* MERCADO: explicit left/right columns. */
+.market-dual-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,.9fr) minmax(540px,1.1fr)!important;
+  gap:14px!important;
+  align-items:start!important;
+}
+.market-left-column,
+.market-right-column{
+  display:grid!important;
+  gap:14px!important;
+  min-width:0!important;
+}
+.market-right-column>.card{
+  min-height:100%!important;
+}
+.market-box .card-title{font-size:16px!important}
+.market-offer-row strong{font-size:13px!important}
+.market-offer-row small{font-size:10px!important}
+.market-offer-row>b{font-size:13px!important}
+.market-tab{font-size:11px!important;padding:9px 14px!important}
+
+/* SOLVENCY: keep A/B/C aligned horizontally and prevent label overflow. */
+.solvency-grid-v93{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+.solvency-grid-v93 .solvency-plan{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.plan-copy>span{font-size:14px!important}
+.plan-subtitle{font-size:9px!important}
+.plan-copy>strong{
+  font-size:12px!important;
+  line-height:1.25!important;
+  overflow-wrap:anywhere!important;
+}
+.plan-metrics span{font-size:8.5px!important}
+.plan-metrics b{font-size:11px!important}
+.plan-status b{
+  font-size:9px!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+
+/* ANALYSIS: two clean columns on top, league full width below. */
+.analysis-layout-v94{
+  display:grid!important;
+  gap:14px!important;
+}
+.analysis-top-v94{
+  display:grid!important;
+  grid-template-columns:minmax(420px,.72fr) minmax(680px,1.28fr)!important;
+  gap:14px!important;
+  align-items:stretch!important;
+}
+.analysis-top-v94>.card{
+  min-height:420px!important;
+  min-width:0!important;
+}
+.analysis-top-v94 .solvency-grid-v93{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.analysis-league-v94>.card{
+  min-height:330px!important;
+}
+.analysis-layout-v94 .speculation-panel,
+.analysis-layout-v94 .solvency-card-v93{
+  height:100%!important;
+}
+
+/* General legibility */
+.decision-message strong{font-size:24px!important}
+.decision-message p{font-size:14px!important;line-height:1.45!important}
+.decision-stat span{font-size:9px!important}
+.decision-stat b{font-size:12px!important}
+.negotiation-player strong{font-size:13px!important}
+.negotiation-player span{font-size:10px!important}
+.negotiation-metric span{font-size:8px!important}
+.negotiation-metric b{font-size:13px!important}
+.alert-row strong{font-size:10.5px!important}
+.alert-row span:last-child{font-size:11.5px!important}
+
+/* Override V9.3 responsive stack rules. */
+@media(max-width:1350px){
+  .squad-layout{
+    grid-template-columns:minmax(0,1fr) minmax(390px,1fr)!important;
+  }
+  .market-dual-layout{
+    grid-template-columns:minmax(0,.88fr) minmax(470px,1.12fr)!important;
+  }
+  .market-overview-grid{
+    grid-template-columns:1fr 1fr!important;
+  }
+  .solvency-grid-v93{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .analysis-top-v94{
+    grid-template-columns:minmax(360px,.7fr) minmax(600px,1.3fr)!important;
+  }
+}
+
+@media(max-width:980px){
+  .squad-layout,
+  .market-dual-layout,
+  .analysis-top-v94{
+    grid-template-columns:1fr!important;
+  }
+  .squad-pitch-card,
+  .roster-card{
+    height:auto!important;
+  }
+  .roster-scroll{
+    height:auto!important;
+    max-height:560px!important;
+  }
+  .solvency-grid-v93{
+    grid-template-columns:1fr!important;
+  }
+}
+
+
+/* V9.4.3 — Approved four-state Bordalás cards */
+.decision-manager{
+  width:300px!important;
+  min-width:300px!important;
+  height:185px!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  border:0!important;
+}
+.decision-manager img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.decision-body{
+  grid-template-columns:315px minmax(0,1fr)!important;
+  min-height:195px!important;
+  align-items:center!important;
+}
+.method-photo{
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:transparent!important;
+}
+@media(max-width:1350px){
+  .decision-manager{
+    width:245px!important;
+    min-width:245px!important;
+    height:152px!important;
+  }
+  .decision-body{
+    grid-template-columns:258px minmax(0,1fr)!important;
+  }
+}
+
+
+/* =========================================================
+   BORDALÁS IA V9.4.4 — APPROVED BORDA IDENTITIES
+   ========================================================= */
+
+/* LEFT: fixed suit portrait, no status card treatment */
+.method-photo{
+  width:100%!important;
+  height:190px!important;
+  object-fit:cover!important;
+  object-position:center 18%!important;
+  display:block!important;
+  background:#08131d!important;
+  border:0!important;
+  border-bottom:1px solid var(--border)!important;
+  border-radius:0!important;
+}
+
+/* RIGHT: dynamic state card, edge-to-edge, no white gutters */
+.decision-manager{
+  width:300px!important;
+  min-width:300px!important;
+  height:169px!important;
+  overflow:hidden!important;
+  border-radius:10px!important;
+  border:1px solid #20384c!important;
+  background:#07131d!important;
+  box-shadow:none!important;
+}
+
+.decision-manager img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:#07131d!important;
+}
+
+.decision-manager:before,
+.decision-state-dot{
+  display:none!important;
+}
+
+.decision-body{
+  grid-template-columns:315px minmax(0,1fr)!important;
+  min-height:180px!important;
+  gap:16px!important;
+  align-items:center!important;
+  overflow:hidden!important;
+}
+
+@media(max-width:1350px){
+  .decision-manager{
+    width:260px!important;
+    min-width:260px!important;
+    height:146px!important;
+  }
+
+  .decision-body{
+    grid-template-columns:274px minmax(0,1fr)!important;
+  }
+}
+
+
+/* =========================================================
+   BORDALÁS IA V9.4.5 — USER-SUPPLIED OFFICIAL IMAGES
+   ========================================================= */
+
+/* LEFT: Pepegod is static forever. */
+.method-photo{
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:1/1!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  display:block!important;
+  margin:0!important;
+  padding:0!important;
+  background:#07131d!important;
+  border:0!important;
+  border-bottom:1px solid var(--border)!important;
+}
+
+/* RIGHT: exact state cards supplied by the user. */
+.decision-manager{
+  width:300px!important;
+  min-width:300px!important;
+  height:165px!important;
+  border:0!important;
+  border-radius:10px!important;
+  overflow:hidden!important;
+  background:#07131d!important;
+  box-shadow:none!important;
+}
+
+.decision-manager img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  display:block!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:#07131d!important;
+}
+
+.decision-manager:before,
+.decision-state-dot{
+  display:none!important;
+}
+
+.decision-body{
+  grid-template-columns:315px minmax(0,1fr)!important;
+  min-height:178px!important;
+  gap:16px!important;
+  align-items:center!important;
+}
+
+@media(max-width:1350px){
+  .decision-manager{
+    width:258px!important;
+    min-width:258px!important;
+    height:142px!important;
+  }
+  .decision-body{
+    grid-template-columns:272px minmax(0,1fr)!important;
+  }
+}
+
+
+/* =========================================================
+   BORDALÁS IA V9.4.7 — REAL STRUCTURE FIX
+   ========================================================= */
+
+/* LEFT PEPEGOD: LOCKED, untouched */
+.method-photo{
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:1/1!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+}
+
+/* RIGHT DECISION:
+   Do NOT impose an arbitrary aspect ratio.
+   Let the supplied image define the height naturally. */
+.decision-manager{
+  width:300px!important;
+  min-width:300px!important;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  border:0!important;
+  border-radius:10px!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  line-height:0!important;
+}
+
+.decision-manager img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:100%!important;
+  object-fit:initial!important;
+  object-position:initial!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+}
+
+.decision-manager:before,
+.decision-state-dot{
+  display:none!important;
+}
+
+.decision-body{
+  display:grid!important;
+  grid-template-columns:300px minmax(0,1fr)!important;
+  gap:18px!important;
+  min-height:0!important;
+  align-items:center!important;
+  overflow:visible!important;
+}
+
+/* HOME BOTTOM: the real HomePage has FOUR children:
+   Solvency / Speculation / League / Objective */
+.home-bottom{
+  grid-column:1 / -1!important;
+  display:grid!important;
+  grid-template-columns:
+    minmax(0,1.18fr)
+    minmax(0,1fr)
+    minmax(0,.9fr)
+    minmax(0,.78fr)!important;
+  gap:12px!important;
+  align-items:stretch!important;
+}
+
+.home-bottom > *{
+  min-width:0!important;
+  height:100%!important;
+}
+
+.home-bottom > .card{
+  min-height:270px!important;
+  height:270px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+
+/* Each lower widget fills the exact same vertical frame */
+.home-bottom .card-header{
+  flex:0 0 auto!important;
+  margin-bottom:8px!important;
+}
+
+.home-bottom .solvency-grid-v93{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+
+.home-bottom .solvency-plan{
+  height:100%!important;
+  min-height:0!important;
+  padding:9px!important;
+  overflow:hidden!important;
+}
+
+.home-bottom .plan-copy{
+  min-width:0!important;
+}
+
+.home-bottom .plan-copy>span{
+  font-size:11px!important;
+}
+
+.home-bottom .plan-subtitle{
+  font-size:7px!important;
+}
+
+.home-bottom .plan-copy>strong{
+  font-size:8.5px!important;
+  line-height:1.2!important;
+  min-height:24px!important;
+  overflow-wrap:anywhere!important;
+}
+
+.home-bottom .plan-metrics{
+  margin-top:6px!important;
+  padding-top:6px!important;
+  gap:2px!important;
+}
+
+.home-bottom .plan-metrics span{
+  font-size:6.8px!important;
+}
+
+.home-bottom .plan-metrics b{
+  font-size:8px!important;
+}
+
+.home-bottom .plan-status{
+  margin-top:auto!important;
+  padding-top:5px!important;
+}
+
+/* Speculation */
+.home-bottom .speculation-content{
+  flex:1 1 auto!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* League */
+.home-bottom .league-list{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+}
+
+/* Objective card */
+.home-bottom .next-matchday{
+  flex:1 1 auto!important;
+  align-content:start!important;
+  overflow:hidden!important;
+}
+
+/* Keep all 4 in a row at normal desktop widths.
+   Only start wrapping on genuinely narrower screens. */
+@media(max-width:1500px){
+  .home-bottom{
+    grid-template-columns:
+      minmax(0,1.15fr)
+      minmax(0,1fr)
+      minmax(0,.9fr)
+      minmax(0,.78fr)!important;
+  }
+
+  .decision-manager{
+    width:270px!important;
+    min-width:270px!important;
+  }
+
+  .decision-body{
+    grid-template-columns:270px minmax(0,1fr)!important;
+  }
+}
+
+@media(max-width:1180px){
+  .home-bottom{
+    grid-template-columns:1fr 1fr!important;
+  }
+
+  .home-bottom > .card{
+    height:auto!important;
+    min-height:260px!important;
+  }
+}
+
+@media(max-width:760px){
+  .home-bottom{
+    grid-template-columns:1fr!important;
+  }
+
+  .decision-body{
+    grid-template-columns:1fr!important;
+  }
+
+  .decision-manager{
+    width:100%!important;
+    min-width:0!important;
+  }
+}
+
+
+/* =========================================================
+   BORDALÁS IA V9.4.9 — FINAL HOME VERTICAL ALIGNMENT
+   Goal: right column height ~= XI card height, so bottom row
+   starts immediately after the XI with no dead vertical gap.
+   ========================================================= */
+
+/* Keep the XI exactly as approved. */
+.home-lineup{
+  min-height:0!important;
+}
+
+/* Compact only the HOME right-hand stack. */
+.home-right{
+  gap:8px!important;
+  align-content:start!important;
+}
+
+/* ---------------- DECISION PANEL ---------------- */
+
+.home-right .decision-panel .card-header{
+  padding:9px 11px 0!important;
+  margin-bottom:5px!important;
+}
+
+.home-right .decision-panel .card-title{
+  font-size:16px!important;
+}
+
+.home-right .decision-body{
+  grid-template-columns:210px minmax(0,1fr)!important;
+  gap:12px!important;
+  min-height:0!important;
+  align-items:center!important;
+}
+
+.home-right .decision-manager{
+  width:210px!important;
+  min-width:210px!important;
+  height:auto!important;
+  aspect-ratio:auto!important;
+}
+
+.home-right .decision-manager img{
+  width:100%!important;
+  height:auto!important;
+}
+
+.home-right .decision-message{
+  padding:4px 9px 4px 0!important;
+}
+
+.home-right .decision-message strong{
+  font-size:18px!important;
+  line-height:1.05!important;
+}
+
+.home-right .decision-message p{
+  font-size:10.5px!important;
+  line-height:1.35!important;
+  margin-top:6px!important;
+}
+
+.home-right .decision-stat{
+  padding:6px 9px!important;
+  gap:7px!important;
+}
+
+.home-right .decision-stat svg{
+  width:13px!important;
+  height:13px!important;
+}
+
+.home-right .decision-stat span{
+  font-size:7.5px!important;
+}
+
+.home-right .decision-stat b{
+  font-size:10px!important;
+  margin-top:1px!important;
+}
+
+/* ---------------- NEGOTIATIONS ---------------- */
+
+.home-right .negotiations{
+  padding:10px 12px!important;
+}
+
+.home-right .negotiations .card-header{
+  margin-bottom:3px!important;
+}
+
+.home-right .negotiations .card-title{
+  font-size:15px!important;
+}
+
+.home-right .negotiation-row{
+  grid-template-columns:32px minmax(95px,1fr) 82px 90px 108px!important;
+  gap:6px!important;
+  padding:5px 0!important;
+}
+
+.home-right .negotiation-avatar{
+  width:30px!important;
+  height:36px!important;
+}
+
+.home-right .negotiation-player strong{
+  font-size:11px!important;
+}
+
+.home-right .negotiation-player span{
+  font-size:8px!important;
+}
+
+.home-right .negotiation-metric span{
+  font-size:6.5px!important;
+}
+
+.home-right .negotiation-metric b{
+  font-size:10.5px!important;
+  margin-top:1px!important;
+}
+
+.home-right .negotiation-row .badge{
+  font-size:7px!important;
+  padding:4px 6px!important;
+}
+
+/* ---------------- ALERTS ---------------- */
+
+.home-right > .card:last-child{
+  padding:10px 12px!important;
+}
+
+.home-right > .card:last-child .card-header{
+  margin-bottom:2px!important;
+}
+
+.home-right > .card:last-child .card-title{
+  font-size:15px!important;
+}
+
+.home-right .alert-row{
+  grid-template-columns:20px 112px 1fr!important;
+  gap:6px!important;
+  padding:5px 0!important;
+}
+
+.home-right .alert-icon{
+  width:19px!important;
+  height:19px!important;
+}
+
+.home-right .alert-icon svg{
+  width:12px!important;
+  height:12px!important;
+}
+
+.home-right .alert-row strong{
+  font-size:8.5px!important;
+}
+
+.home-right .alert-row span:last-child{
+  font-size:9.5px!important;
+  line-height:1.2!important;
+}
+
+/* ---------------- LOWER ROW ---------------- */
+
+/* The row now follows immediately after the top row. */
+.home-bottom{
+  margin-top:0!important;
+  align-self:start!important;
+}
+
+/* Keep all lower cards perfectly aligned. */
+.home-bottom > .card{
+  height:255px!important;
+  min-height:255px!important;
+}
+
+@media(max-width:1500px){
+  .home-right .decision-body{
+    grid-template-columns:190px minmax(0,1fr)!important;
+  }
+
+  .home-right .decision-manager{
+    width:190px!important;
+    min-width:190px!important;
+  }
+
+  .home-right .decision-message strong{
+    font-size:16px!important;
+  }
+
+  .home-right .negotiation-row{
+    grid-template-columns:30px minmax(85px,1fr) 72px 80px 98px!important;
+  }
+}
+
+@media(max-width:1180px){
+  /* Restore comfortable sizing once the layout stacks. */
+  .home-right .decision-body{
+    grid-template-columns:270px minmax(0,1fr)!important;
+  }
+
+  .home-right .decision-manager{
+    width:270px!important;
+    min-width:270px!important;
+  }
+
+  .home-bottom > .card{
+    height:auto!important;
+    min-height:255px!important;
+  }
+}
+
+
+/* =========================================================
+   BORDALÁS IA V9.5.0 — FINAL PRE-PRODUCTION POLISH
+   ========================================================= */
+
+/* Push Alerts down just enough so its lower edge aligns with XI. */
+.home-right .negotiations{
+  min-height:165px!important;
+  box-sizing:border-box!important;
+}
+
+/* Preserve the compact rows but distribute the extra height naturally. */
+.home-right .negotiations-list{
+  min-height:103px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-evenly!important;
+}
+
+/* Biwenger competition standings. */
+.competition-name{
+  margin-top:2px!important;
+  color:#70869a!important;
+}
+
+.competition-row{
+  grid-template-columns:25px minmax(0,1fr) 52px 66px!important;
+}
+
+.competition-manager{
+  min-width:0!important;
+}
+
+.competition-manager strong{
+  display:block!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+.competition-row small{
+  text-align:right!important;
+  color:#8194a5!important;
+  font-size:8px!important;
+}
+
+.competition-row.is-current-user{
+  background:rgba(35,213,111,.075)!important;
+  border-left:2px solid var(--green)!important;
+  padding-left:5px!important;
+}
+
+.competition-row.is-current-user strong,
+.competition-row.is-current-user > span{
+  color:var(--green)!important;
+}
+
+.competition-table tr.is-current-user td{
+  background:rgba(35,213,111,.065)!important;
+}
+
+.competition-table tr.is-current-user td:first-child{
+  border-left:3px solid var(--green)!important;
+}
+
+.you-badge{
+  display:inline-block!important;
+  margin-left:8px!important;
+  padding:2px 5px!important;
+  border:1px solid rgba(35,213,111,.45)!important;
+  border-radius:4px!important;
+  color:var(--green)!important;
+  font-size:7px!important;
+  font-weight:900!important;
+  vertical-align:middle!important;
+}
+
+@media(max-width:1500px){
+  .home-right .negotiations{
+    min-height:165px!important;
+  }
+}
