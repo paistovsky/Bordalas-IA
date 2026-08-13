@@ -30,6 +30,7 @@ export function normalizeStatus(raw = {}) {
     raw,
     meta: raw.meta || {},
     summary,
+    solvency: raw.solvency || {},
     lineup,
     roster: raw.roster || { starters: lineup.players || [], substitutes: [], players: lineup.players || [] },
     competitive: {
