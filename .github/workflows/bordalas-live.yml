@@ -98,7 +98,7 @@ jobs:
       - name: Run Bordalas V10 PRODUCTION
         shell: bash
         run: |
-          python -m src.v10_production_cycle
+          python -m src.v10_full_autonomous_live
 
       - name: Build Sala de Operaciones telemetry
         shell: bash
@@ -110,15 +110,18 @@ jobs:
           echo " BORDALAS IA - DASHBOARD GENERATED"
           echo "========================================"
 
-          test -f dashboard/data/status.json
-          ls -lh dashboard/data/status.json
+          test -f data/trading/v10_full_autonomous_status.json
+            dashboard/data/status.json
+          ls -lh data/trading/v10_full_autonomous_status.json
+            dashboard/data/status.json
 
       - name: Update Cloudflare dashboard
         shell: bash
         run: |
           npx --yes wrangler@4.120.1 kv key put \
             "status.json" \
-            --path "dashboard/data/status.json" \
+            --path "data/trading/v10_full_autonomous_status.json
+            dashboard/data/status.json" \
             --namespace-id "dbb7542f31b34d8ab0590bf774538b21" \
             --remote
 
@@ -149,6 +152,7 @@ jobs:
             data/trading/position_ledger.json
             data/trading/counteroffer_repricing_state.json
             data/trading/v10_production_status.json
+            data/trading/v10_full_autonomous_status.json
             dashboard/data/status.json
           if-no-files-found: ignore
           retention-days: 2
