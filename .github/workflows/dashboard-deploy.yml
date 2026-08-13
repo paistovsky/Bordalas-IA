@@ -1,0 +1,134 @@
+name: Deploy Bordalas Dashboard
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "dashboard-v8/**"
+      - "dashboard/**"
+      - "src/telemetry/**"
+      - "cloudflare/**"
+      - ".github/workflows/dashboard-deploy.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bordalas-dashboard-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    env:
+      TZ: Europe/Madrid
+      PYTHONUNBUFFERED: "1"
+      PYTHONIOENCODING: "utf-8"
+
+      BIWENGER_USERNAME: ${{ secrets.BIWENGER_USERNAME }}
+      BIWENGER_PASSWORD: ${{ secrets.BIWENGER_PASSWORD }}
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install dashboard dependencies
+        working-directory: dashboard-v8
+        run: npm ci
+
+      - name: Validate secrets
+        run: |
+          test -n "$BIWENGER_USERNAME"
+          test -n "$BIWENGER_PASSWORD"
+          test -n "$API_FOOTBALL_KEY"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+
+      - name: Fresh OBSERVER cycle
+        run: python -m src.autopilot --once
+
+      - name: Build telemetry
+        run: |
+          mkdir -p dashboard/data
+          python -m src.telemetry.build_dashboard
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("dashboard/data/status.json")
+              .read_text(encoding="utf-8")
+          )
+
+          balance = (data.get("summary") or {}).get("balance", 0)
+          plans = (
+              (data.get("solvency") or {}).get("plans", {})
+              or {}
+          )
+
+          print("Balance:", balance)
+          print("Source:", plans.get("source"))
+          print("Plan A:", (plans.get("a") or {}).get("player_names"))
+          print("Plan B:", (plans.get("b") or {}).get("player_names"))
+          print("Plan C:", (plans.get("c") or {}).get("player_names"))
+
+          if balance < 0:
+              assert plans.get("source") == "SAFE_DEBT_V10"
+              assert plans.get("a")
+              assert plans.get("b")
+              assert plans.get("c")
+          PY
+
+      - name: Build React
+        working-directory: dashboard-v8
+        run: npm run build
+
+      - name: Assemble Worker assets
+        run: |
+          find dashboard -mindepth 1 -maxdepth 1 ! -name data -exec rm -rf {} +
+          cp -R dashboard-v8/dist/. dashboard/
+          test -f dashboard/index.html
+          test -f dashboard/data/status.json
+
+      - name: Update Cloudflare KV
+        run: |
+          npx --yes wrangler@4.120.1 kv key put \
+            "status.json" \
+            --path "dashboard/data/status.json" \
+            --namespace-id "dbb7542f31b34d8ab0590bf774538b21" \
+            --remote
+
+      - name: Deploy Worker
+        run: |
+          npx --yes wrangler@4.120.1 deploy \
+            --config "cloudflare/wrangler.jsonc"
+
+      - name: Summary
+        run: |
+          echo "BORDALAS DASHBOARD DEPLOYED"
+          echo "Commit: $GITHUB_SHA"
+          echo "Plans: SAFE_DEBT_V10 A/B/C"
