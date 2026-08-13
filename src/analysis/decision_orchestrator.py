@@ -36,6 +36,8 @@ from src.analysis.portfolio_roi_engine import (
 
 from src.analysis.solvency_engine import (
     build_solvency_state,
+    build_t15_solvency_forecast,
+    evaluate_purchase_at_t15,
 )
 
 from src.analysis.speculation_engine import (
@@ -227,6 +229,127 @@ def build_temporal_gate(
             deadline.get(
                 "next_round_unlock"
             ),
+    }
+
+
+
+
+def build_action_queue(
+    candidates: list[dict],
+    *,
+    shadow: bool = False,
+) -> list[dict]:
+    """
+    Separa la preocupacion principal de las acciones posibles.
+
+    En LIVE solo cuentan candidatos executable=True.
+    En SHADOW tambien cuentan shadow_executable=True, pero el
+    resultado nunca se envia al executor de produccion.
+    """
+
+    queue = []
+
+    for candidate in candidates:
+
+        executable = bool(
+            candidate.get("executable", False)
+        )
+
+        shadow_executable = bool(
+            candidate.get(
+                "shadow_executable",
+                False,
+            )
+        )
+
+        if executable or (
+            shadow
+            and shadow_executable
+        ):
+            queue.append(candidate)
+
+    queue.sort(
+        key=lambda item: int(
+            item.get("priority", 0) or 0
+        ),
+        reverse=True,
+    )
+
+    return queue
+
+
+def build_shadow_speculation_candidate(
+    *,
+    speculation: dict,
+    solvency: dict,
+    phase: str,
+    hard_safety_mode: bool,
+    operations_locked: bool,
+) -> dict | None:
+    """
+    Construye una compra especulativa solo para Market Brain
+    SHADOW cuando el engine ya la considera comprable y la
+    simulacion T-15 confirma que la deuda adicional es segura.
+
+    No cambia ENABLE_LIVE_SPECULATION_BUY ni el executor actual.
+    """
+
+    if operations_locked or hard_safety_mode:
+        return None
+
+    if phase not in {"NORMAL", "PREPARATION"}:
+        return None
+
+    budget = (
+        speculation.get("budget", {})
+        or {}
+    )
+
+    if not budget.get("enabled", False):
+        return None
+
+    executable_buys = (
+        speculation.get("executable_buys", [])
+        or []
+    )
+
+    if not executable_buys:
+        return None
+
+    player = executable_buys[0]
+
+    price = int(
+        player.get("price", 0) or 0
+    )
+
+    if price <= 0:
+        return None
+
+    purchase_forecast = evaluate_purchase_at_t15(
+        solvency=solvency,
+        purchase_amount=price,
+    )
+
+    if not purchase_forecast.get("safe", False):
+        return None
+
+    return {
+        "type": "SPECULATION_BUY_SHADOW",
+        "priority": PRIORITY["SPECULATION_BUY"],
+        "action": "BUY_SPECULATION",
+        "executable": False,
+        "shadow_executable": True,
+        "executor": None,
+        "shadow_executor": "MARKET_BRAIN_V10",
+        "reason": (
+            "Market Brain V10 SHADOW: oportunidad especulativa "
+            "compatible con la solvencia proyectada T-15."
+        ),
+        "data": {
+            "player": player,
+            "budget": budget,
+            "t15_purchase_forecast": purchase_forecast,
+        },
     }
 
 
@@ -553,6 +676,12 @@ def build_global_decision(
     solvency = (
         build_solvency_state(
             snapshot
+        )
+    )
+
+    t15_forecast = (
+        build_t15_solvency_forecast(
+            solvency
         )
     )
 
@@ -2003,11 +2132,73 @@ def build_global_decision(
         reverse=True,
     )
 
+    # V10.1: la preocupacion principal sigue siendo candidates[0]
+    # para preservar compatibilidad. En paralelo exponemos la
+    # primera accion realmente ejecutable y una cola SHADOW.
+    action_queue = build_action_queue(
+        candidates
+    )
+
+    action_decision = (
+        action_queue[0]
+        if action_queue
+        else None
+    )
+
+    shadow_candidates = list(candidates)
+
+    shadow_speculation = (
+        build_shadow_speculation_candidate(
+            speculation=speculation,
+            solvency=solvency,
+            phase=phase,
+            hard_safety_mode=hard_safety_mode,
+            operations_locked=operations_locked,
+        )
+    )
+
+    # Si BUY_SPECULATION ya existe como accion LIVE, no duplicamos
+    # el mismo jugador en la cola shadow.
+    if (
+        shadow_speculation is not None
+        and not any(
+            item.get("action") == "BUY_SPECULATION"
+            and item.get("executable", False)
+            for item in shadow_candidates
+        )
+    ):
+        shadow_candidates.append(
+            shadow_speculation
+        )
+
+    shadow_action_queue = build_action_queue(
+        shadow_candidates,
+        shadow=True,
+    )
+
+    shadow_action_decision = (
+        shadow_action_queue[0]
+        if shadow_action_queue
+        else None
+    )
+
     return {
         "decision":
             candidates[
                 0
             ],
+
+        "action_decision":
+            action_decision,
+
+        "action_queue":
+            action_queue,
+
+        "shadow_action_decision":
+            shadow_action_decision,
+
+        "shadow_action_queue":
+            shadow_action_queue,
 
         "candidates":
             candidates,
@@ -2060,6 +2251,9 @@ def build_global_decision(
 
             "solvency":
                 solvency,
+
+            "t15_forecast":
+                t15_forecast,
 
             "franchise":
                 franchise,

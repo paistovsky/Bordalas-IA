@@ -21,6 +21,10 @@ from src.analysis.sales_analyzer import (
     analyze_sales,
 )
 
+from src.analysis.safe_debt_portfolio_engine import (
+    build_safe_liquidity_portfolio,
+)
+
 
 SAFE_LIQUIDITY_BUFFER = 500_000
 
@@ -333,6 +337,7 @@ def build_solvency_guarantee(
     incoming: dict,
     expected: dict,
     cycle_state: dict,
+    safe_portfolio: dict | None = None,
 ) -> dict:
     """
     Fuente unica de verdad de solvencia.
@@ -342,10 +347,22 @@ def build_solvency_guarantee(
     en calculate_expected_liquidity(), por lo que NO se
     vuelve a descontar aqui.
     """
-    secured = int(incoming.get("secured_total", 0) or 0)
-    expected_total = int(expected.get("total", 0) or 0)
+    portfolio_applied = safe_portfolio is not None
 
-    guaranteed_recovery = secured + expected_total
+    if portfolio_applied:
+        secured = int(
+            safe_portfolio.get("usable_secured_total", 0) or 0
+        )
+        expected_total = int(
+            safe_portfolio.get("usable_expected_total", 0) or 0
+        )
+        guaranteed_recovery = int(
+            safe_portfolio.get("usable_total", 0) or 0
+        )
+    else:
+        secured = int(incoming.get("secured_total", 0) or 0)
+        expected_total = int(expected.get("total", 0) or 0)
+        guaranteed_recovery = secured + expected_total
     current_debt = max(-int(balance), 0)
     required_recovery = current_debt + SAFE_LIQUIDITY_BUFFER
 
@@ -374,6 +391,28 @@ def build_solvency_guarantee(
         "guaranteed_recovery": guaranteed_recovery,
         "guarantee_surplus": guarantee_surplus,
         "safe_cycles_remaining": safe_cycles_remaining,
+        "portfolio_applied": portfolio_applied,
+        "gross_candidate_liquidity": int(
+            (safe_portfolio or {}).get("gross_source_total", guaranteed_recovery) or 0
+        ),
+        "portfolio_tier_a": int(
+            ((safe_portfolio or {}).get("tier_a", {}) or {}).get("amount", 0) or 0
+        ),
+        "portfolio_tier_b": int(
+            ((safe_portfolio or {}).get("tier_b", {}) or {}).get("amount", guaranteed_recovery) or 0
+        ),
+        "portfolio_tier_c": int(
+            ((safe_portfolio or {}).get("tier_c", {}) or {}).get("amount", guaranteed_recovery) or 0
+        ),
+        "selected_source_ids": list(
+            (safe_portfolio or {}).get("selected_source_ids", []) or []
+        ),
+        "selected_offer_ids": list(
+            (safe_portfolio or {}).get("selected_offer_ids", []) or []
+        ),
+        "selected_player_ids": list(
+            (safe_portfolio or {}).get("selected_player_ids", []) or []
+        ),
         "reason": (
             "SECURED_LIQUIDITY + EXPECTED_LIQUIDITY cubren deuda "
             "actual y buffer T-15."
@@ -419,6 +458,21 @@ def calculate_offer_reservations(
     secured_needed = max(required_recovery - expected_credit, 0)
 
     offers = list(incoming.get("offers", []))
+
+    # V10.2.1: si la garantia se construyo con una cartera conjunta
+    # validada contra el XI, solo reservamos ofertas que pertenecen
+    # a esa misma cartera. Asi no sustituimos una fuente segura por
+    # otra que podria romper el XI en combinacion.
+    if guarantee.get("portfolio_applied", False):
+        selected_offer_ids = {
+            value
+            for value in guarantee.get("selected_offer_ids", []) or []
+            if value is not None
+        }
+        offers = [
+            offer for offer in offers
+            if offer.get("offer_id") in selected_offer_ids
+        ]
 
     def reservation_key(offer: dict):
         players = offer.get("players", []) or []
@@ -716,6 +770,275 @@ def calculate_temporary_debt_permission(
             f"{phase} permite deuda temporal."
         ),
     }
+
+
+# ======================================================
+# T-15 SOLVENCY FORECAST V10 (SHADOW)
+# ======================================================
+
+
+def build_t15_solvency_forecast(
+    solvency: dict,
+) -> dict:
+    """
+    Proyeccion conservadora de solvencia para T-15.
+
+    No ejecuta ni autoriza escrituras. Resume la capacidad de
+    deuda ya calculada por SOLVENCY_GUARANTEE / MAX_SAFE_DEBT y
+    la expresa como capital desplegable sin romper el buffer T-15.
+    """
+
+    balance = int(
+        solvency.get("balance", 0) or 0
+    )
+
+    guarantee = (
+        solvency.get("solvency_guarantee", {})
+        or {}
+    )
+
+    max_safe_debt = (
+        solvency.get("max_safe_debt", {})
+        or {}
+    )
+
+    temporary_debt = (
+        solvency.get("temporary_debt", {})
+        or {}
+    )
+
+    hard_safety = (
+        solvency.get("hard_safety", {})
+        or {}
+    )
+
+    deadline = (
+        solvency.get("deadline", {})
+        or {}
+    )
+
+    safe_portfolio = (
+        solvency.get("safe_liquidity_portfolio", {})
+        or {}
+    )
+
+    guaranteed_recovery = int(
+        guarantee.get("guaranteed_recovery", 0) or 0
+    )
+
+    safety_buffer = int(
+        guarantee.get(
+            "safety_buffer",
+            SAFE_LIQUIDITY_BUFFER,
+        )
+        or 0
+    )
+
+    current_debt = max(-balance, 0)
+
+    projected_t15_balance = (
+        balance
+        + guaranteed_recovery
+    )
+
+    projected_t15_after_buffer = (
+        projected_t15_balance
+        - safety_buffer
+    )
+
+    additional_debt_headroom = int(
+        max_safe_debt.get(
+            "additional_debt_headroom",
+            0,
+        )
+        or 0
+    )
+
+    # Con saldo positivo podemos desplegar ese cash antes de
+    # empezar a consumir deuda. Despues, solo el headroom que
+    # MAX_SAFE_DEBT considera recuperable antes de T-15.
+    safe_spend_capacity = (
+        max(balance, 0)
+        + additional_debt_headroom
+    )
+
+    operations_locked = bool(
+        deadline.get("operations_locked", False)
+    )
+
+    hard_safety_active = bool(
+        hard_safety.get("active", False)
+        or deadline.get("hard_safety_mode", False)
+        or str(deadline.get("phase", ""))
+        in {"HARD_SAFETY", "FINALIZATION"}
+    )
+
+    debt_window_open = bool(
+        max_safe_debt.get("debt_window_open", False)
+    )
+
+    temporary_debt_allowed = bool(
+        temporary_debt.get("allowed", False)
+    )
+
+    can_increase_debt = bool(
+        not operations_locked
+        and not hard_safety_active
+        and debt_window_open
+        and temporary_debt_allowed
+        and additional_debt_headroom > 0
+    )
+
+    return {
+        "mode": "T15_SHADOW",
+        "balance": balance,
+        "current_debt": current_debt,
+        "guarantee_state": guarantee.get("state"),
+        "guaranteed": bool(
+            guarantee.get("guaranteed", False)
+        ),
+        "secured_liquidity": int(
+            guarantee.get("secured_liquidity", 0) or 0
+        ),
+        "expected_liquidity": int(
+            guarantee.get("expected_liquidity", 0) or 0
+        ),
+        "guaranteed_recovery": guaranteed_recovery,
+        "gross_candidate_liquidity": int(
+            safe_portfolio.get("gross_source_total", guaranteed_recovery) or 0
+        ),
+        "tier_a_liquidity": int(
+            (safe_portfolio.get("tier_a", {}) or {}).get("amount", 0) or 0
+        ),
+        "tier_b_liquidity": int(
+            (safe_portfolio.get("tier_b", {}) or {}).get("amount", guaranteed_recovery) or 0
+        ),
+        "tier_c_liquidity": int(
+            (safe_portfolio.get("tier_c", {}) or {}).get("amount", guaranteed_recovery) or 0
+        ),
+        "selected_recovery_sources": list(
+            safe_portfolio.get("selected_sources", []) or []
+        ),
+        "lineup_blocked_sources": list(
+            safe_portfolio.get("individually_blocked_by_lineup", []) or []
+        ),
+        "safe_portfolio_search": safe_portfolio.get("search", {}),
+        "safety_buffer": safety_buffer,
+        "projected_t15_balance": projected_t15_balance,
+        "projected_t15_after_buffer": projected_t15_after_buffer,
+        "additional_debt_headroom": additional_debt_headroom,
+        "safe_spend_capacity": safe_spend_capacity,
+        "debt_window_open": debt_window_open,
+        "temporary_debt_allowed": temporary_debt_allowed,
+        "can_increase_debt": can_increase_debt,
+        "safe_cycles_remaining": int(
+            max_safe_debt.get("safe_cycles_remaining", 0) or 0
+        ),
+        "operations_locked": operations_locked,
+        "hard_safety_active": hard_safety_active,
+        "phase": deadline.get("phase"),
+        "reason": (
+            "Existe margen para desplegar capital y recuperar "
+            "saldo con buffer antes de T-15."
+            if can_increase_debt
+            else
+            "No se autoriza nueva deuda en shadow con el estado "
+            "de solvencia/tiempo actual."
+        ),
+    }
+
+
+def evaluate_purchase_at_t15(
+    solvency: dict,
+    purchase_amount: int,
+) -> dict:
+    """
+    Simula una compra sin tocar Biwenger y comprueba si, usando
+    solo la liquidez conservadora ya reconocida por Solvency,
+    seguimos por encima del buffer en T-15.
+    """
+
+    amount = max(int(purchase_amount or 0), 0)
+    forecast = build_t15_solvency_forecast(
+        solvency
+    )
+
+    balance_after_purchase = (
+        int(forecast["balance"])
+        - amount
+    )
+
+    debt_after_purchase = max(
+        -balance_after_purchase,
+        0,
+    )
+
+    projected_t15_balance = (
+        balance_after_purchase
+        + int(forecast["guaranteed_recovery"])
+    )
+
+    projected_t15_after_buffer = (
+        projected_t15_balance
+        - int(forecast["safety_buffer"])
+    )
+
+    needs_new_debt = (
+        debt_after_purchase
+        > int(forecast["current_debt"])
+    )
+
+    temporal_ok = bool(
+        not forecast["operations_locked"]
+        and not forecast["hard_safety_active"]
+    )
+
+    debt_ok = bool(
+        not needs_new_debt
+        or forecast["can_increase_debt"]
+    )
+
+    capacity_ok = (
+        amount
+        <= int(forecast["safe_spend_capacity"])
+    )
+
+    safe = bool(
+        amount > 0
+        and temporal_ok
+        and debt_ok
+        and capacity_ok
+        and projected_t15_after_buffer >= 0
+    )
+
+    return {
+        "safe": safe,
+        "purchase_amount": amount,
+        "balance_before": int(forecast["balance"]),
+        "balance_after_purchase": balance_after_purchase,
+        "current_debt": int(forecast["current_debt"]),
+        "debt_after_purchase": debt_after_purchase,
+        "needs_new_debt": needs_new_debt,
+        "projected_t15_balance": projected_t15_balance,
+        "projected_t15_after_buffer": projected_t15_after_buffer,
+        "safe_spend_capacity": int(
+            forecast["safe_spend_capacity"]
+        ),
+        "additional_debt_headroom": int(
+            forecast["additional_debt_headroom"]
+        ),
+        "temporal_ok": temporal_ok,
+        "debt_ok": debt_ok,
+        "capacity_ok": capacity_ok,
+        "reason": (
+            "Compra compatible con solvencia T-15 y buffer."
+            if safe
+            else
+            "Compra no compatible con el forecast conservador T-15."
+        ),
+        "forecast": forecast,
+    }
+
 
 # ======================================================
 # HARD SAFETY
@@ -1035,11 +1358,18 @@ def build_solvency_state(snapshot: dict) -> dict:
         cycle_state=cycle_state,
     )
 
+    safe_liquidity_portfolio = build_safe_liquidity_portfolio(
+        snapshot=snapshot,
+        incoming=incoming,
+        expected=expected,
+    )
+
     guarantee = build_solvency_guarantee(
         balance=balance,
         incoming=incoming,
         expected=expected,
         cycle_state=cycle_state,
+        safe_portfolio=safe_liquidity_portfolio,
     )
 
     max_safe_debt = calculate_max_safe_debt(
@@ -1099,6 +1429,7 @@ def build_solvency_state(snapshot: dict) -> dict:
         "cash": max(balance, 0),
         "secured_liquidity": incoming,
         "expected_liquidity": expected,
+        "safe_liquidity_portfolio": safe_liquidity_portfolio,
         "computer_cycles": cycle_state,
         "solvency_guarantee": guarantee,
         "solvency_reservations": reservations,

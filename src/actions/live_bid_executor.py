@@ -125,6 +125,35 @@ def find_existing_offer(
     return None
 
 
+def get_catalog_player(
+    catalog: dict,
+    player_id: int,
+) -> dict | None:
+    """Obtiene el jugador del catálogo aceptando claves str/int."""
+    player = catalog.get(str(player_id))
+    if player is None:
+        player = catalog.get(player_id)
+    return player if isinstance(player, dict) else None
+
+
+def get_biwenger_minimum_bid(
+    catalog: dict,
+    player_id: int,
+) -> int:
+    """
+    V10.4D: Biwenger valida la oferta contra el valor oficial del jugador,
+    no únicamente contra sale.price del mercado.
+    """
+    player = get_catalog_player(catalog, player_id)
+    if not player:
+        return 0
+    try:
+        return int(player.get("price", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+
 def execute_bid(
     player_id: int,
     amount: int,
@@ -180,6 +209,27 @@ def execute_bid(
     )
 
     # ==================================================
+    # V10.4D: SUELO REAL DE PUJA BIWENGER
+    # ==================================================
+
+    catalog = writer.client.get_player_catalog()
+    minimum_bid = get_biwenger_minimum_bid(
+        catalog,
+        player_id,
+    )
+
+    if minimum_bid <= 0:
+        raise RuntimeError(
+            "No se pudo determinar el valor Biwenger "
+            "fresco del jugador para validar la puja."
+        )
+
+    effective_bid_floor = max(
+        int(current_price or 0),
+        int(minimum_bid or 0),
+    )
+
+    # ==================================================
     # VALIDAR VENDEDOR
     # ==================================================
 
@@ -208,12 +258,14 @@ def execute_bid(
             f"actual ({maximum_bid:,} €)."
         )
 
-    # No permitimos cantidades absurdamente inferiores
-    # al precio de salida.
-    if amount < current_price:
+    # V10.4D: el suelo técnico real es, como mínimo, el valor oficial
+    # Biwenger. Si el listing del manager fuese superior, conservamos también
+    # ese suelo económico.
+    if amount < effective_bid_floor:
         raise RuntimeError(
-            "La puja es inferior al precio "
-            f"actual de mercado ({current_price:,} €)."
+            "La puja es inferior al suelo Biwenger actual "
+            f"({effective_bid_floor:,} €; valor jugador "
+            f"{minimum_bid:,} €, listing {current_price:,} €)."
         )
 
     # ==================================================
@@ -254,6 +306,12 @@ def execute_bid(
 
         "current_price":
             current_price,
+
+        "minimum_bid":
+            minimum_bid,
+
+        "effective_bid_floor":
+            effective_bid_floor,
 
         "balance":
             balance,
@@ -316,6 +374,12 @@ def execute_bid(
     # ==================================================
     # VERIFICACIÓN POSTERIOR
     # ==================================================
+
+    # V10.4C: un HTTP rechazado no es un warning de verificación.
+    if not result["success"]:
+        result["offer_detected_after"] = False
+        result["verification_skipped"] = "HTTP_WRITE_REJECTED"
+        return result
 
     refreshed_market = (
         writer.client.get_market()
