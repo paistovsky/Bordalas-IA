@@ -114,7 +114,6 @@ jobs:
           test -f dashboard/data/status.json
           ls -lh data/trading/v10_full_autonomous_status.json
           ls -lh dashboard/data/status.json
-
       - name: Update Cloudflare dashboard
         shell: bash
         run: |
@@ -128,7 +127,6 @@ jobs:
           echo "========================================"
           echo " BORDALAS IA - CLOUDFLARE KV UPDATED"
           echo "========================================"
-
       - name: Prune persisted state
         if: always()
         shell: bash
