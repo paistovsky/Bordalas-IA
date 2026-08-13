@@ -115,7 +115,7 @@ class BiwengerWriteClient:
             )
 
         endpoint = (
-            f"{self.client.BASE_URL}/offers"
+            f"{self.client.BASE_URL}/offers/"
         )
 
         payload = {
