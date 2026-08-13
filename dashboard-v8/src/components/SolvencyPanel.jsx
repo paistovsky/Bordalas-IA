@@ -38,18 +38,24 @@ function Plan({ title, subtitle, plan, tone }) {
 }
 
 export default function SolvencyPanel({ data }) {
-  const portfolio = data.competitive.portfolio || {};
-  const strategic = portfolio.strategic || null;
-  const current = portfolio.current || null;
-  const strategicAlternatives = portfolio.strategic_alternatives || [];
-  const currentAlternatives = portfolio.current_alternatives || [];
-
-  const candidates = [
-    strategic,
-    ...strategicAlternatives,
-    current,
-    ...currentAlternatives
+  const safeDebt = data.solvency?.plans || {};
+  const safeDebtCandidates = [
+    safeDebt.a,
+    safeDebt.b,
+    safeDebt.c
   ].filter(Boolean);
+
+  const portfolio = data.competitive?.portfolio || {};
+  const competitiveCandidates = [
+    portfolio.strategic || null,
+    ...(portfolio.strategic_alternatives || []),
+    portfolio.current || null,
+    ...(portfolio.current_alternatives || [])
+  ].filter(Boolean);
+
+  const candidates = safeDebtCandidates.length
+    ? safeDebtCandidates
+    : competitiveCandidates;
 
   const unique = [];
   const seen = new Set();

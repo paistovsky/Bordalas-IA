@@ -837,6 +837,233 @@ def compact_portfolio_recommendation(item: dict | None) -> dict | None:
     }
 
 
+def _select_recovery_subset(sources: list[dict], deficit: int) -> list[dict]:
+    """Subconjunto Safe Debt suficiente: minimo exceso y luego menos activos."""
+    clean = [
+        source for source in (sources or [])
+        if safe_int(source.get("amount")) > 0
+    ]
+    deficit = max(safe_int(deficit), 0)
+
+    if not clean or deficit <= 0:
+        return []
+
+    if len(clean) <= 18:
+        best = None
+        best_rank = None
+
+        for mask in range(1, 1 << len(clean)):
+            selected = []
+            total = 0
+
+            for index, source in enumerate(clean):
+                if mask & (1 << index):
+                    selected.append(source)
+                    total += safe_int(source.get("amount"))
+
+            if total < deficit:
+                continue
+
+            player_ids = {
+                safe_int(player_id)
+                for source in selected
+                for player_id in (source.get("player_ids", []) or [])
+                if safe_int(player_id) > 0
+            }
+
+            rank = (
+                total - deficit,
+                len(player_ids),
+                len(selected),
+                total,
+            )
+
+            if best_rank is None or rank < best_rank:
+                best = selected
+                best_rank = rank
+
+        if best is not None:
+            return best
+
+    remaining = sorted(
+        clean,
+        key=lambda source: safe_int(source.get("amount")),
+        reverse=True,
+    )
+    selected = []
+    total = 0
+
+    while remaining and total < deficit:
+        need = deficit - total
+        enough = [
+            source for source in remaining
+            if safe_int(source.get("amount")) >= need
+        ]
+        if enough:
+            chosen = min(
+                enough,
+                key=lambda source: (
+                    safe_int(source.get("amount")) - need,
+                    len(source.get("player_ids", []) or []),
+                ),
+            )
+        else:
+            chosen = remaining[0]
+
+        selected.append(chosen)
+        total += safe_int(chosen.get("amount"))
+        remaining.remove(chosen)
+
+    return selected
+
+
+def compact_safe_debt_recovery_plan(
+    plan: dict | None,
+    *,
+    balance: int,
+    deficit: int,
+    plan_kind: str,
+) -> dict | None:
+    if not plan:
+        return None
+
+    selected_sources = _select_recovery_subset(
+        plan.get("sources", []) or [],
+        deficit,
+    )
+    if not selected_sources:
+        return None
+
+    total_amount = sum(
+        safe_int(source.get("amount"))
+        for source in selected_sources
+    )
+
+    player_ids = []
+    player_names = []
+    source_kinds = []
+
+    for source in selected_sources:
+        source_kinds.append(str(source.get("kind") or "UNKNOWN"))
+
+        for player_id in source.get("player_ids", []) or []:
+            player_id = safe_int(player_id)
+            if player_id > 0 and player_id not in player_ids:
+                player_ids.append(player_id)
+
+        for name in source.get("player_names", []) or []:
+            name = str(name or "").strip()
+            if name and name not in player_names:
+                player_names.append(name)
+
+    post_balance = safe_int(balance) + total_amount
+
+    return {
+        "source": "SAFE_DEBT_V10",
+        "plan_kind": plan_kind,
+        "tier": plan.get("sporting_tier") or plan.get("tier"),
+        "player_ids": player_ids,
+        "player_names": player_names,
+        "source_kinds": source_kinds,
+        "sold_count": len(player_ids),
+        "total_amount": total_amount,
+        "post_balance": post_balance,
+        "restores_solvency": post_balance >= 0,
+        "playable_count": safe_int(plan.get("playable_count")),
+        "missing": safe_int(plan.get("missing")),
+        "lineup_complete": bool(plan.get("lineup_complete")),
+        "formation_before": None,
+        "formation_after": plan.get("formation_after"),
+        "incoming_players": [],
+        "competitive_damage": 0.0,
+        "lineup_score_before": 0.0,
+        "lineup_score_after": round(safe_float(plan.get("lineup_score_after")), 2),
+        "lineup_score_loss": round(safe_float(plan.get("lineup_score_loss")), 2),
+        "lineup_score_loss_percent": round(
+            safe_float(plan.get("lineup_score_loss_percent")),
+            2,
+        ),
+    }
+
+
+def build_dashboard_solvency_plans(state: dict) -> dict:
+    """
+    V10.7.2
+    A = Tier A sin tocar XI.
+    B = B1 trading-safe.
+    C = contingencia, con B2 intermedio y Tier C de emergencia.
+    """
+    solvency = state.get("solvency", {}) or {}
+    portfolio = solvency.get("safe_liquidity_portfolio", {}) or {}
+    balance = safe_int(solvency.get("balance", state.get("balance")))
+    deficit = max(-balance, 0)
+
+    if deficit <= 0 or not portfolio:
+        return {
+            "available": False,
+            "source": "SAFE_DEBT_V10",
+            "deficit": deficit,
+            "plans": [],
+            "a": None,
+            "b": None,
+            "c": None,
+        }
+
+    raw_candidates = [
+        ("A_NO_XI", portfolio.get("tier_a")),
+        ("B1_TRADING_SAFE", portfolio.get("trading_safe")),
+        ("B2_FULL_XI", portfolio.get("tier_b")),
+        ("C_EMERGENCY_10_OF_11", portfolio.get("tier_c")),
+    ]
+
+    plans = []
+    seen = set()
+
+    for kind, raw in raw_candidates:
+        plan = compact_safe_debt_recovery_plan(
+            raw,
+            balance=balance,
+            deficit=deficit,
+            plan_kind=kind,
+        )
+        if not plan:
+            continue
+
+        signature = (
+            tuple(sorted(plan.get("player_ids", []) or [])),
+            safe_int(plan.get("total_amount")),
+        )
+        if signature in seen:
+            continue
+
+        seen.add(signature)
+        plans.append(plan)
+
+    viable = [p for p in plans if p.get("restores_solvency")]
+    non_viable = [p for p in plans if not p.get("restores_solvency")]
+    selected = (viable + non_viable)[:3]
+
+    while len(selected) < 3:
+        selected.append(None)
+
+    return {
+        "available": any(plan is not None for plan in selected),
+        "source": "SAFE_DEBT_V10",
+        "policy": portfolio.get("policy"),
+        "deficit": deficit,
+        "gross_source_total": safe_int(portfolio.get("gross_source_total")),
+        "trading_safe_total": safe_int(portfolio.get("trading_safe_total")),
+        "emergency_complete_total": safe_int(
+            portfolio.get("emergency_complete_total")
+        ),
+        "emergency_ten_total": safe_int(portfolio.get("emergency_ten_total")),
+        "plans": [p for p in selected if p is not None],
+        "a": selected[0],
+        "b": selected[1],
+        "c": selected[2],
+    }
+
+
 def compact_competitive_offer(item: dict) -> dict:
     negotiation = item.get("negotiation", {}) or {}
     replacement = item.get("replacement_detail", {}) or {}
@@ -1393,6 +1620,7 @@ def build_dashboard_state() -> dict:
     )
 
     competitive = load_competitive_dashboard_state()
+    solvency_plans = build_dashboard_solvency_plans(state)
 
     for offer in competitive.get("offers", []) or []:
         player_id = safe_int(
@@ -1536,6 +1764,7 @@ def build_dashboard_state() -> dict:
             ),
             "listed": safe_int(liquidity.get("listing_count")),
             "to_list": safe_int(liquidity.get("to_list_count")),
+            "plans": solvency_plans,
         },
         "franchise": {
             "state": franchise.get("state"),
