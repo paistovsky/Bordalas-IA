@@ -58,6 +58,7 @@ jobs:
           mkdir -p data/rival_intelligence
           mkdir -p data/league_center
           mkdir -p data/competitive_negotiations
+          mkdir -p data/trading
           mkdir -p dashboard/data
 
       - name: Restore Bordalas state
@@ -71,6 +72,7 @@ jobs:
             data/rival_intelligence
             data/league_center
             data/competitive_negotiations
+            data/trading
             data/external_status_cache.json
             data/player_mapping_cache.json
             data/snapshot_*.json
@@ -93,10 +95,10 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN" || (echo "Falta CLOUDFLARE_API_TOKEN" && exit 1)
           test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "Falta CLOUDFLARE_ACCOUNT_ID" && exit 1)
 
-      - name: Run Bordalas LIVE
+      - name: Run Bordalas V10 PRODUCTION
         shell: bash
         run: |
-          python -m src.autopilot --once --live --competitive-live
+          python -m src.v10_production_cycle
 
       - name: Build Sala de Operaciones telemetry
         shell: bash
@@ -144,6 +146,9 @@ jobs:
             data/intelligence/jornada_perfecta_lineups.json
             data/rival_intelligence/rival_intelligence.json
             data/competitive_negotiations/state.json
+            data/trading/position_ledger.json
+            data/trading/counteroffer_repricing_state.json
+            data/trading/v10_production_status.json
             dashboard/data/status.json
           if-no-files-found: ignore
           retention-days: 2

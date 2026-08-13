@@ -38,7 +38,12 @@ function Plan({ title, subtitle, plan, tone }) {
 }
 
 export default function SolvencyPanel({ data }) {
-  const safeDebt = data.solvency?.plans || {};
+  // V10.8: raw es la fuente de verdad. Esto evita perder los planes
+  // aunque normalizeStatus cambie o una versión antigua quede cacheada.
+  const safeDebt =
+    data.raw?.solvency?.plans ||
+    data.solvency?.plans ||
+    {};
   const safeDebtCandidates = [
     safeDebt.a,
     safeDebt.b,
