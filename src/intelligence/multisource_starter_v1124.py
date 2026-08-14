@@ -5,6 +5,7 @@ import re
 import time
 import unicodedata
 
+from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
 from urllib.parse import urljoin
@@ -14,6 +15,7 @@ from bs4 import BeautifulSoup
 
 from src.intelligence.jornada_perfecta_provider import (
     build_roster_records,
+    calculate_refresh_seconds,
     canonical_team_key,
     refresh_jornada_perfecta_data,
 )
@@ -78,6 +80,122 @@ HEADERS = {
 }
 
 TIMEOUT = 25
+
+
+def load_cached_board(
+    path: Path = OUTPUT_FILE,
+) -> dict | None:
+    if not path.exists():
+        return None
+
+    try:
+        value = json.loads(
+            path.read_text(
+                encoding="utf-8-sig",
+            )
+        )
+    except (
+        OSError,
+        json.JSONDecodeError,
+    ):
+        return None
+
+    return value if isinstance(value, dict) else None
+
+
+def cached_board_age_seconds(
+    board: dict,
+    *,
+    path: Path = OUTPUT_FILE,
+    now: datetime | None = None,
+) -> float | None:
+    del path
+    updated_at = board.get("updated_at")
+
+    if updated_at:
+        try:
+            timestamp = datetime.fromisoformat(
+                str(updated_at).replace("Z", "+00:00")
+            )
+            if timestamp.tzinfo is None:
+                timestamp = timestamp.replace(
+                    tzinfo=timezone.utc,
+                )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            timestamp = None
+    else:
+        timestamp = None
+
+    # Un cache antiguo sin timestamp verificable se renueva. No usamos el
+    # mtime porque actions/checkout lo haria parecer nuevo tras cada deploy.
+    if timestamp is None:
+        return None
+
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+
+    return max(
+        0.0,
+        (
+            current.astimezone(timezone.utc)
+            - timestamp.astimezone(timezone.utc)
+        ).total_seconds(),
+    )
+
+
+def cached_board_is_fresh(
+    board: dict | None,
+    *,
+    matchday: int,
+    seconds_to_deadline=None,
+    path: Path = OUTPUT_FILE,
+    now: datetime | None = None,
+) -> bool:
+    if not board:
+        return False
+
+    if int(board.get("matchday") or -1) != int(matchday):
+        return False
+
+    age = cached_board_age_seconds(
+        board,
+        path=path,
+        now=now,
+    )
+    if age is None:
+        return False
+
+    return age < calculate_refresh_seconds(
+        seconds_to_deadline
+    )
+
+
+def board_with_cache_status(
+    board: dict,
+    *,
+    status: str,
+    seconds_to_deadline=None,
+    age_seconds: float | None = None,
+    error: str | None = None,
+) -> dict:
+    result = dict(board)
+    result["cache"] = {
+        "status": status,
+        "age_seconds": (
+            round(age_seconds, 1)
+            if age_seconds is not None
+            else None
+        ),
+        "ttl_seconds": calculate_refresh_seconds(
+            seconds_to_deadline
+        ),
+        "error": error,
+    }
+    return result
 
 
 def normalize(value) -> str:
@@ -2269,31 +2387,63 @@ def build_multisource_board(
     seconds_to_deadline=None,
 ) -> dict:
 
+    cached = load_cached_board()
+    cached_age = (
+        cached_board_age_seconds(cached)
+        if cached
+        else None
+    )
+
+    if cached_board_is_fresh(
+        cached,
+        matchday=matchday,
+        seconds_to_deadline=seconds_to_deadline,
+    ):
+        return board_with_cache_status(
+            cached,
+            status="HIT",
+            seconds_to_deadline=seconds_to_deadline,
+            age_seconds=cached_age,
+        )
+
     roster = build_roster_records(
         snapshot
     )
 
     session = requests.Session()
 
-    jp = build_jp_signals(
-        snapshot,
-        matchday,
-        seconds_to_deadline,
-    )
+    try:
+        jp = build_jp_signals(
+            snapshot,
+            matchday,
+            seconds_to_deadline,
+        )
 
-    af, af_meta = build_af_signals(
-        snapshot,
-        roster,
-        matchday,
-        session,
-    )
+        af, af_meta = build_af_signals(
+            snapshot,
+            roster,
+            matchday,
+            session,
+        )
 
-    ff, ff_meta = build_ff_signals(
-        snapshot,
-        roster,
-        matchday,
-        session,
-    )
+        ff, ff_meta = build_ff_signals(
+            snapshot,
+            roster,
+            matchday,
+            session,
+        )
+    except Exception as error:
+        if cached:
+            return board_with_cache_status(
+                cached,
+                status="STALE_FALLBACK",
+                seconds_to_deadline=seconds_to_deadline,
+                age_seconds=cached_age,
+                error=(
+                    f"{type(error).__name__}: {error}"
+                ),
+            )
+        raise
 
     players = []
 
@@ -2366,6 +2516,11 @@ def build_multisource_board(
         "version":
             "V11.2.4",
 
+        "updated_at":
+            datetime.now(
+                timezone.utc
+            ).isoformat(),
+
         "matchday":
             matchday,
 
@@ -2380,6 +2535,22 @@ def build_multisource_board(
 
         "players":
             players,
+
+        "cache": {
+            "status":
+                "REFRESHED",
+
+            "age_seconds":
+                0.0,
+
+            "ttl_seconds":
+                calculate_refresh_seconds(
+                    seconds_to_deadline
+                ),
+
+            "error":
+                None,
+        },
     }
 
     OUTPUT_FILE.parent.mkdir(

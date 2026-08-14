@@ -337,7 +337,7 @@ def calculate_refresh_seconds(
     seconds_to_deadline: int | None,
 ) -> int:
     """
-    El Autopilot de GitHub corre cada 30 minutos.
+    El Autopilot de GitHub corre cada 15 minutos.
 
     Lejos del cierre no necesitamos golpear Jornada Perfecta
     en cada ciclo. Cerca de T-15 queremos información fresca.
@@ -345,6 +345,12 @@ def calculate_refresh_seconds(
 
     if seconds_to_deadline is None:
         return 2 * 3600
+
+    # En las dos ultimas horas usamos cada despertar de 15 minutos.
+    # Diez minutos de TTL garantizan que el siguiente ciclo no reutilice
+    # un pronostico anterior justo cuando aparecen las alineaciones finales.
+    if 0 < seconds_to_deadline <= 2 * 3600:
+        return 10 * 60
 
     if seconds_to_deadline <= 12 * 3600:
         return 20 * 60
@@ -2274,19 +2280,6 @@ def refresh_jornada_perfecta_data(
         )
 
     (
-        raw_signals,
-        profile_metadata,
-    ) = (
-        verify_signals_with_player_profiles(
-            session=
-                session,
-
-            signals=
-                raw_signals,
-        )
-    )
-
-    (
         players,
         matched_ids,
         parsed_team_keys,
@@ -2297,6 +2290,25 @@ def refresh_jornada_perfecta_data(
 
             snapshot=
                 snapshot,
+        )
+    )
+
+    # Los partidos contienen unos 220 jugadores, pero Bordalas IA solo
+    # necesita informacion individual de los futbolistas de su plantilla.
+    # Resolver primero la identidad reduce la verificacion de perfiles de
+    # ~220 peticiones secuenciales a, como maximo, el tamano de la plantilla.
+    # El pronostico del perfil no participa en el matching de identidad, por
+    # lo que el orden no cambia el resultado deportivo.
+    (
+        players,
+        profile_metadata,
+    ) = (
+        verify_signals_with_player_profiles(
+            session=
+                session,
+
+            signals=
+                players,
         )
     )
 

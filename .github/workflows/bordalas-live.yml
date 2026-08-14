@@ -20,7 +20,9 @@ jobs:
   live:
     name: Bordalas live controlled cycle
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Margen de seguridad para un refresco externo lento. El ciclo normal
+    # debe terminar muy por debajo de este limite tras reutilizar snapshots.
+    timeout-minutes: 20
 
     env:
       TZ: Europe/Madrid
@@ -42,6 +44,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Node 24
         uses: actions/setup-node@v4
@@ -83,8 +87,7 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --disable-pip-version-check -r requirements.txt
 
       - name: Validate secrets
         shell: bash
@@ -94,6 +97,13 @@ jobs:
           test -n "$API_FOOTBALL_KEY" || (echo "Falta API_FOOTBALL_KEY" && exit 1)
           test -n "$CLOUDFLARE_API_TOKEN" || (echo "Falta CLOUDFLARE_API_TOKEN" && exit 1)
           test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "Falta CLOUDFLARE_ACCOUNT_ID" && exit 1)
+
+      - name: Validate optimized production cycle
+        shell: bash
+        run: |
+          python -m src.analysis.test_jp_profile_scope_v114
+          python -m src.analysis.test_multisource_starter_v1124
+          python -m src.analysis.test_v10_full_autonomous_live
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash
@@ -149,6 +159,7 @@ jobs:
             data/trading/position_ledger.json
             data/trading/counteroffer_repricing_state.json
             data/trading/v10_production_status.json
+            data/trading/v10_full_autonomous_status.json
             dashboard/data/status.json
           if-no-files-found: ignore
           retention-days: 2
