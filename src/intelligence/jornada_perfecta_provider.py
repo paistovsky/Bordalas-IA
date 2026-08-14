@@ -19,6 +19,8 @@ from urllib.parse import (
 )
 
 import requests
+
+from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 
@@ -810,6 +812,15 @@ def get_unique_player_links(
                 "probability":
                     None,
 
+                "has_player_marker":
+                    False,
+
+                "empty_player_marker":
+                    False,
+
+                "numeric_player_marker":
+                    False,
+
                 "raw_texts":
                     [],
             },
@@ -822,6 +833,31 @@ def get_unique_player_links(
             ].append(
                 text_value
             )
+
+        if (
+            "player"
+            in classes
+        ):
+
+            record[
+                "has_player_marker"
+            ] = True
+
+            if text_value:
+
+                record[
+                    "numeric_player_marker"
+                ] = bool(
+                    is_numeric_probability_text(
+                        text_value
+                    )
+                )
+
+            else:
+
+                record[
+                    "empty_player_marker"
+                ] = True
 
         # El anchor class=player contiene el porcentaje
         # cuando hay una alternativa.
@@ -1000,54 +1036,91 @@ def build_signals_from_pitch(
     url: str,
 ) -> list[dict]:
 
-    players = (
-        get_unique_player_links(
-            container
-        )
+    players = get_unique_player_links(
+        container
     )
+
+    base_candidates = [
+        item
+        for item in players
+        if (
+            item.get(
+                "empty_player_marker",
+                False,
+            )
+            and
+            item.get(
+                "probability"
+            )
+            is None
+        )
+    ]
+
+    base_xi_hrefs = set()
+
+    if len(base_candidates) == 11:
+        base_xi_hrefs = {
+            item["href"]
+            for item in base_candidates
+        }
 
     signals = []
 
     for item in players:
 
-        probability = (
-            item.get(
-                "probability"
-            )
+        probability = item.get(
+            "probability"
         )
 
-        if probability is None:
+        href = item.get(
+            "href"
+        )
 
-            status = (
-                "TITULAR"
+        if probability is not None:
+
+            probability = int(
+                probability
             )
 
-            confidence = (
-                88
+            if probability >= 67:
+                status = "PROBABLE"
+            elif probability <= 40:
+                status = "SUPLENTE"
+            else:
+                status = "DUDA"
+
+            confidence = max(
+                40,
+                min(
+                    probability,
+                    95,
+                ),
+            )
+
+            parser_role = (
+                "EXPLICIT_PERCENT"
+            )
+
+        elif href in base_xi_hrefs:
+
+            status = "TITULAR"
+            confidence = 82
+            parser_role = (
+                "BASE_XI_STRUCTURAL"
             )
 
         else:
 
-            status = (
-                "PROBABLE"
-            )
-
-            confidence = max(
-                45,
-                min(
-                    int(
-                        probability
-                    ),
-                    85,
-                ),
+            status = "UNKNOWN"
+            confidence = 0
+            parser_role = (
+                "UNPROVEN_NO_PERCENT"
             )
 
         signals.append(
             {
                 "name":
-                    item[
-                        "name"
-                    ],
+                    item["name"],
 
                 "status":
                     status,
@@ -1062,19 +1135,242 @@ def build_signals_from_pitch(
                     "JORNADA_PERFECTA",
 
                 "note": (
-                    "Prediccion de once probable "
-                    f"obtenida de {url}"
+                    "JP pitch discovery: "
+                    f"{parser_role}; {url}"
                 ),
 
                 "source_url":
                     url,
 
+                "player_url":
+                    (
+                        urljoin(
+                            BASE_URL,
+                            href,
+                        )
+                        if href
+                        else None
+                    ),
+
                 "jp_probability":
                     probability,
+
+                "jp_parser_role":
+                    parser_role,
             }
         )
 
     return signals
+
+
+def parse_player_profile_pronostico(
+    html: str,
+) -> dict | None:
+
+    soup = BeautifulSoup(
+        html,
+        "html.parser",
+    )
+
+    page_text = soup.get_text(
+        " ",
+        strip=True,
+    )
+
+    match = re.search(
+        r"Pron[oó]stico\s*:\s*"
+        r"(Titular|Suplente|Probable|Duda|"
+        r"No\s+convocado|Sin\s+minutos)",
+        page_text,
+        re.IGNORECASE,
+    )
+
+    if not match:
+        return None
+
+    raw = normalize_text(
+        match.group(1)
+    )
+
+    mapping = {
+        "titular":
+            ("TITULAR", 96),
+
+        "probable":
+            ("PROBABLE", 84),
+
+        "duda":
+            ("DUDA", 60),
+
+        "suplente":
+            ("SUPLENTE", 96),
+
+        "no convocado":
+            ("NO_CONVOCADO", 99),
+
+        "sin minutos":
+            ("SUPLENTE", 96),
+    }
+
+    status, confidence = mapping.get(
+        raw,
+        ("UNKNOWN", 0),
+    )
+
+    return {
+        "status":
+            status,
+
+        "confidence":
+            confidence,
+
+        "raw_pronostico":
+            match.group(1),
+    }
+
+
+def verify_signals_with_player_profiles(
+    session: requests.Session,
+    signals: list[dict],
+) -> tuple[list[dict], dict]:
+
+    verified = []
+    cache = {}
+
+    checked = 0
+    explicit = 0
+    overrides = 0
+    errors = []
+
+    for signal in signals:
+
+        player_url = signal.get(
+            "player_url"
+        )
+
+        if not player_url:
+
+            verified.append(
+                signal
+            )
+            continue
+
+        checked += 1
+
+        try:
+
+            if player_url not in cache:
+
+                profile_html = fetch_html(
+                    session,
+                    player_url,
+                )
+
+                cache[
+                    player_url
+                ] = (
+                    parse_player_profile_pronostico(
+                        profile_html
+                    )
+                )
+
+                time.sleep(
+                    0.04
+                )
+
+            profile = cache[
+                player_url
+            ]
+
+        except Exception as error:
+
+            errors.append(
+                f"{player_url}: "
+                f"{type(error).__name__}: "
+                f"{error}"
+            )
+
+            verified.append(
+                signal
+            )
+            continue
+
+        if not profile:
+
+            verified.append(
+                {
+                    **signal,
+
+                    "jp_profile_checked":
+                        True,
+
+                    "jp_profile_pronostico":
+                        None,
+                }
+            )
+            continue
+
+        explicit += 1
+
+        previous = signal.get(
+            "status"
+        )
+
+        if previous != profile["status"]:
+            overrides += 1
+
+        verified.append(
+            {
+                **signal,
+
+                "status":
+                    profile["status"],
+
+                "confidence":
+                    profile["confidence"],
+
+                "source_url":
+                    player_url,
+
+                "note": (
+                    "JP PLAYER PROFILE SOURCE OF TRUTH: "
+                    f"Pronostico={profile['raw_pronostico']}; "
+                    f"{player_url}"
+                ),
+
+                "jp_profile_checked":
+                    True,
+
+                "jp_profile_pronostico":
+                    profile[
+                        "raw_pronostico"
+                    ],
+
+                "jp_structural_status_before_profile":
+                    previous,
+
+                "jp_parser_role":
+                    "PLAYER_PROFILE_PRONOSTICO",
+            }
+        )
+
+    return (
+        verified,
+        {
+            "checked":
+                checked,
+
+            "explicit":
+                explicit,
+
+            "overrides":
+                overrides,
+
+            "errors":
+                errors[:10],
+        },
+    )
+
 
 
 def build_page_signals(
@@ -1372,6 +1668,94 @@ def name_similarity(
     )
 
 
+def jp_identity_aliases(
+    signal: dict,
+) -> list[str]:
+    aliases = []
+
+    raw_name = normalize_text(
+        signal.get("name")
+    )
+
+    if raw_name:
+        aliases.append(raw_name)
+
+    player_url = str(
+        signal.get("player_url")
+        or signal.get("source_url")
+        or ""
+    )
+
+    if "/jugador/" in player_url:
+        slug = (
+            player_url
+            .split("/jugador/", 1)[1]
+            .split("/", 1)[0]
+            .split("?", 1)[0]
+        )
+
+        slug_name = normalize_text(
+            slug.replace("-", " ")
+        )
+
+        if slug_name and slug_name not in aliases:
+            aliases.append(slug_name)
+
+    return aliases
+
+
+def strict_identity_similarity(
+    external_name: str,
+    roster_name: str,
+) -> float:
+    left = normalize_text(external_name)
+    right = normalize_text(roster_name)
+
+    if not left or not right:
+        return 0.0
+
+    if left == right:
+        return 1.0
+
+    left_tokens = left.split()
+    right_tokens = right.split()
+
+    if len(left_tokens) == 1:
+        token = left_tokens[0]
+
+        if right_tokens and token == right_tokens[-1]:
+            return 0.90
+
+        return 0.0
+
+    if len(right_tokens) == 1:
+        token = right_tokens[0]
+
+        if left_tokens and token == left_tokens[-1]:
+            return 0.90
+
+        return 0.0
+
+    if left_tokens[-1] != right_tokens[-1]:
+        return (
+            SequenceMatcher(
+                None,
+                left,
+                right,
+            ).ratio()
+            * 0.70
+        )
+
+    return max(
+        0.86,
+        SequenceMatcher(
+            None,
+            left,
+            right,
+        ).ratio(),
+    )
+
+
 def attach_biwenger_identity(
     signals: list[dict],
     snapshot: dict,
@@ -1380,170 +1764,139 @@ def attach_biwenger_identity(
     set[int],
     set[str],
 ]:
-
-    roster = (
-        build_roster_records(
-            snapshot
-        )
+    roster = build_roster_records(
+        snapshot
     )
 
     result = []
-
     matched_ids = set()
 
     parsed_team_keys = {
         canonical_team_key(
-            signal.get(
-                "team"
-            )
+            signal.get("team")
         )
-
         for signal in signals
-
-        if signal.get(
-            "team"
-        )
+        if signal.get("team")
     }
 
-    # Resolver cada señal externa contra nuestra plantilla.
     for signal in signals:
-
-        signal_team_key = (
-            canonical_team_key(
-                signal.get(
-                    "team"
-                )
-            )
+        signal_team_key = canonical_team_key(
+            signal.get("team")
         )
 
-        candidates = [
-            player
-
-            for player in roster
-
-            if (
-                not signal_team_key
-                or
-                not player[
-                    "team_key"
-                ]
-                or
-                player[
-                    "team_key"
-                ]
-                == signal_team_key
-            )
-        ]
+        if signal_team_key:
+            candidates = [
+                player
+                for player in roster
+                if (
+                    player.get("team_key")
+                    and
+                    player["team_key"] == signal_team_key
+                    and
+                    player["id"] not in matched_ids
+                )
+            ]
+        else:
+            candidates = [
+                player
+                for player in roster
+                if player["id"] not in matched_ids
+            ]
 
         if not candidates:
+            continue
 
-            candidates = roster
+        aliases = jp_identity_aliases(
+            signal
+        )
 
-        scored = [
-            (
-                name_similarity(
-                    signal.get(
-                        "name",
-                        "",
-                    ),
-                    player[
-                        "name"
-                    ],
-                ),
-                player,
+        scored = []
+
+        for player in candidates:
+            alias_scores = [
+                strict_identity_similarity(
+                    alias,
+                    player["name"],
+                )
+                for alias in aliases
+            ]
+
+            score = max(alias_scores) if alias_scores else 0.0
+
+            scored.append(
+                (
+                    score,
+                    player,
+                )
             )
 
-            for player in candidates
-        ]
-
         scored.sort(
-            key=lambda item:
-                item[
-                    0
-                ],
+            key=lambda item: item[0],
             reverse=True,
         )
 
-        best_score, best = (
-            scored[
-                0
-            ]
-            if scored
-            else (
-                0.0,
-                None,
-            )
+        if not scored:
+            continue
+
+        best_score, best = scored[0]
+        second_score = (
+            scored[1][0]
+            if len(scored) > 1
+            else 0.0
         )
 
+        if best_score < 0.80:
+            continue
+
         if (
-            best is not None
+            second_score >= 0.80
             and
-            best_score >= 0.72
-            and
-            best[
-                "id"
-            ]
-            not in matched_ids
+            (best_score - second_score) < 0.08
         ):
+            continue
 
-            matched_ids.add(
-                best[
-                    "id"
-                ]
-            )
+        matched_ids.add(
+            best["id"]
+        )
 
-            result.append(
-                {
-                    **signal,
+        result.append(
+            {
+                **signal,
 
-                    "biwenger_id":
-                        best[
-                            "id"
-                        ],
+                "biwenger_id":
+                    best["id"],
 
-                    "name":
-                        best[
-                            "name"
-                        ],
+                "name":
+                    best["name"],
 
-                    "jp_name":
-                        signal.get(
-                            "name"
-                        ),
+                "jp_name":
+                    signal.get("name"),
 
-                    "match_confidence":
-                        round(
-                            best_score
-                            * 100,
-                            1,
-                        ),
-                }
-            )
+                "match_confidence":
+                    round(
+                        best_score * 100,
+                        1,
+                    ),
 
-    # Si un equipo se ha parseado correctamente y un jugador
-    # nuestro de ese equipo NO aparece en el once probable,
-    # lo marcamos como SUPLENTE de forma conservadora.
-    #
-    # Solo lo hacemos si hemos obtenido >= 11 señales externas
-    # para ese equipo.
+                "identity_aliases":
+                    aliases,
+
+                "identity_team_strict":
+                    bool(signal_team_key),
+            }
+        )
+
     counts_by_team = {}
 
     for signal in signals:
-
-        key = (
-            canonical_team_key(
-                signal.get(
-                    "team"
-                )
-            )
+        key = canonical_team_key(
+            signal.get("team")
         )
 
         if not key:
             continue
 
-        counts_by_team[
-            key
-        ] = (
+        counts_by_team[key] = (
             counts_by_team.get(
                 key,
                 0,
@@ -1552,16 +1905,11 @@ def attach_biwenger_identity(
         )
 
     for player in roster:
-
-        if player[
-            "id"
-        ] in matched_ids:
+        if player["id"] in matched_ids:
             continue
 
-        team_key = (
-            player[
-                "team_key"
-            ]
+        team_key = player.get(
+            "team_key"
         )
 
         if (
@@ -1573,20 +1921,15 @@ def attach_biwenger_identity(
             )
             < 11
         ):
-
             continue
 
         result.append(
             {
                 "biwenger_id":
-                    player[
-                        "id"
-                    ],
+                    player["id"],
 
                 "name":
-                    player[
-                        "name"
-                    ],
+                    player["name"],
 
                 "jp_name":
                     None,
@@ -1598,30 +1941,26 @@ def attach_biwenger_identity(
                     72,
 
                 "team":
-                    player[
-                        "team"
-                    ],
+                    player["team"],
 
                 "source":
                     "JORNADA_PERFECTA",
 
-                "note": (
-                    "Jugador de la plantilla no detectado "
-                    "en el once probable de su equipo."
-                ),
-
-                "source_url":
-                    None,
+                "note":
+                    (
+                        "Jugador no localizado entre las "
+                        "senales JP de su propio equipo."
+                    ),
 
                 "match_confidence":
-                    None,
-            }
-        )
+                    100.0,
 
-        matched_ids.add(
-            player[
-                "id"
-            ]
+                "identity_team_strict":
+                    True,
+
+                "jp_parser_role":
+                    "TEAM_ABSENCE_CONSERVATIVE",
+            }
         )
 
     return (
@@ -1629,12 +1968,6 @@ def attach_biwenger_identity(
         matched_ids,
         parsed_team_keys,
     )
-
-
-# ============================================================
-# CRAWLER
-# ============================================================
-
 
 def crawl_target_matchday(
     session: requests.Session,
@@ -1941,6 +2274,19 @@ def refresh_jornada_perfecta_data(
         )
 
     (
+        raw_signals,
+        profile_metadata,
+    ) = (
+        verify_signals_with_player_profiles(
+            session=
+                session,
+
+            signals=
+                raw_signals,
+        )
+    )
+
+    (
         players,
         matched_ids,
         parsed_team_keys,
@@ -1990,6 +2336,24 @@ def refresh_jornada_perfecta_data(
             "raw_signals":
                 len(
                     raw_signals
+                ),
+
+            "jp_profile_checked":
+                profile_metadata.get(
+                    "checked",
+                    0,
+                ),
+
+            "jp_profile_explicit":
+                profile_metadata.get(
+                    "explicit",
+                    0,
+                ),
+
+            "jp_profile_overrides":
+                profile_metadata.get(
+                    "overrides",
+                    0,
                 ),
 
             "matched_roster_players":

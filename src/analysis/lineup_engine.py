@@ -22,6 +22,88 @@ from src.intelligence.lineup_intelligence import (
     build_lineup_intelligence,
 )
 
+from src.analysis.calendar_state import (
+    build_calendar_state,
+)
+
+from src.intelligence.multisource_starter_v1124 import (
+    build_multisource_board,
+)
+
+
+# ============================================================
+# V11.3 STARTER INTELLIGENCE LIVE
+# ============================================================
+
+_MULTISOURCE_STARTER_CACHE = {}
+
+
+def build_starter_intelligence_for_snapshot(
+    snapshot: dict,
+) -> dict | None:
+
+    cache_key = id(snapshot)
+
+    cached = _MULTISOURCE_STARTER_CACHE.get(
+        cache_key
+    )
+
+    if cached is not None:
+        return cached
+
+    try:
+        calendar = build_calendar_state(
+            snapshot
+        )
+
+        matchday = int(
+            calendar.get(
+                "target_matchday"
+            )
+            or 1
+        )
+
+        board = build_multisource_board(
+            snapshot=snapshot,
+            matchday=matchday,
+            seconds_to_deadline=calendar.get(
+                "seconds_to_deadline"
+            ),
+        )
+
+    except Exception as error:
+        board = {
+            "version": "V11.3_FALLBACK",
+            "error": (
+                f"{type(error).__name__}: "
+                f"{error}"
+            ),
+            "players": [],
+        }
+
+    _MULTISOURCE_STARTER_CACHE[
+        cache_key
+    ] = board
+
+    return board
+
+
+def starter_lookup_from_board(
+    board: dict | None,
+) -> dict[int, dict]:
+
+    if not board:
+        return {}
+
+    return {
+        int(item["player_id"]): item
+        for item in board.get(
+            "players",
+            [],
+        )
+        if item.get("player_id") is not None
+    }
+
 
 # ============================================================
 # FORMACIONES
@@ -229,6 +311,7 @@ def calculate_lineup_score(
 def prepare_players(
     snapshot: dict,
     lineup_intelligence: dict | None = None,
+    starter_intelligence: dict | None = None,
 ) -> list[dict]:
 
     if lineup_intelligence is None:
@@ -243,6 +326,19 @@ def prepare_players(
         lineup_intelligence.get(
             "lookup",
             {},
+        )
+    )
+
+    if starter_intelligence is None:
+        starter_intelligence = (
+            build_starter_intelligence_for_snapshot(
+                snapshot
+            )
+        )
+
+    starter_lookup = (
+        starter_lookup_from_board(
+            starter_intelligence
         )
     )
 
@@ -280,6 +376,38 @@ def prepare_players(
                 {},
             )
             or {}
+        )
+
+        starter = (
+            starter_lookup.get(
+                player_id,
+                {},
+            )
+            or {}
+        )
+
+        starter_coverage = int(
+            starter.get(
+                "source_coverage"
+            )
+            or 0
+        )
+
+        starter_probability = (
+            float(
+                starter.get(
+                    "starter_probability"
+                )
+            )
+            if (
+                starter_coverage > 0
+                and
+                starter.get(
+                    "starter_probability"
+                )
+                is not None
+            )
+            else None
         )
 
         external_block = bool(
@@ -337,12 +465,27 @@ def prepare_players(
 
         if lineup_eligible:
 
-            final_score = (
-                base_score
-                + external_adjustment
-                + home_away_adjustment
-                + penalty_adjustment
-            )
+            if starter_probability is not None:
+
+                final_score = (
+                    starter_probability
+                    * 100.0
+                    + starter_coverage
+                    * 25.0
+                    + base_score
+                    * 0.03
+                    + home_away_adjustment
+                    + penalty_adjustment
+                )
+
+            else:
+
+                final_score = (
+                    base_score
+                    + external_adjustment
+                    + home_away_adjustment
+                    + penalty_adjustment
+                )
 
         else:
 
@@ -441,6 +584,36 @@ def prepare_players(
                 "external_lineup_block":
                     external_block,
 
+                "starter_intelligence":
+                    starter,
+
+                "starter_probability":
+                    starter_probability,
+
+                "starter_expected_minutes":
+                    starter.get(
+                        "expected_minutes"
+                    ),
+
+                "starter_source_coverage":
+                    starter_coverage,
+
+                "starter_consensus":
+                    starter.get(
+                        "consensus"
+                    ),
+
+                "starter_confidence":
+                    starter.get(
+                        "confidence"
+                    ),
+
+                "starter_sources":
+                    starter.get(
+                        "sources",
+                        {},
+                    ),
+
                 "home_away_context":
                     home_away_context,
 
@@ -458,8 +631,14 @@ def prepare_players(
                         "base":
                             base_score,
 
-                        "jornada_perfecta":
+                        "jornada_perfecta_legacy":
                             external_adjustment,
+
+                        "starter_probability":
+                            starter_probability,
+
+                        "starter_source_coverage":
+                            starter_coverage,
 
                         "home_away":
                             home_away_adjustment,
@@ -800,6 +979,12 @@ def build_lineup(
             )
         )
 
+    starter_intelligence = (
+        build_starter_intelligence_for_snapshot(
+            snapshot
+        )
+    )
+
     players = (
         prepare_players(
             snapshot=
@@ -807,6 +992,9 @@ def build_lineup(
 
             lineup_intelligence=
                 lineup_intelligence,
+
+            starter_intelligence=
+                starter_intelligence,
         )
     )
 
@@ -996,13 +1184,36 @@ def build_lineup(
 
         for player in best_lineup
 
-        if player.get(
-            "external_lineup_status"
+        if (
+            (
+                player.get(
+                    "starter_probability"
+                )
+                is not None
+                and
+                float(
+                    player.get(
+                        "starter_probability"
+                    )
+                )
+                < 50.0
+            )
+            or
+            (
+                player.get(
+                    "starter_probability"
+                )
+                is None
+                and
+                player.get(
+                    "external_lineup_status"
+                )
+                in {
+                    "DUDA",
+                    "SUPLENTE",
+                }
+            )
         )
-        in {
-            "DUDA",
-            "SUPLENTE",
-        }
     ]
 
     probable_starters = sum(
@@ -1010,13 +1221,36 @@ def build_lineup(
 
         for player in best_lineup
 
-        if player.get(
-            "external_lineup_status"
+        if (
+            (
+                player.get(
+                    "starter_probability"
+                )
+                is not None
+                and
+                float(
+                    player.get(
+                        "starter_probability"
+                    )
+                )
+                >= 60.0
+            )
+            or
+            (
+                player.get(
+                    "starter_probability"
+                )
+                is None
+                and
+                player.get(
+                    "external_lineup_status"
+                )
+                in {
+                    "TITULAR",
+                    "PROBABLE",
+                }
+            )
         )
-        in {
-            "TITULAR",
-            "PROBABLE",
-        }
     )
 
 
@@ -1078,6 +1312,16 @@ def build_lineup(
 
         "lineup_intelligence":
             lineup_intelligence,
+
+        "starter_intelligence":
+            starter_intelligence,
+
+        "starter_intelligence_version":
+            starter_intelligence.get(
+                "version"
+            )
+            if starter_intelligence
+            else None,
 
         "external_source_state":
             lineup_intelligence.get(
