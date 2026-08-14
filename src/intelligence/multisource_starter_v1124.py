@@ -1363,6 +1363,19 @@ def build_ff_signals(
     )
 
 
+def source_vote(
+    probability: float,
+) -> str:
+
+    if probability >= 67.0:
+        return "STARTER"
+
+    if probability <= 40.0:
+        return "BENCH"
+
+    return "UNCERTAIN"
+
+
 def consensus(
     signals: list[dict],
 ) -> dict:
@@ -1380,61 +1393,65 @@ def consensus(
         )
     ]
 
-    values = sorted(
+    probabilities = [
         float(
             signal[
                 "probability"
             ]
         )
         for signal in usable
-    )
+    ]
 
     coverage = len(
-        values
+        probabilities
     )
 
-    if not values:
+    sorted_values = sorted(
+        probabilities
+    )
 
-        probability = 50.0
+    if not sorted_values:
+        raw_probability = 50.0
 
-    elif len(
-        values
-    ) == 1:
+    elif coverage == 1:
+        raw_probability = sorted_values[0]
 
-        probability = values[
-            0
-        ]
-
-    elif len(
-        values
-    ) == 2:
-
-        probability = (
-            values[
-                0
-            ]
+    elif coverage == 2:
+        raw_probability = (
+            sorted_values[0]
             +
-            values[
-                1
-            ]
+            sorted_values[1]
         ) / 2.0
 
     else:
+        # Median: two agreeing sources beat one outlier.
+        raw_probability = sorted_values[1]
 
-        # Median: 2 sources beat 1 outlier.
-        probability = values[
-            1
-        ]
+    votes = [
+        source_vote(
+            value
+        )
+        for value in probabilities
+    ]
 
-    starter_votes = sum(
-        value >= 60
-        for value in values
+    starter_votes = votes.count(
+        "STARTER"
     )
 
-    bench_votes = sum(
-        value <= 40
-        for value in values
+    bench_votes = votes.count(
+        "BENCH"
     )
+
+    uncertain_votes = votes.count(
+        "UNCERTAIN"
+    )
+
+    # --------------------------------------------------------
+    # V11.3.1 CONSENSUS RULE
+    #
+    # STARTER/BENCH needs two real votes when >=2 sources exist.
+    # One STARTER + one 50% source is UNCERTAIN, not STARTER_LEAN.
+    # --------------------------------------------------------
 
     if (
         coverage >= 2
@@ -1450,41 +1467,104 @@ def consensus(
     ):
         label = "BENCH"
 
-    elif probability >= 67:
-        label = "STARTER_LEAN"
+    elif coverage == 1:
 
-    elif probability <= 40:
-        label = "BENCH_LEAN"
+        if starter_votes == 1:
+            label = "STARTER_LEAN"
+
+        elif bench_votes == 1:
+            label = "BENCH_LEAN"
+
+        else:
+            label = "UNCERTAIN"
 
     else:
         label = "UNCERTAIN"
 
+    # Do not let a numerical average contradict the vote class.
+    if label == "STARTER":
+
+        probability = max(
+            67.0,
+            raw_probability,
+        )
+
+    elif label == "BENCH":
+
+        probability = min(
+            40.0,
+            raw_probability,
+        )
+
+    elif label == "STARTER_LEAN":
+
+        # One source can be strongly positive, but it cannot
+        # pretend to have multi-source certainty.
+        probability = min(
+            74.0,
+            max(
+                67.0,
+                raw_probability,
+            ),
+        )
+
+    elif label == "BENCH_LEAN":
+
+        probability = max(
+            26.0,
+            min(
+                40.0,
+                raw_probability,
+            ),
+        )
+
+    else:
+
+        # Any unresolved disagreement stays inside the
+        # uncertainty band.
+        probability = max(
+            41.0,
+            min(
+                59.0,
+                raw_probability,
+            ),
+        )
+
     spread = (
         max(
-            values
+            sorted_values
         )
         -
         min(
-            values
+            sorted_values
         )
-        if len(
-            values
-        )
-        >= 2
+        if coverage >= 2
         else 0.0
     )
 
     if (
         coverage == 3
         and
-        spread <= 20
+        label
+        in {
+            "STARTER",
+            "BENCH",
+        }
+        and
+        spread <= 20.0
     ):
         confidence = "HIGH"
 
     elif (
         coverage >= 2
         and
-        spread <= 30
+        label
+        in {
+            "STARTER",
+            "BENCH",
+        }
+        and
+        spread <= 30.0
     ):
         confidence = "MEDIUM"
 
@@ -1497,10 +1577,57 @@ def consensus(
     else:
         confidence = "NONE"
 
+    ranking_tier = {
+        "STARTER": 5,
+        "STARTER_LEAN": 4,
+        "UNCERTAIN": 3,
+        "BENCH_LEAN": 2,
+        "BENCH": 1,
+    }.get(
+        label,
+        0,
+    )
+
+    vote_details = []
+
+    for signal in usable:
+
+        value = float(
+            signal[
+                "probability"
+            ]
+        )
+
+        vote_details.append(
+            {
+                "source":
+                    signal.get(
+                        "source"
+                    ),
+
+                "probability":
+                    round(
+                        value,
+                        1,
+                    ),
+
+                "vote":
+                    source_vote(
+                        value
+                    ),
+            }
+        )
+
     return {
         "starter_probability":
             round(
                 probability,
+                1,
+            ),
+
+        "raw_starter_probability":
+            round(
+                raw_probability,
                 1,
             ),
 
@@ -1526,13 +1653,27 @@ def consensus(
         "confidence":
             confidence,
 
+        "ranking_tier":
+            ranking_tier,
+
+        "starter_votes":
+            starter_votes,
+
+        "bench_votes":
+            bench_votes,
+
+        "uncertain_votes":
+            uncertain_votes,
+
+        "source_votes":
+            vote_details,
+
         "spread":
             round(
                 spread,
                 1,
             ),
     }
-
 
 def build_multisource_board(
     snapshot: dict,

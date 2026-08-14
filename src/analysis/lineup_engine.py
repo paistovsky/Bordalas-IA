@@ -467,21 +467,63 @@ def prepare_players(
 
             if starter_probability is not None:
 
+                # ====================================================
+                # V11.3.1 CONSENSUS CLASS RANKING
+                # ====================================================
+                #
+                # Confirmed multi-source STARTER beats:
+                # STARTER_LEAN > UNCERTAIN > BENCH_LEAN > BENCH.
+                #
+                # Probability is only a tie-breaker INSIDE the class.
+                # ====================================================
+
+                starter_consensus = str(
+                    starter.get(
+                        "consensus"
+                    )
+                    or "UNCERTAIN"
+                ).upper()
+
+                starter_tier = int(
+                    starter.get(
+                        "ranking_tier"
+                    )
+                    or {
+                        "STARTER": 5,
+                        "STARTER_LEAN": 4,
+                        "UNCERTAIN": 3,
+                        "BENCH_LEAN": 2,
+                        "BENCH": 1,
+                    }.get(
+                        starter_consensus,
+                        3,
+                    )
+                )
+
                 final_score = (
-                    starter_probability
-                    * 100.0
+                    starter_tier
+                    * 100_000.0
+
                     + starter_coverage
-                    * 25.0
+                    * 3_000.0
+
+                    + starter_probability
+                    * 100.0
+
                     + base_score
-                    * 0.03
+
                     + home_away_adjustment
+
                     + penalty_adjustment
                 )
 
             else:
 
+                # Unknown external status is safer than a known bench,
+                # but worse than a resolved UNCERTAIN.
                 final_score = (
-                    base_score
+                    250_000.0
+                    + base_score
                     + external_adjustment
                     + home_away_adjustment
                     + penalty_adjustment
@@ -1191,12 +1233,17 @@ def build_lineup(
                 )
                 is not None
                 and
-                float(
+                str(
                     player.get(
-                        "starter_probability"
+                        "starter_consensus"
                     )
-                )
-                < 50.0
+                    or ""
+                ).upper()
+                in {
+                    "UNCERTAIN",
+                    "BENCH_LEAN",
+                    "BENCH",
+                }
             )
             or
             (
@@ -1228,12 +1275,16 @@ def build_lineup(
                 )
                 is not None
                 and
-                float(
+                str(
                     player.get(
-                        "starter_probability"
+                        "starter_consensus"
                     )
-                )
-                >= 60.0
+                    or ""
+                ).upper()
+                in {
+                    "STARTER",
+                    "STARTER_LEAN",
+                }
             )
             or
             (
