@@ -39,6 +39,50 @@ def _write_used(cycle: dict) -> bool:
     )
 
 
+def _cycle_write_execution(
+    cycle: dict,
+) -> tuple[str | None, dict | None]:
+    """Devuelve la escritura real consumida por el ciclo principal."""
+    for source, key in (
+        ("AUTOPILOT", "execution"),
+        ("COMPETITIVE", "competitive_execution"),
+    ):
+        execution = cycle.get(key, {}) or {}
+        if execution.get("write_performed"):
+            return source, execution
+
+    return None, None
+
+
+def _compact_execution(
+    *,
+    source: str | None,
+    action: str | None,
+    result: dict | None,
+    write_used: bool,
+) -> dict:
+    result = result or {}
+    return {
+        "source": source,
+        "action": action,
+        "status": result.get("status"),
+        "write_performed": bool(write_used),
+        "success": result.get(
+            "success",
+            (
+                result.get(
+                    "writes_biwenger",
+                    result.get("sent"),
+                )
+                if write_used
+                else None
+            ),
+        ),
+        "reason": result.get("reason"),
+        "http_status": result.get("http_status"),
+    }
+
+
 def _best_exit(board: dict) -> dict | None:
     items = [
         item
@@ -106,7 +150,7 @@ def _verify_v10_write(action: str) -> dict:
 
 def run_full_autonomous_cycle() -> dict:
     print("\n" + "=" * 100)
-    print("BORDALAS IA - V10.12 FULL AUTONOMOUS LIVE")
+    print("BORDALAS IA - V10.13 FULL AUTONOMOUS LIVE")
     print("=" * 100)
 
     # 1) Existing production engine first.
@@ -115,9 +159,14 @@ def run_full_autonomous_cycle() -> dict:
         competitive_live=True,
     )
 
+    execution_source, cycle_execution = _cycle_write_execution(cycle)
     write_used = _write_used(cycle)
-    action_taken = None
-    action_result = None
+    action_taken = (
+        cycle_execution.get("action")
+        if cycle_execution
+        else None
+    )
+    action_result = cycle_execution
     v10_verification = {
         "attempted": False,
         "success": None,
@@ -140,6 +189,7 @@ def run_full_autonomous_cycle() -> dict:
             write_used = True
             action_taken = "BUY_V10"
             action_result = buy
+            execution_source = "V10_BUY"
             v10_verification = _verify_v10_write(
                 action_taken
             )
@@ -172,6 +222,7 @@ def run_full_autonomous_cycle() -> dict:
             )
             write_used = True
             action_taken = "RAISE_COUNTER"
+            execution_source = "V10_COUNTER"
             v10_verification = _verify_v10_write(
                 action_taken
             )
@@ -187,18 +238,25 @@ def run_full_autonomous_cycle() -> dict:
             )
             write_used = bool(action_result.get("sent"))
             action_taken = "EXIT_LISTING"
+            execution_source = "V10_EXIT"
             if write_used:
                 v10_verification = _verify_v10_write(
                     action_taken
                 )
 
     payload = {
-        "version": "V10.12",
+        "version": "V10.13",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "full_autonomous_live": True,
         "write_used": write_used,
         "action_taken": action_taken,
         "action_result": action_result,
+        "execution": _compact_execution(
+            source=execution_source,
+            action=action_taken,
+            result=action_result,
+            write_used=write_used,
+        ),
         "snapshot_policy": {
             "initial": 1,
             "legacy_post_write": bool(
@@ -219,7 +277,7 @@ def run_full_autonomous_cycle() -> dict:
     )
 
     print("\n" + "=" * 100)
-    print("V10.12 SUMMARY")
+    print("V10.13 SUMMARY")
     print("=" * 100)
     print("Full autonomous LIVE: YES")
     print(f"Write used: {'YES' if write_used else 'NO'}")

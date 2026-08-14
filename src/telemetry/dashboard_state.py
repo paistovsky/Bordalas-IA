@@ -29,6 +29,9 @@ DASHBOARD_STATUS = Path("dashboard") / "data" / "status.json"
 REACT_DASHBOARD_STATUS = Path("dashboard-v8") / "public" / "data" / "status.json"
 PLAYER_MAPPING_CACHE = Path("data") / "player_mapping_cache.json"
 PLAYER_PHOTO_CACHE = Path("data") / "dashboard_player_photo_cache.json"
+FULL_AUTONOMOUS_STATUS = (
+    Path("data") / "trading" / "v10_full_autonomous_status.json"
+)
 
 
 ACTION_LABELS = {
@@ -45,7 +48,11 @@ ACTION_LABELS = {
     "REROLL_COMPUTER_OFFER": "Pedir nueva oferta a Computer",
     "ACCEPT_CLUSTER_BEFORE_EXPIRY": "Aceptar oferta antes de caducar",
     "WATCH_CRITICAL_EXPIRY_CLUSTER": "Vigilar ofertas críticas",
+    "LIST_FOR_LIQUIDITY": "Publicar jugador para generar liquidez",
     "SAVE_LINEUP": "Guardar XI",
+    "BUY_V10": "Comprar oportunidad de mercado",
+    "RAISE_COUNTER": "Mejorar contraoferta",
+    "EXIT_LISTING": "Publicar salida de cartera",
     "WAIT": "Esperar",
 }
 
@@ -820,6 +827,35 @@ def compact_listings(state: dict) -> dict:
     }
 
 
+def _activity_timestamp(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _same_cycle_execution(previous: dict, current: dict) -> bool:
+    if previous.get("phase") != "PRE_ACTION":
+        return False
+    if current.get("phase") != "POST_ACTION":
+        return False
+    if not previous.get("write_performed"):
+        return False
+    if previous.get("action") != current.get("action"):
+        return False
+    if previous.get("status") != current.get("status"):
+        return False
+
+    before = _activity_timestamp(previous.get("timestamp"))
+    after = _activity_timestamp(current.get("timestamp"))
+    if before is None or after is None:
+        return True
+
+    return 0 <= (after - before).total_seconds() <= 15 * 60
+
+
 def load_activity_feed(limit: int = 100) -> list[dict]:
     if not AUTOPILOT_LOG.exists():
         return []
@@ -833,7 +869,7 @@ def load_activity_feed(limit: int = 100) -> list[dict]:
     except OSError:
         return []
 
-    for line in lines[-limit:][::-1]:
+    for line in lines[-limit:]:
         try:
             record = json.loads(line)
         except json.JSONDecodeError:
@@ -846,21 +882,104 @@ def load_activity_feed(limit: int = 100) -> list[dict]:
             or record.get("action")
         )
 
-        rows.append(
-            {
-                "timestamp": record.get("timestamp"),
-                "phase": record.get("log_phase") or record.get("phase"),
-                "action": action,
-                "label": human_action(action),
-                "write_performed": bool(
-                    execution.get("write_performed", False)
-                ),
-                "success": execution.get("success"),
-                "status": execution.get("status"),
-            }
-        )
+        row = {
+            "timestamp": record.get("timestamp"),
+            "phase": record.get("log_phase") or record.get("phase"),
+            "action": action,
+            "label": human_action(action),
+            "write_performed": bool(
+                execution.get("write_performed", False)
+            ),
+            "success": execution.get("success"),
+            "status": execution.get("status"),
+            "reason": execution.get("reason"),
+            "http_status": execution.get("http_status"),
+            "verified_post_action": False,
+        }
 
-    return rows
+        merged = False
+        if row["phase"] == "POST_ACTION" and row["write_performed"]:
+            for index in range(len(rows) - 1, max(-1, len(rows) - 6), -1):
+                if _same_cycle_execution(rows[index], row):
+                    row["started_at"] = rows[index].get("timestamp")
+                    row["verified_post_action"] = True
+                    rows[index] = row
+                    merged = True
+                    break
+
+        if not merged:
+            rows.append(row)
+
+    return rows[::-1]
+
+
+def load_full_autonomous_status() -> dict:
+    if not FULL_AUTONOMOUS_STATUS.exists():
+        return {}
+    try:
+        payload = json.loads(
+            FULL_AUTONOMOUS_STATUS.read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def build_execution_telemetry(
+    activity: list[dict],
+    cycle_status: dict | None = None,
+) -> tuple[dict, dict]:
+    cycle_status = (
+        cycle_status
+        if cycle_status is not None
+        else load_full_autonomous_status()
+    )
+    execution = cycle_status.get("execution", {}) or {}
+    action = execution.get("action") or cycle_status.get("action_taken")
+    write_used = bool(
+        execution.get(
+            "write_performed",
+            cycle_status.get("write_used", False),
+        )
+    )
+    snapshot_policy = cycle_status.get("snapshot_policy", {}) or {}
+    post_write_verified = bool(
+        snapshot_policy.get("legacy_post_write")
+        or snapshot_policy.get("v10_post_write")
+    )
+
+    cycle = {
+        "version": cycle_status.get("version"),
+        "timestamp": cycle_status.get("timestamp"),
+        "write_used": write_used,
+        "action": action,
+        "label": human_action(action) if action else None,
+        "status": execution.get("status"),
+        "success": execution.get("success"),
+        "source": execution.get("source"),
+        "reason": execution.get("reason"),
+        "http_status": execution.get("http_status"),
+        "post_write_verified": post_write_verified,
+    }
+
+    if write_used and action:
+        last_execution = {
+            **cycle,
+            "timestamp": cycle.get("timestamp"),
+            "write_performed": True,
+            "verified_post_action": post_write_verified,
+        }
+        return cycle, last_execution
+
+    history_execution = next(
+        (
+            item
+            for item in activity
+            if item.get("write_performed")
+        ),
+        {},
+    )
+    return cycle, history_execution
 
 
 
@@ -1856,6 +1975,7 @@ def build_dashboard_state() -> dict:
     result = build_global_decision(snapshot)
     state = result.get("state", {}) or {}
     decision = result.get("decision", {}) or {}
+    action_decision = result.get("action_decision", {}) or {}
 
     board = collect_board_history()
 
@@ -1907,6 +2027,10 @@ def build_dashboard_state() -> dict:
 
     competitive = load_competitive_dashboard_state()
     solvency_plans = build_dashboard_solvency_plans(state)
+    activity = load_activity_feed()
+    cycle_telemetry, last_execution = build_execution_telemetry(
+        activity
+    )
 
     for offer in competitive.get("offers", []) or []:
         player_id = safe_int(
@@ -2004,7 +2128,7 @@ def build_dashboard_state() -> dict:
             "league_id": board.get("league_id"),
             "current_user_id": board.get("current_user_id"),
             "mode": "LIVE",
-            "cycle_minutes": 15,
+            "cycle_minutes": 30,
         },
         "summary": {
             "balance": safe_int(state.get("balance")),
@@ -2041,6 +2165,20 @@ def build_dashboard_state() -> dict:
             "executable": bool(decision.get("executable")),
             "reason": decision.get("reason"),
         },
+        "next_action": {
+            "type": action_decision.get("type"),
+            "action": action_decision.get("action"),
+            "label": (
+                human_action(action_decision.get("action"))
+                if action_decision
+                else None
+            ),
+            "priority": safe_int(action_decision.get("priority")),
+            "executable": bool(action_decision.get("executable")),
+            "reason": action_decision.get("reason"),
+        },
+        "cycle": cycle_telemetry,
+        "last_execution": last_execution,
         "solvency": {
             "needed": bool(recovery.get("needed")),
             "possible": recovery.get("possible"),
@@ -2092,7 +2230,7 @@ def build_dashboard_state() -> dict:
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
         "priorities": candidates,
-        "activity": load_activity_feed(),
+        "activity": activity,
         "competitive": competitive,
     }
 

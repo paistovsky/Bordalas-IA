@@ -105,6 +105,7 @@ jobs:
           python -m src.analysis.test_multisource_starter_v1124
           python -m src.analysis.test_v10_full_autonomous_live
           python -m src.analysis.test_live_solvency_authority_v115
+          python -m src.telemetry.test_dashboard_execution_v121
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash

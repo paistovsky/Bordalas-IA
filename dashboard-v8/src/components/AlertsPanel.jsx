@@ -5,9 +5,22 @@ import { formatMoney } from "../lib/utils";
 export default function AlertsPanel({ data }) {
   const { summary, lineup, competitive } = data;
   const active = competitive.offers || [];
-  const recent = competitive.recentClosed || [];
+  const recent = competitive.recent_closed || competitive.recentClosed || [];
+  const lastExecution = data.lastExecution || {};
 
   const alerts = [];
+  if (lastExecution.action) {
+    alerts.push([
+      lastExecution.success === false ? "danger" : "success",
+      lastExecution.success === false ? CircleAlert : CircleCheck,
+      "ÚLTIMA ACCIÓN LIVE",
+      `${lastExecution.label || lastExecution.action}${
+        lastExecution.verified_post_action || lastExecution.post_write_verified
+          ? " · verificada"
+          : ""
+      }.`
+    ]);
+  }
   if (recent[0]) {
     alerts.push(["danger", CircleAlert, "OFERTA RETIRADA", `${recent[0].rival_name} retiró su oferta por ${recent[0].player_name}.`]);
   }
@@ -21,7 +34,7 @@ export default function AlertsPanel({ data }) {
     <Card>
       <CardHeader><CardTitle>ALERTAS IMPORTANTES</CardTitle></CardHeader>
       <div className="alerts-list">
-        {alerts.map(([tone, Icon, title, copy]) => (
+        {alerts.slice(0, 4).map(([tone, Icon, title, copy]) => (
           <div key={title} className="alert-row">
             <div className={`alert-icon alert-${tone}`}><Icon size={15} /></div>
             <strong className={`tone-${tone}`}>{title}</strong>

@@ -16,6 +16,11 @@ export function normalizeStatus(raw = {}) {
   const competitive = raw.competitive || {};
   const league = raw.league_center || {};
   const competition = raw.competition || league.competition || { standings: [] };
+  const activity = raw.activity || [];
+  const providedLastExecution = raw.last_execution || {};
+  const lastExecution = providedLastExecution.action
+    ? providedLastExecution
+    : activity.find((item) => item.write_performed) || {};
 
   const activeOffers = competitive.offers || [];
   const activeKeys = new Set(
@@ -42,7 +47,11 @@ export function normalizeStatus(raw = {}) {
     offers: raw.offers || [],
     listings: raw.listings || {},
     speculation: raw.speculation || {},
-    activity: raw.activity || [],
+    activity,
+    cycle: raw.cycle || {},
+    lastExecution,
+    nextAction: raw.next_action || {},
+    decision: raw.decision || {},
     league,
     competition,
     laliga: league.laliga || {}

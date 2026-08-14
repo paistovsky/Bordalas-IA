@@ -32,6 +32,14 @@ def main() -> None:
         "Decision:      "
         f"{state.get('decision', {}).get('label')}"
     )
+    print(
+        "Ultima accion: "
+        f"{state.get('last_execution', {}).get('label') or 'Sin escritura'}"
+    )
+    print(
+        "Verificada:    "
+        f"{'SI' if state.get('last_execution', {}).get('verified_post_action') else 'NO'}"
+    )
     print()
     print("# DASHBOARD TELEMETRY V2.0: OK")
     print("=" * 78)

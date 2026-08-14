@@ -77,7 +77,7 @@ export default function App() {
             <span>{PAGE_TITLES[page]}</span>
             <strong>JORNADA {data.summary.target_matchday ?? "—"}</strong>
             <small>
-              Actualizado {ago(data.meta.generated_at)} · ciclo {data.meta.cycle_minutes || 15} min
+              Actualizado {ago(data.meta.generated_at)} · ciclo {data.meta.cycle_minutes || 30} min
             </small>
           </div>
 
@@ -93,6 +93,10 @@ export default function App() {
         <footer className="status-footer">
           <span className="online-dot">● PEPE ONLINE</span>
           <span className="autopilot-live">● AUTOPILOT LIVE</span>
+          <span>{data.cycle.version || "V10"}</span>
+          <span>
+            ÚLTIMA ACCIÓN: {String(data.lastExecution.label || "SIN ESCRITURA").toUpperCase()}
+          </span>
         </footer>
       </main>
     </div>

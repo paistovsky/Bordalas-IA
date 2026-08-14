@@ -2,9 +2,16 @@ import bordalasCalm from "../assets/bordalas-calm.jpg";
 import bordalasWatch from "../assets/bordalas-watch.jpg";
 import bordalasAlert from "../assets/bordalas-alert.jpg";
 import bordalasCritical from "../assets/bordalas-critical.jpg";
-import { Gauge, Target, Shield, WalletCards } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  CheckCircle2,
+  Gauge,
+  Shield,
+  WalletCards
+} from "lucide-react";
 import { Card, CardHeader, CardTitle } from "./ui/Card";
-import { formatMoney } from "../lib/utils";
+import { ago, formatMoney } from "../lib/utils";
 
 function decisionPortrait(data) {
   const level = String(data?.now?.level || "").toUpperCase();
@@ -27,9 +34,14 @@ export default function DecisionPanel({ data }) {
   const { now, summary } = data;
   const deficit = Math.max(0, -Number(summary.balance || 0));
   const [portraitState, portrait] = decisionPortrait(data);
+  const execution = data.lastExecution || {};
+  const nextAction = data.nextAction || {};
+  const executionVerified = Boolean(
+    execution.verified_post_action || execution.post_write_verified
+  );
 
   const rows = [
-    ["ESTRATEGIA ACTUAL", deficit > 0 ? "Recuperar solvencia" : "Conservar ventaja", Target],
+    ["PRÓXIMA ACCIÓN", nextAction.label || "Sin acción ejecutable", ArrowRight],
     ["RIESGO XI", summary.lineup_risk || "BAJO", Shield],
     ["OBJETIVO DE CAJA", deficit ? formatMoney(deficit) : "POSITIVO", WalletCards],
     ["PRESIÓN", Number(summary.hours_to_deadline || 0) < 6 ? "ALTA" : "BAJA", Gauge]
@@ -50,6 +62,25 @@ export default function DecisionPanel({ data }) {
           <strong>{now.title || "Sin acción necesaria"}</strong>
           <p>{String(now.detail || "Bordalás está observando el mercado.").replaceAll("Pepe", "Bordalás")}</p>
         </div>
+      </div>
+
+      <div className={`execution-receipt ${execution.action ? "has-execution" : "no-execution"}`}>
+        <div className="execution-receipt-icon">
+          {executionVerified ? <CheckCircle2 size={18} /> : <Activity size={18} />}
+        </div>
+        <div className="execution-receipt-copy">
+          <span>ÚLTIMA ACCIÓN REAL</span>
+          <strong>{execution.label || "Sin escrituras registradas"}</strong>
+          <small>
+            {execution.status
+              ? String(execution.status).replaceAll("_", " ")
+              : "Sin operación LIVE"}
+            {execution.timestamp ? ` · ${ago(execution.timestamp)}` : ""}
+          </small>
+        </div>
+        <b className={executionVerified ? "execution-proof verified" : "execution-proof"}>
+          {executionVerified ? "✓ VERIFICADA" : execution.action ? "REGISTRADA" : "SIN ESCRITURA"}
+        </b>
       </div>
 
       <div className="decision-stats">

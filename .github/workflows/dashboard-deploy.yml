@@ -40,6 +40,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare persistent directories
+        run: |
+          mkdir -p data/autopilot
+          mkdir -p data/lineup_monitor
+          mkdir -p data/intelligence
+          mkdir -p data/calendar
+          mkdir -p data/rival_intelligence
+          mkdir -p data/league_center
+          mkdir -p data/competitive_negotiations
+          mkdir -p data/trading
+
+      - name: Restore latest Bordalas LIVE state
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            data/autopilot
+            data/lineup_monitor
+            data/intelligence
+            data/calendar
+            data/rival_intelligence
+            data/league_center
+            data/competitive_negotiations
+            data/trading
+            data/external_status_cache.json
+            data/player_mapping_cache.json
+            data/snapshot_*.json
+          key: bordalas-dashboard-state-${{ github.run_id }}
+          restore-keys: |
+            bordalas-state-
+
       - name: Python 3.13
         uses: actions/setup-python@v5
         with:
@@ -69,6 +99,9 @@ jobs:
 
       - name: Fresh OBSERVER cycle
         run: python -m src.autopilot --once
+
+      - name: Validate execution telemetry
+        run: python -m src.telemetry.test_dashboard_execution_v121
 
       - name: Build telemetry
         run: |

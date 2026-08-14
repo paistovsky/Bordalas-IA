@@ -60,9 +60,17 @@ export default function AuditPage({ data }) {
             <strong>
               {String(item.label || "").replaceAll("Pepe", "Bordalás")}
             </strong>
-            <small>{item.phase || "—"}</small>
+            <small>
+              {item.status
+                ? String(item.status).replaceAll("_", " ")
+                : item.phase || "—"}
+            </small>
             <b className={item.write_performed ? "audit-write" : "audit-seen"}>
-              {item.write_performed ? "ESCRITURA" : "VISTO"}
+              {item.write_performed
+                ? item.verified_post_action
+                  ? "✓ VERIFICADA"
+                  : "ESCRITURA"
+                : "VISTO"}
             </b>
           </div>
         ))}

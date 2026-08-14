@@ -1519,3 +1519,102 @@ body{
     min-height:165px!important;
   }
 }
+
+
+/* =========================================================
+   BORDALÁS IA V9.6 — LIVE EXECUTION RECEIPT
+   Separates current strategy from the last verified write.
+   ========================================================= */
+
+.execution-receipt{
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  margin:0 12px 9px;
+  padding:9px 10px;
+  border:1px solid rgba(126,151,172,.2);
+  border-radius:7px;
+  background:linear-gradient(90deg,rgba(15,35,51,.92),rgba(9,24,36,.72));
+}
+
+.execution-receipt.has-execution{
+  border-color:rgba(54,227,125,.38);
+  background:linear-gradient(90deg,rgba(15,58,37,.68),rgba(9,28,30,.72));
+}
+
+.execution-receipt-icon{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:#8ca0b2;
+  background:#14293a;
+}
+
+.has-execution .execution-receipt-icon{
+  color:var(--green);
+  background:rgba(54,227,125,.12);
+}
+
+.execution-receipt-copy{min-width:0}
+.execution-receipt-copy span{
+  display:block;
+  color:#73889b;
+  font-size:7.5px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.execution-receipt-copy strong{
+  display:block;
+  margin-top:2px;
+  overflow:hidden;
+  color:#f2f7fa;
+  font-size:11px;
+  line-height:1.2;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.execution-receipt-copy small{
+  display:block;
+  margin-top:2px;
+  overflow:hidden;
+  color:#8295a5;
+  font-size:7.5px;
+  text-overflow:ellipsis;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.execution-proof{
+  padding:4px 6px;
+  border:1px solid #3a5062;
+  border-radius:5px;
+  color:#8fa0af;
+  font-size:7px;
+  white-space:nowrap;
+}
+.execution-proof.verified{
+  border-color:rgba(54,227,125,.48);
+  color:var(--green);
+  background:rgba(54,227,125,.08);
+}
+
+.decision-stat:first-child b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.audit-item-v93 small{text-transform:uppercase}
+
+@media(max-width:760px){
+  .execution-receipt{
+    grid-template-columns:32px minmax(0,1fr);
+  }
+  .execution-proof{
+    grid-column:2;
+    justify-self:start;
+  }
+}
