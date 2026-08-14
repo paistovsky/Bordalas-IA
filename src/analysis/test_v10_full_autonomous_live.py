@@ -1,5 +1,7 @@
+import json
 import tempfile
 
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -123,6 +125,16 @@ def test_full_cycle_reports_autopilot_write():
         "success": True,
         "http_status": 200,
         "reason": "Oferta Computer rechazada tras revalidacion fresca.",
+        "offer": {
+            "expires_at": datetime(
+                2026,
+                8,
+                16,
+                7,
+                0,
+                tzinfo=timezone.utc,
+            ),
+        },
     }
     cycle = {
         "execution": execution,
@@ -131,11 +143,12 @@ def test_full_cycle_reports_autopilot_write():
     }
 
     with tempfile.TemporaryDirectory() as tmp:
+        status_path = Path(tmp) / "status.json"
         with (
             patch.object(
                 coordinator,
                 "STATUS_PATH",
-                Path(tmp) / "status.json",
+                status_path,
             ),
             patch.object(
                 coordinator,
@@ -167,12 +180,19 @@ def test_full_cycle_reports_autopilot_write():
         ):
             payload = coordinator.run_full_autonomous_cycle()
 
+        saved = json.loads(status_path.read_text(encoding="utf-8"))
+
     buy.assert_not_called()
     assert payload["action_taken"] == "REROLL_COMPUTER_OFFER"
     assert payload["execution"]["source"] == "AUTOPILOT"
     assert payload["execution"]["status"] == "OFFER_REROLLED"
     assert payload["execution"]["write_performed"] is True
     assert payload["execution"]["success"] is True
+    assert saved["version"] == "V10.13.1"
+    assert (
+        saved["action_result"]["offer"]["expires_at"]
+        == "2026-08-16T07:00:00+00:00"
+    )
 
 
 def main():
@@ -186,7 +206,7 @@ def main():
     for fn in tests:
         fn()
         print("OK ", fn.__name__)
-    print("V10.13 FULL AUTONOMOUS LIVE: 5/5 OK")
+    print("V10.13.1 FULL AUTONOMOUS LIVE: 5/5 OK")
 
 
 if __name__ == "__main__":

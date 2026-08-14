@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, time, timezone
 from pathlib import Path
 
 from src.autopilot import refresh_snapshot, run_cycle
@@ -28,6 +28,19 @@ EXIT_ACTIONS = {
     "CUT_LOSS",
     "ROTATE_CAPITAL",
 }
+
+
+def _json_default(value):
+    """Serializa tipos auxiliares presentes en resultados LIVE anidados."""
+    if isinstance(value, (datetime, date, time)):
+        return value.isoformat()
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, set):
+        return sorted(value)
+    raise TypeError(
+        f"Object of type {type(value).__name__} is not JSON serializable"
+    )
 
 
 def _write_used(cycle: dict) -> bool:
@@ -150,7 +163,7 @@ def _verify_v10_write(action: str) -> dict:
 
 def run_full_autonomous_cycle() -> dict:
     print("\n" + "=" * 100)
-    print("BORDALAS IA - V10.13 FULL AUTONOMOUS LIVE")
+    print("BORDALAS IA - V10.13.1 FULL AUTONOMOUS LIVE")
     print("=" * 100)
 
     # 1) Existing production engine first.
@@ -245,7 +258,7 @@ def run_full_autonomous_cycle() -> dict:
                 )
 
     payload = {
-        "version": "V10.13",
+        "version": "V10.13.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "full_autonomous_live": True,
         "write_used": write_used,
@@ -272,12 +285,17 @@ def run_full_autonomous_cycle() -> dict:
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
     STATUS_PATH.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            indent=2,
+            default=_json_default,
+        ),
         encoding="utf-8",
     )
 
     print("\n" + "=" * 100)
-    print("V10.13 SUMMARY")
+    print("V10.13.1 SUMMARY")
     print("=" * 100)
     print("Full autonomous LIVE: YES")
     print(f"Write used: {'YES' if write_used else 'NO'}")
