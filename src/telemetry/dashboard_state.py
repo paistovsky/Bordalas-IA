@@ -415,6 +415,79 @@ def compact_lineup(
             )
         )
 
+        # ====================================================
+        # V11.4.1 DASHBOARD MULTISOURCE HOTFIX
+        # ====================================================
+        starter = (
+            player.get(
+                "starter_intelligence"
+            )
+            or {}
+        )
+
+        starter_sources = (
+            player.get(
+                "starter_sources"
+            )
+            or starter.get(
+                "sources"
+            )
+            or {}
+        )
+
+        starter_consensus = (
+            player.get(
+                "starter_consensus"
+            )
+            or starter.get(
+                "consensus"
+            )
+        )
+
+        starter_probability = (
+            player.get(
+                "starter_probability"
+            )
+        )
+
+        if starter_probability is None:
+            starter_probability = starter.get(
+                "starter_probability"
+            )
+
+        starter_coverage = safe_int(
+            player.get(
+                "starter_source_coverage",
+                starter.get(
+                    "source_coverage"
+                ),
+            )
+        )
+
+        def source_probability(
+            source_name: str,
+        ):
+            source = (
+                starter_sources.get(
+                    source_name
+                )
+                or {}
+            )
+
+            value = source.get(
+                "probability"
+            )
+
+            if value is None:
+                return None
+
+            return round(
+                safe_float(
+                    value
+                ),
+                1,
+            )
+
         players.append(
             {
                 "id": player_id,
@@ -446,11 +519,121 @@ def compact_lineup(
                     2,
                 ),
                 "availability": player.get("availability_label"),
-                "jp_status": player.get("external_lineup_status"),
-                "jp_confidence": round(
-                    safe_float(player.get("external_lineup_confidence")),
-                    1,
+
+                # Compatibility aliases for current dashboard frontend:
+                # no longer JP-only; now real multisource consensus.
+                "jp_status": (
+                    starter_consensus
+                    or player.get(
+                        "external_lineup_status"
+                    )
                 ),
+
+                "jp_confidence": (
+                    round(
+                        safe_float(
+                            starter_probability
+                        ),
+                        1,
+                    )
+                    if starter_probability is not None
+                    else round(
+                        safe_float(
+                            player.get(
+                                "external_lineup_confidence"
+                            )
+                        ),
+                        1,
+                    )
+                ),
+
+                # Native multisource fields for the next UI iteration.
+                "starter_consensus":
+                    starter_consensus,
+
+                "starter_probability": (
+                    round(
+                        safe_float(
+                            starter_probability
+                        ),
+                        1,
+                    )
+                    if starter_probability is not None
+                    else None
+                ),
+
+                "starter_expected_minutes": (
+                    round(
+                        safe_float(
+                            player.get(
+                                "starter_expected_minutes",
+                                starter.get(
+                                    "expected_minutes"
+                                ),
+                            )
+                        ),
+                        1,
+                    )
+                    if (
+                        player.get(
+                            "starter_expected_minutes"
+                        )
+                        is not None
+                        or starter.get(
+                            "expected_minutes"
+                        )
+                        is not None
+                    )
+                    else None
+                ),
+
+                "starter_source_coverage":
+                    starter_coverage,
+
+                "starter_confidence": (
+                    player.get(
+                        "starter_confidence"
+                    )
+                    or starter.get(
+                        "confidence"
+                    )
+                ),
+
+                "starter_votes":
+                    safe_int(
+                        starter.get(
+                            "starter_votes"
+                        )
+                    ),
+
+                "uncertain_votes":
+                    safe_int(
+                        starter.get(
+                            "uncertain_votes"
+                        )
+                    ),
+
+                "bench_votes":
+                    safe_int(
+                        starter.get(
+                            "bench_votes"
+                        )
+                    ),
+
+                "jp_probability":
+                    source_probability(
+                        "JORNADA_PERFECTA"
+                    ),
+
+                "ff_probability":
+                    source_probability(
+                        "FUTBOLFANTASY"
+                    ),
+
+                "af_probability":
+                    source_probability(
+                        "ANALITICA_FANTASY"
+                    ),
                 "icon_hero": icon_hero,
                 "biwenger_photo_url": photo.get("biwenger_photo_url"),
                 "api_football_id": photo.get("api_football_id"),
