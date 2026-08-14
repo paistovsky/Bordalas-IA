@@ -125,7 +125,7 @@ def main():
     for fn in tests:
         fn()
         print("OK ", fn.__name__)
-    print("V10.11 FULL AUTONOMOUS LIVE: 4/4 OK")
+    print("V10.12 FULL AUTONOMOUS LIVE: 4/4 OK")
 
 
 if __name__ == "__main__":

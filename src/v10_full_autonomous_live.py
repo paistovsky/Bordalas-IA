@@ -106,7 +106,7 @@ def _verify_v10_write(action: str) -> dict:
 
 def run_full_autonomous_cycle() -> dict:
     print("\n" + "=" * 100)
-    print("BORDALAS IA - V10.11 FULL AUTONOMOUS LIVE")
+    print("BORDALAS IA - V10.12 FULL AUTONOMOUS LIVE")
     print("=" * 100)
 
     # 1) Existing production engine first.
@@ -193,7 +193,7 @@ def run_full_autonomous_cycle() -> dict:
                 )
 
     payload = {
-        "version": "V10.11",
+        "version": "V10.12",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "full_autonomous_live": True,
         "write_used": write_used,
@@ -219,7 +219,7 @@ def run_full_autonomous_cycle() -> dict:
     )
 
     print("\n" + "=" * 100)
-    print("V10.11 SUMMARY")
+    print("V10.12 SUMMARY")
     print("=" * 100)
     print("Full autonomous LIVE: YES")
     print(f"Write used: {'YES' if write_used else 'NO'}")

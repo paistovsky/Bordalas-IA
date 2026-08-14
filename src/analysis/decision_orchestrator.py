@@ -648,6 +648,28 @@ def calculate_solvency_priority(
     ]
 
 
+def calculate_accept_expiry_priority(
+    balance: int,
+    phase: str,
+) -> int:
+    """
+    Una oferta cuya perdida rompe SOLVENCY_GUARANTEE es una accion de
+    solvencia, no una simple decision comercial.
+
+    Cuando el saldo es negativo debe ganar a cualquier cambio del XI,
+    reroll o mantenimiento. La ventana urgente ya esta limitada por el
+    motor Accept-Before-Expiry a las seis horas anteriores al deadline
+    efectivo, por lo que esta prioridad no provoca ventas prematuras.
+    """
+    if phase in LOCK_PHASES:
+        return 0
+
+    if balance < 0:
+        return PRIORITY["EMERGENCY_SOLVENCY"] + 10
+
+    return PRIORITY["ACCEPT_EXPIRY_URGENT"]
+
+
 def add_temporal_gate(
     candidates: list[dict],
     temporal_gate: dict,
@@ -1706,9 +1728,10 @@ def build_global_decision(
                     "ACCEPT_BEFORE_EXPIRY_SAFETY",
 
                 "priority":
-                    PRIORITY[
-                        "ACCEPT_EXPIRY_URGENT"
-                    ],
+                    calculate_accept_expiry_priority(
+                        balance=balance,
+                        phase=phase,
+                    ),
 
                 "action":
                     "ACCEPT_CLUSTER_BEFORE_EXPIRY",

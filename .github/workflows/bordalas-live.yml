@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Respaldo interno de GitHub.
-    # El cron-job externo despierta a Pepe cada 15 minutos.
+    # Ciclo autonomo principal: dos ejecuciones por hora.
+    # El cron-job externo puede permanecer desactivado.
     - cron: "7,37 * * * *"
 
 permissions:
@@ -104,6 +104,7 @@ jobs:
           python -m src.analysis.test_jp_profile_scope_v114
           python -m src.analysis.test_multisource_starter_v1124
           python -m src.analysis.test_v10_full_autonomous_live
+          python -m src.analysis.test_live_solvency_authority_v115
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash

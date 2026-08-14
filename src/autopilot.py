@@ -2517,6 +2517,28 @@ def ensure_lineup_baseline(
 # ============================================================
 
 
+def select_live_decision(
+    result: dict,
+) -> dict:
+    """
+    La decision global describe la preocupacion principal y puede ser solo
+    informativa. action_decision es la primera accion LIVE ejecutable.
+
+    Conservamos el fallback para resultados antiguos, pero produccion debe
+    ejecutar action_decision cuando exista.
+    """
+    action_decision = result.get(
+        "action_decision"
+    )
+
+    if action_decision:
+        return action_decision
+
+    return result[
+        "decision"
+    ]
+
+
 def run_cycle(
     live: bool = False,
     competitive_live: bool = False,
@@ -2600,9 +2622,9 @@ def run_cycle(
     )
 
     decision = (
-        result[
-            "decision"
-        ]
+        select_live_decision(
+            result
+        )
     )
 
     execution = (
