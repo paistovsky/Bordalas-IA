@@ -500,9 +500,45 @@ def prepare_players(
                     )
                 )
 
+                # ====================================================
+                # V11.3.3 VOTE QUALITY TIEBREAK
+                # ====================================================
+                #
+                # Inside the SAME consensus class:
+                # STARTER votes are positive evidence.
+                # BENCH votes are negative evidence.
+                #
+                # Example:
+                # 1S/2U/0B > 1S/1U/1B > 0S/2U/1B
+                # ====================================================
+
+                starter_votes = int(
+                    starter.get(
+                        "starter_votes"
+                    )
+                    or 0
+                )
+
+                bench_votes = int(
+                    starter.get(
+                        "bench_votes"
+                    )
+                    or 0
+                )
+
+                vote_quality = (
+                    starter_votes
+                    * 5_000.0
+                    -
+                    bench_votes
+                    * 5_000.0
+                )
+
                 final_score = (
                     starter_tier
                     * 100_000.0
+
+                    + vote_quality
 
                     + starter_coverage
                     * 3_000.0
