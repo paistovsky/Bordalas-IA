@@ -948,44 +948,811 @@ def ff_team_slug(
     )
 
 
-def parse_ff_profile_probability(
+def ff_percentages(
+    text: str,
+) -> list[float]:
+
+    result = []
+
+    for raw in re.findall(
+        r"(?<!\d)(\d{1,3})\s*%",
+        str(
+            text
+            or ""
+        ),
+    ):
+
+        value = float(
+            raw
+        )
+
+        if 0.0 <= value <= 100.0:
+            result.append(
+                value
+            )
+
+    return result
+
+
+def ff_element_external_names(
+    element,
+) -> list[str]:
+
+    names = []
+
+    for anchor in element.find_all(
+        "a",
+        href=True,
+    ):
+
+        label = anchor.get_text(
+            " ",
+            strip=True,
+        )
+
+        if (
+            label
+            and
+            len(
+                normalize(
+                    label
+                )
+            )
+            >= 3
+        ):
+            names.append(
+                label
+            )
+
+        href = str(
+            anchor.get(
+                "href"
+            )
+            or ""
+        )
+
+        for token in (
+            "/jugadores/",
+            "/jugador/",
+        ):
+
+            if token in href:
+
+                tail = (
+                    href.split(
+                        token,
+                        1,
+                    )[
+                        1
+                    ]
+                    .split(
+                        "?",
+                        1,
+                    )[
+                        0
+                    ]
+                    .strip(
+                        "/"
+                    )
+                )
+
+                pieces = [
+                    part
+                    for part in tail.split(
+                        "/"
+                    )
+                    if part
+                ]
+
+                if pieces:
+
+                    slug = pieces[
+                        -1
+                    ].replace(
+                        "-",
+                        " ",
+                    )
+
+                    if slug:
+                        names.append(
+                            slug
+                        )
+
+    for image in element.find_all(
+        "img",
+    ):
+
+        alt = str(
+            image.get(
+                "alt"
+            )
+            or ""
+        ).strip()
+
+        match = re.search(
+            r"(?:Foto|Imagen|Jugador)\s+de\s+(.+)",
+            alt,
+            re.IGNORECASE,
+        )
+
+        if match:
+            names.append(
+                match.group(
+                    1
+                )
+            )
+
+    unique = []
+
+    for name in names:
+
+        normalized = normalize(
+            name
+        )
+
+        if (
+            normalized
+            and
+            normalized
+            not in {
+                normalize(
+                    item
+                )
+                for item in unique
+            }
+        ):
+            unique.append(
+                name
+            )
+
+    return unique
+
+
+def ff_match_external_names(
+    external_names: list[str],
+    players: list[dict],
+    snapshot: dict,
+) -> dict | None:
+
+    scored = []
+
+    for player in players:
+
+        aliases = (
+            aliases_for_roster_player(
+                player,
+                snapshot,
+            )
+        )
+
+        score = 0.0
+        source_name = None
+
+        for external_name in external_names:
+
+            current = (
+                strict_name_score(
+                    external_name,
+                    aliases,
+                )
+            )
+
+            if current > score:
+
+                score = current
+                source_name = (
+                    external_name
+                )
+
+        scored.append(
+            (
+                score,
+                player,
+                source_name,
+            )
+        )
+
+    scored.sort(
+        key=lambda item: item[
+            0
+        ],
+        reverse=True,
+    )
+
+    if not scored:
+        return None
+
+    best_score, best, best_name = (
+        scored[
+            0
+        ]
+    )
+
+    second = (
+        scored[
+            1
+        ][
+            0
+        ]
+        if len(
+            scored
+        )
+        > 1
+        else 0.0
+    )
+
+    if best_score < 0.75:
+        return None
+
+    if (
+        second >= 0.75
+        and
+        best_score - second < 0.08
+    ):
+        return None
+
+    return {
+        "player":
+            best,
+
+        "score":
+            round(
+                best_score,
+                3,
+            ),
+
+        "source_name":
+            best_name,
+    }
+
+
+def ff_find_probability_column(
+    table,
+) -> int | None:
+
+    rows = table.find_all(
+        "tr"
+    )
+
+    for row in rows[:4]:
+
+        cells = row.find_all(
+            [
+                "th",
+                "td",
+            ]
+        )
+
+        for index, cell in enumerate(
+            cells
+        ):
+
+            header = normalize(
+                cell.get_text(
+                    " ",
+                    strip=True,
+                )
+            )
+
+            if (
+                header == "prob"
+                or
+                header.startswith(
+                    "prob "
+                )
+                or
+                "probabilidad"
+                in header
+            ):
+                return index
+
+    return None
+
+
+def ff_extract_table_records(
+    soup,
+    players: list[dict],
+    snapshot: dict,
+) -> list[dict]:
+
+    records = []
+
+    for table in soup.find_all(
+        "table"
+    ):
+
+        probability_index = (
+            ff_find_probability_column(
+                table
+            )
+        )
+
+        # Strongest signal: the table explicitly contains
+        # a Prob./Probabilidad column.
+        if probability_index is None:
+            continue
+
+        for row in table.find_all(
+            "tr"
+        ):
+
+            cells = row.find_all(
+                [
+                    "td",
+                    "th",
+                ]
+            )
+
+            if (
+                len(
+                    cells
+                )
+                <= probability_index
+            ):
+                continue
+
+            probability_values = (
+                ff_percentages(
+                    cells[
+                        probability_index
+                    ].get_text(
+                        " ",
+                        strip=True,
+                    )
+                )
+            )
+
+            if not probability_values:
+                continue
+
+            external_names = (
+                ff_element_external_names(
+                    row
+                )
+            )
+
+            # Some FF versions render the player as plain text.
+            if not external_names:
+
+                for cell in cells:
+
+                    text_value = (
+                        cell.get_text(
+                            " ",
+                            strip=True,
+                        )
+                    )
+
+                    if (
+                        text_value
+                        and
+                        "%"
+                        not in text_value
+                        and
+                        len(
+                            normalize(
+                                text_value
+                            )
+                        )
+                        <= 50
+                    ):
+
+                        external_names.append(
+                            text_value
+                        )
+
+            matched = (
+                ff_match_external_names(
+                    external_names,
+                    players,
+                    snapshot,
+                )
+            )
+
+            if not matched:
+                continue
+
+            records.append(
+                {
+                    "player":
+                        matched[
+                            "player"
+                        ],
+
+                    "source_name":
+                        matched[
+                            "source_name"
+                        ],
+
+                    "match_score":
+                        matched[
+                            "score"
+                        ],
+
+                    "probability":
+                        probability_values[
+                            0
+                        ],
+
+                    "method":
+                        "TEAM_TABLE_PROB_COLUMN",
+                }
+            )
+
+    return records
+
+
+def ff_extract_row_records(
+    soup,
+    players: list[dict],
+    snapshot: dict,
+) -> list[dict]:
+
+    records = []
+
+    # Fallback for versions where the lineup is rendered as
+    # div/list cards instead of a semantic table.
+    for element in soup.find_all(
+        [
+            "tr",
+            "li",
+            "article",
+            "div",
+        ]
+    ):
+
+        text_value = element.get_text(
+            " ",
+            strip=True,
+        )
+
+        if (
+            not text_value
+            or
+            len(
+                text_value
+            )
+            > 260
+        ):
+            continue
+
+        values = ff_percentages(
+            text_value
+        )
+
+        if len(values) != 1:
+            continue
+
+        classes = " ".join(
+            element.get(
+                "class",
+                [],
+            )
+            or []
+        )
+
+        marker = normalize(
+            f"{element.get('id','')} "
+            f"{classes}"
+        )
+
+        # Avoid unrelated market/stat cards unless DOM semantics
+        # look lineup/player/probability-related.
+        semantic = any(
+            token in marker
+            for token in (
+                "aline",
+                "lineup",
+                "player",
+                "jugador",
+                "prob",
+                "once",
+            )
+        )
+
+        external_names = (
+            ff_element_external_names(
+                element
+            )
+        )
+
+        if (
+            not semantic
+            and
+            not external_names
+        ):
+            continue
+
+        matched = (
+            ff_match_external_names(
+                external_names,
+                players,
+                snapshot,
+            )
+        )
+
+        if not matched:
+            continue
+
+        records.append(
+            {
+                "player":
+                    matched[
+                        "player"
+                    ],
+
+                "source_name":
+                    matched[
+                        "source_name"
+                    ],
+
+                "match_score":
+                    matched[
+                        "score"
+                    ],
+
+                "probability":
+                    values[
+                        0
+                    ],
+
+                "method":
+                    "TEAM_DOM_NEAR_PLAYER_PERCENT",
+            }
+        )
+
+    return records
+
+
+def ff_extract_text_window_records(
+    soup,
+    players: list[dict],
+    snapshot: dict,
+) -> list[dict]:
+
+    records = []
+
+    # Last conservative fallback. Search only inside a section
+    # whose text contains "Posible alineacion".
+    possible_section = None
+
+    for heading in soup.find_all(
+        [
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+        ]
+    ):
+
+        heading_text = normalize(
+            heading.get_text(
+                " ",
+                strip=True,
+            )
+        )
+
+        if (
+            "posible alineacion"
+            in heading_text
+            or
+            "alineacion probable"
+            in heading_text
+        ):
+
+            possible_section = (
+                heading.parent
+            )
+            break
+
+    if possible_section is None:
+        return records
+
+    section_text = (
+        possible_section.get_text(
+            " ",
+            strip=True,
+        )
+    )
+
+    section_norm = normalize(
+        section_text
+    )
+
+    for player in players:
+
+        aliases = (
+            aliases_for_roster_player(
+                player,
+                snapshot,
+            )
+        )
+
+        candidate_aliases = sorted(
+            aliases,
+            key=len,
+            reverse=True,
+        )
+
+        found = None
+
+        for alias in candidate_aliases:
+
+            alias_norm = normalize(
+                alias
+            )
+
+            if (
+                len(
+                    alias_norm
+                )
+                < 4
+            ):
+                continue
+
+            index = section_norm.find(
+                alias_norm
+            )
+
+            if index >= 0:
+                found = alias_norm
+                break
+
+        if not found:
+            continue
+
+        # Normalized-text offsets are approximate. Use a generous
+        # local window but accept ONLY one percentage.
+        index = section_norm.find(
+            found
+        )
+
+        window = section_norm[
+            max(
+                0,
+                index - 80,
+            ):
+            index
+            + len(
+                found
+            )
+            + 100
+        ]
+
+        values = ff_percentages(
+            window
+        )
+
+        if len(values) != 1:
+            continue
+
+        records.append(
+            {
+                "player":
+                    player,
+
+                "source_name":
+                    found,
+
+                "match_score":
+                    0.90,
+
+                "probability":
+                    values[
+                        0
+                    ],
+
+                "method":
+                    "TEAM_POSSIBLE_XI_TEXT_WINDOW",
+            }
+        )
+
+    return records
+
+
+def parse_ff_team_page(
     html: str,
-    matchday: int,
-) -> float | None:
+    players: list[dict],
+    snapshot: dict,
+) -> list[dict]:
 
     soup = BeautifulSoup(
         html,
         "html.parser",
     )
 
-    text = soup.get_text(
-        " ",
-        strip=True,
-    )
+    strategies = [
+        ff_extract_table_records(
+            soup,
+            players,
+            snapshot,
+        ),
 
-    patterns = [
-        rf"Titular\s+J{int(matchday)}\s*(\d{{1,3}})\s*%",
-        rf"Titular\s+Jornada\s*{int(matchday)}\s*(\d{{1,3}})\s*%",
+        ff_extract_row_records(
+            soup,
+            players,
+            snapshot,
+        ),
+
+        ff_extract_text_window_records(
+            soup,
+            players,
+            snapshot,
+        ),
     ]
 
-    for pattern in patterns:
+    best_by_id = {}
 
-        match = re.search(
-            pattern,
-            text,
-            re.IGNORECASE,
-        )
+    method_priority = {
+        "TEAM_TABLE_PROB_COLUMN":
+            3,
 
-        if match:
+        "TEAM_DOM_NEAR_PLAYER_PERCENT":
+            2,
 
-            value = float(
-                match.group(1)
+        "TEAM_POSSIBLE_XI_TEXT_WINDOW":
+            1,
+    }
+
+    for records in strategies:
+
+        for record in records:
+
+            player_id = int(
+                record[
+                    "player"
+                ][
+                    "id"
+                ]
             )
 
-            if 0 <= value <= 100:
-                return value
+            previous = (
+                best_by_id.get(
+                    player_id
+                )
+            )
 
-    return None
+            if previous is None:
+
+                best_by_id[
+                    player_id
+                ] = record
+
+                continue
+
+            current_key = (
+                method_priority.get(
+                    record[
+                        "method"
+                    ],
+                    0,
+                ),
+                record[
+                    "match_score"
+                ],
+            )
+
+            previous_key = (
+                method_priority.get(
+                    previous[
+                        "method"
+                    ],
+                    0,
+                ),
+                previous[
+                    "match_score"
+                ],
+            )
+
+            if current_key > previous_key:
+
+                best_by_id[
+                    player_id
+                ] = record
+
+    return list(
+        best_by_id.values()
+    )
 
 
 def build_ff_signals(
@@ -998,6 +1765,8 @@ def build_ff_signals(
     dict,
 ]:
 
+    del matchday
+
     roster_by_team = {}
 
     for player in roster:
@@ -1007,6 +1776,7 @@ def build_ff_signals(
         )
 
         if key:
+
             roster_by_team.setdefault(
                 key,
                 [],
@@ -1017,7 +1787,8 @@ def build_ff_signals(
     result = {}
     errors = []
     team_pages = 0
-    player_profiles = 0
+    parsed_records = 0
+    methods = {}
 
     for team_key, players in roster_by_team.items():
 
@@ -1035,6 +1806,7 @@ def build_ff_signals(
         )
 
         if not slug:
+
             errors.append(
                 f"NO_SLUG:{team_name}"
             )
@@ -1064,225 +1836,46 @@ def build_ff_signals(
 
         team_pages += 1
 
-        soup = BeautifulSoup(
+        records = parse_ff_team_page(
             html,
-            "html.parser",
+            players,
+            snapshot,
         )
 
-        links = []
-        seen = set()
+        parsed_records += len(
+            records
+        )
 
-        for anchor in soup.find_all(
-            "a",
-            href=True,
-        ):
+        for record in records:
 
-            href = str(
-                anchor.get(
-                    "href"
-                )
-                or ""
-            )
-
-            if "/jugadores/" not in href:
-                continue
-
-            url = urljoin(
-                FF_BASE,
-                href,
-            )
-
-            label = anchor.get_text(
-                " ",
-                strip=True,
-            )
-
-            if not label:
-                parts = (
-                    href.strip(
-                        "/"
-                    )
-                    .split(
-                        "/"
-                    )
-                )
-
-                if len(parts) >= 2:
-                    label = (
-                        parts[
-                            1
-                        ]
-                        .replace(
-                            "-",
-                            " ",
-                        )
-                    )
-
-            key = (
-                normalize(
-                    label
-                ),
-                url,
-            )
-
-            if key in seen:
-                continue
-
-            seen.add(
-                key
-            )
-
-            links.append(
-                {
-                    "name":
-                        label,
-
-                    "url":
-                        url,
-                }
-            )
-
-        used_links = set()
-
-        for player in players:
-
-            scored = []
-
-            aliases = (
-                aliases_for_roster_player(
-                    player,
-                    snapshot,
-                )
-            )
-
-            for link in links:
-
-                if link[
-                    "url"
-                ] in used_links:
-                    continue
-
-                score = strict_name_score(
-                    link[
-                        "name"
-                    ],
-                    aliases,
-                )
-
-                # Also use profile URL slug.
-                slug_alias = normalize(
-                    link[
-                        "url"
-                    ]
-                    .split(
-                        "/jugadores/",
-                        1,
-                    )[
-                        -1
-                    ]
-                    .split(
-                        "/",
-                        1,
-                    )[
-                        0
-                    ]
-                    .replace(
-                        "-",
-                        " ",
-                    )
-                )
-
-                score = max(
-                    score,
-                    strict_name_score(
-                        slug_alias,
-                        aliases,
-                    ),
-                )
-
-                scored.append(
-                    (
-                        score,
-                        link,
-                    )
-                )
-
-            scored.sort(
-                key=lambda item: item[0],
-                reverse=True,
-            )
-
-            if not scored:
-                continue
-
-            score, link = scored[
-                0
+            player = record[
+                "player"
             ]
-
-            second = (
-                scored[
-                    1
-                ][
-                    0
-                ]
-                if len(
-                    scored
-                )
-                > 1
-                else 0.0
-            )
-
-            if score < 0.75:
-                continue
-
-            if (
-                second >= 0.75
-                and
-                score - second < 0.08
-            ):
-                continue
-
-            try:
-
-                profile_html = fetch(
-                    session,
-                    link[
-                        "url"
-                    ],
-                )
-
-                player_profiles += 1
-
-            except Exception as error:
-
-                errors.append(
-                    f"{player.get('name')}:"
-                    f"{type(error).__name__}:"
-                    f"{error}"
-                )
-
-                continue
-
-            probability = (
-                parse_ff_profile_probability(
-                    profile_html,
-                    matchday,
-                )
-            )
-
-            if probability is None:
-                continue
-
-            used_links.add(
-                link[
-                    "url"
-                ]
-            )
 
             player_id = int(
                 player[
                     "id"
                 ]
+            )
+
+            probability = float(
+                record[
+                    "probability"
+                ]
+            )
+
+            method = record[
+                "method"
+            ]
+
+            methods[
+                method
+            ] = (
+                methods.get(
+                    method,
+                    0,
+                )
+                + 1
             )
 
             result[
@@ -1293,9 +1886,7 @@ def build_ff_signals(
 
                 "probability":
                     round(
-                        float(
-                            probability
-                        ),
+                        probability,
                         1,
                     ),
 
@@ -1314,34 +1905,24 @@ def build_ff_signals(
                     100,
 
                 "method":
-                    (
-                        f"PROFILE_TITULAR_J"
-                        f"{matchday}"
-                    ),
+                    method,
 
                 "source_name":
-                    link[
-                        "name"
-                    ],
+                    record.get(
+                        "source_name"
+                    ),
 
                 "team":
                     team_name,
 
                 "url":
-                    link[
-                        "url"
-                    ],
+                    team_url,
 
                 "match_score":
-                    round(
-                        score,
-                        3,
-                    ),
+                    record[
+                        "match_score"
+                    ],
             }
-
-            time.sleep(
-                0.05
-            )
 
     return (
         result,
@@ -1350,17 +1931,24 @@ def build_ff_signals(
                 team_pages,
 
             "player_profiles":
-                player_profiles,
+                0,
+
+            "parsed_records":
+                parsed_records,
 
             "matched":
                 len(
                     result
                 ),
 
+            "methods":
+                methods,
+
             "errors":
                 errors[:20],
         },
     )
+
 
 
 def source_vote(

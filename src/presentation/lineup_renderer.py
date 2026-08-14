@@ -463,7 +463,7 @@ def render_lineup_field(
         f"Formacion:           {formation}",
         f"Jugadores elegidos:  {selected_count}/11",
         f"XI valido:           {playable}/11",
-        f"Titular/Probable JP: {probable_starters}/11",
+        f"Starter/Lean consenso: {probable_starters}/11",
         (
             "Huecos jornada:      "
             + format_shortages(

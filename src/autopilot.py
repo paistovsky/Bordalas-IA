@@ -2079,7 +2079,7 @@ def print_cycle_result(
     )
 
     print(
-        f"Fuente alineacion:       "
+        f"Fuente legacy:       "
         f"{lineup_monitor.get('external_lineup_source')}"
     )
 
