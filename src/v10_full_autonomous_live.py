@@ -114,6 +114,77 @@ def _best_exit(board: dict) -> dict | None:
     )[0]
 
 
+def _best_cancel(board: dict) -> dict | None:
+    """
+    CANCEL_COUNTER tiene prioridad 100 en el motor, por encima de
+    RAISE_COUNTER (90), porque mantener viva una contraoferta que
+    el rival puede aceptar sobre un jugador que ya es NEVER_SELL
+    es la situacion mas peligrosa del tablero.
+
+    Hasta ahora esa accion no la consumia nadie: se emitia, se
+    imprimia y se olvidaba. cancel_bid() no tenia un solo
+    llamante en todo el repositorio.
+
+    Se cancela counter_offer_id -NUESTRA contraoferta-, nunca
+    incoming_offer_id, que es la oferta del rival.
+    """
+    items = [
+        item
+        for item in (board.get("actions", []) or [])
+        if item.get("action") == "CANCEL_COUNTER"
+        and int(item.get("counter_offer_id") or 0) > 0
+    ]
+    if not items:
+        return None
+    return sorted(
+        items,
+        key=lambda x: (
+            int(x.get("priority") or 0),
+            float(x.get("urgency_score") or 0),
+        ),
+        reverse=True,
+    )[0]
+
+
+def _temporal_block(cycle: dict) -> str | None:
+    """
+    Devuelve la fase si las operaciones estan bloqueadas.
+
+    Las escrituras V10 -contraoferta, cancelacion, salida- no
+    pasaban por ninguna barrera temporal: solo el ejecutor legacy
+    la respetaba. Un ciclo que arranca en fase NORMAL y termina
+    90 segundos despues ya dentro del bloqueo podia escribir.
+    """
+    state = (
+        (
+            cycle.get(
+                "result",
+                {},
+            )
+            or {}
+        ).get(
+            "state",
+            {},
+        )
+        or {}
+    )
+
+    if bool(
+        state.get(
+            "operations_locked",
+            False,
+        )
+    ):
+        return str(
+            state.get(
+                "phase",
+                "UNKNOWN",
+            )
+        )
+
+    return None
+
+
 def _best_raise(board: dict) -> dict | None:
     items = [
         item
@@ -216,13 +287,43 @@ def run_full_autonomous_cycle() -> dict:
     print_counter_repricing(counter.get("board", {}) or {})
 
     # 5) If still no write, execute ONE best autonomous action.
-    if not write_used:
+    temporal_block = _temporal_block(cycle)
+
+    if temporal_block:
+        print()
+        print(
+            f"V10: escrituras bloqueadas por fase "
+            f"{temporal_block}. Ninguna accion autonoma."
+        )
+
+    if not write_used and not temporal_block:
+        cancel_candidate = _best_cancel(counter.get("board", {}) or {})
         counter_candidate = _best_raise(counter.get("board", {}) or {})
         exit_candidate = _best_exit(position.get("board", {}) or {})
 
-        # Counter repricing has priority over exit if both exist because
-        # it is time-sensitive and tied to an active rival offer.
-        if counter_candidate:
+        # CANCEL_COUNTER va primero: prioridad 100 en el motor,
+        # por encima de RAISE_COUNTER (90). Mantener viva una
+        # contraoferta sobre un NEVER_SELL puede costar el jugador.
+        if cancel_candidate:
+            writer = BiwengerWriteClient()
+
+            action_result = writer.cancel_bid(
+                offer_id=int(
+                    cancel_candidate["counter_offer_id"]
+                ),
+                execute=True,
+            )
+            write_used = bool(
+                action_result.get("success")
+            )
+            action_taken = "CANCEL_COUNTER"
+            execution_source = "V10_CANCEL"
+            if write_used:
+                v10_verification = _verify_v10_write(
+                    action_taken
+                )
+
+        elif counter_candidate:
             writer = BiwengerWriteClient()
 
             offer_id = int(counter_candidate["incoming_offer_id"])
@@ -233,12 +334,15 @@ def run_full_autonomous_cycle() -> dict:
                 amount=amount,
                 execute=True,
             )
-            write_used = True
+            write_used = bool(
+                action_result.get("success")
+            )
             action_taken = "RAISE_COUNTER"
             execution_source = "V10_COUNTER"
-            v10_verification = _verify_v10_write(
-                action_taken
-            )
+            if write_used:
+                v10_verification = _verify_v10_write(
+                    action_taken
+                )
 
         elif exit_candidate:
             player_id = int(exit_candidate["player_id"])
