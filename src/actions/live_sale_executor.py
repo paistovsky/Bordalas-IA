@@ -202,17 +202,54 @@ def execute_sale_listing(
     # VERIFICACIÓN POSTERIOR
     # ==================================================
 
-    refreshed_market = (
-        writer.client.get_market()
-    )
-
-    result["listing_detected_after"] = (
-        find_existing_sale(
-            refreshed_market,
-            player_id,
-            writer.user_id,
+    if not result["success"]:
+        result["listing_detected_after"] = False
+        result["verification_status"] = (
+            "SKIPPED_WRITE_REJECTED"
         )
-        is not None
-    )
+        return result
+
+    # Mismo blindaje que en las pujas: la escritura ya ocurrio,
+    # de modo que un fallo aqui es de la comprobacion y no puede
+    # borrar lo que sabemos de la operacion.
+    try:
+        refreshed_market = (
+            writer.client.get_market()
+        )
+
+        detectada = (
+            find_existing_sale(
+                refreshed_market,
+                player_id,
+                writer.user_id,
+            )
+            is not None
+        )
+
+        result["listing_detected_after"] = detectada
+
+        if detectada:
+            result["verification_status"] = "CONFIRMED"
+
+        else:
+            # DEFECTO 10: antes se marcaba EXECUTED y nadie
+            # miraba listing_detected_after. Una publicacion que
+            # devolvia 200 pero no llegaba a crearse se daba por
+            # hecha, se consumia la escritura del ciclo y el
+            # jugador seguia en plantilla perdiendo valor.
+            result["verification_status"] = "NOT_REFLECTED"
+            result["status"] = "EXECUTED_NOT_REFLECTED"
+
+    except Exception as error:
+
+        result["listing_detected_after"] = None
+
+        result["verification_status"] = "UNVERIFIED"
+
+        result["verification_error"] = (
+            f"{type(error).__name__}: {error}"
+        )
+
+        result["status"] = "EXECUTED_UNVERIFIED"
 
     return result

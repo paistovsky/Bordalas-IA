@@ -381,16 +381,46 @@ def execute_bid(
         result["verification_skipped"] = "HTTP_WRITE_REJECTED"
         return result
 
-    refreshed_market = (
-        writer.client.get_market()
-    )
-
-    result["offer_detected_after"] = (
-        find_existing_offer(
-            refreshed_market,
-            player_id,
+    # La escritura YA ha ocurrido. A partir de aqui cualquier
+    # fallo es de la comprobacion, no de la puja.
+    #
+    # Antes esta llamada estaba fuera de todo try: un 502 pasajero
+    # del proxy hacia que get_market() lanzase, la excepcion subia
+    # hasta el except general de multi_bid_executor y el resultado
+    # se reportaba como ERROR / executed=0. Quien lo leyese
+    # concluiria que no habia dinero comprometido cuando si lo
+    # habia, y se perdia hasta el identificador de la oferta.
+    try:
+        refreshed_market = (
+            writer.client.get_market()
         )
-        is not None
-    )
+
+        result["offer_detected_after"] = (
+            find_existing_offer(
+                refreshed_market,
+                player_id,
+            )
+            is not None
+        )
+
+        result["verification_status"] = (
+            "CONFIRMED"
+            if result["offer_detected_after"]
+            else "NOT_REFLECTED"
+        )
+
+    except Exception as error:
+
+        # No sabemos si la puja figura, pero SI sabemos que se
+        # envio y que Biwenger la acepto. Eso no se pierde.
+        result["offer_detected_after"] = None
+
+        result["verification_status"] = (
+            "UNVERIFIED"
+        )
+
+        result["verification_error"] = (
+            f"{type(error).__name__}: {error}"
+        )
 
     return result
