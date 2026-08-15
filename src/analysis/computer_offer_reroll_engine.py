@@ -34,6 +34,14 @@ STATE_FILE = (
 # debe convertirse en dinero antes de perderla.
 ACCEPT_BEFORE_EXPIRY_HOURS = 6.0
 
+# Con la jornada encima, una oferta reservada para solvencia
+# debe convertirse en dinero aunque todavia no caduque.
+#
+# Sin esta regla la unica presion era la caducidad de la propia
+# oferta, que es independiente del calendario: se podia llegar
+# al cierre de jornada en negativo con ofertas buenas sin tocar.
+ACCEPT_BEFORE_DEADLINE_HOURS = 6.0
+
 # Umbrales deliberadamente prudentes.
 #
 # No asumimos una distribucion concreta de las ofertas Computer.
@@ -766,6 +774,7 @@ def analyze_computer_offer(
     solvency: dict,
     reserved_offer_ids: set,
     history: dict,
+    hours_to_deadline: float | None = None,
 ) -> dict:
 
     offer_id = (
@@ -872,38 +881,93 @@ def analyze_computer_offer(
             "El motor de reroll no autoriza tocar la oferta."
         )
 
-    elif (
-        reserved
-        and
-        not reroll_safe
-    ):
+    elif reserved:
 
-        can_reroll = (
-            False
-        )
+        # Una oferta reservada para solvencia NUNCA puede caer
+        # a las ramas de calidad de abajo: si lo hace acaba en
+        # KEEP_GOOD_OFFER o REROLL_CANDIDATE y la reserva se
+        # pierde en silencio.
+        #
+        # Antes esta rama exigia ademas "not reroll_safe", asi
+        # que toda oferta reservada y rerolleable se escapaba
+        # y no se cobraba jamas.
 
-        if (
+        expiry_pressure = bool(
             hours_to_expiry
             is not None
             and
             hours_to_expiry
             <= ACCEPT_BEFORE_EXPIRY_HOURS
+        )
+
+        deadline_pressure = bool(
+            hours_to_deadline
+            is not None
+            and
+            hours_to_deadline
+            <= ACCEPT_BEFORE_DEADLINE_HOURS
+        )
+
+        if (
+            expiry_pressure
+            or
+            deadline_pressure
         ):
 
             action = (
                 "ACCEPT_BEFORE_EXPIRY"
             )
 
+            can_reroll = (
+                False
+            )
+
+            motivo = (
+                "proxima a caducar"
+                if expiry_pressure
+                else "con el cierre de jornada encima"
+            )
+
             reason = (
                 "Oferta SOLVENCY_RESERVED, necesaria para "
-                "garantizar T-15, y proxima a caducar. "
-                "No se puede rerollear con seguridad."
+                f"garantizar T-15, y {motivo}. "
+                "Se convierte en dinero antes de perderla."
+            )
+
+        elif (
+            quality[
+                "quality"
+            ]
+            == "WEAK"
+            and
+            replacement_possible
+            and
+            reroll_safe
+        ):
+
+            action = (
+                "REROLL_CANDIDATE"
+            )
+
+            can_reroll = (
+                True
+            )
+
+            reason = (
+                "Oferta SOLVENCY_RESERVED pero claramente por "
+                "debajo de mercado, sin presion de caducidad "
+                "ni de jornada. Existe ciclo de reemplazo "
+                "seguro que mantiene SOLVENCY_GUARANTEE."
             )
 
         else:
 
             action = (
                 "KEEP_SOLVENCY_RESERVED"
+            )
+
+            can_reroll = (
+                False
             )
 
             reason = (
@@ -1036,6 +1100,7 @@ def analyze_computer_offer(
 def build_computer_offer_reroll_board(
     snapshot: dict,
     persist_history: bool = False,
+    hours_to_deadline: float | None = None,
 ) -> dict:
 
     solvency = (
@@ -1076,6 +1141,28 @@ def build_computer_offer_reroll_board(
         or []
     )
 
+    # Presion de calendario.
+    #
+    # build_solvency_state ya calcula los segundos que faltan
+    # para el cierre real de jornada, asi que no hace falta
+    # cablear nada desde los llamadores: todos heredan la regla.
+    if hours_to_deadline is None:
+
+        seconds_to_deadline = (
+            solvency.get(
+                "seconds_to_deadline"
+            )
+        )
+
+        if seconds_to_deadline is not None:
+
+            hours_to_deadline = (
+                float(
+                    seconds_to_deadline
+                )
+                / 3600.0
+            )
+
     history = (
         load_offer_history()
     )
@@ -1093,6 +1180,9 @@ def build_computer_offer_reroll_board(
 
             history=
                 history,
+
+            hours_to_deadline=
+                hours_to_deadline,
         )
 
         for offer

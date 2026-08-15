@@ -439,6 +439,9 @@ def calculate_offer_reservations(
     if balance >= 0:
         return {
             "required_recovery": 0,
+            "secured_needed": 0,
+            "current_debt": 0,
+            "debt_covered_by_secured": True,
             "reserved": [],
             "reserved_offer_ids": [],
             "reserved_total": 0,
@@ -456,6 +459,21 @@ def calculate_offer_reservations(
         guarantee.get("expected_liquidity", 0) or 0
     )
     secured_needed = max(required_recovery - expected_credit, 0)
+
+    # SUELO DE DEUDA REAL.
+    #
+    # EXPECTED_LIQUIDITY es dinero de jugadores listados que
+    # todavia NO ha comprado nadie. Si dejamos que cubra la
+    # deuda actual, secured_needed baja de mas, se reservan
+    # menos ofertas de las necesarias y el autopiloto se queda
+    # esperando una venta que puede no llegar nunca: el saldo
+    # negativo se vuelve permanente.
+    #
+    # Mientras el saldo real sea negativo exigimos reservar
+    # ofertas REALES por al menos la deuda actual. La liquidez
+    # esperada solo puede cubrir el buffer de seguridad.
+    current_debt = max(-int(balance), 0)
+    secured_needed = max(secured_needed, current_debt)
 
     offers = list(incoming.get("offers", []))
 
@@ -519,9 +537,17 @@ def calculate_offer_reservations(
         reserved_total + expected_credit >= required_recovery
     )
 
+    # La deuda real solo esta cubierta si hay dinero REAL
+    # reservado para taparla, no liquidez esperada.
+    debt_covered_by_secured = bool(
+        reserved_total >= current_debt
+    )
+
     return {
         "required_recovery": required_recovery,
         "secured_needed": secured_needed,
+        "current_debt": current_debt,
+        "debt_covered_by_secured": debt_covered_by_secured,
         "reserved": reserved,
         "reserved_offer_ids": [
             offer.get("offer_id")
