@@ -790,6 +790,11 @@ def build_competitive_observer(
             negotiation_state
         )
 
+        # Transiciones que SOLO deben persistirse si de verdad
+        # llegamos a escribir en Biwenger. Ver nota en el bloque
+        # de should_respond, mas abajo.
+        pending_negotiation_transitions = {}
+
         for decision in (
             offer_decisions.get(
                 "decisions",
@@ -1005,7 +1010,20 @@ def build_competitive_observer(
                 )
             ):
 
-                updated_negotiation_state = (
+                # apply_observer_response SIMULA el estado
+                # posterior a responder: su propio docstring lo
+                # dice. Antes esa simulacion se persistia sin mas,
+                # y como los estados que escribe son terminales
+                # (ACCEPT_NOW -> CLOSED, COUNTER_OFFER ->
+                # WAITING_RIVAL) la oferta quedaba bloqueada para
+                # siempre aunque no se hubiese escrito nada en
+                # Biwenger. Bastaba un ciclo en observacion, o un
+                # fallo HTTP, para perder la oferta.
+                #
+                # Ahora la simulacion se usa dentro del ciclo pero
+                # la transicion queda EN ESPERA: solo se persiste
+                # cuando la escritura se confirma.
+                simulado = (
                     apply_observer_response(
                         state=
                             updated_negotiation_state,
@@ -1036,9 +1054,45 @@ def build_competitive_observer(
                     )
                 )
 
-        save_negotiation_state(
-            updated_negotiation_state
-        )
+                updated_negotiation_state = simulado
+
+                clave_negociacion = str(
+                    negotiation.get(
+                        "key"
+                    )
+                )
+
+                entrada = (
+                    (
+                        simulado.get(
+                            "negotiations",
+                            {},
+                        )
+                        or {}
+                    ).get(
+                        clave_negociacion
+                    )
+                )
+
+                if entrada is not None:
+
+                    pending_negotiation_transitions[
+                        clave_negociacion
+                    ] = {
+                        "entry":
+                            entrada,
+
+                        "offer_id":
+                            decision.get(
+                                "offer_id"
+                            ),
+
+                        "player_id":
+                            decision.get(
+                                "player_id"
+                            ),
+                    }
+
 
         portfolio = (
             offer_decisions.get(
@@ -1110,6 +1164,9 @@ def build_competitive_observer(
 
             "intelligent_bids":
                 intelligent_bids,
+
+            "pending_negotiation_transitions":
+                pending_negotiation_transitions,
         }
 
     except Exception as error:
@@ -2539,6 +2596,118 @@ def select_live_decision(
     ]
 
 
+def confirm_negotiation_transitions(
+    competitive_observer: dict,
+    competitive_execution: dict,
+) -> dict:
+    """
+    Persiste la transicion de negociacion SOLO de la oferta que
+    de verdad se escribio en Biwenger.
+
+    El observador ya no guarda nada: deja las transiciones en
+    espera. Si la escritura no ocurre -ciclo en observacion, gate
+    que bloquea, fallo HTTP- el estado no avanza y la oferta
+    sigue disponible en el siguiente ciclo.
+    """
+
+    pendientes = (
+        competitive_observer.get(
+            "pending_negotiation_transitions",
+            {},
+        )
+        or {}
+    )
+
+    if not pendientes:
+        return {
+            "persisted": False,
+            "reason": "No hay transiciones en espera.",
+        }
+
+    escribio = bool(
+        competitive_execution.get(
+            "write_performed",
+            False,
+        )
+    )
+
+    ok = bool(
+        competitive_execution.get(
+            "success",
+            False,
+        )
+    )
+
+    if not (escribio and ok):
+        return {
+            "persisted": False,
+            "reason": (
+                "Sin escritura confirmada: el estado de "
+                "negociacion no avanza."
+            ),
+        }
+
+    offer_id = (
+        competitive_execution.get(
+            "offer_id"
+        )
+        or
+        (
+            competitive_execution.get(
+                "selected_offer",
+                {},
+            )
+            or {}
+        ).get(
+            "offer_id"
+        )
+    )
+
+    claves = [
+        clave
+        for clave, dato in pendientes.items()
+        if offer_id is not None
+        and dato.get("offer_id") == offer_id
+    ]
+
+    if not claves:
+        return {
+            "persisted": False,
+            "reason": (
+                f"La escritura confirmada (oferta {offer_id}) no "
+                f"corresponde a ninguna transicion en espera."
+            ),
+        }
+
+    estado = (
+        load_negotiation_state()
+    )
+
+    negociaciones = estado.setdefault(
+        "negotiations",
+        {},
+    )
+
+    for clave in claves:
+        negociaciones[clave] = (
+            pendientes[clave]["entry"]
+        )
+
+    save_negotiation_state(
+        estado
+    )
+
+    return {
+        "persisted": True,
+        "keys": claves,
+        "offer_id": offer_id,
+        "reason": (
+            "Escritura confirmada: estado de negociacion "
+            "avanzado solo para esa oferta."
+        ),
+    }
+
+
 def run_cycle(
     live: bool = False,
     competitive_live: bool = False,
@@ -2564,18 +2733,34 @@ def run_cycle(
         )
     )
 
+    # build_global_decision() devuelve temporal_gate y balance
+    # DENTRO de result["state"], no en el nivel superior.
+    #
+    # Leerlos de result directamente daba siempre {} y 0, con lo
+    # que operations_locked era siempre False y el bloqueo
+    # BLOCK_TEMPORAL_LOCK del safety gate competitivo resultaba
+    # inalcanzable: con la jornada bloqueada la ruta competitiva
+    # podia llegar a escribir en Biwenger.
+    cycle_state = (
+        result.get(
+            "state",
+            {},
+        )
+        or {}
+    )
+
     competitive_observer = (
         build_competitive_observer(
             snapshot,
             temporal_gate=(
-                result.get(
+                cycle_state.get(
                     "temporal_gate",
                     {},
                 )
                 or {}
             ),
             current_balance=(
-                result.get(
+                cycle_state.get(
                     "balance",
                     0,
                 )
@@ -2762,6 +2947,13 @@ def run_cycle(
             "success":
                 True,
         }
+
+    negotiation_persistence = (
+        confirm_negotiation_transitions(
+            competitive_observer,
+            competitive_execution,
+        )
+    )
 
     print_execution_result(
         execution

@@ -3,6 +3,10 @@ from typing import Any
 from src.biwenger.client import BiwengerClient
 
 
+# Centinela: distingue "no me pasaron cuerpo" de "el cuerpo es None".
+_UNSET = object()
+
+
 class BiwengerWriteClient:
     """
     Cliente de escritura de BordalÃ¡s IA.
@@ -77,11 +81,121 @@ class BiwengerWriteClient:
     def _is_success(
         self,
         status_code: int,
+        payload: Any = _UNSET,
     ) -> bool:
 
+        return self._evaluate_success(
+            status_code,
+            payload,
+        )[0]
+
+    def _evaluate_success(
+        self,
+        status_code: int,
+        payload: Any = _UNSET,
+    ) -> tuple[bool, str]:
+        """
+        Un codigo HTTP 200 NO significa que la operacion se haya
+        hecho. La API de Biwenger devuelve el estado real dentro
+        del cuerpo: el cliente de lectura ya lo valida asi
+        (client.py -> if data.get("status") != 200: raise).
+
+        Este cliente solo miraba el codigo HTTP, de modo que una
+        respuesta 200 con {"status": 400, "message": "saldo
+        insuficiente"} -o una pagina HTML de mantenimiento con
+        codigo 200- se daba por buena. El sistema consumia la
+        escritura del ciclo y persistia historial creyendo que
+        habia operado.
+
+        Devuelve (exito, motivo). El motivo viaja en la respuesta
+        para poder diagnosticar sin adivinar.
+        """
+
+        if status_code not in self.SUCCESS_CODES:
+            return (
+                False,
+                f"HTTP {status_code}",
+            )
+
+        # 204 No Content: no hay cuerpo que validar.
+        if payload is None:
+            return (
+                True,
+                "OK",
+            )
+
+        # Llamada antigua sin cuerpo: se mantiene el
+        # comportamiento previo para no romper nada.
+        if payload is _UNSET:
+            return (
+                True,
+                "OK (cuerpo no verificado)",
+            )
+
+        if isinstance(payload, dict):
+
+            inner = payload.get("status")
+
+            if isinstance(inner, bool):
+                # Algunas APIs usan status booleano.
+                if not inner:
+                    return (
+                        False,
+                        "cuerpo con status=false",
+                    )
+
+            elif isinstance(inner, int):
+                if inner not in self.SUCCESS_CODES:
+                    mensaje = (
+                        payload.get("message")
+                        or payload.get("error")
+                        or ""
+                    )
+                    return (
+                        False,
+                        f"cuerpo con status={inner} {mensaje}".strip(),
+                    )
+
+            error = payload.get("error")
+
+            if error:
+                return (
+                    False,
+                    f"cuerpo con error: {error}",
+                )
+
+            return (
+                True,
+                "OK",
+            )
+
+        if isinstance(payload, str):
+
+            texto = payload.strip()
+
+            if not texto:
+                return (
+                    True,
+                    "OK (cuerpo vacio)",
+                )
+
+            # Respuesta no-JSON con codigo de exito: tipicamente
+            # un portal de WAF, un error de proxy o una pagina de
+            # mantenimiento. No es una operacion confirmada.
+            if texto.startswith("<"):
+                return (
+                    False,
+                    "respuesta HTML, no JSON",
+                )
+
+            return (
+                True,
+                "OK (cuerpo de texto)",
+            )
+
         return (
-            status_code
-            in self.SUCCESS_CODES
+            True,
+            "OK",
         )
 
     @staticmethod
@@ -184,6 +298,20 @@ class BiwengerWriteClient:
             )
         )
 
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
         return {
             **request,
 
@@ -194,14 +322,13 @@ class BiwengerWriteClient:
                 response.status_code,
 
             "response":
-                self._safe_response(
-                    response
-                ),
+                body,
 
             "success":
-                self._is_success(
-                    response.status_code
-                ),
+                success,
+
+            "success_detail":
+                success_detail,
         }
 
 
@@ -332,6 +459,20 @@ class BiwengerWriteClient:
             )
         )
 
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
         return {
             **request,
 
@@ -342,14 +483,13 @@ class BiwengerWriteClient:
                 response.status_code,
 
             "response":
-                self._safe_response(
-                    response
-                ),
+                body,
 
             "success":
-                self._is_success(
-                    response.status_code
-                ),
+                success,
+
+            "success_detail":
+                success_detail,
         }
 
 
@@ -422,6 +562,20 @@ class BiwengerWriteClient:
             )
         )
 
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
         return {
             **request,
 
@@ -432,14 +586,13 @@ class BiwengerWriteClient:
                 response.status_code,
 
             "response":
-                self._safe_response(
-                    response
-                ),
+                body,
 
             "success":
-                self._is_success(
-                    response.status_code
-                ),
+                success,
+
+            "success_detail":
+                success_detail,
         }
 
     # ==================================================
@@ -530,6 +683,20 @@ class BiwengerWriteClient:
             )
         )
 
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
         return {
             **request,
 
@@ -540,14 +707,13 @@ class BiwengerWriteClient:
                 response.status_code,
 
             "response":
-                self._safe_response(
-                    response
-                ),
+                body,
 
             "success":
-                self._is_success(
-                    response.status_code
-                ),
+                success,
+
+            "success_detail":
+                success_detail,
         }
 
     # ==================================================
@@ -648,6 +814,20 @@ class BiwengerWriteClient:
             )
         )
 
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
         return {
             **request,
 
@@ -658,14 +838,13 @@ class BiwengerWriteClient:
                 response.status_code,
 
             "response":
-                self._safe_response(
-                    response
-                ),
+                body,
 
             "success":
-                self._is_success(
-                    response.status_code
-                ),
+                success,
+
+            "success_detail":
+                success_detail,
         }
 
     # ==================================================
@@ -746,6 +925,20 @@ class BiwengerWriteClient:
             )
         )
 
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
         return {
             **request,
 
@@ -756,14 +949,13 @@ class BiwengerWriteClient:
                 response.status_code,
 
             "response":
-                self._safe_response(
-                    response
-                ),
+                body,
 
             "success":
-                self._is_success(
-                    response.status_code
-                ),
+                success,
+
+            "success_detail":
+                success_detail,
         }
 
     # ==================================================
@@ -867,6 +1059,20 @@ class BiwengerWriteClient:
             )
         )
 
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
         return {
             **request,
 
@@ -877,12 +1083,11 @@ class BiwengerWriteClient:
                 response.status_code,
 
             "response":
-                self._safe_response(
-                    response
-                ),
+                body,
 
             "success":
-                self._is_success(
-                    response.status_code
-                ),
+                success,
+
+            "success_detail":
+                success_detail,
         }
