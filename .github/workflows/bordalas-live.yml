@@ -115,6 +115,11 @@ jobs:
           python -m src.analysis.test_write_path_guards_v1
           python -m src.analysis.test_negotiation_persistence_v1
           python -m src.analysis.test_bid_deduplication_v1
+          python -m src.analysis.test_source_accuracy_v1
+          python -m src.analysis.test_write_verification_v1
+          python -m src.analysis.test_protection_gate_v1
+          python -m src.analysis.test_reroll_memory_v1
+          python -m src.analysis.test_ledger_dedup_v1
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash

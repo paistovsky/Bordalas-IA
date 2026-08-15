@@ -1,10 +1,14 @@
 from src.analysis.market_analyzer import (
+    get_latest_snapshot,
     load_snapshot,
     analyze_market,
 )
 
 
-SNAPSHOT = "data/snapshot_20260809_130856.json"
+# Antes apuntaba a un snapshot del 09/08 que ya no
+# existe: el test fallaba por un fichero borrado, no
+# por el motor que pretende comprobar.
+SNAPSHOT = get_latest_snapshot()
 
 
 print("Cargando snapshot...")

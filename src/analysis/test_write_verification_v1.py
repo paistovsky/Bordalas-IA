@@ -23,6 +23,10 @@ Ejecutar:
     python -m src.analysis.test_write_verification_v1
 """
 
+# HEALTH_CHECK: SAFE
+# Solo inspecciona codigo fuente y estructuras en memoria.
+# No instancia BiwengerWriteClient ni realiza ninguna escritura.
+
 import ast
 import inspect
 import textwrap

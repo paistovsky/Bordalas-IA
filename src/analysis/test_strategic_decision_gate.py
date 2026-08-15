@@ -75,7 +75,7 @@ def main() -> None:
 
     print(
         f"Deadline XI:        "
-        f"{calendar['time_to_lineup_lock']}"
+        f"{calendar.get('time_to_lineup_lock', 'n/d')}"
     )
 
     print(

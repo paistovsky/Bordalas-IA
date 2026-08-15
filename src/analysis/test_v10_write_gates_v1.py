@@ -24,6 +24,10 @@ Ejecutar:
     python -m src.analysis.test_v10_write_gates_v1
 """
 
+# HEALTH_CHECK: SAFE
+# Solo inspecciona codigo fuente y estructuras en memoria.
+# No instancia BiwengerWriteClient ni realiza ninguna escritura.
+
 import inspect
 
 from src.v10_full_autonomous_live import (

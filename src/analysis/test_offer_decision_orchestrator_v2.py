@@ -54,17 +54,27 @@ def main() -> None:
         print("NINGUNO")
     else:
         for item in candidates:
-            top = (
+            top_list = (
                 item.get(
                     "data",
                     {},
                 )
+                # "top_offer_decision" no la produce nadie: el
+                # candidato transporta el board entero en
+                # data["offer_decisions"], y build_offer_decision_board
+                # ya ordena decisions por decision_priority, asi
+                # que decisions[0] ES el top.
                 .get(
-                    "top_offer_decision",
+                    "offer_decisions",
                     {},
                 )
-                or {}
+                .get(
+                    "decisions",
+                    [],
+                )[:1]
             )
+
+            top = top_list[0] if top_list else {}
 
             print(
                 f"type={item.get('type')} "
@@ -125,10 +135,19 @@ def main() -> None:
                 {},
             )
             .get(
-                "top_offer_decision",
+                "offer_decisions",
                 {},
             )
-            or {}
+            .get(
+                "decisions",
+                [],
+            )
+        )
+
+        top_from_candidate = (
+            top_from_candidate[0]
+            if top_from_candidate
+            else {}
         )
 
         board_decisions = (

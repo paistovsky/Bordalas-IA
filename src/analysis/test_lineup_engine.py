@@ -69,7 +69,8 @@ for position_id in [
 
         game = (
             "✅ PARTIDO"
-            if player["has_game"]
+            # has_game se renombro a counts_for_round.
+            if player.get("counts_for_round", True)
             else "⚠ SIN PARTIDO"
         )
 

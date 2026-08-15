@@ -199,10 +199,15 @@ def build_action_plan(
                         "lineup_position"
                     ],
 
+                # El campo se renombro a counts_for_round en
+                # prepare_players. Con corchetes esto reventaba;
+                # hoy no salta porque nadie importa bordalas.py,
+                # que es el unico llamante de build_action_plan.
                 "has_game":
-                    player[
-                        "has_game"
-                    ],
+                    player.get(
+                        "counts_for_round",
+                        True,
+                    ),
 
                 "lineup_score":
                     player[

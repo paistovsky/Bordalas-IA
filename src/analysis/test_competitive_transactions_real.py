@@ -687,7 +687,9 @@ def main() -> None:
     )
 
     print_rivals(
-        rival_intelligence=
+        # La funcion se define en este mismo fichero con el
+        # parametro "intelligence".
+        intelligence=
             rival_intelligence,
         current_user_id=
             current_user_id,

@@ -308,9 +308,35 @@ def main() -> None:
     )
     print()
 
+    # El plan NO tiene una clave "selected": eso no existe en el
+    # planner. Lo que devuelve es selected_offers (todas las que
+    # hay que aceptar), first_offer y selected_plan con la
+    # simulacion del conjunto.
+    selected_offers = (
+        plan.get(
+            "selected_offers",
+            [],
+        )
+        or []
+    )
+
+    selected_plan = (
+        plan.get(
+            "selected_plan",
+            {},
+        )
+        or {}
+    )
+
+    required_accept_count = safe_int(
+        plan.get(
+            "required_accept_count"
+        )
+    )
+
     selected = (
         plan.get(
-            "selected"
+            "first_offer"
         )
         or {}
     )
@@ -358,7 +384,7 @@ def main() -> None:
     else:
 
         print(
-            "NINGUNA VENTA INDIVIDUAL AUTORIZABLE."
+            "NINGUNA OFERTA SELECCIONADA."
         )
 
     print()
@@ -382,30 +408,50 @@ def main() -> None:
         False,
     ):
 
-        if not selected:
-            errors.append(
-                "Planner READY sin oferta seleccionada."
-            )
+        # Un plan puede necesitar VARIAS ofertas combinadas. Este
+        # test asumia que ready implicaba una unica venta que
+        # bastase sola, y por eso cantaba error ante cualquier
+        # MULTI_ACCEPT_PLAN_READY, que es un plan perfectamente
+        # valido. Tampoco existe "individually_sufficient" en el
+        # planner: salia None en todos los candidatos.
 
-        elif selected.get(
-            "protected",
-            False,
-        ):
+        if not selected_offers:
             errors.append(
-                "Planner selecciono un jugador protegido."
-            )
-
-        elif not selected.get(
-            "individually_sufficient",
-            False,
-        ):
-            errors.append(
-                "Planner selecciono una oferta que no basta sola."
+                "Planner READY sin ninguna oferta seleccionada."
             )
 
         else:
+
+            if required_accept_count != len(
+                selected_offers
+            ):
+                errors.append(
+                    f"required_accept_count="
+                    f"{required_accept_count} no coincide con "
+                    f"{len(selected_offers)} ofertas "
+                    f"seleccionadas."
+                )
+
+            protegidas = [
+                oferta
+                for oferta in selected_offers
+                if oferta.get(
+                    "protected",
+                    False,
+                )
+            ]
+
+            if protegidas:
+                errors.append(
+                    f"Planner selecciono "
+                    f"{len(protegidas)} jugador(es) protegido(s)."
+                )
+
+            # LO QUE DE VERDAD IMPORTA: el conjunto elegido debe
+            # mantener SOLVENCY_GUARANTEE. Da igual si es una
+            # oferta o cuatro.
             simulation = (
-                selected.get(
+                selected_plan.get(
                     "simulation",
                     {},
                 )
@@ -417,18 +463,85 @@ def main() -> None:
                 False,
             ):
                 errors.append(
-                    "La seleccion no mantiene SOLVENCY_GUARANTEE."
+                    f"El plan de {len(selected_offers)} oferta(s) "
+                    f"NO mantiene SOLVENCY_GUARANTEE."
                 )
+
+        print()
+        print(
+            f"Plan listo -> {plan.get('status')}: "
+            f"{len(selected_offers)} oferta(s), "
+            f"{safe_int(selected_plan.get('total_amount')):,.0f} EUR"
+        )
 
     else:
 
-        if plan.get(
-            "status"
-        ) != "MULTI_ACCEPT_REQUIRED":
+        # NO se comprueba el NOMBRE del estado.
+        #
+        # Primero lo intente con una lista de nombres validos y
+        # fue un error de diseno: el planner arrastra el veredicto
+        # del motor de seguridad, que tiene su propio vocabulario,
+        # y en cuanto cambia el mercado aparece un estado que no
+        # estaba en la lista. Un test que hay que ampliar cada
+        # semana no protege nada, solo molesta.
+        #
+        # Lo que de verdad importa es el CONTRATO de un plan
+        # bloqueado:
+        #
+        #   1. ready es False
+        #   2. dice en que estado esta
+        #   3. explica por que
+        #   4. y NO arrastra ofertas seleccionadas
+        #
+        # El punto 4 es el critico: un plan bloqueado que ademas
+        # trajese ofertas elegidas seria una trampa para el
+        # executor.
 
-            errors.append(
-                "Planner bloqueado con status inesperado."
+        estado = str(
+            plan.get(
+                "status"
             )
+            or ""
+        ).strip()
+
+        motivo = str(
+            plan.get(
+                "reason"
+            )
+            or ""
+        ).strip()
+
+        seleccionadas = (
+            plan.get(
+                "selected_offers",
+                [],
+            )
+            or []
+        )
+
+        if not estado:
+            errors.append(
+                "Plan bloqueado sin status: imposible "
+                "diagnosticar por que no actua."
+            )
+
+        if not motivo:
+            errors.append(
+                f"Plan bloqueado ({estado}) sin reason."
+            )
+
+        if seleccionadas:
+            errors.append(
+                f"PELIGRO: plan bloqueado ({estado}) pero "
+                f"arrastra {len(seleccionadas)} ofertas "
+                f"seleccionadas. El executor podria tomarlas "
+                f"por validas."
+            )
+
+        print()
+        print(
+            f"Plan bloqueado -> {estado}: {motivo}"
+        )
 
     if errors:
 

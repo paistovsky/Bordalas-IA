@@ -24,6 +24,9 @@ def main() -> None:
     intelligence = build_rival_intelligence(
         events=board.get("events", []),
         users=board.get("users", []),
+        # build_rival_intelligence exige profiles desde V2: sin
+        # ellos no puede contar las plantillas de los rivales.
+        profiles=board.get("profiles", []),
         catalog=snapshot.get("catalog", {}),
         current_user_id=board.get("current_user_id"),
         own_finances=board.get("own_finances", {}),

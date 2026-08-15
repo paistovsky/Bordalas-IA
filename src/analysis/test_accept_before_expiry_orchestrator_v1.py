@@ -12,6 +12,7 @@ from src.analysis.computer_offer_reroll_engine import (
 )
 
 from src.analysis.decision_orchestrator import (
+    ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY,
     build_global_decision,
 )
 
@@ -181,7 +182,7 @@ def main() -> None:
     print()
     print("=" * 128)
     print(
-        "          BORDALAS IA - ACCEPT BEFORE EXPIRY ORCHESTRATOR V1 - OBSERVER"
+        "          BORDALAS IA - ACCEPT BEFORE EXPIRY ORCHESTRATOR V1 - LIVE"
     )
     print("=" * 128)
     print()
@@ -595,11 +596,26 @@ def main() -> None:
             "La simulación urgente no generó candidato."
         )
     else:
-        if urgent_candidate.get(
-            "executable"
+        # Accept-Before-Expiry dejo de ser Observer: la bandera
+        # ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY del orquestador esta
+        # en True a proposito, con read-before-write y
+        # revalidacion completa en el executor.
+        #
+        # La asercion se ata a la bandera en vez de fijar un
+        # valor: asi vale en los dos modos y avisa si alguna vez
+        # dejan de coincidir.
+        if bool(
+            urgent_candidate.get(
+                "executable"
+            )
+        ) != bool(
+            ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY
         ):
             errors.append(
-                "Accept-Before-Expiry sigue Observer: executable debe ser False."
+                f"executable={urgent_candidate.get('executable')} "
+                f"no coincide con "
+                f"ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY="
+                f"{ENABLE_LIVE_ACCEPT_BEFORE_EXPIRY}."
             )
 
         if urgent_candidate.get(
@@ -637,7 +653,7 @@ def main() -> None:
         )
 
     print(
-        "# ACCEPT BEFORE EXPIRY ORCHESTRATOR V1 OBSERVER: OK"
+        "# ACCEPT BEFORE EXPIRY ORCHESTRATOR V1 LIVE: OK"
     )
 
     print("=" * 128)

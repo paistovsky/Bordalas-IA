@@ -13,41 +13,9 @@ KNOWN_NON_ECONOMIC_TYPES = {
     "leagueReset",
     "leagueSettings",
     "playerMovements",
-    "roundStarted",
     "userJoin",
     "userName",
 }
-
-
-def betting_pool_is_economic(
-    content,
-) -> bool:
-    """
-    Una quiniela solo mueve saldo de liga si de verdad hubo
-    participacion y reparto.
-
-    Los "credits" del pool son moneda propia de Biwenger, no el
-    saldo de la liga, asi que no cuentan. Pero si algun dia
-    aparecen premios o respuestas, este evento deja de ser
-    decorativo y hay que mirarlo: por eso NO se mete en la lista
-    blanca sin condiciones.
-    """
-
-    pool = (
-        (
-            content
-            or {}
-        ).get(
-            "pool",
-            {},
-        )
-        or {}
-    )
-
-    return bool(
-        pool.get("prizes")
-        or pool.get("responses")
-    )
 
 
 # ============================================================
@@ -1337,41 +1305,6 @@ def build_rival_intelligence(
     economic_operations = 0
     competitive_bids = 0
 
-    # DEDUPLICACION POR CONTENIDO.
-    #
-    # El tablon de Biwenger devuelve la misma operacion bajo dos
-    # event_id distintos. Comprobado el 15/08/2026: el fichaje de
-    # Yamal por 24.897.600 aparece en los eventos 01172994d5b4 y
-    # 5748a8232cb8, misma fecha y mismo importe.
-    #
-    # Deduplicar por event_id no sirve -son distintos-, asi que
-    # la huella se hace con el contenido economico. Sin esto el
-    # ledger contaba tres compras como seis y descuadraba el
-    # saldo en 28.097.432 EUR, justo el doble de los gastos.
-    seen_operations = set()
-
-    def already_counted(
-        kind: str,
-        player_id,
-        amount: int,
-        counterparty,
-        when: int,
-    ) -> bool:
-
-        huella = (
-            kind,
-            safe_int(player_id),
-            safe_int(amount),
-            safe_int(counterparty),
-            safe_int(when),
-        )
-
-        if huella in seen_operations:
-            return True
-
-        seen_operations.add(huella)
-        return False
-
     # --------------------------------------------------------
     # LEDGER + BIDS
     # --------------------------------------------------------
@@ -1450,14 +1383,6 @@ def build_rival_intelligence(
                     in managers
                     and
                     amount > 0
-                    and
-                    not already_counted(
-                        "BUY_FROM_COMPUTER",
-                        player_id,
-                        amount,
-                        buyer_id,
-                        event_date,
-                    )
                 ):
 
                     add_expense(
@@ -1659,17 +1584,7 @@ def build_rival_intelligence(
                 if amount <= 0:
                     continue
 
-                if (
-                    seller_id in managers
-                    and
-                    not already_counted(
-                        "SELL",
-                        player_id,
-                        amount,
-                        seller_id,
-                        event_date,
-                    )
-                ):
+                if seller_id in managers:
 
                     add_income(
                         managers[
@@ -1776,20 +1691,6 @@ def build_rival_intelligence(
                     ] += 1
 
                     economic_operations += 1
-
-        elif (
-            event_type
-            == "bettingPool"
-            and
-            not betting_pool_is_economic(
-                content
-            )
-        ):
-
-            # Quiniela sin premios ni respuestas: decorativa.
-            # Si algun dia trae reparto, cae al else y se marca
-            # como desconocida para que salte la revision.
-            pass
 
         elif (
             event_type
