@@ -150,6 +150,7 @@ def record_predictions(
     board: dict,
     matchday: int,
     ledger: dict | None = None,
+    snapshot: dict | None = None,
 ) -> dict:
     """
     Congela lo que dijo cada fuente ANTES de que se juegue.
@@ -173,6 +174,16 @@ def record_predictions(
 
     if existente.get("scored"):
         return ledger
+
+    # Linea base de partidos disputados en el momento de
+    # predecir. Guardarla aqui hace que puntuar despues no
+    # necesite recuperar la foto antigua: basta la de entonces
+    # contra la de ahora.
+    base_apariciones = (
+        catalog_players(snapshot)
+        if snapshot
+        else {}
+    )
 
     predicciones = {}
 
@@ -199,9 +210,17 @@ def record_predictions(
 
             fuentes[nombre] = float(probabilidad)
 
+        base = _appearances(
+            base_apariciones.get(
+                int(player_id),
+                {},
+            )
+        )
+
         predicciones[str(int(player_id))] = {
             "player_name": jugador.get("player_name"),
             "team": jugador.get("team"),
+            "appearances_at_prediction": base,
             "sources": fuentes,
             "consensus": jugador.get("consensus"),
             "consensus_probability": jugador.get(
@@ -646,3 +665,141 @@ def print_weights(
         "0.25 equivale a decir siempre 50%."
     )
     print("=" * 72)
+
+
+# ============================================================
+# CICLO AUTOMATICO
+# ============================================================
+
+def outcomes_from_snapshot(
+    matchday: int,
+    snapshot: dict,
+    ledger: dict,
+) -> dict[str, dict]:
+    """
+    Resultados usando la linea base guardada al predecir.
+
+    No hace falta conservar la foto antigua: cada prediccion
+    lleva anotados los partidos que el jugador tenia entonces.
+    """
+
+    registro = (
+        ledger.get("matchdays", {})
+        .get(str(int(matchday)), {})
+    )
+
+    actuales = catalog_players(snapshot)
+    resultados = {}
+
+    for player_id, prediccion in (
+        registro.get("predictions", {}) or {}
+    ).items():
+
+        base = prediccion.get(
+            "appearances_at_prediction"
+        )
+
+        if base is None:
+            continue
+
+        ahora = _appearances(
+            actuales.get(
+                int(player_id),
+                {},
+            )
+        )
+
+        if ahora is None or ahora < base:
+            continue
+
+        resultados[player_id] = {
+            "played": 1 if ahora > base else 0,
+            "appearances_before": base,
+            "appearances_after": ahora,
+            "ground_truth_method": "APPEARANCE_DELTA",
+        }
+
+    return resultados
+
+
+def sync_ledger(
+    board: dict,
+    snapshot: dict,
+    current_matchday: int,
+    ledger: dict | None = None,
+) -> dict:
+    """
+    Punto de entrada unico para el ciclo de produccion.
+
+    1. Registra las predicciones de la jornada en curso. Se
+       reescriben en cada ciclo, asi que la version que queda es
+       la ultima antes de que la jornada avance.
+    2. Puntua cualquier jornada anterior que siguiese pendiente.
+
+    Nunca lanza: un fallo del libro no puede detener un ciclo de
+    produccion. Devuelve el libro y un resumen de lo hecho.
+    """
+
+    ledger = (
+        ledger
+        if ledger is not None
+        else load_ledger()
+    )
+
+    hecho = {
+        "recorded": None,
+        "scored": [],
+        "error": None,
+    }
+
+    try:
+        current_matchday = int(current_matchday)
+
+        if board:
+            ledger = record_predictions(
+                board=board,
+                matchday=current_matchday,
+                ledger=ledger,
+                snapshot=snapshot,
+            )
+            hecho["recorded"] = current_matchday
+
+        for clave in sorted(
+            ledger.get("matchdays", {}),
+            key=lambda valor: int(valor),
+        ):
+
+            jornada = int(clave)
+
+            if jornada >= current_matchday:
+                continue
+
+            if ledger["matchdays"][clave].get("scored"):
+                continue
+
+            resultados = outcomes_from_snapshot(
+                matchday=jornada,
+                snapshot=snapshot,
+                ledger=ledger,
+            )
+
+            if not resultados:
+                continue
+
+            ledger = score_matchday(
+                matchday=jornada,
+                outcomes=resultados,
+                ledger=ledger,
+            )
+
+            hecho["scored"].append(jornada)
+
+    except Exception as error:
+        hecho["error"] = (
+            f"{type(error).__name__}: {error}"
+        )
+
+    return {
+        "ledger": ledger,
+        "summary": hecho,
+    }

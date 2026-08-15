@@ -14,9 +14,11 @@ from src.intelligence.source_accuracy_ledger import (
     brier,
     empty_ledger,
     infer_outcomes,
+    outcomes_from_snapshot,
     record_predictions,
     score_matchday,
     source_weights,
+    sync_ledger,
 )
 
 
@@ -385,6 +387,168 @@ def test_datos_incoherentes_no_inventan_resultado() -> None:
     print("  OK  ante datos incoherentes no se inventa resultado")
 
 
+
+# ============================================================
+# CICLO AUTOMATICO
+# ============================================================
+
+def _snapshot_catalogo(apariciones: dict) -> dict:
+    return {
+        "catalog": {
+            "data": {
+                "players": [
+                    {
+                        "id": pid,
+                        "playedHome": valor,
+                        "playedAway": 0,
+                    }
+                    for pid, valor in apariciones.items()
+                ],
+            },
+        },
+    }
+
+
+def test_guarda_linea_base_al_predecir() -> None:
+    ledger = record_predictions(
+        board=_board(),
+        matchday=1,
+        ledger=empty_ledger(),
+        snapshot=_snapshot_catalogo({
+            1599: 0,
+            41606: 0,
+            26271: 0,
+        }),
+    )
+
+    pred = ledger["matchdays"]["1"]["predictions"]["1599"]
+
+    assert pred["appearances_at_prediction"] == 0, (
+        "Sin linea base no se puede puntuar despues sin "
+        "conservar la foto antigua."
+    )
+
+    print("  OK  guarda los partidos disputados al predecir")
+
+
+def test_puntua_sin_necesitar_la_foto_antigua() -> None:
+    ledger = record_predictions(
+        board=_board(),
+        matchday=1,
+        ledger=empty_ledger(),
+        snapshot=_snapshot_catalogo({
+            1599: 0,
+            41606: 0,
+            26271: 0,
+        }),
+    )
+
+    # Jugaron Jonny Castro y Yamal; Mangala no.
+    resultados = outcomes_from_snapshot(
+        matchday=1,
+        snapshot=_snapshot_catalogo({
+            1599: 1,
+            41606: 0,
+            26271: 1,
+        }),
+        ledger=ledger,
+    )
+
+    assert resultados["1599"]["played"] == 1
+    assert resultados["41606"]["played"] == 0
+    assert resultados["26271"]["played"] == 1
+
+    print("  OK  puntua solo con la foto actual")
+
+
+def test_sync_registra_y_puntua_sola() -> None:
+    """
+    El ciclo completo: se registra la jornada 1, avanza el
+    calendario y la 1 se puntua sin intervencion.
+    """
+    resultado = sync_ledger(
+        board=_board(),
+        snapshot=_snapshot_catalogo({
+            1599: 0,
+            41606: 0,
+            26271: 0,
+        }),
+        current_matchday=1,
+        ledger=empty_ledger(),
+    )
+
+    ledger = resultado["ledger"]
+
+    assert resultado["summary"]["recorded"] == 1
+    assert resultado["summary"]["scored"] == []
+    assert ledger["matchdays"]["1"]["scored"] is False
+
+    # Avanza la jornada: ahora la 1 debe puntuarse sola.
+    resultado = sync_ledger(
+        board={"players": []},
+        snapshot=_snapshot_catalogo({
+            1599: 1,
+            41606: 1,
+            26271: 1,
+        }),
+        current_matchday=2,
+        ledger=ledger,
+    )
+
+    ledger = resultado["ledger"]
+
+    assert resultado["summary"]["scored"] == [1], (
+        "REGRESION: al avanzar la jornada, la anterior no se "
+        "puntuo sola."
+    )
+    assert ledger["matchdays"]["1"]["scored"] is True
+
+    jp = (
+        ledger["matchdays"]["1"]["per_source"]
+        ["JORNADA_PERFECTA"]["mean_brier"]
+    )
+    af = (
+        ledger["matchdays"]["1"]["per_source"]
+        ["ANALITICA_FANTASY"]["mean_brier"]
+    )
+
+    assert jp < af
+
+    print(
+        f"  OK  al avanzar de jornada se puntua sola "
+        f"(JP {jp:.3f} < AF {af:.3f})"
+    )
+
+
+def test_sync_nunca_lanza() -> None:
+    """
+    Un fallo del libro no puede tumbar un ciclo de produccion.
+    """
+    basura = [
+        (None, None, None),
+        ({"players": "no-es-lista"}, {}, 1),
+        ({"players": [{"player_id": "abc"}]}, {}, "x"),
+    ]
+
+    for board, snapshot, matchday in basura:
+        try:
+            salida = sync_ledger(
+                board=board,
+                snapshot=snapshot,
+                current_matchday=matchday,
+                ledger=empty_ledger(),
+            )
+        except Exception as error:
+            raise AssertionError(
+                f"REGRESION: sync_ledger lanzo "
+                f"{type(error).__name__}: {error}"
+            )
+
+        assert "ledger" in salida
+
+    print("  OK  con entradas basura devuelve error, no lanza")
+
+
 # ============================================================
 
 TESTS = [
@@ -399,6 +563,10 @@ TESTS = [
     test_muchas_jornadas_si_separan,
     test_infiere_quien_jugo,
     test_datos_incoherentes_no_inventan_resultado,
+    test_guarda_linea_base_al_predecir,
+    test_puntua_sin_necesitar_la_foto_antigua,
+    test_sync_registra_y_puntua_sola,
+    test_sync_nunca_lanza,
 ]
 
 

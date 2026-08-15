@@ -42,6 +42,12 @@ from src.analysis.rival_intelligence_engine import (
     build_rival_intelligence,
 )
 
+from src.intelligence.source_accuracy_ledger import (
+    load_ledger,
+    save_ledger,
+    sync_ledger,
+)
+
 from src.analysis.negotiation_state_engine import (
     apply_observer_response,
     load_negotiation_state,
@@ -2708,6 +2714,83 @@ def confirm_negotiation_transitions(
     }
 
 
+def sync_source_accuracy(
+    cycle_state: dict,
+) -> dict:
+    """
+    Alimenta el libro de acierto por fuente.
+
+    starter_multisource_v1124.json se reescribe en cada ciclo:
+    sin esta llamada las predicciones de una jornada se pierden
+    en cuanto empieza a calcularse la siguiente, y no habria con
+    que puntuar a las fuentes.
+
+    FASE OBSERVADOR: no influye en ninguna decision.
+
+    Blindado a proposito: un fallo del libro jamas puede detener
+    un ciclo de produccion.
+    """
+
+    try:
+        from src.intelligence.multisource_starter_v1124 import (
+            OUTPUT_FILE,
+        )
+
+        if not OUTPUT_FILE.exists():
+            return {
+                "recorded": None,
+                "scored": [],
+                "error": "Sin tablero multifuente todavia.",
+            }
+
+        with open(
+            OUTPUT_FILE,
+            encoding="utf-8",
+        ) as fichero:
+            board = json.load(fichero)
+
+        matchday = (
+            cycle_state.get(
+                "target_matchday"
+            )
+            or board.get(
+                "matchday"
+            )
+        )
+
+        if matchday is None:
+            return {
+                "recorded": None,
+                "scored": [],
+                "error": "Jornada objetivo desconocida.",
+            }
+
+        resultado = sync_ledger(
+            board=board,
+            snapshot=cycle_state.get(
+                "_snapshot",
+                {},
+            ),
+            current_matchday=int(matchday),
+            ledger=load_ledger(),
+        )
+
+        save_ledger(
+            resultado["ledger"]
+        )
+
+        return resultado["summary"]
+
+    except Exception as error:
+        return {
+            "recorded": None,
+            "scored": [],
+            "error": (
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def run_cycle(
     live: bool = False,
     competitive_live: bool = False,
@@ -2947,6 +3030,22 @@ def run_cycle(
             "success":
                 True,
         }
+
+    source_accuracy = (
+        sync_source_accuracy(
+            {
+                **cycle_state,
+                "_snapshot": snapshot,
+            }
+        )
+    )
+
+    if source_accuracy.get("scored"):
+        print()
+        print(
+            f"Libro de fuentes: puntuadas las jornadas "
+            f"{source_accuracy['scored']}."
+        )
 
     negotiation_persistence = (
         confirm_negotiation_transitions(
