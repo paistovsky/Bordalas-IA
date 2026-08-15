@@ -47,6 +47,158 @@ ACCEPT_EXPIRY_ACTION = "ACCEPT_CLUSTER_BEFORE_EXPIRY"
 SPECULATION_BUY_ACTION = "BUY_SPECULATION"
 
 
+# ==================================================
+# DEDUPLICACION DE PUJAS SALIENTES
+# ==================================================
+
+ACTIVE_OFFER_STATUS = {
+    "waiting",
+    "pending",
+}
+
+
+def get_own_user_id(
+    snapshot: dict,
+) -> int | None:
+
+    valor = (
+        (
+            snapshot.get(
+                "league",
+                {},
+            )
+            or {}
+        ).get(
+            "user",
+            {},
+        )
+        or {}
+    ).get(
+        "id"
+    )
+
+    try:
+        return (
+            int(valor)
+            if valor is not None
+            else None
+        )
+
+    except (TypeError, ValueError):
+        return None
+
+
+def find_own_pending_bid(
+    snapshot: dict,
+    player_id: int,
+) -> dict | None:
+    """
+    Busca una puja SALIENTE nuestra, todavia viva, por este
+    jugador.
+
+    La rama BUY_SPECULATION revalidaba saldo, presupuesto,
+    propiedad y precio, pero no miraba si ya teniamos una puja
+    pendiente por el mismo jugador. Como una puja no se resuelve
+    hasta el cierre de mercado, el jugador seguia en el mercado y
+    el saldo no se descontaba, asi que el mismo objetivo volvia a
+    salir como executable_buys[0] en cada ciclo: una puja nueva
+    cada 30 minutos sobre lo mismo.
+
+    Filtra por direccion a proposito. En el snapshot real las
+    ofertas entrantes llegan con from=None y las nuestras con
+    from=<nuestro id>; mirar solo requestedPlayers, como hace
+    find_existing_offer en live_bid_executor, puede confundir una
+    oferta entrante con una puja propia.
+    """
+
+    own_user_id = (
+        get_own_user_id(
+            snapshot
+        )
+    )
+
+    if own_user_id is None:
+        return None
+
+    ofertas = (
+        (
+            snapshot.get(
+                "market",
+                {},
+            )
+            or {}
+        ).get(
+            "offers",
+            [],
+        )
+        or []
+    )
+
+    for oferta in ofertas:
+
+        origen = oferta.get(
+            "from"
+        )
+
+        origen_id = (
+            origen.get("id")
+            if isinstance(origen, dict)
+            else origen
+        )
+
+        try:
+            origen_id = (
+                int(origen_id)
+                if origen_id is not None
+                else None
+            )
+
+        except (TypeError, ValueError):
+            origen_id = None
+
+        if origen_id != own_user_id:
+            continue
+
+        estado = str(
+            oferta.get(
+                "status",
+                "",
+            )
+        ).lower()
+
+        if (
+            estado
+            and
+            estado not in ACTIVE_OFFER_STATUS
+        ):
+            continue
+
+        for solicitado in (
+            oferta.get(
+                "requestedPlayers",
+                [],
+            )
+            or []
+        ):
+
+            solicitado_id = (
+                solicitado.get("id")
+                if isinstance(solicitado, dict)
+                else solicitado
+            )
+
+            try:
+                solicitado_id = int(solicitado_id)
+
+            except (TypeError, ValueError):
+                continue
+
+            if solicitado_id == int(player_id):
+                return oferta
+
+    return None
+
+
 def refresh_snapshot_for_write_revalidation() -> tuple[str, dict]:
     """
     Read-before-write obligatorio para operaciones delicadas.
@@ -1454,6 +1606,45 @@ def execute_autopilot_decision(
                     fresh_snapshot_file,
                 "speculation":
                     fresh_board,
+            }
+
+        # DEDUPLICACION: una puja viva por este jugador significa
+        # que ya comprometimos ese dinero. Volver a pujar duplica
+        # el compromiso sin que el saldo lo refleje, porque la
+        # puja no se resuelve hasta el cierre de mercado.
+        puja_viva = (
+            find_own_pending_bid(
+                snapshot=
+                    fresh_snapshot,
+
+                player_id=
+                    int(
+                        requested_player_id
+                    ),
+            )
+        )
+
+        if puja_viva is not None:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_BID_ALREADY_PENDING",
+                    reason=(
+                        f"Ya existe una puja nuestra viva por "
+                        f"este jugador "
+                        f"(oferta {puja_viva.get('id')}, "
+                        f"{puja_viva.get('amount')} EUR). "
+                        f"No se duplica."
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+                "speculation":
+                    fresh_board,
+                "existing_bid":
+                    puja_viva,
             }
 
         market_sales = (
