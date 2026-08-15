@@ -679,6 +679,7 @@ def build_competitive_observer(
     snapshot: dict,
     temporal_gate: dict | None = None,
     current_balance: int | None = None,
+    liquidity: dict | None = None,
 ) -> dict:
     """
     V1.8.1 SAFETY GATE DRY RUN.
@@ -790,6 +791,39 @@ def build_competitive_observer(
             )
         )
 
+        # Proteccion por jugador.
+        #
+        # competitive_safety_gate comprueba
+        # offer["protection"] == "NEVER_AUTO_SELL", pero esa clave
+        # nunca se rellenaba aqui: la palabra "protection" no
+        # aparecia ni una vez en este fichero. BLOCK_PROTECTED_PLAYER
+        # era, por tanto, una barrera inalcanzable.
+        #
+        # El dato ya existe: liquidity_manager lo calcula por
+        # jugador y lo expone en el roster. Solo habia que traerlo.
+        protection_lookup = {}
+
+        for item in (
+            (liquidity or {}).get(
+                "roster",
+                [],
+            )
+            or []
+        ):
+            try:
+                protection_lookup[
+                    int(item["id"])
+                ] = str(
+                    item.get(
+                        "protection",
+                        "",
+                    )
+                    or ""
+                )
+
+            except (KeyError, TypeError, ValueError):
+                continue
+
         manager_offers = []
 
         updated_negotiation_state = (
@@ -844,6 +878,16 @@ def build_competitive_observer(
                     "player_id":
                         decision.get(
                             "player_id"
+                        ),
+
+                    "protection":
+                        protection_lookup.get(
+                            safe_int(
+                                decision.get(
+                                    "player_id"
+                                )
+                            ),
+                            "",
                         ),
 
                     "player_name":
@@ -2847,6 +2891,13 @@ def run_cycle(
                     "balance",
                     0,
                 )
+            ),
+            liquidity=(
+                cycle_state.get(
+                    "liquidity",
+                    {},
+                )
+                or {}
             ),
         )
     )

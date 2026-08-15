@@ -1171,6 +1171,13 @@ def execute_autopilot_decision(
                     int(
                         offer_id
                     ),
+
+                # Sin el importe, best_offer_seen nunca llega al
+                # disco y el motor no recuerda lo que rechazo.
+                amount=
+                    fresh_offer.get(
+                        "amount"
+                    ),
             )
 
         return {

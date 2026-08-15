@@ -42,6 +42,14 @@ ACCEPT_BEFORE_EXPIRY_HOURS = 6.0
 # al cierre de jornada en negativo con ofertas buenas sin tocar.
 ACCEPT_BEFORE_DEADLINE_HOURS = 6.0
 
+# Tope de rechazos por jugador.
+#
+# Sin tope el motor podia rechazar 970.000, luego 960.000, luego
+# 950.000... sin recordar que ya habia rechazado algo mejor, y
+# acabar aceptando una oferta peor que la primera o perdiendolas
+# todas por caducidad.
+MAX_REROLLS_PER_PLAYER = 3
+
 # Umbrales deliberadamente prudentes.
 #
 # No asumimos una distribucion concreta de las ofertas Computer.
@@ -413,10 +421,17 @@ def update_seen_offer_history(
 def record_reroll(
     player_id: int,
     offer_id=None,
+    amount=None,
 ) -> None:
     """
-    Se usara cuando el executor LIVE de reroll exista.
-    V1 solo analiza: NO llama a esta funcion automaticamente.
+    Registra un rechazo real de oferta Computer.
+
+    Persiste tambien best_offer_seen. update_seen_offer_history
+    lo calcula al construir el tablero, pero ese tablero corre
+    siempre con persist_history=False, de modo que el maximo
+    historico nunca llegaba al disco y la memoria del motor era
+    inservible: podia rechazar 970.000 y luego aceptar 950.000
+    sin enterarse.
     """
 
     history = (
@@ -458,6 +473,22 @@ def record_reroll(
         )
         + 1
     )
+
+    if amount is not None:
+
+        # La mejor oferta que hemos TIRADO. Es la referencia
+        # honesta: best_offer_seen incluye la que estas mirando
+        # ahora mismo y no sirve para decidir sobre ella.
+        state[
+            "best_offer_rejected"
+        ] = max(
+            safe_int(
+                state.get(
+                    "best_offer_rejected"
+                )
+            ),
+            safe_int(amount),
+        )
 
     state[
         "last_rerolled_offer_id"
@@ -769,6 +800,73 @@ def calculate_hours_to_expiry(
     )
 
 
+def reroll_block_reason(
+    history_state: dict,
+    amount: int,
+) -> tuple[str, str] | None:
+    """
+    Decide si el historial desaconseja rechazar esta oferta.
+
+    Dos frenos, complementarios:
+
+    MEMORIA - se compara contra la mejor oferta que hemos
+    RECHAZADO, no contra la mejor que hemos visto.
+
+    La diferencia importa. best_offer_seen se actualiza al ver
+    la oferta actual, asi que compararse con el bloquearia
+    siempre el primer reroll: la oferta que estas evaluando ya
+    es, por definicion, la mejor vista.
+
+    Contra lo rechazado la regla si dice algo: si la oferta
+    actual no mejora lo que ya tiramos, el reroll ha fracasado
+    -tuvimos algo igual o mejor y lo dejamos ir-, y seguir
+    rechazando es la espiral descendente. Solo si la hemos
+    mejorado tiene sentido plantearse otro intento.
+
+    TOPE - por si las ofertas oscilan al alza y la memoria sola
+    no converge.
+
+    Devuelve (accion, motivo) o None si se puede rerollear.
+    """
+
+    rerolls = safe_int(
+        history_state.get(
+            "reroll_count"
+        )
+    )
+
+    if rerolls >= MAX_REROLLS_PER_PLAYER:
+
+        return (
+            "KEEP_REROLL_CAP_REACHED",
+            f"Ya se han rechazado {rerolls} ofertas por este "
+            f"jugador (tope {MAX_REROLLS_PER_PLAYER}). "
+            f"Seguir rechazando arriesga acabar peor.",
+        )
+
+    rechazado = safe_int(
+        history_state.get(
+            "best_offer_rejected"
+        )
+    )
+
+    if (
+        rechazado > 0
+        and
+        safe_int(amount) <= rechazado
+    ):
+
+        return (
+            "KEEP_NO_IMPROVEMENT",
+            f"La oferta ({safe_int(amount)}) no mejora la mejor "
+            f"que ya rechazamos por este jugador ({rechazado}). "
+            f"El reroll no esta funcionando: seguir rechazando "
+            f"es bajar en espiral.",
+        )
+
+    return None
+
+
 def analyze_computer_offer(
     offer: dict,
     solvency: dict,
@@ -943,6 +1041,12 @@ def analyze_computer_offer(
             replacement_possible
             and
             reroll_safe
+            and
+            reroll_block_reason(
+                history_state,
+                offer.get("amount"),
+            )
+            is None
         ):
 
             action = (
@@ -976,6 +1080,36 @@ def analyze_computer_offer(
                 "incluso contando una nueva oferta futura "
                 "con haircut conservador."
             )
+
+    elif (
+        quality[
+            "quality"
+        ]
+        == "WEAK"
+        and
+        replacement_possible
+        and
+        reroll_safe
+        and
+        reroll_block_reason(
+            history_state,
+            offer.get("amount"),
+        )
+        is not None
+    ):
+
+        # El historial desaconseja seguir rechazando.
+        (
+            action,
+            reason,
+        ) = reroll_block_reason(
+            history_state,
+            offer.get("amount"),
+        )
+
+        can_reroll = (
+            False
+        )
 
     elif (
         quality[
