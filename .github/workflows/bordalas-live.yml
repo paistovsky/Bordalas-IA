@@ -107,6 +107,15 @@ jobs:
           python -m src.analysis.test_live_solvency_authority_v115
           python -m src.telemetry.test_dashboard_execution_v121
 
+          # Candados de la auditoria del 15/08/2026.
+          # Deterministas, sin red ni credenciales: si alguien
+          # reintroduce una de estas guardias dormidas, el ciclo
+          # se detiene aqui y no llega a produccion.
+          python -m src.analysis.test_solvency_deadlock_v1
+          python -m src.analysis.test_write_path_guards_v1
+          python -m src.analysis.test_negotiation_persistence_v1
+          python -m src.analysis.test_bid_deduplication_v1
+
       - name: Run Bordalas V10 PRODUCTION
         shell: bash
         run: |
