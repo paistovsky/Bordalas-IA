@@ -53,6 +53,10 @@ DE DONDE SALE "LO QUE VALE PARA NOSOTROS"
 
 from __future__ import annotations
 
+from src.analysis.rival_ledger_audit import (
+    audit_rival_ledger,
+)
+
 
 # Prima sobre el precio de mercado, cuando todavia no hay
 # historial suficiente para calibrar.
@@ -87,6 +91,11 @@ MIN_AUCTIONS_FOR_PARTICIPATION = 8
 # probabilidad de pujar. Prudente: sin historial no se puede
 # afirmar que alguien no puja.
 PRIOR_PARTICIPATION = 0.30
+
+# Cuando no se puede conciliar la plantilla de un rival -el
+# informe viene resumido y no trae roster-, se supone esta
+# cobertura. Ni fiarse del todo ni ignorar lo medido.
+ASSUMED_COVERAGE_WHEN_UNKNOWN = 0.50
 
 # Primas por debajo o muy por encima de esto son ruido: precios
 # historicos desfasados, operaciones raras.
@@ -268,6 +277,25 @@ def build_bid_model(
 
     hay_historial = subastas >= MIN_AUCTIONS_FOR_PARTICIPATION
 
+    # Conciliacion jugador a jugador.
+    #
+    # Antes la confianza en los datos salia de
+    # `validation.exact`, que compara nuestro saldo oficial con el
+    # reconstruido. Solo el nuestro: Biwenger no publica el saldo
+    # de nadie mas. Sobre ese indicador se decidia si pujar al
+    # minimo, o sea que se medía una cosa para decidir sobre otra.
+    #
+    # Lo que si se puede comprobar es si sabemos explicar cada
+    # jugador de cada plantilla rival: o vino en el reparto
+    # inicial, o hay una compra registrada. Eso si mide lo que nos
+    # importa.
+    auditoria = audit_rival_ledger(
+        inteligencia,
+        own_user_id=own_user_id,
+    )
+
+    por_manager = auditoria.get("by_manager") or {}
+
     rivales = []
 
     for manager in managers:
@@ -293,8 +321,25 @@ def build_bid_model(
             safe_int(manager.get("max_winning_bid")),
         )
 
+        conciliacion = por_manager.get(identificador) or {}
+
+        cobertura = conciliacion.get("coverage")
+
+        if cobertura is None:
+            cobertura = ASSUMED_COVERAGE_WHEN_UNKNOWN
+
         if hay_historial:
-            participacion = min(pujas / max(subastas, 1), 1.0)
+
+            medida = min(pujas / max(subastas, 1), 1.0)
+
+            # Lo medido pesa tanto como completa sea nuestra
+            # informacion de ese rival. De uno del que nos falta
+            # media historia, "ha pujado dos veces" no significa
+            # que solo haya pujado dos veces.
+            participacion = (
+                medida * cobertura
+                + PRIOR_PARTICIPATION * (1.0 - cobertura)
+            )
 
         else:
             participacion = (
@@ -312,8 +357,20 @@ def build_bid_model(
                 "max_observed_bid": observada,
                 "participation": round(participacion, 4),
                 "profile": manager.get("profile"),
+                "coverage": round(cobertura, 4),
+
+                # Afirmar que alguien NO puja es una afirmacion en
+                # negativo, y solo se puede hacer si de verdad
+                # conocemos su historia. Con cobertura baja, un
+                # cero puede ser simplemente lo que no hemos
+                # visto.
                 "never_bids": bool(
-                    hay_historial and pujas == 0
+                    hay_historial
+                    and pujas == 0
+                    and conciliacion.get(
+                        "can_claim_never_bids",
+                        False,
+                    )
                 ),
             }
         )
@@ -326,6 +383,17 @@ def build_bid_model(
         "auctions_observed": subastas,
         "participation_from_history": hay_historial,
         "premium": prima,
+        "ledger_audit": auditoria,
+        "data_coverage": auditoria.get("min_coverage"),
+
+        # Fiarse del ledger exige las dos cosas: que nuestro saldo
+        # cuadre Y que sepamos explicar las plantillas rivales.
+        # Antes bastaba con lo primero.
+        "ledger_trusted": bool(
+            (inteligencia.get("validation") or {}).get("exact")
+            is True
+            and auditoria.get("status") == "COMPLETO"
+        ),
         "ledger_exact": (
             (inteligencia.get("validation") or {}).get("exact")
             is True

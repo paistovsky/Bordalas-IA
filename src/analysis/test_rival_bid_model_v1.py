@@ -41,6 +41,11 @@ PRECIO = 420_000          # Oluwaseyi, precio real del 16/08
 VALOR = 490_000           # reventa 640k menos 150k de margen
 
 
+# Instante del reparto inicial de la liga, como en los datos
+# reales: todos los jugadores del lote comparten `owner_since`.
+REPARTO = 1786379245
+
+
 def rival(
     user_id: int,
     nombre: str,
@@ -48,7 +53,63 @@ def rival(
     observada: int = 0,
     perdidas: int = 0,
     ganadas: int = 0,
+    plantilla: int = 15,
+    sin_explicar: int = 0,
 ) -> dict:
+    """
+    Un manager con su plantilla conciliable.
+
+    `sin_explicar` son jugadores que aparecieron en su plantilla
+    despues del reparto sin que tengamos registrada la compra: es
+    el sintoma de que nos falta historia suya.
+    """
+
+    roster = []
+    transacciones = []
+
+    del_reparto = max(
+        plantilla - ganadas - sin_explicar,
+        0,
+    )
+
+    for i in range(del_reparto):
+        roster.append(
+            {
+                "id": user_id * 1000 + i,
+                "name": f"{nombre} draft {i}",
+                "value": 1_000_000,
+                "owner_since": REPARTO,
+            }
+        )
+
+    for i in range(ganadas):
+        pid = user_id * 1000 + 500 + i
+        roster.append(
+            {
+                "id": pid,
+                "name": f"{nombre} fichado {i}",
+                "value": 2_000_000,
+                "owner_since": REPARTO + 86_400 * (i + 1),
+            }
+        )
+        transacciones.append(
+            {
+                "kind": "BUY_FROM_COMPUTER",
+                "player_id": pid,
+                "amount": 2_000_000,
+            }
+        )
+
+    for i in range(sin_explicar):
+        roster.append(
+            {
+                "id": user_id * 1000 + 900 + i,
+                "name": f"{nombre} misterioso {i}",
+                "value": 3_000_000,
+                "owner_since": REPARTO + 86_400 * (i + 1),
+            }
+        )
+
     return {
         "user_id": user_id,
         "name": nombre,
@@ -56,6 +117,8 @@ def rival(
         "max_observed_bid": observada,
         "lost_bids": perdidas,
         "won_auctions": ganadas,
+        "roster": roster,
+        "transactions": transacciones,
     }
 
 
@@ -128,10 +191,13 @@ def test_la_participacion_sale_del_historial() -> None:
 
     pollo = por_nombre(model, "Pollo17")
 
-    # 11 perdidas + 2 ganadas sobre 23 subastas.
+    # 11 perdidas + 2 ganadas sobre 23 subastas, y su plantilla
+    # se explica entera, asi que lo medido vale tal cual.
+    assert pollo["coverage"] == 1.0
     assert abs(pollo["participation"] - 13 / 23) < 0.001, (
-        f"Pollo17 ha pujado 13 veces en 23 subastas: deberia salir "
-        f"{13/23:.3f}, salio {pollo['participation']}."
+        f"Pollo17 ha pujado 13 veces en 23 subastas y su historia "
+        f"esta completa: deberia salir {13/23:.3f}, salio "
+        f"{pollo['participation']}."
     )
     assert model["participation_from_history"] is True
 
@@ -462,6 +528,121 @@ def test_la_curva_deja_sitio_a_la_cola() -> None:
     print(f"  OK  a +45 % de prima se gana el {p*100:.0f} %, no el 100 %")
 
 
+def test_sin_conciliar_no_se_afirma_que_alguien_no_puja() -> None:
+    """
+    "Este rival no puja nunca" es una afirmacion en negativo, y
+    solo se puede hacer conociendo su historia entera.
+
+    Con jugadores en su plantilla que no sabemos de donde salieron,
+    un cero de pujas puede ser simplemente lo que no hemos visto.
+    """
+    opaco = rival(
+        50, "Opaco", 30_000_000,
+        observada=0, perdidas=0, ganadas=0,
+        plantilla=15, sin_explicar=6,
+    )
+
+    model = modelo([opaco])
+
+    datos = por_nombre(model, "Opaco")
+
+    assert datos["coverage"] < 1.0
+    assert datos["never_bids"] is False, (
+        "REGRESION: se afirmo que un rival no puja teniendo su "
+        "historia incompleta."
+    )
+    assert datos["participation"] > 0, (
+        "Con la historia incompleta hay que suponer que puede "
+        "pujar."
+    )
+
+    print(
+        f"  OK  con cobertura {datos['coverage']*100:.0f} % no se "
+        f"afirma que no puje"
+    )
+
+
+def test_con_la_historia_completa_si_se_puede_afirmar() -> None:
+    limpio = rival(
+        51, "Transparente", 30_000_000,
+        observada=0, perdidas=0, ganadas=0,
+        plantilla=15, sin_explicar=0,
+    )
+
+    model = modelo([limpio])
+
+    datos = por_nombre(model, "Transparente")
+
+    assert datos["coverage"] == 1.0
+    assert datos["never_bids"] is True, (
+        "Con la plantilla explicada entera y cero pujas, si se "
+        "puede afirmar que no puja."
+    )
+
+    print("  OK  con la historia completa si se afirma")
+
+
+def test_la_falta_de_datos_encoge_lo_medido() -> None:
+    """
+    De un rival del que nos falta media historia, "ha pujado dos
+    veces" no significa que solo haya pujado dos veces.
+    """
+    completo = rival(
+        52, "Completo", 30_000_000,
+        observada=5_000_000, perdidas=2, ganadas=0,
+        plantilla=15, sin_explicar=0,
+    )
+    incompleto = rival(
+        53, "Incompleto", 30_000_000,
+        observada=5_000_000, perdidas=2, ganadas=0,
+        plantilla=15, sin_explicar=8,
+    )
+
+    model = modelo([completo, incompleto])
+
+    a = por_nombre(model, "Completo")
+    b = por_nombre(model, "Incompleto")
+
+    assert b["participation"] > a["participation"], (
+        f"Con menos informacion hay que suponer mas actividad, no "
+        f"menos. Completo {a['participation']}, incompleto "
+        f"{b['participation']}."
+    )
+
+    print(
+        f"  OK  cobertura {a['coverage']*100:.0f} % -> "
+        f"{a['participation']:.2f} vs "
+        f"{b['coverage']*100:.0f} % -> {b['participation']:.2f}"
+    )
+
+
+def test_el_ledger_solo_es_fiable_si_tambien_cuadran_los_rivales() -> None:
+    """
+    El fallo del 16/08: `validation.exact` compara SOLO nuestro
+    saldo, y sobre el se decidia si pujar al minimo.
+    """
+    con_hueco = modelo(
+        [rival(54, "Opaco", 30_000_000, plantilla=15, sin_explicar=4)]
+    )
+    sin_hueco = modelo(
+        [rival(55, "Claro", 30_000_000, plantilla=15, sin_explicar=0)]
+    )
+
+    assert con_hueco["ledger_exact"] is True, (
+        "Nuestro saldo cuadra en los dos casos."
+    )
+    assert con_hueco["ledger_trusted"] is False, (
+        "REGRESION: se dio por fiable un ledger con plantillas "
+        "rivales sin explicar."
+    )
+    assert sin_hueco["ledger_trusted"] is True
+
+    print(
+        "  OK  fiarse exige que cuadre nuestro saldo Y las "
+        "plantillas rivales"
+    )
+
+
 def test_las_primas_absurdas_se_descartan() -> None:
     """
     Un precio historico desfasado produce primas de 5x o de 0,1x
@@ -549,6 +730,10 @@ TESTS = [
     test_sin_muestras_se_usa_la_curva_por_defecto_y_se_dice,
     test_con_historial_suficiente_se_calibra,
     test_la_curva_deja_sitio_a_la_cola,
+    test_sin_conciliar_no_se_afirma_que_alguien_no_puja,
+    test_con_la_historia_completa_si_se_puede_afirmar,
+    test_la_falta_de_datos_encoge_lo_medido,
+    test_el_ledger_solo_es_fiable_si_tambien_cuadran_los_rivales,
     test_las_primas_absurdas_se_descartan,
     test_aguanta_inteligencia_rota,
     test_un_precio_invalido_no_genera_puja,

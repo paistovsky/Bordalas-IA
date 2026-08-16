@@ -160,9 +160,53 @@ def snapshot(
     }
 
 
+REPARTO = 1786379245
+
+
 def rivales(activos: bool = True) -> dict:
-    return {
-        "managers": [
+    """
+    Rivales con plantilla conciliable.
+
+    El roster hace falta: sin el no se puede comprobar si conocemos
+    su historia, y el modelo -con razon- deja de dar por hecho que
+    un rival este inactivo.
+    """
+
+    managers = []
+
+    for i in range(4):
+
+        roster = [
+            {
+                "id": (100 + i) * 1000 + j,
+                "name": f"Rival {i} draft {j}",
+                "value": 1_000_000,
+                "owner_since": REPARTO,
+            }
+            for j in range(15)
+        ]
+
+        transacciones = []
+
+        if activos:
+            pid = (100 + i) * 1000 + 500
+            roster.append(
+                {
+                    "id": pid,
+                    "name": f"Rival {i} fichado",
+                    "value": 2_000_000,
+                    "owner_since": REPARTO + 86_400,
+                }
+            )
+            transacciones.append(
+                {
+                    "kind": "BUY_FROM_COMPUTER",
+                    "player_id": pid,
+                    "amount": 2_000_000,
+                }
+            )
+
+        managers.append(
             {
                 "user_id": 100 + i,
                 "name": f"Rival {i}",
@@ -170,9 +214,13 @@ def rivales(activos: bool = True) -> dict:
                 "max_observed_bid": 8_000_000 if activos else 0,
                 "lost_bids": 6 if activos else 0,
                 "won_auctions": 1 if activos else 0,
+                "roster": roster,
+                "transactions": transacciones,
             }
-            for i in range(4)
-        ],
+        )
+
+    return {
+        "managers": managers,
         "competitive_bids": 23,
         "validation": {"exact": True},
     }
