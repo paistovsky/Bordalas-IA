@@ -102,6 +102,24 @@ export default function App() {
           </div>
         )}
 
+        {data.consistency?.available && !data.consistency.ok && (
+          <div className="alert crit">
+            <b>ESTA PANTALLA NO CUADRA CON BIWENGER.</b>{" "}
+            {data.consistency.summary}
+            <ul className="consistency-list">
+              {(data.consistency.checks || [])
+                .filter((check) => !check.ok)
+                .map((check) => (
+                  <li key={check.key}>
+                    {check.label}: Biwenger dice{" "}
+                    <b>{String(check.expected)}</b>, aquí sale{" "}
+                    <b>{String(check.found)}</b>. {check.detail}
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
+
         {data.lineup?.starter_data_total > 0 &&
           !data.lineup?.starter_data_ok && (
           <div className="alert warn">

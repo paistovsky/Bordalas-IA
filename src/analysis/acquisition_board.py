@@ -30,6 +30,10 @@ from src.analysis.acquisition_valuation import (
     value_candidate,
 )
 
+from src.analysis.bid_exposure_engine import (
+    build_bid_exposure,
+)
+
 from src.analysis.historical_price_lookup import (
     build_historical_price_lookup,
 )
@@ -88,6 +92,29 @@ def build_acquisition_board(
         )
 
         vendedores = build_market_seller_lookup(snapshot)
+
+        # LO QUE YA HEMOS PUJADO
+        #
+        # El tablero decia "0 CON PUJA" con tres pujas vivas en
+        # Biwenger por 3.126.002 EUR. El contador de la caja SI
+        # las veia; esta tabla no, porque nunca se le paso el
+        # dato. Y la columna se llamaba PUJAMOS, que es lo que
+        # cualquiera entiende por "tenemos una puja puesta"
+        # cuando en realidad ensenaba la puja *recomendada*.
+        #
+        # Aqui entra el hecho: cuanto hay puesto, por quien.
+        exposicion = build_bid_exposure(
+            snapshot,
+            own_user_id=current_user_id,
+        )
+
+        puja_viva = {}
+
+        for operacion in (exposicion.get("operations") or []):
+            for jugador in (operacion.get("player_ids") or []):
+                puja_viva[safe_int(jugador)] = safe_int(
+                    operacion.get("amount")
+                )
 
         filas = []
 
@@ -154,7 +181,17 @@ def build_acquisition_board(
                 ),
 
                 "reason": valoracion.get("reason"),
+
+                # `bid` es lo que pujariamos. `live_bid` es lo que
+                # YA tenemos puesto en Biwenger. Dos numeros
+                # distintos que la pantalla estaba mezclando en
+                # una sola columna.
                 "bid": 0,
+                "live_bid": puja_viva.get(safe_int(player_id)) or 0,
+                "has_live_bid": (
+                    safe_int(player_id) in puja_viva
+                ),
+
                 "win_probability": None,
                 "expected_value": None,
                 "decision": valoracion.get("decision"),
@@ -189,9 +226,14 @@ def build_acquisition_board(
 
             filas.append(fila)
 
+        # Primero lo que se puede ejecutar HOY, y dentro de eso lo
+        # que todavia no tiene puja nuestra. Asi la primera fila
+        # de la tabla es la que el ciclo va a ejecutar de verdad,
+        # que es como se lee en la consola.
         filas.sort(
             key=lambda item: (
                 item["decision"] != "BID",
+                bool(item.get("has_live_bid")),
                 -(item.get("expected_value") or 0),
                 -item["our_value"],
             )
@@ -214,12 +256,46 @@ def build_acquisition_board(
             if f.get("xi_decision") == "NO_MEJORA_TITULARIDAD"
         )
 
+        # El recorte no puede esconder nuestro propio dinero.
+        #
+        # Con `limit=12` sobre 20 valorados, dos de las tres pujas
+        # vivas caian fuera de la lista y la pantalla no tenia
+        # forma de ensenarlas aunque quisiera. Lo que ya esta
+        # comprometido entra siempre.
+        mostradas = filas[:limit]
+
+        vistos = {f["id"] for f in mostradas}
+
+        mostradas.extend(
+            f
+            for f in filas
+            if f.get("has_live_bid") and f["id"] not in vistos
+        )
+
+        con_puja_viva = [
+            f for f in filas if f.get("has_live_bid")
+        ]
+
         return {
             "available": True,
             "market_size": len(filas),
             "biddable": sum(
                 1 for f in filas if f["decision"] == "BID"
             ),
+
+            # Lo que YA tenemos puesto, frente a lo que se podria
+            # pujar. Son dos cosas y la pantalla las confundia.
+            "with_live_bid": len(con_puja_viva),
+            "live_bid_total": sum(
+                safe_int(f.get("live_bid")) for f in con_puja_viva
+            ),
+            "actionable": sum(
+                1
+                for f in filas
+                if f["decision"] == "BID"
+                and not f.get("has_live_bid")
+            ),
+
             "starter_coverage": {
                 "with_forecast": con_pronostico,
                 "total": len(filas),
@@ -238,7 +314,7 @@ def build_acquisition_board(
                 }
                 for r in (modelo.get("rivals") or [])
             ],
-            "targets": filas[:limit],
+            "targets": mostradas,
         }
 
     except Exception as error:

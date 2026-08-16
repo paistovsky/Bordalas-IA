@@ -7,6 +7,19 @@ const DECISION = {
   SIN_VALOR: ["idle", "SIN VALOR"]
 };
 
+/**
+ * Dos columnas, no una.
+ *
+ * "PUJAMOS" ensenaba la puja RECOMENDADA y se leia como "tenemos
+ * una puja puesta". Con tres pujas vivas en Biwenger por
+ * 3.126.002 EUR, la tabla decia "0 CON PUJA" y guiones en toda
+ * la columna. El contador de la caja si las veia; esta tabla no
+ * recibia el dato.
+ *
+ * Ahora PUESTO es el hecho -lo que hay comprometido ahora mismo-
+ * y PUJARIAMOS es la recomendacion.
+ */
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -85,7 +98,7 @@ function CashPanel({ exposure }) {
   );
 }
 
-function TargetsPanel({ acquisition, pointsMarket }) {
+function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
   if (!acquisition?.available) {
     return (
       <section className="pan">
@@ -94,6 +107,34 @@ function TargetsPanel({ acquisition, pointsMarket }) {
       </section>
     );
   }
+
+  const objetivos = acquisition.targets || [];
+
+  // Contado sobre las filas que se estan pintando, no sobre un
+  // resumen aparte. Si la tabla no lo ensena, no cuenta.
+  const conPuja = objetivos.filter(
+    (t) => Number(t.live_bid || 0) > 0
+  );
+
+  const vivas = conPuja.length;
+  const comprometido = conPuja.reduce(
+    (total, t) => total + Number(t.live_bid || 0),
+    0
+  );
+
+  const porPujar = objetivos.filter(
+    (t) => t.decision === "BID" && !(Number(t.live_bid || 0) > 0)
+  ).length;
+
+  // El dashboard tiene que cazarse a si mismo.
+  //
+  // La caja lee las pujas del snapshot; esta tabla las cruza con
+  // el mercado del Computer. Si los dos numeros no coinciden hay
+  // dinero comprometido que esta pantalla no esta mostrando, y
+  // eso hay que decirlo en vez de ensenar el numero bonito.
+  const descuadre =
+    exposure?.operation_count != null &&
+    Number(exposure.operation_count) !== vivas;
 
   return (
     <section className="pan">
@@ -107,9 +148,17 @@ function TargetsPanel({ acquisition, pointsMarket }) {
               : "precio del punto sin calibrar"}
           </div>
         </div>
-        <span className={acquisition.biddable ? "pill ok" : "pill idle"}>
-          {acquisition.biddable} CON PUJA
-        </span>
+        <div className="pill-row">
+          {vivas > 0 && (
+            <span className="pill live">
+              {vivas} PUJA{vivas === 1 ? "" : "S"} VIVA
+              {vivas === 1 ? "" : "S"} · {formatMoney(comprometido)}
+            </span>
+          )}
+          <span className={porPujar ? "pill ok" : "pill idle"}>
+            {porPujar} POR PUJAR
+          </span>
+        </div>
       </div>
 
       <table>
@@ -119,7 +168,8 @@ function TargetsPanel({ acquisition, pointsMarket }) {
             <th></th>
             <th className="n">MERCADO</th>
             <th className="n">VALE PARA NOSOTROS</th>
-            <th className="n">PUJAMOS</th>
+            <th className="n">PUESTO</th>
+            <th className="n">PUJARÍAMOS</th>
             <th className="n">GANAR</th>
             <th>INTENCIÓN</th>
             <th>SUSTITUYE</th>
@@ -130,14 +180,22 @@ function TargetsPanel({ acquisition, pointsMarket }) {
           {(acquisition.targets || []).map((target) => {
             const [tone, label] = DECISION[target.decision] || ["idle", target.decision];
             const bids = target.decision === "BID";
+            const viva = Number(target.live_bid || 0) > 0;
 
             return (
-              <tr key={target.id} className={bids ? "" : "off"} title={target.reason}>
+              <tr
+                key={target.id}
+                className={viva ? "live" : bids ? "" : "off"}
+                title={target.reason}
+              >
                 <td>{target.name}</td>
                 <td className="dim">{positionLabel(target.position)}</td>
                 <td className="n">{formatEuros(target.market_price)}</td>
                 <td className="n">{formatEuros(target.our_value)}</td>
-                <td className="n strong">{bids ? formatEuros(target.bid) : "—"}</td>
+                <td className="n strong">
+                  {viva ? formatEuros(target.live_bid) : "—"}
+                </td>
+                <td className="n">{bids ? formatEuros(target.bid) : "—"}</td>
                 <td className="n">
                   {target.win_probability != null
                     ? `${Math.round(target.win_probability * 100)}%`
@@ -145,14 +203,31 @@ function TargetsPanel({ acquisition, pointsMarket }) {
                 </td>
                 <td className="dim">{target.intent || "—"}</td>
                 <td className="dim">{target.replaces || "—"}</td>
-                <td><span className={`pill ${tone}`}>{label}</span></td>
+                <td>
+                  {viva ? (
+                    <span className="pill live">PUJA PUESTA</span>
+                  ) : (
+                    <span className={`pill ${tone}`}>{label}</span>
+                  )}
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
 
+      {descuadre && (
+        <div className="alert warn" style={{ marginTop: 10 }}>
+          La caja dice {exposure.operation_count} puja(s) viva(s) y esta tabla
+          encuentra {vivas}. Alguna puja es de un jugador que ya no está en el
+          mercado del Computer. No se decide nada con esta tabla hasta que
+          cuadren.
+        </div>
+      )}
+
       <p className="note" style={{ textAlign: "left" }}>
+        <b>PUESTO</b> es lo que ya hay comprometido en Biwenger ahora mismo.{" "}
+        <b>PUJARÍAMOS</b> es lo que el modelo recomienda si no hubiera puja.
         Pasa el ratón por una fila para ver el porqué completo.
       </p>
     </section>
@@ -248,7 +323,11 @@ export default function MarketPage({ data }) {
         <ListingsPanel listings={data.listings} />
       </div>
 
-      <TargetsPanel acquisition={data.acquisition} pointsMarket={data.pointsMarket} />
+      <TargetsPanel
+        acquisition={data.acquisition}
+        pointsMarket={data.pointsMarket}
+        exposure={data.exposure}
+      />
 
       <div style={{ marginTop: 11 }}>
         <OffersPanel offers={data.offers || []} />

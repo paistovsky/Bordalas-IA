@@ -2,6 +2,14 @@ import { formatMoney } from "../lib/utils";
 
 /**
  * Tira de estado. Seis numeros y de donde salen.
+ *
+ * El ultimo era "Objetivos hoy 0/20" y con tres pujas vivas en
+ * Biwenger seguia diciendo 0. Contaba cuantos candidatos pasan el
+ * filtro AHORA, que baja a cero justo despues de pujar por ellos:
+ * el numero se apagaba precisamente cuando Pepe acababa de actuar.
+ *
+ * Lo primero que hay que ver es lo que hay puesto. Lo que se
+ * podria pujar va debajo, cuando no hay nada puesto.
  */
 
 function Kpi({ label, value, sub, tone = "" }) {
@@ -57,10 +65,14 @@ export default function KpiStrip({ data }) {
         tone={Number(lineup.missing || 0) > 0 ? "bad" : ""}
       />
       <Kpi
-        label="Objetivos hoy"
-        value={`${acquisition.biddable ?? 0}/${acquisition.market_size ?? 0}`}
-        sub="del mercado Computer"
-        tone={Number(acquisition.biddable || 0) > 0 ? "good" : ""}
+        label="Pujas puestas"
+        value={`${exposure.operation_count ?? 0}`}
+        sub={
+          Number(exposure.operation_count || 0) > 0
+            ? `${formatMoney(exposure.committed_total)} comprometidos`
+            : `${acquisition.actionable ?? acquisition.biddable ?? 0} por pujar de ${acquisition.market_size ?? 0}`
+        }
+        tone={Number(exposure.operation_count || 0) > 0 ? "good" : ""}
       />
     </div>
   );

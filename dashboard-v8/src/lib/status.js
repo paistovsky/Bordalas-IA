@@ -65,6 +65,10 @@ export function normalizeStatus(raw = {}) {
     pointsMarket: raw.points_market || { calibrated: false },
     ledgerAudit: raw.ledger_audit || { available: false },
     rivalIntel: raw.rival_intelligence || { managers: [] },
-    backoff: raw.backoff || { blocked: [], blocked_count: 0 }
+    backoff: raw.backoff || { blocked: [], blocked_count: 0 },
+
+    // La auditoria que el generador hace de si mismo. Si esto
+    // dice que no cuadra, no se decide mirando la pantalla.
+    consistency: raw.consistency || { available: false, ok: true, checks: [] }
   };
 }

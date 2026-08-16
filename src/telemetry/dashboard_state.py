@@ -2485,6 +2485,25 @@ def build_dashboard_state() -> dict:
         "competitive": competitive,
     }
 
+    # LO ULTIMO, Y A PROPOSITO.
+    #
+    # Se audita el payload ya montado contra el snapshot, que es
+    # la verdad. Si una parte de la pantalla sabe algo que otra
+    # no -tres pujas vivas en CAJA y cero en OBJETIVOS-, sale
+    # aqui y la interfaz lo grita en rojo.
+    #
+    # No corrige: levanta la mano. Un dashboard que se equivoca
+    # en silencio es peor que uno que falta.
+    from src.telemetry.dashboard_consistency import (
+        build_consistency_report,
+    )
+
+    dashboard["consistency"] = build_consistency_report(
+        dashboard,
+        snapshot,
+        current_user_id=board.get("current_user_id"),
+    )
+
     return dashboard
 
 
