@@ -15,6 +15,11 @@ from src.analysis.solvency_engine import (
     build_solvency_state,
 )
 
+from src.analysis.bid_exposure_engine import (
+    apply_exposure_to_budget,
+    build_bid_exposure,
+)
+
 from src.analysis.strategic_target_engine import (
     build_strategic_target_board,
 )
@@ -1438,14 +1443,103 @@ def calculate_speculation_budget(
     # ==================================================
 
     usable_capital = min(
-        balance,
+        max(balance, 0),
         maximum_bid,
     )
 
-    total_budget = int(
+    cash_budget = int(
         usable_capital
         * MAX_SPECULATION_BUDGET_PERCENT
     )
+
+    # El acantilado.
+    #
+    # Esta rama solo miraba la caja. Con saldo +239.968 y
+    # 10.719.800 de margen de deuda seguro, el presupuesto salia
+    # 35.995 y la especulacion quedaba bloqueada por
+    # LOW_LIQUIDITY. Con saldo -1 EUR, la rama de deuda daba
+    # 6.431.880.
+    #
+    # Un euro de diferencia en el saldo cambiaba el presupuesto en
+    # seis millones y medio, y en la direccion equivocada: tener
+    # dinero salia peor que no tenerlo.
+    #
+    # El margen de deuda no depende del signo del saldo. Se
+    # calcula como max_total_debt - current_debt, y con saldo
+    # positivo current_debt es cero, asi que no hay doble conteo:
+    # son dos bolsillos distintos. Lo que si es un techo real es
+    # maximumBid, y se respeta abajo.
+    #
+    # Las condiciones para usar deuda son EXACTAMENTE las mismas
+    # que exige la rama de saldo negativo. No se relaja nada.
+
+    guaranteed = bool(
+        guarantee.get(
+            "guaranteed",
+            False,
+        )
+    )
+
+    headroom = int(
+        safe_debt.get(
+            "additional_debt_headroom",
+            0,
+        )
+        or 0
+    )
+
+    debt_window_open = bool(
+        safe_debt.get(
+            "debt_window_open",
+            False,
+        )
+    )
+
+    debt_allowed = bool(
+        temporary_debt.get(
+            "allowed",
+            False,
+        )
+    )
+
+    debt_usable = bool(
+        guaranteed
+        and debt_window_open
+        and debt_allowed
+        and headroom > 0
+    )
+
+    debt_budget = (
+        int(headroom * MAX_DEBT_SPECULATION_PERCENT)
+        if debt_usable
+        else 0
+    )
+
+    if not debt_usable:
+
+        if not guaranteed:
+            debt_reason = "SOLVENCY_GUARANTEE no esta garantizada."
+
+        elif not debt_window_open:
+            debt_reason = "La ventana de deuda segura esta cerrada."
+
+        elif not debt_allowed:
+            debt_reason = "La ventana temporal no permite nueva deuda."
+
+        else:
+            debt_reason = "MAX_SAFE_DEBT no deja margen adicional."
+
+    else:
+        debt_reason = None
+
+    total_budget = cash_budget + debt_budget
+
+    # Nunca superar la capacidad real de puja de Biwenger.
+    if maximum_bid > 0:
+        total_budget = min(
+            total_budget,
+            maximum_bid,
+        )
 
     single_limit = int(
         total_budget
@@ -1458,9 +1552,20 @@ def calculate_speculation_budget(
             "enabled": False,
             "total_budget": 0,
             "single_operation_limit": 0,
+            "raw_authorized_budget": total_budget,
+            "cash_budget": cash_budget,
+            "debt_budget": debt_budget,
+            "safe_debt_headroom": headroom,
+            "debt_unavailable_reason": debt_reason,
             "reason": (
                 "No existe capacidad suficiente "
                 "para especulacion actualmente."
+                + (
+                    f" El margen de deuda tampoco esta "
+                    f"disponible: {debt_reason}"
+                    if debt_reason
+                    else ""
+                )
             ),
             "blocked_by": "LOW_LIQUIDITY",
             "balance": balance,
@@ -1471,13 +1576,27 @@ def calculate_speculation_budget(
         "enabled": True,
         "total_budget": total_budget,
         "single_operation_limit": single_limit,
+        "cash_budget": cash_budget,
+        "debt_budget": debt_budget,
+        "safe_debt_headroom": headroom,
+        "debt_unavailable_reason": debt_reason,
         "reason": (
             "Existe margen de liquidez para "
             "operaciones especulativas."
-        ),
+            + (
+                f" Incluye {debt_budget:,} EUR de deuda "
+                f"segura dentro de MAX_SAFE_DEBT."
+                if debt_budget > 0
+                else ""
+            )
+        ).replace(",", "."),
         "blocked_by": None,
         "balance": balance,
-        "mode": "CASH",
+        "mode": (
+            "CASH_AND_DEBT"
+            if debt_budget > 0
+            else "CASH"
+        ),
     }
 
 # ======================================================
@@ -1572,6 +1691,17 @@ def build_speculation_board(
             active_franchise_bid=
                 active_franchise_bid,
         )
+    )
+
+    # Descontar lo ya comprometido en pujas vivas de ciclos
+    # anteriores. Sin esto, cada ciclo cree tener el presupuesto
+    # entero y se pueden acumular mas compromisos de los que hay
+    # dinero para pagar.
+    bid_exposure = build_bid_exposure(snapshot)
+
+    budget = apply_exposure_to_budget(
+        budget,
+        bid_exposure,
     )
 
     # ==================================================
@@ -1778,10 +1908,16 @@ def build_speculation_board(
         "enabled"
     ]:
 
+        # Lo que queda, no lo que habia.
+        #
+        # Una puja de un ciclo anterior sigue viva y sigue sin
+        # descontar saldo, asi que sin esto cada ciclo volvia a
+        # partir del presupuesto entero.
         remaining_budget = int(
-            budget[
-                "total_budget"
-            ]
+            budget.get(
+                "available_budget",
+                budget["total_budget"],
+            )
         )
 
         for player in buy_candidates:
@@ -1829,6 +1965,9 @@ def build_speculation_board(
 
         "budget":
             budget,
+
+        "bid_exposure":
+            bid_exposure,
 
         "players":
             analyzed,

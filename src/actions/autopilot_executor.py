@@ -1501,9 +1501,24 @@ def execute_autopilot_decision(
             or {}
         )
 
-        # V1 LIVE deliberadamente conservadora:
-        # aunque el engine soporte deuda segura,
-        # aqui exigimos saldo positivo.
+        # Saldo negativo.
+        #
+        # Esta rama exigia saldo positivo y punto, aunque el motor
+        # de presupuesto autorizase la operacion. Era un bloqueo
+        # de mas: en Biwenger se puede operar en negativo y sanear
+        # antes del inicio de jornada, y el juego mismo dice hasta
+        # donde -maximumBid-.
+        #
+        # "balance >= 0" no es una comprobacion de seguridad, es
+        # una aproximacion tosca a una. La de verdad la hace
+        # calculate_speculation_budget, que con saldo negativo
+        # exige SOLVENCY_GUARANTEE cubierta, ventana de deuda
+        # abierta, permiso temporal vigente y margen dentro de
+        # MAX_SAFE_DEBT. Cuatro condiciones en vez de una, y todas
+        # miran si podremos pagar, que es lo que importaba.
+        #
+        # Asi que en vez de vetar el saldo negativo, se exige que
+        # el motor lo haya autorizado explicitamente.
         fresh_balance = int(
             fresh_budget.get(
                 "balance",
@@ -1512,15 +1527,27 @@ def execute_autopilot_decision(
             or 0
         )
 
-        if fresh_balance < 0:
+        fresh_mode = str(
+            fresh_budget.get(
+                "mode",
+                "",
+            )
+            or ""
+        )
+
+        if (
+            fresh_balance < 0
+            and fresh_mode not in {"DEBT", "CASH_AND_DEBT"}
+        ):
 
             return {
                 **build_noop_result(
                     decision=decision,
                     status="SPECULATION_NEGATIVE_BALANCE_BLOCK",
                     reason=(
-                        "Compra especulativa LIVE bloqueada: "
-                        "V1 exige saldo positivo."
+                        "Saldo negativo y el presupuesto no viene "
+                        "de una via de deuda autorizada "
+                        f"(modo={fresh_mode or 'desconocido'})."
                     ),
                     success=True,
                 ),
@@ -1744,10 +1771,24 @@ def execute_autopilot_decision(
             or 0
         )
 
+        # Lo que queda despues de descontar las pujas vivas de
+        # ciclos anteriores. Comparar contra total_budget dejaba
+        # pasar una puja nueva cada 30 minutos sobre el mismo
+        # presupuesto entero.
+        available_budget = int(
+            fresh_budget.get(
+                "available_budget",
+                total_budget,
+            )
+            or 0
+        )
+
         if (
             bid_amount > single_limit
             or
             bid_amount > total_budget
+            or
+            bid_amount > available_budget
         ):
 
             return {
