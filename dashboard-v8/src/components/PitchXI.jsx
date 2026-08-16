@@ -55,6 +55,16 @@ function confidenceClass(value) {
   return "crit";
 }
 
+/**
+ * Sin dato no es cero.
+ *
+ * Pintar "tit. 0 %" cuando la fuente externa falla hace creer
+ * que el once no juega. Se dice que no se sabe.
+ */
+function hasConfidence(value) {
+  return value != null && Number(value) > 0;
+}
+
 function PlayerCard({ player, watched }) {
   const photo =
     player.photo_url ||
@@ -66,7 +76,8 @@ function PlayerCard({ player, watched }) {
     ? `https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/${player.team_id}.png`
     : null;
 
-  const confidence = player.jp_confidence ?? player.start_probability ?? null;
+  const raw = player.jp_confidence ?? player.start_probability ?? null;
+  const confidence = hasConfidence(raw) ? Number(raw) : null;
   const increment = Number(player.price_increment || 0);
 
   return (
@@ -97,16 +108,22 @@ function PlayerCard({ player, watched }) {
         </span>
       </div>
 
-      <div className="pbar">
-        <i
-          className={confidenceClass(confidence)}
-          style={{ width: `${Math.max(Math.min(Number(confidence || 0), 100), 0)}%` }}
-        />
+      <div className={confidence == null ? "pbar unknown" : "pbar"}>
+        {confidence != null && (
+          <i
+            className={confidenceClass(confidence)}
+            style={{ width: `${Math.max(Math.min(confidence, 100), 0)}%` }}
+          />
+        )}
       </div>
 
       <div className="pfoot">
-        <span>{confidence != null ? `tit. ${confidence}%` : positionLabel(player.position)}</span>
-        <span className="pts">{player.points != null ? `${player.points} pt` : "—"}</span>
+        <span className={confidence == null ? "dim" : ""}>
+          {confidence != null ? `tit. ${confidence}%` : "sin dato"}
+        </span>
+        <span className="pts">
+          {player.points != null ? `${player.points} pt` : "—"}
+        </span>
       </div>
     </article>
   );

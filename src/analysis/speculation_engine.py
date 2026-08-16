@@ -1917,6 +1917,42 @@ def build_speculation_board(
 
     executable_buys = []
 
+    # ==================================================
+    # LO QUE PIDE EL VENDEDOR
+    # ==================================================
+    #
+    # El precio del catalogo es lo que VALE el jugador. Lo que
+    # cuesta comprarlo es lo que PIDE quien lo tiene publicado, y
+    # no son lo mismo.
+    #
+    # En las ventas del Computer coinciden. En las de rivales no:
+    # el 16/08/2026, de 32 ventas de rivales, Pollo17 pedia
+    # 1.370.000 EUR por Iker Munoz, que vale 480.000. Un +185 %.
+    #
+    # Pujar el valor de catalogo por uno de esos es tirar la
+    # puja: no puede ganar y ademas descuenta de la puja maxima
+    # hasta el reset.
+    asking_price = {}
+
+    for sale in (
+        (snapshot.get("market") or {}).get("sales") or []
+    ):
+        ficha = sale.get("player") or {}
+        pid = ficha.get("id")
+
+        if pid is None:
+            continue
+
+        try:
+            asking_price[int(pid)] = int(
+                sale.get("price") or 0
+            )
+
+        except (TypeError, ValueError):
+            continue
+
+    rejected_by_seller_floor = []
+
     if budget[
         "enabled"
     ]:
@@ -1941,7 +1977,7 @@ def build_speculation_board(
 
                 continue
 
-            price = int(
+            catalog_price = int(
                 player.get(
                     "price",
                     0,
@@ -1949,7 +1985,40 @@ def build_speculation_board(
                 or 0
             )
 
-            if price <= 0:
+            if catalog_price <= 0:
+                continue
+
+            pedido = asking_price.get(
+                int(player.get("id") or 0),
+                0,
+            )
+
+            # Lo que de verdad cuesta comprarlo.
+            price = max(catalog_price, pedido)
+
+            if pedido > catalog_price:
+
+                rejected_by_seller_floor.append(
+                    {
+                        "id": player.get("id"),
+                        "name": player.get("name"),
+                        "catalog_price": catalog_price,
+                        "asking_price": pedido,
+                        "premium_percent": round(
+                            (pedido / catalog_price - 1) * 100,
+                            1,
+                        ),
+                        "reason": (
+                            f"Piden {pedido:,} EUR por un jugador "
+                            f"que vale {catalog_price:,}."
+                        ).replace(",", "."),
+                    }
+                )
+
+                # Pagar una prima sobre el valor no es
+                # especulacion, es lo contrario: se compra caro
+                # para revender. Que lo evalue la via de mejora
+                # del once, que sabe valorar puntos.
                 continue
 
             if (
@@ -1990,6 +2059,9 @@ def build_speculation_board(
 
         "executable_buys":
             executable_buys,
+
+        "rejected_by_seller_floor":
+            rejected_by_seller_floor,
 
         "owned":
             owned,

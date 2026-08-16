@@ -20,6 +20,18 @@ from src.analysis.price_history_store import (
     save_price_history_store,
 )
 
+from src.analysis.acquisition_board import (
+    build_acquisition_board,
+)
+
+from src.analysis.solvency_engine import (
+    build_solvency_state,
+)
+
+from src.analysis.speculation_engine import (
+    build_speculation_board,
+)
+
 from src.analysis.action_failure_backoff import (
     candidate_target_id,
     load_backoff_state,
@@ -720,6 +732,143 @@ def safe_float(
         return default
 
 
+# ============================================================
+# INTELIGENCIA RIVAL COMPARTIDA
+# ============================================================
+#
+# Se construia dentro de build_competitive_observer, que corre
+# DESPUES de la decision. Por eso el orchestrator no podia usar
+# el tablero de adquisicion -que la necesita- y acababa
+# decidiendo con el scoring antiguo.
+#
+# Ahora se construye una vez, antes de decidir, y la reutilizan
+# los dos. El tablon se pide una sola vez por ciclo: es una
+# llamada de red y no hay motivo para hacerla dos veces.
+
+_RIVAL_INTELLIGENCE_CACHE: dict = {}
+
+
+def load_rival_intelligence(
+    snapshot: dict,
+) -> dict:
+    """
+    Retrato de la competencia, cacheado por ciclo.
+
+    Nunca lanza: sin tablon devuelve un informe vacio y quien
+    llame decide que hacer con el.
+    """
+
+    if "value" in _RIVAL_INTELLIGENCE_CACHE:
+        return _RIVAL_INTELLIGENCE_CACHE["value"]
+
+    vacio = {
+        "available": False,
+        "managers": [],
+        "current_user_id": None,
+        "reason": "No se pudo leer el tablon.",
+    }
+
+    try:
+        board = collect_board_history()
+
+        market_status = (
+            (snapshot.get("market") or {}).get("status")
+            or {}
+        )
+
+        current_user_id = board.get(
+            "current_user_id"
+        )
+
+        inteligencia = build_rival_intelligence(
+            events=board.get("events", []),
+            users=board.get("users", []),
+            profiles=board.get("profiles", []),
+            catalog=snapshot.get("catalog", {}),
+            current_user_id=current_user_id,
+            own_finances=board.get("own_finances", {}),
+            own_balance=market_status.get("balance"),
+            own_maximum_bid=market_status.get("maximumBid"),
+        )
+
+        inteligencia["available"] = True
+        inteligencia["current_user_id"] = current_user_id
+
+    except Exception as error:
+        inteligencia = {
+            **vacio,
+            "reason": (
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    _RIVAL_INTELLIGENCE_CACHE["value"] = inteligencia
+
+    return inteligencia
+
+
+def reset_rival_intelligence_cache() -> None:
+    _RIVAL_INTELLIGENCE_CACHE.clear()
+
+
+def build_cycle_acquisition_board(
+    snapshot: dict,
+) -> dict:
+    """
+    Lo que Bordalas quiere fichar hoy, con su cuenta hecha.
+
+    Es EL MISMO tablero que pinta el dashboard. Ese era el
+    problema: el dashboard lo enseñaba y el ciclo ejecutaba otra
+    lista distinta.
+
+    Nunca lanza. Si falla, devuelve no disponible y el
+    orchestrator se queda con la ruta antigua en vez de dejar de
+    operar.
+    """
+
+    try:
+        inteligencia = load_rival_intelligence(
+            snapshot
+        )
+
+        solvency = build_solvency_state(
+            snapshot
+        )
+
+        speculation = build_speculation_board(
+            snapshot
+        )
+
+        presupuesto = (
+            speculation.get("budget")
+            or {}
+        )
+
+        disponible = presupuesto.get(
+            "available_budget",
+            presupuesto.get("total_budget"),
+        )
+
+        return build_acquisition_board(
+            snapshot=snapshot,
+            rival_intelligence=inteligencia,
+            current_user_id=inteligencia.get(
+                "current_user_id"
+            ),
+            available_budget=disponible,
+        )
+
+    except Exception as error:
+        return {
+            "available": False,
+            "targets": [],
+            "reason": (
+                f"No se pudo construir el tablero de "
+                f"adquisicion: {type(error).__name__}: {error}"
+            ),
+        }
+
+
 def build_competitive_observer(
     snapshot: dict,
     temporal_gate: dict | None = None,
@@ -762,8 +911,17 @@ def build_competitive_observer(
             )
         )
 
+        # Ya se construyo antes de decidir. Volver a pedir el
+        # tablon seria una segunda llamada de red por el mismo
+        # dato.
+        compartida = load_rival_intelligence(
+            snapshot
+        )
+
         rival_intelligence = (
-            build_rival_intelligence(
+            compartida
+            if compartida.get("available")
+            else build_rival_intelligence(
                 events=
                     board.get(
                         "events",
@@ -2058,6 +2216,55 @@ def archive_prices(
 # ============================================================
 
 
+
+def print_acquisition_board(
+    board: dict,
+) -> None:
+    """
+    Lo mismo que enseña el dashboard, en la consola del ciclo.
+
+    Si las dos listas no coinciden, se ve aqui antes que en una
+    captura de pantalla.
+    """
+
+    print()
+    print("-" * 70)
+    print("OBJETIVOS DE FICHAJE")
+    print("-" * 70)
+
+    if not board or not board.get("available"):
+        print(
+            f"  No disponible: "
+            f"{(board or {}).get('reason', 'sin motivo')}"
+        )
+        return
+
+    objetivos = [
+        item
+        for item in (board.get("targets") or [])
+        if item.get("decision") == "BID"
+    ]
+
+    print(
+        f"  Valorados: {board.get('market_size', 0)}   "
+        f"Pujables: {board.get('biddable', 0)}"
+    )
+
+    if not objetivos:
+        print("  Ninguno supera el filtro en este ciclo.")
+        return
+
+    for indice, objetivo in enumerate(objetivos, start=1):
+        marca = "-> EJECUTA" if indice == 1 else ""
+        print(
+            f"  {indice}. {str(objetivo.get('name'))[:22]:<24}"
+            f"puja {int(objetivo.get('bid') or 0):>10,}   "
+            f"gana {int((objetivo.get('win_probability') or 0) * 100):>3}%   "
+            f"VE {int(objetivo.get('expected_value') or 0):>10,}   "
+            f"{objetivo.get('intent') or ''} {marca}".replace(",", ".")
+        )
+
+
 def print_cycle_result(
     snapshot_file: str,
     snapshot: dict,
@@ -2645,6 +2852,19 @@ def print_execution_result(
         f"{'SI' if execution.get('success') else 'NO'}"
     )
 
+    # De que motor salio el objetivo.
+    #
+    # Si aqui aparece SPECULATION_SCORING es que el tablero de
+    # adquisicion ha fallado y hemos vuelto a la lista antigua.
+    # La red de seguridad esta bien; enterarse tarde, no.
+    if execution.get(
+        "target_source"
+    ):
+        print(
+            f"Objetivo elegido por:    "
+            f"{execution.get('target_source')}"
+        )
+
     if (
         execution.get(
             "http_status"
@@ -3116,9 +3336,28 @@ def run_cycle(
         time.perf_counter()
     )
 
+    # Cada ciclo parte de cero: en --loop el proceso no muere
+    # entre vueltas y el tablon cambia.
+    reset_rival_intelligence_cache()
+
+    # El tablero de adquisicion es el que pinta el dashboard.
+    # Pasarselo al orchestrator es lo que hace que lo que se ve
+    # sea lo que se ejecuta.
+    acquisition_board = (
+        build_cycle_acquisition_board(
+            snapshot
+        )
+    )
+
+    print_acquisition_board(
+        acquisition_board
+    )
+
     result = (
         build_global_decision(
-            snapshot
+            snapshot,
+            acquisition_board=
+                acquisition_board,
         )
     )
 

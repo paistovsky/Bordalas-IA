@@ -1689,6 +1689,61 @@ def execute_autopilot_decision(
             None,
         )
 
+        # ----------------------------------------------------
+        # DE QUIEN ES EL OBJETIVO
+        # ----------------------------------------------------
+        #
+        # Esta puerta exigia que el jugador figurase en
+        # `executable_buys`, que es la lista del scoring antiguo.
+        #
+        # Con ella puesta daba igual que el orchestrator mandase
+        # el objetivo del tablero de adquisicion: si el scoring
+        # antiguo no lo habia elegido, el executor lo rechazaba.
+        # El analista mandaba y el executor solo obedecia al
+        # becario.
+        #
+        # Cuando el objetivo viene del tablero de adquisicion se
+        # revalida por su cuenta -sigue en mercado, precio, suelo
+        # del vendedor, presupuesto y sin puja duplicada- en vez
+        # de pedirle permiso a la lista antigua.
+        target_source = str(
+            data.get(
+                "target_source",
+                "SPECULATION_SCORING",
+            )
+        )
+
+        from_acquisition = (
+            target_source == "ACQUISITION_BOARD"
+        )
+
+        if fresh_player is None and from_acquisition:
+
+            catalogo = (
+                (
+                    (
+                        fresh_snapshot.get("catalog")
+                        or {}
+                    ).get("data")
+                    or {}
+                ).get("players")
+                or {}
+            )
+
+            if isinstance(catalogo, dict):
+                catalogo = list(catalogo.values())
+
+            fresh_player = next(
+                (
+                    ficha
+                    for ficha in catalogo
+                    if isinstance(ficha, dict)
+                    and int(ficha.get("id", 0) or 0)
+                    == int(requested_player_id)
+                ),
+                None,
+            )
+
         if fresh_player is None:
 
             return {
@@ -1696,8 +1751,8 @@ def execute_autopilot_decision(
                     decision=decision,
                     status="SPECULATION_NO_LONGER_EXECUTABLE",
                     reason=(
-                        "El jugador ya no figura entre los "
-                        "executable_buys del snapshot fresco."
+                        "El jugador ya no aparece ni en el "
+                        "tablero fresco ni en el catalogo."
                     ),
                     success=True,
                 ),
@@ -1817,13 +1872,107 @@ def execute_autopilot_decision(
                     fresh_snapshot_file,
             }
 
-        bid_amount = int(
+        # ----------------------------------------------------
+        # SUELO DEL VENDEDOR
+        # ----------------------------------------------------
+        #
+        # El 16/08/2026 Pepe pujo 480.000 EUR por Iker Munoz.
+        # Pollo17 lo tenia publicado a 1.370.000. La puja se
+        # acepto -Biwenger la admite- pero no puede ganar jamas:
+        # esta un 185 % por debajo de lo que pide el dueno. Y
+        # mientras vive, descuenta 480.000 de la puja maxima.
+        #
+        # El fallo estaba justo aqui: se tenia la venta fresca
+        # delante (`fresh_sale`) y se cogia el precio del
+        # CATALOGO en vez del precio PEDIDO.
+        #
+        # En las ventas del Computer los dos coinciden, por eso
+        # no se habia notado. En las de rivales no: de 32 ventas
+        # de rivales ese dia, las primas iban del -2 % al +185 %.
+        listed_price = int(
+            fresh_sale.get(
+                "price",
+                0,
+            )
+            or 0
+        )
+
+        catalog_price = int(
             fresh_player.get(
                 "price",
                 0,
             )
             or 0
         )
+
+        # La puja recomendada por el tablero de adquisicion ya
+        # esta calculada contra la participacion medida de cada
+        # rival: pujar el minimo cuando hay tres rivales activos
+        # es regalar la subasta.
+        #
+        # Nunca por debajo de lo que pide el vendedor, y nunca
+        # por debajo del valor de catalogo.
+        recommended_bid = int(
+            data.get(
+                "recommended_bid",
+                0,
+            )
+            or 0
+        )
+
+        bid_amount = max(
+            catalog_price,
+            listed_price,
+            recommended_bid,
+        )
+
+        seller = (
+            fresh_sale.get(
+                "user"
+            )
+            or {}
+        )
+
+        if listed_price > catalog_price:
+
+            authorised = int(
+                (
+                    (
+                        decision.get("data")
+                        or {}
+                    ).get("budget")
+                    or {}
+                ).get(
+                    "single_operation_limit",
+                    0,
+                )
+                or 0
+            )
+
+            if authorised > 0 and bid_amount > authorised:
+
+                return {
+                    **build_noop_result(
+                        decision=decision,
+                        status="SPECULATION_ABOVE_SELLER_FLOOR",
+                        reason=(
+                            f"{seller.get('name') or 'El vendedor'} "
+                            f"pide {listed_price:,} EUR y el "
+                            f"jugador vale {catalog_price:,}. "
+                            f"Pujar por debajo de lo que pide no "
+                            f"puede ganar, y pagar lo que pide "
+                            f"supera el limite autorizado de "
+                            f"{authorised:,} EUR."
+                        ).replace(",", "."),
+                        success=True,
+                    ),
+                    "revalidation_snapshot":
+                        fresh_snapshot_file,
+                    "listed_price":
+                        listed_price,
+                    "catalog_price":
+                        catalog_price,
+                }
 
         if bid_amount <= 0:
 

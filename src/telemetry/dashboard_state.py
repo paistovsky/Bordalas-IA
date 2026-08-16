@@ -9,6 +9,7 @@ from pathlib import Path
 import requests
 
 from src.analysis.decision_orchestrator import build_global_decision
+from src.analysis.acquisition_board import build_acquisition_board
 from src.analysis.market_analyzer import get_latest_snapshot, load_snapshot
 from src.analysis.rival_intelligence_engine import (
     build_rival_intelligence,
@@ -552,21 +553,22 @@ def compact_lineup(
                     )
                 ),
 
+                # Un 0 % no es una prediccion: es que no hay
+                # dato.
+                #
+                # El 16/08/2026 el dashboard pinto los once
+                # jugadores con "tit. 0 %" y la barra vacia,
+                # mientras la consola del mismo ciclo decia
+                # conf:96 %. La fuente externa habia fallado y
+                # aqui un 0.0 se colaba como si fuese una
+                # medicion. Pintar cero cuando no sabes es peor
+                # que no pintar nada: parece que el once no juega.
                 "jp_confidence": (
-                    round(
-                        safe_float(
-                            starter_probability
+                    _starter_confidence(
+                        starter_probability,
+                        player.get(
+                            "external_lineup_confidence"
                         ),
-                        1,
-                    )
-                    if starter_probability is not None
-                    else round(
-                        safe_float(
-                            player.get(
-                                "external_lineup_confidence"
-                            )
-                        ),
-                        1,
                     )
                 ),
 
@@ -1983,6 +1985,30 @@ def compact_biwenger_competition(
         ),
     }
 
+def _starter_confidence(
+    starter_probability,
+    external_confidence,
+):
+    """
+    Probabilidad de ser titular, o None si no la sabemos.
+
+    Nunca devuelve 0: si no hay medicion se dice que no la hay y
+    la interfaz pinta "sin dato".
+    """
+
+    for candidato in (starter_probability, external_confidence):
+
+        if candidato is None:
+            continue
+
+        valor = safe_float(candidato)
+
+        if valor > 0:
+            return round(valor, 1)
+
+    return None
+
+
 def compact_guardrail(liquidity: dict) -> dict:
     """
     Estado posicional: cuantos tengo, cuantos necesito para poder
@@ -2087,150 +2113,6 @@ def compact_ledger_audit(audit: dict) -> dict:
             if datos.get("auditable")
         ],
     }
-
-
-def build_acquisition_board(
-    snapshot: dict,
-    rival_intelligence: dict,
-    current_user_id,
-    available_budget: int | None,
-    limit: int = 12,
-) -> dict:
-    """
-    Que hay en el mercado del Computer, cuanto vale para nosotros y
-    cuanto pujariamos.
-
-    Es la vista que responde a "que va a hacer Pepe hoy". Antes no
-    existia: el panel de especulacion solo mostraba nombres y
-    scores, sin decir cuanto ni por que.
-    """
-
-    try:
-        contexto = build_valuation_context(snapshot)
-
-        catalogo = {
-            safe_int(item.get("id")): item
-            for item in (
-                (
-                    (snapshot.get("catalog") or {}).get("data") or {}
-                ).get("players") or {}
-            ).values()
-            if isinstance(item, dict)
-        }
-
-        modelo = build_bid_model(
-            rival_intelligence,
-            # Precio de aquel momento, no el de hoy.
-            price_lookup=build_historical_price_lookup(),
-            own_user_id=current_user_id,
-        )
-
-        vendedores = build_market_seller_lookup(snapshot)
-
-        filas = []
-
-        for player_id, venta in vendedores.items():
-
-            if venta.get("seller_user_id") is not None:
-                continue
-
-            ficha = catalogo.get(safe_int(player_id))
-
-            if not ficha:
-                continue
-
-            estado = str(ficha.get("status") or "ok").lower()
-
-            valoracion = value_candidate(ficha, contexto)
-
-            fila = {
-                "id": safe_int(player_id),
-                "name": ficha.get("name"),
-                "position": safe_int(ficha.get("position")),
-                "team_id": safe_int(ficha.get("teamID")),
-                "market_price": safe_int(ficha.get("price")),
-                "price_increment": safe_int(
-                    ficha.get("priceIncrement")
-                ),
-                "points_last_season": ficha.get("pointsLastSeason"),
-                "status": estado,
-                "our_value": safe_int(valoracion.get("value")),
-                "intent": valoracion.get("intent"),
-                "replaces": (
-                    (valoracion.get("replaces") or {}).get("name")
-                ),
-                "reason": valoracion.get("reason"),
-                "bid": 0,
-                "win_probability": None,
-                "expected_value": None,
-                "decision": valoracion.get("decision"),
-            }
-
-            if estado not in {"ok", "unknown"}:
-                fila["decision"] = "NO_DISPONIBLE"
-                fila["reason"] = f"Estado del jugador: {estado}."
-
-            elif valoracion.get("value", 0) > 0:
-
-                plan = optimal_bid(
-                    price=safe_int(ficha.get("price")),
-                    value=valoracion["value"],
-                    model=modelo,
-                    available_budget=available_budget,
-
-                    # El dashboard tiene que enseñar la misma
-                    # decision que toma produccion, no una
-                    # parecida.
-                    intent=valoracion.get("intent"),
-                )
-
-                fila["decision"] = plan.get("decision")
-                fila["bid"] = safe_int(plan.get("bid"))
-                fila["win_probability"] = plan.get("win_probability")
-                fila["expected_value"] = plan.get("expected_value")
-                fila["bid_reasons"] = plan.get("reasons", [])
-
-                if plan.get("decision") != "BID":
-                    fila["reason"] = plan.get("reason")
-
-            filas.append(fila)
-
-        filas.sort(
-            key=lambda item: (
-                item["decision"] != "BID",
-                -(item.get("expected_value") or 0),
-                -item["our_value"],
-            )
-        )
-
-        return {
-            "available": True,
-            "market_size": len(filas),
-            "biddable": sum(
-                1 for f in filas if f["decision"] == "BID"
-            ),
-            "premium_model": modelo.get("premium"),
-            "data_coverage": modelo.get("data_coverage"),
-            "ledger_trusted": modelo.get("ledger_trusted"),
-            "rivals": [
-                {
-                    "name": r.get("name"),
-                    "participation": r.get("participation"),
-                    "capacity": r.get("capacity"),
-                    "coverage": r.get("coverage"),
-                    "never_bids": r.get("never_bids"),
-                }
-                for r in (modelo.get("rivals") or [])
-            ],
-            "targets": filas[:limit],
-        }
-
-    except Exception as error:
-        return {
-            "available": False,
-            "targets": [],
-            "reason": f"{type(error).__name__}: {error}",
-        }
 
 
 def build_dashboard_state() -> dict:

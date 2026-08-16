@@ -99,7 +99,10 @@ main{flex:1;padding:14px 16px;min-width:0}
 /* El campo esta acotado a 660px: si la columna izquierda
    se lleva 2fr sobra sitio a su lado y falta al panel de
    la derecha. */
-.g23{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+/* La columna del campo mide lo que mide el campo: 620 de campo
+   + 13 de padding a cada lado. Con fracciones sobraba azul a los
+   lados y le faltaba sitio al panel de la derecha. */
+.g23{grid-template-columns:minmax(0,650px) minmax(0,1fr)}
 .g21{grid-template-columns:2fr 1fr}
 .g3{grid-template-columns:repeat(3,1fr)}
 .g2{grid-template-columns:repeat(2,1fr)}
@@ -154,7 +157,7 @@ tr.off td{opacity:.55}
   /* Ancho acotado y centrado. Estirado a todo el panel las
      cuatro fichas de una linea quedaban apinadas en el medio
      con medio campo vacio a los lados. */
-  width:100%;max-width:660px;margin:0 auto;
+  width:100%;max-width:620px;margin:0 auto;
   background:
     linear-gradient(rgba(8,24,14,.35),rgba(8,24,14,.35)),
     repeating-linear-gradient(90deg,#154a2c 0,#154a2c 12.5%,#103f26 12.5%,#103f26 25%);
@@ -164,11 +167,20 @@ tr.off td{opacity:.55}
   box-shadow:inset 0 0 60px rgba(0,0,0,.22);
 }
 .pitch.compact{min-height:430px;padding:20px 10px;gap:10px}
-.pline{position:relative;z-index:1;display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+/* Las fichas reparten el ancho de la linea en vez de tener uno
+   fijo. Con 5 defensas y ancho fijo la quinta se caia a una
+   linea nueva -Yeray solo, debajo de los otros cuatro-. Asi la
+   linea nunca envuelve: las fichas se estrechan lo justo. */
+.pline{
+  position:relative;z-index:1;
+  display:flex;justify-content:center;align-items:stretch;
+  gap:7px;flex-wrap:nowrap;
+}
 
 .pcard{
-  width:120px;background:rgba(6,14,10,.86);
-  border:2px solid #2f6a44;border-radius:10px;padding:8px 7px;
+  flex:1 1 0;min-width:0;max-width:124px;
+  background:rgba(6,14,10,.86);
+  border:2px solid #2f6a44;border-radius:10px;padding:8px 6px;
   box-shadow:0 4px 12px rgba(0,0,0,.35);
 }
 .pcard.watched{border-color:var(--warn);box-shadow:0 0 0 3px rgba(234,179,8,.14),0 4px 12px rgba(0,0,0,.35)}
@@ -180,13 +192,17 @@ tr.off td{opacity:.55}
 .pface.ini{display:grid;place-items:center;font:700 17px/1 sans-serif;color:#9fe9b8}
 .pcrest{position:absolute;right:2px;bottom:-2px;width:19px;height:19px;border-radius:3px;background:#0b1a12}
 .pname{font-size:12.5px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prow{display:flex;justify-content:space-between;gap:4px;font-size:11px;font-family:ui-monospace,monospace;margin-top:3px}
+.prow{display:flex;justify-content:space-between;gap:3px;font-size:10.5px;font-family:ui-monospace,monospace;margin-top:3px;white-space:nowrap}
+.prow span{overflow:hidden;text-overflow:ellipsis}
 .pval{color:#cfe9d8}
 .pbar{height:4px;background:#12291b;border-radius:2px;overflow:hidden;margin:4px 0 2px}
 .pbar i{display:block;height:100%;background:var(--ok)}
 .pbar i.warn{background:var(--warn)}
 .pbar i.crit{background:var(--crit)}
-.pfoot{display:flex;justify-content:space-between;gap:4px;font-size:10.5px;color:#93a7b3}
+/* Sin medicion: barra rayada, no barra vacia. Una barra a
+   cero se lee como 'no juega'; esto se lee como 'no se'. */
+.pbar.unknown{background:repeating-linear-gradient(45deg,#1b3326 0,#1b3326 3px,#12291b 3px,#12291b 6px)}
+.pfoot{display:flex;justify-content:space-between;gap:3px;font-size:10px;color:#93a7b3;white-space:nowrap}
 .pts{color:#9fe9b8;font-family:ui-monospace,monospace;font-weight:700}
 
 /* Líneas del campo. Contenedor propio, sin eventos de ratón,

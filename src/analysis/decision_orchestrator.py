@@ -252,6 +252,91 @@ def build_temporal_gate(
 
 
 
+def players_with_live_bid(
+    speculation: dict | None,
+) -> set:
+    """
+    Jugadores por los que YA tenemos una puja viva.
+
+    Una puja no se resuelve hasta el reset, asi que el jugador
+    sigue en el mercado y sigue siendo el mejor objetivo del
+    tablero. Sin este filtro el ciclo lo elige otra vez, el
+    executor responde SPECULATION_BID_ALREADY_PENDING sin
+    escribir, y la vuelta se gasta en nada.
+
+    Es el hambre de acciones otra vez, en su tercera forma: no
+    una accion que falla ni una que no urge, sino una que ya
+    esta hecha.
+    """
+
+    exposicion = (
+        (speculation or {}).get("bid_exposure")
+        or {}
+    )
+
+    ocupados = set()
+
+    for operacion in (
+        exposicion.get("operations") or []
+    ):
+        for player_id in (
+            operacion.get("player_ids") or []
+        ):
+            try:
+                ocupados.add(int(player_id))
+
+            except (TypeError, ValueError):
+                continue
+
+    return ocupados
+
+
+def best_acquisition_target(
+    acquisition_board: dict | None,
+    exclude_ids: set | None = None,
+) -> dict | None:
+    """
+    El mejor objetivo del tablero de adquisicion, o None.
+
+    Se ordena por valor esperado, que es lo mismo que hace la
+    tabla del dashboard: asi la primera fila que ves con PUJAR es
+    la que el ciclo va a ejecutar.
+
+    `exclude_ids` aparta a los que ya tienen puja nuestra viva,
+    para que el ciclo baje al siguiente en vez de repetir.
+    """
+
+    if not acquisition_board:
+        return None
+
+    if not acquisition_board.get("available"):
+        return None
+
+    excluidos = exclude_ids or set()
+
+    pujables = [
+        objetivo
+        for objetivo in (
+            acquisition_board.get("targets") or []
+        )
+        if objetivo.get("decision") == "BID"
+        and int(objetivo.get("bid") or 0) > 0
+        and int(objetivo.get("id") or 0) not in excluidos
+    ]
+
+    if not pujables:
+        return None
+
+    pujables.sort(
+        key=lambda item: (
+            -int(item.get("expected_value") or 0),
+            int(item.get("bid") or 0),
+        )
+    )
+
+    return pujables[0]
+
+
 def build_action_queue(
     candidates: list[dict],
     *,
@@ -705,6 +790,7 @@ def add_temporal_gate(
 def build_global_decision(
     snapshot: dict,
     failure_backoff: dict | None = None,
+    acquisition_board: dict | None = None,
 ) -> dict:
     """
     Construye UNA unica decision global sin ejecutar escrituras.
@@ -712,6 +798,15 @@ def build_global_decision(
     La jornada real y sus fases temporales gobiernan las
     prioridades. El round interno de Biwenger NO decide
     el deadline.
+
+    `acquisition_board` es el tablero que pinta el dashboard:
+    valoracion en euros, modelo de puja rival y barreras de
+    rendimiento. Cuando llega, manda el sobre el scoring antiguo
+    para decidir a quien se compra.
+
+    Hasta el 16/08/2026 no llegaba nunca, y eso significaba que
+    el dashboard proponia cuatro pujas mientras el ciclo
+    ejecutaba una quinta que no salia en ninguna pantalla.
     """
 
     solvency = (
@@ -2068,6 +2163,59 @@ def build_global_decision(
         balance >= 0
     ):
 
+        # ----------------------------------------------------
+        # QUIEN ELIGE AL OBJETIVO
+        # ----------------------------------------------------
+        #
+        # Si tenemos el tablero de adquisicion, el objetivo sale
+        # de ahi: es el que esta valorado en euros, con su puja
+        # optima calculada contra la participacion medida de cada
+        # rival y pasado por las barreras de rendimiento.
+        #
+        # `executable_buys` es la lista del scoring antiguo. Solo
+        # se usa si el tablero no esta disponible, para no dejar
+        # a Pepe sin operar por un fallo de telemetria.
+        pendientes_legacy = [
+            player
+            for player in executable_buys
+            if int(player.get("id") or 0)
+            not in players_with_live_bid(speculation)
+        ]
+
+        objetivo = (
+            pendientes_legacy[0]
+            if pendientes_legacy
+            else executable_buys[0]
+        )
+
+        fuente_objetivo = "SPECULATION_SCORING"
+        puja_recomendada = 0
+        motivo_objetivo = None
+
+        # Los que ya tienen puja nuestra viva no se repiten: el
+        # ciclo baja al siguiente de la lista.
+        ya_pujados = players_with_live_bid(
+            speculation
+        )
+
+        mejor = best_acquisition_target(
+            acquisition_board,
+            exclude_ids=ya_pujados,
+        )
+
+        if mejor is not None:
+            objetivo = {
+                **(mejor.get("player") or {}),
+                "id": mejor.get("id"),
+                "name": mejor.get("name"),
+                "price": mejor.get("market_price"),
+            }
+            fuente_objetivo = "ACQUISITION_BOARD"
+            puja_recomendada = int(
+                mejor.get("bid") or 0
+            )
+            motivo_objetivo = mejor.get("reason")
+
         candidates.append(
             {
                 "type":
@@ -2094,8 +2242,14 @@ def build_global_decision(
                     ),
 
                 "reason": (
-                    "Existe una oportunidad especulativa "
-                    "dentro del presupuesto autorizado. "
+                    (
+                        f"{objetivo.get('name')}: "
+                        f"{motivo_objetivo} "
+                        if motivo_objetivo
+                        else
+                        "Existe una oportunidad especulativa "
+                        "dentro del presupuesto autorizado. "
+                    )
                     + (
                         "Compra LIVE habilitada con read-before-write "
                         "y revalidacion completa."
@@ -2107,12 +2261,19 @@ def build_global_decision(
 
                 "data": {
                     "player":
-                        executable_buys[
-                            0
-                        ],
+                        objetivo,
 
                     "budget":
                         budget,
+
+                    "target_source":
+                        fuente_objetivo,
+
+                    "recommended_bid":
+                        puja_recomendada,
+
+                    "acquisition_target":
+                        mejor,
                 },
             }
         )
@@ -2284,6 +2445,9 @@ def build_global_decision(
 
         "failure_backoff":
             backoff_report,
+
+        "acquisition_board":
+            acquisition_board,
 
         "shadow_action_decision":
             shadow_action_decision,
