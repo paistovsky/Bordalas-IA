@@ -8,7 +8,7 @@ import SquadPage from "./pages/SquadPage";
 import LeaguePage from "./pages/LeaguePage";
 import AuditPage from "./pages/AuditPage";
 import { fetchStatus, normalizeStatus } from "./lib/status";
-import { ago } from "./lib/utils";
+import { ago, minutesOld } from "./lib/utils";
 
 const TITLES = {
   home: "INICIO",
@@ -65,6 +65,14 @@ export default function App() {
     audit: <AuditPage data={data} />
   };
 
+  const edad = minutesOld(data.meta.generated_at);
+  const cicloMin = Number(data.meta.cycle_minutes || 30);
+
+  // Un ciclo y medio sin regenerar ya no es "hace un rato": es
+  // una foto vieja y hay que decirlo antes de que alguien tome
+  // una decision con ella.
+  const rancio = edad != null && edad > cicloMin * 1.5;
+
   return (
     <>
       <Sidebar page={page} setPage={setPage} data={data} />
@@ -73,14 +81,35 @@ export default function App() {
         <div className="page-head">
           <h1>{TITLES[page]}</h1>
           <span className="tag">
-            JORNADA {data.summary.target_matchday ?? "—"} · actualizado{" "}
-            {ago(data.meta.generated_at)}
+            JORNADA {data.summary.target_matchday ?? "—"}
+          </span>
+          <span className={rancio ? "freshness stale" : "freshness"}>
+            ● foto de {ago(data.meta.generated_at)}
           </span>
         </div>
 
         {error && (
           <div className="alert warn">
             La última actualización falló ({error}). Se muestra el último estado válido.
+          </div>
+        )}
+
+        {rancio && !error && (
+          <div className="alert warn">
+            Estos datos son de hace {Math.round(edad)} minutos y el ciclo corre
+            cada {cicloMin}. Entre ciclo y ciclo lo que ves es una foto: puede
+            haber pujas o movimientos que aún no aparecen aquí.
+          </div>
+        )}
+
+        {data.lineup?.starter_data_total > 0 &&
+          !data.lineup?.starter_data_ok && (
+          <div className="alert warn">
+            Probabilidad de ser titular disponible solo para{" "}
+            {data.lineup.starter_data_players} de{" "}
+            {data.lineup.starter_data_total} jugadores del XI: la fuente
+            externa no ha respondido en esta generación. Los huecos dicen «sin
+            dato» en vez de un 0 % que no significaría nada.
           </div>
         )}
 

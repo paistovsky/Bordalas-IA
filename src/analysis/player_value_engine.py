@@ -61,6 +61,47 @@ from __future__ import annotations
 CONFIDENCE_HISTORICAL = 1.00
 CONFIDENCE_MARKET_IMPLIED = 0.55
 
+
+# ============================================================
+# TITULARIDAD
+# ============================================================
+#
+# Los puntos de la temporada pasada dicen lo bueno que es un
+# jugador. No dicen si va a jugar. Y en Biwenger un suplente que
+# no sale del banquillo puntua cero por muy bueno que sea.
+#
+# Que paso por no mirar esto: el 16/08/2026 Bordalas propuso
+# pujar 1.236.001 EUR por Andres Castrin -97 puntos el ano
+# pasado, pronostico SUPLENTE- para sustituir a Yeray -24 puntos,
+# pronostico TITULAR-. La cuenta decia "suma 73 puntos". El campo
+# habria dicho otra cosa.
+#
+# Dos correcciones distintas, y hacen falta las dos:
+#
+#   1. Los puntos esperados se escalan por la probabilidad de
+#      jugar. Un suplente aporta algo -entra, hay lesiones,
+#      rota- pero no lo que aportaria de titular.
+#
+#   2. Y aun escalados, un pronostico de suplente NO puede
+#      reclamar que mejora el once por delante de un titular
+#      confirmado. Eso ya no es una cuestion de cuanto: es que la
+#      operacion no hace lo que dice que hace.
+
+# Lo que aporta un jugador con probabilidad cero de ser titular.
+# No es cero: los suplentes entran. Es poco.
+BENCH_POINTS_FACTOR = 0.15
+
+# Mismos cortes que el consenso multifuente, para que "titular"
+# signifique lo mismo en todo el programa.
+STARTER_PROBABILITY_THRESHOLD = 67.0
+BENCH_PROBABILITY_THRESHOLD = 40.0
+
+# De un candidato sin senal de titularidad no se sabe si jugara.
+# No se le escalan los puntos -inventar un numero seria peor-
+# pero se le exige mas margen, que es lo que se hace siempre que
+# se sabe menos.
+CONFIDENCE_NO_STARTER_DATA = 0.75
+
 # Margen que exigimos sobre el valor justo.
 #
 # OJO: esto NO es "el descuento con el que compramos". Ese
@@ -244,19 +285,63 @@ def build_team_strength(catalog: dict) -> dict:
 # ============================================================
 
 
+def starter_factor(probability) -> float:
+    """
+    Que fraccion de sus puntos cabe esperar de un jugador con esta
+    probabilidad de ser titular.
+
+    Lineal entre `BENCH_POINTS_FACTOR` -no cuento con el- y 1,0
+    -titular seguro-. Sin dato devuelve 1,0: no se escala lo que
+    no se sabe, se penaliza por otro lado (la confianza).
+    """
+
+    if probability is None:
+        return 1.0
+
+    try:
+        p = float(probability)
+    except (TypeError, ValueError):
+        return 1.0
+
+    p = max(0.0, min(p, 100.0)) / 100.0
+
+    return BENCH_POINTS_FACTOR + (1.0 - BENCH_POINTS_FACTOR) * p
+
+
+def is_predicted_starter(starter: dict | None) -> bool:
+
+    if not starter:
+        return False
+
+    probabilidad = starter.get("probability")
+
+    if probabilidad is None:
+        return False
+
+    return float(probabilidad) >= STARTER_PROBABILITY_THRESHOLD
+
+
 def estimate_season_points(
     player: dict,
     points_market: dict,
     team_strength: dict | None = None,
+    starter: dict | None = None,
 ) -> dict:
     """
     Cuantos puntos cabe esperar de este jugador.
 
     Con historico, los del ano pasado. Sin el, los que implica su
     precio, con la confianza rebajada.
-    """
 
-    historico = safe_int(player.get("pointsLastSeason"))
+    Y en los dos casos, escalados por la probabilidad de que
+    llegue a jugar. `starter` es la entrada de
+    `candidate_starter_lookup`: `{"probability", "consensus",
+    "coverage", "source"}`. Sin ella el numero es el de siempre,
+    pero se marca que se esta valorando a ciegas.
+
+    `raw_points` conserva el numero sin escalar, porque explicar
+    la decision requiere poder decir "97 puntos, pero suplente".
+    """
 
     fuerza = None
 
@@ -265,16 +350,62 @@ def estimate_season_points(
             safe_int(player.get("teamID"))
         )
 
-    if historico > 0:
+    probabilidad = (starter or {}).get("probability")
+    factor = starter_factor(probabilidad)
+    consenso = (starter or {}).get("consensus")
+
+    if probabilidad is None:
+        nota_titular = (
+            " Sin pronostico de titularidad: se valora a ciegas y "
+            "se exige mas margen."
+        )
+    else:
+        nota_titular = (
+            f" Pronostico {consenso or '?'} "
+            f"({float(probabilidad):.0f} % titular): cuentan el "
+            f"{factor*100:.0f} % de esos puntos."
+        )
+
+    def envolver(
+        puntos_brutos: int,
+        source: str,
+        confidence: float,
+        reason: str,
+    ) -> dict:
+
+        if probabilidad is None:
+            confidence = confidence * CONFIDENCE_NO_STARTER_DATA
+
         return {
-            "points": historico,
-            "source": "HISTORICO",
-            "confidence": CONFIDENCE_HISTORICAL,
+            "points": int(round(puntos_brutos * factor)),
+            "raw_points": int(puntos_brutos),
+            "source": source,
+            "confidence": round(confidence, 4),
             "team_strength": fuerza,
-            "reason": (
-                f"{historico} puntos la temporada pasada en LaLiga."
+            "starter_probability": (
+                float(probabilidad)
+                if probabilidad is not None
+                else None
             ),
+            "starter_consensus": consenso,
+            "starter_factor": round(factor, 4),
+            "starter_source": (
+                (starter or {}).get("source")
+                if probabilidad is not None
+                else "SIN_DATO"
+            ),
+            "reason": reason + nota_titular,
         }
+
+    historico = safe_int(player.get("pointsLastSeason"))
+
+    if historico > 0:
+        return envolver(
+            historico,
+            "HISTORICO",
+            CONFIDENCE_HISTORICAL,
+            f"{historico} puntos la temporada pasada en LaLiga.",
+        )
 
     tarifa = safe_int(points_market.get("rate_median"))
     precio = safe_int(player.get("price"))
@@ -282,9 +413,18 @@ def estimate_season_points(
     if tarifa <= 0 or precio <= 0:
         return {
             "points": 0,
+            "raw_points": 0,
             "source": "DESCONOCIDO",
             "confidence": 0.0,
             "team_strength": fuerza,
+            "starter_probability": (
+                float(probabilidad)
+                if probabilidad is not None
+                else None
+            ),
+            "starter_consensus": consenso,
+            "starter_factor": round(factor, 4),
+            "starter_source": "SIN_DATO",
             "reason": (
                 "Sin historico y sin precio del punto: no hay por "
                 "donde estimar."
@@ -293,12 +433,11 @@ def estimate_season_points(
 
     implicados = int(precio / tarifa)
 
-    return {
-        "points": implicados,
-        "source": "IMPLICITO_MERCADO",
-        "confidence": CONFIDENCE_MARKET_IMPLIED,
-        "team_strength": fuerza,
-        "reason": (
+    return envolver(
+        implicados,
+        "IMPLICITO_MERCADO",
+        CONFIDENCE_MARKET_IMPLIED,
+        (
             f"Sin historico en LaLiga. Su precio implica unos "
             f"{implicados} puntos"
             + (
@@ -308,7 +447,7 @@ def estimate_season_points(
                 else "."
             )
         ),
-    }
+    )
 
 
 # ============================================================
@@ -323,6 +462,8 @@ def xi_upgrade_value(
     confidence: float = CONFIDENCE_HISTORICAL,
     recovered_value: int = 0,
     margin: float = DEFAULT_XI_MARGIN,
+    candidate_starter: dict | None = None,
+    replaced_starter: dict | None = None,
 ) -> dict:
     """
     Lo maximo que pagariamos por un fichaje que mejora el once.
@@ -330,6 +471,13 @@ def xi_upgrade_value(
     `recovered_value` es lo que recuperamos vendiendo al que
     sustituye. Por defecto cero: lo prudente es suponer que se
     queda de suplente y no entra caja.
+
+    `candidate_starter` y `replaced_starter` son las entradas de
+    `candidate_starter_lookup`. Con ellas se aplica la regla que
+    faltaba: quitar del once a un titular confirmado para meter a
+    alguien que no lo es no es mejorar el once, sea cual sea la
+    diferencia de puntos historicos. Ahi la operacion se rechaza
+    entera, no se descuenta.
     """
 
     tarifa = safe_int(points_market.get("rate_median"))
@@ -339,6 +487,34 @@ def xi_upgrade_value(
             "SIN_TARIFA",
             "No se ha podido medir cuanto cuesta un punto.",
         )
+
+    # --------------------------------------------------------
+    # LA REGLA DEL ONCE
+    # --------------------------------------------------------
+
+    if is_predicted_starter(replaced_starter):
+
+        if not is_predicted_starter(candidate_starter):
+
+            p_sale = float(replaced_starter["probability"])
+
+            p_entra = (candidate_starter or {}).get("probability")
+
+            como_esta = (
+                f"{float(p_entra):.0f} % titular"
+                if p_entra is not None
+                else "sin pronostico de titularidad"
+            )
+
+            return _sin_valor(
+                "NO_MEJORA_TITULARIDAD",
+                (
+                    f"Sustituiria a un titular confirmado "
+                    f"({p_sale:.0f} % titular) por alguien que "
+                    f"esta {como_esta}. Sumara puntos en la hoja, "
+                    f"no en el campo: el once empeora."
+                ),
+            )
 
     delta = safe_int(candidate_points) - safe_int(replaced_points)
 

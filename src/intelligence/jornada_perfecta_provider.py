@@ -1603,6 +1603,113 @@ def build_roster_records(
                             ),
                         )
                     ),
+
+                "scope":
+                    "ROSTER",
+            }
+        )
+
+    return records
+
+
+def build_market_records(
+    snapshot: dict,
+) -> list[dict]:
+    """
+    Los jugadores que hoy estan en venta y NO son nuestros.
+
+    POR QUE EXISTE
+
+        Hasta ahora la identidad JP solo se resolvia contra la
+        plantilla propia, asi que de un candidato del mercado no
+        se sabia nada de titularidad: ni que es titular, ni que
+        es suplente. Y sin ese dato la valoracion comparaba
+        puntos de la temporada pasada a pelo.
+
+        Eso produjo el caso que lo destapo: pujar 1.236.001 EUR
+        por Andres Castrin -pronostico suplente, 97 puntos el ano
+        pasado- para sustituir a Yeray -titular, 24 puntos-. Sobre
+        el papel "suma 73 puntos". En el campo, un suplente no
+        puntua.
+
+        Con estos registros las senales JP del mercado dejan de
+        tirarse a la basura.
+    """
+
+    catalogo = (
+        (snapshot or {})
+        .get("catalog", {})
+        .get("data", {})
+        .get("players", {})
+        or {}
+    )
+
+    propios = {
+        int(player["id"])
+        for player in ((snapshot or {}).get("my_team") or [])
+        if player.get("id") is not None
+    }
+
+    ventas = (
+        ((snapshot or {}).get("market") or {}).get("sales")
+        or []
+    )
+
+    records = []
+    vistos = set()
+
+    for venta in ventas:
+
+        if not isinstance(venta, dict):
+            continue
+
+        player_id = (venta.get("player") or {}).get("id")
+
+        if player_id is None:
+            continue
+
+        player_id = int(player_id)
+
+        if player_id in propios or player_id in vistos:
+            continue
+
+        ficha = catalogo.get(str(player_id)) or {}
+
+        nombre = ficha.get("name")
+
+        if not nombre:
+            continue
+
+        vistos.add(player_id)
+
+        equipo = get_catalog_team_name(
+            snapshot,
+            ficha.get("teamID"),
+        )
+
+        records.append(
+            {
+                "id":
+                    player_id,
+
+                "name":
+                    nombre,
+
+                "normalized_name":
+                    normalize_text(
+                        nombre
+                    ),
+
+                "team":
+                    equipo,
+
+                "team_key":
+                    canonical_team_key(
+                        equipo
+                    ),
+
+                "scope":
+                    "MARKET",
             }
         )
 
@@ -1762,28 +1869,28 @@ def strict_identity_similarity(
     )
 
 
-def attach_biwenger_identity(
+def match_signals_against_records(
     signals: list[dict],
-    snapshot: dict,
+    records: list[dict],
+    scope: str,
 ) -> tuple[
     list[dict],
+    list[dict],
     set[int],
-    set[str],
 ]:
-    roster = build_roster_records(
-        snapshot
-    )
+    """
+    Una pasada de identidad contra un conjunto de jugadores.
+
+    Devuelve (emparejados, senales_sobrantes, ids_emparejados).
+
+    Las sobrantes son las senales JP que esta pasada no supo
+    colocar. Se pasan a la siguiente pasada en vez de tirarse,
+    que es lo que se hacia antes.
+    """
 
     result = []
+    leftover = []
     matched_ids = set()
-
-    parsed_team_keys = {
-        canonical_team_key(
-            signal.get("team")
-        )
-        for signal in signals
-        if signal.get("team")
-    }
 
     for signal in signals:
         signal_team_key = canonical_team_key(
@@ -1793,7 +1900,7 @@ def attach_biwenger_identity(
         if signal_team_key:
             candidates = [
                 player
-                for player in roster
+                for player in records
                 if (
                     player.get("team_key")
                     and
@@ -1805,11 +1912,12 @@ def attach_biwenger_identity(
         else:
             candidates = [
                 player
-                for player in roster
+                for player in records
                 if player["id"] not in matched_ids
             ]
 
         if not candidates:
+            leftover.append(signal)
             continue
 
         aliases = jp_identity_aliases(
@@ -1842,6 +1950,7 @@ def attach_biwenger_identity(
         )
 
         if not scored:
+            leftover.append(signal)
             continue
 
         best_score, best = scored[0]
@@ -1852,6 +1961,7 @@ def attach_biwenger_identity(
         )
 
         if best_score < 0.80:
+            leftover.append(signal)
             continue
 
         if (
@@ -1859,6 +1969,7 @@ def attach_biwenger_identity(
             and
             (best_score - second_score) < 0.08
         ):
+            leftover.append(signal)
             continue
 
         matched_ids.add(
@@ -1889,28 +2000,38 @@ def attach_biwenger_identity(
 
                 "identity_team_strict":
                     bool(signal_team_key),
+
+                "identity_scope":
+                    scope,
             }
         )
 
-    counts_by_team = {}
+    return (
+        result,
+        leftover,
+        matched_ids,
+    )
 
-    for signal in signals:
-        key = canonical_team_key(
-            signal.get("team")
-        )
 
-        if not key:
-            continue
+def mark_unmatched_as_bench(
+    records: list[dict],
+    matched_ids: set[int],
+    counts_by_team: dict,
+    scope: str,
+) -> list[dict]:
+    """
+    Si de un equipo se han leido 11 senales o mas, el once de ese
+    equipo esta publicado. Un jugador de ese equipo que no aparece
+    en el once publicado es, conservadoramente, suplente.
 
-        counts_by_team[key] = (
-            counts_by_team.get(
-                key,
-                0,
-            )
-            + 1
-        )
+    Esta es la unica via por la que se sabe que un candidato del
+    mercado NO va a jugar: no por lo que diga de el una pagina,
+    sino por no estar en la alineacion de su propio equipo.
+    """
 
-    for player in roster:
+    result = []
+
+    for player in records:
         if player["id"] in matched_ids:
             continue
 
@@ -1966,8 +2087,115 @@ def attach_biwenger_identity(
 
                 "jp_parser_role":
                     "TEAM_ABSENCE_CONSERVATIVE",
+
+                "identity_scope":
+                    scope,
             }
         )
+
+    return result
+
+
+def attach_biwenger_identity(
+    signals: list[dict],
+    snapshot: dict,
+) -> tuple[
+    list[dict],
+    set[int],
+    set[str],
+]:
+    """
+    Pone identidad de Biwenger a las senales de Jornada Perfecta.
+
+    DOS PASADAS, Y EL ORDEN IMPORTA
+
+        Primero la plantilla propia, con exactamente el mismo
+        conjunto de candidatos que antes de existir el mercado.
+        Asi el dato de titularidad de nuestros jugadores -que es
+        el que decide el once- no puede empeorar por haber
+        anadido candidatos nuevos al saco: un nombre del mercado
+        no puede volver ambiguo un emparejamiento que hoy es
+        limpio.
+
+        Despues, y solo con las senales que la primera pasada no
+        supo colocar, los jugadores que estan en venta.
+    """
+
+    roster = build_roster_records(
+        snapshot
+    )
+
+    market = build_market_records(
+        snapshot
+    )
+
+    parsed_team_keys = {
+        canonical_team_key(
+            signal.get("team")
+        )
+        for signal in signals
+        if signal.get("team")
+    }
+
+    counts_by_team = {}
+
+    for signal in signals:
+        key = canonical_team_key(
+            signal.get("team")
+        )
+
+        if not key:
+            continue
+
+        counts_by_team[key] = (
+            counts_by_team.get(
+                key,
+                0,
+            )
+            + 1
+        )
+
+    (
+        result,
+        sobrantes,
+        matched_ids,
+    ) = match_signals_against_records(
+        signals,
+        roster,
+        "ROSTER",
+    )
+
+    (
+        del_mercado,
+        _,
+        matched_market_ids,
+    ) = match_signals_against_records(
+        sobrantes,
+        market,
+        "MARKET",
+    )
+
+    result.extend(
+        del_mercado
+    )
+
+    result.extend(
+        mark_unmatched_as_bench(
+            roster,
+            matched_ids,
+            counts_by_team,
+            "ROSTER",
+        )
+    )
+
+    result.extend(
+        mark_unmatched_as_bench(
+            market,
+            matched_market_ids,
+            counts_by_team,
+            "MARKET",
+        )
+    )
 
     return (
         result,
@@ -2299,8 +2527,26 @@ def refresh_jornada_perfecta_data(
     # ~220 peticiones secuenciales a, como maximo, el tamano de la plantilla.
     # El pronostico del perfil no participa en el matching de identidad, por
     # lo que el orden no cambia el resultado deportivo.
+    #
+    # Desde que la identidad tambien cubre el mercado hay que separar:
+    # de los candidatos del mercado nos vale la prediccion de la pagina
+    # del partido, que ya viene leida y es gratis. Pedir su perfil uno a
+    # uno anadiria ~60 peticiones secuenciales por refresco para afinar
+    # un dato que solo usamos como filtro, no para alinear.
+    del_mercado = [
+        signal
+        for signal in players
+        if signal.get("identity_scope") == "MARKET"
+    ]
+
+    de_plantilla = [
+        signal
+        for signal in players
+        if signal.get("identity_scope") != "MARKET"
+    ]
+
     (
-        players,
+        de_plantilla,
         profile_metadata,
     ) = (
         verify_signals_with_player_profiles(
@@ -2308,9 +2554,11 @@ def refresh_jornada_perfecta_data(
                 session,
 
             signals=
-                players,
+                de_plantilla,
         )
     )
+
+    players = de_plantilla + del_mercado
 
     now = (
         datetime.now(
@@ -2371,6 +2619,11 @@ def refresh_jornada_perfecta_data(
             "matched_roster_players":
                 len(
                     matched_ids
+                ),
+
+            "matched_market_players":
+                len(
+                    del_mercado
                 ),
 
             "parsed_teams":

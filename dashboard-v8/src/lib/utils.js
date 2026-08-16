@@ -35,6 +35,21 @@ export function ago(iso) {
   return `hace ${Math.floor(delta / 1440)} d`;
 }
 
+/**
+ * Minutos desde la ultima generacion, o null.
+ *
+ * El dashboard solo se regenera al terminar cada ciclo. Entre
+ * ciclo y ciclo lo que se ve es una foto, y hay que decirlo: el
+ * 16/08/2026 el panel de caja mostraba dos pujas vivas cuando ya
+ * habia tres, simplemente porque la foto era de un minuto antes
+ * de la tercera.
+ */
+export function minutesOld(iso) {
+  if (!iso) return null;
+  const delta = (Date.now() - new Date(iso).getTime()) / 60000;
+  return Number.isFinite(delta) ? Math.max(delta, 0) : null;
+}
+
 export function initials(name) {
   return String(name || "?")
     .split(/\s+/)

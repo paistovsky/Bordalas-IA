@@ -2256,6 +2256,35 @@ def print_acquisition_board(
         f"Pujables: {board.get('biddable', 0)}"
     )
 
+    # Sin esto, "Pujables: 0" no distingue entre "hoy no hay
+    # chollos" y "no llega el pronostico de titularidad y la
+    # regla del once lo esta bloqueando todo". Son dos cosas muy
+    # distintas y solo una hay que arreglarla.
+    cobertura = board.get("starter_coverage") or {}
+
+    if cobertura:
+
+        con = int(cobertura.get("with_forecast") or 0)
+        total = int(cobertura.get("total") or 0)
+        bloqueados = int(
+            cobertura.get("blocked_by_starter_rule") or 0
+        )
+
+        print(
+            f"  Con pronostico de titular: {con}/{total}   "
+            f"Bloqueados por la regla del once: {bloqueados}"
+        )
+
+        if total and con == 0:
+            print(
+                "  AVISO: ningun candidato tiene pronostico de "
+                "titularidad."
+            )
+            print(
+                "         Mientras siga asi no se mejora el once. "
+                "Revisa el refresco de Jornada Perfecta."
+            )
+
     if not objetivos:
         print("  Ninguno supera el filtro en este ciclo.")
         return

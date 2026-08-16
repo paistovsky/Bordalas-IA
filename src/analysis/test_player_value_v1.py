@@ -31,13 +31,19 @@ EL ERROR QUE CAZO ESTA PRUEBA
     que compramos ya emergia de ahi. Exigirlo otra vez aqui era
     contarlo dos veces.
 
-Ejecutar:
+Ejecutar (cualquiera de las dos):
     python -m src.analysis.test_player_value_v1
+    python src/analysis/test_player_value_v1.py
 """
 
-from src.analysis.player_value_engine import (
+import sys
+
+sys.path.insert(0, ".")
+
+from src.analysis.player_value_engine import (  # noqa: E402
     CONFIDENCE_HISTORICAL,
     CONFIDENCE_MARKET_IMPLIED,
+    CONFIDENCE_NO_STARTER_DATA,
     MAX_PROJECTED_DAILY_RATE,
     MIN_POINTS_SAMPLES,
     TREND_DECAY,
@@ -163,8 +169,15 @@ def test_con_historico_se_usan_los_puntos_reales() -> None:
     )
 
     assert resultado["points"] == 160
+    assert resultado["raw_points"] == 160
     assert resultado["source"] == "HISTORICO"
-    assert resultado["confidence"] == CONFIDENCE_HISTORICAL
+
+    # Sin pronostico de titularidad no se escalan los puntos
+    # -inventar un factor seria peor- pero se cobra en confianza.
+    assert resultado["starter_source"] == "SIN_DATO"
+    assert resultado["confidence"] == round(
+        CONFIDENCE_HISTORICAL * CONFIDENCE_NO_STARTER_DATA, 4
+    ), resultado["confidence"]
 
     print("  OK  con historico se usan los puntos reales")
 
@@ -182,7 +195,9 @@ def test_sin_historico_se_usa_lo_que_implica_el_precio() -> None:
         f"{resultado['points']}."
     )
     assert resultado["source"] == "IMPLICITO_MERCADO"
-    assert resultado["confidence"] == CONFIDENCE_MARKET_IMPLIED
+    assert resultado["confidence"] == round(
+        CONFIDENCE_MARKET_IMPLIED * CONFIDENCE_NO_STARTER_DATA, 4
+    ), resultado["confidence"]
     assert resultado["confidence"] < CONFIDENCE_HISTORICAL, (
         "Una estimacion no puede valer lo mismo que un dato."
     )

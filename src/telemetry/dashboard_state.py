@@ -680,12 +680,68 @@ def compact_lineup(
             }
         )
 
+    # Cuantos del once tienen probabilidad de titular MEDIDA.
+    #
+    # Cuando la fuente externa falla, todos salen sin dato y el
+    # panel lo dice, pero nadie se entera de que la fuente ha
+    # caido. Con este recuento el fallo se ve en la consola del
+    # ciclo y en la pantalla, en vez de descubrirse mirando once
+    # huecos.
+    con_dato = sum(
+        1
+        for item in players
+        if item.get("jp_confidence") is not None
+    )
+
+    # Y POR QUE ha fallado.
+    #
+    # Contar los huecos dice que la fuente cayo. No dice si es que
+    # la pagina no respondio, si devolvio un 403, o si es que la
+    # cache estaba caducada y no se pudo refrescar. Sin eso, «sin
+    # dato» en el dashboard y 96 % en la consola del PC parecen
+    # una contradiccion en vez de dos entornos distintos: el
+    # scraper corre igual en los dos, pero desde GitHub Actions
+    # sale por una IP de centro de datos.
+    # Import local a proposito: `lineup_engine` importa de aqui,
+    # y a nivel de modulo esto seria un ciclo. La funcion cachea
+    # por snapshot, asi que no hay coste.
+    try:
+        from src.analysis.lineup_engine import (
+            build_starter_intelligence_for_snapshot,
+        )
+
+        tablero = (
+            build_starter_intelligence_for_snapshot(snapshot) or {}
+        )
+    except Exception as error:
+        tablero = {
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+    cache_tablero = tablero.get("cache") or {}
+
     return {
         "formation": lineup.get("formation_name"),
         "playable": safe_int(lineup_state.get("playable_count")),
         "missing": safe_int(lineup_state.get("missing")),
         "score": round(safe_float(lineup.get("score")), 2),
         "total_value": sum(safe_int(item.get("price")) for item in players),
+        "starter_data_players": con_dato,
+        "starter_data_total": len(players),
+        "starter_data_ok": bool(
+            players and con_dato == len(players)
+        ),
+        "starter_board_version": tablero.get("version"),
+        "starter_board_matchday": tablero.get("matchday"),
+        "starter_board_updated_at": tablero.get("updated_at"),
+        "starter_board_players": len(
+            tablero.get("players") or []
+        ),
+        "starter_cache_status": cache_tablero.get("status"),
+        "starter_source_error": (
+            cache_tablero.get("error")
+            or tablero.get("error")
+        ),
         "players": players,
     }
 

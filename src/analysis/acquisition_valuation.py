@@ -39,6 +39,10 @@ LO QUE NO HACE
 
 from __future__ import annotations
 
+from src.analysis.candidate_starter_lookup import (
+    get_starter_lookup,
+)
+
 from src.analysis.player_velocity_lookup import (
     build_velocity_lookup,
 )
@@ -69,21 +73,36 @@ def safe_int(value, default: int = 0) -> int:
 def build_valuation_context(
     snapshot: dict,
     velocity_lookup: dict | None = None,
+    starter_lookup: dict | None = None,
 ) -> dict:
     """
     Lo que hay que calcular una sola vez por ciclo: el precio del
     punto, la fuerza de cada equipo, el peor de los nuestros en
-    cada posicion y la velocidad de precio medida por jugador.
+    cada posicion, la velocidad de precio medida por jugador y el
+    pronostico de titularidad.
 
-    Si no se pasa `velocity_lookup` se construye aqui. Se calcula
-    una vez y se reparte, porque leer el historial de precios
+    Si no se pasan los lookups se construyen aqui. Se calculan
+    una vez y se reparten, porque leer el historial de precios
     para cada candidato seria absurdo.
+
+    EL PEOR DE CADA POSICION SE ELIGE YA CON TITULARIDAD
+
+        Es la mitad silenciosa del arreglo. "El peor" se decidia
+        por puntos de la temporada pasada, asi que un jugador con
+        buen historial que este semana no juega parecia mejor que
+        un titular modesto. Y el peor es justo a quien se propone
+        vender.
     """
 
     catalogo = (snapshot or {}).get("catalog") or {}
 
     if velocity_lookup is None:
         velocity_lookup = build_velocity_lookup()
+
+    if starter_lookup is None:
+        starter_lookup = get_starter_lookup()
+
+    starter_lookup = starter_lookup or {}
 
     mercado = calibrate_points_market(catalogo)
     equipos = build_team_strength(catalogo)
@@ -100,8 +119,12 @@ def build_valuation_context(
         if posicion not in (1, 2, 3, 4):
             continue
 
+        titularidad = starter_lookup.get(
+            safe_int(jugador.get("id"))
+        )
+
         puntos = estimate_season_points(
-            jugador, mercado, equipos
+            jugador, mercado, equipos, starter=titularidad
         )
 
         actual = peor_por_posicion.get(posicion)
@@ -115,11 +138,20 @@ def build_valuation_context(
                 "name": jugador.get("name"),
                 "price": safe_int(jugador.get("price")),
                 "points": puntos["points"],
+                "raw_points": puntos.get("raw_points"),
                 "points_source": puntos["source"],
+                "starter": titularidad,
+                "starter_probability": puntos.get(
+                    "starter_probability"
+                ),
+                "starter_consensus": puntos.get(
+                    "starter_consensus"
+                ),
             }
 
     return {
         "velocity": velocity_lookup or {},
+        "starter": starter_lookup,
         "points_market": mercado,
         "team_strength": equipos,
         "weakest_by_position": peor_por_posicion,
@@ -160,8 +192,14 @@ def value_candidate(
                 "El jugador no tiene precio de mercado valido.",
             )
 
+        titulares = (context or {}).get("starter") or {}
+
+        titularidad = titulares.get(
+            safe_int(player.get("id"))
+        )
+
         estimacion = estimate_season_points(
-            player, mercado, equipos
+            player, mercado, equipos, starter=titularidad
         )
 
         # --------------------------------------------------
@@ -186,6 +224,8 @@ def value_candidate(
                 points_market=mercado,
                 confidence=estimacion["confidence"],
                 recovered_value=recuperado,
+                candidate_starter=titularidad,
+                replaced_starter=sustituido.get("starter"),
             )
 
             como_xi["replaces"] = sustituido
@@ -259,6 +299,7 @@ def value_candidate(
             "decision": "VALUED",
             "market_price": precio,
             "points": estimacion,
+            "starter": titularidad,
             "as_xi": como_xi,
             "as_speculation": como_trading,
             "replaces": mejor.get("replaces"),

@@ -524,20 +524,61 @@ def refresh_jp_market_intelligence(
         or current_age > MAX_PROVIDER_CACHE_AGE_HOURS
     )
 
+    provider_error = None
+
     if force_provider_refresh or stale:
-        provider_result = refresh_jornada_perfecta_market_data(
-            force=True
-        )
-        data = provider_result["data"]
-        provider_status = provider_result["status"]
+
+        # ESTO ES UN ENRIQUECIMIENTO, NO UNA DEPENDENCIA.
+        #
+        # Sin la red, `fetch_html` lanza y la excepcion subia
+        # entera por `build_speculation_board` ->
+        # `build_offer_decision_board` -> `build_global_decision`
+        # hasta tumbar el ciclo y la generacion del dashboard.
+        #
+        # El scraper corre igual en el PC de casa que en GitHub
+        # Actions, pero desde Actions sale por una IP de centro
+        # de datos y Jornada Perfecta la rechaza. Resultado: en
+        # local todo bien, y en produccion el paso falla, el
+        # workflow aborta y el dashboard desplegado se queda
+        # congelado en la ultima ejecucion que si salio.
+        #
+        # Sin este try, un 403 de una pagina de terceros decide
+        # si Pepe opera.
+        try:
+            provider_result = refresh_jornada_perfecta_market_data(
+                force=True
+            )
+            data = provider_result["data"]
+            provider_status = provider_result["status"]
+
+        except Exception as error:
+            provider_error = f"{type(error).__name__}: {error}"
+            provider_status = (
+                "STALE_FALLBACK"
+                if isinstance(data, dict)
+                else "UNAVAILABLE"
+            )
+
     else:
         provider_status = "CACHE"
 
-    intelligence = build_all_jp_market_intelligence(data)
+    if not isinstance(data, dict):
+        data = {}
+
+    try:
+        intelligence = build_all_jp_market_intelligence(data)
+    except Exception as error:
+        provider_error = (
+            provider_error
+            or f"{type(error).__name__}: {error}"
+        )
+        intelligence = []
 
     return {
         "source": "JORNADA_PERFECTA_MARKET_INTELLIGENCE",
         "provider_status": provider_status,
+        "provider_error": provider_error,
+        "available": bool(intelligence),
         "updated_at": data.get("updated_at"),
         "age_hours": age_hours(data.get("updated_at")),
         "players": intelligence,

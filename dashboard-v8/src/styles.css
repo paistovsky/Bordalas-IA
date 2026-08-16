@@ -83,6 +83,17 @@ main{flex:1;padding:14px 16px;min-width:0}
 .page-head{display:flex;align-items:baseline;gap:10px;margin-bottom:11px;flex-wrap:wrap}
 .page-head h1{font-size:14px;letter-spacing:.1em}
 .page-head .tag{font-size:10.5px;color:var(--dim)}
+/* La edad del dato, a la vista. Verde = fresco, ambar = foto
+   vieja. Un numero sin fecha invita a decidir con el. */
+.freshness{
+  font-size:10.5px;font-weight:700;color:var(--ok);
+  border:1px solid rgba(34,197,94,.35);border-radius:99px;
+  padding:2px 9px;background:rgba(34,197,94,.08);
+}
+.freshness.stale{
+  color:var(--warn);border-color:rgba(234,179,8,.45);
+  background:rgba(234,179,8,.10);
+}
 
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:12px}
 .kpi{background:var(--pan);border:1px solid var(--line);border-radius:9px;padding:9px 12px}

@@ -121,6 +121,38 @@ def build_acquisition_board(
                 "replaces": (
                     (valoracion.get("replaces") or {}).get("name")
                 ),
+
+                # Sin esto la pantalla no puede explicar por que
+                # un jugador con mas puntos que el nuestro NO es
+                # una mejora, que fue exactamente la pregunta.
+                "starter_probability": (
+                    (valoracion.get("starter") or {}).get(
+                        "probability"
+                    )
+                ),
+                "starter_consensus": (
+                    (valoracion.get("starter") or {}).get(
+                        "consensus"
+                    )
+                ),
+                "starter_source": (
+                    (valoracion.get("starter") or {}).get("source")
+                ),
+                "expected_points": (
+                    (valoracion.get("points") or {}).get("points")
+                ),
+                "raw_points": (
+                    (valoracion.get("points") or {}).get(
+                        "raw_points"
+                    )
+                ),
+                "xi_decision": (
+                    (valoracion.get("as_xi") or {}).get("decision")
+                ),
+                "xi_reason": (
+                    (valoracion.get("as_xi") or {}).get("reason")
+                ),
+
                 "reason": valoracion.get("reason"),
                 "bid": 0,
                 "win_probability": None,
@@ -165,12 +197,34 @@ def build_acquisition_board(
             )
         )
 
+        # Cuantos candidatos del mercado tienen pronostico de
+        # titularidad. Importa mirarlo: la regla del once bloquea
+        # a quien no lo tiene, asi que si esta cobertura se cae a
+        # cero Pepe deja de mejorar el once y hay que enterarse
+        # por aqui, no por el silencio.
+        con_pronostico = sum(
+            1
+            for f in filas
+            if f.get("starter_probability") is not None
+        )
+
+        bloqueados = sum(
+            1
+            for f in filas
+            if f.get("xi_decision") == "NO_MEJORA_TITULARIDAD"
+        )
+
         return {
             "available": True,
             "market_size": len(filas),
             "biddable": sum(
                 1 for f in filas if f["decision"] == "BID"
             ),
+            "starter_coverage": {
+                "with_forecast": con_pronostico,
+                "total": len(filas),
+                "blocked_by_starter_rule": bloqueados,
+            },
             "premium_model": modelo.get("premium"),
             "data_coverage": modelo.get("data_coverage"),
             "ledger_trusted": modelo.get("ledger_trusted"),
