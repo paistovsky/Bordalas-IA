@@ -1,4 +1,4 @@
-from biwenger.client import BiwengerClient
+from src.biwenger.client import BiwengerClient
 
 
 print()

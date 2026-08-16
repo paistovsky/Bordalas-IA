@@ -121,6 +121,7 @@ jobs:
           python -m src.analysis.test_reroll_memory_v1
           python -m src.analysis.test_ledger_dedup_v1
           python -m src.analysis.test_market_clock_v1
+          python -m src.analysis.test_position_guardrail_v1
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash

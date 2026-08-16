@@ -8,6 +8,11 @@ from src.analysis.offer_analyzer import (
     build_offer_board,
 )
 
+from src.analysis.position_guardrail import (
+    build_position_guardrail,
+    validate_sale_set,
+)
+
 from src.analysis.sale_price_engine import (
     calculate_sale_price,
 )
@@ -972,6 +977,7 @@ def build_incoming_offer_candidates(
 def build_recovery_plan(
     balance: int,
     offers: list[dict],
+    guardrail: dict | None = None,
 ) -> dict:
 
     if balance >= 0:
@@ -997,6 +1003,12 @@ def build_recovery_plan(
 
             "reason":
                 "El saldo actual no es negativo.",
+
+            "guardrail_applied":
+                guardrail is not None,
+
+            "rejected_by_guardrail":
+                [],
         }
 
     deficit = abs(
@@ -1019,6 +1031,8 @@ def build_recovery_plan(
 
     best = None
 
+    rejected_by_guardrail = []
+
     # La plantilla es pequeña; combinations es perfectamente
     # razonable y nos permite encontrar la combinación exacta.
     for count in range(
@@ -1033,6 +1047,41 @@ def build_recovery_plan(
             eligible,
             count,
         ):
+
+            # Dos ofertas por el mismo jugador no son dos ventas.
+            # Sumarlas inflaba lo recuperado y hacia pasar planes
+            # que no recaudaban lo que decian.
+            ids_combo = [
+                int(item.get("player_id") or 0)
+                for item in combo
+            ]
+
+            if len(set(ids_combo)) != len(ids_combo):
+                continue
+
+            # Guardarrail posicional.
+            #
+            # Antes el unico filtro era descartar franchise, asi
+            # que vender a los dos porteros en el mismo ciclo era
+            # una combinacion legal para este bucle. Cada venta
+            # por separado pasaba todos los controles; el problema
+            # solo aparece mirandolas juntas, que es justo lo que
+            # hace validate_sale_set.
+            if guardrail is not None:
+
+                veredicto = validate_sale_set(
+                    guardrail,
+                    ids_combo,
+                )
+
+                if not veredicto.get("ok"):
+                    rejected_by_guardrail.append(
+                        {
+                            "player_ids": ids_combo,
+                            "reason": veredicto.get("reason"),
+                        }
+                    )
+                    continue
 
             recovered = sum(
                 item[
@@ -1133,7 +1182,20 @@ def build_recovery_plan(
             "reason": (
                 "Las ofertas recibidas disponibles "
                 "no cubren todavía el déficit."
+                + (
+                    f" Se descartaron "
+                    f"{len(rejected_by_guardrail)} combinaciones "
+                    f"por dejar una posicion sin cubrir."
+                    if rejected_by_guardrail
+                    else ""
+                )
             ),
+
+            "guardrail_applied":
+                guardrail is not None,
+
+            "rejected_by_guardrail":
+                rejected_by_guardrail,
         }
 
     return {
@@ -1171,8 +1233,15 @@ def build_recovery_plan(
 
         "reason": (
             "Existe una combinación de ofertas "
-            "capaz de recuperar solvencia."
+            "capaz de recuperar solvencia sin dejar "
+            "ninguna posición por debajo del mínimo."
         ),
+
+        "guardrail_applied":
+            guardrail is not None,
+
+        "rejected_by_guardrail":
+            rejected_by_guardrail,
     }
 
 
@@ -1207,6 +1276,16 @@ def build_liquidity_state(
         )
     )
 
+    # El guardarrail se construye del mismo roster que ya
+    # tenemos, asi que no cuesta nada, y se pasa al plan de
+    # recuperacion para que no pueda elegir una combinacion que
+    # deje una posicion sin cubrir.
+    guardrail = (
+        build_position_guardrail(
+            roster
+        )
+    )
+
     recovery = (
         build_recovery_plan(
             balance=
@@ -1216,6 +1295,9 @@ def build_liquidity_state(
 
             offers=
                 incoming,
+
+            guardrail=
+                guardrail,
         )
     )
 
@@ -1280,6 +1362,9 @@ def build_liquidity_state(
 
         "recovery":
             recovery,
+
+        "position_guardrail":
+            guardrail,
 
         "listing_count":
             len(

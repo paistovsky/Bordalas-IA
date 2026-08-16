@@ -3,6 +3,11 @@ from __future__ import annotations
 import copy
 from itertools import combinations
 
+from src.analysis.position_guardrail import (
+    build_position_guardrail,
+    validate_sale_set,
+)
+
 from src.analysis.accept_before_expiry_safety_engine import (
     revalidate_accept_before_expiry_cluster,
 )
@@ -646,6 +651,22 @@ def build_accept_before_expiry_execution_plan(
     evaluated_count = 0
     winning_options = []
 
+    # Guardarrail posicional.
+    #
+    # Este bucle busca el subconjunto de ofertas que mantiene la
+    # solvencia, y hasta ahora solo miraba dinero y dano
+    # deportivo. Nada le impedia elegir un plan que vaciara una
+    # posicion: aceptar las dos ofertas por nuestros dos porteros
+    # era una combinacion perfectamente valida para el.
+    #
+    # Es la ruta que de verdad escribe, asi que aqui importa mas
+    # que en ningun otro sitio.
+    guardrail = build_position_guardrail(
+        snapshot.get("my_team")
+    )
+
+    blocked_by_guardrail = []
+
     # Buscamos por cardinalidad creciente.
     for size in range(
         1,
@@ -660,6 +681,30 @@ def build_accept_before_expiry_execution_plan(
         ):
 
             evaluated_count += 1
+
+            combo_player_ids = [
+                pid
+                for item in combo
+                for pid in (item.get("player_ids") or [])
+            ]
+
+            positional = validate_sale_set(
+                guardrail,
+                combo_player_ids,
+            )
+
+            if not positional.get("ok"):
+                blocked_by_guardrail.append(
+                    {
+                        "offer_ids": [
+                            item["offer_id"]
+                            for item in combo
+                        ],
+                        "player_ids": combo_player_ids,
+                        "reason": positional.get("reason"),
+                    }
+                )
+                continue
 
             accepted_offers = [
                 item["offer"]
@@ -738,13 +783,37 @@ def build_accept_before_expiry_execution_plan(
 
     if not winning_options:
 
+        # Distinguir los dos motivos importa: uno dice que no hay
+        # dinero suficiente y el otro que si lo hay pero el precio
+        # es romper la plantilla. La respuesta operativa no es la
+        # misma.
+        solo_falla_el_guardarrail = (
+            bool(blocked_by_guardrail)
+        )
+
         return {
             "ready": False,
-            "status": "NO_SAFE_COMBINATION",
-            "reason": (
-                "Ni siquiera aceptando todas las ofertas elegibles "
-                "se consigue mantener SOLVENCY_GUARANTEE."
+            "status": (
+                "BLOCKED_POSITION_FLOOR"
+                if solo_falla_el_guardarrail
+                else "NO_SAFE_COMBINATION"
             ),
+            "reason": (
+                (
+                    "Hay combinaciones que recuperan la solvencia, "
+                    "pero todas dejan alguna posicion por debajo "
+                    "del minimo para alinear. "
+                    + str(
+                        blocked_by_guardrail[0].get("reason")
+                    )
+                )
+                if solo_falla_el_guardarrail
+                else (
+                    "Ni siquiera aceptando todas las ofertas elegibles "
+                    "se consigue mantener SOLVENCY_GUARANTEE."
+                )
+            ),
+            "blocked_by_guardrail": blocked_by_guardrail,
             "selected_offers": [],
             "first_offer": None,
             "candidates": metadata,
@@ -814,6 +883,8 @@ def build_accept_before_expiry_execution_plan(
         "alternative_minimum_plans": winning_options[:10],
         "candidates": metadata,
         "evaluated_combinations": evaluated_count,
+        "blocked_by_guardrail": blocked_by_guardrail,
+        "position_guardrail": guardrail,
         "cluster": cluster,
         "revalidation": validation,
         "observer_only": True,

@@ -63,6 +63,10 @@ from src.analysis.market_clock import (
     print_market_clock,
 )
 
+from src.analysis.position_guardrail import (
+    print_position_guardrail,
+)
+
 from src.analysis.competitive_execution_shadow import (
     build_competitive_shadow_decision,
     execute_competitive_shadow,
@@ -2909,6 +2913,19 @@ def run_cycle(
     if isinstance(result, dict):
         result.setdefault("state", cycle_state)
         result["state"]["market_clock"] = market_clock
+
+    # Estado posicional de la plantilla. Sale del mismo roster que
+    # ya calcula liquidity_manager, asi que aqui solo se muestra.
+    try:
+        print_position_guardrail(
+            (
+                cycle_state.get("liquidity", {})
+                or {}
+            ).get("position_guardrail")
+        )
+
+    except Exception:
+        pass
 
     competitive_observer = (
         build_competitive_observer(
