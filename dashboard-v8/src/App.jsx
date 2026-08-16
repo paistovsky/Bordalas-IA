@@ -2,22 +2,21 @@ import { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import KpiStrip from "./components/KpiStrip";
 import HomePage from "./pages/HomePage";
-import SquadPage from "./pages/SquadPage";
 import MarketPage from "./pages/MarketPage";
+import BrainPage from "./pages/BrainPage";
+import SquadPage from "./pages/SquadPage";
 import LeaguePage from "./pages/LeaguePage";
 import AuditPage from "./pages/AuditPage";
-import AnalysisPage from "./pages/AnalysisPage";
 import { fetchStatus, normalizeStatus } from "./lib/status";
 import { ago } from "./lib/utils";
 
-const PAGE_TITLES = {
+const TITLES = {
   home: "INICIO",
-  squad: "PLANTILLA",
   market: "MERCADO",
+  brain: "CEREBRO",
+  squad: "PLANTILLA",
   league: "LIGA",
-  analysis: "ANÁLISIS",
-  audit: "AUDITORÍA",
-  settings: "AJUSTES"
+  audit: "AUDITORÍA"
 };
 
 export default function App() {
@@ -50,55 +49,49 @@ export default function App() {
   }, []);
 
   if (error && !data) {
-    return <div className="fatal-error">No se pudo cargar Bordalás IA: {error}</div>;
+    return <div className="screen err">NO SE PUDO CARGAR BORDALÁS IA · {error}</div>;
   }
 
   if (!data) {
-    return <div className="loading-screen">CARGANDO BORDALÁS IA…</div>;
+    return <div className="screen">CARGANDO BORDALÁS IA…</div>;
   }
 
   const pages = {
     home: <HomePage data={data} />,
-    squad: <SquadPage data={data} />,
     market: <MarketPage data={data} />,
+    brain: <BrainPage data={data} />,
+    squad: <SquadPage data={data} />,
     league: <LeaguePage data={data} />,
-    analysis: <AnalysisPage data={data} />,
-    audit: <AuditPage data={data} />,
-    settings: <div className="empty-page">Ajustes del dashboard — próximamente.</div>
+    audit: <AuditPage data={data} />
   };
 
   return (
-    <div className="app-shell">
-      <Sidebar page={page} setPage={setPage} />
+    <>
+      <Sidebar page={page} setPage={setPage} data={data} />
 
-      <main className="main-workspace">
-        <header className="top-header">
-          <div className="matchday-title">
-            <span>{PAGE_TITLES[page]}</span>
-            <strong>JORNADA {data.summary.target_matchday ?? "—"}</strong>
-            <small>
-              Actualizado {ago(data.meta.generated_at)} · ciclo {data.meta.cycle_minutes || 30} min
-            </small>
-          </div>
-
-          <KpiStrip data={data} />
-        </header>
-
-        {error && <div className="soft-error">Última actualización falló: {error}. Mostrando último estado válido.</div>}
-
-        <section className="page-content">
-          {pages[page]}
-        </section>
-
-        <footer className="status-footer">
-          <span className="online-dot">● PEPE ONLINE</span>
-          <span className="autopilot-live">● AUTOPILOT LIVE</span>
-          <span>{data.cycle.version || "V10"}</span>
-          <span>
-            ÚLTIMA ACCIÓN: {String(data.lastExecution.label || "SIN ESCRITURA").toUpperCase()}
+      <main>
+        <div className="page-head">
+          <h1>{TITLES[page]}</h1>
+          <span className="tag">
+            JORNADA {data.summary.target_matchday ?? "—"} · actualizado{" "}
+            {ago(data.meta.generated_at)}
           </span>
-        </footer>
+        </div>
+
+        {error && (
+          <div className="alert warn">
+            La última actualización falló ({error}). Se muestra el último estado válido.
+          </div>
+        )}
+
+        <KpiStrip data={data} />
+
+        {pages[page]}
+
+        <p className="note">
+          Todos los números salen de dashboard/data/status.json. Nada inventado.
+        </p>
       </main>
-    </div>
+    </>
   );
 }

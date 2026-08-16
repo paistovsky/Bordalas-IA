@@ -210,11 +210,32 @@ export default function LineupPitch({
   return (
     <div className={large ? "football-pitch large" : "football-pitch"}>
       <div className="pitch-vignette" />
-      <div className="pitch-inner" />
-      <div className="pitch-half" />
-      <div className="pitch-center" />
-      <div className="pitch-box pitch-box-top" />
-      <div className="pitch-box pitch-box-bottom" />
+
+      <div className="pitch-lines" aria-hidden="true">
+        <div className="pitch-inner" />
+        <div className="pitch-half" />
+        <div className="pitch-center" />
+        <div className="pitch-spot pitch-spot-center" />
+
+        <div className="pitch-box pitch-box-top" />
+        <div className="pitch-box pitch-box-bottom" />
+        <div className="pitch-goalarea pitch-goalarea-top" />
+        <div className="pitch-goalarea pitch-goalarea-bottom" />
+
+        <div className="pitch-spot pitch-penalty-top" />
+        <div className="pitch-spot pitch-penalty-bottom" />
+        <div className="pitch-arc pitch-arc-top" />
+        <div className="pitch-arc pitch-arc-bottom" />
+
+        <div className="pitch-goal pitch-goal-top" />
+        <div className="pitch-goal pitch-goal-bottom" />
+
+        <div className="pitch-corner pitch-corner-tl" />
+        <div className="pitch-corner pitch-corner-tr" />
+        <div className="pitch-corner pitch-corner-bl" />
+        <div className="pitch-corner pitch-corner-br" />
+      </div>
+
       {players.map((player) => (
         <PlayerCard
           key={player.id}

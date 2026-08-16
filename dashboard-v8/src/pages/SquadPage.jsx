@@ -1,80 +1,91 @@
-import { Card, CardHeader, CardTitle } from "../components/ui/Card";
-import LineupPitch from "../components/LineupPitch";
-import PlayerAvatar from "../components/PlayerAvatar";
-import { formatMoney, positionLabel } from "../lib/utils";
-
-function PlayerRow({ player, starter }) {
-  return (
-    <div className={starter ? "roster-row starter" : "roster-row"}>
-      <PlayerAvatar player={player} className="roster-avatar" />
-      <div className="roster-name">
-        <strong>{player.name}</strong>
-        <span>{positionLabel(player.position)} · dorsal {player.number || "—"}</span>
-      </div>
-      <div className="roster-value">
-        <b>{formatMoney(player.price)}</b>
-        <span className={Number(player.price_increment) >= 0 ? "price-up" : "price-down"}>
-          {Number(player.price_increment) >= 0 ? "▲" : "▼"} {formatMoney(Math.abs(Number(player.price_increment || 0)))}
-        </span>
-      </div>
-      <span className={starter ? "starter-chip" : "bench-chip"}>
-        {starter ? "TITULAR" : "SUPLENTE"}
-      </span>
-    </div>
-  );
-}
+import PitchXI from "../components/PitchXI";
+import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 
 export default function SquadPage({ data }) {
-  const starters = data.roster?.starters || data.lineup.players || [];
+  const lineup = data.lineup || {};
+  const starters = data.roster?.starters || lineup.players || [];
   const substitutes = data.roster?.substitutes || [];
+  const guardrail = data.guardrail || {};
+
+  const rows = [
+    ...starters.map((player) => ({ ...player, starter: true })),
+    ...substitutes.map((player) => ({ ...player, starter: false }))
+  ];
 
   return (
-    <div className="squad-layout">
-      <Card className="squad-pitch-card">
-        <CardHeader>
+    <div className="grid g21">
+      <section className="pan pan-pitch">
+        <div className="pan-head">
           <div>
-            <CardTitle>XI TITULAR</CardTitle>
-            <p className="section-subtitle">
-              FORMACIÓN {data.lineup.formation || "—"} · XI {data.lineup.playable || 0}/11
-            </p>
+            <h2>XI TITULAR</h2>
+            <div className="sub">{lineup.formation || "—"} · {lineup.playable ?? 0}/11</div>
           </div>
-        </CardHeader>
-        <LineupPitch
-          lineup={data.lineup}
-          offers={data.competitive.offers}
-          data={data}
-        />
-      </Card>
-
-      <Card className="roster-card">
-        <CardHeader>
-          <div>
-            <CardTitle>PLANTILLA</CardTitle>
-            <p className="section-subtitle">
-              {data.roster?.count || starters.length + substitutes.length} jugadores
-            </p>
-          </div>
-        </CardHeader>
-
-        <div className="roster-scroll">
-          <div className="roster-section-title">
-            TITULARES <span>{starters.length}</span>
-          </div>
-          {starters.map((player) => (
-            <PlayerRow key={`s-${player.id}`} player={player} starter />
-          ))}
-
-          <div className="roster-section-title bench-title">
-            SUPLENTES <span>{substitutes.length}</span>
-          </div>
-          {substitutes.length
-            ? substitutes.map((player) => (
-                <PlayerRow key={`b-${player.id}`} player={player} starter={false} />
-              ))
-            : <div className="empty-state">La telemetría aún no ha publicado suplentes.</div>
-          }
         </div>
-      </Card>
+        <PitchXI lineup={lineup} offers={data.competitive?.offers || []} />
+      </section>
+
+      <div className="stack">
+        <section className="pan">
+          <h2>PLANTILLA POR POSICIÓN</h2>
+          <div className="sub">Cuántos puede vender sin romper el XI</div>
+          <div className="poswrap">
+            {(guardrail.by_position || []).map((row) => (
+              <div
+                className={row.at_floor ? "poscel crit" : row.below_desired ? "poscel warn" : "poscel"}
+                key={row.position}
+              >
+                <b>{row.name.toUpperCase()}</b>
+                <span className="big">{row.owned}</span>
+                <small>suelo {row.floor} · vend. {row.disposable}</small>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="pan">
+          <div className="pan-head">
+            <div>
+              <h2>PLANTILLA</h2>
+              <div className="sub">{rows.length} jugadores</div>
+            </div>
+          </div>
+
+          <div className="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>JUGADOR</th>
+                  <th></th>
+                  <th className="n">VALOR</th>
+                  <th className="n">CAMBIO</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((player) => {
+                  const increment = Number(player.price_increment || 0);
+                  return (
+                    <tr key={player.id}>
+                      <td>{player.name}</td>
+                      <td className="dim">{positionLabel(player.position)}</td>
+                      <td className="n">{formatEuros(player.price)}</td>
+                      <td className={increment > 0 ? "n up" : increment < 0 ? "n down" : "n flat"}>
+                        {increment > 0 ? "▲" : increment < 0 ? "▼" : "—"}{" "}
+                        {increment ? formatMoney(Math.abs(increment)) : ""}
+                      </td>
+                      <td>
+                        <span className={player.starter ? "pill ok" : "pill idle"}>
+                          {player.starter ? "TITULAR" : "SUPLENTE"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

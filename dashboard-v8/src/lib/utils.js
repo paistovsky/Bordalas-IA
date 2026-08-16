@@ -14,6 +14,17 @@ export function formatMoney(value) {
   return `${sign}${abs.toLocaleString("es-ES")}€`;
 }
 
+/**
+ * Euros exactos.
+ *
+ * formatMoney redondea (22.589 -> 23k€) y para un precio por
+ * punto eso borra justo la precision que hace util el dato.
+ */
+export function formatEuros(value) {
+  const n = Math.round(Number(value || 0));
+  return `${n.toLocaleString("es-ES")} €`;
+}
+
 export function ago(iso) {
   if (!iso) return "—";
   const delta = (Date.now() - new Date(iso).getTime()) / 60000;

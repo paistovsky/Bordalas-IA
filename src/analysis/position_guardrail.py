@@ -76,7 +76,45 @@ def _derive_floor() -> dict:
     return suelo
 
 
-POSITION_FLOOR = _derive_floor()   # {1: 1, 2: 3, 3: 3, 4: 1}
+# Suelo estrategico, por encima del que exige la formacion.
+#
+# La formacion menos exigente (5-4-1, 4-5-1) admite un solo
+# delantero, pero jugar con uno no es la estrategia: esta liga
+# se gana con 4-4-2 o 4-3-3 porque los delanteros meten goles y
+# son los que mas puntuan -por eso son tambien los mas caros-.
+#
+# Quedarse en un delantero es legal y perdedor. El suelo de
+# venta sube a 2 aunque Pepe luego alinee tres.
+#
+# Esto NO toca FORMATIONS: el motor de alineacion sigue pudiendo
+# elegir cualquier formacion legal. Lo unico que cambia es
+# cuantos se pueden vender.
+STRATEGIC_FLOOR = {
+    4: 2,   # delantero
+}
+
+
+def _apply_strategic_floor(suelo: dict) -> dict:
+    """
+    El suelo real es el mayor de los dos: el que exige la
+    formacion y el que exige la estrategia.
+    """
+
+    return {
+        posicion: max(
+            minimo,
+            STRATEGIC_FLOOR.get(
+                posicion,
+                0,
+            ),
+        )
+        for posicion, minimo in suelo.items()
+    }
+
+
+POSITION_FLOOR = _apply_strategic_floor(
+    _derive_floor()
+)   # {1: 1, 2: 3, 3: 3, 4: 2}
 
 # Colchon comodo. Por debajo no se bloquea nada, pero se avisa:
 # la posicion esta al limite y conviene reponerla.

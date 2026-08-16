@@ -1,80 +1,53 @@
-import bordalasMethod from "../assets/bordalas-method.jpg";
 import {
   Home,
-  UsersRound,
   ShoppingCart,
+  Brain,
+  UsersRound,
   Trophy,
-  ChartNoAxesCombined,
-  ClipboardList,
-  Settings
+  ClipboardList
 } from "lucide-react";
 
-const items = [
+const ITEMS = [
   ["home", "INICIO", Home],
-  ["squad", "PLANTILLA", UsersRound],
   ["market", "MERCADO", ShoppingCart],
+  ["brain", "CEREBRO", Brain],
+  ["squad", "PLANTILLA", UsersRound],
   ["league", "LIGA", Trophy],
-  ["analysis", "ANÁLISIS", ChartNoAxesCombined],
-  ["audit", "AUDITORÍA", ClipboardList],
-  ["settings", "AJUSTES", Settings]
+  ["audit", "AUDITORÍA", ClipboardList]
 ];
 
-const BORDALAS_PHRASES = [
-  "Esto es fútbol, papá.",
-  "Competir siempre, también contra presupuestos mayores.",
-  "El equipo tiene que saber sufrir y saber competir.",
-  "Orden, trabajo y máxima exigencia hasta el final.",
-  "Primero controlamos el partido; después buscamos dónde hacer daño.",
-  "Cada detalle cuenta cuando el objetivo es ganar."
-];
+export default function Sidebar({ page, setPage, data }) {
+  const cycle = data?.cycle || {};
+  const last = data?.lastExecution || {};
 
-function hourlyPhrase() {
-  const hour = new Date().getHours();
-  return BORDALAS_PHRASES[hour % BORDALAS_PHRASES.length];
-}
-
-export default function Sidebar({ page, setPage }) {
   return (
-    <aside className="sidebar">
-      <div className="brand-block">
-        <div className="brand-shield">B</div>
+    <nav className="sidebar">
+      <div className="brand">
+        <div className="blogo">B</div>
         <div>
-          <strong>BORDALÁS IA</strong>
+          <b>BORDALÁS IA</b>
           <small>LA INTELIGENCIA DEL FÚTBOL</small>
         </div>
       </div>
 
-      <nav className="sidebar-nav">
-        {items.map(([id, label, Icon]) => (
-          <button
-            key={id}
-            className={page === id ? "sidebar-link active" : "sidebar-link"}
-            onClick={() => setPage(id)}
-          >
-            <Icon size={18} />
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
+      {ITEMS.map(([id, label, Icon]) => (
+        <button
+          key={id}
+          className={page === id ? "on" : ""}
+          onClick={() => setPage(id)}
+        >
+          <Icon size={16} />
+          <span>{label}</span>
+        </button>
+      ))}
 
-      <div className="sidebar-method">
-        <img
-          className="method-photo"
-          src={bordalasMethod}
-          alt="Bordalás"
-        />
-        <div className="method-copy">
-          <strong>EL MÉTODO BORDALÁS</strong>
-          <div className="method-values">
-            <span>✓ Orden</span>
-            <span>✓ Solidez</span>
-            <span>✓ Trabajo</span>
-            <span>✓ Eficiencia</span>
-          </div>
-          <blockquote>“{hourlyPhrase()}”</blockquote>
-          <small>Frase de la hora</small>
-        </div>
+      <div className="sidebar-foot">
+        <b><span className="dot-ok">●</span> AUTOPILOT LIVE</b>
+        {cycle.version || "V10"} · ciclo {data?.meta?.cycle_minutes || 30} min
+        <br />
+        última escritura:{" "}
+        {last.label ? String(last.label).toLowerCase() : "ninguna"}
       </div>
-    </aside>
+    </nav>
   );
 }

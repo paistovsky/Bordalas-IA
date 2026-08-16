@@ -20,6 +20,9 @@ Ejecutar:
 """
 
 from src.analysis.position_guardrail import (
+    STRATEGIC_FLOOR,
+    _apply_strategic_floor,
+    _derive_floor,
     POSITION_DESIRED,
     POSITION_FLOOR,
     build_position_guardrail,
@@ -132,12 +135,40 @@ def test_el_suelo_sale_de_las_formaciones() -> None:
     """
     Escrito a mano se desactualiza. Derivado de las formaciones,
     no.
+
+    Sobre ese suelo derivado se aplica el suelo estrategico: la
+    formacion admite un delantero, pero la liga se gana con dos.
     """
-    assert POSITION_FLOOR == {1: 1, 2: 3, 3: 3, 4: 1}, (
-        f"El suelo deberia ser 1-3-3-1, salio {POSITION_FLOOR}."
+    derivado = _derive_floor()
+
+    assert derivado == {1: 1, 2: 3, 3: 3, 4: 1}, (
+        f"El suelo derivado deberia ser 1-3-3-1, salio {derivado}."
     )
 
-    print("  OK  el suelo 1-3-3-1 se deriva de las formaciones")
+    assert POSITION_FLOOR == {1: 1, 2: 3, 3: 3, 4: 2}, (
+        f"El suelo efectivo deberia ser 1-3-3-2, salio {POSITION_FLOOR}."
+    )
+
+    assert STRATEGIC_FLOOR[4] == 2
+
+    print("  OK  suelo derivado 1-3-3-1, efectivo 1-3-3-2")
+
+
+def test_el_suelo_estrategico_nunca_baja_el_derivado() -> None:
+    """
+    El suelo estrategico solo puede endurecer. Si alguien pone un
+    valor mas bajo que el que exige la formacion, manda la
+    formacion: por debajo de ella no hay once que alinear.
+    """
+    endurecido = _apply_strategic_floor({1: 1, 2: 3, 3: 3, 4: 1})
+    assert endurecido[4] == 2
+
+    for posicion, minimo in _derive_floor().items():
+        assert POSITION_FLOOR[posicion] >= minimo, (
+            f"El suelo de {posicion} quedo por debajo de la formacion."
+        )
+
+    print("  OK  el suelo estrategico endurece, nunca ablanda")
 
 
 def test_el_recuento_cuadra_con_la_plantilla_real() -> None:
@@ -284,20 +315,24 @@ def test_vender_cuatro_defensas_de_seis_no() -> None:
 
 def test_vender_al_unico_delantero_no_franchise() -> None:
     """
-    Yamal es intocable por franchise, asi que Jutgla es el unico
-    delantero que se puede mover. El suelo de delanteros es 1 y
-    Yamal lo cubre, asi que vender a Jutgla es legal.
+    Yamal es intocable por franchise y Jutgla es el otro
+    delantero. Con el suelo estrategico en 2, venderlo dejaria la
+    delantera en uno: bloqueado.
+
+    Es deliberado. Jugar con un delantero es legal y perdedor;
+    los delanteros son los que mas puntuan. Si se quiere cambiar
+    a Jutgla por otro mejor, primero entra el nuevo.
     """
     guardarrail = build_position_guardrail(plantilla_real())
 
     veredicto = validate_sale_set(guardarrail, [JUTGLA])
 
-    assert veredicto["ok"] is True, (
-        "Con Yamal en plantilla el suelo de delanteros sigue "
-        "cubierto."
+    assert veredicto["ok"] is False, (
+        "Con solo 2 delanteros y suelo 2, vender uno debe "
+        "bloquearse."
     )
 
-    print("  OK  vender a Jutgla deja la delantera cubierta")
+    print("  OK  con 2 delanteros no se vende ninguno")
 
 
 def test_una_venta_por_posicion_a_la_vez_si_cabe() -> None:
@@ -309,7 +344,7 @@ def test_una_venta_por_posicion_a_la_vez_si_cabe() -> None:
 
     veredicto = validate_sale_set(
         guardarrail,
-        [BAYINDIR, VALENTIN, JAVI, JUTGLA],
+        [BAYINDIR, VALENTIN, JAVI],
     )
 
     assert veredicto["ok"] is True, (
@@ -317,7 +352,18 @@ def test_una_venta_por_posicion_a_la_vez_si_cabe() -> None:
         f"{veredicto.get('reason')}"
     )
 
-    print("  OK  soltar lastre en cuatro posiciones a la vez cabe")
+    # El mismo conjunto con un delantero dentro ya no cabe: la
+    # delantera esta justo en el suelo estrategico.
+    con_delantero = validate_sale_set(
+        guardarrail,
+        [BAYINDIR, VALENTIN, JAVI, JUTGLA],
+    )
+
+    assert con_delantero["ok"] is False, (
+        "Anadir a Jutgla rompe el suelo de delanteros."
+    )
+
+    print("  OK  soltar lastre cabe; tocar la delantera no")
 
 
 def test_vaciar_el_centro_del_campo_esta_prohibido() -> None:
@@ -376,8 +422,13 @@ def test_la_delantera_corta_se_marca_para_reponer() -> None:
     assert porteria["below_desired"] is False
 
     delantera = guardarrail["by_position"][4]
-    assert delantera["at_floor"] is False
     assert delantera["owned"] == 2
+    assert delantera["floor"] == 2
+    assert delantera["at_floor"] is True, (
+        "Con 2 delanteros y suelo 2, la delantera esta en el "
+        "suelo y hay que decirlo."
+    )
+    assert delantera["disposable"] == 0
 
     print("  OK  el estado por posicion se publica para comprar")
 
@@ -714,6 +765,7 @@ def test_saldo_positivo_no_toca_nada() -> None:
 
 TESTS = [
     test_el_suelo_sale_de_las_formaciones,
+    test_el_suelo_estrategico_nunca_baja_el_derivado,
     test_el_recuento_cuadra_con_la_plantilla_real,
     test_vender_los_dos_porteros_esta_prohibido,
     test_cada_portero_por_separado_pasaria,

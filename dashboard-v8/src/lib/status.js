@@ -54,6 +54,16 @@ export function normalizeStatus(raw = {}) {
     decision: raw.decision || {},
     league,
     competition,
-    laliga: league.laliga || {}
+    laliga: league.laliga || {},
+
+    // V10.14: telemetria nueva. Cada bloque se declara disponible
+    // o no, para que la interfaz no invente lo que no ha medido.
+    marketClock: raw.market_clock || { available: false },
+    guardrail: raw.position_guardrail || { available: false },
+    exposure: raw.exposure || { available: false },
+    acquisition: raw.acquisition || { available: false },
+    pointsMarket: raw.points_market || { calibrated: false },
+    ledgerAudit: raw.ledger_audit || { available: false },
+    backoff: raw.backoff || { blocked: [], blocked_count: 0 }
   };
 }

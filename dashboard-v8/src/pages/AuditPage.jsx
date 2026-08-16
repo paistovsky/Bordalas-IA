@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
-import { Card, CardHeader, CardTitle } from "../components/ui/Card";
 
 const FILTERS = [
   ["all", "TODO"],
+  ["writes", "ESCRITURAS"],
   ["market", "MERCADO"],
   ["lineup", "XI"],
-  ["competitive", "COMPETITIVE"],
-  ["writes", "ESCRITURAS"]
+  ["competitive", "RIVALES"]
 ];
 
 function category(item) {
@@ -20,6 +19,7 @@ function category(item) {
 
 export default function AuditPage({ data }) {
   const [filter, setFilter] = useState("all");
+  const backoff = data.backoff || {};
 
   const rows = useMemo(() => {
     if (filter === "all") return data.activity;
@@ -27,55 +27,92 @@ export default function AuditPage({ data }) {
   }, [data.activity, filter]);
 
   return (
-    <Card className="audit-card-v93">
-      <CardHeader>
-        <div>
-          <CardTitle>AUDITORÍA DE BORDALÁS</CardTitle>
-          <p className="section-subtitle">
-            Últimos {data.activity.length} registros publicados
-          </p>
-        </div>
-      </CardHeader>
-
-      <div className="audit-filters">
-        {FILTERS.map(([id, label]) => (
-          <button
-            key={id}
-            className={filter === id ? "audit-filter active" : "audit-filter"}
-            onClick={() => setFilter(id)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className="audit-scroll">
-        {rows.map((item, index) => (
-          <div className="audit-item audit-item-v93" key={index}>
-            <span>
-              {item.timestamp
-                ? new Date(item.timestamp).toLocaleString("es-ES")
-                : "—"}
-            </span>
-            <strong>
-              {String(item.label || "").replaceAll("Pepe", "Bordalás")}
-            </strong>
-            <small>
-              {item.status
-                ? String(item.status).replaceAll("_", " ")
-                : item.phase || "—"}
-            </small>
-            <b className={item.write_performed ? "audit-write" : "audit-seen"}>
-              {item.write_performed
-                ? item.verified_post_action
-                  ? "✓ VERIFICADA"
-                  : "ESCRITURA"
-                : "VISTO"}
-            </b>
+    <>
+      {Boolean((backoff.blocked || []).length) && (
+        <section className="pan">
+          <div className="pan-head">
+            <div>
+              <h2>ACCIONES EN ESPERA</h2>
+              <div className="sub">Apartadas porque su escritura falla</div>
+            </div>
+            <span className="pill warn">{backoff.blocked.length}</span>
           </div>
-        ))}
-        {!rows.length && <div className="empty-state">No hay registros para este filtro.</div>}
-      </div>
-    </Card>
+
+          {backoff.blocked.map((item, index) => (
+            <div className="kv" key={index}>
+              <span>
+                <b>{String(item.action || "").replaceAll("_", " ")}</b>{" "}
+                <span className="dim">
+                  {item.consecutive_failures === 1
+                    ? "ha fallado 1 vez"
+                    : `ha fallado ${item.consecutive_failures} veces seguidas`}
+                  {item.last_http_status ? ` · HTTP ${item.last_http_status}` : ""}
+                </span>
+              </span>
+              <b className="mono">
+                {Math.max(Math.floor(Number(item.seconds_remaining || 0) / 60), 1)} min
+              </b>
+            </div>
+          ))}
+
+          <p className="note" style={{ textAlign: "left" }}>
+            Se reintentan solas. Mientras tanto el ciclo sigue con lo siguiente
+            en la cola en vez de reintentar lo mismo cada media hora.
+          </p>
+        </section>
+      )}
+
+      <section className="pan">
+        <div className="pan-head">
+          <div>
+            <h2>AUDITORÍA DE BORDALÁS</h2>
+            <div className="sub">Últimos {data.activity.length} registros publicados</div>
+          </div>
+        </div>
+
+        <div className="filters">
+          {FILTERS.map(([id, label]) => (
+            <button
+              key={id}
+              className={filter === id ? "on" : ""}
+              onClick={() => setFilter(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="scroll">
+          {rows.map((item, index) => (
+            <div className="arow" key={index}>
+              <span className="ts">
+                {item.timestamp
+                  ? new Date(item.timestamp).toLocaleString("es-ES", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })
+                  : "—"}
+              </span>
+              <span className="what">
+                {String(item.label || item.action || "—").replaceAll("Pepe", "Bordalás")}
+              </span>
+              <span className="tag">
+                {item.status ? String(item.status).replaceAll("_", " ") : item.phase || ""}
+              </span>
+              <span className={item.write_performed ? "pill ok" : "pill idle"}>
+                {item.write_performed
+                  ? item.verified_post_action
+                    ? "VERIFICADA"
+                    : "ESCRITA"
+                  : "observa"}
+              </span>
+            </div>
+          ))}
+          {!rows.length && <div className="empty">No hay registros para este filtro.</div>}
+        </div>
+      </section>
+    </>
   );
 }
