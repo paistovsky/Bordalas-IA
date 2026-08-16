@@ -68,22 +68,24 @@ def calculate_combo_score(
             player
             for player in combo
             if (
-                player["position"]
+                player.get("position")
                 == position_id
                 and
-                player[
-                    "has_current_round_game"
-                ]
+                player.get(
+                    "has_current_round_game",
+                    False,
+                )
                 and
-                player[
-                    "matchday_need_score"
-                ] > 0
+                player.get(
+                    "matchday_need_score",
+                    0,
+                ) > 0
             )
         ]
 
         candidates.sort(
             key=lambda player:
-                player["intelligent_score"],
+                player.get("intelligent_score", 0),
             reverse=True,
         )
 
@@ -92,9 +94,10 @@ def calculate_combo_score(
         ]
 
         for player in extras:
-            score -= player[
-                "matchday_need_score"
-            ]
+            score -= player.get(
+                "matchday_need_score",
+                0,
+            )
 
     # --------------------------------------------------
     # NO DUPLICAR BONUS ESTRUCTURAL
@@ -108,18 +111,19 @@ def calculate_combo_score(
             player
             for player in combo
             if (
-                player["position"]
+                player.get("position")
                 == position_id
                 and
-                player[
-                    "structural_need_score"
-                ] > 0
+                player.get(
+                    "structural_need_score",
+                    0,
+                ) > 0
             )
         ]
 
         candidates.sort(
             key=lambda player:
-                player["intelligent_score"],
+                player.get("intelligent_score", 0),
             reverse=True,
         )
 
@@ -128,9 +132,10 @@ def calculate_combo_score(
         ]
 
         for player in extras:
-            score -= player[
-                "structural_need_score"
-            ]
+            score -= player.get(
+                "structural_need_score",
+                0,
+            )
 
     return score
 
@@ -151,13 +156,20 @@ def combo_is_strategically_valid(
 
     for player in combo:
 
+        # Sin el dato, se asume que NO resuelve una urgencia: el
+        # jugador tendra que justificarse por score. Es el lado
+        # conservador, y evita que una clave ausente tumbe el
+        # optimizador con un KeyError.
         solves_matchday_need = (
-            player[
-                "has_current_round_game"
-            ]
+            bool(
+                player.get(
+                    "has_current_round_game",
+                    False,
+                )
+            )
             and
             matchday_shortages.get(
-                player["position"],
+                player.get("position"),
                 0,
             ) > 0
         )
@@ -180,7 +192,31 @@ def combo_is_strategically_valid(
 
 def optimize_portfolio(
     snapshot: dict,
+    available_budget: int | None = None,
+    rival_intelligence: dict | None = None,
 ) -> dict:
+    """
+    Elige la mejor COMBINACION de fichajes que cabe en el
+    presupuesto.
+
+    EL PRESUPUESTO SE MEDIA CONTRA LA MAGNITUD EQUIVOCADA
+
+    Igual que pasaba en bid_engine: el presupuesto operativo salia
+    del SALDO menos una reserva del 20 %. Con el saldo real del
+    16/08/2026 eran 191.975 EUR, y de los diez candidatos el mas
+    barato costaba 440.000. La salida era literalmente
+
+        "No se ha encontrado ninguna combinacion valida."
+
+    En Biwenger la capacidad de gasto no es la caja: es
+    maximumBid, que el juego calcula ya con el limite de deuda
+    dentro.
+
+    Quien llame puede pasar un presupuesto propio, y deberia: el
+    bueno es `available_budget` del motor de especulacion, que ya
+    descuenta las pujas vivas de ciclos anteriores. El calculo de
+    aqui es solo el respaldo.
+    """
 
     # --------------------------------------------------
     # MOTOR INTELIGENTE
@@ -188,25 +224,46 @@ def optimize_portfolio(
 
     recommendations = (
         calculate_intelligent_bids(
-            snapshot
+            snapshot,
+            rival_intelligence=rival_intelligence,
         )
     )
 
-    balance = (
-        snapshot["market"]
-        ["status"]
-        ["balance"]
-    )
+    status = (
+        snapshot.get("market", {}) or {}
+    ).get("status", {}) or {}
 
-    cash_reserve = int(
-        balance
-        * CASH_RESERVE_PERCENT
-    )
+    balance = int(status.get("balance", 0) or 0)
 
-    available_budget = (
-        balance
-        - cash_reserve
-    )
+    maximum_bid = int(status.get("maximumBid", 0) or 0)
+
+    budget_source = "INYECTADO"
+
+    if available_budget is None:
+
+        # Capacidad real de gasto, no caja.
+        capacity = maximum_bid if maximum_bid > 0 else balance
+
+        cash_reserve = int(
+            capacity
+            * CASH_RESERVE_PERCENT
+        )
+
+        available_budget = capacity - cash_reserve
+
+        budget_source = (
+            "MAXIMUM_BID"
+            if maximum_bid > 0
+            else "BALANCE"
+        )
+
+    else:
+        available_budget = max(int(available_budget), 0)
+        cash_reserve = 0
+
+    # Nunca por encima de lo que Biwenger permite comprometer.
+    if maximum_bid > 0:
+        available_budget = min(available_budget, maximum_bid)
 
     # --------------------------------------------------
     # SOLO JUGADORES QUE SIGUEN SIENDO PUJABLES
@@ -348,6 +405,12 @@ def optimize_portfolio(
 
         "available_budget":
             available_budget,
+
+        "budget_source":
+            budget_source,
+
+        "maximum_bid":
+            maximum_bid,
 
         "matchday_shortages":
             matchday_shortages,

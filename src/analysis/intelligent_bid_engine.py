@@ -15,8 +15,19 @@ from src.analysis.exact_price_policy import (
     apply_ratio_exact,
 )
 
+from src.analysis.bid_exposure_engine import (
+    get_own_user_id,
+)
+
+from src.analysis.pvp_bid_engine import (
+    INTENT_SPECULATION,
+    build_rival_threat,
+    calculate_pvp_bid,
+)
+
 
 MAX_EXTERNAL_CHECKS = 5
+
 
 def _safe_int(value) -> int:
     try:
@@ -378,6 +389,8 @@ def calculate_intelligent_bids(
         if _safe_int(item.get("id")) > 0
     }
 
+    own_user_id = get_own_user_id(snapshot)
+
     for player in base_results:
 
         base_score = player[
@@ -397,12 +410,35 @@ def calculate_intelligent_bids(
             < MAX_EXTERNAL_CHECKS
         ):
 
-            external_status = (
-                get_external_player_status(
-                    snapshot,
-                    player,
+            # El estado externo es informacion de apoyo, no una
+            # decision. Si falla, la puja debe evaluarse igual.
+            #
+            # El 16/08/2026 esto tumbo el ciclo entero: la API
+            # rechazaba la busqueda de Sorloth por la o barrada y
+            # la excepcion subia hasta arriba. El fallo era
+            # anterior, pero estaba dormido porque el techo de
+            # puja roto hacia que ningun jugador llegase a
+            # action == PUJAR y esta rama no se ejecutaba nunca.
+            #
+            # Arreglar el techo lo desperto. La causa esta
+            # corregida en normalize_name; esto es la red por si
+            # la API vuelve a cambiar de opinion sobre lo que
+            # acepta.
+            try:
+                external_status = (
+                    get_external_player_status(
+                        snapshot,
+                        player,
+                    )
                 )
-            )
+
+            except Exception as error:
+                external_status = {
+                    "external_available": False,
+                    "error": (
+                        f"{type(error).__name__}: {error}"
+                    ),
+                }
 
             external_checks += 1
 
@@ -593,9 +629,83 @@ def calculate_intelligent_bids(
                 )
             )
 
+        # --------------------------------------------------
+        # PUJA CONTRA RIVALES - MERCADO DEL COMPUTER
+        # --------------------------------------------------
+        #
+        # El observer competitivo de arriba solo entra cuando el
+        # vendedor es otro manager. Los jugadores del Computer no
+        # tienen vendedor, y son justo los que se disputan en
+        # subasta a ciegas contra toda la liga: el 16/08/2026 eran
+        # 20 de los 53 del mercado. Para esos no habia ninguna
+        # logica competitiva.
+        #
+        # La puja salia de una escalera fija de primas sobre el
+        # precio -+8/6/4/2 %- que no miraba si alguien podia
+        # disputarnos al jugador.
+        #
+        # TECHO DELIBERADO: rational_max es la puja que habria
+        # hecho la escalera. Asi este cambio solo puede abaratar,
+        # nunca encarecer. Cuando exista el motor de mejora del XI
+        # y se pueda distinguir la intencion, ese techo se podra
+        # levantar para los objetivos del once.
+
+        pvp = None
+
+        if (
+            action == "PUJAR"
+            and suggested_bid > 0
+            and market_sale
+            and seller_user_id is None
+            and rival_intelligence is not None
+        ):
+
+            market_price_now = _safe_int(
+                player.get(
+                    "market_price",
+                    player.get("player_price", 0),
+                )
+            )
+
+            threat = build_rival_threat(
+                rival_intelligence,
+                market_price_now,
+                own_user_id=own_user_id,
+            )
+
+            pvp = calculate_pvp_bid(
+                market_price=market_price_now,
+                threat=threat,
+                intent=INTENT_SPECULATION,
+                rational_max=suggested_bid,
+            )
+
+            if pvp.get("decision") == "BID":
+                legacy_suggested_bid = suggested_bid
+                suggested_bid = pvp["bid"]
+
+            else:
+                legacy_suggested_bid = suggested_bid
+
+        else:
+            legacy_suggested_bid = suggested_bid
+
         results.append(
             {
                 **player,
+
+                "pvp":
+                    pvp,
+
+                "pvp_saving":
+                    (
+                        legacy_suggested_bid - suggested_bid
+                        if pvp
+                        else 0
+                    ),
+
+                "legacy_suggested_bid":
+                    legacy_suggested_bid,
 
                 "base_score":
                     base_score,

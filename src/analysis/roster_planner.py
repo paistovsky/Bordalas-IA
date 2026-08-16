@@ -2,6 +2,11 @@ from src.analysis.portfolio_optimizer import (
     optimize_portfolio,
 )
 
+from src.analysis.position_guardrail import (
+    build_position_guardrail,
+    validate_sale_set,
+)
+
 from src.analysis.sales_analyzer import (
     analyze_sales,
 )
@@ -67,6 +72,51 @@ def build_roster_plan(
     optional_sales = []
 
     # --------------------------------------------------
+    # GUARDARRAIL POSICIONAL
+    # --------------------------------------------------
+    #
+    # Este bucle recorria las ventas ordenadas por sale_score y
+    # acumulaba hasta cubrir el deficit, sin mirar de que posicion
+    # era cada una. Con un deficit grande podia vaciar la porteria
+    # o dejar la defensa en dos.
+    #
+    # El 16/08/2026 el plan salia legal -vendia un portero de dos-
+    # pero por suerte: nada lo comprobaba.
+    #
+    # validate_sale_set mira el CONJUNTO, asi que hay que
+    # preguntarle por la lista completa cada vez que se anade una
+    # venta, no por la venta suelta.
+
+    guardrail = build_position_guardrail(
+        snapshot.get("my_team")
+    )
+
+    blocked_by_guardrail = []
+
+    def sale_fits(candidate: dict, current: list) -> bool:
+
+        tentative = [
+            item["id"] for item in current
+        ] + [candidate["id"]]
+
+        verdict = validate_sale_set(
+            guardrail,
+            tentative,
+        )
+
+        if not verdict.get("ok"):
+            blocked_by_guardrail.append(
+                {
+                    "id": candidate.get("id"),
+                    "name": candidate.get("name"),
+                    "reason": verdict.get("reason"),
+                }
+            )
+            return False
+
+        return True
+
+    # --------------------------------------------------
     # VENTAS POR NECESIDAD DE LIQUIDEZ
     # --------------------------------------------------
 
@@ -79,6 +129,12 @@ def build_roster_plan(
             if (
                 player["sale_score"]
                 < MIN_SALE_SCORE
+            ):
+                continue
+
+            if not sale_fits(
+                player,
+                recommended_sales,
             ):
                 continue
 
@@ -116,11 +172,21 @@ def build_roster_plan(
 
         if (
             player["sale_score"]
-            >= MIN_SALE_SCORE
+            < MIN_SALE_SCORE
         ):
-            optional_sales.append(
-                player
-            )
+            continue
+
+        # Las opcionales se ejecutarian ADEMAS de las necesarias,
+        # asi que se validan contra las dos listas juntas.
+        if not sale_fits(
+            player,
+            recommended_sales + optional_sales,
+        ):
+            continue
+
+        optional_sales.append(
+            player
+        )
 
     projected_balance = (
         balance
@@ -156,4 +222,10 @@ def build_roster_plan(
 
         "projected_balance":
             projected_balance,
+
+        "position_guardrail":
+            guardrail,
+
+        "blocked_by_guardrail":
+            blocked_by_guardrail,
     }
