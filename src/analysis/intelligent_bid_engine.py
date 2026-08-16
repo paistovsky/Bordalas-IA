@@ -19,10 +19,14 @@ from src.analysis.bid_exposure_engine import (
     get_own_user_id,
 )
 
-from src.analysis.pvp_bid_engine import (
-    INTENT_SPECULATION,
-    build_rival_threat,
-    calculate_pvp_bid,
+from src.analysis.acquisition_valuation import (
+    build_valuation_context,
+    value_candidate,
+)
+
+from src.analysis.rival_bid_model import (
+    build_bid_model,
+    optimal_bid,
 )
 
 
@@ -391,6 +395,28 @@ def calculate_intelligent_bids(
 
     own_user_id = get_own_user_id(snapshot)
 
+    # Contexto de valoracion y retrato de la competencia. Se
+    # calculan una vez por ciclo, no una vez por jugador.
+    valuation_context = build_valuation_context(snapshot)
+
+    catalog_by_id = {
+        _safe_int(item.get("id")): item
+        for item in (
+            (
+                (snapshot.get("catalog") or {}).get("data") or {}
+            ).get("players") or {}
+        ).values()
+        if isinstance(item, dict)
+    }
+
+    bid_model = build_bid_model(
+        rival_intelligence,
+        price_lookup=lambda pid: _safe_int(
+            (catalog_by_id.get(_safe_int(pid)) or {}).get("price")
+        ),
+        own_user_id=own_user_id,
+    )
+
     for player in base_results:
 
         base_score = player[
@@ -630,62 +656,132 @@ def calculate_intelligent_bids(
             )
 
         # --------------------------------------------------
-        # PUJA CONTRA RIVALES - MERCADO DEL COMPUTER
+        # VALOR Y PUJA - MERCADO DEL COMPUTER
         # --------------------------------------------------
         #
         # El observer competitivo de arriba solo entra cuando el
         # vendedor es otro manager. Los jugadores del Computer no
         # tienen vendedor, y son justo los que se disputan en
         # subasta a ciegas contra toda la liga: el 16/08/2026 eran
-        # 20 de los 53 del mercado. Para esos no habia ninguna
-        # logica competitiva.
+        # 20 de los 53 del mercado.
         #
-        # La puja salia de una escalera fija de primas sobre el
-        # precio -+8/6/4/2 %- que no miraba si alguien podia
-        # disputarnos al jugador.
+        # Para esos, la puja salia de una escalera fija de primas
+        # sobre el precio -+8/6/4/2 %- que ni miraba lo que el
+        # jugador nos aportaba ni si alguien podia disputarnoslo.
         #
-        # TECHO DELIBERADO: rational_max es la puja que habria
-        # hecho la escalera. Asi este cambio solo puede abaratar,
-        # nunca encarecer. Cuando exista el motor de mejora del XI
-        # y se pueda distinguir la intencion, ese techo se podra
-        # levantar para los objetivos del once.
+        # Ahora son dos preguntas separadas y las dos con datos:
+        #
+        #   1. Cuanto vale para nosotros. Si mejora el once, lo
+        #      que cuestan en el mercado los puntos que suma sobre
+        #      el peor de los nuestros en su posicion, mas lo que
+        #      recuperemos vendiendo a ese. Si solo es para
+        #      revender, la reventa estimada menos el margen.
+        #
+        #   2. Cuanto pujar. El importe que maximiza
+        #      P(ganar) x (valor - puja), con la probabilidad
+        #      calibrada con lo que los rivales han hecho de
+        #      verdad, no con lo que podrian hacer.
+        #
+        # Si no vale nada, no se puja. Antes se pujaba igual,
+        # porque la escalera siempre daba un numero.
 
-        pvp = None
+        valuation = None
+        bid_plan = None
+        promoted_by_value = False
+
+        # Se valora TODO lo que publica el Computer, no solo lo que
+        # la escalera de scores marco como pujable.
+        #
+        # Ese filtro -final_score >= 55- descartaba justo los
+        # chollos. El 16/08/2026 dejaba fuera a Copete, 150.000 EUR
+        # y 56 puntos la temporada pasada, que es la mejor
+        # operacion del mercado: sustituye a Yeray, suma 32 puntos
+        # y libera 1,96 M. Su score era 40.
+        #
+        # El score es una senal mas, no una puerta. La puerta ahora
+        # es el valor: si no vale, no se puja, y si vale, se puja
+        # aunque el score sea bajo.
+        es_mercado_computer = bool(
+            market_sale
+            and seller_user_id is None
+            and not own_player
+        )
 
         if (
-            action == "PUJAR"
-            and suggested_bid > 0
-            and market_sale
-            and seller_user_id is None
+            es_mercado_computer
             and rival_intelligence is not None
         ):
 
-            market_price_now = _safe_int(
-                player.get(
-                    "market_price",
-                    player.get("player_price", 0),
-                )
-            )
+            # Del catalogo, no de la recomendacion: aqui estan
+            # precio, posicion, puntos del ano pasado, equipo y
+            # tendencia. La recomendacion no trae todo eso.
+            ficha = catalog_by_id.get(player_id) or {}
 
-            threat = build_rival_threat(
-                rival_intelligence,
-                market_price_now,
-                own_user_id=own_user_id,
-            )
+            estado = str(ficha.get("status") or "ok").lower()
 
-            pvp = calculate_pvp_bid(
-                market_price=market_price_now,
-                threat=threat,
-                intent=INTENT_SPECULATION,
-                rational_max=suggested_bid,
-            )
+            legacy_suggested_bid = suggested_bid
 
-            if pvp.get("decision") == "BID":
-                legacy_suggested_bid = suggested_bid
-                suggested_bid = pvp["bid"]
+            if estado not in {"ok", "unknown"}:
+
+                # Lesionado, sancionado o descartado: no se ficha
+                # por barato que salga.
+                suggested_bid = 0
+                action = "NO PUJAR"
+
+                valuation = {
+                    "value": 0,
+                    "decision": "NO_DISPONIBLE",
+                    "intent": None,
+                    "reason": (
+                        f"Estado del jugador: {estado}."
+                    ),
+                }
+
+            elif external_risk >= 60:
+
+                suggested_bid = 0
+                action = "NO PUJAR"
+
+                valuation = {
+                    "value": 0,
+                    "decision": "RIESGO_EXTERNO",
+                    "intent": None,
+                    "reason": (
+                        f"Riesgo externo {external_risk}."
+                    ),
+                }
 
             else:
-                legacy_suggested_bid = suggested_bid
+
+                valuation = value_candidate(
+                    ficha or player,
+                    valuation_context,
+                )
+
+                if valuation.get("value", 0) > 0:
+
+                    bid_plan = optimal_bid(
+                        price=_safe_int(
+                            ficha.get("price")
+                            or player.get("market_price")
+                            or player.get("player_price")
+                        ),
+                        value=valuation["value"],
+                        model=bid_model,
+                    )
+
+                    if bid_plan.get("decision") == "BID":
+                        suggested_bid = bid_plan["bid"]
+                        promoted_by_value = action != "PUJAR"
+                        action = "PUJAR"
+
+                    else:
+                        suggested_bid = 0
+                        action = "NO PUJAR"
+
+                else:
+                    suggested_bid = 0
+                    action = "NO PUJAR"
 
         else:
             legacy_suggested_bid = suggested_bid
@@ -694,18 +790,38 @@ def calculate_intelligent_bids(
             {
                 **player,
 
-                "pvp":
-                    pvp,
+                "valuation":
+                    valuation,
 
-                "pvp_saving":
+                "bid_plan":
+                    bid_plan,
+
+                "our_value":
                     (
-                        legacy_suggested_bid - suggested_bid
-                        if pvp
-                        else 0
+                        valuation.get("value")
+                        if valuation
+                        else None
+                    ),
+
+                "intent":
+                    (
+                        valuation.get("intent")
+                        if valuation
+                        else None
+                    ),
+
+                "win_probability":
+                    (
+                        bid_plan.get("win_probability")
+                        if bid_plan
+                        else None
                     ),
 
                 "legacy_suggested_bid":
                     legacy_suggested_bid,
+
+                "promoted_by_value":
+                    promoted_by_value,
 
                 "base_score":
                     base_score,
