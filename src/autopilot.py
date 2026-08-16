@@ -58,6 +58,11 @@ from src.analysis.competitive_safety_gate import (
     select_single_competitive_action,
 )
 
+from src.analysis.market_clock import (
+    build_market_clock,
+    print_market_clock,
+)
+
 from src.analysis.competitive_execution_shadow import (
     build_competitive_shadow_decision,
     execute_competitive_shadow,
@@ -2845,6 +2850,27 @@ def run_cycle(
         snapshot,
     ) = refresh_snapshot()
 
+    # El reloj del mercado va antes del analisis porque condiciona
+    # todo lo que venga detras: si el reset ya paso, las pujas de
+    # este ciclo no se ejecutan hasta el siguiente, y lo que no
+    # este publicado no recibira oferta del Computer.
+    #
+    # Aislado en try/except: es informacion, no puede tumbar un
+    # ciclo.
+    try:
+        market_clock = build_market_clock(snapshot)
+
+    except Exception as clock_error:
+        market_clock = {
+            "available": False,
+            "window_state": "UNKNOWN",
+            "reason": (
+                f"{type(clock_error).__name__}: {clock_error}"
+            ),
+        }
+
+    print_market_clock(market_clock)
+
     print()
     print(
         "Pensando..."
@@ -2875,6 +2901,14 @@ def run_cycle(
         )
         or {}
     )
+
+    # Se cuelga del estado para que lo vean los motores que
+    # decidan sobre el, y el dashboard cuando toque.
+    cycle_state["market_clock"] = market_clock
+
+    if isinstance(result, dict):
+        result.setdefault("state", cycle_state)
+        result["state"]["market_clock"] = market_clock
 
     competitive_observer = (
         build_competitive_observer(
@@ -3294,6 +3328,9 @@ def run_cycle(
 
         "analysis_seconds":
             elapsed,
+
+        "market_clock":
+            market_clock,
 
         "competitive_observer":
             competitive_observer,
