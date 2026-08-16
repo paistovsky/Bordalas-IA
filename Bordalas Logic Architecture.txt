@@ -1,0 +1,15 @@
+                PEPE / ORQUESTADOR
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+    HARD SAFETY                OBJETIVO
+    FINANCIERO                 DEPORTIVO
+    saldo >= 0                     │
+          │                        │
+          └────────────┬───────────┘
+                       │
+                 ESPECULADOR
+              aumenta patrimonio
+                       │
+                       ▼
+               mejora el equipo

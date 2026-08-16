@@ -8,6 +8,7 @@ from src.analysis.speculation_engine import (
 
 from src.analysis.market_listing_lifecycle_engine import (
     build_market_listing_lifecycle_board,
+    resolve_renewal_price,
 )
 
 from src.analysis.computer_offer_reroll_engine import (
@@ -1351,6 +1352,72 @@ def execute_autopilot_decision(
                     fresh_snapshot_file,
             }
 
+        # ----------------------------------------------------
+        # SUELO DE PRECIO
+        # ----------------------------------------------------
+        #
+        # Observado en produccion:
+        #
+        #   2026-08-11  Alvaro Fidalgo
+        #               publicado 1.183.812 / valor 1.060.000
+        #               -> HTTP 204, renovacion OK
+        #
+        #   2026-08-16  Yeray
+        #               publicado 1.941.001 / valor 1.950.000
+        #               -> HTTP 400, renovacion rechazada
+        #
+        # La unica diferencia medible es que Yeray estaba
+        # publicado POR DEBAJO de su valor de mercado: su precio
+        # habia subido despues de publicarlo.
+        #
+        # Es una hipotesis con dos observaciones, no una certeza.
+        # Por eso la correccion es conservadora: subimos el
+        # precio al valor de mercado cuando se ha quedado corto.
+        # Nunca lo bajamos. En el peor caso la renovacion vuelve
+        # a fallar y el backoff la aparta; en el mejor, deja de
+        # fallar. Pedir mas dinero nunca nos perjudica.
+        market_value = int(
+            (
+                (
+                    fresh_listing.get(
+                        "listing",
+                        {},
+                    )
+                    or {}
+                ).get(
+                    "player",
+                    {},
+                )
+                or {}
+            ).get(
+                "price",
+                0,
+            )
+            or 0
+        )
+
+        renewal_pricing = (
+            resolve_renewal_price(
+                listed_price=
+                    listed_price,
+
+                market_value=
+                    market_value,
+            )
+        )
+
+        renewal_price = (
+            renewal_pricing[
+                "renewal_price"
+            ]
+        )
+
+        price_raised = (
+            renewal_pricing[
+                "price_raised"
+            ]
+        )
+
         writer = BiwengerWriteClient()
 
         result = (
@@ -1361,7 +1428,7 @@ def execute_autopilot_decision(
                     ),
 
                 price=
-                    listed_price,
+                    renewal_price,
 
                 execute=True,
             )
@@ -1387,10 +1454,19 @@ def execute_autopilot_decision(
 
             "reason":
                 (
-                    "Publicacion renovada usando POST /market."
-                    if success
-                    else
-                    "Biwenger no confirmo la renovacion."
+                    (
+                        "Publicacion renovada usando POST /market."
+                        if success
+                        else
+                        "Biwenger no confirmo la renovacion."
+                    )
+                    + (
+                        f" Precio subido de {listed_price} a "
+                        f"{renewal_price} para no publicar por "
+                        "debajo del valor de mercado."
+                        if price_raised
+                        else ""
+                    )
                 ),
 
             "write_performed":
@@ -1416,6 +1492,15 @@ def execute_autopilot_decision(
 
             "listed_price":
                 listed_price,
+
+            "renewal_price":
+                renewal_price,
+
+            "market_value":
+                market_value,
+
+            "price_raised_to_market_value":
+                price_raised,
 
             "revalidation_snapshot":
                 fresh_snapshot_file,

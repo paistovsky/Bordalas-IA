@@ -154,13 +154,16 @@ def _observed_bids(manager: dict) -> list:
                 {
                     "amount": importe,
                     "player_id": safe_int(item.get("player_id")),
+                    "date": safe_int(item.get("date")),
                 }
             )
 
     ganada = safe_int(manager.get("max_winning_bid"))
 
     if ganada > 0:
-        bids.append({"amount": ganada, "player_id": 0})
+        bids.append(
+            {"amount": ganada, "player_id": 0, "date": 0}
+        )
 
     return bids
 
@@ -172,16 +175,40 @@ def calibrate_premium_curve(
     """
     Que prima sobre el precio de mercado se paga en esta liga.
 
-    Se aproxima dividiendo cada puja observada entre el precio
-    actual del jugador. Es ruidoso -el precio de entonces no es el
-    de ahora- pero es una medicion, y una medicion ruidosa vence a
-    una constante inventada.
+    `price_lookup(player_id, cuando)` debe devolver el precio del
+    jugador EN ESE INSTANTE. Si no lo sabe, cero, y esa puja no se
+    usa.
 
-    Con menos de MIN_PREMIUM_SAMPLES muestras se devuelve la curva
-    por defecto, y se dice.
+    POR QUE EL PARAMETRO LLEVA FECHA
+        La primera version dividia cada puja entre el precio
+        ACTUAL del jugador, argumentando que una medicion ruidosa
+        vence a una constante inventada. Era falso: el ruido no
+        era simetrico.
+
+        Los precios suben, asi que una puja de hace cuatro dias
+        dividida entre el precio de hoy sale sistematicamente
+        baja. Medido sobre datos reales el 16/08/2026: de 23
+        pujas, 18 daban una "prima" por debajo de 1,0, y la
+        mediana salia 0,94. Hugo Gonzalez aparecia pujando un
+        58 % por debajo del mercado cuando lo que habia pasado es
+        que su precio se habia duplicado.
+
+        Una puja por debajo del precio de salida es imposible en
+        una subasta del Computer. Que salieran 18 no era ruido:
+        era la prueba de que el denominador estaba mal.
+
+        Con esa curva, el modelo creia que los rivales pujan por
+        debajo del mercado, pujaba al minimo y perdia las
+        subastas. Un sesgo asi es peor que la constante que vino a
+        sustituir, porque parece medido.
+
+    Con menos de MIN_PREMIUM_SAMPLES muestras utilizables se
+    devuelve la curva por defecto, y se dice.
     """
 
     muestras = []
+    descartadas_sin_precio = 0
+    descartadas_imposibles = 0
 
     if price_lookup is not None:
 
@@ -192,14 +219,32 @@ def calibrate_premium_curve(
 
             for bid in _observed_bids(manager):
 
-                precio = safe_int(
-                    price_lookup(bid["player_id"])
-                )
+                try:
+                    precio = safe_int(
+                        price_lookup(
+                            bid["player_id"],
+                            bid.get("date"),
+                        )
+                    )
+
+                except TypeError:
+                    # Un lookup sin fecha no sirve: mediria contra
+                    # el precio de hoy y volveria el sesgo.
+                    precio = 0
 
                 if precio <= 0:
+                    descartadas_sin_precio += 1
                     continue
 
                 prima = bid["amount"] / precio
+
+                if prima < 1.0:
+                    # Imposible en una subasta del Computer: la
+                    # puja no puede bajar del precio de salida.
+                    # Si sale, el precio que tenemos no es el de
+                    # aquel momento.
+                    descartadas_imposibles += 1
+                    continue
 
                 if PREMIUM_FLOOR <= prima <= PREMIUM_CEILING:
                     muestras.append(prima)
@@ -209,10 +254,15 @@ def calibrate_premium_curve(
             "curve": list(DEFAULT_PREMIUM_CURVE),
             "calibrated": False,
             "samples": len(muestras),
+            "discarded_no_price": descartadas_sin_precio,
+            "discarded_impossible": descartadas_imposibles,
             "reason": (
                 f"Solo {len(muestras)} pujas medibles; hacen falta "
                 f"{MIN_PREMIUM_SAMPLES}. Se usa la curva por "
-                f"defecto."
+                f"defecto. Descartadas: "
+                f"{descartadas_sin_precio} sin precio de aquel "
+                f"momento, {descartadas_imposibles} por debajo del "
+                f"precio de salida."
             ),
         }
 
@@ -239,9 +289,12 @@ def calibrate_premium_curve(
         "curve": curva,
         "calibrated": True,
         "samples": len(muestras),
+        "discarded_no_price": descartadas_sin_precio,
+        "discarded_impossible": descartadas_imposibles,
         "reason": (
-            f"Calibrada con {len(muestras)} pujas observadas. "
-            f"Prima mediana {muestras[len(muestras) // 2]:.2f}x."
+            f"Calibrada con {len(muestras)} pujas medidas contra "
+            f"el precio de aquel momento. Prima mediana "
+            f"{muestras[len(muestras) // 2]:.2f}x."
         ),
     }
 

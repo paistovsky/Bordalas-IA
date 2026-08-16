@@ -13,6 +13,13 @@ from src.analysis.decision_orchestrator import (
     build_global_decision,
 )
 
+from src.analysis.action_failure_backoff import (
+    candidate_target_id,
+    load_backoff_state,
+    record_action_result,
+    save_backoff_state,
+)
+
 from src.analysis.lineup_monitor import (
     save_lineup_monitor_state,
 )
@@ -621,6 +628,28 @@ def append_log(
             "reason":
                 execution.get(
                     "reason"
+                ),
+
+            # Sin el cuerpo de la respuesta no se puede
+            # diagnosticar un rechazo de Biwenger: un HTTP 400
+            # a secas no dice nada.
+            "response":
+                (
+                    str(
+                        execution.get(
+                            "response"
+                        )
+                    )[:1000]
+                    if execution.get(
+                        "response"
+                    )
+                    is not None
+                    else None
+                ),
+
+            "player_id":
+                execution.get(
+                    "player_id"
                 ),
         }
 
@@ -2655,6 +2684,126 @@ def select_live_decision(
     ]
 
 
+def register_action_outcome(
+    decision: dict,
+    execution: dict,
+) -> dict:
+    """
+    Recuerda si la escritura funciono.
+
+    Una accion que falla en Biwenger ciclo tras ciclo no puede
+    seguir siendo la primera de la cola: bloquea todo lo demas.
+    Aqui se guarda el fallo para que el siguiente ciclo la
+    aparte temporalmente.
+
+    Solo cuentan los intentos de escritura reales. Un DRY_RUN
+    no ha tocado nada y no se castiga.
+    """
+
+    if not execution:
+        return {
+            "recorded": False,
+            "reason": "No hay resultado de ejecucion.",
+        }
+
+    if not execution.get(
+        "write_performed",
+        False,
+    ):
+        return {
+            "recorded": False,
+            "reason": (
+                "Sin escritura real: no hay nada que "
+                "registrar."
+            ),
+        }
+
+    action = (
+        execution.get(
+            "action"
+        )
+        or decision.get(
+            "action"
+        )
+    )
+
+    target_id = (
+        candidate_target_id(
+            decision
+        )
+    )
+
+    if target_id is None:
+        target_id = execution.get(
+            "player_id"
+        )
+
+    try:
+        state = load_backoff_state()
+
+        state = record_action_result(
+            state,
+
+            action=
+                action,
+
+            target_id=
+                target_id,
+
+            success=
+                bool(
+                    execution.get(
+                        "success",
+                        False,
+                    )
+                ),
+
+            write_performed=
+                True,
+
+            status=
+                execution.get(
+                    "status"
+                ),
+
+            http_status=
+                execution.get(
+                    "http_status"
+                ),
+
+            reason=
+                execution.get(
+                    "reason"
+                ),
+        )
+
+        save_backoff_state(
+            state
+        )
+
+    except OSError as error:
+
+        return {
+            "recorded": False,
+            "reason": (
+                f"No se pudo guardar el estado de backoff: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    return {
+        "recorded": True,
+        "action": action,
+        "target_id": target_id,
+        "success": bool(
+            execution.get(
+                "success",
+                False,
+            )
+        ),
+    }
+
+
 def confirm_negotiation_transitions(
     competitive_observer: dict,
     competitive_execution: dict,
@@ -3005,6 +3154,14 @@ def run_cycle(
             execute=
                 live,
         )
+    )
+
+    register_action_outcome(
+        decision=
+            decision,
+
+        execution=
+            execution,
     )
 
     competitive_execution = {

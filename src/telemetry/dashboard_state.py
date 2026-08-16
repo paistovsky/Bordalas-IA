@@ -15,6 +15,21 @@ from src.analysis.rival_intelligence_engine import (
     save_rival_intelligence,
 )
 from src.collectors.board_history_collector import collect_board_history
+from src.analysis.market_clock import build_market_clock
+from src.analysis.rival_ledger_audit import audit_rival_ledger
+from src.analysis.player_value_engine import calibrate_points_market
+from src.analysis.acquisition_valuation import (
+    build_valuation_context,
+    value_candidate,
+)
+from src.analysis.historical_price_lookup import (
+    build_historical_price_lookup,
+)
+
+from src.analysis.rival_bid_model import build_bid_model, optimal_bid
+from src.analysis.intelligent_bid_engine import (
+    build_market_seller_lookup,
+)
 from src.telemetry.league_center import build_league_center
 
 
@@ -63,6 +78,7 @@ TYPE_LABELS = {
     "SPECULATION_WATCH": "Especulación",
     "SPECULATION_BUY": "Especulación",
     "MARKET_LISTING_RENEW": "Publicaciones en venta",
+    "MARKET_LISTING_RENEW_URGENT": "Publicación a punto de caducar",
     "COMPUTER_OFFER_REROLL_WATCH": "Ofertas Computer",
     "ACCEPT_BEFORE_EXPIRY_WATCH": "Caducidad de ofertas",
     "ACCEPT_BEFORE_EXPIRY_SAFETY": "Caducidad de ofertas",
@@ -1967,6 +1983,251 @@ def compact_biwenger_competition(
         ),
     }
 
+def compact_guardrail(liquidity: dict) -> dict:
+    """
+    Estado posicional: cuantos tengo, cuantos necesito para poder
+    alinear, cuantos sobran.
+    """
+
+    guardrail = (liquidity or {}).get("position_guardrail") or {}
+
+    if not guardrail.get("available"):
+        return {"available": False}
+
+    return {
+        "available": True,
+        "by_position": [
+            {
+                "position": datos["position"],
+                "name": datos["position_name"],
+                "owned": datos["owned"],
+                "floor": datos["floor"],
+                "desired": datos["desired"],
+                "disposable": datos["disposable"],
+                "at_floor": datos["at_floor"],
+                "below_desired": datos["below_desired"],
+            }
+            for datos in (
+                guardrail.get("by_position") or {}
+            ).values()
+        ],
+        "goalkeeper_warning": guardrail.get("goalkeeper_warning"),
+        "positions_to_replenish": guardrail.get(
+            "positions_to_replenish", []
+        ),
+    }
+
+
+def compact_exposure(state: dict) -> dict:
+    """
+    Dinero comprometido en pujas vivas y cuanto queda libre.
+    """
+
+    speculation = state.get("speculation", {}) or {}
+    exposure = speculation.get("bid_exposure") or {}
+    budget = speculation.get("budget", {}) or {}
+
+    return {
+        "available": bool(exposure.get("available")),
+        "committed_total": safe_int(exposure.get("committed_total")),
+        "operation_count": safe_int(exposure.get("operation_count")),
+        "operations": [
+            {
+                "offer_id": item.get("offer_id"),
+                "amount": safe_int(item.get("amount")),
+                "player_ids": item.get("player_ids", []),
+            }
+            for item in (exposure.get("operations") or [])[:8]
+        ],
+        "total_budget": safe_int(budget.get("total_budget")),
+        "available_budget": safe_int(
+            budget.get("available_budget", budget.get("total_budget"))
+        ),
+        "cash_budget": safe_int(budget.get("cash_budget")),
+        "debt_budget": safe_int(budget.get("debt_budget")),
+        "mode": budget.get("mode"),
+        "blocked_by": budget.get("blocked_by"),
+        "reason": budget.get("reason"),
+    }
+
+
+def compact_ledger_audit(audit: dict) -> dict:
+    """
+    ¿Sabemos explicar la plantilla de cada rival?
+    """
+
+    if not audit or not audit.get("available"):
+        return {
+            "available": False,
+            "status": (audit or {}).get("status"),
+            "reason": (audit or {}).get("reason"),
+        }
+
+    return {
+        "available": True,
+        "status": audit.get("status"),
+        "min_coverage": audit.get("min_coverage"),
+        "reason": audit.get("reason"),
+        "managers_with_gaps": audit.get("managers_with_gaps", []),
+        "by_manager": [
+            {
+                "name": datos.get("name"),
+                "is_us": datos.get("is_us"),
+                "coverage": datos.get("coverage"),
+                "roster_size": datos.get("roster_size"),
+                "from_initial_draft": datos.get("from_initial_draft"),
+                "acquired": datos.get("acquired"),
+                "explained": datos.get("explained"),
+                "unexplained": [
+                    j.get("name")
+                    for j in (datos.get("unexplained") or [])
+                ],
+            }
+            for datos in (audit.get("by_manager") or {}).values()
+            if datos.get("auditable")
+        ],
+    }
+
+
+def build_acquisition_board(
+    snapshot: dict,
+    rival_intelligence: dict,
+    current_user_id,
+    available_budget: int | None,
+    limit: int = 12,
+) -> dict:
+    """
+    Que hay en el mercado del Computer, cuanto vale para nosotros y
+    cuanto pujariamos.
+
+    Es la vista que responde a "que va a hacer Pepe hoy". Antes no
+    existia: el panel de especulacion solo mostraba nombres y
+    scores, sin decir cuanto ni por que.
+    """
+
+    try:
+        contexto = build_valuation_context(snapshot)
+
+        catalogo = {
+            safe_int(item.get("id")): item
+            for item in (
+                (
+                    (snapshot.get("catalog") or {}).get("data") or {}
+                ).get("players") or {}
+            ).values()
+            if isinstance(item, dict)
+        }
+
+        modelo = build_bid_model(
+            rival_intelligence,
+            # Precio de aquel momento, no el de hoy.
+            price_lookup=build_historical_price_lookup(),
+            own_user_id=current_user_id,
+        )
+
+        vendedores = build_market_seller_lookup(snapshot)
+
+        filas = []
+
+        for player_id, venta in vendedores.items():
+
+            if venta.get("seller_user_id") is not None:
+                continue
+
+            ficha = catalogo.get(safe_int(player_id))
+
+            if not ficha:
+                continue
+
+            estado = str(ficha.get("status") or "ok").lower()
+
+            valoracion = value_candidate(ficha, contexto)
+
+            fila = {
+                "id": safe_int(player_id),
+                "name": ficha.get("name"),
+                "position": safe_int(ficha.get("position")),
+                "team_id": safe_int(ficha.get("teamID")),
+                "market_price": safe_int(ficha.get("price")),
+                "price_increment": safe_int(
+                    ficha.get("priceIncrement")
+                ),
+                "points_last_season": ficha.get("pointsLastSeason"),
+                "status": estado,
+                "our_value": safe_int(valoracion.get("value")),
+                "intent": valoracion.get("intent"),
+                "replaces": (
+                    (valoracion.get("replaces") or {}).get("name")
+                ),
+                "reason": valoracion.get("reason"),
+                "bid": 0,
+                "win_probability": None,
+                "expected_value": None,
+                "decision": valoracion.get("decision"),
+            }
+
+            if estado not in {"ok", "unknown"}:
+                fila["decision"] = "NO_DISPONIBLE"
+                fila["reason"] = f"Estado del jugador: {estado}."
+
+            elif valoracion.get("value", 0) > 0:
+
+                plan = optimal_bid(
+                    price=safe_int(ficha.get("price")),
+                    value=valoracion["value"],
+                    model=modelo,
+                    available_budget=available_budget,
+                )
+
+                fila["decision"] = plan.get("decision")
+                fila["bid"] = safe_int(plan.get("bid"))
+                fila["win_probability"] = plan.get("win_probability")
+                fila["expected_value"] = plan.get("expected_value")
+                fila["bid_reasons"] = plan.get("reasons", [])
+
+                if plan.get("decision") != "BID":
+                    fila["reason"] = plan.get("reason")
+
+            filas.append(fila)
+
+        filas.sort(
+            key=lambda item: (
+                item["decision"] != "BID",
+                -(item.get("expected_value") or 0),
+                -item["our_value"],
+            )
+        )
+
+        return {
+            "available": True,
+            "market_size": len(filas),
+            "biddable": sum(
+                1 for f in filas if f["decision"] == "BID"
+            ),
+            "premium_model": modelo.get("premium"),
+            "data_coverage": modelo.get("data_coverage"),
+            "ledger_trusted": modelo.get("ledger_trusted"),
+            "rivals": [
+                {
+                    "name": r.get("name"),
+                    "participation": r.get("participation"),
+                    "capacity": r.get("capacity"),
+                    "coverage": r.get("coverage"),
+                    "never_bids": r.get("never_bids"),
+                }
+                for r in (modelo.get("rivals") or [])
+            ],
+            "targets": filas[:limit],
+        }
+
+    except Exception as error:
+        return {
+            "available": False,
+            "targets": [],
+            "reason": f"{type(error).__name__}: {error}",
+        }
+
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -1998,6 +2259,15 @@ def build_dashboard_state() -> dict:
 
     save_rival_intelligence(rival_intelligence)
 
+    # Conciliacion jugador a jugador: ¿sabemos explicar la
+    # plantilla de cada rival? Sin esto, el panel podia decir que
+    # un manager no habia comprado nada cuando lo que pasaba es
+    # que no lo habiamos visto.
+    ledger_audit = audit_rival_ledger(
+        rival_intelligence,
+        own_user_id=board.get("current_user_id"),
+    )
+
     league_center = build_league_center(
         snapshot=snapshot,
         board=board,
@@ -2020,6 +2290,31 @@ def build_dashboard_state() -> dict:
         human_candidate(candidate)
         for candidate in result.get("candidates", [])[:7]
     ]
+
+    # El otro reloj: el reset del Computer. La operativa diaria
+    # depende de el, no del deadline de jornada.
+    try:
+        market_clock = build_market_clock(snapshot)
+
+    except Exception as clock_error:
+        market_clock = {
+            "available": False,
+            "window_state": "UNKNOWN",
+            "reason": f"{type(clock_error).__name__}: {clock_error}",
+        }
+
+    exposure = compact_exposure(state)
+
+    acquisition = build_acquisition_board(
+        snapshot=snapshot,
+        rival_intelligence=rival_intelligence,
+        current_user_id=board.get("current_user_id"),
+        available_budget=exposure.get("available_budget") or None,
+    )
+
+    points_market = calibrate_points_market(
+        snapshot.get("catalog", {})
+    )
 
     photo_lookup = build_player_photo_lookup(
         snapshot
@@ -2179,6 +2474,13 @@ def build_dashboard_state() -> dict:
         },
         "cycle": cycle_telemetry,
         "last_execution": last_execution,
+        # Acciones apartadas temporalmente porque su escritura
+        # falla en Biwenger. Se muestran para que un fallo
+        # persistente no quede escondido.
+        "backoff": result.get("failure_backoff") or {
+            "blocked": [],
+            "blocked_count": 0,
+        },
         "solvency": {
             "needed": bool(recovery.get("needed")),
             "possible": recovery.get("possible"),
@@ -2229,6 +2531,12 @@ def build_dashboard_state() -> dict:
         "offers": compact_offers(state),
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
+        "market_clock": market_clock,
+        "position_guardrail": compact_guardrail(liquidity),
+        "exposure": exposure,
+        "acquisition": acquisition,
+        "points_market": points_market,
+        "ledger_audit": compact_ledger_audit(ledger_audit),
         "priorities": candidates,
         "activity": activity,
         "competitive": competitive,

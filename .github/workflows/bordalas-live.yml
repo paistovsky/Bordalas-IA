@@ -131,6 +131,7 @@ jobs:
           python -m src.analysis.test_rival_bid_model_v1
           python -m src.analysis.test_player_value_v1
           python -m src.analysis.test_acquisition_wiring_v1
+          python -m src.analysis.test_action_starvation_v1
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash

@@ -27,10 +27,75 @@ RENEW_ACTION = "RENEW_MARKET_LISTING"
 # caducidad cercana para telemetria/alertas.
 EXPIRY_WARNING_HOURS = 12.0
 
+# Una publicacion que caduca dentro de estas horas es URGENTE:
+# hay que renovarla ya o la perdemos.
+#
+# Por encima de este margen la renovacion sigue siendo
+# necesaria, pero no compite con acciones irreversibles como
+# pujar: el mercado Computer se resetea una vez al dia y una
+# puja no realizada se pierde para siempre, mientras que una
+# publicacion tiene decenas de ciclos por delante para
+# renovarse.
+#
+# Sin esta distincion el ciclo -que ejecuta UNA accion por
+# vuelta- se dedicaba a renovar anuncios con 14 horas de vida
+# por delante mientras habia seis objetivos pujables sin tocar.
+RENEW_URGENT_HOURS = 3.0
+
 
 # ============================================================
 # HELPERS
 # ============================================================
+
+
+def resolve_renewal_price(
+    listed_price,
+    market_value,
+) -> dict:
+    """
+    Precio con el que se vuelve a publicar un jugador.
+
+    Observado en produccion: una publicacion por DEBAJO del
+    valor de mercado actual es rechazada por Biwenger con
+    HTTP 400. Ocurre cuando el precio del jugador sube despues
+    de haberlo publicado.
+
+    La correccion solo puede SUBIR el precio, nunca bajarlo:
+    pedir mas dinero por un jugador que queremos vender no nos
+    perjudica en ningun escenario.
+    """
+
+    publicado = int(
+        listed_price
+        or 0
+    )
+
+    valor = int(
+        market_value
+        or 0
+    )
+
+    precio = max(
+        publicado,
+        valor,
+    )
+
+    return {
+        "listed_price":
+            publicado,
+
+        "market_value":
+            valor,
+
+        "renewal_price":
+            precio,
+
+        "price_raised":
+            bool(
+                precio
+                > publicado
+            ),
+    }
 
 
 def get_my_team_lookup(
@@ -323,6 +388,8 @@ def analyze_listing_lifecycle(
     # DECISION
     # ========================================================
 
+    renew_urgent = False
+
     if expires_at is None:
 
         action = (
@@ -368,6 +435,20 @@ def analyze_listing_lifecycle(
             "siguiente ciclo Computer y debe renovarse "
             "si queremos mantenerla disponible."
         )
+
+        if (
+            hours_to_expiry is not None
+            and
+            hours_to_expiry
+            <= RENEW_URGENT_HOURS
+        ):
+            renew_urgent = True
+
+            reason = (
+                f"{reason} Quedan "
+                f"{round(hours_to_expiry, 2)} h de vida: "
+                "es urgente."
+            )
 
     else:
 
@@ -454,6 +535,12 @@ def analyze_listing_lifecycle(
         "renew_required":
             renew_required,
 
+        "renew_urgent":
+            renew_urgent,
+
+        "renew_urgent_hours":
+            RENEW_URGENT_HOURS,
+
         "action":
             action,
 
@@ -535,6 +622,17 @@ def build_market_listing_lifecycle_board(
         )
     ]
 
+    renew_urgent = [
+        player
+
+        for player in renew_required
+
+        if player.get(
+            "renew_urgent",
+            False,
+        )
+    ]
+
     expiry_warnings = [
         player
 
@@ -578,6 +676,14 @@ def build_market_listing_lifecycle_board(
         "renew_required_count":
             len(
                 renew_required
+            ),
+
+        "renew_urgent":
+            renew_urgent,
+
+        "renew_urgent_count":
+            len(
+                renew_urgent
             ),
 
         "expiry_warnings":

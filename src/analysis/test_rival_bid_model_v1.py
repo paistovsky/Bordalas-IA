@@ -465,17 +465,27 @@ def test_sin_muestras_se_usa_la_curva_por_defecto_y_se_dice() -> None:
 
 
 def test_con_historial_suficiente_se_calibra() -> None:
+    """
+    El buscador de precio recibe jugador Y fecha: tiene que
+    devolver lo que costaba ENTONCES.
+    """
     historial = [
         {
             "user_id": 1,
             "name": "R1",
             "maximum_bid": 10_000_000,
             "lost_bid_history": [
-                {"amount": int(1_000_000 * f), "player_id": 77}
-                for f in (
-                    1.00, 1.01, 1.02, 1.03, 1.05, 1.06,
-                    1.08, 1.10, 1.15, 1.20, 1.30, 1.45,
-                    1.02, 1.04,
+                {
+                    "amount": int(1_000_000 * f),
+                    "player_id": 77,
+                    "date": 1_786_400_000 + i * 3600,
+                }
+                for i, f in enumerate(
+                    (
+                        1.00, 1.01, 1.02, 1.03, 1.05, 1.06,
+                        1.08, 1.10, 1.15, 1.20, 1.30, 1.45,
+                        1.02, 1.04,
+                    )
                 )
             ],
         }
@@ -483,7 +493,7 @@ def test_con_historial_suficiente_se_calibra() -> None:
 
     prima = calibrate_premium_curve(
         historial,
-        price_lookup=lambda pid: 1_000_000,
+        price_lookup=lambda pid, cuando: 1_000_000,
     )
 
     assert prima["calibrated"] is True
@@ -492,6 +502,7 @@ def test_con_historial_suficiente_se_calibra() -> None:
         f"Siete tramos, incluida la cola. Salieron "
         f"{len(prima['curve'])}."
     )
+    assert prima["discarded_impossible"] == 0
     assert prima["curve"][0][0] < prima["curve"][-1][0], (
         "La curva debe ir de menor a mayor prima."
     )
@@ -643,10 +654,18 @@ def test_el_ledger_solo_es_fiable_si_tambien_cuadran_los_rivales() -> None:
     )
 
 
-def test_las_primas_absurdas_se_descartan() -> None:
+def test_una_puja_por_debajo_del_precio_es_imposible() -> None:
     """
-    Un precio historico desfasado produce primas de 5x o de 0,1x
-    que envenenarian la curva.
+    EL fallo del 16/08/2026.
+
+    En una subasta del Computer no se puede pujar por debajo del
+    precio de salida. Si al medir sale una prima menor que 1,0, el
+    precio que estamos usando no es el de aquel momento.
+
+    Con datos reales, dividiendo entre el precio de HOY, salian 18
+    de 23 por debajo de 1,0 y la mediana daba 0,94. El modelo
+    creia que los rivales pujan bajo, pujaba al minimo y perdia
+    las subastas.
     """
     historial = [
         {
@@ -654,10 +673,100 @@ def test_las_primas_absurdas_se_descartan() -> None:
             "name": "R1",
             "maximum_bid": 10_000_000,
             "lost_bid_history": (
-                [{"amount": 1_050_000, "player_id": 77}] * 13
-                + [{"amount": 9_000_000, "player_id": 77}]
-                + [{"amount": 10_000, "player_id": 77}]
+                [
+                    {
+                        "amount": 1_050_000,
+                        "player_id": 77,
+                        "date": 1_786_400_000 + i,
+                    }
+                    for i in range(13)
+                ]
+                + [
+                    {
+                        "amount": 9_000_000,
+                        "player_id": 77,
+                        "date": 1_786_400_100,
+                    },
+                    {
+                        "amount": 420_000,
+                        "player_id": 77,
+                        "date": 1_786_400_200,
+                    },
+                ]
             ),
+        }
+    ]
+
+    prima = calibrate_premium_curve(
+        historial,
+        price_lookup=lambda pid, cuando: 1_000_000,
+    )
+
+    assert prima["samples"] == 13, (
+        f"Quedaron {prima['samples']} muestras; deberian ser 13."
+    )
+    assert prima["discarded_impossible"] == 1, (
+        "La puja por debajo del precio de salida tiene que "
+        "descartarse y contarse."
+    )
+
+    print(
+        "  OK  una puja por debajo del precio de salida no "
+        "envenena la curva"
+    )
+
+
+def test_sin_precio_de_aquel_momento_no_se_calibra() -> None:
+    """
+    Preferimos la curva por defecto documentada antes que una
+    medicion sesgada, porque un sesgo parece medido.
+    """
+    historial = [
+        {
+            "user_id": 1,
+            "name": "R1",
+            "maximum_bid": 10_000_000,
+            "lost_bid_history": [
+                {
+                    "amount": 1_050_000,
+                    "player_id": 77,
+                    "date": 1_786_400_000 + i,
+                }
+                for i in range(20)
+            ],
+        }
+    ]
+
+    prima = calibrate_premium_curve(
+        historial,
+        price_lookup=lambda pid, cuando: 0,
+    )
+
+    assert prima["calibrated"] is False
+    assert prima["discarded_no_price"] == 20
+    assert prima["curve"] == list(DEFAULT_PREMIUM_CURVE)
+
+    print("  OK  sin precio de aquel momento se usa el prior")
+
+
+def test_un_lookup_sin_fecha_no_se_acepta() -> None:
+    """
+    Un buscador de un solo argumento mediria contra el precio de
+    hoy y devolveria el sesgo. Se rechaza en vez de usarse.
+    """
+    historial = [
+        {
+            "user_id": 1,
+            "name": "R1",
+            "maximum_bid": 10_000_000,
+            "lost_bid_history": [
+                {
+                    "amount": 1_050_000,
+                    "player_id": 77,
+                    "date": 1_786_400_000 + i,
+                }
+                for i in range(20)
+            ],
         }
     ]
 
@@ -666,12 +775,11 @@ def test_las_primas_absurdas_se_descartan() -> None:
         price_lookup=lambda pid: 1_000_000,
     )
 
-    assert prima["samples"] == 13, (
-        f"Las dos primas absurdas deberian descartarse. Quedaron "
-        f"{prima['samples']} muestras."
+    assert prima["calibrated"] is False, (
+        "Un lookup sin fecha no puede calibrar nada."
     )
 
-    print("  OK  las primas imposibles no envenenan la curva")
+    print("  OK  un buscador sin fecha se rechaza")
 
 
 # ============================================================
@@ -734,7 +842,9 @@ TESTS = [
     test_con_la_historia_completa_si_se_puede_afirmar,
     test_la_falta_de_datos_encoge_lo_medido,
     test_el_ledger_solo_es_fiable_si_tambien_cuadran_los_rivales,
-    test_las_primas_absurdas_se_descartan,
+    test_una_puja_por_debajo_del_precio_es_imposible,
+    test_sin_precio_de_aquel_momento_no_se_calibra,
+    test_un_lookup_sin_fecha_no_se_acepta,
     test_aguanta_inteligencia_rota,
     test_un_precio_invalido_no_genera_puja,
 ]

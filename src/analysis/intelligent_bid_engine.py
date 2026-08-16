@@ -24,6 +24,10 @@ from src.analysis.acquisition_valuation import (
     value_candidate,
 )
 
+from src.analysis.historical_price_lookup import (
+    build_historical_price_lookup,
+)
+
 from src.analysis.rival_bid_model import (
     build_bid_model,
     optimal_bid,
@@ -411,9 +415,10 @@ def calculate_intelligent_bids(
 
     bid_model = build_bid_model(
         rival_intelligence,
-        price_lookup=lambda pid: _safe_int(
-            (catalog_by_id.get(_safe_int(pid)) or {}).get("price")
-        ),
+        # Precio DE AQUEL MOMENTO, no el de hoy: los precios
+        # suben y dividir entre el actual daba primas por debajo
+        # de 1,0, que es imposible en una subasta.
+        price_lookup=build_historical_price_lookup(),
         own_user_id=own_user_id,
     )
 

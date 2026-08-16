@@ -44,6 +44,10 @@ from src.analysis.speculation_engine import (
     build_speculation_board,
 )
 
+from src.analysis.action_failure_backoff import (
+    apply_backoff_to_candidates,
+)
+
 
 PRIORITY = {
     # Barrera temporal absoluta.
@@ -69,7 +73,10 @@ PRIORITY = {
     "SOLVENCY_PREPARATION": 780,
     "LINEUP_UPDATE_LOW": 760,
     "LINEUP_LOW": 700,
-    "MARKET_LISTING_RENEW": 660,
+    # Una publicacion a punto de caducar si es urgente: la
+    # perdemos en menos de RENEW_URGENT_HOURS.
+    "MARKET_LISTING_RENEW_URGENT": 690,
+
     "INCOMING_OFFERS": 650,
     "COMPUTER_OFFER_REROLL_WATCH": 670,
     "ACCEPT_EXPIRY_WATCH": 665,
@@ -78,6 +85,17 @@ PRIORITY = {
     "LIQUIDITY_MAINTENANCE": 550,
     "SOLVENCY_NORMAL": 500,
     "SPECULATION_BUY": 400,
+
+    # Renovar una publicacion con horas de vida por delante NO
+    # es urgente y NO debe adelantar a una puja.
+    #
+    # El mercado Computer se resetea una vez al dia: la puja que
+    # no se hace hoy se pierde para siempre. La publicacion, en
+    # cambio, tiene decenas de ciclos por delante y sube a
+    # MARKET_LISTING_RENEW_URGENT en cuanto de verdad corre
+    # peligro.
+    "MARKET_LISTING_RENEW": 350,
+
     "SPECULATION_WATCH": 300,
     "IDLE": 0,
 }
@@ -686,6 +704,7 @@ def add_temporal_gate(
 
 def build_global_decision(
     snapshot: dict,
+    failure_backoff: dict | None = None,
 ) -> dict:
     """
     Construye UNA unica decision global sin ejecutar escrituras.
@@ -1839,28 +1858,51 @@ def build_global_decision(
         or []
     )
 
+    urgent_renewals = (
+        listing_lifecycle.get(
+            "renew_urgent",
+            [],
+        )
+        or []
+    )
+
     if (
         renewal_candidates
         and
         not operations_locked
     ):
 
-        # Solo una renovacion por ciclo.
+        # Solo una renovacion por ciclo, y siempre la que de
+        # verdad corre peligro antes que la que aun tiene
+        # medio dia de vida.
+        renewal_urgent = bool(
+            urgent_renewals
+        )
+
         renewal = (
-            renewal_candidates[
-                0
-            ]
+            urgent_renewals[0]
+            if renewal_urgent
+            else renewal_candidates[0]
+        )
+
+        renewal_priority_key = (
+            "MARKET_LISTING_RENEW_URGENT"
+            if renewal_urgent
+            else "MARKET_LISTING_RENEW"
         )
 
         candidates.append(
             {
                 "type":
-                    "MARKET_LISTING_RENEW",
+                    renewal_priority_key,
 
                 "priority":
                     PRIORITY[
-                        "MARKET_LISTING_RENEW"
+                        renewal_priority_key
                     ],
+
+                "renew_urgent":
+                    renewal_urgent,
 
                 "action":
                     (
@@ -1885,6 +1927,16 @@ def build_global_decision(
                     f"La publicacion de {renewal.get('name')} "
                     "caduca antes de terminar el siguiente ciclo "
                     "Computer. "
+                    + (
+                        f"Quedan "
+                        f"{renewal.get('hours_to_expiry')} h: "
+                        "urgente. "
+                        if renewal_urgent
+                        else
+                        f"Aun quedan "
+                        f"{renewal.get('hours_to_expiry')} h, "
+                        "no adelanta a una puja. "
+                    )
                     + (
                         "Renovacion LIVE habilitada."
                         if ENABLE_LIVE_MARKET_LISTING_RENEW
@@ -2155,6 +2207,19 @@ def build_global_decision(
         reverse=True,
     )
 
+    # Una accion que acaba de fallar al escribir en Biwenger no
+    # puede monopolizar la cola ciclo tras ciclo. Se desactiva
+    # temporalmente -no se borra- para que el resto avance.
+    backoff_report = (
+        apply_backoff_to_candidates(
+            candidates=
+                candidates,
+
+            state=
+                failure_backoff,
+        )
+    )
+
     # V10.1: la preocupacion principal sigue siendo candidates[0]
     # para preservar compatibilidad. En paralelo exponemos la
     # primera accion realmente ejecutable y una cola SHADOW.
@@ -2216,6 +2281,9 @@ def build_global_decision(
 
         "action_queue":
             action_queue,
+
+        "failure_backoff":
+            backoff_report,
 
         "shadow_action_decision":
             shadow_action_decision,
