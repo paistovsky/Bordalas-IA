@@ -285,12 +285,81 @@ check(
 
 
 # ================================================================
-# 6. EL CABLEADO EXISTE DE VERDAD
+# 6. EL RESPALDO NO ES UNA PUERTA TRASERA
 # ================================================================
 
 
 print()
-print("6. Los cuatro puntos están conectados")
+print("6. Sin objetivos libres no se compra por comprar")
+print("-" * 60)
+
+# 16/08/2026 20:48. Con las tres pujas buenas ya colocadas, el
+# tablero se queda sin candidatos libres. Si eso hiciera caer al
+# scoring antiguo, el ciclo siguiente compraria algo que el
+# analista habia descartado: el becario entrando por la ventana.
+#
+# El respaldo existe para cuando el tablero FALLA, no para
+# cuando dice que no.
+
+import inspect as _insp  # noqa: E402
+
+from src.analysis import decision_orchestrator as _orch  # noqa: E402
+
+_src = _insp.getsource(_orch.build_global_decision)
+
+check(
+    "distingue tablero disponible de tablero caido",
+    "tablero_manda" in _src,
+)
+
+check(
+    "con tablero disponible y sin objetivo, no hay compra",
+    "if tablero_manda and mejor is None:" in _src
+    and "objetivo = None" in _src,
+)
+
+check(
+    "y se publica como vigilancia, no en silencio",
+    "SPECULATION_WATCH" in _src
+    and "No se compra por comprar" in _src,
+)
+
+# La condicion, aislada.
+def _decide(disponible, hay_objetivo, hay_legacy):
+    if disponible and not hay_objetivo:
+        return "NO_COMPRAR"
+    if hay_objetivo:
+        return "ACQUISITION_BOARD"
+    return "SPECULATION_SCORING" if hay_legacy else "NO_COMPRAR"
+
+check(
+    "tablero OK con objetivo -> manda el tablero",
+    _decide(True, True, True) == "ACQUISITION_BOARD",
+)
+
+check(
+    "tablero OK sin objetivo -> no se compra, aunque haya lista vieja",
+    _decide(True, False, True) == "NO_COMPRAR",
+)
+
+check(
+    "tablero caido -> respaldo al scoring antiguo",
+    _decide(False, False, True) == "SPECULATION_SCORING",
+)
+
+check(
+    "tablero caido y sin lista vieja -> no se compra",
+    _decide(False, False, False) == "NO_COMPRAR",
+)
+
+
+# ================================================================
+# 7. EL CABLEADO EXISTE DE VERDAD
+# ================================================================
+
+
+print()
+print("7. Los cuatro puntos están conectados")
 print("-" * 60)
 
 import inspect  # noqa: E402

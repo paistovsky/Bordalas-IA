@@ -2203,7 +2203,30 @@ def build_global_decision(
             exclude_ids=ya_pujados,
         )
 
-        if mejor is not None:
+        # ----------------------------------------------------
+        # LA PUERTA TRASERA DEL BECARIO
+        # ----------------------------------------------------
+        #
+        # Si el tablero esta DISPONIBLE y aun asi no devuelve
+        # objetivo, la respuesta correcta es "hoy no se compra
+        # nada mas", no "que elija el scoring antiguo".
+        #
+        # Paso el 16/08/2026 a las 20:48: con las tres pujas
+        # buenas ya colocadas, el tablero se quedaba sin
+        # candidatos libres y el ciclo siguiente habria vuelto a
+        # la lista vieja para comprar algo que el analista habia
+        # descartado. El becario entrando por la ventana.
+        #
+        # El respaldo existe para cuando el tablero FALLA, no
+        # para cuando dice que no.
+        tablero_manda = bool(
+            (acquisition_board or {}).get("available")
+        )
+
+        if tablero_manda and mejor is None:
+            objetivo = None
+
+        elif mejor is not None:
             objetivo = {
                 **(mejor.get("player") or {}),
                 "id": mejor.get("id"),
@@ -2216,10 +2239,45 @@ def build_global_decision(
             )
             motivo_objetivo = mejor.get("reason")
 
-        candidates.append(
-            {
-                "type":
-                    "SPECULATION_BUY",
+        if objetivo is None:
+
+            candidates.append(
+                {
+                    "type":
+                        "SPECULATION_WATCH",
+
+                    "priority":
+                        PRIORITY[
+                            "SPECULATION_WATCH"
+                        ],
+
+                    "action":
+                        "WATCH_SPECULATION",
+
+                    "executable":
+                        False,
+
+                    "executor":
+                        None,
+
+                    "reason": (
+                        "Todos los objetivos valorados que "
+                        "compensan ya tienen puja nuestra viva. "
+                        "No se compra por comprar."
+                    ),
+
+                    "data": {
+                        "already_bid":
+                            sorted(ya_pujados),
+                    },
+                }
+            )
+
+        else:
+            candidates.append(
+                {
+                    "type":
+                        "SPECULATION_BUY",
 
                 "priority":
                     PRIORITY[
