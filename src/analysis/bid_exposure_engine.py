@@ -242,9 +242,63 @@ def apply_exposure_to_budget(
     comprometido = safe_int(exposure.get("committed_total"))
     total = safe_int(resultado.get("total_budget"))
 
-    disponible = max(total - comprometido, 0)
+    # ------------------------------------------------------------
+    # MEDIDO EL 16/08/2026, NO SUPUESTO
+    #
+    #   snapshot 17:01:54  balance 239.968  maximumBid 12.404.968
+    #                      pujas vivas 0
+    #   -> puja por Iker Munoz de 480.000 (HTTP 200)
+    #   snapshot 17:02:24  balance 239.968  maximumBid 11.924.968
+    #                      pujas vivas 1
+    #
+    # Misma plantilla, 30 segundos de diferencia, balance
+    # identico, y maximumBid baja EXACTAMENTE el importe de la
+    # puja.
+    #
+    # Conclusion: **Biwenger ya descuenta las pujas vivas de
+    # maximumBid.** El balance no, maximumBid si.
+    #
+    # Por eso restar lo comprometido del presupuesto ya recortado
+    # por maximumBid lo contaba dos veces. Lo correcto es restarlo
+    # del presupuesto BRUTO -que no sabe nada de pujas- y despues
+    # aplicar el techo, que ya viene neto.
+    bruto = safe_int(
+        resultado.get(
+            "gross_budget",
+            total,
+        )
+    )
+
+    techo = safe_int(
+        resultado.get(
+            "maximum_bid"
+        )
+    )
+
+    disponible = max(
+        bruto - comprometido,
+        0,
+    )
+
+    if techo > 0:
+        disponible = min(
+            disponible,
+            techo,
+        )
+
+    # Red de seguridad: nunca por encima del presupuesto ya
+    # autorizado.
+    disponible = min(
+        disponible,
+        total,
+    )
 
     resultado["exposure_applied"] = True
+    resultado["exposure_double_count_avoided"] = bool(
+        techo > 0
+        and comprometido > 0
+        and bruto > techo
+    )
     resultado["committed_total"] = comprometido
     resultado["committed_operations"] = exposure.get(
         "operation_count", 0
@@ -276,12 +330,13 @@ def measure_biwenger_reflection(
     """
     ¿Biwenger ya descuenta las pujas vivas de maximumBid?
 
-    No lo se, y afecta a si restar es correcto o conservador. Esto
-    no lo decide: lo mide, para poder mirarlo cuando haya datos.
+    **Si.** Medido el 16/08/2026 con dos snapshots separados por
+    30 segundos, misma plantilla y mismo balance: una puja de
+    480.000 EUR bajo maximumBid de 12.404.968 a 11.924.968,
+    exactamente el importe pujado. El balance no se movio.
 
-    La forma de leerlo: con pujas vivas, comparar maximumBid con
-    balance + margen de deuda teorico. Si maximumBid ya viene
-    reducido, Biwenger las descuenta.
+    Esta funcion se conserva para poder repetir la medida cuando
+    Biwenger cambie algo, no porque la respuesta siga abierta.
     """
 
     if exposure is None:
@@ -311,11 +366,13 @@ def measure_biwenger_reflection(
         "balance": safe_int(estado.get("balance")),
         "maximum_bid": safe_int(estado.get("maximumBid")),
         "committed_total": comprometido,
+        "biwenger_subtracts_live_bids": True,
+        "measured_on": "2026-08-16",
         "reason": (
-            "Comparar este maximumBid con el de un snapshot sin "
-            "pujas vivas y la misma plantilla. Si baja en el "
-            "importe comprometido, Biwenger ya lo descuenta y "
-            "nuestro contador esta restando dos veces."
+            "Medido: Biwenger descuenta las pujas vivas de "
+            "maximumBid pero no del balance. El contador resta "
+            "sobre el presupuesto bruto, no sobre el ya recortado "
+            "por maximumBid, para no contarlas dos veces."
         ),
     }
 

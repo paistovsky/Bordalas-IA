@@ -1390,6 +1390,8 @@ def calculate_speculation_budget(
             * MAX_DEBT_SPECULATION_PERCENT
         )
 
+        gross_budget = total_budget
+
         # Nunca superar la capacidad real de puja de Biwenger.
         if maximum_bid > 0:
             total_budget = min(
@@ -1423,6 +1425,8 @@ def calculate_speculation_budget(
         return {
             "enabled": True,
             "total_budget": total_budget,
+            "gross_budget": gross_budget,
+            "maximum_bid": maximum_bid,
             "single_operation_limit": single_limit,
             "reason": (
                 "Saldo negativo permitido: SOLVENCY_GUARANTEE "
@@ -1534,6 +1538,13 @@ def calculate_speculation_budget(
 
     total_budget = cash_budget + debt_budget
 
+    # Presupuesto bruto: lo que autoriza nuestro modelo antes de
+    # chocar con el techo de Biwenger. Se conserva porque el
+    # contador de exposicion lo necesita: maximum_bid YA viene
+    # descontado de las pujas vivas y restarlas otra vez seria
+    # contarlas dos veces.
+    gross_budget = total_budget
+
     # Nunca superar la capacidad real de puja de Biwenger.
     if maximum_bid > 0:
         total_budget = min(
@@ -1575,6 +1586,8 @@ def calculate_speculation_budget(
     return {
         "enabled": True,
         "total_budget": total_budget,
+        "gross_budget": gross_budget,
+        "maximum_bid": maximum_bid,
         "single_operation_limit": single_limit,
         "cash_budget": cash_budget,
         "debt_budget": debt_budget,

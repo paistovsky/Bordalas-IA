@@ -397,6 +397,106 @@ def test_sin_saber_quienes_somos_no_inventa() -> None:
 
 # ============================================================
 
+def test_no_contamos_dos_veces_lo_que_biwenger_ya_descuenta() -> None:
+    """
+    Medido el 16/08/2026: una puja de 480.000 EUR bajo maximumBid
+    de 12.404.968 a 11.924.968 con el balance intacto.
+
+    Biwenger YA descuenta las pujas vivas de maximumBid. Si
+    ademas se las restamos al presupuesto que ya venia recortado
+    por maximumBid, las contamos dos veces y Pepe puja de menos.
+    """
+    exposicion = build_bid_exposure(
+        snapshot([
+            puja_nuestra(1, 100, 480_000),
+        ])
+    )
+
+    # Modelo autoriza 20 M; Biwenger solo deja 11.924.968, que ya
+    # viene neto de la puja viva.
+    entrada = {
+        **presupuesto(11_924_968),
+        "gross_budget": 20_000_000,
+        "maximum_bid": 11_924_968,
+    }
+
+    resultado = apply_exposure_to_budget(
+        entrada,
+        exposicion,
+    )
+
+    assert resultado["available_budget"] == 11_924_968, (
+        f"El techo de Biwenger ya venia neto: disponible deben "
+        f"ser 11.924.968, no "
+        f"{resultado['available_budget']:,}."
+    )
+    assert resultado["exposure_double_count_avoided"] is True
+
+    print("  OK  el techo de Biwenger no se descuenta dos veces")
+
+
+def test_si_manda_nuestro_modelo_si_se_descuenta() -> None:
+    """
+    El caso contrario: cuando el limite lo pone nuestro modelo y
+    no maximumBid, lo comprometido SI hay que restarlo, porque
+    nuestro presupuesto bruto no sabe nada de pujas vivas.
+    """
+    exposicion = build_bid_exposure(
+        snapshot([
+            puja_nuestra(1, 100, 2_000_000),
+        ])
+    )
+
+    entrada = {
+        **presupuesto(6_400_000),
+        "gross_budget": 6_400_000,
+        "maximum_bid": 30_000_000,
+    }
+
+    resultado = apply_exposure_to_budget(
+        entrada,
+        exposicion,
+    )
+
+    assert resultado["available_budget"] == 4_400_000, (
+        f"6,4 M brutos menos 2 M comprometidos son 4,4 M, no "
+        f"{resultado['available_budget']:,}."
+    )
+    assert resultado["exposure_double_count_avoided"] is False
+
+    print("  OK  con el modelo mandando, lo comprometido si resta")
+
+
+def test_nunca_por_encima_del_presupuesto_autorizado() -> None:
+    """
+    Red de seguridad: pase lo que pase con bruto y techo, lo
+    disponible no puede superar lo que ya se habia autorizado.
+    """
+    exposicion = build_bid_exposure(
+        snapshot([
+            puja_nuestra(1, 100, 10_000),
+        ])
+    )
+
+    entrada = {
+        **presupuesto(1_000_000),
+        "gross_budget": 50_000_000,
+        "maximum_bid": 40_000_000,
+    }
+
+    resultado = apply_exposure_to_budget(
+        entrada,
+        exposicion,
+    )
+
+    assert resultado["available_budget"] <= 1_000_000, (
+        f"Disponible no puede superar el total autorizado: "
+        f"{resultado['available_budget']:,}."
+    )
+
+    print("  OK  disponible nunca supera el total autorizado")
+
+
 TESTS = [
     test_suma_nuestras_pujas_vivas,
     test_las_ofertas_entrantes_no_son_compromiso,
@@ -412,6 +512,9 @@ TESTS = [
     test_la_medicion_se_activa_con_pujas_vivas,
     test_aguanta_snapshots_rotos,
     test_sin_saber_quienes_somos_no_inventa,
+    test_no_contamos_dos_veces_lo_que_biwenger_ya_descuenta,
+    test_si_manda_nuestro_modelo_si_se_descuenta,
+    test_nunca_por_encima_del_presupuesto_autorizado,
 ]
 
 
