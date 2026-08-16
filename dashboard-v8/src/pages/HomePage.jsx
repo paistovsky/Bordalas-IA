@@ -44,7 +44,13 @@ export default function HomePage({ data }) {
           <div className="poswrap">
             {(guardrail.by_position || []).map((row) => (
               <div
-                className={row.at_floor ? "poscel crit" : row.below_desired ? "poscel warn" : "poscel"}
+                className={
+                  row.owned < row.floor
+                    ? "poscel crit"
+                    : row.below_desired
+                    ? "poscel warn"
+                    : "poscel"
+                }
                 key={row.position}
               >
                 <b>{row.name.toUpperCase()}</b>

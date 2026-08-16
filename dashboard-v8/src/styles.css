@@ -96,7 +96,10 @@ main{flex:1;padding:14px 16px;min-width:0}
 .kpi.good .v{color:var(--ok)}
 
 .grid{display:grid;gap:11px;margin-bottom:11px}
-.g23{grid-template-columns:2fr 1fr}
+/* El campo esta acotado a 660px: si la columna izquierda
+   se lleva 2fr sobra sitio a su lado y falta al panel de
+   la derecha. */
+.g23{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
 .g21{grid-template-columns:2fr 1fr}
 .g3{grid-template-columns:repeat(3,1fr)}
 .g2{grid-template-columns:repeat(2,1fr)}

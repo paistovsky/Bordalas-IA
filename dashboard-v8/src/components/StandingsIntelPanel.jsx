@@ -3,21 +3,31 @@ import { formatMoney } from "../lib/utils";
 /**
  * Clasificacion con inteligencia del rival.
  *
- * La columna que importa no es el patrimonio sino la
- * participacion: cuantas veces puja de verdad cada uno. Poder
- * pagar y ponerse a pujar son cosas distintas, y confundirlas
- * fue justo lo que rompio el primer modelo PvP.
+ * Tres numeros por manager y cada uno responde a algo distinto:
+ *
+ *   CAJA  - el dinero que tiene ahora mismo. Puede ser negativo:
+ *           Biwenger deja operar en rojo.
+ *   TOPE  - lo maximo que puede pujar hoy = caja + margen de
+ *           deuda. El ratio de deuda no es una suposicion: se
+ *           calibra contra el maximumBid oficial de Pepe, que
+ *           Biwenger si nos da exacto.
+ *   PUJA  - cuantas veces puja de verdad, medido sobre el
+ *           historial del tablon.
+ *
+ * Poder pagar y ponerse a pujar son cosas distintas. Confundir
+ * las dos fue lo que rompio el primer modelo PvP: con siete
+ * rivales solventes, los 53 jugadores del mercado tenian seis
+ * competidores y la ruta de puja ajustada no se activaba nunca.
  */
 
 export default function StandingsIntelPanel({ data }) {
   const standings = data.competition?.standings || [];
   const rivals = data.acquisition?.rivals || [];
-  const audit = data.ledgerAudit || {};
+  const managers = data.rivalIntel?.managers || [];
+  const calibration = data.rivalIntel?.maximum_bid_calibration || {};
 
   const byName = new Map(rivals.map((rival) => [rival.name, rival]));
-  const coverage = new Map(
-    (audit.by_manager || []).map((manager) => [manager.name, manager.coverage])
-  );
+  const intelByName = new Map(managers.map((manager) => [manager.name, manager]));
 
   return (
     <section className="pan">
@@ -26,9 +36,9 @@ export default function StandingsIntelPanel({ data }) {
           <h2>CLASIFICACIÓN E INTELIGENCIA</h2>
           <div className="sub">{data.competition?.name || "Liga"}</div>
         </div>
-        {audit.status && (
-          <span className={audit.status === "COMPLETO" ? "pill ok" : "pill warn"}>
-            LEDGER {audit.status}
+        {calibration.available && (
+          <span className="pill ok">
+            DEUDA ×{Number(calibration.ratio || 0).toFixed(2)}
           </span>
         )}
       </div>
@@ -39,15 +49,17 @@ export default function StandingsIntelPanel({ data }) {
             <th>#</th>
             <th>MÁNAGER</th>
             <th className="n">PTS</th>
-            <th className="n">PATRIM.</th>
+            <th className="n">CAJA</th>
+            <th className="n">TOPE</th>
             <th className="n">PUJA</th>
-            <th className="n">DATOS</th>
           </tr>
         </thead>
         <tbody>
           {standings.map((row) => {
             const rival = byName.get(row.name);
-            const cover = coverage.get(row.name);
+            const intel = intelByName.get(row.name);
+            const balance = intel?.balance;
+            const cap = intel?.maximum_bid ?? rival?.capacity;
             const percent =
               rival && !rival.never_bids
                 ? Math.round(Number(rival.participation || 0) * 100)
@@ -58,24 +70,26 @@ export default function StandingsIntelPanel({ data }) {
                 <td className="dim">{row.rank}º</td>
                 <td>
                   {row.name}
-                  {row.is_current_user && <span className="pill me" style={{ marginLeft: 6 }}>TÚ</span>}
+                  {row.is_current_user && (
+                    <span className="pill me" style={{ marginLeft: 6 }}>TÚ</span>
+                  )}
                 </td>
                 <td className="n">{row.points}</td>
-                <td className="n">{formatMoney(row.team_value)}</td>
+                <td className={Number(balance) < 0 ? "n down" : "n"}>
+                  {balance != null ? formatMoney(balance) : "—"}
+                </td>
+                <td className="n strong">{cap != null ? formatMoney(cap) : "—"}</td>
                 <td className="n">
                   {rival?.never_bids ? (
                     <span className="pill idle">NUNCA</span>
                   ) : percent != null ? (
-                    <span className={percent >= 40 ? "pill crit" : percent >= 15 ? "pill warn" : "pill idle"}>
+                    <span
+                      className={
+                        percent >= 40 ? "pill crit" : percent >= 15 ? "pill warn" : "pill idle"
+                      }
+                    >
                       {percent}%
                     </span>
-                  ) : (
-                    <span className="dim">—</span>
-                  )}
-                </td>
-                <td className="n">
-                  {cover != null ? (
-                    <span className={cover >= 1 ? "up" : "down"}>{Math.round(cover * 100)}%</span>
                   ) : (
                     <span className="dim">—</span>
                   )}
@@ -87,8 +101,11 @@ export default function StandingsIntelPanel({ data }) {
       </table>
 
       <p className="note" style={{ textAlign: "left", marginTop: 9 }}>
-        PUJA = veces que ese mánager puja de verdad, medida sobre el histórico
-        del tablón. DATOS = cuánto de su plantilla actual sabemos explicar.
+        CAJA = dinero ahora (puede ir en rojo). TOPE = caja + margen de deuda,
+        con el ratio calibrado contra el maximumBid oficial de Pepe. PUJA =
+        veces que ese mánager puja de verdad, medida sobre el tablón. Lo que
+        tienen publicado en venta <b>no</b> suma al tope: en el reset las pujas
+        se resuelven antes de que el Computer haga ofertas.
       </p>
     </section>
   );

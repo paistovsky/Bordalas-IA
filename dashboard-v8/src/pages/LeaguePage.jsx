@@ -4,6 +4,15 @@ import { formatEuros } from "../lib/utils";
 export default function LeaguePage({ data }) {
   const audit = data.ledgerAudit || {};
 
+  // El patrimonio no cabe en el panel de INICIO desde que
+  // entraron caja y tope; aqui si, y no se pierde.
+  const worth = new Map(
+    (data.rivalIntel?.managers || []).map((manager) => [
+      manager.name,
+      manager.roster_value
+    ])
+  );
+
   return (
     <>
       <StandingsIntelPanel data={data} />
@@ -25,6 +34,7 @@ export default function LeaguePage({ data }) {
               <thead>
                 <tr>
                   <th>MÁNAGER</th>
+                  <th className="n">PATRIM.</th>
                   <th className="n">PLANTILLA</th>
                   <th className="n">DEL SORTEO</th>
                   <th className="n">FICHADOS</th>
@@ -41,6 +51,7 @@ export default function LeaguePage({ data }) {
                         {manager.name}
                         {manager.is_us && <span className="pill me" style={{ marginLeft: 6 }}>TÚ</span>}
                       </td>
+                      <td className="n">{formatEuros(worth.get(manager.name) || 0)}</td>
                       <td className="n">{manager.roster_size}</td>
                       <td className="n">{manager.from_initial_draft}</td>
                       <td className="n">{manager.acquired}</td>

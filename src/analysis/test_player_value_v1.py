@@ -38,7 +38,9 @@ Ejecutar:
 from src.analysis.player_value_engine import (
     CONFIDENCE_HISTORICAL,
     CONFIDENCE_MARKET_IMPLIED,
+    MAX_PROJECTED_DAILY_RATE,
     MIN_POINTS_SAMPLES,
+    TREND_DECAY,
     build_team_strength,
     calibrate_points_market,
     estimate_resale_price,
@@ -445,7 +447,124 @@ def test_valores_absurdos_no_generan_dinero() -> None:
 
 # ============================================================
 
+
+# ============================================================
+# LA TENDENCIA, MEDIDA EN VEZ DE SUPUESTA
+# ============================================================
+
+
+def test_el_desgaste_es_el_medido_no_el_inventado() -> None:
+    """
+    0,65 era una cifra escrita a mano. Medido sobre 80 snapshots,
+    la media diaria de los tres dias siguientes es 0,601 veces la
+    de hoy, y eso equivale a un desgaste de 0,53.
+
+    Si alguien lo sube sin volver a medir, este test lo para.
+    """
+    assert abs(TREND_DECAY - 0.53) < 0.005, (
+        f"TREND_DECAY deberia ser el medido (0,53), es {TREND_DECAY}."
+    )
+
+    suma = 1 + TREND_DECAY + TREND_DECAY ** 2
+
+    assert abs(suma - 1.803) < 0.02, (
+        f"Tres dias con este desgaste suman {suma:.3f}; lo medido "
+        f"es 1,803."
+    )
+
+    print("  OK  el desgaste 0,53 sale de la medicion, no de la intuicion")
+
+
+def test_la_velocidad_medida_manda_sobre_el_incremento() -> None:
+    """
+    Un solo dia es ruidoso. Si hay velocidad medida sobre varios
+    dias, se usa esa, y se dice cual se ha usado.
+    """
+    con_incremento = estimate_resale_price(
+        1_000_000, 10_000, 3
+    )
+    con_velocidad = estimate_resale_price(
+        1_000_000, 10_000, 3, velocity_percent_per_day=2.0
+    )
+
+    assert con_incremento["source"] == "incremento de ayer"
+    assert con_velocidad["source"] == "velocidad medida"
+
+    assert (
+        con_velocidad["appreciation"]
+        > con_incremento["appreciation"]
+    ), "Un 2 %/dia deberia proyectar mas que un 1 %/dia."
+
+    print("  OK  manda la velocidad medida y se declara la fuente")
+
+
+def test_la_subida_se_recorta_a_la_banda_plausible() -> None:
+    """
+    Yusi Enriquez venia subiendo un 12 % diario despues de
+    firmar. Existe, pero proyectar tres dias mas a ese ritmo es
+    extrapolar la cola de la distribucion.
+    """
+    disparada = estimate_resale_price(
+        360_000, 0, 3, velocity_percent_per_day=12.46
+    )
+
+    assert disparada["clamped"] is True
+    assert (
+        disparada["daily_rate_percent"]
+        <= MAX_PROJECTED_DAILY_RATE + 0.01
+    )
+    assert "recortado" in disparada["reason"]
+
+    normal = estimate_resale_price(
+        360_000, 0, 3, velocity_percent_per_day=1.5
+    )
+
+    assert normal["clamped"] is False
+
+    print("  OK  una subida fuera de banda se recorta y se dice")
+
+
+def test_las_caidas_no_se_recortan() -> None:
+    """
+    Recortar tambien las caidas nos haria optimistas justo con el
+    jugador que se esta desplomando. Ese es el error caro.
+    """
+    cayendo = estimate_resale_price(
+        1_000_000, 0, 3, velocity_percent_per_day=-10.0
+    )
+
+    assert cayendo["clamped"] is False
+    assert cayendo["appreciation"] == -300_000, (
+        f"Una caida del 10 % diario tres dias son -300.000, "
+        f"salio {cayendo['appreciation']}."
+    )
+
+    print("  OK  una caida se proyecta entera, sin recorte")
+
+
+def test_dos_precios_distintos_con_la_misma_velocidad() -> None:
+    """
+    La tasa es tasa: al mismo ritmo, el caro sube mas euros que
+    el barato. Con euros planos los dos subian lo mismo.
+    """
+    caro = estimate_resale_price(
+        5_950_000, 0, 3, velocity_percent_per_day=1.0
+    )
+    barato = estimate_resale_price(
+        150_000, 0, 3, velocity_percent_per_day=1.0
+    )
+
+    assert caro["appreciation"] > barato["appreciation"] * 30
+
+    print("  OK  al mismo ritmo, el caro sube mas euros")
+
+
 TESTS = [
+    test_el_desgaste_es_el_medido_no_el_inventado,
+    test_la_velocidad_medida_manda_sobre_el_incremento,
+    test_la_subida_se_recorta_a_la_banda_plausible,
+    test_las_caidas_no_se_recortan,
+    test_dos_precios_distintos_con_la_misma_velocidad,
     test_la_tarifa_se_mide_en_el_catalogo,
     test_sin_muestras_no_se_valora_nada,
     test_la_fuerza_del_equipo_sale_de_los_datos,

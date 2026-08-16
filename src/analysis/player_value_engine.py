@@ -90,7 +90,51 @@ DEFAULT_SPECULATION_MARGIN = 0.25
 # Las tendencias de precio se agotan. Proyectar la subida diaria
 # en linea recta a cinco dias da numeros de fantasia, asi que cada
 # dia siguiente cuenta menos.
-TREND_DECAY = 0.65
+# ============================================================
+# DESGASTE DE LA TENDENCIA
+# ============================================================
+#
+# Antes era 0,65 escrito a mano. Medido el 16/08/2026 sobre 80
+# snapshots reales -572 jugadores, 2.657 cambios diarios-:
+#
+#   Que predice mejor el dia siguiente
+#     como euros planos       coef 0,710   R2 0,538
+#     como tasa (% del precio) coef 0,851   R2 0,569  <-- gana
+#     normalizado a precio^0,325 coef 0,739  R2 0,546
+#
+#   Que predice mejor los TRES dias siguientes
+#     ultimo incremento diario  coef 0,570   R2 0,659
+#     velocidad de 3 dias       coef 0,601   R2 0,674  <-- gana
+#
+# El movimiento diario persiste de verdad: va en el mismo sentido
+# el 88 % de las veces. Proyectar esta justificado.
+#
+# La media diaria de los tres dias siguientes es 0,601 veces la
+# de hoy. Para que la suma con desgaste de esos tres dias valga
+# 3 x 0,601 = 1,803 hace falta:
+#
+#   1 + d + d^2 = 1,803   ->   d = 0,53
+#
+# Es decir: el 0,65 de antes proyectaba un 15 % MAS de lo que el
+# mercado hace en realidad.
+TREND_DECAY = 0.53
+
+# Cuanto de la varianza del futuro explica esta proyeccion.
+# Se guarda para poder decirlo, no para calcular con ello.
+TREND_R2 = 0.67
+
+# Techo plausible de subida diaria, medido sobre los mismos 403
+# jugadores con historial: el p90 esta en +4,53 %/dia.
+#
+# Por encima existe -Yusi Enriquez venia subiendo un 12 % diario
+# tras firmar- pero proyectar tres dias mas a ese ritmo es
+# extrapolar la cola. Se recorta y se deja constancia.
+#
+# EL RECORTE ES SOLO AL ALZA, a proposito. Recortar tambien las
+# caidas nos haria optimistas justo con el jugador que se esta
+# desplomando, que es el error caro. Una bajada se proyecta
+# entera y sin desgaste.
+MAX_PROJECTED_DAILY_RATE = 4.53
 
 MIN_POINTS_SAMPLES = 40
 
@@ -340,44 +384,96 @@ def estimate_resale_price(
     price: int,
     daily_increment: int,
     horizon_days: int = 3,
+    velocity_percent_per_day: float | None = None,
 ) -> dict:
     """
     A cuanto creemos que se puede revender.
 
-    Proyeccion con desgaste: una subida de 250.000 EUR al dia no
-    se mantiene cinco dias seguidos. Cada dia siguiente pesa
-    TREND_DECAY veces el anterior.
+    Se proyecta en TASA, no en euros, y se compone dia a dia con
+    el desgaste medido. En la practica el resultado casi coincide
+    con proyectar euros -porque precio x tasa = incremento-, y esa
+    fue una correccion que llegue a proponer creyendo que habia
+    un fallo donde no lo habia. La diferencia real aparece solo
+    con jugadores baratos que se mueven rapido, donde componer si
+    cambia el numero.
 
-    Es una aproximacion deliberadamente conservadora. Cuando el
-    motor de tendencias exponga velocidad y aceleracion, este
-    calculo deberia sustituirse por el suyo.
+    `velocity_percent_per_day` es la velocidad medida por el motor
+    de tendencias sobre varios dias. Cuando esta disponible se usa
+    en lugar del incremento de ayer: un solo dia es ruidoso y
+    medir sobre tres predice mejor (R2 0,674 frente a 0,659).
+
+    La proyeccion explica unos dos tercios de lo que hace el
+    precio despues. No es una certeza y el margen exigido en
+    `speculation_value` esta ahi para cubrir el tercio restante.
     """
 
     base = safe_int(price)
-    paso = safe_int(daily_increment)
+    dias = max(int(horizon_days), 0)
 
     if base <= 0:
-        return {"resale": 0, "appreciation": 0, "reason": "Sin precio."}
+        return {
+            "resale": 0,
+            "appreciation": 0,
+            "reason": "Sin precio.",
+        }
 
-    subida = 0.0
-    peso = 1.0
+    paso = safe_int(daily_increment)
 
-    for _ in range(max(int(horizon_days), 0)):
-        subida += paso * peso
-        peso *= TREND_DECAY
+    if velocity_percent_per_day is not None:
+        porcentaje = float(velocity_percent_per_day)
+        fuente = "velocidad medida"
+    else:
+        porcentaje = (paso / base) * 100 if base else 0.0
+        fuente = "incremento de ayer"
 
-    # Una tendencia bajista se respeta entera: si esta cayendo, no
-    # se le aplica desgaste a la caida.
-    if paso < 0:
-        subida = paso * max(int(horizon_days), 0)
+    recortado = False
+
+    if porcentaje > MAX_PROJECTED_DAILY_RATE:
+        porcentaje = MAX_PROJECTED_DAILY_RATE
+        recortado = True
+
+    tasa = porcentaje / 100.0
+
+    if dias == 0 or tasa == 0:
+        return {
+            "resale": base,
+            "appreciation": 0,
+            "horizon_days": dias,
+            "source": fuente,
+            "clamped": recortado,
+            "reason": "Sin tendencia que proyectar.",
+        }
+
+    # Una tendencia bajista se respeta entera: si esta cayendo,
+    # no se le aplica desgaste a la caida.
+    if tasa < 0:
+        factor = 1 + tasa * dias
+    else:
+        factor = 1.0
+        peso = 1.0
+        for _ in range(dias):
+            factor *= (1 + tasa * peso)
+            peso *= TREND_DECAY
+
+    reventa = max(int(base * factor), 0)
+    subida = reventa - base
 
     return {
-        "resale": max(int(base + subida), 0),
-        "appreciation": int(subida),
-        "horizon_days": int(horizon_days),
+        "resale": reventa,
+        "appreciation": subida,
+        "horizon_days": dias,
+        "daily_rate_percent": round(tasa * 100, 3),
+        "source": fuente,
+        "clamped": recortado,
         "reason": (
-            f"Sube {paso:,} EUR/dia. A {horizon_days} dias con "
-            f"desgaste, {int(subida):,} EUR."
+            f"{fuente}: {tasa * 100:+.2f} %/dia"
+            + (
+                " (recortado a la banda plausible)"
+                if recortado
+                else ""
+            )
+            + f". A {dias} dias con desgaste medido "
+            f"({TREND_DECAY}), {subida:,} EUR."
         ).replace(",", "."),
     }
 
@@ -388,6 +484,7 @@ def speculation_value(
     horizon_days: int = 3,
     margin: float = DEFAULT_SPECULATION_MARGIN,
     confidence: float = CONFIDENCE_HISTORICAL,
+    velocity_percent_per_day: float | None = None,
 ) -> dict:
     """
     Lo maximo que pagariamos por un jugador que solo queremos para
@@ -406,7 +503,10 @@ def speculation_value(
         )
 
     reventa = estimate_resale_price(
-        base, daily_increment, horizon_days
+        base,
+        daily_increment,
+        horizon_days,
+        velocity_percent_per_day=velocity_percent_per_day,
     )
 
     objetivo = reventa["resale"]

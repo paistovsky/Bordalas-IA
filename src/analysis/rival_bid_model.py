@@ -118,6 +118,42 @@ PREMIUM_CEILING = 2.50
 MIN_WIN_PROBABILITY = 0.15
 
 
+# ============================================================
+# RENDIMIENTO MINIMO DE UNA ESPECULACION
+# ============================================================
+#
+# El 16/08/2026 el motor daba PUJAR por Soler a 5.950.001 EUR
+# con un valor esperado de 7.438 EUR: un 0,12 % de rendimiento
+# que ademas inmovilizaba el 81 % del presupuesto y dejaba fuera
+# a Cabrera, Arriaga y Castrin, que rendian 9,6 %, 67 % y 164 %.
+#
+# El valor esperado a secas es una cifra absoluta y no ve cuanto
+# capital hay que inmovilizar para conseguirla. Estas dos
+# barreras lo miran:
+#
+#   RENDIMIENTO. Por debajo de este porcentaje la tesis esta
+#   dentro del ruido del propio estimador: los precios de
+#   Biwenger se mueven a saltos de 10.000 EUR, que sobre un
+#   jugador de precio medio son justo un 3 %. Si la ganancia
+#   esperada no supera un salto de precio, no estamos midiendo
+#   nada, estamos redondeando.
+#
+#   GANANCIA MINIMA. El ciclo ejecuta UNA accion por vuelta. Una
+#   operacion que deja menos que esto no merece el turno cuando
+#   la cola tiene alternativas. Es la misma logica que aparto las
+#   renovaciones rotas, aplicada al valor en vez de a la
+#   prioridad.
+#
+# Solo se aplican a la ESPECULACION. Una mejora del once se paga
+# en puntos, no en euros de reventa, y exigirle rendimiento de
+# caja seria medirla con la regla equivocada.
+MIN_SPECULATION_YIELD = 0.03
+
+MIN_SPECULATION_EXPECTED_VALUE = 25_000
+
+SPECULATION_INTENT = "SPECULATION"
+
+
 def safe_int(value, default: int = 0) -> int:
     try:
         return int(value or 0)
@@ -581,6 +617,7 @@ def optimal_bid(
     value: int,
     model: dict,
     available_budget: int | None = None,
+    intent: str | None = None,
 ) -> dict:
     """
     El importe que maximiza el valor esperado.
@@ -591,6 +628,12 @@ def optimal_bid(
     margen si es especulacion, valor en puntos si es para el once.
     Sin ese numero no se puja, porque no habria forma de saber si
     ganar la subasta es bueno.
+
+    `intent` distingue las dos vias. Si es SPECULATION se le
+    exige ademas un rendimiento minimo sobre el capital que
+    inmoviliza: una mejora del once se paga en puntos, pero una
+    especulacion que solo devuelve el 0,12 % no es una operacion,
+    es ruido caro.
 
     Nunca lanza.
     """
@@ -673,6 +716,52 @@ def optimal_bid(
                 ),
                 options=opciones,
             )
+
+        es_especulacion = (
+            str(intent or "").upper()
+            == SPECULATION_INTENT
+        )
+
+        if es_especulacion:
+
+            rendimiento = (
+                mejor["expected_value"]
+                / max(mejor["bid"], 1)
+            )
+
+            if rendimiento < MIN_SPECULATION_YIELD:
+                return _no_bid(
+                    "RENDIMIENTO_INSUFICIENTE",
+                    (
+                        f"Como especulacion rinde un "
+                        f"{rendimiento * 100:.2f} % "
+                        f"({mejor['expected_value']:,} EUR sobre "
+                        f"{mejor['bid']:,} inmovilizados) y se "
+                        f"exige al menos un "
+                        f"{MIN_SPECULATION_YIELD * 100:.0f} %. "
+                        f"Por debajo de eso la subida estimada "
+                        f"esta dentro del ruido del precio y el "
+                        f"dinero rinde mas en otra operacion."
+                    ).replace(",", "."),
+                    options=opciones,
+                )
+
+            if (
+                mejor["expected_value"]
+                < MIN_SPECULATION_EXPECTED_VALUE
+            ):
+                return _no_bid(
+                    "GANANCIA_INSUFICIENTE",
+                    (
+                        f"Como especulacion deja "
+                        f"{mejor['expected_value']:,} EUR y el "
+                        f"ciclo solo ejecuta una accion por "
+                        f"vuelta: por debajo de "
+                        f"{MIN_SPECULATION_EXPECTED_VALUE:,} EUR "
+                        f"no merece el turno."
+                    ).replace(",", "."),
+                    options=opciones,
+                )
 
         if mejor["win_probability"] < MIN_WIN_PROBABILITY:
             return _no_bid(

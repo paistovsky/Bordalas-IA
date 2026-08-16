@@ -39,6 +39,10 @@ LO QUE NO HACE
 
 from __future__ import annotations
 
+from src.analysis.player_velocity_lookup import (
+    build_velocity_lookup,
+)
+
 from src.analysis.player_value_engine import (
     build_team_strength,
     calibrate_points_market,
@@ -64,14 +68,22 @@ def safe_int(value, default: int = 0) -> int:
 
 def build_valuation_context(
     snapshot: dict,
+    velocity_lookup: dict | None = None,
 ) -> dict:
     """
     Lo que hay que calcular una sola vez por ciclo: el precio del
-    punto, la fuerza de cada equipo y el peor de los nuestros en
-    cada posicion.
+    punto, la fuerza de cada equipo, el peor de los nuestros en
+    cada posicion y la velocidad de precio medida por jugador.
+
+    Si no se pasa `velocity_lookup` se construye aqui. Se calcula
+    una vez y se reparte, porque leer el historial de precios
+    para cada candidato seria absurdo.
     """
 
     catalogo = (snapshot or {}).get("catalog") or {}
+
+    if velocity_lookup is None:
+        velocity_lookup = build_velocity_lookup()
 
     mercado = calibrate_points_market(catalogo)
     equipos = build_team_strength(catalogo)
@@ -107,6 +119,7 @@ def build_valuation_context(
             }
 
     return {
+        "velocity": velocity_lookup or {},
         "points_market": mercado,
         "team_strength": equipos,
         "weakest_by_position": peor_por_posicion,
@@ -181,6 +194,12 @@ def value_candidate(
         # COMO ESPECULACION
         # --------------------------------------------------
 
+        velocidades = (context or {}).get("velocity") or {}
+
+        velocidad = velocidades.get(
+            safe_int(player.get("id"))
+        )
+
         como_trading = speculation_value(
             price=precio,
             daily_increment=safe_int(
@@ -188,6 +207,10 @@ def value_candidate(
             ),
             horizon_days=horizon_days,
             confidence=estimacion["confidence"],
+
+            # Medida sobre varios dias cuando la hay; si no,
+            # dentro se cae al incremento de ayer y lo dice.
+            velocity_percent_per_day=velocidad,
         )
 
         # --------------------------------------------------

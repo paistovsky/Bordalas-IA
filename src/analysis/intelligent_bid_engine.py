@@ -773,6 +773,13 @@ def calculate_intelligent_bids(
                         ),
                         value=valuation["value"],
                         model=bid_model,
+
+                        # La via por la que lo queremos cambia lo
+                        # que se le exige: la especulacion tiene
+                        # que rendir sobre el capital que
+                        # inmoviliza, la mejora del once se paga
+                        # en puntos.
+                        intent=valuation.get("intent"),
                     )
 
                     if bid_plan.get("decision") == "BID":

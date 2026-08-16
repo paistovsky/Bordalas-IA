@@ -64,6 +64,7 @@ export function normalizeStatus(raw = {}) {
     acquisition: raw.acquisition || { available: false },
     pointsMarket: raw.points_market || { calibrated: false },
     ledgerAudit: raw.ledger_audit || { available: false },
+    rivalIntel: raw.rival_intelligence || { managers: [] },
     backoff: raw.backoff || { blocked: [], blocked_count: 0 }
   };
 }

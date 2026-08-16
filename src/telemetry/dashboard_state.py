@@ -2177,6 +2177,11 @@ def build_acquisition_board(
                     value=valoracion["value"],
                     model=modelo,
                     available_budget=available_budget,
+
+                    # El dashboard tiene que enseñar la misma
+                    # decision que toma produccion, no una
+                    # parecida.
+                    intent=valoracion.get("intent"),
                 )
 
                 fila["decision"] = plan.get("decision")

@@ -27,6 +27,8 @@ Ejecutar:
 from src.analysis.rival_bid_model import (
     DEFAULT_PREMIUM_CURVE,
     MIN_PREMIUM_SAMPLES,
+    MIN_SPECULATION_EXPECTED_VALUE,
+    MIN_SPECULATION_YIELD,
     MIN_WIN_PROBABILITY,
     build_bid_model,
     calibrate_premium_curve,
@@ -819,6 +821,154 @@ def test_un_precio_invalido_no_genera_puja() -> None:
 
 # ============================================================
 
+
+# ============================================================
+# RENDIMIENTO MINIMO DE LA ESPECULACION
+# ============================================================
+
+
+def _modelo_sin_rivales() -> dict:
+    """
+    Nadie puja: la probabilidad al minimo es alta y el importe
+    optimo es precio + 1. Asi el test mide el rendimiento, no la
+    puja contra rivales.
+    """
+    return build_bid_model({"managers": []})
+
+
+def test_la_especulacion_de_soler_ya_no_se_puja() -> None:
+    """
+    El caso real del 16/08/2026.
+
+    Soler costaba 5.950.000 y valia 5.965.543 para nosotros. El
+    motor pujaba 5.950.001 con un valor esperado de 7.438 EUR: un
+    0,12 % que inmovilizaba el 81 % del presupuesto.
+    """
+    plan = optimal_bid(
+        price=5_950_000,
+        value=5_965_543,
+        model=_modelo_sin_rivales(),
+        intent="SPECULATION",
+    )
+
+    assert plan["decision"] != "BID", (
+        f"Soler no deberia pujarse como especulacion, salio "
+        f"{plan['decision']}."
+    )
+
+    assert plan["decision"] in {
+        "RENDIMIENTO_INSUFICIENTE",
+        "GANANCIA_INSUFICIENTE",
+    }, plan["decision"]
+
+    print("  OK  Soler cae: 0,12 % no es una especulacion")
+
+
+def test_el_mismo_jugador_como_mejora_del_once_si_se_puja() -> None:
+    """
+    La misma cuenta, otra via. Una mejora del once se paga en
+    puntos: exigirle rendimiento de caja seria medirla con la
+    regla equivocada.
+    """
+    plan = optimal_bid(
+        price=5_950_000,
+        value=5_965_543,
+        model=_modelo_sin_rivales(),
+        intent="XI_UPGRADE",
+    )
+
+    assert plan["decision"] == "BID", (
+        f"Como mejora del once deberia pujarse, salio "
+        f"{plan['decision']}: {plan.get('reason')}"
+    )
+
+    print("  OK  como mejora del once la misma cuenta si pasa")
+
+
+def test_sin_intencion_no_se_aplica_la_barrera() -> None:
+    """
+    Quien no declara intencion mantiene el comportamiento
+    anterior. La barrera es una regla de la especulacion, no un
+    filtro global que se cuele por defecto.
+    """
+    plan = optimal_bid(
+        price=5_950_000,
+        value=5_965_543,
+        model=_modelo_sin_rivales(),
+    )
+
+    assert plan["decision"] == "BID"
+
+    print("  OK  sin intencion declarada, nada cambia")
+
+
+def test_una_especulacion_que_si_rinde_pasa() -> None:
+    """
+    Un jugador de 400.000 que se estima revender por 520.000:
+    120.000 de margen sobre 400.001 inmovilizados. Eso si es una
+    operacion.
+    """
+    plan = optimal_bid(
+        price=400_000,
+        value=520_000,
+        model=_modelo_sin_rivales(),
+        intent="SPECULATION",
+    )
+
+    assert plan["decision"] == "BID", (
+        f"Deberia pujarse: {plan.get('reason')}"
+    )
+
+    rendimiento = plan["expected_value"] / plan["bid"]
+
+    assert rendimiento >= MIN_SPECULATION_YIELD
+
+    print(
+        f"  OK  una especulacion al "
+        f"{rendimiento * 100:.0f} % si se puja"
+    )
+
+
+def test_buen_porcentaje_pero_calderilla_no_merece_el_turno() -> None:
+    """
+    El ciclo ejecuta UNA accion por vuelta. Un 10 % sobre 60.000
+    EUR son 6.000 EUR: el porcentaje esta bien pero la operacion
+    no paga el turno.
+    """
+    plan = optimal_bid(
+        price=60_000,
+        value=75_000,
+        model=_modelo_sin_rivales(),
+        intent="SPECULATION",
+    )
+
+    assert plan["decision"] == "GANANCIA_INSUFICIENTE", (
+        f"Salio {plan['decision']}: {plan.get('reason')}"
+    )
+
+    print("  OK  buen porcentaje sobre calderilla no basta")
+
+
+def test_el_motivo_explica_el_rechazo_con_numeros() -> None:
+    """
+    Un rechazo sin cifras no se puede discutir.
+    """
+    plan = optimal_bid(
+        price=5_950_000,
+        value=5_965_543,
+        model=_modelo_sin_rivales(),
+        intent="SPECULATION",
+    )
+
+    motivo = plan.get("reason", "")
+
+    assert "%" in motivo, motivo
+    assert str(MIN_SPECULATION_EXPECTED_VALUE)[:2] in motivo \
+        or f"{MIN_SPECULATION_YIELD * 100:.0f} %" in motivo, motivo
+
+    print("  OK  el rechazo viene con las cifras")
+
+
 TESTS = [
     test_el_que_nunca_ha_pujado_no_es_una_amenaza,
     test_la_participacion_sale_del_historial,
@@ -847,6 +997,12 @@ TESTS = [
     test_un_lookup_sin_fecha_no_se_acepta,
     test_aguanta_inteligencia_rota,
     test_un_precio_invalido_no_genera_puja,
+    test_la_especulacion_de_soler_ya_no_se_puja,
+    test_el_mismo_jugador_como_mejora_del_once_si_se_puja,
+    test_sin_intencion_no_se_aplica_la_barrera,
+    test_una_especulacion_que_si_rinde_pasa,
+    test_buen_porcentaje_pero_calderilla_no_merece_el_turno,
+    test_el_motivo_explica_el_rechazo_con_numeros,
 ]
 
 
