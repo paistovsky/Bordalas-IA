@@ -1,11 +1,56 @@
 from src.analysis.recommendation_engine import generate_recommendations
 
 
-def calculate_bid_recommendations(snapshot: dict) -> list[dict]:
+def calculate_bid_recommendations(
+    snapshot: dict,
+    budget_limit: int | None = None,
+) -> list[dict]:
+    """
+    budget_limit es el techo de concentracion por jugador.
+
+    Antes se calculaba aqui dentro como el 45 % del SALDO. Con el
+    saldo real del 16/08/2026 -239.968 EUR- eso daba 107.985, y el
+    jugador mas barato del mercado costaba 150.000: los veinte
+    salian como DEMASIADO CARO. Ese fue el motivo mas directo de
+    que Pepe no pujara por nadie.
+
+    El error era la magnitud elegida. En Biwenger se puede operar
+    con deuda, y la capacidad de gasto no es el saldo sino
+    maximumBid, que el propio juego calcula como saldo mas el
+    limite de deuda. Un motor de recomendaciones que mide contra
+    la caja esta midiendo contra la magnitud equivocada.
+
+    Ahora el techo por defecto es maximumBid, y quien llame puede
+    pasar uno mas ajustado. Los controles de dinero de verdad
+    -presupuesto especulativo, contador de exposicion y valor
+    racional por jugador- viven aguas abajo y son los que deciden
+    si la puja se escribe.
+    """
+
     recommendations = generate_recommendations(snapshot)
 
-    balance = snapshot["market"]["status"]["balance"]
     maximum_bid = snapshot["market"]["status"]["maximumBid"]
+
+    if budget_limit is None:
+        budget_limit = maximum_bid
+
+    # Jugadores que ya son nuestros.
+    #
+    # El 16/08/2026 este motor evaluaba a 13 de los 15 de la
+    # plantilla como objetivos de compra, y Jutgla salia PUJAR a
+    # 5.170.000 EUR. Los otros doce se libraban solo porque su
+    # score no llegaba a 55: no habia nada que lo impidiese.
+    #
+    # Aguas abajo si hay guardias -SKIP_OWN_PLAYER-, pero para
+    # entonces el jugador ya ha ocupado un puesto en el ranking y
+    # puede haber desplazado a un objetivo de verdad.
+    own_player_ids = set()
+
+    for player in (snapshot.get("my_team") or []):
+        try:
+            own_player_ids.add(int(player["id"]))
+        except (KeyError, TypeError, ValueError):
+            continue
 
     results = []
 
@@ -69,10 +114,6 @@ def calculate_bid_recommendations(snapshot: dict) -> list[dict]:
         # PROTECCIÓN DE PRESUPUESTO
         # --------------------------------------------------
 
-        # En esta primera versión no queremos dedicar más
-        # del 45% de nuestro saldo a un único jugador.
-        budget_limit = int(balance * 0.45)
-
         affordable = (
             suggested_bid <= maximum_bid
             and suggested_bid <= budget_limit
@@ -82,7 +123,18 @@ def calculate_bid_recommendations(snapshot: dict) -> list[dict]:
         # DECISIÓN
         # --------------------------------------------------
 
-        if final_score < 55:
+        own_player = False
+
+        try:
+            own_player = int(player["id"]) in own_player_ids
+        except (KeyError, TypeError, ValueError):
+            own_player = False
+
+        if own_player:
+            action = "YA ES NUESTRO"
+            suggested_bid = 0
+
+        elif final_score < 55:
             action = "NO PUJAR"
             suggested_bid = 0
 
@@ -106,6 +158,8 @@ def calculate_bid_recommendations(snapshot: dict) -> list[dict]:
                 "budget_limit": budget_limit,
 
                 "affordable": affordable,
+
+                "own_player": own_player,
 
                 "action": action,
             }
