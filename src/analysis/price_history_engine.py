@@ -350,6 +350,44 @@ def build_price_history_index(
                 record
             )
 
+    # ------------------------------------------------------
+    # HISTORICO COMPACTO
+    # ------------------------------------------------------
+    #
+    # Los snapshots completos se podan a 24 -12 horas con el
+    # ciclo cada 30 minutos-, asi que por si solos no sirven de
+    # archivo. El fichero compacto de `data/autopilot` guarda 45
+    # dias de precios y sobrevive al pruning.
+    #
+    # Se mezclan los dos: el snapshot manda cuando coinciden,
+    # porque trae el registro completo (estado, puntos, nombre) y
+    # el compacto solo el precio.
+    try:
+        from src.analysis.price_history_store import (
+            build_index_from_store,
+        )
+
+        compacto = build_index_from_store()
+
+    except Exception:
+        compacto = {}
+
+    for player_id, registros in (compacto or {}).items():
+
+        existentes = index.setdefault(
+            int(player_id),
+            [],
+        )
+
+        vistos = {
+            item["timestamp"]
+            for item in existentes
+        }
+
+        for registro in registros:
+            if registro["timestamp"] not in vistos:
+                existentes.append(registro)
+
     # Garantizamos orden cronológico.
     for records in index.values():
 

@@ -13,6 +13,13 @@ from src.analysis.decision_orchestrator import (
     build_global_decision,
 )
 
+from src.analysis.price_history_store import (
+    describe_store,
+    load_price_history_store,
+    record_snapshot_prices,
+    save_price_history_store,
+)
+
 from src.analysis.action_failure_backoff import (
     candidate_target_id,
     load_backoff_state,
@@ -1964,10 +1971,86 @@ def refresh_snapshot() -> tuple[
         )
     )
 
+    archive_prices(
+        snapshot
+    )
+
     return (
         snapshot_file,
         snapshot,
     )
+
+
+def archive_prices(
+    snapshot: dict,
+) -> dict:
+    """
+    Guarda los precios de hoy en el historico compacto.
+
+    Los snapshots completos se podan a 24 y con el ciclo cada 30
+    minutos eso son 12 horas de memoria. Todo lo que Bordalas
+    sabe del mercado -velocidad de cada jugador, curva de primas
+    de los rivales, desgaste de la tendencia- se calcula
+    comparando dias distintos, asi que sin archivo esos motores
+    se degradan solos.
+
+    Un fallo aqui no puede tumbar el ciclo: es archivo, no
+    operativa.
+    """
+
+    try:
+        store = load_price_history_store()
+
+        resultado = record_snapshot_prices(
+            snapshot,
+            store=store,
+        )
+
+        save_price_history_store(
+            resultado["store"]
+        )
+
+        estado = describe_store(
+            resultado["store"]
+        )
+
+        print()
+        print("-" * 70)
+        print("HISTORICO DE PRECIOS")
+        print("-" * 70)
+        print(
+            f"  Anotados hoy:            "
+            f"{resultado['recorded']}"
+        )
+        print(
+            f"  Sin cambio:              "
+            f"{resultado['unchanged']}"
+        )
+        print(
+            f"  Registros archivados:    "
+            f"{estado.get('records', 0)}"
+        )
+        print(
+            f"  Jugadores:               "
+            f"{estado.get('players', 0)}"
+        )
+        print(
+            f"  Historia acumulada:      "
+            f"{estado.get('days', 0)} dias"
+        )
+
+        return estado
+
+    except Exception as error:
+        print(
+            f"  Historico de precios no guardado: "
+            f"{type(error).__name__}: {error}"
+        )
+
+        return {
+            "available": False,
+            "reason": f"{type(error).__name__}: {error}",
+        }
 
 
 # ============================================================
