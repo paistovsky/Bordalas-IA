@@ -239,12 +239,47 @@ check(
 
 
 # ================================================================
-# 5. EL CABLEADO EXISTE DE VERDAD
+# 5. EL RESPALDO DEL CATALOGO TRAE LO QUE LA PUERTA MIRA
 # ================================================================
 
 
 print()
-print("5. Los cuatro puntos están conectados")
+print("5. El objetivo del tablero pasa la puerta de mercado")
+print("-" * 60)
+
+# 16/08/2026 20:03. El filtro de pujas vivas hizo su trabajo,
+# aparto a Yusi y eligio a Castrin. El executor respondio
+# "ya no esta disponible en el mercado"... con Castrin publicado.
+#
+# La ficha del catalogo no trae `ownership_state` -ese campo lo
+# pone el tablero antiguo-, asi que la comprobacion comparaba
+# None contra "EN_MERCADO" y bloqueaba siempre.
+
+import inspect as _inspect  # noqa: E402
+
+from src.actions import autopilot_executor as _ex  # noqa: E402
+
+_fuente = _inspect.getsource(_ex)
+
+check(
+    "el respaldo del catalogo rellena ownership_state",
+    'ficha_catalogo' in _fuente
+    and '"ownership_state": (' in _fuente,
+)
+
+check(
+    "y lo deduce de las ventas frescas, no lo supone",
+    "en_venta" in _fuente,
+)
+
+
+# ================================================================
+# 6. EL CABLEADO EXISTE DE VERDAD
+# ================================================================
+
+
+print()
+print("6. Los cuatro puntos están conectados")
 print("-" * 60)
 
 import inspect  # noqa: E402

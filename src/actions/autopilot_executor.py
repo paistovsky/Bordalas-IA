@@ -1733,7 +1733,7 @@ def execute_autopilot_decision(
             if isinstance(catalogo, dict):
                 catalogo = list(catalogo.values())
 
-            fresh_player = next(
+            ficha_catalogo = next(
                 (
                     ficha
                     for ficha in catalogo
@@ -1743,6 +1743,42 @@ def execute_autopilot_decision(
                 ),
                 None,
             )
+
+            if ficha_catalogo is not None:
+
+                # La ficha del catalogo no trae `ownership_state`:
+                # ese campo lo pone el tablero antiguo. Sin
+                # ponerlo aqui, la comprobacion de mas abajo
+                # comparaba None contra "EN_MERCADO" y bloqueaba
+                # SIEMPRE al objetivo del tablero de adquisicion.
+                #
+                # Paso el 16/08/2026 a las 20:03: el filtro de
+                # pujas vivas hizo bien su trabajo, aparto a Yusi
+                # y eligio a Castrin, y el executor respondio
+                # "ya no esta disponible en el mercado" con
+                # Castrin publicado en el mercado.
+                en_venta = {
+                    int(
+                        (venta.get("player") or {}).get("id")
+                        or 0
+                    )
+                    for venta in (
+                        (
+                            fresh_snapshot.get("market")
+                            or {}
+                        ).get("sales")
+                        or []
+                    )
+                }
+
+                fresh_player = {
+                    **ficha_catalogo,
+                    "ownership_state": (
+                        "EN_MERCADO"
+                        if int(requested_player_id) in en_venta
+                        else "NO_DISPONIBLE"
+                    ),
+                }
 
         if fresh_player is None:
 

@@ -11,6 +11,11 @@ from src.actions.autopilot_executor import (
 
 from src.analysis.decision_orchestrator import (
     build_global_decision,
+    players_with_live_bid,
+)
+
+from src.analysis.bid_exposure_engine import (
+    build_bid_exposure,
 )
 
 from src.analysis.price_history_store import (
@@ -2219,6 +2224,7 @@ def archive_prices(
 
 def print_acquisition_board(
     board: dict,
+    already_bid: set | None = None,
 ) -> None:
     """
     Lo mismo que enseña el dashboard, en la consola del ciclo.
@@ -2254,8 +2260,28 @@ def print_acquisition_board(
         print("  Ninguno supera el filtro en este ciclo.")
         return
 
+    # El marcador tiene que senalar al que se va a ejecutar de
+    # verdad, no al primero de la lista. Los que ya tienen puja
+    # nuestra viva se saltan.
+    already_bid = already_bid or set()
+    ejecutable_marcado = False
+
     for indice, objetivo in enumerate(objetivos, start=1):
-        marca = "-> EJECUTA" if indice == 1 else ""
+
+        ya_pujado = (
+            int(objetivo.get("id") or 0) in already_bid
+        )
+
+        if ya_pujado:
+            marca = "(puja viva)"
+
+        elif not ejecutable_marcado:
+            marca = "-> EJECUTA"
+            ejecutable_marcado = True
+
+        else:
+            marca = ""
+
         print(
             f"  {indice}. {str(objetivo.get('name'))[:22]:<24}"
             f"puja {int(objetivo.get('bid') or 0):>10,}   "
@@ -3350,7 +3376,14 @@ def run_cycle(
     )
 
     print_acquisition_board(
-        acquisition_board
+        acquisition_board,
+        already_bid=players_with_live_bid(
+            {
+                "bid_exposure": build_bid_exposure(
+                    snapshot
+                )
+            }
+        ),
     )
 
     result = (
