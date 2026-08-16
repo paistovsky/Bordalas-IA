@@ -272,6 +272,17 @@ check(
     "en_venta" in _fuente,
 )
 
+# Una sustitucion que no encuentra su patron se queda en nada y
+# no avisa. Paso con esta misma clave: el executor la calculaba
+# y no la devolvia, asi que la consola nunca la imprimia.
+_i = _fuente.index("SPECULATION_BID_PLACED")
+_retorno = _fuente[_i:_i + 2500]
+
+check(
+    "el resultado de una puja colocada devuelve target_source",
+    '"target_source":' in _retorno,
+)
+
 
 # ================================================================
 # 6. EL CABLEADO EXISTE DE VERDAD

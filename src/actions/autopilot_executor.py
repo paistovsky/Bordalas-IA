@@ -2185,6 +2185,12 @@ def execute_autopilot_decision(
                     bid_amount
                 ),
 
+            # De que motor salio el objetivo. Si algun dia
+            # aparece SPECULATION_SCORING es que el tablero de
+            # adquisicion fallo y volvimos a la lista antigua.
+            "target_source":
+                target_source,
+
             "seller_user_id":
                 seller_user_id,
 
