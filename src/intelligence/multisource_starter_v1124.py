@@ -83,8 +83,10 @@ TIMEOUT = 25
 
 
 def load_cached_board(
-    path: Path = OUTPUT_FILE,
+    path: Path | None = None,
 ) -> dict | None:
+    path = path or OUTPUT_FILE
+
     if not path.exists():
         return None
 
@@ -106,7 +108,7 @@ def load_cached_board(
 def cached_board_age_seconds(
     board: dict,
     *,
-    path: Path = OUTPUT_FILE,
+    path: Path | None = None,
     now: datetime | None = None,
 ) -> float | None:
     del path
@@ -152,10 +154,29 @@ def cached_board_is_fresh(
     *,
     matchday: int,
     seconds_to_deadline=None,
-    path: Path = OUTPUT_FILE,
+    path: Path | None = None,
     now: datetime | None = None,
 ) -> bool:
     if not board:
+        return False
+
+    # UN TABLERO VACIO NO ES UN TABLERO FRESCO.
+    #
+    # 16/08/2026. El dashboard publicado pinto "sin dato" en los
+    # once mientras en el PC de casa el mismo codigo sacaba 96 %.
+    # No fallo nada: `cache_status` decia HIT, `error` decia null,
+    # y el tablero traia CERO jugadores.
+    #
+    # Un tablero sin jugadores solo se genera cuando el snapshot
+    # llego sin plantilla. Ese fichero se escribia igual, y a
+    # partir de ahi esta funcion lo daba por bueno durante dos
+    # horas -solo miraba jornada y antiguedad-, envenenando cada
+    # generacion posterior aunque el snapshot siguiente fuese
+    # perfecto.
+    #
+    # Servir la nada como si fuese un dato es el fallo mas caro
+    # de todos, porque no se parece a un fallo.
+    if not (board.get("players") or []):
         return False
 
     if int(board.get("matchday") or -1) != int(matchday):
@@ -2409,6 +2430,56 @@ def build_multisource_board(
     roster = build_roster_records(
         snapshot
     )
+
+    # SIN PLANTILLA NO SE ESCRIBE NADA.
+    #
+    # La otra mitad del mismo fallo. Con un snapshot sin
+    # `my_team` este bucle no produce ninguna fila, y aun asi el
+    # fichero se guardaba: un tablero de cero jugadores, con
+    # `error: null` y jornada correcta, que despues se servia
+    # como cache valida.
+    #
+    # Un snapshot sin plantilla es un snapshot roto, no una
+    # plantilla vacia. Se dice, se conserva el tablero anterior
+    # si lo hay, y no se pisa el disco.
+    if not roster:
+
+        cached_vacio = load_cached_board()
+
+        motivo = (
+            "El snapshot llego sin plantilla ('my_team' vacio): "
+            "no se puede construir el tablero de titularidad y "
+            "no se sobrescribe el anterior."
+        )
+
+        if cached_vacio and (cached_vacio.get("players") or []):
+            return board_with_cache_status(
+                cached_vacio,
+                status="STALE_FALLBACK",
+                seconds_to_deadline=seconds_to_deadline,
+                age_seconds=cached_board_age_seconds(
+                    cached_vacio
+                ),
+                error=motivo,
+            )
+
+        return {
+            "version": "V11.2.4",
+            "updated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+            "matchday": matchday,
+            "metadata": {},
+            "players": [],
+            "cache": {
+                "status": "NO_ROSTER",
+                "age_seconds": None,
+                "ttl_seconds": calculate_refresh_seconds(
+                    seconds_to_deadline
+                ),
+                "error": motivo,
+            },
+        }
 
     session = requests.Session()
 

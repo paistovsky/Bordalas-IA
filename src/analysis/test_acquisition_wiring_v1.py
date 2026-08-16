@@ -48,6 +48,12 @@ PRECIO_TENAGLIA = 3_270_000
 ESCALERA_TENAGLIA = 3_340_000
 
 
+from src.analysis import (  # noqa: E402
+    acquisition_valuation as valuation_mod,
+    candidate_starter_lookup as starter_mod,
+)
+
+
 class SinRed:
     def __init__(self, candidatos):
         self.candidatos = candidatos
@@ -62,11 +68,34 @@ class SinRed:
         motor.get_external_player_status = (
             lambda snapshot, player: {"external_available": False}
         )
+
+        # Y TAMPOCO EL PRONOSTICO DE TITULARIDAD.
+        #
+        # `build_valuation_context` lee `data/intelligence` del
+        # disco. Estos tests no lo mencionan en ninguna parte y
+        # aun asi dependian de el: el 16/08/2026 dos de ellos
+        # empezaron a fallar sin tocar una linea, porque el
+        # fichero de Jornada Perfecta paso a cubrir tambien el
+        # mercado y el "Tenaglia" inventado del fixture -id
+        # 41100- coincidio con un Tenaglia real pronosticado
+        # SUPLENTE. Sus 160 puntos se quedaron en 67 y la puja
+        # se cayo.
+        #
+        # Un test que cambia de resultado porque alguien scrapeo
+        # una pagina no esta probando nada. La regla del once
+        # tiene su propio fichero -`test_starter_aware_xi_v1`- y
+        # ahi el dato se inyecta a mano.
+        self.previos["starter"] = starter_mod.get_starter_lookup
+        starter_mod.get_starter_lookup = lambda: {}
+        valuation_mod.get_starter_lookup = lambda: {}
+
         return self
 
     def __exit__(self, *args):
         motor.calculate_bid_recommendations = self.previos["bids"]
         motor.get_external_player_status = self.previos["ext"]
+        starter_mod.get_starter_lookup = self.previos["starter"]
+        valuation_mod.get_starter_lookup = self.previos["starter"]
         return False
 
 

@@ -111,9 +111,12 @@ export default function App() {
                 .filter((check) => !check.ok)
                 .map((check) => (
                   <li key={check.key}>
-                    {check.label}: Biwenger dice{" "}
-                    <b>{String(check.expected)}</b>, aquí sale{" "}
-                    <b>{String(check.found)}</b>. {check.detail}
+                    {check.label}:{" "}
+                    {check.source === "BIWENGER" ? "Biwenger dice " : ""}
+                    <b>{check.expected_label ?? String(check.expected)}</b>
+                    {check.source === "BIWENGER" ? ", aquí sale " : " · "}
+                    <b>{check.found_label ?? String(check.found)}</b>.{" "}
+                    {check.detail}
                   </li>
                 ))}
             </ul>
@@ -125,9 +128,38 @@ export default function App() {
           <div className="alert warn">
             Probabilidad de ser titular disponible solo para{" "}
             {data.lineup.starter_data_players} de{" "}
-            {data.lineup.starter_data_total} jugadores del XI: la fuente
-            externa no ha respondido en esta generación. Los huecos dicen «sin
-            dato» en vez de un 0 % que no significaría nada.
+            {data.lineup.starter_data_total} jugadores del XI. Los huecos dicen
+            «sin dato» en vez de un 0 % que no significaría nada.
+
+            {/* El POR QUE, no solo el cuantos. "La fuente externa
+                no ha respondido" no dice si es que la pagina dio
+                un 403, si la cache estaba vacia o si el tablero
+                se cayo. Sin eso no se puede arreglar. */}
+            <div style={{ marginTop: 6 }}>
+              <b>Motivo:</b>{" "}
+              {data.lineup.starter_source_error ? (
+                <code>{data.lineup.starter_source_error}</code>
+              ) : data.lineup.starter_board_players === 0 ? (
+                "el tablero multifuente ha salido vacío (0 jugadores). " +
+                "Suele significar que no se ha podido leer Jornada Perfecta " +
+                "desde donde se generó este dashboard."
+              ) : (
+                "sin error registrado; el tablero tiene " +
+                `${data.lineup.starter_board_players ?? "?"} jugadores.`
+              )}
+            </div>
+
+            <div className="dim" style={{ marginTop: 4 }}>
+              tablero {data.lineup.starter_board_version || "?"} ·{" "}
+              caché {data.lineup.starter_cache_status || "?"} ·{" "}
+              jornada {data.lineup.starter_board_matchday ?? "?"} ·{" "}
+              generado {data.lineup.starter_board_updated_at || "?"}
+            </div>
+
+            <div style={{ marginTop: 6 }}>
+              El XI que ves arriba está elegido <b>sin</b> ese dato: es el
+              mejor por valor y puntos, no por quién va a jugar.
+            </div>
           </div>
         )}
 

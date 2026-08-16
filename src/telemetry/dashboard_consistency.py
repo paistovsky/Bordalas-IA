@@ -60,6 +60,13 @@ def _check(
         "found": found,
         "ok": expected == found,
         "detail": detail,
+
+        # De donde sale cada lado de la comparacion. Sin esto la
+        # pantalla escribe "Biwenger dice X" incluso cuando el
+        # numero no viene de Biwenger.
+        "source": "BIWENGER",
+        "expected_label": None,
+        "found_label": None,
     }
 
 
@@ -263,17 +270,40 @@ def build_consistency_report(
             alineacion.get("starter_data_players")
         )
 
+        # OJO CON EL TEXTO DE ESTA FILA.
+        #
+        # Las cuatro de arriba comparan contra Biwenger. Esta no:
+        # compara el tamano del XI contra cuantos de esos once
+        # tienen pronostico. Decir "Biwenger dice 11" aqui seria
+        # mentir sobre el origen del numero, en un panel cuyo
+        # unico trabajo es no mentir.
         comprobaciones.append(
-            _check(
-                "starter_data",
-                "Pronostico de titular en el XI",
-                total_xi,
-                con_dato,
-                (
-                    alineacion.get("starter_source_error")
-                    or "Sin pronostico no se puede juzgar el once."
+            {
+                **_check(
+                    "starter_data",
+                    "Pronostico de titular en el XI",
+                    total_xi,
+                    con_dato,
+                    (
+                        alineacion.get("starter_source_error")
+                        or (
+                            "El tablero de titularidad trae "
+                            f"{alineacion.get('starter_board_players')} "
+                            f"jugadores (cache "
+                            f"{alineacion.get('starter_cache_status')}, "
+                            f"jornada "
+                            f"{alineacion.get('starter_board_matchday')}, "
+                            f"generado "
+                            f"{alineacion.get('starter_board_updated_at')}). "
+                            "Sin pronostico, el XI se elige por valor y "
+                            "puntos, no por quien va a jugar."
+                        )
+                    ),
                 ),
-            )
+                "source": "XI",
+                "expected_label": f"{total_xi} jugadores en el XI",
+                "found_label": f"{con_dato} con pronostico",
+            }
         )
 
         fallos = [c for c in comprobaciones if not c["ok"]]
