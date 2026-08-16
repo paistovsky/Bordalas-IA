@@ -48,12 +48,37 @@ function initials(name) {
     .toUpperCase();
 }
 
-function confidenceClass(value) {
+/**
+ * Verde, ambar, rojo.
+ *
+ * Los cortes NO son inventados aqui: son los mismos que usa el
+ * consenso multifuente para votar (>=67 titular, <=40 suplente).
+ * Si la pantalla pintase con otros umbrales, un jugador podria
+ * salir verde y estar contado como suplente en la decision.
+ *
+ * Cuando el consenso viene dado, manda el consenso: ha mirado
+ * tres fuentes y esto solo mira un numero.
+ */
+function confidenceClass(value, consensus) {
+  const veredicto = String(consensus || "").toUpperCase();
+
+  if (veredicto === "STARTER" || veredicto === "STARTER_LEAN") return "ok";
+  if (veredicto === "BENCH" || veredicto === "BENCH_LEAN") return "crit";
+  if (veredicto === "UNCERTAIN") return "warn";
+
   const n = Number(value || 0);
-  if (n >= 70) return "";
-  if (n >= 40) return "warn";
+  if (n >= 67) return "ok";
+  if (n > 40) return "warn";
   return "crit";
 }
+
+const CONSENSUS_LABEL = {
+  STARTER: "titular",
+  STARTER_LEAN: "titular?",
+  UNCERTAIN: "duda",
+  BENCH_LEAN: "suplente?",
+  BENCH: "suplente"
+};
 
 /**
  * Sin dato no es cero.
@@ -76,8 +101,20 @@ function PlayerCard({ player, watched }) {
     ? `https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/${player.team_id}.png`
     : null;
 
-  const raw = player.jp_confidence ?? player.start_probability ?? null;
+  const raw =
+    player.starter_probability ??
+    player.jp_confidence ??
+    player.start_probability ??
+    null;
+
   const confidence = hasConfidence(raw) ? Number(raw) : null;
+  const consensus = player.starter_consensus || null;
+  const tone = confidenceClass(confidence, consensus);
+
+  // De cuantas fuentes sale. Un 92 % de una sola fuente y un
+  // 92 % de tres no valen lo mismo, y el campo lo dice.
+  const coverage = Number(player.starter_source_coverage || 0);
+
   const increment = Number(player.price_increment || 0);
 
   return (
@@ -111,15 +148,26 @@ function PlayerCard({ player, watched }) {
       <div className={confidence == null ? "pbar unknown" : "pbar"}>
         {confidence != null && (
           <i
-            className={confidenceClass(confidence)}
+            className={tone}
             style={{ width: `${Math.max(Math.min(confidence, 100), 0)}%` }}
           />
         )}
       </div>
 
       <div className="pfoot">
-        <span className={confidence == null ? "dim" : ""}>
+        <span
+          className={confidence == null ? "dim" : `tit ${tone}`}
+          title={
+            confidence == null
+              ? "La fuente externa no ha respondido en esta generación."
+              : `${CONSENSUS_LABEL[consensus] || "sin consenso"} · ` +
+                (coverage
+                  ? `${coverage} fuente${coverage === 1 ? "" : "s"}`
+                  : "cobertura desconocida")
+          }
+        >
           {confidence != null ? `tit. ${confidence}%` : "sin dato"}
+          {confidence != null && coverage === 1 ? "*" : ""}
         </span>
         <span className="pts">
           {player.points != null ? `${player.points} pt` : "—"}

@@ -217,6 +217,13 @@ tr.live td{opacity:1}
 .pbar i{display:block;height:100%;background:var(--ok)}
 .pbar i.warn{background:var(--warn)}
 .pbar i.crit{background:var(--crit)}
+.pbar i.ok{background:var(--ok)}
+/* Rojo / ambar / verde tambien en el texto, no solo en la
+   barra: de un vistazo y sin tener que medir anchuras. */
+.pfoot .tit{font-weight:700}
+.pfoot .tit.ok{color:var(--ok)}
+.pfoot .tit.warn{color:var(--warn)}
+.pfoot .tit.crit{color:var(--crit)}
 /* Sin medicion: barra rayada, no barra vacia. Una barra a
    cero se lee como 'no juega'; esto se lee como 'no se'. */
 .pbar.unknown{background:repeating-linear-gradient(45deg,#1b3326 0,#1b3326 3px,#12291b 3px,#12291b 6px)}
@@ -351,3 +358,6 @@ tr.live td{opacity:1}
 .alert.crit{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.45);color:#fca5a5;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px}
 .consistency-list{margin:6px 0 0 16px;padding:0;line-height:1.55}
 .consistency-list li{margin:2px 0}
+
+/* Ambar en texto de tabla: la titularidad intermedia. */
+.warn-text{color:var(--warn)}

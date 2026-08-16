@@ -56,8 +56,37 @@ function Money({ exposure, solvency }) {
               ? `déficit ${formatMoney(solvency.deficit)}`
               : "no hace falta vender para llegar al cierre"}
           </div>
+
+          {/* `possible` era el dato que faltaba: hay deficits que
+              no se pueden cubrir vendiendo sin romper el XI, y
+              eso no es lo mismo que "hay que sanear". */}
+          {solvency.needed && (
+            <div className="m">
+              {solvency.possible
+                ? "Se puede cubrir vendiendo sin romper el once."
+                : "NO se puede cubrir sin romper el once."}
+            </div>
+          )}
         </div>
       )}
+
+      {/* De dónde saldría el dinero si hiciera falta. Estaba en
+          los datos y no se pintaba en ningún sitio. */}
+      <div className="node">
+        <div className="t">
+          {solvency?.listed ?? 0} publicados
+          {Number(solvency?.to_list || 0) > 0
+            ? ` · ${solvency.to_list} por publicar`
+            : ""}
+        </div>
+        <div className="d">
+          {solvency?.incoming_offers ?? 0} oferta(s) del Computer sobre la mesa
+        </div>
+        <div className="m">
+          Publicar es gratis y reversible: es la vía de liquidez que no
+          compromete nada hasta que se acepta.
+        </div>
+      </div>
     </div>
   );
 }

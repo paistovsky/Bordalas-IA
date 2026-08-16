@@ -17,6 +17,99 @@ function category(item) {
   return "other";
 }
 
+/**
+ * Este ciclo, en una línea.
+ *
+ * `cycle.write_used` y los contadores del motor competitivo
+ * estaban en los datos y no los leía nadie. "¿Ha escrito Pepe en
+ * esta vuelta y qué?" no debería exigir bajar a la lista de
+ * registros y buscarlo.
+ */
+function CyclePanel({ cycle = {}, last = {}, competitive = {}, consistency = {} }) {
+  const escribio = Boolean(cycle.write_used);
+
+  return (
+    <section className="pan">
+      <div className="pan-head">
+        <div>
+          <h2>ESTE CICLO</h2>
+          <div className="sub">
+            {cycle.version || "—"} ·{" "}
+            {cycle.timestamp
+              ? new Date(cycle.timestamp).toLocaleString("es-ES")
+              : "sin marca de tiempo"}
+          </div>
+        </div>
+        <span className={escribio ? "pill ok" : "pill idle"}>
+          {escribio ? "HA ESCRITO" : "SOLO HA MIRADO"}
+        </span>
+      </div>
+
+      {escribio ? (
+        <>
+          <div className="kv">
+            <span>Qué hizo</span>
+            <b>{cycle.label || cycle.action || "—"}</b>
+          </div>
+          <div className="kv">
+            <span>Cómo acabó</span>
+            <b className={cycle.success ? "up" : "down"}>
+              {String(cycle.status || "—").replaceAll("_", " ")}
+              {cycle.http_status ? ` · HTTP ${cycle.http_status}` : ""}
+            </b>
+          </div>
+          <div className="kv">
+            <span>Comprobado después de escribir</span>
+            <b className={cycle.post_write_verified ? "up" : "down"}>
+              {cycle.post_write_verified ? "SÍ" : "NO"}
+            </b>
+          </div>
+          {(cycle.reason || last.reason) && (
+            <p className="note" style={{ textAlign: "left" }}>
+              {cycle.reason || last.reason}
+            </p>
+          )}
+        </>
+      ) : (
+        <div className="empty">
+          Ninguna escritura en esta vuelta. El ciclo permite una como máximo.
+        </div>
+      )}
+
+      <div className="kv" style={{ marginTop: 8 }}>
+        <span>Motor competitivo</span>
+        <b className={competitive.live_enabled ? "up" : "dim"}>
+          {competitive.status_label ||
+            (competitive.live_enabled ? "en vivo" : "solo observa")}
+        </b>
+      </div>
+      <div className="kv">
+        <span>Ofertas de mánagers</span>
+        <b className="mono">
+          {competitive.offer_count ?? 0}
+          {competitive.responding_count
+            ? ` · ${competitive.responding_count} respondiendo`
+            : ""}
+          {competitive.waiting_count
+            ? ` · ${competitive.waiting_count} en espera`
+            : ""}
+        </b>
+      </div>
+
+      {consistency.available && (
+        <div className="kv">
+          <span>La pantalla cuadra con Biwenger</span>
+          <b className={consistency.ok ? "up" : "down"}>
+            {consistency.ok
+              ? `SÍ · ${(consistency.checks || []).length} comprobaciones`
+              : `NO · ${consistency.failed_count} fallo(s)`}
+          </b>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function AuditPage({ data }) {
   const [filter, setFilter] = useState("all");
   const backoff = data.backoff || {};
@@ -28,6 +121,13 @@ export default function AuditPage({ data }) {
 
   return (
     <>
+      <CyclePanel
+        cycle={data.cycle || {}}
+        last={data.lastExecution || {}}
+        competitive={data.competitive || {}}
+        consistency={data.consistency || {}}
+      />
+
       {Boolean((backoff.blocked || []).length) && (
         <section className="pan">
           <div className="pan-head">

@@ -20,6 +20,13 @@ import { formatMoney } from "../lib/utils";
  * competidores y la ruta de puja ajustada no se activaba nunca.
  */
 
+const THREAT = {
+  HIGH: "pill crit",
+  MEDIUM: "pill warn",
+  LOW: "pill idle",
+  NONE: "pill idle"
+};
+
 export default function StandingsIntelPanel({ data }) {
   const standings = data.competition?.standings || [];
   const rivals = data.acquisition?.rivals || [];
@@ -52,6 +59,8 @@ export default function StandingsIntelPanel({ data }) {
             <th className="n">CAJA</th>
             <th className="n">TOPE</th>
             <th className="n">PUJA</th>
+            <th className="n">MÁX. VISTO</th>
+            <th className="n">AMENAZA</th>
           </tr>
         </thead>
         <tbody>
@@ -94,6 +103,32 @@ export default function StandingsIntelPanel({ data }) {
                     <span className="dim">—</span>
                   )}
                 </td>
+
+                {/* Lo mas alto que se le ha visto pagar de
+                    verdad. El tope dice lo que PODRIA; esto dice
+                    hasta donde ha llegado. */}
+                <td className="n dim" title={
+                  intel?.lost_bids != null
+                    ? `${intel.lost_bids} puja(s) perdida(s) registradas`
+                    : undefined
+                }>
+                  {intel?.max_observed_bid
+                    ? formatMoney(intel.max_observed_bid)
+                    : "—"}
+                </td>
+
+                <td className="n">
+                  {intel?.threat_level ? (
+                    <span className={THREAT[intel.threat_level] || "pill idle"}>
+                      {intel.threat_level}
+                      {intel.threat_score != null
+                        ? ` ${Math.round(Number(intel.threat_score))}`
+                        : ""}
+                    </span>
+                  ) : (
+                    <span className="dim">—</span>
+                  )}
+                </td>
               </tr>
             );
           })}
@@ -103,9 +138,11 @@ export default function StandingsIntelPanel({ data }) {
       <p className="note" style={{ textAlign: "left", marginTop: 9 }}>
         CAJA = dinero ahora (puede ir en rojo). TOPE = caja + margen de deuda,
         con el ratio calibrado contra el maximumBid oficial de Pepe. PUJA =
-        veces que ese mánager puja de verdad, medida sobre el tablón. Lo que
-        tienen publicado en venta <b>no</b> suma al tope: en el reset las pujas
-        se resuelven antes de que el Computer haga ofertas.
+        veces que ese mánager puja de verdad, medida sobre el tablón. MÁX.
+        VISTO = lo más alto que se le ha visto pagar (pasa el ratón para ver
+        sus pujas perdidas). AMENAZA combina las cuatro. Lo que tienen
+        publicado en venta <b>no</b> suma al tope: en el reset las pujas se
+        resuelven antes de que el Computer haga ofertas.
       </p>
     </section>
   );

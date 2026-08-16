@@ -20,6 +20,17 @@ const DECISION = {
  * y PUJARIAMOS es la recomendacion.
  */
 
+// Mismos cortes que el consenso multifuente (>=67 titular,
+// <=40 suplente). Si la pantalla usara otros, un candidato
+// podria salir verde y estar contado como suplente al decidir.
+function STARTER_TONE(probability) {
+  if (probability == null) return "dim";
+  const n = Number(probability);
+  if (n >= 67) return "up";
+  if (n > 40) return "warn-text";
+  return "down";
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -45,6 +56,17 @@ function ClockPanel({ clock }) {
       <div className="kv"><span>Quedan</span><b className="mono">{Number(clock.hours_to_reset).toFixed(2)} h</b></div>
       <div className="kv"><span>Jugadores del Computer</span><b className="mono">{clock.computer_listings}</b></div>
       <div className="kv"><span>Se puede pujar</span><b className={clock.bidding_window_open ? "up" : "down"}>{clock.bidding_window_open ? "SÍ" : "NO"}</b></div>
+
+      {/* Un plazo para actuar que estaba en los datos y no se
+          pintaba en ninguna parte. Publicar despues del reset
+          es publicar un dia tarde. */}
+      <div className="kv">
+        <span>Hay que publicar antes del reset</span>
+        <b className={clock.must_publish_before_reset ? "down" : "dim"}>
+          {clock.must_publish_before_reset ? "SÍ" : "no hace falta"}
+        </b>
+      </div>
+
       <div className="kv"><span>Origen del dato</span><span className="tag">{clock.source}</span></div>
 
       {clock.listings_stale && (
@@ -136,6 +158,15 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
     exposure?.operation_count != null &&
     Number(exposure.operation_count) !== vivas;
 
+  const cobertura = acquisition.starter_coverage || {};
+
+  // Con cero pronósticos, la regla del once bloquea todas las
+  // mejoras y "0 POR PUJAR" parecería que no hay chollos. No es
+  // eso: es que falta el dato para poder juzgarlos.
+  const sinPronostico =
+    Number(cobertura.total || 0) > 0 &&
+    Number(cobertura.with_forecast || 0) === 0;
+
   return (
     <section className="pan">
       <div className="pan-head">
@@ -146,6 +177,9 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             {pointsMarket?.calibrated
               ? `un punto cuesta ${formatEuros(pointsMarket.rate_median)}`
               : "precio del punto sin calibrar"}
+            {cobertura.total
+              ? ` · ${cobertura.with_forecast}/${cobertura.total} con pronóstico de titular`
+              : ""}
           </div>
         </div>
         <div className="pill-row">
@@ -167,6 +201,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th>JUGADOR</th>
             <th></th>
             <th className="n">MERCADO</th>
+            <th className="n">TIT.</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th className="n">PUESTO</th>
             <th className="n">PUJARÍAMOS</th>
@@ -186,11 +221,26 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
               <tr
                 key={target.id}
                 className={viva ? "live" : bids ? "" : "off"}
-                title={target.reason}
+                title={
+                  [target.xi_reason, target.reason]
+                    .filter(Boolean)
+                    .join("  —  ") || undefined
+                }
               >
                 <td>{target.name}</td>
                 <td className="dim">{positionLabel(target.position)}</td>
                 <td className="n">{formatEuros(target.market_price)}</td>
+
+                {/* La respuesta a "¿cómo es eso mejorar el XI?".
+                    Un candidato con más puntos que el nuestro
+                    puede ser suplente, y hasta ahora eso no se
+                    veía en ninguna columna. */}
+                <td className={`n ${STARTER_TONE(target.starter_probability)}`}>
+                  {target.starter_probability != null
+                    ? `${Math.round(Number(target.starter_probability))}%`
+                    : <span className="dim">sin dato</span>}
+                </td>
+
                 <td className="n">{formatEuros(target.our_value)}</td>
                 <td className="n strong">
                   {viva ? formatEuros(target.live_bid) : "—"}
@@ -215,6 +265,15 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
           })}
         </tbody>
       </table>
+
+      {sinPronostico && (
+        <div className="alert warn" style={{ marginTop: 10 }}>
+          Ningún candidato del mercado tiene pronóstico de titularidad, así que
+          la regla del once bloquea las {cobertura.blocked_by_starter_rule ?? 0}{" "}
+          mejoras que había. No es que no haya chollos: es que falta el dato
+          para juzgarlos. Revisa el refresco de Jornada Perfecta.
+        </div>
+      )}
 
       {descuadre && (
         <div className="alert warn" style={{ marginTop: 10 }}>

@@ -1,6 +1,7 @@
 import PitchXI from "../components/PitchXI";
 import TimelinePanel from "../components/TimelinePanel";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
+import FranchisePanel from "../components/FranchisePanel";
 import { formatMoney } from "../lib/utils";
 
 function squadValue(players = []) {
@@ -33,6 +34,10 @@ export default function HomePage({ data }) {
 
         <div className="stack">
           <TimelinePanel data={data} />
+          <FranchisePanel
+            franchise={data.raw?.franchise || {}}
+            exposure={data.exposure || {}}
+          />
           <StandingsIntelPanel data={data} />
         </div>
       </div>
