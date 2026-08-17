@@ -983,6 +983,124 @@ def test_la_cache_comprueba_a_quien_cubre():
             ff.BOARD_FILE = original
 
 
+def test_a_quien_se_vende():
+    """
+    La venta mira lo que un jugador ES, no lo que fue.
+
+    LOS DOS ERRORES OPUESTOS QUE ARREGLA
+
+        `analyze_sales` puntuaba con puntos de la temporada
+        pasada, precio y si entra en el once. Con la plantilla
+        real del 17/08/2026 eso daba:
+
+            Gustavo Puerta  CLAVE en el Racing, sin LaLiga el ano
+                            pasado -> marcado para vender por
+                            "bajo rendimiento historico".
+
+            Hugo Rincon     RESERVA, titular hoy por falta de
+                            alternativa -> protegido por estar en
+                            el once.
+
+        Fallaba en las dos direcciones a la vez.
+    """
+
+    import glob
+    import json
+
+    from src.analysis import sales_analyzer as ventas
+
+    snapshots = sorted(glob.glob("data/snapshot_*.json"))
+
+    if not snapshots:
+        print("    (sin snapshots: me lo salto)")
+        return
+
+    snapshot = json.loads(
+        open(snapshots[-1], encoding="utf-8").read()
+    )
+
+    original = ventas._ff_signal
+
+    def con_senal(senal):
+        ventas._ff_signal = lambda pid: dict(senal)
+        return {p["id"]: p for p in ventas.analyze_sales(snapshot)}
+
+    try:
+        sin_datos = con_senal({})
+
+        claves = con_senal(
+            {
+                "hierarchy_value": 50,
+                "hierarchy_label": "Clave",
+                "probability": 80.0,
+            }
+        )
+
+        reservas = con_senal(
+            {
+                "hierarchy_value": 20,
+                "hierarchy_label": "Reserva",
+                "probability": 15.0,
+            }
+        )
+
+        rotos = con_senal(
+            {
+                "hierarchy_value": 20,
+                "hierarchy_label": "Reserva",
+                "probability": 0.0,
+                "absence": {
+                    "matchdays_out": 18,
+                    "basis": "FECHA",
+                },
+            }
+        )
+
+    finally:
+        ventas._ff_signal = original
+
+    assert sin_datos, "el fixture necesita plantilla"
+
+    for player_id, clave in claves.items():
+
+        # A un Clave no se le reprocha no tener historico.
+        assert not any(
+            "Bajo rendimiento" in r for r in clave["reasons"]
+        ), (clave["name"], clave["reasons"])
+
+        # Y siempre cuesta mas soltarlo que a un Reserva.
+        assert (
+            clave["sale_score"]
+            < reservas[player_id]["sale_score"]
+        ), clave["name"]
+
+        # Una baja larga lo empeora todavia mas.
+        assert (
+            rotos[player_id]["sale_score"]
+            >= reservas[player_id]["sale_score"]
+        ), clave["name"]
+
+    # Un Reserva titular no queda protegido por estarlo: si juega
+    # es porque no hay nadie mejor, y eso pide fichar, no
+    # conservar.
+    titulares_reserva = [
+        p for p in reservas.values() if p["in_lineup"]
+    ]
+
+    assert titulares_reserva, "el fixture necesita titulares"
+
+    for player in titulares_reserva:
+        assert any(
+            "falta de alternativa" in r for r in player["reasons"]
+        ), (player["name"], player["reasons"])
+
+    # Sin tablero de FutbolFantasy se puntua como siempre: peor,
+    # pero nunca se cae.
+    assert all(
+        p["hierarchy"] is None for p in sin_datos.values()
+    )
+
+
 def main():
 
     pruebas = [
@@ -998,6 +1116,7 @@ def main():
         test_partes_de_baja,
         test_a_quien_se_conserva,
         test_la_cache_comprueba_a_quien_cubre,
+        test_a_quien_se_vende,
     ]
 
     for prueba in pruebas:
