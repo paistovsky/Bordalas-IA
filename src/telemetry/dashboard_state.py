@@ -380,6 +380,27 @@ def build_player_photo_lookup(
 ) -> dict[int, dict]:
     return build_player_photo_lookup_v3(snapshot)
 
+
+def _ff_signal(player_id) -> dict:
+    """
+    La señal de FutbolFantasy de un jugador, para pintarla.
+
+    Blindado a proposito: el dashboard es telemetria. Si el tablero
+    no esta o no se puede leer, se pintan menos columnas; lo que no
+    puede es tumbar la generacion del estado.
+    """
+
+    try:
+        from src.analysis.candidate_starter_lookup import (
+            get_starter_lookup,
+        )
+
+        return get_starter_lookup().get(safe_int(player_id)) or {}
+
+    except Exception:
+        return {}
+
+
 def compact_lineup(
     lineup_state: dict,
     snapshot: dict,
@@ -512,10 +533,32 @@ def compact_lineup(
                 1,
             )
 
+        # LO QUE VE PEPE TIENE QUE VERSE EN PANTALLA
+        #
+        # Desde el 17/08/2026 el tablero de FutbolFantasy trae
+        # equipo, jerarquia y parte de baja de cada jugador, y la
+        # valoracion ya decide con ellos. Si no salen aqui, el
+        # dashboard cuenta una historia mas pobre que la que Pepe
+        # esta usando para gastar dinero.
+        senal_ff = _ff_signal(player_id)
+
+        jerarquia_ff = senal_ff.get("hierarchy") or {}
+
         players.append(
             {
                 "id": player_id,
                 "name": fixed_name,
+
+                "team_name": senal_ff.get("team"),
+
+                "hierarchy": jerarquia_ff.get("label"),
+                "hierarchy_value": jerarquia_ff.get("value"),
+                "franchise": bool(jerarquia_ff.get("franchise")),
+
+                "availability": (
+                    (senal_ff.get("availability") or {}).get("label")
+                ),
+                "absence": senal_ff.get("absence"),
                 "position": safe_int(
                     player.get(
                         "lineup_position",

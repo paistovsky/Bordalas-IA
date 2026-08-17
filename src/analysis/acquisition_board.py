@@ -152,6 +152,44 @@ def build_acquisition_board(
                 # Sin esto la pantalla no puede explicar por que
                 # un jugador con mas puntos que el nuestro NO es
                 # una mejora, que fue exactamente la pregunta.
+
+                # EL EQUIPO Y LA JERARQUIA, QUE SON LO QUE AGUANTA
+                #
+                # El % dice quien juega este sabado; la jerarquia
+                # dice que es un jugador en su equipo. Desde el
+                # 17/08/2026 la valoracion decide con las dos, asi
+                # que las dos tienen que verse: si un dato no se
+                # ve, no se mete.
+                "team": (
+                    (valoracion.get("starter") or {}).get("team")
+                ),
+                "hierarchy": (
+                    (valoracion.get("starter") or {}).get(
+                        "hierarchy_label"
+                    )
+                ),
+                "hierarchy_value": (
+                    (valoracion.get("starter") or {}).get(
+                        "hierarchy_value"
+                    )
+                ),
+                "franchise": bool(
+                    (valoracion.get("starter") or {}).get(
+                        "franchise"
+                    )
+                ),
+                "availability": (
+                    (
+                        (valoracion.get("starter") or {}).get(
+                            "availability"
+                        )
+                        or {}
+                    ).get("label")
+                ),
+                "absence": (
+                    (valoracion.get("starter") or {}).get("absence")
+                ),
+
                 "starter_probability": (
                     (valoracion.get("starter") or {}).get(
                         "probability"

@@ -31,6 +31,54 @@ function STARTER_TONE(probability) {
   return "down";
 }
 
+/**
+ * La jerarquia, que es el dato que aguanta.
+ *
+ * El % dice quien juega ESTE sabado y cambia cada semana. La
+ * jerarquia dice que ES un jugador en su equipo y dura toda la
+ * temporada. Se ficha para meses, asi que esta columna pesa mas
+ * que la de al lado aunque ocupe menos.
+ *
+ * El escalon de arriba -Dios- se pinta distinto porque no es un
+ * Clave mejor: es el fichaje franquicia, otra categoria.
+ */
+const HIERARCHY_TONE = {
+  DIOS: "me",
+  CLAVE: "ok",
+  IMPORTANTE: "ok",
+  ROTACIÓN: "warn",
+  ROTACION: "warn",
+  REVULSIVO: "idle",
+  RESERVA: "idle",
+  DESCARTE: "crit"
+};
+
+function Hierarchy({ label }) {
+  if (!label) return <span className="dim">—</span>;
+
+  const tone = HIERARCHY_TONE[String(label).toUpperCase()] || "idle";
+
+  return <span className={`pill ${tone}`}>{String(label).toUpperCase()}</span>;
+}
+
+/**
+ * Sin dato no es lo mismo que disponible: solo se dice algo
+ * cuando hay algo que decir.
+ */
+function estadoFisico(target) {
+  const estado = target.availability;
+
+  if (!estado || estado === "DISPONIBLE") return null;
+
+  const fuera = target.absence?.matchdays_out;
+
+  if (fuera) {
+    return `${estado} · se pierde ${fuera} jornada${fuera === 1 ? "" : "s"}`;
+  }
+
+  return estado;
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -200,8 +248,10 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
           <tr>
             <th>JUGADOR</th>
             <th></th>
+            <th>EQUIPO</th>
             <th className="n">MERCADO</th>
             <th className="n">TIT.</th>
+            <th>JERARQUÍA</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th className="n">PUESTO</th>
             <th className="n">PUJARÍAMOS</th>
@@ -222,13 +272,14 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                 key={target.id}
                 className={viva ? "live" : bids ? "" : "off"}
                 title={
-                  [target.xi_reason, target.reason]
+                  [estadoFisico(target), target.xi_reason, target.reason]
                     .filter(Boolean)
                     .join("  —  ") || undefined
                 }
               >
                 <td>{target.name}</td>
                 <td className="dim">{positionLabel(target.position)}</td>
+                <td className="dim">{target.team || "—"}</td>
                 <td className="n">{formatEuros(target.market_price)}</td>
 
                 {/* La respuesta a "¿cómo es eso mejorar el XI?".
@@ -239,6 +290,18 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                   {target.starter_probability != null
                     ? `${Math.round(Number(target.starter_probability))}%`
                     : <span className="dim">sin dato</span>}
+                </td>
+
+                {/* Lo estructural, al lado de lo semanal. Un
+                    Reserva al 70 % esta semana sigue siendo un
+                    Reserva, y esta columna es la que lo dice. */}
+                <td>
+                  <Hierarchy label={target.hierarchy} />
+                  {estadoFisico(target) && (
+                    <div className="dim" style={{ fontSize: 9 }}>
+                      {estadoFisico(target)}
+                    </div>
+                  )}
                 </td>
 
                 <td className="n">{formatEuros(target.our_value)}</td>
@@ -271,7 +334,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
           Ningún candidato del mercado tiene pronóstico de titularidad, así que
           la regla del once bloquea las {cobertura.blocked_by_starter_rule ?? 0}{" "}
           mejoras que había. No es que no haya chollos: es que falta el dato
-          para juzgarlos. Revisa el refresco de Jornada Perfecta.
+          para juzgarlos. Revisa el refresco de FutbolFantasy.
         </div>
       )}
 

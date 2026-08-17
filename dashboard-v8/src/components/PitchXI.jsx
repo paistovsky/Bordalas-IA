@@ -72,6 +72,21 @@ function confidenceClass(value, consensus) {
   return "crit";
 }
 
+/**
+ * Los mismos tonos que la tabla de OBJETIVOS, a proposito: un
+ * Clave tiene que verse igual en el campo que en el mercado.
+ */
+const HIERARCHY_TONE = {
+  DIOS: "me",
+  CLAVE: "ok",
+  IMPORTANTE: "ok",
+  ROTACIÓN: "warn",
+  ROTACION: "warn",
+  REVULSIVO: "idle",
+  RESERVA: "idle",
+  DESCARTE: "crit"
+};
+
 const CONSENSUS_LABEL = {
   STARTER: "titular",
   STARTER_LEAN: "titular?",
@@ -136,6 +151,26 @@ function PlayerCard({ player, watched }) {
       </div>
 
       <div className="pname">{player.name}</div>
+
+      {/* EL ESCUDO NO BASTA.
+          Obliga a reconocer veinte escudos diminutos para saber
+          de quien juega cada uno. El nombre del equipo se lee. */}
+      <div className="pteam">{player.team_name || ""}</div>
+
+      {/* La jerarquia: que ES en su equipo, no si juega el
+          sabado. Es lo que decide si se ficha o se vende, asi
+          que tiene que estar donde se mira la plantilla. */}
+      {player.hierarchy && (
+        <div className="phier">
+          <span
+            className={`pill ${
+              HIERARCHY_TONE[String(player.hierarchy).toUpperCase()] || "idle"
+            }`}
+          >
+            {String(player.hierarchy).toUpperCase()}
+          </span>
+        </div>
+      )}
 
       <div className="prow">
         <span className="pval">{formatMoney(player.price)}</span>
