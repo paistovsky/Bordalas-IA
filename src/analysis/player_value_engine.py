@@ -285,6 +285,322 @@ def build_team_strength(catalog: dict) -> dict:
 # ============================================================
 
 
+# ============================================================
+# JERARQUIA
+#
+# El eje estructural. El % dice quien juega ESTE sabado y cambia
+# cada semana; la jerarquia dice QUE ES un jugador en su equipo y
+# aguanta la temporada. Una compra dura meses, asi que la base
+# tiene que ser la jerarquia.
+#
+# DE DONDE SALEN ESTOS NUMEROS
+#
+#     No estan inventados: son los minutos reales que publica FF,
+#     medidos sobre 137 jugadores de 18 equipos el 17/08/2026,
+#     normalizados contra el escalon Clave.
+#
+#         Clave        n=32   71,8 min de media   ->  1,000
+#         Importante   n=33   69,7                ->  0,971
+#         Rotacion     n=35   40,6                ->  0,566
+#         Revulsivo    n=16   28,8                ->  0,401
+#         Reserva      n=20   16,1                ->  0,225
+#
+#     ADVERTENCIA: la muestra es de una jornada. Sirve para no
+#     inventarse la escala, no para darla por cerrada. A partir de
+#     la jornada 6-8 hay que recalibrar con minutos acumulados.
+#
+#     Dios (60) no se pudo medir: solo hay dos en toda la liga y
+#     FF no publicaba sus minutos. Se le da el mismo 1,00 que a
+#     Clave en vez de inflarlo por intuicion.
+#
+#     Descarte (10) tenia n=1, que no es una muestra. Se fija por
+#     debajo de Reserva y se dice que es criterio, no medida.
+# ============================================================
+
+HIERARCHY_POINTS_FACTOR = {
+    60: 1.00,   # Dios       (no medido)
+    50: 1.00,   # Clave
+    40: 0.97,   # Importante
+    30: 0.57,   # Rotacion
+    25: 0.40,   # Revulsivo
+    20: 0.22,   # Reserva
+    10: 0.10,   # Descarte   (criterio, n=1)
+}
+
+
+# Probabilidad TIPICA de cada escalon, medida en la misma tanda.
+#
+# Hace falta para no contar dos veces lo mismo. Jerarquia y % van
+# de la mano -un Clave ronda el 72 %, un Reserva el 14 %-, asi que
+# multiplicar los dos factores penalizaria dos veces al mismo
+# jugador. Lo que aporta el % no es su valor absoluto: es cuanto
+# se SEPARA de lo normal en su escalon.
+#
+# Un Clave al 90 % esta por encima de lo suyo y sube. Un Clave al
+# 0 % -lesionado- se desploma. Un Clave al 72 % no mueve nada,
+# porque eso es exactamente lo que se espera de un Clave.
+HIERARCHY_TYPICAL_PROBABILITY = {
+    60: 75.0,
+    50: 71.7,
+    40: 66.0,
+    30: 43.4,
+    25: 30.5,
+    20: 13.9,
+    10: 3.3,
+}
+
+
+# Cuanto pesa la desviacion semanal sobre la base estructural.
+#
+# BAJADO DE 0,5 A 0,15 EL 17/08/2026
+#
+#     Con 0,5, un dato de un sabado movia un tercio de una
+#     estimacion de nueve meses, y producia el absurdo de que una
+#     DUDA penalizase mas que una BAJA CONFIRMADA: la duda caia
+#     por la via del porcentaje -que pesaba mucho- y la baja por
+#     la via de las jornadas perdidas -que pesa lo que debe-.
+#
+#     Ahora que existen la jerarquia y los partes de baja, el
+#     porcentaje semanal es en gran parte redundante. Se queda
+#     como correccion pequeña, que es lo que es.
+WEEKLY_ADJUSTMENT_WEIGHT = 0.15
+
+# Suelo y techo del ajuste.
+#
+# EL TECHO ES 1,0 POR DECISION DEL DUENO (17/08/2026)
+#
+#     `raw_points` son los puntos de la temporada pasada. Dejar
+#     que el factor pasase de 1,0 significaba valorar a un jugador
+#     por encima de lo que nunca ha hecho, solo porque esta semana
+#     va mejor de lo normal en su escalon.
+#
+#     El cambio a base estructural ya sube las valoraciones entre
+#     un 19 % y un 36 % -un Importante al 70 % pasa de 0,745 a
+#     0,989-, y esa subida esta justificada: el modelo anterior
+#     recortaba la temporada entera por un dato de una semana.
+#     Pero el historico se queda como tope. Se paga mejor, no se
+#     paga de mas.
+MIN_EXPECTED_FACTOR = 0.05
+MAX_EXPECTED_FACTOR = 1.00
+
+
+# La escalera, en orden. La distancia se mide en ESCALONES, no en
+# el numero de FF, porque la escala no es lineal: de Revulsivo a
+# Rotacion hay 5 puntos y de Rotacion a Importante hay 10.
+HIERARCHY_LADDER = [10, 20, 25, 30, 40, 50, 60]
+
+# Cuantos escalones puede bajar un fichaje respecto al que sale
+# antes de que sea un destrozo del once. Dos: cambiar un Clave por
+# un Rotacion ya no se permite; por un Importante, si.
+HIERARCHY_VETO_STEPS = 2
+
+
+# ============================================================
+# AUSENCIAS
+#
+# Cuantas jornadas se pierde, no si juega el sabado.
+#
+# POR QUE HACE FALTA APARTE DEL %
+#
+#     Con solo el porcentaje, una gripe y un cruzado roto son el
+#     mismo dato: 0 %. Al pasar a base estructural, un Clave
+#     lesionado paso de valer el 15 % de sus puntos al 64 %,
+#     porque la jerarquia dice "es un Clave" y nadie contaba las
+#     jornadas perdidas.
+#
+# COMO ENTRA
+#
+#     Cuando se conoce el horizonte, la parte de temporada que se
+#     pierde SUSTITUYE al ajuste semanal, no se multiplica con el.
+#     Multiplicarlos seria contar dos veces la misma baja: el 0 %
+#     de esta jornada ya esta dentro de "se pierde seis jornadas".
+# ============================================================
+
+# Jornadas de una temporada. Se usa para medir que fraccion de lo
+# que queda se pierde un jugador.
+SEASON_MATCHDAYS = 38
+
+# Que hacer con una "Baja indefinida".
+#
+# NO ES UNA MEDIDA, ES UNA POLITICA. FF dice que no sabe cuanto
+# durara; nosotros no podemos fingir que si. Diez jornadas es un
+# punto medio prudente entre "vuelve pronto" y "temporada
+# terminada", elegido a mano el 17/08/2026 y revisable.
+INDEFINITE_ABSENCE_MATCHDAYS = 10
+
+# Por debajo de esto no se baja aunque la baja sea eterna: un
+# jugador con contrato sigue teniendo valor de reventa.
+MIN_ABSENCE_FACTOR = 0.05
+
+
+def absence_factor(
+    starter: dict | None,
+    current_matchday: int | None = None,
+) -> tuple[float | None, str | None]:
+    """
+    Fraccion de lo que queda de temporada que SI va a jugar.
+
+    Devuelve `None` cuando no hay parte de baja: entonces manda el
+    ajuste semanal de siempre.
+    """
+
+    ausencia = (starter or {}).get("absence") or {}
+
+    if not ausencia:
+        return (None, None)
+
+    fuera = ausencia.get("matchdays_out")
+
+    if fuera is None:
+
+        if ausencia.get("basis") == "INDEFINIDA":
+            fuera = INDEFINITE_ABSENCE_MATCHDAYS
+
+        else:
+            return (None, None)
+
+    fuera = max(0, int(fuera))
+
+    if fuera == 0:
+        return (None, None)
+
+    # La jornada viaja dentro de la propia senal, asi que quien
+    # llame no tiene que acordarse de pasarla.
+    if current_matchday is None:
+        current_matchday = (starter or {}).get("matchday")
+
+    jugadas = max(0, int(current_matchday or 1) - 1)
+
+    quedan = max(1, SEASON_MATCHDAYS - jugadas)
+
+    factor = max(
+        MIN_ABSENCE_FACTOR,
+        (quedan - min(fuera, quedan)) / quedan,
+    )
+
+    detalle = ausencia.get("prognosis") or ausencia.get("detail")
+
+    return (
+        factor,
+        (
+            f"se pierde {fuera} de las {quedan} jornadas que "
+            f"quedan"
+            + (f" ({detalle})" if detalle else "")
+        ),
+    )
+
+
+def hierarchy_rank(starter: dict | None) -> int | None:
+    """
+    Posicion en la escalera, o None si no hay jerarquia.
+
+    El 0 de FF ("sin definir") no es el escalon de abajo: es
+    ausencia de dato y devuelve None.
+    """
+
+    valor = (starter or {}).get("hierarchy_value")
+
+    if not valor:
+        return None
+
+    try:
+        valor = int(valor)
+    except (TypeError, ValueError):
+        return None
+
+    if valor not in HIERARCHY_LADDER:
+        return None
+
+    return HIERARCHY_LADDER.index(valor)
+
+
+def hierarchy_label(starter: dict | None) -> str | None:
+    return (starter or {}).get("hierarchy_label")
+
+
+def expected_points_factor(
+    starter: dict | None,
+    current_matchday: int | None = None,
+) -> tuple[float, str]:
+    """
+    Que fraccion de sus puntos cabe esperar, y por que.
+
+    Tres cosas, multiplicadas:
+
+        base estructural  x  ajuste semanal  x  fraccion que juega
+
+    LAS TRES, NO UNA U OTRA
+
+        La primera version aplicaba la ausencia EN LUGAR del
+        ajuste semanal, para no contar dos veces la misma lesion.
+        Con el peso semanal en 0,5 tenia sentido, pero producia un
+        orden absurdo: una duda salia peor que una baja confirmada
+        de una jornada.
+
+        Con el peso semanal en 0,15 la superposicion es pequeña y
+        multiplicar da el orden correcto, que es el que pidio el
+        dueño: una baja de una jornada nunca vale mas que una
+        duda, y cuantas mas jornadas se pierda, menos vale.
+
+            duda de esta jornada        0,888
+            baja confirmada 1 jornada   0,864
+            baja de 2 jornadas          0,840
+            baja de 3 jornadas          0,816
+    """
+
+    probabilidad = (starter or {}).get("probability")
+    rango = hierarchy_rank(starter)
+
+    ausencia, motivo_ausencia = absence_factor(
+        starter,
+        current_matchday,
+    )
+
+    # Sin jerarquia: se cae al comportamiento anterior, solo con
+    # el % de la semana. Peor, pero no ciego.
+    if rango is None:
+        return (
+            starter_factor(probabilidad),
+            "sin jerarquia: solo cuenta el pronostico de la jornada",
+        )
+
+    escalon = HIERARCHY_LADDER[rango]
+    base = HIERARCHY_POINTS_FACTOR[escalon]
+
+    factor = base
+
+    motivos = [f"base {base:.2f} por jerarquia"]
+
+    # 1. La jornada, como correccion pequeña.
+    if probabilidad is not None:
+
+        tipica = HIERARCHY_TYPICAL_PROBABILITY[escalon]
+
+        desviacion = (float(probabilidad) - tipica) / 100.0
+
+        factor *= 1.0 + WEEKLY_ADJUSTMENT_WEIGHT * desviacion
+
+        motivos.append(
+            f"{float(probabilidad):.0f} % frente al {tipica:.0f} % "
+            f"tipico de su escalon"
+        )
+
+    # 2. Las jornadas que se pierde, que es lo que de verdad manda
+    #    cuando la baja es larga.
+    if ausencia is not None:
+
+        factor *= ausencia
+
+        motivos.append(motivo_ausencia)
+
+    factor = max(
+        MIN_EXPECTED_FACTOR,
+        min(factor, MAX_EXPECTED_FACTOR),
+    )
+
+    return (factor, "; ".join(motivos))
+
+
 def starter_factor(probability) -> float:
     """
     Que fraccion de sus puntos cabe esperar de un jugador con esta
@@ -306,6 +622,23 @@ def starter_factor(probability) -> float:
     p = max(0.0, min(p, 100.0)) / 100.0
 
     return BENCH_POINTS_FACTOR + (1.0 - BENCH_POINTS_FACTOR) * p
+
+
+def _is_predicted_bench(starter: dict | None) -> bool:
+    """
+    Claramente suplente esta jornada, no simplemente "no titular".
+
+    La diferencia importa: entre el 40 y el 67 hay una franja de
+    duda que no es motivo para vetar una compra, y tratarla como
+    suplencia era lo que hacia que el veto saltase por un punto.
+    """
+
+    probabilidad = (starter or {}).get("probability")
+
+    if probabilidad is None:
+        return False
+
+    return float(probabilidad) <= BENCH_PROBABILITY_THRESHOLD
 
 
 def is_predicted_starter(starter: dict | None) -> bool:
@@ -351,18 +684,26 @@ def estimate_season_points(
         )
 
     probabilidad = (starter or {}).get("probability")
-    factor = starter_factor(probabilidad)
     consenso = (starter or {}).get("consensus")
 
-    if probabilidad is None:
+    factor, explicacion = expected_points_factor(starter)
+
+    etiqueta = hierarchy_label(starter)
+
+    if probabilidad is None and etiqueta is None:
         nota_titular = (
             " Sin pronostico de titularidad: se valora a ciegas y "
             "se exige mas margen."
         )
     else:
         nota_titular = (
-            f" Pronostico {consenso or '?'} "
-            f"({float(probabilidad):.0f} % titular): cuentan el "
+            f" {etiqueta or 'sin jerarquia'}"
+            + (
+                f", {float(probabilidad):.0f} % titular"
+                if probabilidad is not None
+                else ""
+            )
+            + f" ({explicacion}): cuentan el "
             f"{factor*100:.0f} % de esos puntos."
         )
 
@@ -489,12 +830,89 @@ def xi_upgrade_value(
         )
 
     # --------------------------------------------------------
-    # LA REGLA DEL ONCE
+    # SIN PRONOSTICO NO SE PUJA
+    #
+    # La regla del once de aqui abajo solo se dispara cuando SABE
+    # que el sustituido es titular. Con eso, la ausencia de dato
+    # no frenaba: dejaba pasar.
+    #
+    # Se vio el 17/08/2026 al cambiar de fuente. Con el tablero
+    # vacio la regla bloqueo cero operaciones y el sistema propuso
+    # tres compras a ciegas -entre ellas la de Castrin, la que
+    # destapo todo esto-. Antes bloqueaba diecisiete.
+    #
+    # Es el peor fallo posible en un guardarrail: cuanto menos
+    # sabe, mas permite. Se invierte. Si falta el pronostico de
+    # cualquiera de los dos lados, no hay mejora del once que
+    # valorar. Si la fuente se cae, Pepe deja de mejorar el once
+    # -que es molesto- en vez de fichar a ciegas -que es caro-.
+    # --------------------------------------------------------
+
+    for quien, senal in (
+        ("del que saldria", replaced_starter),
+        ("del que entraria", candidate_starter),
+    ):
+
+        if (senal or {}).get("probability") is None:
+
+            return _sin_valor(
+                "SIN_PRONOSTICO",
+                (
+                    f"No hay pronostico de titularidad {quien}. "
+                    f"Sin ese dato no se puede saber si el once "
+                    f"mejora, y a ciegas no se puja."
+                ),
+            )
+
+    # --------------------------------------------------------
+    # EL VETO ESTRUCTURAL
+    #
+    # Antes el veto era semanal: saltaba porque un porcentaje
+    # cruzaba el 67. Eso hace que la misma compra este permitida
+    # el martes y prohibida el jueves sin que haya cambiado nada
+    # de fondo, y al reves: deja pasar a un Reserva que esta
+    # puntualmente al 70 % porque el titular tiene gripe.
+    #
+    # Lo que no cambia el jueves es lo que es cada uno en su
+    # equipo. Un Clave sigue siendo Clave en diciembre. Asi que el
+    # veto se mide en escalones de jerarquia: se rechaza bajar dos
+    # o mas. Clave por Importante, si. Clave por Rotacion, no.
+    #
+    # Es el error de Castrin dicho en su idioma: no era un
+    # problema de porcentaje, era que es Reserva.
+    # --------------------------------------------------------
+
+    rango_sale = hierarchy_rank(replaced_starter)
+    rango_entra = hierarchy_rank(candidate_starter)
+
+    if rango_sale is not None and rango_entra is not None:
+
+        caida = rango_sale - rango_entra
+
+        if caida >= HIERARCHY_VETO_STEPS:
+
+            return _sin_valor(
+                "NO_MEJORA_JERARQUIA",
+                (
+                    f"Sustituiria a un "
+                    f"{hierarchy_label(replaced_starter)} por un "
+                    f"{hierarchy_label(candidate_starter)}: "
+                    f"{caida} escalones de bajada. El once empeora "
+                    f"toda la temporada, no solo esta jornada."
+                ),
+            )
+
+    # --------------------------------------------------------
+    # LA REGLA DEL ONCE, AHORA SOLO PARA LO EXTREMO
+    #
+    # Se mantiene como suelo, pero deja de dispararse por un
+    # porcentaje que baja de 67 a 63: solo frena cuando el que
+    # entra es claramente suplente esta jornada.
     # --------------------------------------------------------
 
     if is_predicted_starter(replaced_starter):
 
-        if not is_predicted_starter(candidate_starter):
+        if _is_predicted_bench(candidate_starter):
 
             p_sale = float(replaced_starter["probability"])
 

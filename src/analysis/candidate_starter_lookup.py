@@ -1,12 +1,10 @@
 """
-Probabilidad de ser titular, para CUALQUIER jugador, no solo los
-nuestros.
+Probabilidad de ser titular y jerarquia, para CUALQUIER jugador.
 
 POR QUE EXISTE
 
-    Toda la inteligencia de titularidad que tiene Bordalas -tres
-    fuentes, consenso, votos- estaba cableada a la plantilla
-    propia. Para valorar un fichaje no habia nada.
+    Toda la inteligencia de titularidad estaba cableada a la
+    plantilla propia. Para valorar un fichaje no habia nada.
 
     Asi que la valoracion comparaba puntos de la temporada pasada
     a pelo, y el 16/08/2026 propuso pujar 1.236.001 EUR por Andres
@@ -15,22 +13,32 @@ POR QUE EXISTE
     puntos" es cierto en la hoja de calculo y falso en el campo:
     un suplente no puntua.
 
-DE DONDE SALE CADA COSA
+QUE CAMBIO EL 17/08/2026
 
-    - De nuestros jugadores, del tablero multifuente
-      (`starter_multisource_v1124.json`): tres fuentes y consenso.
-      Es el dato bueno y no se toca.
+    Una sola fuente: FutbolFantasy. Se retiran Jornada Perfecta y
+    el consenso multifuente.
 
-    - De los del mercado, de las senales de Jornada Perfecta
-      (`jornada_perfecta_lineups.json`), que desde la extension de
-      identidad del proveedor tambien los cubren. Una sola fuente,
-      y aqui se dice que es una sola.
+    El consenso no funcionaba. Con cobertura 1 topaba todo en
+    74/26 y las etiquetas dejaban de significar nada: un 92 % de
+    una fuente y un 25 % de otra salian como "UNCERTAIN 58 %", que
+    no es un acuerdo, es el promedio de dos cosas que no se pueden
+    promediar. Y con JP el mercado quedaba cubierto a medias y con
+    la mitad de los SUPLENTE deducidos por ausencia, que muchas
+    veces solo significaba que el nombre no emparejo.
+
+    De FF sale ademas la JERARQUIA -Dios, Clave, Importante,
+    Rotacion, Revulsivo, Reserva, Descarte-, que es lo que de
+    verdad hace falta para fichar: el porcentaje dice quien juega
+    ESTE sabado y cambia cada semana; la jerarquia dice que es un
+    jugador en su equipo y aguanta la temporada. Una compra dura
+    meses y no se decide con un dato de siete dias.
 
 LO QUE NO HACE
 
     No inventa. Un jugador del que no hay senal devuelve None, no
-    un 50 % de relleno. Quien decida que hacer con la ausencia de
-    dato que lo decida sabiendo que no hay dato.
+    un 50 % de relleno. Una jerarquia sin definir es None, no
+    "Descarte". Quien decida que hacer con la ausencia de dato que
+    lo decida sabiendo que no hay dato.
 """
 
 from __future__ import annotations
@@ -41,29 +49,15 @@ from pathlib import Path
 
 
 BOARD_FILE = Path(
-    "data/intelligence/starter_multisource_v1124.json"
-)
-
-JP_FILE = Path(
-    "data/intelligence/jornada_perfecta_lineups.json"
+    "data/intelligence/futbolfantasy_board.json"
 )
 
 
-# Umbrales de voto. Los mismos que usa el consenso multifuente,
+# Umbrales de voto. Los mismos que usa el resto del sistema,
 # repetidos aqui a proposito para no importar el modulo pesado de
 # scraping desde la ruta de valoracion.
 STARTER_VOTE = 67.0
 BENCH_VOTE = 40.0
-
-# Prior por estado de Jornada Perfecta, ponderado por la confianza
-# que la propia pagina publica. Identico a `jp_probability`.
-JP_PRIOR = {
-    "TITULAR": 94.0,
-    "PROBABLE": 76.0,
-    "DUDA": 50.0,
-    "SUPLENTE": 24.0,
-    "NO_CONVOCADO": 1.0,
-}
 
 
 _CACHE: dict | None = None
@@ -78,24 +72,20 @@ def reset_starter_lookup_cache() -> None:
 
 def _files_key() -> tuple:
     """
-    Firma de los dos ficheros de los que sale todo esto.
+    Firma del fichero del que sale todo esto.
 
     La cache va atada a ella y no a "ya lo lei una vez". Dentro de
-    un ciclo el refresco de inteligencia REESCRIBE estos ficheros,
-    y valorar con la version anterior seria decidir con el
+    un ciclo el refresco de inteligencia REESCRIBE el tablero, y
+    valorar con la version anterior seria decidir con el
     pronostico de la jornada de antes sin enterarse.
     """
 
-    firma = []
+    try:
+        estado = BOARD_FILE.stat()
+        return (str(BOARD_FILE), estado.st_mtime_ns, estado.st_size)
 
-    for path in (BOARD_FILE, JP_FILE):
-        try:
-            estado = path.stat()
-            firma.append((str(path), estado.st_mtime_ns, estado.st_size))
-        except OSError:
-            firma.append((str(path), None, None))
-
-    return tuple(firma)
+    except OSError:
+        return (str(BOARD_FILE), None, None)
 
 
 def _load(path: Path) -> dict | None:
@@ -121,92 +111,19 @@ def vote_label(probability: float | None) -> str | None:
     return "UNCERTAIN"
 
 
-def jp_row_probability(row: dict) -> float | None:
-    """
-    Misma formula que el tablero multifuente: el prior del estado,
-    acercado al 50 % en la medida en que la pagina no esta segura.
-    """
-
-    prior = JP_PRIOR.get(
-        str(row.get("status") or "UNKNOWN").upper()
-    )
-
-    if prior is None:
-        return None
-
-    try:
-        confianza = float(row.get("confidence") or 0)
-    except (TypeError, ValueError):
-        confianza = 0.0
-
-    confianza = max(0.0, min(confianza, 100.0))
-
-    return round(
-        50.0 + (prior - 50.0) * (confianza / 100.0),
-        1,
-    )
-
-
-def build_starter_lookup(
-    board: dict | None = None,
-    jp: dict | None = None,
-) -> dict:
+def build_starter_lookup(board: dict | None = None) -> dict:
     """
     `{player_id: {"probability", "consensus", "coverage",
-      "source"}}`.
+      "source", "scope", "team", "hierarchy", "availability"}}`.
 
-    El tablero multifuente pisa a Jornada Perfecta cuando los dos
-    tienen al jugador: tres fuentes valen mas que una.
+    Sin consenso y sin topes: la probabilidad es la que publica
+    FutbolFantasy, tal cual.
     """
 
     if board is None:
         board = _load(BOARD_FILE) or {}
 
-    if jp is None:
-        jp = _load(JP_FILE) or {}
-
     lookup: dict[int, dict] = {}
-
-    # ------------------------------------------------------
-    # Una fuente: Jornada Perfecta. Cubre mercado y plantilla.
-    # ------------------------------------------------------
-
-    for row in ((jp or {}).get("players") or []):
-
-        if not isinstance(row, dict):
-            continue
-
-        player_id = row.get("biwenger_id")
-
-        if player_id is None:
-            continue
-
-        probabilidad = jp_row_probability(row)
-
-        if probabilidad is None:
-            continue
-
-        # De donde sale el SUPLENTE importa. Uno leido de la
-        # alineacion publicada es un dato; uno deducido de "no
-        # aparece en el once de su equipo" es una suposicion
-        # prudente que a veces solo significa que el nombre no
-        # emparejo. Hay que poder distinguirlos al mirarlo.
-        rol = row.get("jp_parser_role")
-
-        lookup[int(player_id)] = {
-            "probability": probabilidad,
-            "consensus": vote_label(probabilidad),
-            "coverage": 1,
-            "source": "JORNADA_PERFECTA",
-            "status": row.get("status"),
-            "inferred": rol == "TEAM_ABSENCE_CONSERVATIVE",
-            "parser_role": rol,
-            "scope": row.get("identity_scope") or "ROSTER",
-        }
-
-    # ------------------------------------------------------
-    # Tres fuentes: el tablero. Solo plantilla, y manda.
-    # ------------------------------------------------------
 
     for row in ((board or {}).get("players") or []):
 
@@ -219,15 +136,62 @@ def build_starter_lookup(
         if player_id is None or probabilidad is None:
             continue
 
+        disponibilidad = row.get("availability") or {}
+        jerarquia = row.get("hierarchy") or None
+
         lookup[int(player_id)] = {
             "probability": float(probabilidad),
-            "consensus": row.get("consensus"),
-            "coverage": int(row.get("source_coverage") or 0),
-            "source": "MULTISOURCE",
-            "status": None,
+
+            "consensus": (
+                row.get("consensus")
+                or vote_label(float(probabilidad))
+            ),
+
+            "coverage": int(row.get("source_coverage") or 1),
+            "source": row.get("source") or "FUTBOLFANTASY",
+
+            "scope": row.get("scope") or "ROSTER",
+            "team": row.get("team"),
+
+            # La jerarquia viaja entera -valor, etiqueta y si es
+            # de nivel franquicia- para que quien valore no tenga
+            # que traducir numeros a mano.
+            "hierarchy": jerarquia,
+            "hierarchy_value": (
+                jerarquia.get("value") if jerarquia else None
+            ),
+            "hierarchy_label": (
+                jerarquia.get("label") if jerarquia else None
+            ),
+            "franchise": bool(
+                jerarquia.get("franchise") if jerarquia else False
+            ),
+
+            "availability": disponibilidad,
+            "status": disponibilidad.get("label"),
+            "can_play": disponibilidad.get("can_play"),
+
+            # El parte de baja, cuando lo hay: cuantas jornadas se
+            # pierde y con que fundamento. Es lo que separa una
+            # gripe de un cruzado, que con solo el % son el mismo
+            # 0 %.
+            "absence": row.get("absence"),
+
+            # La jornada del tablero viaja con cada jugador para
+            # que quien valore sepa contra cuantas jornadas
+            # restantes mide una ausencia, sin tener que ir a
+            # buscarla a otro sitio.
+            "matchday": (board or {}).get("matchday"),
+
+            "next_match": row.get("next_match") or {},
+            "team_context": row.get("team_context") or {},
+            "minutes": row.get("minutes"),
+
+            # FF publica un pronostico leido, no deducido por
+            # ausencia. Se deja el campo por compatibilidad con
+            # quien lo imprimia, siempre en False.
             "inferred": False,
-            "parser_role": None,
-            "scope": "ROSTER",
+            "parser_role": (row.get("match") or {}).get("method"),
         }
 
     return lookup
@@ -235,8 +199,7 @@ def build_starter_lookup(
 
 def get_starter_lookup() -> dict:
     """
-    Se relee cuando cambia alguno de los dos ficheros, no una vez
-    por proceso.
+    Se relee cuando cambia el tablero, no una vez por proceso.
     """
 
     global _CACHE, _CACHE_KEY
@@ -261,14 +224,22 @@ def describe_lookup(lookup: dict | None = None) -> dict:
         if value.get("scope") == "MARKET"
     )
 
+    con_jerarquia = sum(
+        1
+        for value in lookup.values()
+        if value.get("hierarchy_value")
+    )
+
     return {
         "available": bool(lookup),
         "players": len(lookup),
         "market_players": del_mercado,
         "roster_players": len(lookup) - del_mercado,
-        "multisource": sum(
+        "with_hierarchy": con_jerarquia,
+        "franchise": sum(
             1
             for value in lookup.values()
-            if value.get("source") == "MULTISOURCE"
+            if value.get("franchise")
         ),
+        "source": "FUTBOLFANTASY",
     }

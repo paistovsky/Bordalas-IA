@@ -138,23 +138,88 @@ def safe_int(value, default: int = 0) -> int:
         return default
 
 
+def _keep_value(player: dict) -> float:
+    """
+    Lo que vale conservar a este jugador, ya descontada su
+    situacion.
+
+    EL PRECIO PROTEGIA AL REVES
+
+        Hasta el 17/08/2026 el orden de permanencia era: titular
+        del XI, luego mas protegido, luego MAS CARO. Y el precio
+        va justo al reves de lo que hace falta cuando alguien se
+        rompe: un Dios que se parte el cruzado en agosto valdra
+        mucho menos en octubre -es a quien hay que soltar antes- y
+        era precisamente a quien el guardarrail agarraba con mas
+        fuerza, por caro.
+
+        Peor todavia: para esta lista, un Dios lesionado una
+        semana y un Dios lesionado hasta enero eran identicos.
+
+    QUE SE USA AHORA
+
+        El precio de mercado multiplicado por el factor de puntos
+        esperados, que ya lleva dentro las tres cosas: jerarquia,
+        pronostico de la jornada y jornadas de baja.
+
+        Asi no hace falta una regla especial para lesiones ni un
+        umbral del tipo "mas de N jornadas fuera". Un Dios sano
+        sigue siendo el ultimo en venderse; uno roto hasta enero
+        baja solo.
+
+    Sin senal para ese jugador se cae al precio pelado, que es el
+    comportamiento de antes.
+    """
+
+    precio = safe_int(
+        player.get("market_value")
+        if player.get("market_value") is not None
+        else player.get("price")
+    )
+
+    # El llamante puede traerlo ya calculado; si no, se busca.
+    factor = player.get("keep_factor")
+
+    if factor is None:
+
+        try:
+            from src.analysis.candidate_starter_lookup import (
+                get_starter_lookup,
+            )
+
+            from src.analysis.player_value_engine import (
+                expected_points_factor,
+            )
+
+            senal = get_starter_lookup().get(
+                safe_int(player.get("id"))
+            )
+
+            if senal:
+                factor, _ = expected_points_factor(senal)
+
+        except Exception:
+            factor = None
+
+    if factor is None:
+        return float(precio)
+
+    return float(precio) * float(factor)
+
+
 def _keep_priority(player: dict) -> tuple:
     """
     A quien conservamos primero dentro de una posicion.
 
-    Orden: titular del XI, luego mas protegido, luego mas caro.
-    El id al final solo para que el resultado sea siempre el
-    mismo ante empates.
+    Orden: titular del XI, luego mas protegido, luego el que mas
+    valga conservar. El id al final solo para que el resultado sea
+    siempre el mismo ante empates.
     """
 
     return (
         0 if player.get("in_lineup") else 1,
         -float(player.get("protection_score") or 0),
-        -safe_int(
-            player.get("market_value")
-            if player.get("market_value") is not None
-            else player.get("price")
-        ),
+        -_keep_value(player),
         safe_int(player.get("id")),
     )
 

@@ -250,10 +250,21 @@ def build_acquisition_board(
             if f.get("starter_probability") is not None
         )
 
+        # Los tres motivos por los que la regla del once frena una
+        # compra. `NO_MEJORA_JERARQUIA` y `SIN_PRONOSTICO` son del
+        # 17/08/2026, y sin anadirlos aqui el contador volvia a
+        # quedarse corto: paso de 12 bloqueados a 5 el dia que el
+        # veto empezo a hacer MAS trabajo, no menos.
+        VETOS_DEL_ONCE = (
+            "NO_MEJORA_TITULARIDAD",
+            "NO_MEJORA_JERARQUIA",
+            "SIN_PRONOSTICO",
+        )
+
         bloqueados = sum(
             1
             for f in filas
-            if f.get("xi_decision") == "NO_MEJORA_TITULARIDAD"
+            if f.get("xi_decision") in VETOS_DEL_ONCE
         )
 
         # El recorte no puede esconder nuestro propio dinero.

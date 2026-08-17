@@ -42,7 +42,6 @@ from src.analysis.acquisition_valuation import (  # noqa: E402
 
 from src.analysis.candidate_starter_lookup import (  # noqa: E402
     build_starter_lookup,
-    jp_row_probability,
     vote_label,
 )
 
@@ -216,21 +215,46 @@ sin_dato = xi_upgrade_value(
     replaced_starter=TITULAR,
 )
 
+# El motivo cambio de nombre el 17/08/2026. Lo que importa es que
+# la operacion no se hace: sin saber quien entra, no se toca a un
+# titular.
 check(
     "sin pronostico del candidato tampoco se toca a un titular",
-    sin_dato.get("decision") == "NO_MEJORA_TITULARIDAD",
+    sin_dato.get("decision") == "SIN_PRONOSTICO"
+    and sin_dato.get("intent") is None,
     str(sin_dato.get("decision")),
 )
 
 
+# ================================================================
+# LA REGLA SE DIO LA VUELTA EL 17/08/2026
+#
+# Este check decia, literalmente, "sin ningun dato de titularidad
+# la regla NO se aplica", y comprobaba que la compra salia
+# adelante. Era cierto, y era el agujero.
+#
+# La regla del once solo frenaba cuando SABIA que el sustituido
+# era titular. O sea que cuanto menos sabia, mas permitia. Se vio
+# al cambiar de fuente: con el tablero vacio bloqueo cero
+# operaciones y el sistema propuso tres compras a ciegas, entre
+# ellas la de Castrin, que es el caso que abre este mismo fichero.
+#
+# Ahora la ausencia de dato FRENA. Si la fuente se cae, Pepe deja
+# de mejorar el once -que es molesto- en vez de fichar a ciegas
+# -que es caro-.
+# ================================================================
+
+a_ciegas = xi_upgrade_value(
+    candidate_points=150,
+    replaced_points=60,
+    points_market=MERCADO,
+)
+
 check(
-    "sin ningun dato de titularidad la regla no se aplica",
-    xi_upgrade_value(
-        candidate_points=150,
-        replaced_points=60,
-        points_market=MERCADO,
-    ).get("intent")
-    == "XI_UPGRADE",
+    "sin ningun dato de titularidad NO se puja",
+    a_ciegas.get("decision") == "SIN_PRONOSTICO"
+    and a_ciegas.get("value") == 0,
+    str(a_ciegas.get("decision")),
 )
 
 
@@ -356,30 +380,54 @@ print("5. El pronostico de un candidato del mercado")
 print("-" * 60)
 
 
+# ACTUALIZADO EL 17/08/2026
+#
+# Esta seccion probaba Jornada Perfecta y el consenso multifuente,
+# los dos retirados. Ahora hay una sola fuente -FutbolFantasy- y
+# cubre mercado y plantilla por igual, asi que lo que hay que
+# comprobar ya no es "de donde viene cada uno" sino que el mercado
+# llega entero y con jerarquia.
+
 lookup = build_starter_lookup(
     board={
         "players": [
             {
                 "player_id": 5771,
+                "player_name": "Uno de los nuestros",
+                "scope": "ROSTER",
                 "starter_probability": 92.2,
                 "consensus": "STARTER",
-                "source_coverage": 2,
-            }
-        ]
-    },
-    jp={
-        "players": [
-            {
-                "biwenger_id": 38072,
-                "status": "SUPLENTE",
-                "confidence": 72,
-                "identity_scope": "MARKET",
+                "source": "FUTBOLFANTASY",
+                "source_coverage": 1,
+                "hierarchy": {
+                    "value": 50,
+                    "label": "Clave",
+                    "franchise": False,
+                },
+                "availability": {
+                    "code": 0,
+                    "label": "DISPONIBLE",
+                    "can_play": True,
+                },
             },
             {
-                "biwenger_id": 5771,
-                "status": "TITULAR",
-                "confidence": 88,
-                "identity_scope": "ROSTER",
+                "player_id": 38072,
+                "player_name": "Uno del mercado",
+                "scope": "MARKET",
+                "starter_probability": 24.0,
+                "consensus": "BENCH",
+                "source": "FUTBOLFANTASY",
+                "source_coverage": 1,
+                "hierarchy": {
+                    "value": 20,
+                    "label": "Reserva",
+                    "franchise": False,
+                },
+                "availability": {
+                    "code": 0,
+                    "label": "DISPONIBLE",
+                    "can_play": True,
+                },
             },
         ]
     },
@@ -392,33 +440,27 @@ check(
 )
 
 check(
-    "y se sabe que viene de una sola fuente",
-    lookup[38072]["coverage"] == 1
-    and lookup[38072]["source"] == "JORNADA_PERFECTA",
+    "y viene con su jerarquia, que es el dato que aguanta",
+    lookup[38072]["hierarchy_label"] == "Reserva"
+    and lookup[38072]["hierarchy_value"] == 20,
     str(lookup[38072]),
 )
 
 check(
-    "de los nuestros manda el tablero de tres fuentes",
-    lookup[5771]["source"] == "MULTISOURCE"
+    "el mercado se distingue de la plantilla",
+    lookup[38072]["scope"] == "MARKET"
+    and lookup[5771]["scope"] == "ROSTER",
+)
+
+check(
+    "la fuente es unica y se dice cual es",
+    lookup[5771]["source"] == "FUTBOLFANTASY"
     and lookup[5771]["probability"] == 92.2,
     str(lookup[5771]),
 )
 
 check(
-    "un estado que no se entiende no inventa probabilidad",
-    jp_row_probability({"status": "VETE_A_SABER", "confidence": 90})
-    is None,
-)
-
-check(
-    "sin confianza la senal se queda en el 50 %, no en el prior",
-    jp_row_probability({"status": "TITULAR", "confidence": 0})
-    == 50.0,
-)
-
-check(
-    "los cortes de voto son los del consenso multifuente",
+    "los cortes de voto siguen siendo los mismos",
     vote_label(67.0) == "STARTER"
     and vote_label(40.0) == "BENCH"
     and vote_label(55.0) == "UNCERTAIN"
@@ -427,7 +469,7 @@ check(
 
 check(
     "un fichero ausente no tumba nada",
-    build_starter_lookup(board={}, jp={}) == {},
+    build_starter_lookup(board={}) == {},
 )
 
 

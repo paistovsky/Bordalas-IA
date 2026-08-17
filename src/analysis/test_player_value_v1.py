@@ -52,8 +52,42 @@ from src.analysis.player_value_engine import (  # noqa: E402
     estimate_resale_price,
     estimate_season_points,
     speculation_value,
-    xi_upgrade_value,
+    xi_upgrade_value as _xi_upgrade_value,
 )
+
+
+# ============================================================
+# PRONOSTICO NEUTRO
+#
+# Desde el 17/08/2026 `xi_upgrade_value` rechaza cualquier
+# operacion sin pronostico de titularidad de los dos lados: un
+# guardarrail que cuanto menos sabe mas permite estaba al reves,
+# y con el tablero vacio se propusieron tres compras a ciegas.
+#
+# Estos tests miden la ARITMETICA de la mejora del once -tarifa,
+# margen, lo que se recupera vendiendo-, no la regla del once,
+# que tiene su propio fichero. Se les inyecta a los dos lados la
+# MISMA señal neutra: mismo escalon y su probabilidad tipica. Sin
+# veto de por medio, lo que queda medido es la cuenta.
+#
+# Se envuelve la funcion en vez de tocar las nueve llamadas: asi
+# cada test sigue diciendo exactamente lo que decia.
+# ============================================================
+
+NEUTRO = {
+    "probability": 66.0,
+    "consensus": "UNCERTAIN",
+    "hierarchy_value": 40,
+    "hierarchy_label": "Importante",
+}
+
+
+def xi_upgrade_value(*args, **kwargs):
+
+    kwargs.setdefault("candidate_starter", dict(NEUTRO))
+    kwargs.setdefault("replaced_starter", dict(NEUTRO))
+
+    return _xi_upgrade_value(*args, **kwargs)
 
 
 # Medido en el catalogo real del 16/08/2026.

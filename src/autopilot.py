@@ -816,6 +816,89 @@ def reset_rival_intelligence_cache() -> None:
     _RIVAL_INTELLIGENCE_CACHE.clear()
 
 
+def refresh_starter_intelligence(
+    snapshot: dict,
+) -> dict:
+    """
+    Va a buscar el pronostico de titularidad ANTES de valorar.
+
+    EL AGUJERO QUE TAPA
+
+        Nadie lo hacia. `get_starter_lookup()` lee un fichero del
+        disco, y el unico sitio que escribia ese fichero era un
+        script de sombra que se lanza a mano. En produccion, la
+        inteligencia de titularidad era lo que quedo escrito la
+        ultima vez que alguien corrio un script.
+
+        Por eso el tablero del 17/08 decia "0/20 CON PRONOSTICO":
+        no es que la fuente fallase, es que nadie iba a buscarla.
+
+    La cache del proveedor decide si toca bajar de verdad, asi que
+    llamar aqui en cada ciclo no significa scrapear en cada ciclo.
+
+    Blindado a proposito: un fallo del pronostico deja el tablero
+    anterior en pie, pero jamas tumba un ciclo de produccion.
+    """
+
+    try:
+        from src.analysis.calendar_state import (
+            build_calendar_state,
+        )
+
+        from src.analysis.candidate_starter_lookup import (
+            reset_starter_lookup_cache,
+        )
+
+        from src.intelligence.futbolfantasy_provider import (
+            refresh_board,
+        )
+
+        from src.intelligence.jornada_perfecta_provider import (
+            calculate_refresh_seconds,
+        )
+
+        calendario = build_calendar_state(snapshot) or {}
+
+        jornada = int(
+            calendario.get("target_matchday")
+            or 1
+        )
+
+        tablero = refresh_board(
+            snapshot,
+            jornada,
+            ttl_seconds=calculate_refresh_seconds(
+                calendario.get("seconds_to_deadline")
+            ),
+        )
+
+        # El lookup cachea por firma de fichero. Si el tablero se
+        # ha reescrito en esta misma llamada, hay que soltar la
+        # copia vieja antes de valorar.
+        reset_starter_lookup_cache()
+
+        meta = tablero.get("metadata") or {}
+
+        return {
+            "status": (tablero.get("cache") or {}).get("status"),
+            "matchday": tablero.get("matchday"),
+            "matched": meta.get("matched"),
+            "targets": meta.get("targets"),
+            "matched_market": meta.get("matched_market"),
+            "targets_market": meta.get("targets_market"),
+            "errors": meta.get("errors") or [],
+            "error": (tablero.get("cache") or {}).get("error"),
+        }
+
+    except Exception as error:
+        return {
+            "status": "FAILED",
+            "matched": None,
+            "targets": None,
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+
 def build_cycle_acquisition_board(
     snapshot: dict,
 ) -> dict:
@@ -830,6 +913,10 @@ def build_cycle_acquisition_board(
     orchestrator se queda con la ruta antigua en vez de dejar de
     operar.
     """
+
+    # Primero el pronostico, despues la cuenta. Al reves se valora
+    # con el dato de ayer.
+    starter = refresh_starter_intelligence(snapshot)
 
     try:
         inteligencia = load_rival_intelligence(
@@ -854,7 +941,7 @@ def build_cycle_acquisition_board(
             presupuesto.get("total_budget"),
         )
 
-        return build_acquisition_board(
+        tablero = build_acquisition_board(
             snapshot=snapshot,
             rival_intelligence=inteligencia,
             current_user_id=inteligencia.get(
@@ -863,10 +950,20 @@ def build_cycle_acquisition_board(
             available_budget=disponible,
         )
 
+        # Que se vea de donde salio el pronostico con el que se ha
+        # valorado. Si un dia vuelve a haber "0 pujables", esto
+        # dice en el acto si fue por falta de chollos o por falta
+        # de dato.
+        if isinstance(tablero, dict):
+            tablero["starter_refresh"] = starter
+
+        return tablero
+
     except Exception as error:
         return {
             "available": False,
             "targets": [],
+            "starter_refresh": starter,
             "reason": (
                 f"No se pudo construir el tablero de "
                 f"adquisicion: {type(error).__name__}: {error}"

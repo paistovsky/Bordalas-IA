@@ -1,0 +1,834 @@
+"""
+Fija el bloque 1: FutbolFantasy como fuente unica.
+
+QUE VIGILA Y POR QUE
+
+    1. EL PARSER, contra HTML de verdad guardado en data/ff_html.
+       No hay API: el dato viaja en atributos data-* de la pagina,
+       asi que un rediseño de FF nos rompe el parser en silencio.
+       Este test es la alarma. Si un dia baja la cobertura, salta
+       aqui y no en una puja.
+
+    2. LA JERARQUIA, escalon a escalon. 60 es Dios y 0 NO es
+       Descarte: es "sin definir". Confundirlos seria inventarse
+       el dato mas bajo para quien no tiene dato.
+
+    3. LA IDENTIDAD, incluidos los que costaron sangre: Mbappe,
+       Lo Celso, Aleña. Y los que NO deben emparejar: dos
+       apellidos iguales de personas distintas.
+
+    4. EL GUARDARRAIL, que es lo unico de aqui que mueve dinero:
+       sin pronostico no se puja. Se comprueba que la ausencia de
+       dato FRENA, no que deja pasar.
+
+USO
+    python -m src.analysis.test_futbolfantasy_source_v12
+"""
+
+from pathlib import Path
+
+from src.analysis.candidate_starter_lookup import (
+    build_starter_lookup,
+)
+
+from src.analysis.player_value_engine import (
+    xi_upgrade_value,
+)
+
+from src.intelligence.futbolfantasy_provider import (
+    HIERARCHY_LABELS,
+    build_player_entry,
+    match_team,
+    parse_team_page,
+    team_slug,
+)
+
+
+HTML_DIR = Path("data/ff_html")
+
+MERCADO = {"rate_median": 22589}
+
+
+EQUIPOS_LIGA = [
+    "Alavés", "Athletic", "Atlético", "Barcelona", "Betis",
+    "Celta", "Deportivo", "Elche", "Espanyol", "Getafe",
+    "Levante", "Málaga", "Osasuna", "Racing", "Rayo Vallecano",
+    "Real Madrid", "Real Sociedad", "Sevilla", "Valencia",
+    "Villarreal",
+]
+
+
+def test_slugs():
+    """
+    Los veinte equipos del catalogo resuelven pagina.
+
+    `Atletico` se quedaba fuera porque el diccionario decia
+    "atletico madrid" y Biwenger dice "Atletico" a secas. Y el
+    Rayo daba 404 con el slug `rayo`.
+    """
+
+    for equipo in EQUIPOS_LIGA:
+
+        slug = team_slug(equipo)
+
+        assert slug, f"{equipo} no resuelve slug de FutbolFantasy"
+
+    assert team_slug("Atlético") == "atletico"
+    assert team_slug("Rayo Vallecano") == "rayo-vallecano"
+
+
+def test_jerarquia_completa():
+    """
+    La escala, entera, y el 0 fuera de ella.
+    """
+
+    assert HIERARCHY_LABELS[60] == "DIOS"
+    assert HIERARCHY_LABELS[50] == "CLAVE"
+    assert HIERARCHY_LABELS[40] == "IMPORTANTE"
+    assert HIERARCHY_LABELS[30] == "ROTACION"
+    assert HIERARCHY_LABELS[25] == "REVULSIVO"
+    assert HIERARCHY_LABELS[20] == "RESERVA"
+    assert HIERARCHY_LABELS[10] == "DESCARTE"
+
+    # Sin definir no es el escalon de abajo: es ausencia de dato.
+    assert 0 not in HIERARCHY_LABELS
+
+
+def test_parser_sobre_html_real():
+    """
+    Cobertura medida, no prometida.
+
+    Referencia del 17/08/2026: 18 paginas, 464 jugadores, ni uno
+    sin probabilidad. Los margenes van holgados a proposito -las
+    plantillas cambian- pero un desplome se ve.
+    """
+
+    # Solo paginas de EQUIPO. En la misma carpeta viven ahora
+    # lesionados.html y sancionados.html, que tienen otra
+    # estructura y otro parser.
+    slugs_equipo = {
+        team_slug(equipo)
+        for equipo in EQUIPOS_LIGA
+        if team_slug(equipo)
+    }
+
+    ficheros = sorted(
+        fichero
+        for fichero in HTML_DIR.glob("*.html")
+        if fichero.stem in slugs_equipo
+    )
+
+    if not ficheros:
+        print(
+            "    (sin HTML en data/ff_html: corre "
+            "scripts/dump_ff_team_html.py)"
+        )
+        return
+
+    total = 0
+    sin_probabilidad = 0
+    etiquetas = set()
+
+    for fichero in ficheros:
+
+        pagina = parse_team_page(
+            fichero.read_text(encoding="utf-8")
+        )
+
+        jugadores = pagina["players"]
+
+        # Una plantilla de LaLiga no baja de 18 fichas. Si el
+        # parser saca menos, no es que el equipo tenga poca gente.
+        assert len(jugadores) >= 18, (
+            f"{fichero.name}: solo {len(jugadores)} jugadores"
+        )
+
+        total += len(jugadores)
+
+        for jugador in jugadores:
+
+            if jugador["probability"] is None:
+                sin_probabilidad += 1
+
+            if jugador["hierarchy_label"]:
+                etiquetas.add(jugador["hierarchy_label"].upper())
+
+        # El equipo tambien trae contexto.
+        assert pagina["team"]["coach"], (
+            f"{fichero.name}: sin entrenador"
+        )
+
+    assert total >= 350, f"solo {total} jugadores en total"
+
+    assert sin_probabilidad == 0, (
+        f"{sin_probabilidad} jugadores sin probabilidad"
+    )
+
+    # Que aparezcan varios escalones distintos: si un cambio de
+    # DOM dejase la jerarquia en blanco, esto lo caza.
+    assert len(etiquetas) >= 5, f"solo {etiquetas}"
+
+
+def test_identidad():
+    """
+    Los nombres que costaron, y los que no deben cruzarse.
+    """
+
+    from src.intelligence.futbolfantasy_provider import _name_score
+
+    def score(ff_nombre, biwenger):
+        return _name_score(
+            {"ff_name": ff_nombre, "ff_slug": None},
+            {"name": biwenger, "slug": None},
+        )
+
+    # FF escribe el nombre completo; Biwenger el de camiseta.
+    for ff_nombre, biwenger in (
+        ("Kylian Mbappe", "Mbappé"),
+        ("Giovani Lo Celso", "Lo Celso"),
+        ("Carles Aleña", "Aleñá"),
+        ("Federico Valverde", "Valverde"),
+    ):
+        assert score(ff_nombre, biwenger) >= 0.9, (
+            f"{ff_nombre} deberia emparejar con {biwenger}"
+        )
+
+    # Apellido compartido no es identidad.
+    for ff_nombre, biwenger in (
+        ("Andres Garcia", "Pedro Garcia"),
+        ("Marcos Alonso", "Alonso Perez"),
+        ("Jonny Castro", "Castro Otto"),
+    ):
+        assert score(ff_nombre, biwenger) < 0.82, (
+            f"{ff_nombre} NO deberia emparejar con {biwenger}"
+        )
+
+
+def test_identidad_por_equipo():
+    """
+    El emparejamiento ocurre dentro de una plantilla, y el margen
+    sobre el segundo es lo que sostiene la identidad.
+    """
+
+    fichero = HTML_DIR / "alaves.html"
+
+    if not fichero.exists():
+        print("    (sin alaves.html: me lo salto)")
+        return
+
+    pagina = parse_team_page(fichero.read_text(encoding="utf-8"))
+
+    objetivos = [
+        {
+            "id": 1, "name": "Tenaglia", "slug": "nahuel-tenaglia",
+            "team": "Alavés", "price": 3390000, "scope": "MARKET",
+        },
+        {
+            "id": 2, "name": "Sivera", "slug": "antonio-sivera",
+            "team": "Alavés", "price": 4060000, "scope": "ROSTER",
+        },
+        {
+            "id": 3, "name": "Facundo Garcés",
+            "slug": "facundo-garces",
+            "team": "Alavés", "price": 150000, "scope": "MARKET",
+        },
+    ]
+
+    emparejados = match_team(pagina["players"], objetivos)
+
+    assert len(emparejados) == len(objetivos), (
+        f"solo {len(emparejados)} de {len(objetivos)}"
+    )
+
+    for match in emparejados:
+
+        entrada = build_player_entry(
+            match,
+            pagina["team"],
+            "Alavés",
+        )
+
+        assert entrada["match"]["confidence"] == "ALTA", (
+            f"{entrada['player_name']} salio "
+            f"{entrada['match']['confidence']}"
+        )
+
+        assert entrada["starter_probability"] is not None
+
+    # Garces es el caso de estado fisico: FF sabe que no esta
+    # disponible; Biwenger solo dice que no juega.
+    garces = [
+        build_player_entry(m, pagina["team"], "Alavés")
+        for m in emparejados
+        if m["target"]["id"] == 3
+    ][0]
+
+    assert garces["availability"]["label"] == "NO_DISPONIBLE"
+    assert garces["availability"]["can_play"] is False
+
+
+def test_lookup():
+    """
+    El tablero se traduce a lo que consume la valoracion.
+    """
+
+    tablero = {
+        "players": [
+            {
+                "player_id": 7,
+                "player_name": "Mbappé",
+                "team": "Real Madrid",
+                "scope": "MARKET",
+                "starter_probability": 70.0,
+                "consensus": "STARTER",
+                "source": "FUTBOLFANTASY",
+                "source_coverage": 1,
+                "hierarchy": {
+                    "value": 60,
+                    "label": "Dios",
+                    "franchise": True,
+                },
+                "availability": {
+                    "code": 0,
+                    "label": "DISPONIBLE",
+                    "can_play": True,
+                },
+                "match": {"method": "NAME"},
+            },
+            {
+                "player_id": 8,
+                "player_name": "Sin jerarquia",
+                "team": "Getafe",
+                "scope": "ROSTER",
+                "starter_probability": 0.0,
+                "consensus": "BENCH",
+                "source": "FUTBOLFANTASY",
+                "source_coverage": 1,
+                "hierarchy": None,
+                "availability": {
+                    "code": 50,
+                    "label": "LESIONADO",
+                    "can_play": False,
+                },
+                "match": {"method": "NAME"},
+            },
+        ]
+    }
+
+    lookup = build_starter_lookup(tablero)
+
+    assert lookup[7]["probability"] == 70.0
+    assert lookup[7]["franchise"] is True
+    assert lookup[7]["hierarchy_value"] == 60
+    assert lookup[7]["scope"] == "MARKET"
+
+    # Un 0 % es un dato, no una ausencia. Si esto se rompe,
+    # vuelve el "0/20 con pronostico" teniendo pronostico.
+    assert 8 in lookup
+    assert lookup[8]["probability"] == 0.0
+    assert lookup[8]["hierarchy_value"] is None
+    assert lookup[8]["can_play"] is False
+
+
+def test_sin_pronostico_no_se_puja():
+    """
+    EL QUE MUEVE DINERO.
+
+    Con el tablero vacio, la regla del once bloqueaba cero
+    operaciones y el sistema proponia comprar a ciegas. Un
+    guardarrail que cuanto menos sabe mas permite esta al reves.
+    """
+
+    def decision(candidato, sustituido):
+        return xi_upgrade_value(
+            candidate_points=120,
+            replaced_points=20,
+            points_market=MERCADO,
+            candidate_starter=candidato,
+            replaced_starter=sustituido,
+        )
+
+    # Sin dato de ninguno de los dos lados: se frena.
+    assert decision(None, None)["decision"] == "SIN_PRONOSTICO"
+
+    assert (
+        decision({"probability": 70.0}, None)["decision"]
+        == "SIN_PRONOSTICO"
+    )
+
+    assert (
+        decision(None, {"probability": 70.0})["decision"]
+        == "SIN_PRONOSTICO"
+    )
+
+    # Con dato de los dos, manda la regla del once.
+    assert (
+        decision(
+            {"probability": 20.0},
+            {"probability": 70.0},
+        )["decision"]
+        == "NO_MEJORA_TITULARIDAD"
+    )
+
+    # Y una mejora de verdad se valora.
+    buena = decision(
+        {"probability": 80.0},
+        {"probability": 70.0},
+    )
+
+    assert buena.get("value", 0) > 0
+    assert buena.get("intent") == "XI_UPGRADE"
+
+    # Un 0 % del que sale es un dato: se puede sustituir.
+    assert (
+        decision(
+            {"probability": 80.0},
+            {"probability": 0.0},
+        ).get("value", 0)
+        > 0
+    )
+
+
+def test_jerarquia_en_los_puntos():
+    """
+    La base es estructural; el % solo ajusta.
+
+    LO QUE ESTE TEST IMPIDE
+
+        Contar dos veces lo mismo. Jerarquia y porcentaje van de
+        la mano -un Clave ronda el 72 %, un Reserva el 14 %-, asi
+        que multiplicar los dos factores castigaria al mismo
+        jugador por partida doble. El % solo aporta su desviacion
+        respecto a lo normal en su escalon.
+    """
+
+    from src.analysis.player_value_engine import (
+        expected_points_factor,
+    )
+
+    def senal(probabilidad, valor, etiqueta):
+        return {
+            "probability": probabilidad,
+            "hierarchy_value": valor,
+            "hierarchy_label": etiqueta,
+        }
+
+    # Un Clave en su probabilidad tipica no mueve la base.
+    factor, _ = expected_points_factor(senal(71.7, 50, "Clave"))
+    assert abs(factor - 1.0) < 0.01, factor
+
+    # Por debajo de lo suyo, baja.
+    abajo, _ = expected_points_factor(senal(0.0, 50, "Clave"))
+
+    assert abajo < 1.0, abajo
+
+    # Por encima de lo suyo NO sube del historico: decision del
+    # dueño el 17/08/2026. Los puntos de la temporada pasada son
+    # el tope. Se paga mejor, no se paga de mas.
+    arriba, _ = expected_points_factor(senal(90.0, 50, "Clave"))
+
+    assert arriba == 1.0, arriba
+
+    tope, _ = expected_points_factor(senal(100.0, 60, "Dios"))
+
+    assert tope == 1.0, tope
+
+    # Un Reserva con una semana buena NO se convierte en titular.
+    reserva, _ = expected_points_factor(senal(70.0, 20, "Reserva"))
+
+    assert reserva < 0.4, reserva
+
+    # El orden de los escalones se respeta cuando cada uno esta en
+    # SU probabilidad normal. Ahi manda la base estructural.
+    from src.analysis.player_value_engine import (
+        HIERARCHY_TYPICAL_PROBABILITY,
+    )
+
+    anterior = None
+
+    for valor, etiqueta in (
+        (50, "Clave"),
+        (40, "Importante"),
+        (30, "Rotacion"),
+        (25, "Revulsivo"),
+        (20, "Reserva"),
+        (10, "Descarte"),
+    ):
+        factor, _ = expected_points_factor(
+            senal(
+                HIERARCHY_TYPICAL_PROBABILITY[valor],
+                valor,
+                etiqueta,
+            )
+        )
+
+        if anterior is not None:
+            assert factor < anterior, (etiqueta, factor, anterior)
+
+        anterior = factor
+
+    # A UNA MISMA probabilidad los dos escalones vecinos quedan muy
+    # juntos: un Clave al 50 % esta mas lejos de lo suyo (72 %) que
+    # un Importante al 50 % de lo suyo (66 %), asi que la ventaja
+    # estructural del Clave casi se le consume.
+    #
+    # Con el peso semanal en 0,5 llegaban a cruzarse. Con 0,15 ya
+    # no, pero la distancia sigue siendo minima, y eso es lo que
+    # importa: el porcentaje de una jornada no puede dar la vuelta
+    # a lo que un jugador es.
+    clave_50, _ = expected_points_factor(senal(50.0, 50, "Clave"))
+    imp_50, _ = expected_points_factor(senal(50.0, 40, "Importante"))
+
+    assert abs(clave_50 - imp_50) < 0.05, (clave_50, imp_50)
+
+    # Sin jerarquia no se rompe: se cae al comportamiento viejo.
+    sin_jerarquia, motivo = expected_points_factor(
+        senal(70.0, None, None)
+    )
+
+    assert 0 < sin_jerarquia <= 1.0
+    assert "sin jerarquia" in motivo
+
+
+def test_veto_estructural():
+    """
+    Se veta bajar dos escalones, no que un % cruce el 67.
+    """
+
+    def senal(probabilidad, valor, etiqueta):
+        return {
+            "probability": probabilidad,
+            "hierarchy_value": valor,
+            "hierarchy_label": etiqueta,
+        }
+
+    def decision(candidato, sustituido):
+        return xi_upgrade_value(
+            candidate_points=120,
+            replaced_points=20,
+            points_market=MERCADO,
+            candidate_starter=candidato,
+            replaced_starter=sustituido,
+        )
+
+    clave = senal(70.0, 50, "Clave")
+
+    # Dos escalones o mas: fuera.
+    assert (
+        decision(senal(70.0, 25, "Revulsivo"), clave)["decision"]
+        == "NO_MEJORA_JERARQUIA"
+    )
+
+    assert (
+        decision(senal(70.0, 30, "Rotacion"), clave)["decision"]
+        == "NO_MEJORA_JERARQUIA"
+    )
+
+    # Un escalon: se permite y se valora.
+    assert (
+        decision(senal(70.0, 40, "Importante"), clave).get("value", 0)
+        > 0
+    )
+
+    # Lo que ya no debe pasar: vetar porque el % bajo de 67 a 63
+    # entre dos jugadores del mismo escalon.
+    assert (
+        decision(senal(63.0, 50, "Clave"), clave).get("value", 0) > 0
+    )
+
+    # Pero un suplente claro sigue frenado, aunque sea Clave.
+    assert (
+        decision(senal(20.0, 50, "Clave"), clave)["decision"]
+        == "NO_MEJORA_TITULARIDAD"
+    )
+
+    # Y subir de escalon es justo lo que queremos que ocurra.
+    assert (
+        decision(
+            senal(80.0, 50, "Clave"),
+            senal(30.0, 20, "Reserva"),
+        ).get("value", 0)
+        > 0
+    )
+
+
+def test_partes_de_baja():
+    """
+    Una gripe y un cruzado dejan de ser el mismo 0 %.
+
+    Contra el HTML real de /laliga/lesionados y /laliga/sancionados.
+    """
+
+    import json
+    from datetime import datetime, timezone
+
+    from src.analysis.player_value_engine import (
+        expected_points_factor,
+    )
+
+    from src.intelligence import futbolfantasy_absences as bajas
+
+    lesionados_html = HTML_DIR / "lesionados.html"
+
+    if not lesionados_html.exists():
+        print(
+            "    (sin lesionados.html: corre "
+            "scripts/dump_ff_team_html.py)"
+        )
+        return
+
+    calendario = json.loads(
+        bajas.CALENDAR_FILE.read_text(encoding="utf-8")
+    )
+
+    fechas = bajas.matchday_dates(calendario)
+
+    assert len(fechas) >= 30, len(fechas)
+
+    partes = bajas.parse_injuries(
+        lesionados_html.read_text(encoding="utf-8"),
+        current_matchday=2,
+        fechas=fechas,
+        today=datetime(2026, 8, 17, tzinfo=timezone.utc),
+    )
+
+    assert len(partes) >= 20, len(partes)
+
+    # Una baja larga tiene que salir larga.
+    largas = [
+        p
+        for p in partes.values()
+        if (p.get("matchdays_out") or 0) >= 10
+    ]
+
+    assert largas, "ninguna baja larga detectada"
+
+    # Y una duda no es una baja.
+    #
+    # OJO: manda el TEXTO, no la clase de gravedad. FF mete en
+    # `gravedad-1` tanto "Duda para la jornada 2" como "Baja hasta
+    # finales de agosto", que son cosas distintas -uno puede jugar
+    # el sabado y el otro no-. Si algun dia se prefiere la clase
+    # al texto, este test lo cazara.
+    dudas = [
+        p
+        for p in partes.values()
+        if str(p.get("prognosis") or "").lower().startswith("duda")
+    ]
+
+    assert dudas, "ninguna duda leida"
+
+    for parte in dudas:
+        assert parte["matchdays_out"] == 0, parte
+
+    # Y al reves: una baja que aun no ha terminado nunca sale como
+    # cero, aunque FF la haya etiquetado como duda.
+    #
+    # Se comparan contra la jornada 2, que es la del fixture. Una
+    # "baja confirmada para la jornada 1" ya se cumplio y vale
+    # cero: eso es correcto, no un fallo.
+    pendientes = [
+        p
+        for p in partes.values()
+        if str(p.get("prognosis") or "").lower().startswith("baja")
+        and p.get("basis") in ("FECHA", "JORNADA")
+        and (p.get("return_matchday") or 0) > 2
+    ]
+
+    assert pendientes, "ninguna baja pendiente"
+
+    for parte in pendientes:
+        assert (parte.get("matchdays_out") or 0) >= 1, parte
+
+    # Ante una horquilla -"hasta octubre-noviembre"- se coge el
+    # mes tardio. Acortar una baja infla el valor del jugador.
+    horquillas = [
+        p
+        for p in partes.values()
+        if "-" in str(p.get("prognosis") or "")
+        and p.get("matchdays_out")
+    ]
+
+    for parte in horquillas:
+        assert parte["basis"] == "FECHA", parte
+
+    # "Baja indefinida" se marca distinto de "no lo he entendido".
+    indefinidas = [
+        p
+        for p in partes.values()
+        if p.get("basis") == "INDEFINIDA"
+    ]
+
+    for parte in indefinidas:
+        assert parte["matchdays_out"] is None
+
+    sanciones_html = HTML_DIR / "sancionados.html"
+
+    if sanciones_html.exists():
+
+        sanciones = bajas.parse_suspensions(
+            sanciones_html.read_text(encoding="utf-8")
+        )
+
+        assert sanciones, "ninguna sancion leida"
+
+        for parte in sanciones.values():
+            assert parte["matchdays_out"] is not None
+
+    # ------------------------------------------------------
+    # Y LO QUE IMPORTA: QUE MUEVA EL VALOR
+    # ------------------------------------------------------
+
+    def dios(ausencia):
+        return {
+            "probability": 0.0,
+            "hierarchy_value": 60,
+            "hierarchy_label": "Dios",
+            "matchday": 2,
+            "absence": ausencia,
+        }
+
+    corta, _ = expected_points_factor(
+        dios({"matchdays_out": 1, "basis": "JORNADA"})
+    )
+
+    media, _ = expected_points_factor(
+        dios({"matchdays_out": 6, "basis": "FECHA"})
+    )
+
+    larga, _ = expected_points_factor(
+        dios({"matchdays_out": 18, "basis": "FECHA"})
+    )
+
+    assert corta > media > larga, (corta, media, larga)
+
+    # Mes y medio fuera tiene que doler de verdad, y una jornada
+    # poco.
+    assert corta > 0.85, corta
+    assert larga < 0.6, larga
+
+    # Una baja indefinida no puede salir gratis.
+    indefinida, _ = expected_points_factor(
+        dios({"matchdays_out": None, "basis": "INDEFINIDA"})
+    )
+
+    assert indefinida < corta, (indefinida, corta)
+
+    # ORDEN QUE PIDIO EL DUEÑO (17/08/2026)
+    #
+    # Una baja confirmada de una jornada nunca puede valer mas que
+    # una simple duda, y cuantas mas jornadas se pierda, menos
+    # vale. Con el peso semanal en 0,5 esto se incumplia: la duda
+    # penalizaba mas que la baja.
+    duda, _ = expected_points_factor(
+        {
+            "probability": 0.0,
+            "hierarchy_value": 60,
+            "hierarchy_label": "Dios",
+            "matchday": 2,
+        }
+    )
+
+    anterior = duda
+
+    for jornadas in (1, 2, 3, 4, 6, 10, 18):
+
+        factor, _ = expected_points_factor(
+            dios({"matchdays_out": jornadas, "basis": "FECHA"})
+        )
+
+        assert factor <= anterior, (jornadas, factor, anterior)
+
+        anterior = factor
+
+
+def test_a_quien_se_conserva():
+    """
+    Un Dios roto hasta marzo se suelta antes que un Clave sano.
+
+    EL FALLO QUE ARREGLA
+
+        El orden de permanencia terminaba en "el mas caro se
+        conserva". El precio va justo al reves de lo que hace
+        falta cuando alguien se rompe: quien se parte el cruzado
+        en agosto valdra mucho menos en octubre, y era a quien el
+        guardarrail agarraba con mas fuerza.
+
+        Y un Dios de baja una semana y otro de baja hasta enero
+        eran, para esta lista, el mismo jugador.
+    """
+
+    from src.analysis.position_guardrail import (
+        _keep_priority,
+        _keep_value,
+    )
+
+    # Sin señal se comporta como antes: manda el precio.
+    assert _keep_value({"id": 1, "price": 10_000_000}) == 10_000_000
+
+    # Con señal, la baja descuenta.
+    sano = _keep_value(
+        {"id": 1, "price": 25_440_000, "keep_factor": 1.0}
+    )
+
+    roto = _keep_value(
+        {"id": 1, "price": 25_440_000, "keep_factor": 0.24}
+    )
+
+    assert roto < sano
+
+    # Y el orden se da la vuelta frente a uno mas barato pero sano.
+    plantel = [
+        {
+            "id": 1,
+            "price": 25_440_000,
+            "keep_factor": 0.24,
+            "in_lineup": False,
+        },
+        {
+            "id": 2,
+            "price": 10_000_000,
+            "keep_factor": 1.0,
+            "in_lineup": False,
+        },
+    ]
+
+    orden = sorted(plantel, key=_keep_priority)
+
+    assert orden[0]["id"] == 2, (
+        "el Clave sano tiene que conservarse antes que el Dios roto"
+    )
+
+    # Estar en el once sigue mandando por encima de todo: si juega,
+    # es que puede jugar.
+    plantel[0]["in_lineup"] = True
+
+    assert sorted(plantel, key=_keep_priority)[0]["id"] == 1
+
+
+def main():
+
+    pruebas = [
+        test_slugs,
+        test_jerarquia_completa,
+        test_parser_sobre_html_real,
+        test_identidad,
+        test_identidad_por_equipo,
+        test_lookup,
+        test_sin_pronostico_no_se_puja,
+        test_jerarquia_en_los_puntos,
+        test_veto_estructural,
+        test_partes_de_baja,
+        test_a_quien_se_conserva,
+    ]
+
+    for prueba in pruebas:
+        prueba()
+        print(f"  OK  {prueba.__name__}")
+
+    print()
+    print("FutbolFantasy v12: todo en verde.")
+
+
+if __name__ == "__main__":
+    main()

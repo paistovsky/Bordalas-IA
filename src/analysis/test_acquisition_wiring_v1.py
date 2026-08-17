@@ -54,6 +54,39 @@ from src.analysis import (  # noqa: E402
 )
 
 
+class _TitularidadNeutra(dict):
+    """
+    Un lookup que da a CUALQUIER jugador la misma señal.
+
+    Importante en su probabilidad tipica: no es titular indiscutible
+    ni suplente, y sobre todo es IGUAL para los dos lados de una
+    sustitucion, con lo que ningun veto se dispara y lo que queda
+    medido es el cableado.
+
+    Se sobreescribe `__bool__` porque el consumidor hace
+    `starter_lookup or {}` y un dict vacio es falso: sin esto, la
+    señal se perderia por el camino.
+    """
+
+    SEÑAL = {
+        "probability": 66.0,
+        "consensus": "UNCERTAIN",
+        "hierarchy_value": 40,
+        "hierarchy_label": "Importante",
+        "source": "TEST",
+        "coverage": 1,
+    }
+
+    def get(self, key, default=None):
+        return dict(self.SEÑAL)
+
+    def __bool__(self):
+        return True
+
+
+TITULARIDAD_NEUTRA = _TitularidadNeutra()
+
+
 class SinRed:
     def __init__(self, candidatos):
         self.candidatos = candidatos
@@ -85,9 +118,21 @@ class SinRed:
         # una pagina no esta probando nada. La regla del once
         # tiene su propio fichero -`test_starter_aware_xi_v1`- y
         # ahi el dato se inyecta a mano.
+        #
+        # 17/08/2026: anularlo con un diccionario VACIO dejo de
+        # valer. Desde que "sin pronostico no se puja", el vacio
+        # ya no es neutro: bloquea todas las compras y estos tests
+        # median cero.
+        #
+        # Se anula con una señal NEUTRA en vez de con la ausencia:
+        # todo el mundo del mismo escalon y en su probabilidad
+        # tipica. Sigue sin depender de lo que haya scrapeado
+        # nadie, que era el objetivo, y ademas no dispara ningun
+        # veto -mismo escalon, cero escalones de bajada-, con lo
+        # que lo que se mide sigue siendo el cableado.
         self.previos["starter"] = starter_mod.get_starter_lookup
-        starter_mod.get_starter_lookup = lambda: {}
-        valuation_mod.get_starter_lookup = lambda: {}
+        starter_mod.get_starter_lookup = lambda: TITULARIDAD_NEUTRA
+        valuation_mod.get_starter_lookup = lambda: TITULARIDAD_NEUTRA
 
         return self
 

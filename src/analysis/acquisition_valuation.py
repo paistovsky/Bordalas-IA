@@ -286,6 +286,7 @@ def value_candidate(
                 points=estimacion,
                 as_xi=como_xi,
                 as_speculation=como_trading,
+                starter=titularidad,
             )
 
         mejor = max(
@@ -323,13 +324,28 @@ def _sin_valor(
     points: dict | None = None,
     as_xi: dict | None = None,
     as_speculation: dict | None = None,
+    starter: dict | None = None,
 ) -> dict:
+    """
+    EL PRONOSTICO VIAJA TAMBIEN CUANDO SE DICE QUE NO.
+
+        `starter` no estaba aqui, y era el motivo de que la
+        cabecera del tablero dijese "8 de 20 con pronostico"
+        teniendo 44 de 47. Un candidato rechazado perdia su
+        pronostico por el camino, y justamente los rechazados son
+        los que hay que poder explicar: la fila decia "tit=None"
+        mientras su propio motivo rezaba "esta 20 % titular".
+
+        El dato estaba en la decision y se perdia al enseñarlo.
+    """
+
     return {
         "value": 0,
         "intent": None,
         "decision": decision,
         "reason": reason,
         "points": points,
+        "starter": starter,
         "as_xi": as_xi,
         "as_speculation": as_speculation,
         "reasons": [reason],
