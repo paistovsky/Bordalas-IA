@@ -383,6 +383,20 @@ WEEKLY_ADJUSTMENT_WEIGHT = 0.15
 MIN_EXPECTED_FACTOR = 0.05
 MAX_EXPECTED_FACTOR = 1.00
 
+# EL RIVAL SI PUEDE EMPUJAR POR ENCIMA DEL TECHO
+#
+# Con el tope en 1,0 a secas, el calendario solo podia hacer daño
+# a los mejores: un Clave o un Dios ya estan pegados al techo, asi
+# que el -10 % de un rival dificil bajaba y el +10 % de uno
+# asequible no subia nada. Medido: Dios +0,0 % / -9,3 %, Rotacion
+# +10,0 % / -10,0 %.
+#
+# El techo existe para no inventarse valor de la nada, no para
+# ignorar que este sabado le toca el colista. Asi que el historico
+# sigue siendo el tope de la base, y solo el rival puede pasar de
+# ahi, y solo hasta un 10 %.
+MAX_FACTOR_WITH_FIXTURE = 1.10
+
 
 # La escalera, en orden. La distancia se mide en ESCALONES, no en
 # el numero de FF, porque la escala no es lineal: de Revulsivo a
@@ -707,7 +721,23 @@ def expected_points_factor(
             f"tipico de su escalon"
         )
 
-    # 2. El rival de la proxima jornada, con peso pequeño.
+    # 2. Las jornadas que se pierde, que es lo que de verdad manda
+    #    cuando la baja es larga.
+    if ausencia is not None:
+
+        factor *= ausencia
+
+        motivos.append(motivo_ausencia)
+
+    # EL TECHO DEL HISTORICO, ANTES DEL RIVAL
+    #
+    # Todo lo de arriba -lo que un jugador es y lo que va a estar
+    # disponible- no puede pasar de sus puntos del año pasado. Esa
+    # fue la decision del dueño.
+    factor = min(factor, MAX_EXPECTED_FACTOR)
+
+    # 3. Y ahora si, el rival, que es lo unico que puede asomar por
+    #    encima de ese techo.
     rival, motivo_rival = fixture_factor(starter)
 
     if rival is not None:
@@ -716,17 +746,9 @@ def expected_points_factor(
 
         motivos.append(motivo_rival)
 
-    # 3. Las jornadas que se pierde, que es lo que de verdad manda
-    #    cuando la baja es larga.
-    if ausencia is not None:
-
-        factor *= ausencia
-
-        motivos.append(motivo_ausencia)
-
     factor = max(
         MIN_EXPECTED_FACTOR,
-        min(factor, MAX_EXPECTED_FACTOR),
+        min(factor, MAX_FACTOR_WITH_FIXTURE),
     )
 
     return (factor, "; ".join(motivos))

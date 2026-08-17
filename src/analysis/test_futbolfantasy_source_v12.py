@@ -1189,6 +1189,198 @@ def test_rival_y_previsibilidad():
     assert predictability_confidence({}) == (None, None)
 
 
+def test_intencion_de_venta_solo_observa():
+    """
+    Pepe dice a quien soltaria. Y no lo hace.
+
+    LO QUE VIGILA
+
+        1. Que PROPONGA. Hasta hoy solo se vendia cuando faltaba
+           caja, asi que un Reserva podia pudrirse en la plantilla
+           mientras la caja aguantase.
+
+        2. Que el liston sea mas alto que el de vender por
+           necesidad: proponer una venta sin necesitar el dinero
+           pide mas conviccion.
+
+        3. Que el guardarrail posicional mande por encima.
+
+        4. Y sobre todo: QUE NO VENDA. Este modulo no puede
+           importar un executor ni devolver nada ejecutable. Una
+           venta mala no se corrige: el jugador se lo lleva otro.
+    """
+
+    import ast
+    import glob
+    import inspect
+    import json
+
+    from src.analysis import sale_intent
+
+    # EL CANDADO DE VERDAD: que no haya por donde escribir.
+    #
+    # Se miran las IMPORTACIONES, no el texto. La primera version
+    # buscaba la palabra "executor" en el codigo fuente y saltaba
+    # con el propio comentario que explica que no hay executor.
+    arbol = ast.parse(inspect.getsource(sale_intent))
+
+    importados = set()
+
+    for nodo in ast.walk(arbol):
+
+        if isinstance(nodo, ast.Import):
+            for alias in nodo.names:
+                importados.add(alias.name)
+
+        elif isinstance(nodo, ast.ImportFrom):
+            importados.add(nodo.module or "")
+
+    for modulo in importados:
+        for prohibido in ("executor", "write_client", "requests"):
+            assert prohibido not in modulo, (
+                f"sale_intent importa {modulo}: solo observa"
+            )
+
+    # Y que no llame a nada que escriba.
+    llamadas = {
+        nodo.func.id
+        for nodo in ast.walk(arbol)
+        if isinstance(nodo, ast.Call)
+        and isinstance(nodo.func, ast.Name)
+    }
+
+    assert "open" not in llamadas, "sale_intent no escribe ficheros"
+
+    snapshots = sorted(glob.glob("data/snapshot_*.json"))
+
+    if not snapshots:
+        print("    (sin snapshots: me lo salto)")
+        return
+
+    snapshot = json.loads(
+        open(snapshots[-1], encoding="utf-8").read()
+    )
+
+    intencion = sale_intent.build_sale_intent(snapshot)
+
+    assert intencion["available"], intencion.get("reason")
+    assert intencion["mode"] == "OBSERVACION"
+
+    # El liston de proponer va por encima del de vigilar.
+    assert (
+        intencion["propose_score"] > intencion["watch_score"]
+    )
+
+    for ficha in intencion["proposals"]:
+
+        assert ficha["sale_score"] >= intencion["propose_score"]
+
+        # Toda propuesta tiene que poder explicarse.
+        assert ficha["reasons"], ficha["name"]
+
+        # Publicar, no vender: aceptar una oferta tiene su propio
+        # motor con sus propios frenos.
+        assert ficha["action"] == "PUBLICAR_EN_MERCADO"
+
+    for ficha in intencion["watch"]:
+        assert ficha["sale_score"] < intencion["propose_score"]
+        assert "action" not in ficha
+
+    # Un bloqueo del guardarrail siempre dice por que.
+    for ficha in intencion["blocked"]:
+        assert ficha.get("blocked_reason")
+
+    # Con el liston imposible no se propone a nadie, y no revienta.
+    vacio = sale_intent.build_sale_intent(
+        snapshot,
+        propose_score=1000,
+    )
+
+    assert vacio["available"]
+    assert vacio["proposals"] == []
+
+    # Y un snapshot roto se dice, no se lanza.
+    roto = sale_intent.build_sale_intent({})
+
+    assert roto["available"] is False
+    assert roto["reason"]
+    assert roto["proposals"] == []
+
+
+def test_se_puede_comprar_con_saldo_negativo():
+    """
+    La compra no se bloquea por deber dinero.
+
+    POR QUE
+
+        Habia un `balance >= 0` delante de todo el bloque de
+        compra. Con el saldo en -264.032 EUR, el ciclo del
+        17/08/2026 tenia tres objetivos marcados PUJAR en el
+        tablero y no ejecutaba ninguno: ni siquiera llegaba a
+        mirarlos.
+
+        No era una proteccion, era una puerta vieja. El sistema de
+        deuda segura que vino despues ya decide esto mucho mejor,
+        y esta en la MISMA condicion: con saldo negativo,
+        `budget["enabled"]` exige garantia de solvencia, ventana
+        de calendario abierta y margen de deuda positivo.
+
+        El freno pasa de "¿tienes dinero?" a "¿puedes devolverlo y
+        te da tiempo a venderlo?".
+
+    QUE VIGILA ESTE TEST
+
+        Que nadie vuelva a poner la puerta. Se mira el arbol del
+        codigo, no el texto: se busca el `if` que autoriza la
+        compra y se comprueba que no compara el saldo.
+    """
+
+    import ast
+    import inspect
+
+    from src.analysis import decision_orchestrator
+
+    arbol = ast.parse(inspect.getsource(decision_orchestrator))
+
+    guardas = []
+
+    for nodo in ast.walk(arbol):
+
+        if not isinstance(nodo, ast.If):
+            continue
+
+        cuerpo = " ".join(ast.dump(hijo) for hijo in nodo.body)
+
+        # El bloque que crea la accion de compra.
+        if "SPECULATION_BUY" not in cuerpo:
+            continue
+
+        if "BUY_SPECULATION" not in cuerpo:
+            continue
+
+        guardas.append(ast.dump(nodo.test))
+
+    assert guardas, (
+        "no se encuentra el bloque que autoriza la compra"
+    )
+
+    for guarda in guardas:
+
+        assert "balance" not in guarda, (
+            "la compra ha vuelto a bloquearse por saldo negativo. "
+            "Quien decide con deuda es el presupuesto de "
+            "especulacion, que mira garantia, ventana de "
+            "calendario y margen: no la caja."
+        )
+
+        # Y que el presupuesto siga siendo condicion. Si esto
+        # desaparece, se compra sin ningun freno.
+        assert "enabled" in guarda, (
+            "el presupuesto ha dejado de ser condicion para "
+            "comprar: eso si seria quitar la red"
+        )
+
+
 def main():
 
     pruebas = [
@@ -1206,6 +1398,8 @@ def main():
         test_la_cache_comprueba_a_quien_cubre,
         test_a_quien_se_vende,
         test_rival_y_previsibilidad,
+        test_intencion_de_venta_solo_observa,
+        test_se_puede_comprar_con_saldo_negativo,
     ]
 
     for prueba in pruebas:

@@ -2149,6 +2149,38 @@ def build_global_decision(
         }
     )
 
+    # ============================================================
+    # SE PUEDE COMPRAR CON SALDO NEGATIVO
+    #
+    # Aqui habia un `balance >= 0` que bloqueaba la compra entera
+    # mientras se debiese un euro. Retirado el 17/08/2026 por
+    # decision del dueño, y no es una relajacion: es quitar una
+    # puerta vieja que contradecia al sistema que vino despues.
+    #
+    # QUIEN PROTEGE AHORA
+    #
+    #     `budget.get("enabled")`, que ya esta en esta misma
+    #     condicion y es mucho mas fino. Con saldo negativo, el
+    #     presupuesto de especulacion exige TODO esto antes de
+    #     abrir un euro:
+    #
+    #       - SOLVENCY_GUARANTEE garantizada: que el plan de
+    #         ventas cubra la deuda.
+    #       - `debt_window_open`: que el calendario permita
+    #         endeudarse ahora. Siempre se puede vender la vispera
+    #         de la jornada; a noventa minutos del partido, no.
+    #       - `temporary_debt.allowed` y un `headroom` positivo,
+    #         que es cuanta deuda MAS es segura.
+    #
+    #     Y el importe de la puja sale de ese mismo presupuesto,
+    #     asi que la exposicion queda acotada por el headroom, no
+    #     por la caja.
+    #
+    # O sea que el freno no desaparece: pasa de "¿tienes dinero?"
+    # a "¿puedes devolverlo y te da tiempo a venderlo?", que es la
+    # pregunta correcta en un fantasy.
+    # ============================================================
+
     if (
         speculation_phase_allowed
         and
@@ -2159,8 +2191,6 @@ def build_global_decision(
         executable_buys
         and
         not hard_safety_mode
-        and
-        balance >= 0
     ):
 
         # ----------------------------------------------------

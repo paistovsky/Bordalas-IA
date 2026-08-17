@@ -3557,6 +3557,42 @@ def run_cycle(
     except Exception:
         pass
 
+    # ----------------------------------------------------------
+    # A QUIEN SOLTARIA PEPE SI NADIE LE OBLIGASE
+    #
+    # OBSERVACION PURA. No publica, no vende, no toca Biwenger.
+    #
+    # Hasta hoy Pepe solo proponia ventas cuando faltaba caja, asi
+    # que un jugador podia deshacerse solo -Reserva, o roto hasta
+    # enero- y nadie decia nada mientras la caja aguantase.
+    #
+    # Esto lo dice. Ejecutarlo es otra decision, y del dueño.
+    # ----------------------------------------------------------
+    try:
+        from src.analysis.sale_intent import (
+            build_sale_intent,
+            describe_sale_intent,
+        )
+
+        intencion_venta = build_sale_intent(snapshot)
+
+        print()
+        print("-" * 70)
+        print("INTENCION DE VENTA (OBSERVACION)")
+        print("-" * 70)
+
+        for linea in describe_sale_intent(intencion_venta):
+            print(linea)
+
+        if isinstance(result, dict):
+            result["state"]["sale_intent"] = intencion_venta
+
+    except Exception as error:
+        print(
+            f"  Intencion de venta no disponible: "
+            f"{type(error).__name__}: {error}"
+        )
+
     competitive_observer = (
         build_competitive_observer(
             snapshot,
