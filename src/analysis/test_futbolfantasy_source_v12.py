@@ -806,6 +806,183 @@ def test_a_quien_se_conserva():
     assert sorted(plantel, key=_keep_priority)[0]["id"] == 1
 
 
+def test_la_cache_comprueba_a_quien_cubre():
+    """
+    Una caché fresca que no cubre el mercado de hoy NO vale.
+
+    EL FALLO QUE ARREGLA, VISTO EN EL PRIMER CICLO REAL
+
+        17/08/2026, 20:25. El tablero de las 17:06 tenia hora y
+        media de vida, la jornada correcta y 59 jugadores, asi que
+        se sirvio como valido.
+
+        Pero el mercado de Biwenger rota: de los 48 candidatos de
+        ese momento, 19 no estaban en el tablero -Lunin, Tenaglia,
+        Mendy, Diego Conde...-. Ninguno tenia pronostico y la
+        cabecera cayo de 18/20 a 8/20 sin que nada fallase ni nadie
+        se enterase.
+
+        Mirar la edad y la jornada no bastaba. Hay que mirar a
+        quien cubre.
+    """
+
+    import json
+    import tempfile
+    from datetime import datetime, timezone
+    from pathlib import Path
+
+    from src.intelligence import futbolfantasy_provider as ff
+
+    if not (HTML_DIR / "alaves.html").exists():
+        print("    (sin HTML de equipos: me lo salto)")
+        return
+
+    class RespuestaFalsa:
+        def __init__(self, texto):
+            self.text = texto
+
+        def raise_for_status(self):
+            return None
+
+    class SesionDeDisco:
+        """
+        Sirve las paginas ya descargadas. Cuenta cuantas pide, que
+        es la otra mitad de lo que se comprueba aqui: al completar
+        no se pueden bajar los veinte equipos otra vez.
+        """
+
+        def __init__(self):
+            self.pedidas = []
+
+        def get(self, url, **kwargs):
+            self.pedidas.append(url)
+
+            nombre = url.rstrip("/").rsplit("/", 1)[-1]
+
+            fichero = HTML_DIR / f"{nombre}.html"
+
+            if not fichero.exists():
+                return RespuestaFalsa("<html></html>")
+
+            return RespuestaFalsa(
+                fichero.read_text(encoding="utf-8")
+            )
+
+    snapshots = sorted(Path("data").glob("snapshot_*.json"))
+
+    if not snapshots:
+        print("    (sin snapshots: me lo salto)")
+        return
+
+    snapshot = json.loads(
+        snapshots[-1].read_text(encoding="utf-8")
+    )
+
+    objetivos = ff.build_targets(snapshot)
+
+    assert len(objetivos) > 20, len(objetivos)
+
+    # Un tablero recien hecho que solo cubre a la mitad.
+    mitad = objetivos[: len(objetivos) // 2]
+
+    fuera = [
+        o
+        for o in objetivos[len(objetivos) // 2:]
+        if o.get("team")
+    ]
+
+    assert fuera, "el fixture necesita objetivos sin cubrir"
+
+    cacheado = {
+        "version": "V12.0",
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "matchday": 2,
+        "metadata": {},
+        "players": [
+            {
+                "player_id": o["id"],
+                "player_name": o["name"],
+                "team": o["team"],
+                "scope": o["scope"],
+                "starter_probability": 70.0,
+                "consensus": "STARTER",
+                "source": "FUTBOLFANTASY",
+                "source_coverage": 1,
+                "hierarchy": None,
+                "availability": {"code": 0, "label": "DISPONIBLE"},
+                "match": {"method": "NAME", "confidence": "ALTA"},
+                "ff": {"slug": None},
+            }
+            for o in mitad
+        ],
+        "cache": {},
+    }
+
+    original = ff.BOARD_FILE
+
+    with tempfile.TemporaryDirectory() as carpeta:
+
+        ff.BOARD_FILE = Path(carpeta) / "board.json"
+
+        ff.BOARD_FILE.write_text(
+            json.dumps(cacheado, ensure_ascii=False),
+            encoding="utf-8",
+        )
+
+        try:
+            sesion = SesionDeDisco()
+
+            resultado = ff.refresh_board(
+                snapshot,
+                2,
+                session=sesion,
+            )
+
+            estado = (resultado.get("cache") or {}).get("status")
+
+            # Lo que fallaba: esto salia "HIT".
+            assert estado == "TOPPED_UP", estado
+
+            cubiertos = {
+                p["player_id"] for p in resultado["players"]
+            }
+
+            sin_cubrir = [
+                o["name"]
+                for o in objetivos
+                if o.get("team")
+                and ff.team_slug(o["team"])
+                and o["id"] not in cubiertos
+            ]
+
+            # Que los que ya estaban no se pierdan al completar.
+            for o in mitad:
+                assert o["id"] in cubiertos, o["name"]
+
+            # Y que no se rebaje la liga entera para añadir unos
+            # pocos: solo los equipos que hacen falta.
+            equipos_pedidos = [
+                u for u in sesion.pedidas if "/equipos/" in u
+            ]
+
+            equipos_necesarios = {
+                o["team"] for o in fuera if ff.team_slug(o["team"])
+            }
+
+            assert len(equipos_pedidos) <= len(equipos_necesarios), (
+                f"pidio {len(equipos_pedidos)} paginas para "
+                f"{len(equipos_necesarios)} equipos"
+            )
+
+            print(
+                f"    (completado: {len(equipos_pedidos)} paginas, "
+                f"{len(sin_cubrir)} sin emparejar)"
+            )
+
+        finally:
+            ff.BOARD_FILE = original
+
+
 def main():
 
     pruebas = [
@@ -820,6 +997,7 @@ def main():
         test_veto_estructural,
         test_partes_de_baja,
         test_a_quien_se_conserva,
+        test_la_cache_comprueba_a_quien_cubre,
     ]
 
     for prueba in pruebas:

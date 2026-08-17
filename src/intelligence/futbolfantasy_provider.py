@@ -1085,6 +1085,31 @@ def refresh_board(
 
     cache = load_board()
 
+    objetivos = build_targets(snapshot)
+
+    # ------------------------------------------------------
+    # LA CACHE TIENE QUE COMPROBAR A QUIEN CUBRE
+    #
+    # El primer ciclo real -17/08/2026, 20:25- lo destapo: el
+    # tablero de las 17:06 tenia hora y media, la jornada correcta
+    # y 59 jugadores, asi que se sirvio como valido. Pero EL
+    # MERCADO DE BIWENGER ROTA: de los 48 candidatos de ese
+    # momento, 19 no estaban en el tablero. Lunin, Tenaglia,
+    # Mendy... ninguno tenia pronostico, y la cabecera cayo de
+    # 18/20 a 8/20 sin que nada fallase.
+    #
+    # Mirar la edad y la jornada no basta. Hay que mirar si cubre
+    # a los jugadores de HOY.
+    #
+    # Y cuando no los cubre no se tira todo: se completa solo con
+    # los equipos de los que faltan. Refrescar entero cada media
+    # hora serian 22 paginas cada vez; asi suelen ser dos o tres.
+    # ------------------------------------------------------
+
+    cacheados: dict[int, dict] = {}
+
+    completando = False
+
     if not force and cache:
 
         edad = board_age_seconds(cache)
@@ -1095,16 +1120,37 @@ def refresh_board(
             and cache.get("matchday") == matchday
             and (cache.get("players") or [])
         ):
-            salida = dict(cache)
-            salida["cache"] = {
-                "status": "HIT",
-                "age_seconds": round(edad, 1),
-                "ttl_seconds": ttl_seconds,
-                "error": None,
-            }
-            return salida
 
-    objetivos = build_targets(snapshot)
+            cacheados = {
+                p["player_id"]: p
+                for p in cache["players"]
+                if p.get("player_id") is not None
+            }
+
+            pendientes = [
+                objetivo
+                for objetivo in objetivos
+                if objetivo["id"] not in cacheados
+            ]
+
+            if not pendientes and objetivos:
+
+                salida = dict(cache)
+                salida["cache"] = {
+                    "status": "HIT",
+                    "age_seconds": round(edad, 1),
+                    "ttl_seconds": ttl_seconds,
+                    "error": None,
+                }
+                return salida
+
+            if pendientes:
+                completando = True
+                objetivos_a_bajar = pendientes
+
+    if not completando:
+        cacheados = {}
+        objetivos_a_bajar = objetivos
 
     if not objetivos:
 
@@ -1142,7 +1188,7 @@ def refresh_board(
 
     sin_equipo = []
 
-    for objetivo in objetivos:
+    for objetivo in objetivos_a_bajar:
 
         if not objetivo.get("team"):
             sin_equipo.append(objetivo["name"])
@@ -1231,6 +1277,22 @@ def refresh_board(
         }
         return salida
 
+    # Al completar, lo bajado ahora se suma a lo que ya habia. Se
+    # conserva solo a quien sigue siendo objetivo: un jugador que
+    # ya no esta en el mercado no tiene por que seguir ocupando
+    # sitio en el tablero.
+    if completando:
+
+        vigentes = {objetivo["id"] for objetivo in objetivos}
+
+        nuevos = {entry["player_id"] for entry in jugadores}
+
+        jugadores = [
+            entry
+            for player_id, entry in cacheados.items()
+            if player_id in vigentes and player_id not in nuevos
+        ] + jugadores
+
     cubiertos = {entry["player_id"] for entry in jugadores}
 
     salida = {
@@ -1278,11 +1340,12 @@ def refresh_board(
                     "player": entry["player_name"],
                     "team": entry["team"],
                     "ff_slug": (entry.get("ff") or {}).get("slug"),
-                    "score": entry["match"]["score"],
-                    "margin": entry["match"]["margin"],
+                    "score": (entry.get("match") or {}).get("score"),
+                    "margin": (entry.get("match") or {}).get("margin"),
                 }
                 for entry in jugadores
-                if entry["match"]["confidence"] != "ALTA"
+                if (entry.get("match") or {}).get("confidence", "ALTA")
+                != "ALTA"
             ],
 
             # DUDA DEL DATO: la identidad esta clara pero el valor
@@ -1294,11 +1357,14 @@ def refresh_board(
                     "player": entry["player_name"],
                     "team": entry["team"],
                     "price_gap_percent": (
-                        entry["match"]["price_gap_percent"]
+                        (entry.get("match") or {}).get(
+                            "price_gap_percent"
+                        )
                     ),
                 }
                 for entry in jugadores
-                if (entry["match"]["price_gap_percent"] is not None)
+                if (entry.get("match") or {}).get("price_gap_percent")
+                is not None
                 and abs(entry["match"]["price_gap_percent"])
                 > PRICE_GAP_ALERT
             ],
@@ -1329,7 +1395,7 @@ def refresh_board(
         "players": jugadores,
 
         "cache": {
-            "status": "REFRESHED",
+            "status": "TOPPED_UP" if completando else "REFRESHED",
             "age_seconds": 0.0,
             "ttl_seconds": ttl_seconds,
             "error": None,
