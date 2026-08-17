@@ -1381,6 +1381,86 @@ def test_se_puede_comprar_con_saldo_negativo():
         )
 
 
+def test_el_once_usa_la_fuente_unica():
+    """
+    El XI se elige con FutbolFantasy, no con el sistema retirado.
+
+    EL CASO QUE LO DESTAPO
+
+        Lo vio el dueño en su propio dashboard, la noche del
+        17/08/2026:
+
+            Jonny Castro  70 % IMPORTANTE  ->  al banquillo
+            Hugo Rincon   41 % RESERVA     ->  al once
+
+        En FF, Castro es Importante al 70 % y Rincon es Reserva.
+        El motor los alineaba al reves porque `lineup_engine`
+        seguia reconstruyendo el tablero multifuente -scrapeando
+        Jornada Perfecta y Analitica en cada ciclo- en vez de leer
+        la fuente unica que ya usaban la compra y la venta.
+
+        Se habia migrado todo menos lo unico que puntua.
+    """
+
+    import ast
+    import inspect
+
+    from src.analysis import lineup_engine
+
+    # 1. Que no vuelva a importar el modulo retirado.
+    arbol = ast.parse(inspect.getsource(lineup_engine))
+
+    for nodo in ast.walk(arbol):
+
+        modulo = ""
+
+        if isinstance(nodo, ast.ImportFrom):
+            modulo = nodo.module or ""
+
+        elif isinstance(nodo, ast.Import):
+            modulo = " ".join(a.name for a in nodo.names)
+
+        assert "multisource_starter" not in modulo, (
+            "el once ha vuelto al sistema multifuente retirado"
+        )
+
+    # 2. Que el tablero que arma salga de la fuente unica.
+    tablero = lineup_engine.board_from_single_source()
+
+    assert tablero["source"] == "FUTBOLFANTASY"
+
+    if not tablero["players"]:
+        print("    (sin tablero de FF: me lo salto)")
+        return
+
+    for jugador in tablero["players"]:
+
+        assert jugador["source_coverage"] >= 1
+
+        # Un solo voto, el de FF: no puede votar titular y
+        # suplente a la vez.
+        votos = (
+            jugador["starter_votes"]
+            + jugador["bench_votes"]
+            + jugador["uncertain_votes"]
+        )
+
+        assert votos <= 1, jugador["player_name"]
+
+    # 3. Y que la jerarquia viaje hasta aqui, aunque la seleccion
+    #    todavia no la use: es lo que permitira que un Reserva
+    #    deje de ser titular por definicion.
+    con_jerarquia = [
+        j
+        for j in tablero["players"]
+        if (j.get("hierarchy") or {}).get("label")
+    ]
+
+    assert con_jerarquia, (
+        "la jerarquia no llega al motor del once"
+    )
+
+
 def main():
 
     pruebas = [
@@ -1400,6 +1480,7 @@ def main():
         test_rival_y_previsibilidad,
         test_intencion_de_venta_solo_observa,
         test_se_puede_comprar_con_saldo_negativo,
+        test_el_once_usa_la_fuente_unica,
     ]
 
     for prueba in pruebas:

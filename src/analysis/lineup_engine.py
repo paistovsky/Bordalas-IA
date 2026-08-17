@@ -26,9 +26,9 @@ from src.analysis.calendar_state import (
     build_calendar_state,
 )
 
-from src.intelligence.multisource_starter_v1124 import (
-    build_multisource_board,
-)
+# El import de `multisource_starter_v1124` se retiro el
+# 17/08/2026. Este modulo ya no scrapea nada: lee el lookup de
+# FutbolFantasy que el ciclo refresca antes de valorar.
 
 
 # ============================================================
@@ -36,6 +36,91 @@ from src.intelligence.multisource_starter_v1124 import (
 # ============================================================
 
 _MULTISOURCE_STARTER_CACHE = {}
+
+
+def board_from_single_source() -> dict:
+    """
+    El tablero del once, hecho con la fuente unica.
+
+    POR QUE EXISTE
+
+        El 17/08/2026 se migro a FutbolFantasy todo: la compra, la
+        valoracion, el veto, la venta y el dashboard. El once no.
+        Seguia eligiendose con el sistema multifuente retirado, que
+        ademas se reconstruia en cada ciclo scrapeando Jornada
+        Perfecta y Analitica Fantasy.
+
+        Lo vio el dueño en su propio dashboard:
+
+            Jonny Castro  70 % IMPORTANTE  ->  al banquillo
+            Hugo Rincon   41 % RESERVA     ->  al once
+
+        En FF, Castro es Importante al 70 % y Rincon es Reserva y
+        ni sale en el once del Athletic. El motor los alineaba al
+        reves porque no miraba FF.
+
+    QUE HACE
+
+        Traduce el lookup de la fuente unica a la forma que ya
+        espera el resto de este modulo. No se toca la logica de
+        seleccion: solo de donde salen los numeros.
+
+        Los votos se derivan del consenso porque con una sola
+        fuente hay un solo voto. El desempate por calidad de voto
+        sigue funcionando -un STARTER gana a un UNCERTAIN- pero ya
+        no hay tres fuentes que puedan contradecirse.
+    """
+
+    from src.analysis.candidate_starter_lookup import (
+        get_starter_lookup,
+    )
+
+    lookup = get_starter_lookup() or {}
+
+    jugadores = []
+
+    for player_id, senal in lookup.items():
+
+        consenso = senal.get("consensus")
+
+        jerarquia = senal.get("hierarchy") or {}
+
+        jugadores.append(
+            {
+                "player_id": int(player_id),
+                "player_name": senal.get("player_name"),
+
+                "starter_probability": senal.get("probability"),
+                "consensus": consenso,
+                "source_coverage": int(senal.get("coverage") or 1),
+
+                # Un voto, el de FF.
+                "starter_votes": 1 if consenso == "STARTER" else 0,
+                "bench_votes": 1 if consenso == "BENCH" else 0,
+                "uncertain_votes": 1 if consenso == "UNCERTAIN" else 0,
+
+                # De aqui salen la jerarquia y el parte de baja,
+                # que hoy no los usa la seleccion pero viajan para
+                # que pueda usarlos.
+                "hierarchy": jerarquia,
+                "absence": senal.get("absence"),
+                "availability": senal.get("availability"),
+                "team": senal.get("team"),
+
+                "sources": {
+                    "FUTBOLFANTASY": {
+                        "source": "FUTBOLFANTASY",
+                        "probability": senal.get("probability"),
+                    },
+                },
+            }
+        )
+
+    return {
+        "version": "V12.0_SINGLE_SOURCE",
+        "source": "FUTBOLFANTASY",
+        "players": jugadores,
+    }
 
 
 def build_starter_intelligence_for_snapshot(
@@ -51,29 +136,32 @@ def build_starter_intelligence_for_snapshot(
     if cached is not None:
         return cached
 
+    # FUENTE UNICA (17/08/2026)
+    #
+    # Aqui se llamaba a `build_multisource_board`, que ademas de
+    # decidir el once volvia a scrapear Jornada Perfecta y
+    # Analitica Fantasy en CADA ciclo. Las dos estan retiradas.
+    #
+    # Ahora se lee el lookup de FutbolFantasy, que el ciclo ya ha
+    # refrescado antes de valorar: ni una peticion mas, y el mismo
+    # dato que usan la compra y la venta. Un solo sitio donde
+    # equivocarse.
     try:
-        calendar = build_calendar_state(
-            snapshot
-        )
+        board = board_from_single_source()
 
-        matchday = int(
-            calendar.get(
-                "target_matchday"
-            )
-            or 1
-        )
-
-        board = build_multisource_board(
-            snapshot=snapshot,
-            matchday=matchday,
-            seconds_to_deadline=calendar.get(
-                "seconds_to_deadline"
-            ),
-        )
+        if not board.get("players"):
+            board = {
+                "version": "V12.0_EMPTY",
+                "error": (
+                    "El tablero de FutbolFantasy esta vacio: se "
+                    "alinea sin pronostico."
+                ),
+                "players": [],
+            }
 
     except Exception as error:
         board = {
-            "version": "V11.3_FALLBACK",
+            "version": "V12.0_FALLBACK",
             "error": (
                 f"{type(error).__name__}: "
                 f"{error}"
