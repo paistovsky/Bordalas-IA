@@ -1101,6 +1101,94 @@ def test_a_quien_se_vende():
     )
 
 
+def test_rival_y_previsibilidad():
+    """
+    El rival de la jornada y lo fiable que es cada pronostico.
+
+    LA TRAMPA QUE EVITA
+
+        La previsibilidad de TEMPORADA seria mejor multiplicador
+        -es estable- pero el 17/08/2026 solo 7 equipos de 18
+        tenian valor y los otros 11 marcaban 0,0. Ese 0 no es
+        "impredecible": es que aun no hay historial.
+
+        Usarlo habria castigado a once equipos por un dato que no
+        existe. Mismo error que tratar `hierarchy = 0` como
+        Descarte.
+    """
+
+    from src.analysis.player_value_engine import (
+        expected_points_factor,
+        fixture_factor,
+        predictability_confidence,
+    )
+
+    def senal(dificultad=None, previsibilidad=None, escalon=30):
+        valor = {
+            "probability": 43.4,
+            "hierarchy_value": escalon,
+            "hierarchy_label": "Rotacion",
+            "matchday": 2,
+        }
+
+        if dificultad:
+            valor["next_match"] = {
+                "difficulty": dificultad,
+                "rival": "RIV",
+            }
+
+        if previsibilidad is not None:
+            valor["team_context"] = {
+                "predictability": previsibilidad,
+            }
+
+        return valor
+
+    # La escala es simetrica y el 3 no mueve nada.
+    neutro, _ = fixture_factor(senal(dificultad=3))
+
+    assert abs(neutro - 1.0) < 1e-9, neutro
+
+    facil, _ = fixture_factor(senal(dificultad=1))
+    duro, _ = fixture_factor(senal(dificultad=5))
+
+    assert facil > 1.0 > duro, (facil, duro)
+    assert abs((facil - 1.0) + (duro - 1.0)) < 1e-9, (facil, duro)
+
+    # Un indice que no existe no inventa factor.
+    assert fixture_factor(senal(dificultad=9)) == (None, None)
+    assert fixture_factor(senal()) == (None, None)
+
+    # Y en los puntos se nota, pero poco: es un partido de 38.
+    con_facil, _ = expected_points_factor(senal(dificultad=1))
+    con_duro, _ = expected_points_factor(senal(dificultad=5))
+
+    assert con_facil > con_duro
+    assert (con_facil / con_duro) < 1.25, con_facil / con_duro
+
+    # ------------------------------------------------------
+    # LA FIABILIDAD
+    # ------------------------------------------------------
+
+    for valor, esperado in ((40.0, 0.85), (60.0, 0.925), (80.0, 1.0)):
+
+        factor, _ = predictability_confidence(
+            senal(previsibilidad=valor)
+        )
+
+        assert abs(factor - esperado) < 1e-6, (valor, factor)
+
+    # EL CANDADO: sin dato no se penaliza. Un 0 de FF significa
+    # "aun no hay historial", no "impredecible".
+    assert predictability_confidence(
+        senal(previsibilidad=0.0)
+    ) == (None, None)
+
+    assert predictability_confidence(senal()) == (None, None)
+
+    assert predictability_confidence({}) == (None, None)
+
+
 def main():
 
     pruebas = [
@@ -1117,6 +1205,7 @@ def main():
         test_a_quien_se_conserva,
         test_la_cache_comprueba_a_quien_cubre,
         test_a_quien_se_vende,
+        test_rival_y_previsibilidad,
     ]
 
     for prueba in pruebas:

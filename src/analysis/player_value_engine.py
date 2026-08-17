@@ -490,6 +490,128 @@ def absence_factor(
     )
 
 
+# ============================================================
+# EL RIVAL DE LA PROXIMA JORNADA
+#
+# FF publica `data-rival_dif_index`, escala de 5 y simetrica.
+# Comprobada contra los 18 equipos y consistente consigo misma:
+# Getafe-Racing sale 1 en una pagina y 5 en la otra.
+#
+#     1 muy asequible · 2 asequible · 3 igualado
+#     4 dificil       · 5 muy dificil
+#
+# PESA POCO A PROPOSITO
+#
+#     Un Clave contra el Levante no vale lo que contra el Barca,
+#     pero esto es una estimacion de TEMPORADA y el proximo rival
+#     es un partido de 38. Darle mas peso seria repetir el error
+#     que ya cometimos con el porcentaje semanal: decidir meses
+#     con el dato de un sabado.
+#
+#     Donde este dato manda de verdad es en la reventa a tres
+#     dias, que es otro motor.
+# ============================================================
+
+FIXTURE_WEIGHT = 0.10
+
+FIXTURE_LABELS = {
+    1: "muy asequible",
+    2: "asequible",
+    3: "igualado",
+    4: "dificil",
+    5: "muy dificil",
+}
+
+
+def fixture_factor(starter: dict | None) -> tuple[float | None, str | None]:
+
+    indice = (
+        (starter or {}).get("next_match") or {}
+    ).get("difficulty")
+
+    if not indice:
+        return (None, None)
+
+    try:
+        indice = int(indice)
+    except (TypeError, ValueError):
+        return (None, None)
+
+    if indice not in FIXTURE_LABELS:
+        return (None, None)
+
+    # 3 es igualado y no mueve nada. 1 sube, 5 baja.
+    factor = 1.0 + FIXTURE_WEIGHT * (3 - indice) / 2.0
+
+    rival = (
+        (starter or {}).get("next_match") or {}
+    ).get("rival")
+
+    return (
+        factor,
+        (
+            f"rival {FIXTURE_LABELS[indice]}"
+            + (f" ({rival})" if rival else "")
+        ),
+    )
+
+
+# ============================================================
+# LO FIABLE QUE ES EL PRONOSTICO DE ESE EQUIPO
+#
+# FF mide cuanto acierta prediciendo cada alineacion. Un
+# pronostico de un equipo "Previsible" vale mas que el mismo
+# numero de uno "Imprevisible", y hasta hoy valian igual.
+#
+# SE USA LA DE LA JORNADA, NO LA DE LA TEMPORADA
+#
+#     La de temporada seria mejor -es estable- pero el 17/08/2026
+#     solo 7 equipos de 18 tenian valor, y los otros 11 marcaban
+#     0,0. Ese 0 no es "impredecible": es que aun no hay
+#     historial. Usarlo como multiplicador habria castigado a once
+#     equipos por un dato que no existe, que es exactamente el
+#     error del `hierarchy = 0`.
+#
+#     La de la jornada esta siempre y discrimina: 40 Imprevisible,
+#     60 Poco previsible, 80 Previsible.
+#
+# Esto NO toca los puntos. Toca la CONFIANZA, que es lo que
+# decide cuanto se paga por ellos.
+# ============================================================
+
+MIN_PREDICTABILITY_CONFIDENCE = 0.85
+
+
+def predictability_confidence(
+    starter: dict | None,
+) -> tuple[float | None, str | None]:
+
+    contexto = (starter or {}).get("team_context") or {}
+
+    valor = contexto.get("predictability")
+
+    if not valor:
+        return (None, None)
+
+    try:
+        valor = float(valor)
+    except (TypeError, ValueError):
+        return (None, None)
+
+    # 40 -> 0,85   60 -> 0,925   80 -> 1,00
+    factor = MIN_PREDICTABILITY_CONFIDENCE + (
+        (1.0 - MIN_PREDICTABILITY_CONFIDENCE)
+        * max(0.0, min((valor - 40.0) / 40.0, 1.0))
+    )
+
+    etiqueta = contexto.get("predictability_label")
+
+    return (
+        round(factor, 4),
+        f"alineacion {etiqueta or f'{valor:.0f} %'}",
+    )
+
+
 def hierarchy_rank(starter: dict | None) -> int | None:
     """
     Posicion en la escalera, o None si no hay jerarquia.
@@ -585,7 +707,16 @@ def expected_points_factor(
             f"tipico de su escalon"
         )
 
-    # 2. Las jornadas que se pierde, que es lo que de verdad manda
+    # 2. El rival de la proxima jornada, con peso pequeño.
+    rival, motivo_rival = fixture_factor(starter)
+
+    if rival is not None:
+
+        factor *= rival
+
+        motivos.append(motivo_rival)
+
+    # 3. Las jornadas que se pierde, que es lo que de verdad manda
     #    cuando la baja es larga.
     if ausencia is not None:
 
@@ -716,6 +847,19 @@ def estimate_season_points(
 
         if probabilidad is None:
             confidence = confidence * CONFIDENCE_NO_STARTER_DATA
+
+        # LO FIABLE QUE ES EL PRONOSTICO DE ESE EQUIPO
+        #
+        # No toca los puntos: toca cuanto se paga por ellos. Un
+        # pronostico de un equipo "Imprevisible" vale lo mismo en
+        # puntos y menos en euros, que es justo la distincion que
+        # faltaba.
+        fiabilidad, motivo_fiabilidad = predictability_confidence(
+            starter
+        )
+
+        if fiabilidad is not None:
+            confidence = confidence * fiabilidad
 
         return {
             "points": int(round(puntos_brutos * factor)),
