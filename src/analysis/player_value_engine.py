@@ -537,21 +537,85 @@ FIXTURE_LABELS = {
 }
 
 
+# ============================================================
+# JUGAR EN CASA (18/08/2026)
+# ============================================================
+#
+# LA DIFICULTAD DE FF NO INCLUYE EL CAMPO. COMPROBADO.
+#
+#     Se miraron los emparejamientos de la jornada 2 y salen por
+#     parejas identicas:
+#
+#         Deportivo vs ELC casa 3  |  Elche   vs DEP fuera 3
+#         Osasuna   vs LEV casa 3  |  Levante vs OSA fuera 3
+#         Athletic  vs SEV casa 3  |  Sevilla vs ATH fuera 3
+#
+#     El mismo partido, la misma dificultad para los dos lados. Y
+#     el Madrid FUERA en Espanyol saca un 2 -facil- mientras el
+#     Espanyol EN CASA saca un 4. La dificultad mide al rival, no
+#     donde se juega.
+#
+#     `away` viene aparte en el dato de FF y no lo miraba nadie.
+#
+# EL PESO ES CRITERIO, NO MEDICION
+#
+#     Un 5 % arriba en casa y un 5 % abajo fuera. Puesto a ojo,
+#     en el orden de magnitud de la ventaja de campo que se
+#     observa en el futbol, y deliberadamente por debajo del peso
+#     del rival: importa mas contra quien juegas que donde.
+#
+#     Medible de verdad cuando haya puntos acumulados por local y
+#     visitante, igual que las dos tablas de la jerarquia.
+# ============================================================
+
+HOME_WEIGHT = 0.05
+
+
+def venue_factor(starter: dict | None) -> tuple[float | None, str | None]:
+    """
+    Jugar en casa o fuera. None si no se sabe donde se juega.
+
+    Ausencia de dato no es dato: sin `away` no se asume campo
+    neutral con un 1.0 silencioso.
+    """
+
+    partido = (starter or {}).get("next_match") or {}
+
+    if partido.get("away") is None:
+        return (None, None)
+
+    if bool(partido.get("away")):
+        return (1.0 - HOME_WEIGHT, "fuera de casa")
+
+    return (1.0 + HOME_WEIGHT, "en casa")
+
+
 def fixture_factor(starter: dict | None) -> tuple[float | None, str | None]:
+    """
+    Como de bueno es el proximo partido: rival y campo.
+
+    Es el factor de UNA jornada, a peso completo. Para decisiones
+    que duran meses hay que diluirlo con `season_fixture_factor`.
+    """
 
     indice = (
         (starter or {}).get("next_match") or {}
     ).get("difficulty")
 
-    if not indice:
-        return (None, None)
+    campo, motivo_campo = venue_factor(starter)
 
     try:
-        indice = int(indice)
+        indice = int(indice) if indice else None
+
     except (TypeError, ValueError):
-        return (None, None)
+        indice = None
 
     if indice not in FIXTURE_LABELS:
+
+        # Sin rival pero con campo todavia hay algo que decir.
+        if campo is not None:
+            return (campo, motivo_campo)
+
         return (None, None)
 
     # 3 es igualado y no mueve nada. 1 sube, 5 baja.
@@ -561,12 +625,92 @@ def fixture_factor(starter: dict | None) -> tuple[float | None, str | None]:
         (starter or {}).get("next_match") or {}
     ).get("rival")
 
+    motivo = (
+        f"rival {FIXTURE_LABELS[indice]}"
+        + (f" ({rival})" if rival else "")
+    )
+
+    if campo is not None:
+        factor *= campo
+        motivo += f", {motivo_campo}"
+
+    return (factor, motivo)
+
+
+# ============================================================
+# EL PARTIDO DECIDE CUANDO, NO SI
+# ============================================================
+#
+# EL CASO (dueño, 18/08/2026)
+#
+#     "Tenemos a un tio que vale 50 y en el mercado hay uno de
+#     52. Pero el de 52 juega fuera y contra el Barsa. Pierde
+#     seguro. Hay que valorar si juegan en casa y contra un
+#     equipo grande o no, ¿no crees?"
+#
+# POR QUE NO SE APLICA A PESO COMPLETO
+#
+#     Porque el cambio dura lo que queda de temporada y el
+#     partido dura un sabado. A peso completo:
+#
+#         sin campo:  52 − 50           = +2   se hace
+#         con campo:  52×0.90 − 50×1.10 = −8   se bloquea
+#
+#     Ocho puntos de temporada decididos por una jornada. Es el
+#     mismo error que ya se cometio con WEEKLY_ADJUSTMENT_WEIGHT,
+#     que estaba en 0,5 y hubo que bajarlo a 0,15 porque un dato
+#     de un sabado movia un tercio de una estimacion de nueve
+#     meses.
+#
+# LA SOLUCION: QUE EL PESO LO PONGA EL CALENDARIO
+#
+#     El proximo partido es UNO de los que quedan. En la jornada
+#     2 quedan 37: pesa 1/37 y no mueve casi nada. En la 35
+#     quedan 4 y pesa un cuarto. En la ultima pesa entero, que es
+#     cuando el partido ES la decision.
+#
+#     La misma formula sirve todo el año y se ajusta sola.
+# ============================================================
+
+
+def remaining_matchdays(matchday) -> int:
+    """
+    Cuantas jornadas quedan contando la que viene. Minimo 1.
+    """
+
+    try:
+        jugadas = int(matchday or 0)
+
+    except (TypeError, ValueError):
+        jugadas = 0
+
+    return max(
+        1,
+        SEASON_MATCHDAYS - max(0, jugadas) + 1,
+    )
+
+
+def season_fixture_factor(
+    starter: dict | None,
+    matchday=None,
+) -> tuple[float | None, str | None]:
+    """
+    El proximo partido, diluido en lo que queda de temporada.
+
+    Sin jornada conocida devuelve None: antes no tocar la
+    valoracion que diluirla por un numero inventado.
+    """
+
+    factor, motivo = fixture_factor(starter)
+
+    if factor is None or not matchday:
+        return (None, None)
+
+    quedan = remaining_matchdays(matchday)
+
     return (
-        factor,
-        (
-            f"rival {FIXTURE_LABELS[indice]}"
-            + (f" ({rival})" if rival else "")
-        ),
+        1.0 + (factor - 1.0) / quedan,
+        f"{motivo} (pesa 1 de {quedan} jornadas)",
     )
 
 
@@ -971,6 +1115,10 @@ def xi_upgrade_value(
     margin: float = DEFAULT_XI_MARGIN,
     candidate_starter: dict | None = None,
     replaced_starter: dict | None = None,
+
+    # Sin jornada no se aplica el calendario. Es opcional a
+    # proposito: quien no la pase se comporta como antes.
+    matchday=None,
 ) -> dict:
     """
     Lo maximo que pagariamos por un fichaje que mejora el once.
@@ -1100,15 +1248,75 @@ def xi_upgrade_value(
                 ),
             )
 
-    delta = safe_int(candidate_points) - safe_int(replaced_points)
+    # --------------------------------------------------------
+    # EL PROXIMO PARTIDO, DILUIDO
+    # --------------------------------------------------------
+    #
+    # Los puntos que llegan aqui son de temporada y no saben nada
+    # del calendario. El proximo partido se aplica a los dos
+    # lados -al que entra y al que sale- pero repartido entre las
+    # jornadas que quedan, porque el cambio dura eso y el partido
+    # dura un sabado.
+    #
+    # En la jornada 2 esto casi no mueve nada, que es lo correcto.
+    # En la 35 decide, que tambien.
+    # --------------------------------------------------------
+
+    entra = float(safe_int(candidate_points))
+    sale = float(safe_int(replaced_points))
+
+    partido_entra, motivo_entra = season_fixture_factor(
+        candidate_starter,
+        matchday,
+    )
+
+    partido_sale, _ = season_fixture_factor(
+        replaced_starter,
+        matchday,
+    )
+
+    if partido_entra is not None:
+        entra *= partido_entra
+
+    if partido_sale is not None:
+        sale *= partido_sale
+
+    delta = int(round(entra - sale))
 
     if delta <= 0:
+
+        crudo = safe_int(candidate_points) - safe_int(
+            replaced_points
+        )
+
+        # Que se note cuando lo que tumba el cambio es el
+        # calendario y no el jugador: no es lo mismo "no mejora"
+        # que "no mejora ESTA semana".
+        por_el_partido = (
+            crudo > 0
+            and (
+                partido_entra is not None
+                or partido_sale is not None
+            )
+        )
+
         return _sin_valor(
             "NO_MEJORA",
             (
-                f"Suma {safe_int(candidate_points)} puntos y el que "
-                f"sustituiria tiene {safe_int(replaced_points)}. "
-                f"No es una mejora."
+                (
+                    f"Sumaria {crudo} puntos, pero con el "
+                    f"calendario de la mano el cambio se queda "
+                    f"en {delta}"
+                    + (f": {motivo_entra}" if motivo_entra else "")
+                    + ". Mejor esperar a otra jornada."
+                )
+                if por_el_partido
+                else (
+                    f"Suma {safe_int(candidate_points)} puntos y "
+                    f"el que sustituiria tiene "
+                    f"{safe_int(replaced_points)}. No es una "
+                    f"mejora."
+                )
             ),
         )
 

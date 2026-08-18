@@ -226,6 +226,11 @@ def value_candidate(
                 recovered_value=recuperado,
                 candidate_starter=titularidad,
                 replaced_starter=sustituido.get("starter"),
+
+                # La jornada, para que el calendario pese lo que
+                # le toca: casi nada al principio de temporada,
+                # mucho al final.
+                matchday=(titularidad or {}).get("matchday"),
             )
 
             como_xi["replaces"] = sustituido
