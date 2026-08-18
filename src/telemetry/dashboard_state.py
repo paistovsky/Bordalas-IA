@@ -89,6 +89,16 @@ def _edad_en_segundos(marca) -> int | None:
 
 ACTION_LABELS = {
     "MONITOR_OFFERS": "Vigilar ofertas",
+
+    # Cobrar una oferta que el motor ya ha aprobado. Hasta el
+    # 18/08 no se emitia nunca, asi que tampoco tenia nombre en
+    # castellano y salia "Accept Recovery Offer".
+    "ACCEPT_RECOVERY_OFFER": "Cobrar oferta aprobada",
+
+    # Las dos que salian en ingles en la pantalla de MERCADO.
+    "KEEP_PROTECTED": "Conservar: jugador protegido",
+    "KEEP_SOLVENCY_RESERVED": "Conservar: reservado para solvencia",
+
     "NEVER_SELL": "No vender",
     "KEEP_GOOD_OFFER": "Conservar buena oferta",
     "HOLD_SOLVENCY_RESERVED": "Reservar para solvencia",

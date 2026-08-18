@@ -137,6 +137,85 @@ RISKY_PHASES = {
 }
 
 
+def _euros(value) -> str:
+    """
+    Un importe legible en castellano, sin tocar el resto del texto.
+
+    Existe porque la primera version formateaba la frase entera y
+    despues hacia `.replace(",", ".")` para pasar los miles al
+    formato de aqui. Eso tambien se llevaba por delante las comas
+    de la prosa que viene detras, en `reasons`, que es justo la
+    parte que explica POR QUE se cobra esa oferta.
+    """
+
+    try:
+        importe = int(value or 0)
+
+    except (TypeError, ValueError):
+        return "? EUR"
+
+    return f"{importe:,}".replace(",", ".") + " EUR"
+
+
+COLLECTABLE_DECISIONS = {
+    "ACCEPT_NOW",
+    "ACCEPT_FOR_SOLVENCY",
+}
+
+
+def offers_to_collect(
+    actionable: list[dict] | None,
+) -> list[dict]:
+    """
+    De las ofertas que el motor ya ha aprobado, cuales se pueden
+    cobrar de verdad y en que orden.
+
+    A QUIEN SE COBRA PRIMERO
+
+        Antes lo que hace falta para tapar el agujero, y despues
+        lo que mas prima deja. Las dos son ventas ya aprobadas;
+        el orden solo decide cual cae en ESTE ciclo, porque solo
+        se ejecuta una accion por ciclo.
+
+    QUE SE CAE DE LA LISTA
+
+        Sin `offer_id` no hay nada que aceptar: el executor la
+        rechazaria con INVALID_OFFER_ID despues de haberla
+        anunciado como la accion del ciclo, y esa accion perdida
+        no vuelve hasta dentro de media hora.
+
+        `NEVER_AUTO_SELL` es cinturon sobre los tirantes. El
+        executor tambien lo bloquea, pero un jugador protegido no
+        deberia llegar siquiera a proponerse.
+
+    Esta fuera de `build_global_decision` para poder probarla sin
+    montar un snapshot entero.
+    """
+
+    def orden(item):
+        return (
+            # ACCEPT_FOR_SOLVENCY primero: ahi el dinero hace
+            # falta, no solo compensa.
+            0
+            if item.get("decision") == "ACCEPT_FOR_SOLVENCY"
+            else 1,
+
+            -float(item.get("premium_percent") or 0.0),
+        )
+
+    return sorted(
+        (
+            item
+            for item in (actionable or [])
+            if isinstance(item, dict)
+            and item.get("decision") in COLLECTABLE_DECISIONS
+            and item.get("offer_id") is not None
+            and item.get("protection") != "NEVER_AUTO_SELL"
+        ),
+        key=orden,
+    )
+
+
 def hours_remaining(
     seconds: int | None,
 ) -> float | None:
@@ -1633,6 +1712,46 @@ def build_global_decision(
                 len(actionable),
         }
 
+        # ====================================================
+        # Y ALGUIEN TIENE QUE COBRARLA (18/08/2026)
+        # ====================================================
+        #
+        # Aqui se calculaba `actionable` -las ofertas que hay que
+        # aceptar- y solo se usaba para CONTAR cuantas hay en un
+        # texto. La accion emitida era MONITOR_OFFERS, con
+        # `executable: False` y `executor: None`.
+        #
+        # O sea: la decision se calculaba, se contaba y se tiraba.
+        #
+        # El motivo esta unas lineas mas arriba, en el bloque de
+        # solvencia: "Offer Decision Engine V2 es la unica
+        # autoridad para decidir si una oferta concreta debe
+        # aceptarse... el recovery clasico ya NO genera
+        # ACCEPT_RECOVERY_OFFER".
+        #
+        # Se apago el camino viejo y no se encendio el nuevo. El
+        # executor `ACCEPT_RECOVERY_OFFER` seguia intacto -llama a
+        # `writer.accept_offer`- pero ya no se lo pedia nadie.
+        #
+        # Se vio el 18/08 despues de arreglar cuatro cosas
+        # seguidas para que Pepe decidiera bien que oferta cobrar:
+        # el orden de las ramas, el doble regimen, la tierra de
+        # nadie y la prima que valia cero. Todas correctas, y
+        # ninguna llegaba al gatillo.
+        #
+        # A QUIEN SE COBRA PRIMERO
+        #
+        #     Antes lo que hace falta para tapar el agujero, y
+        #     despues lo que mas prima deja. Las dos son ventas
+        #     que el motor ya ha aprobado; el orden solo decide
+        #     cual de ellas cae en este ciclo, porque solo se
+        #     ejecuta una accion por ciclo.
+        # ====================================================
+
+        cobrables = offers_to_collect(actionable)
+
+        a_cobrar = cobrables[0] if cobrables else None
+
         candidates.append(
             {
                 "type":
@@ -1643,30 +1762,54 @@ def build_global_decision(
                         "INCOMING_OFFERS"
                     ],
 
-                # Las protecciones y reservas son ESTADO,
-                # no acciones globales.
+                # Las protecciones y reservas son ESTADO, no
+                # acciones. Pero una oferta aprobada SI es una
+                # accion, y hasta hoy no se emitia ninguna.
                 "action":
-                    "MONITOR_OFFERS",
+                    "ACCEPT_RECOVERY_OFFER"
+                    if a_cobrar
+                    else "MONITOR_OFFERS",
 
                 "executable":
-                    False,
+                    bool(a_cobrar),
 
                 "executor":
-                    None,
+                    "AUTOPILOT" if a_cobrar else None,
 
                 "reason": (
-                    f"Offer Decision Engine V2 controla "
-                    f"{len(evaluated_offers)} ofertas: "
-                    f"{len(protections)} protegidas, "
-                    f"{len(solvency_reserves)} reservas de solvencia, "
-                    f"{len(good_offers)} buenas para conservar, "
-                    f"{len(hold_offers)} en espera y "
-                    f"{len(actionable)} con signal accionable. "
-                    "Observer: la inteligencia general de ofertas "
-                    "no ejecuta escrituras."
+                    (
+                        f"Cobrar la oferta por "
+                        f"{a_cobrar.get('player_name')}: "
+                        f"{_euros(a_cobrar.get('amount'))}, "
+                        f"prima "
+                        f"{float(a_cobrar.get('premium_percent') or 0):.1f} %, "
+                        f"venta "
+                        f"{float(a_cobrar.get('sale_score') or 0):.0f}/100. "
+                        + " ".join(
+                            (a_cobrar.get("reasons") or [])[:1]
+                        )
+                    )
+                    if a_cobrar
+                    else (
+                        f"Offer Decision Engine V2 controla "
+                        f"{len(evaluated_offers)} ofertas: "
+                        f"{len(protections)} protegidas, "
+                        f"{len(solvency_reserves)} reservas de "
+                        f"solvencia, {len(good_offers)} buenas "
+                        f"para conservar, {len(hold_offers)} en "
+                        f"espera y {len(actionable)} con signal "
+                        f"accionable. Ninguna para cobrar ahora."
+                    )
                 ),
 
                 "data": {
+                    # Lo que el executor necesita para cobrarla.
+                    "offer":
+                        a_cobrar,
+
+                    "queued_to_collect":
+                        cobrables,
+
                     "protections":
                         protections,
 

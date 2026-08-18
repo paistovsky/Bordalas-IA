@@ -417,6 +417,150 @@ def test_la_prima_llega_de_verdad():
     )
 
 
+def test_alguien_tiene_que_cobrarla():
+    """
+    La quinta pared: la decision se calculaba y se tiraba.
+
+    `build_global_decision` calculaba `actionable` -las ofertas
+    que hay que aceptar- y solo la usaba para CONTAR cuantas hay
+    dentro de un texto. La accion emitida era MONITOR_OFFERS, con
+    `executable: False` y `executor: None`.
+
+    El executor `ACCEPT_RECOVERY_OFFER` seguia intacto y ya no se
+    lo pedia nadie: se apago el camino viejo cuando Offer
+    Decision Engine V2 paso a ser la unica autoridad, y no se
+    encendio el nuevo.
+    """
+
+    from src.analysis.decision_orchestrator import (
+        offers_to_collect,
+    )
+
+    fidalgo = {
+        "decision": "ACCEPT_NOW",
+        "offer_id": 4001,
+        "player_name": "Alvaro Fidalgo",
+        "premium_percent": 4.4,
+        "sale_score": 75,
+    }
+
+    agujero = {
+        "decision": "ACCEPT_FOR_SOLVENCY",
+        "offer_id": 4002,
+        "player_name": "Suplente cualquiera",
+        "premium_percent": 0.3,
+        "sale_score": 55,
+    }
+
+    otra_buena = {
+        "decision": "ACCEPT_NOW",
+        "offer_id": 4003,
+        "player_name": "Otro que sobra",
+        "premium_percent": 2.0,
+        "sale_score": 62,
+    }
+
+    cola = offers_to_collect([fidalgo, agujero, otra_buena])
+
+    assert len(cola) == 3
+
+    assert cola[0] is agujero, (
+        "tapar el agujero va primero: ahi el dinero hace falta, "
+        "no solo compensa"
+    )
+
+    assert cola[1] is fidalgo, (
+        "entre dos ventas aprobadas se cobra antes la que mas "
+        "prima deja"
+    )
+
+
+def test_lo_que_no_se_puede_cobrar_no_se_propone():
+    """
+    Proponer una oferta imposible cuesta el ciclo entero.
+
+    Solo se ejecuta una accion cada media hora. Si la elegida se
+    cae en el executor por no tener `offer_id`, no se cobra nada
+    y no hay segundo intento hasta el ciclo siguiente.
+    """
+
+    from src.analysis.decision_orchestrator import (
+        offers_to_collect,
+    )
+
+    assert offers_to_collect([]) == []
+    assert offers_to_collect(None) == []
+
+    sin_id = {
+        "decision": "ACCEPT_NOW",
+        "offer_id": None,
+        "premium_percent": 9.0,
+    }
+
+    protegido = {
+        "decision": "ACCEPT_NOW",
+        "offer_id": 4004,
+        "protection": "NEVER_AUTO_SELL",
+        "premium_percent": 12.0,
+    }
+
+    solo_reroll = {
+        "decision": "REROLL_CANDIDATE",
+        "offer_id": 4005,
+        "premium_percent": 8.0,
+    }
+
+    assert offers_to_collect(
+        [sin_id, protegido, solo_reroll]
+    ) == [], (
+        "se esta proponiendo cobrar algo que el executor va a "
+        "rechazar, y ese ciclo se pierde"
+    )
+
+
+def test_el_gatillo_esta_conectado():
+    """
+    Que la cola exista no basta: hay que emitir la accion.
+
+    Estructural a proposito. El fallo no fue una cuenta mal
+    hecha, fue un cable suelto entre dos piezas correctas, y eso
+    solo se ve mirando quien llama a quien.
+    """
+
+    import inspect
+
+    from src.analysis import decision_orchestrator
+    from src.actions.autopilot_executor import (
+        HARD_SAFETY_ALLOWED_ACTIONS,
+    )
+
+    fuente = inspect.getsource(
+        decision_orchestrator.build_global_decision
+    )
+
+    assert "offers_to_collect(" in fuente, (
+        "el orchestrator ha dejado de calcular que oferta cobrar"
+    )
+
+    assert '"ACCEPT_RECOVERY_OFFER"' in fuente, (
+        "vuelve a emitirse solo MONITOR_OFFERS: la decision se "
+        "calcula y se tira"
+    )
+
+    # Y que el executor siga aceptando esa accion, incluso con la
+    # caja en rojo, que es justo cuando cobrar hace falta.
+    assert (
+        "ACCEPT_RECOVERY_OFFER" in HARD_SAFETY_ALLOWED_ACTIONS
+    )
+
+    # El executor lee `data.offer`. Si el orchestrator cambia el
+    # nombre de la clave, la accion sale como INVALID_DECISION.
+    assert '"offer":' in fuente, (
+        "el executor busca decision['data']['offer'] y ya no se "
+        "esta poniendo ahi"
+    )
+
+
 def main():
 
     pruebas = [
@@ -428,6 +572,9 @@ def main():
         test_la_tierra_de_nadie_se_resuelve,
         test_la_banda_esta_cableada,
         test_la_prima_llega_de_verdad,
+        test_alguien_tiene_que_cobrarla,
+        test_lo_que_no_se_puede_cobrar_no_se_propone,
+        test_el_gatillo_esta_conectado,
     ]
 
     for prueba in pruebas:
