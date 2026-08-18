@@ -48,6 +48,14 @@ from src.analysis.action_failure_backoff import (
     apply_backoff_to_candidates,
 )
 
+# Los minimos por posicion para poder alinear. Se leen de donde
+# ya estaban en vez de escribirlos otra vez aqui: dos listas de
+# minimos que se separan es como se acaba vendiendo al ultimo
+# portero con la bendicion de un guardarrail.
+from src.analysis.sales_analyzer import (
+    MIN_POSITION_COUNTS,
+)
+
 
 PRIORITY = {
     # Barrera temporal absoluta.
@@ -163,8 +171,71 @@ COLLECTABLE_DECISIONS = {
 }
 
 
+def position_floor_lookup(snapshot: dict | None) -> dict:
+    """
+    Por cada jugador nuestro, si venderlo dejaria su posicion por
+    debajo del minimo para poder alinear.
+
+    POR QUE HACE FALTA AQUI (18/08/2026)
+
+        La puntuacion de venta mira el exceso de plantilla, pero
+        solo para SUMAR: "hay margen en esta posicion", +15. No
+        resta nada cuando no hay margen. Es un premio, no un
+        freno.
+
+        Mientras nadie cobraba solo, daba igual. Desde hoy Pepe
+        acepta ofertas por su cuenta, y la primera cola que salio
+        tenia un portero dentro. Con dos porteros venderlo es
+        correcto; con uno, nos quedamos sin poder alinear.
+
+        El camino de aceptar por caducidad si consulta el
+        guardarrail de posiciones. El de cobrar, recien abierto,
+        no consultaba nada.
+    """
+
+    conteo = {}
+
+    for jugador in ((snapshot or {}).get("my_team") or []):
+
+        if not isinstance(jugador, dict):
+            continue
+
+        try:
+            posicion = int(jugador.get("position") or 0)
+        except (TypeError, ValueError):
+            continue
+
+        conteo[posicion] = conteo.get(posicion, 0) + 1
+
+    bloqueados = {}
+
+    for jugador in ((snapshot or {}).get("my_team") or []):
+
+        if not isinstance(jugador, dict):
+            continue
+
+        try:
+            posicion = int(jugador.get("position") or 0)
+            player_id = int(jugador.get("id") or 0)
+        except (TypeError, ValueError):
+            continue
+
+        minimo = MIN_POSITION_COUNTS.get(posicion)
+
+        if minimo is None:
+            continue
+
+        # Si al venderlo bajamos del minimo, este no se toca.
+        bloqueados[player_id] = (
+            conteo.get(posicion, 0) - 1 < minimo
+        )
+
+    return bloqueados
+
+
 def offers_to_collect(
     actionable: list[dict] | None,
+    position_floor: dict | None = None,
 ) -> list[dict]:
     """
     De las ofertas que el motor ya ha aprobado, cuales se pueden
@@ -188,9 +259,28 @@ def offers_to_collect(
         executor tambien lo bloquea, pero un jugador protegido no
         deberia llegar siquiera a proponerse.
 
+        Y el ultimo de su posicion tampoco: cobrar 600.000 EUR
+        por el unico portero es un mal negocio aunque la prima
+        sea buena, porque el domingo no hay a quien alinear.
+
     Esta fuera de `build_global_decision` para poder probarla sin
     montar un snapshot entero.
     """
+
+    suelo = position_floor or {}
+
+    def deja_la_posicion_coja(item):
+        try:
+            player_id = int(item.get("player_id") or 0)
+        except (TypeError, ValueError):
+            return False
+
+        # Si no sabemos de quien es la oferta, no inventamos que
+        # es seguro venderlo.
+        if player_id not in suelo:
+            return bool(suelo)
+
+        return bool(suelo[player_id])
 
     def orden(item):
         return (
@@ -211,6 +301,7 @@ def offers_to_collect(
             and item.get("decision") in COLLECTABLE_DECISIONS
             and item.get("offer_id") is not None
             and item.get("protection") != "NEVER_AUTO_SELL"
+            and not deja_la_posicion_coja(item)
         ),
         key=orden,
     )
@@ -1748,7 +1839,10 @@ def build_global_decision(
         #     ejecuta una accion por ciclo.
         # ====================================================
 
-        cobrables = offers_to_collect(actionable)
+        cobrables = offers_to_collect(
+            actionable,
+            position_floor=position_floor_lookup(snapshot),
+        )
 
         a_cobrar = cobrables[0] if cobrables else None
 
@@ -1937,11 +2031,11 @@ def build_global_decision(
     # ========================================================
     #
     # Esta capa sustituye al watcher legacy de caducidad.
-    # La necesidad de aceptar se decide simulando la pÃƒÂ©rdida
-    # simultÃƒÂ¡nea de clusters de ofertas y recalculando
+    # La necesidad de aceptar se decide simulando la pérdida
+    # simultánea de clusters de ofertas y recalculando
     # SOLVENCY_GUARANTEE desde cero.
     #
-    # AÃƒÂºn NO ejecuta ACCEPT_OFFER automÃƒÂ¡ticamente.
+    # Aún NO ejecuta ACCEPT_OFFER automáticamente.
     # ========================================================
 
     urgent_expiry_clusters = (
@@ -2006,9 +2100,9 @@ def build_global_decision(
                     ),
 
                 "reason": (
-                    f"Cluster crÃƒÂ­tico de ofertas: {player_names}. "
-                    "Perderlo rompe SOLVENCY_GUARANTEE y el lÃƒÂ­mite "
-                    "efectivo ya estÃƒÂ¡ dentro del margen operativo. "
+                    f"Cluster crítico de ofertas: {player_names}. "
+                    "Perderlo rompe SOLVENCY_GUARANTEE y el límite "
+                    "efectivo ya está dentro del margen operativo. "
                     + (
                         "Aceptacion LIVE habilitada: el executor "
                         "refrescara Biwenger y revalidara TODO antes "
@@ -2068,10 +2162,10 @@ def build_global_decision(
                     None,
 
                 "reason": (
-                    f"Cluster crÃƒÂ­tico de ofertas: {player_names}. "
-                    "Perderlo romperÃƒÂ­a SOLVENCY_GUARANTEE, pero "
-                    "todavÃƒÂ­a no estamos dentro del margen operativo "
-                    "de aceptaciÃƒÂ³n. Debe conservarse y vigilarse."
+                    f"Cluster crítico de ofertas: {player_names}. "
+                    "Perderlo rompería SOLVENCY_GUARANTEE, pero "
+                    "todavía no estamos dentro del margen operativo "
+                    "de aceptación. Debe conservarse y vigilarse."
                 ),
 
                 "data": {

@@ -9,10 +9,10 @@ _UNSET = object()
 
 class BiwengerWriteClient:
     """
-    Cliente de escritura de BordalÃ¡s IA.
+    Cliente de escritura de Bordalás IA.
 
     Todas las operaciones son DRY-RUN salvo que
-    se utilice explÃ­citamente execute=True.
+    se utilice explícitamente execute=True.
     """
 
     SUCCESS_CODES = {
@@ -971,7 +971,7 @@ class BiwengerWriteClient:
 
         if len(player_ids) != 11:
             raise ValueError(
-                "La alineaciÃ³n debe contener "
+                "La alineación debe contener "
                 "exactamente 11 jugadores."
             )
 

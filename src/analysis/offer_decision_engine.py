@@ -556,8 +556,8 @@ def decide_incoming_offer(
         )
     )
 
-    # El recovery plan clasico sirve para saber quÃ© ofertas
-    # podrÃ­an cubrir saldo, pero NO significa que debamos aceptar
+    # El recovery plan clasico sirve para saber qué ofertas
+    # podrían cubrir saldo, pero NO significa que debamos aceptar
     # ahora. La fuente de verdad temporal para Computer es
     # computer_offer_reroll_engine / solvency_guarantee.
     recovery_selected = (
@@ -705,7 +705,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta Computer necesaria para solvencia "
-                "y prÃ³xima a caducar."
+                "y próxima a caducar."
             )
 
         elif solvency_reserved:
@@ -715,7 +715,7 @@ def decide_incoming_offer(
 
             reasons.append(
                 "Oferta marcada SOLVENCY_RESERVED. "
-                "Se conserva como garantÃ­a de liquidez y "
+                "Se conserva como garantía de liquidez y "
                 "no se acepta ni rerollea mientras siga reservada."
             )
 
@@ -835,7 +835,7 @@ def decide_incoming_offer(
         confidence = 85
 
         reasons.append(
-            "El activo mantiene una seÃ±al especulativa positiva."
+            "El activo mantiene una señal especulativa positiva."
         )
 
     # LA MISMA REGLA QUE ARRIBA, NO UNA COPIA.
@@ -871,7 +871,7 @@ def decide_incoming_offer(
         confidence = 80
 
         reasons.append(
-            "Oferta favorable; se conserva sin vender automÃ¡ticamente."
+            "Oferta favorable; se conserva sin vender automáticamente."
         )
 
     else:
@@ -958,8 +958,8 @@ def decide_incoming_offer(
 
     if recovery_selected:
         reasons.append(
-            "El recovery plan clÃ¡sico la incluye como posible "
-            "fuente de caja, pero eso NO fuerza aceptaciÃ³n inmediata."
+            "El recovery plan clásico la incluye como posible "
+            "fuente de caja, pero eso NO fuerza aceptación inmediata."
         )
 
     if solvency_reserved:

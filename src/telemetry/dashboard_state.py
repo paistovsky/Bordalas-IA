@@ -99,6 +99,14 @@ ACTION_LABELS = {
     "KEEP_PROTECTED": "Conservar: jugador protegido",
     "KEEP_SOLVENCY_RESERVED": "Conservar: reservado para solvencia",
 
+    # Los veredictos de Offer Decision Engine V2. No tenian
+    # nombre porque hasta ahora no se enseñaban en ningun sitio:
+    # la tabla de ofertas hablaba en nombre del motor de reroll.
+    "ACCEPT_NOW": "Cobrar ahora",
+    "ACCEPT_FOR_SOLVENCY": "Cobrar para tapar la caja",
+    "REROLL_CANDIDATE": "Pedir otra oferta mejor",
+    "HOLD_OFFER": "Esperar",
+
     "NEVER_SELL": "No vender",
     "KEEP_GOOD_OFFER": "Conservar buena oferta",
     "HOLD_SOLVENCY_RESERVED": "Reservar para solvencia",
@@ -895,8 +903,67 @@ def compact_rivals(intelligence: dict, current_user_id: int | None) -> list[dict
     return rows
 
 
-def compact_offers(state: dict) -> list[dict]:
+def compact_offers(
+    state: dict,
+    offer_decisions: dict | None = None,
+    collecting: dict | None = None,
+) -> list[dict]:
+    """
+    Las ofertas recibidas, con la respuesta del motor que MANDA.
+
+    LA PANTALLA ENSEÑABA AL MOTOR EQUIVOCADO (18/08/2026)
+
+        Esta tabla se pintaba entera desde `offer_reroll`, que es
+        el motor viejo y solo sabe contestar a una pregunta:
+        ¿merece la pena pedirle otra oferta al Computer? Por eso
+        trece ofertas seguidas decian "Conservar buena oferta",
+        cinco de ellas con mas del 3 % de prima.
+
+        Quien decide si una oferta se cobra es Offer Decision
+        Engine V2 -"la unica autoridad", dice su propio codigo- y
+        su veredicto no aparecia en ninguna pantalla del
+        dashboard. Ni uno solo de sus campos: ni la decision, ni
+        la puntuacion de venta, ni el motivo.
+
+        Asi que el dia que arreglamos que cobrase, no habia forma
+        de mirar la pantalla y saber si lo estaba haciendo.
+
+        Es el fallo de siempre aqui: el dato existe, se calcula
+        bien, y nadie lo enseña.
+
+    LO QUE SE VE AHORA
+
+        Manda la decision de V2. La opinion del motor de reroll
+        se queda al lado, porque sigue siendo util saber si va a
+        pedir otra oferta, pero ya no habla en su nombre.
+
+        Y `collecting` marca cual se cobra en ESTE ciclo: de
+        varias aprobadas solo cae una, y la diferencia entre "se
+        cobra ahora" y "esta aprobada y espera turno" es justo lo
+        que el dueño necesita ver para no pensar que algo falla.
+    """
+
     offer_reroll = state.get("offer_reroll", {}) or {}
+
+    # Indice por oferta y, de rebote, por jugador: el motor de
+    # reroll agrupa por operacion y V2 decide por oferta, asi que
+    # el id de oferta es lo unico que casa siempre.
+    por_id = {}
+
+    for item in (
+        (offer_decisions or {}).get("decisions") or []
+    ):
+        if item.get("offer_id") is not None:
+            por_id[item.get("offer_id")] = item
+
+    cobrando = (collecting or {}).get("offer_id")
+
+    en_cola = {
+        item.get("offer_id")
+        for item in ((collecting or {}).get("queued") or [])
+        if item.get("offer_id") is not None
+    }
+
     offers = []
 
     for offer in offer_reroll.get("offers", []) or []:
@@ -904,6 +971,16 @@ def compact_offers(state: dict) -> list[dict]:
             player.get("name", "?")
             for player in offer.get("players", []) or []
         ]
+
+        offer_id = offer.get("offer_id")
+
+        decision = por_id.get(offer_id) or {}
+
+        # La accion que se enseña es la de V2 cuando la hay. Si no
+        # la hay se dice cual es, en vez de disfrazar la del otro
+        # motor de veredicto.
+        accion = decision.get("decision") or offer.get("action")
+
         offers.append(
             {
                 "players": names,
@@ -915,8 +992,48 @@ def compact_offers(state: dict) -> list[dict]:
                 "solvency_reserved": bool(
                     offer.get("solvency_reserved")
                 ),
-                "action": offer.get("action"),
-                "action_label": human_action(offer.get("action")),
+
+                "action": accion,
+                "action_label": human_action(accion),
+
+                # De donde sale el veredicto de arriba. Sin esto
+                # vuelve a ser imposible saber quien esta
+                # hablando.
+                "decision_source": (
+                    "OFFER_DECISION_V2"
+                    if decision
+                    else "REROLL_ENGINE"
+                ),
+
+                "sale_score": (
+                    round(safe_float(decision.get("sale_score")), 0)
+                    if decision.get("sale_score") is not None
+                    else None
+                ),
+
+                "protection": decision.get("protection"),
+
+                "decision_reason": (
+                    (decision.get("reasons") or [None])[0]
+                ),
+
+                # La opinion del motor viejo, al lado y con su
+                # nombre puesto.
+                "reroll_action": offer.get("action"),
+                "reroll_action_label": human_action(
+                    offer.get("action")
+                ),
+
+                "collecting_now": (
+                    offer_id is not None
+                    and offer_id == cobrando
+                ),
+
+                "queued_to_collect": (
+                    offer_id in en_cola
+                    and offer_id != cobrando
+                ),
+
                 "hours_to_expiry": (
                     round(safe_float(offer.get("hours_to_expiry")), 1)
                     if offer.get("hours_to_expiry") is not None
@@ -2327,6 +2444,18 @@ def build_dashboard_state() -> dict:
     decision = result.get("decision", {}) or {}
     action_decision = result.get("action_decision", {}) or {}
 
+    # El bloque de ofertas del ciclo. Lleva dentro el veredicto de
+    # Offer Decision Engine V2 y cual se cobra ahora, que hasta el
+    # 18/08/2026 se calculaba y no salia por ninguna pantalla.
+    offer_intelligence = next(
+        (
+            (item.get("data") or {})
+            for item in (result.get("candidates") or [])
+            if item.get("type") == "OFFER_DECISION_INTELLIGENCE"
+        ),
+        {},
+    )
+
     board = collect_board_history()
 
     market_status = (
@@ -2617,7 +2746,21 @@ def build_dashboard_state() -> dict:
         },
         "league_center": league_center,
         "competition": competition,
-        "offers": compact_offers(state),
+        "offers": compact_offers(
+            state,
+            offer_decisions=offer_intelligence.get(
+                "offer_decisions"
+            ),
+            collecting={
+                "offer_id": (
+                    offer_intelligence.get("offer") or {}
+                ).get("offer_id"),
+
+                "queued": offer_intelligence.get(
+                    "queued_to_collect"
+                ),
+            },
+        ),
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
         "market_clock": market_clock,

@@ -235,12 +235,133 @@ def test_la_auditoria_puede_fallar():
     assert informe["ok"] is False
 
 
+def test_las_ofertas_las_narra_quien_decide():
+    """
+    La cuarta forma de mentir: hablar en nombre de otro motor.
+
+    EL CASO (18/08/2026, foto del dueño)
+
+        Trece ofertas en pantalla y las trece decian "Conservar
+        buena oferta". Cinco pasaban del 3 % de prima. El dia que
+        conectamos el cobro, era imposible mirar la pantalla y
+        saber si estaba cobrando.
+
+        La tabla se pintaba desde `offer_reroll`, que solo sabe
+        contestar si merece la pena pedir otra oferta. Quien
+        decide si se cobra es Offer Decision Engine V2, y ni uno
+        solo de sus campos aparecia en el dashboard.
+
+        No era un numero mal calculado. Era el numero correcto de
+        la pregunta equivocada.
+    """
+
+    from src.telemetry.dashboard_state import compact_offers
+
+    state = {
+        "offer_reroll": {
+            "offers": [
+                {
+                    "offer_id": 1,
+                    "players": [{"name": "Mangala"}],
+                    "amount": 2_922_500,
+                    "premium_percent": 4.7,
+                    "action": "KEEP_GOOD_OFFER",
+                    "hours_to_expiry": 31.5,
+                },
+                {
+                    "offer_id": 7,
+                    "players": [{"name": "Nadie lo ha visto"}],
+                    "amount": 100,
+                    "premium_percent": 0.1,
+                    "action": "KEEP_GOOD_OFFER",
+                    "hours_to_expiry": 2.0,
+                },
+            ]
+        }
+    }
+
+    decisiones = {
+        "decisions": [
+            {
+                "offer_id": 1,
+                "decision": "ACCEPT_NOW",
+                "sale_score": 68.0,
+                "reasons": ["prima buena y es suplente"],
+            }
+        ]
+    }
+
+    filas = compact_offers(
+        state,
+        offer_decisions=decisiones,
+        collecting={
+            "offer_id": 1,
+            "queued": [{"offer_id": 1}],
+        },
+    )
+
+    mangala, huerfana = filas
+
+    # 1. Manda V2, no el motor de reroll.
+    assert mangala["action"] == "ACCEPT_NOW", (
+        "la tabla ha vuelto a hablar en nombre del motor de "
+        "reroll: dira 'Conservar' de algo que se esta cobrando"
+    )
+
+    assert mangala["decision_source"] == "OFFER_DECISION_V2"
+
+    # 2. Y en castellano, que para eso es una pantalla.
+    assert mangala["action_label"] == "Cobrar ahora"
+
+    # 3. La opinion del motor viejo sigue ahi, con su nombre.
+    assert mangala["reroll_action"] == "KEEP_GOOD_OFFER"
+
+    # 4. Se ve cual cae en ESTE ciclo. Solo se ejecuta una.
+    assert mangala["collecting_now"] is True
+
+    # 5. Y la puntuacion de venta, que es la mitad de la regla:
+    #    sin ella, una prima buena no explica por que no se cobra.
+    assert mangala["sale_score"] == 68
+    assert mangala["decision_reason"]
+
+    # 6. Lo que V2 no ha mirado no se disfraza de veredicto suyo.
+    assert huerfana["decision_source"] == "REROLL_ENGINE"
+    assert huerfana["sale_score"] is None
+    assert huerfana["collecting_now"] is False
+
+
+def test_el_dashboard_recoge_el_bloque_de_ofertas():
+    """
+    Que `compact_offers` sepa contarlo no sirve si nadie se lo da.
+
+    El mismo cable suelto de por la mañana, un piso mas arriba.
+    """
+
+    import inspect
+
+    from src.telemetry import dashboard_state
+
+    fuente = inspect.getsource(
+        dashboard_state.build_dashboard_state
+    )
+
+    assert "OFFER_DECISION_INTELLIGENCE" in fuente, (
+        "el dashboard ha dejado de leer el bloque de ofertas del "
+        "ciclo: la tabla vuelve a ser del motor viejo"
+    )
+
+    assert "offer_decisions=" in fuente
+    assert "queued_to_collect" in fuente
+
+
 def main():
 
     pruebas = [
         test_el_dinero_dice_de_que_esta_hecho,
         test_sin_fecha_no_se_dice_que_es_de_ahora,
         test_la_auditoria_puede_fallar,
+        test_las_ofertas_las_narra_quien_decide,
+        test_el_dashboard_recoge_el_bloque_de_ofertas,
     ]
 
     for prueba in pruebas:

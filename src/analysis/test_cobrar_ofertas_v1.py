@@ -518,6 +518,122 @@ def test_lo_que_no_se_puede_cobrar_no_se_propone():
     )
 
 
+def test_no_se_vende_al_ultimo_portero():
+    """
+    Cobrar bien una oferta que te deja sin poder alinear.
+
+    EL CASO (18/08/2026, primera cola real)
+
+        La primera vez que Pepe eligio solo a quien cobrar, la
+        cola salio asi:
+
+            ACCEPT_NOW  Alvaro Fidalgo  +4,4 %  venta 75
+            ACCEPT_NOW  Bayindir        +0,8 %  venta 60
+
+        Bayindir es portero. Con dos porteros venderlo esta bien
+        -por eso la puntuacion le da 60-, pero nadie estaba
+        comprobando que hubiera dos.
+
+        La puntuacion de venta mira el exceso de plantilla solo
+        para SUMAR: "hay margen en esta posicion", +15. No resta
+        cuando no hay margen. Es un premio, no un freno, y hasta
+        hoy no hacia falta que lo fuera porque no vendia solo.
+
+        El camino de aceptar por caducidad si consulta el
+        guardarrail de posiciones. El de cobrar, recien abierto,
+        no consultaba nada.
+    """
+
+    from src.analysis.decision_orchestrator import (
+        offers_to_collect,
+        position_floor_lookup,
+    )
+
+    bayindir = {
+        "decision": "ACCEPT_NOW",
+        "offer_id": 5001,
+        "player_id": 700,
+        "player_name": "Bayindir",
+        "premium_percent": 0.8,
+    }
+
+    fidalgo = {
+        "decision": "ACCEPT_NOW",
+        "offer_id": 5002,
+        "player_id": 800,
+        "player_name": "Alvaro Fidalgo",
+        "premium_percent": 4.4,
+    }
+
+    # Dos porteros: se puede soltar uno.
+    con_recambio = position_floor_lookup(
+        {
+            "my_team": [
+                {"id": 700, "position": 1},
+                {"id": 701, "position": 1},
+                {"id": 800, "position": 3},
+                {"id": 801, "position": 3},
+                {"id": 802, "position": 3},
+                {"id": 803, "position": 3},
+            ]
+        }
+    )
+
+    cola = offers_to_collect(
+        [bayindir, fidalgo],
+        position_floor=con_recambio,
+    )
+
+    assert len(cola) == 2
+    assert cola[0] is fidalgo
+
+    # Un solo portero: esa oferta ya no se propone.
+    sin_recambio = position_floor_lookup(
+        {
+            "my_team": [
+                {"id": 700, "position": 1},
+                {"id": 800, "position": 3},
+                {"id": 801, "position": 3},
+                {"id": 802, "position": 3},
+                {"id": 803, "position": 3},
+            ]
+        }
+    )
+
+    cola = offers_to_collect(
+        [bayindir, fidalgo],
+        position_floor=sin_recambio,
+    )
+
+    assert [item["player_name"] for item in cola] == [
+        "Alvaro Fidalgo"
+    ], (
+        "se esta cobrando por el ultimo portero: el domingo no "
+        "hay a quien alinear"
+    )
+
+    # AUSENCIA DE DATO NO ES DATO
+    #
+    # Con plantilla conocida, una oferta por alguien que no esta
+    # en ella no se da por segura. Sin plantilla ninguna no se
+    # bloquea nada, porque entonces el freno seria el bug.
+    desconocido = {
+        "decision": "ACCEPT_NOW",
+        "offer_id": 5003,
+        "player_id": 999,
+        "premium_percent": 7.0,
+    }
+
+    assert offers_to_collect(
+        [desconocido],
+        position_floor=sin_recambio,
+    ) == []
+
+    assert len(
+        offers_to_collect([desconocido], position_floor={})
+    ) == 1
+
+
 def test_el_gatillo_esta_conectado():
     """
     Que la cola exista no basta: hay que emitir la accion.
@@ -574,6 +690,7 @@ def main():
         test_la_prima_llega_de_verdad,
         test_alguien_tiene_que_cobrarla,
         test_lo_que_no_se_puede_cobrar_no_se_propone,
+        test_no_se_vende_al_ultimo_portero,
         test_el_gatillo_esta_conectado,
     ]
 
