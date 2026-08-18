@@ -135,6 +135,7 @@ jobs:
           python -m src.analysis.test_dashboard_truth_v1
           python -m src.analysis.test_intocables_v1
           python -m src.analysis.test_calendario_v1
+          python -m src.analysis.test_cobrar_ofertas_v1
           python -m src.analysis.test_action_starvation_v1
           python -m src.analysis.test_price_history_store_v1
           python -m src.analysis.test_futbolfantasy_source_v12

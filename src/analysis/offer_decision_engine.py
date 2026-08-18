@@ -51,6 +51,15 @@ PREMIUM_EXCELLENT = 8.0
 PREMIUM_GOOD = 3.0
 PREMIUM_FAIR = 0.0
 
+# Cuanta puntuacion de venta hace falta para cobrar una oferta.
+#
+# Mas baja para quien no juega -si esta en el banquillo, el coste
+# deportivo de soltarlo es casi cero y basta con que la prima sea
+# excelente- y mas alta para quien si juega, porque ahi la venta
+# toca el once.
+ACCEPT_BENCH_SALE_SCORE = 45.0
+ACCEPT_CLEAR_SALE_SCORE = 60.0
+
 # Evitamos aceptar una oferta que destruya un activo que
 # claramente sigue en tendencia de revalorizacion.
 SPECULATION_HOLD_THRESHOLD = 62.0
@@ -127,6 +136,87 @@ def classify_offer_quality(
         return "FAIR"
 
     return "BELOW_MARKET"
+
+
+# ============================================================
+# CUANDO UNA OFERTA COMPENSA
+# ============================================================
+#
+# POR QUE ESTA AQUI, EN UNA FUNCION, Y NO ESCRITO DOS VECES
+#
+#     Esta regla vivia suelta en la rama de "ofertas de otros
+#     managers", debajo de la rama del Computer. Y como el
+#     Computer se comia su propia rama antes, estas dos
+#     condiciones NUNCA se evaluaban para una oferta suya.
+#
+#     Auditado el 18/08/2026 con doce ofertas del Computer sobre
+#     la mesa -44,15 millones- entre ellas Alvaro Fidalgo, 75 de
+#     100 en venta, suplente, con la mejor prima de las doce
+#     (+4,4 %). Se iba a quedar en plantilla y la oferta iba a
+#     caducar, con el saldo en -1,46 millones.
+#
+#     El unico camino a aceptar una oferta del Computer era
+#     ACCEPT_FOR_SOLVENCY, que exige DOS cosas a la vez: que la
+#     oferta este reservada para tapar un agujero y que queden
+#     menos de seis horas para que caduque. O sea: Pepe solo
+#     vendia al Computer cuando le faltaba el dinero y se le
+#     acababa el tiempo. Nunca por buen precio.
+#
+#     Ahora la regla es una sola y la usan los dos caminos. Si
+#     algun dia cambia, cambia para ambos.
+#
+# NO LLEVA VETO DE JERARQUIA, Y ES DELIBERADO
+#
+#     `sale_intent` si veta a los Dios, los Clave y al portero
+#     titular, porque ahi Pepe vende por iniciativa propia. Aqui
+#     REACCIONA a una oferta, y la regla del dueño para eso es
+#     otra: "Yamal solo se vende si cae por lesion o sancion
+#     larga". Un Dios roto seis jornadas es justo el caso en que
+#     su puntuacion de venta sube y hay que venderlo.
+#
+#     Quien protege aqui es la puntuacion, que ya mira la
+#     jerarquia: hoy Yamal, Olasagasti, Gustavo Puerta y Dituro
+#     estan a 0 sobre 100 y el corte esta en 60.
+# ============================================================
+
+
+def sale_is_worth_it(
+    quality: str,
+    sale_score: float,
+    in_lineup: bool,
+) -> tuple[bool, str | None]:
+    """
+    Si esta oferta compensa venderla. Vale para cualquiera.
+
+    Dos puertas, y basta con una:
+
+    - Prima excelente por alguien que no juega. El coste
+      deportivo es asumible porque no estaba en el once.
+    - Prima buena por alguien claramente vendible. Aqui el
+      jugador PUEDE estar en el once: si su puntuacion de venta
+      pasa de 60 es que ya no deberia estar.
+    """
+
+    if (
+        quality == "EXCELLENT"
+        and sale_score >= ACCEPT_BENCH_SALE_SCORE
+        and not in_lineup
+    ):
+        return (
+            True,
+            "Prima excelente y coste deportivo asumible.",
+        )
+
+    if (
+        quality in {"GOOD", "EXCELLENT"}
+        and sale_score >= ACCEPT_CLEAR_SALE_SCORE
+    ):
+        return (
+            True,
+            "Oferta favorable por un activo claramente vendible.",
+        )
+
+    return (False, None)
 
 
 def calculate_economic_score(
@@ -439,11 +529,21 @@ def decide_incoming_offer(
     # COMPUTER: RESPETAR SU MOTOR COMO FUENTE DE VERDAD
     # ========================================================
 
-    elif (
-        counterparty_type == "COMPUTER"
-        and
-        reroll_offer is not None
-    ):
+    # DOS REGIMENES SEGUN SI OTRO MOTOR TUVO OPINION (18/08/2026)
+    #
+    # Esta rama exigia ademas `reroll_offer is not None`. Si el
+    # motor de reroll no habia opinado sobre una oferta del
+    # Computer, la oferta se caia hacia abajo y la decidian las
+    # reglas de los managers.
+    #
+    # O sea: la misma oferta se juzgaba con dos varas distintas
+    # segun si otro motor la habia mirado o no, y eso no lo
+    # decide nadie, lo decide el azar de que exista una entrada.
+    #
+    # Ahora entra toda oferta del Computer. Sin entrada de reroll,
+    # `reroll_action` es None y cae al else, que aplica la misma
+    # regla que aplicaria abajo. Los dos regimenes convergen.
+    elif counterparty_type == "COMPUTER":
 
         if reroll_action == "ACCEPT_BEFORE_EXPIRY":
 
@@ -485,35 +585,65 @@ def decide_incoming_offer(
                 "Computer Reroll Engine protege este activo."
             )
 
-        elif reroll_action == "KEEP_GOOD_OFFER":
-
-            action = "KEEP_GOOD_OFFER"
-            confidence = 90
-
-            reasons.append(
-                "Oferta Computer buena; conservar opcionalidad "
-                "sin vender automÃ¡ticamente."
-            )
-
-        elif reroll_action == "KEEP_OFFER":
-
-            action = "HOLD_OFFER"
-            confidence = 88
-
-            reasons.append(
-                "Computer Reroll Engine considera que el reroll "
-                "no compensa con la informaciÃ³n actual."
-            )
-
         else:
 
-            action = "HOLD_OFFER"
-            confidence = 80
+            # ------------------------------------------------
+            # AQUI SE COBRA
+            # ------------------------------------------------
+            #
+            # El motor de reroll ya ha dicho lo suyo y no pide ni
+            # reroll ni reserva: la oferta se queda como esta. Es
+            # el momento de preguntarse si compensa cobrarla, que
+            # es justo lo que nunca se preguntaba.
+            #
+            # Y se pregunta con la MISMA funcion que usa el
+            # camino de los managers, no con una copia.
+            # ------------------------------------------------
 
-            reasons.append(
-                "Oferta Computer sin seÃ±al ejecutable especÃ­fica; "
-                "se conserva en observaciÃ³n."
+            compensa, motivo = sale_is_worth_it(
+                quality=quality,
+                sale_score=sale_score,
+                in_lineup=in_lineup,
             )
+
+            if compensa:
+
+                action = "ACCEPT_NOW"
+                confidence = 86
+
+                reasons.append(motivo)
+
+            elif reroll_action == "KEEP_GOOD_OFFER":
+
+                action = "KEEP_GOOD_OFFER"
+                confidence = 90
+
+                reasons.append(
+                    "Oferta Computer buena, pero el jugador no "
+                    "esta para vender: se conserva la "
+                    "opcionalidad."
+                )
+
+            elif reroll_action == "KEEP_OFFER":
+
+                action = "HOLD_OFFER"
+                confidence = 88
+
+                reasons.append(
+                    "Computer Reroll Engine considera que el "
+                    "reroll no compensa con la informacion "
+                    "actual."
+                )
+
+            else:
+
+                action = "HOLD_OFFER"
+                confidence = 80
+
+                reasons.append(
+                    "Oferta Computer sin señal ejecutable "
+                    "especifica; se conserva en observacion."
+                )
 
     # ========================================================
     # OFERTAS DE OTROS MANAGERS / CASOS NO COMPUTER
@@ -535,36 +665,28 @@ def decide_incoming_offer(
             "El activo mantiene una seÃ±al especulativa positiva."
         )
 
-    elif (
-        quality == "EXCELLENT"
-        and
-        sale_score >= 45
-        and
-        not in_lineup
-    ):
+    # LA MISMA REGLA QUE ARRIBA, NO UNA COPIA.
+    #
+    # Estas dos condiciones estaban escritas a mano aqui, y por
+    # estar debajo de la rama del Computer no se aplicaban nunca
+    # a sus ofertas. Ahora viven en `sale_is_worth_it` y las usan
+    # los dos caminos: si un dia cambia el criterio, cambia para
+    # ambos.
+    elif sale_is_worth_it(
+        quality=quality,
+        sale_score=sale_score,
+        in_lineup=in_lineup,
+    )[0]:
 
         action = "ACCEPT_NOW"
         confidence = 88
 
         reasons.append(
-            "Prima excelente y coste deportivo asumible."
-        )
-
-    elif (
-        quality
-        in {
-            "GOOD",
-            "EXCELLENT",
-        }
-        and
-        sale_score >= 60
-    ):
-
-        action = "ACCEPT_NOW"
-        confidence = 84
-
-        reasons.append(
-            "Oferta favorable por un activo claramente vendible."
+            sale_is_worth_it(
+                quality=quality,
+                sale_score=sale_score,
+                in_lineup=in_lineup,
+            )[1]
         )
 
     elif quality in {
