@@ -50,6 +50,43 @@ FULL_AUTONOMOUS_STATUS = (
 )
 
 
+# A partir de cuando "este ciclo" deja de ser este ciclo.
+#
+# Un ciclo son 30 minutos. Dos ciclos de margen absorben un
+# retraso normal -un refresco lento, una cola de GitHub-; a
+# partir de ahi lo que se esta enseñando es historia y hay que
+# decirlo.
+STALE_CYCLE_SECONDS = 2 * 30 * 60
+
+
+def _edad_en_segundos(marca) -> int | None:
+    """
+    Cuanto hace de esa marca de tiempo. None si no se sabe.
+
+    Ausencia de dato no es dato: si la marca no viene o no se
+    puede leer, se devuelve None y NO cero, que se leeria como
+    "acaba de pasar" -justo el error que esto viene a evitar-.
+    """
+
+    if not marca:
+        return None
+
+    texto = str(marca).strip().replace("Z", "+00:00")
+
+    try:
+        instante = datetime.fromisoformat(texto)
+
+    except ValueError:
+        return None
+
+    ahora = datetime.now(tz=instante.tzinfo)
+
+    return max(
+        0,
+        int((ahora - instante).total_seconds()),
+    )
+
+
 ACTION_LABELS = {
     "MONITOR_OFFERS": "Vigilar ofertas",
     "NEVER_SELL": "No vender",
@@ -585,6 +622,20 @@ def compact_lineup(
                     safe_float(player.get("lineup_score")),
                     2,
                 ),
+
+                # POR QUE ESTE Y NO OTRO (18/08/2026)
+                #
+                # El numero que ordena el once: jerarquia y
+                # porcentaje en una sola cifra de 0 a 1. Sube al
+                # dashboard porque el dia que Yamal se cayo del
+                # XI no habia forma de ver contra quien habia
+                # perdido ni por cuanto.
+                "weekly_expected_value": round(
+                    safe_float(
+                        player.get("weekly_expected_value")
+                    ),
+                    3,
+                ),
                 "availability": player.get("availability_label"),
 
                 # Compatibility aliases for current dashboard frontend:
@@ -765,6 +816,18 @@ def compact_lineup(
 
     return {
         "formation": lineup.get("formation_name"),
+
+        # LA REGLA DEL DIOS (18/08/2026)
+        #
+        # Un Dios juega siempre salvo 0 % motivado. Si alguno
+        # falta, aqui esta el motivo; si alguno esta al 0 % y
+        # nadie lo explica, aqui esta el aviso. Sin esto, un Dios
+        # ausente vuelve a ser un misterio que hay que reconstruir
+        # a mano, que es como empezo todo esto con Yamal.
+        "mandatory_hierarchy": (
+            lineup.get("mandatory_hierarchy") or {}
+        ),
+
         "playable": safe_int(lineup_state.get("playable_count")),
         "missing": safe_int(lineup_state.get("missing")),
         "score": round(safe_float(lineup.get("score")), 2),
@@ -1078,6 +1141,36 @@ def build_execution_telemetry(
         "http_status": execution.get("http_status"),
         "post_write_verified": post_write_verified,
     }
+
+    # ==================================================
+    # CUANTOS ANOS TIENE ESTO (18/08/2026)
+    # ==================================================
+    #
+    # `v10_full_autonomous_status.json` se leia tal cual, sin
+    # mirar su fecha. Y ese fichero solo se reescribe cuando el
+    # motor con permiso de escritura ejecuta; el observador que
+    # regenera el dashboard corre mucho mas a menudo.
+    #
+    # Resultado: el 17/08 a las 20:44 la pantalla enseñaba, bajo
+    # el titulo "ESTE CICLO", una escritura del 16/08 a las 18:56.
+    # Mas de un dia, con fecha absoluta y sin ningun aviso. Se leia
+    # como lo que parecia -"acaba de escribir"- y de ahi salio la
+    # pregunta de si Pepe estaba pujando siquiera.
+    #
+    # El fichero no puede decir su propia edad, asi que se calcula
+    # aqui y viaja con el. Que la pantalla decida como pintarlo,
+    # pero que no pueda alegar que no lo sabia.
+    cycle["age_seconds"] = _edad_en_segundos(
+        cycle.get("timestamp")
+    )
+
+    # Un ciclo son 30 minutos. Con mas de dos ciclos de retraso
+    # esto ya no es "este ciclo", es historia.
+    cycle["stale"] = bool(
+        cycle["age_seconds"] is not None
+        and
+        cycle["age_seconds"] > STALE_CYCLE_SECONDS
+    )
 
     if write_used and action:
         last_execution = {

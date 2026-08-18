@@ -177,6 +177,22 @@ def build_bid_exposure(
             if importe <= 0:
                 continue
 
+            # A QUIEN LE PUJAMOS
+            #
+            # `to` es la otra parte de la operacion: el manager
+            # que vende, o vacio cuando el vendedor es el
+            # Computer.
+            #
+            # Sin esto, el tablero puede decir "hay una puja de
+            # 463.500" pero no a quien. Y "a un rival" no es una
+            # respuesta: en esta liga saber si le pujas a
+            # Prinzipote o a Pollo17 cambia lo que esperas que
+            # pase, porque de cada uno se sabe cuanto suele pagar.
+            destino = oferta.get("to")
+
+            if not isinstance(destino, dict):
+                destino = {}
+
             operaciones.append(
                 {
                     "offer_id": oferta.get("offer_id")
@@ -185,6 +201,14 @@ def build_bid_exposure(
                     "player_ids": _requested_player_ids(oferta),
                     "status": estado or "waiting",
                     "until": oferta.get("until"),
+
+                    "counterparty_id": (
+                        safe_int(destino.get("id")) or None
+                    ),
+
+                    # Vacio = Computer. Es la ausencia de manager,
+                    # no un dato que falte.
+                    "counterparty_name": destino.get("name"),
                 }
             )
 

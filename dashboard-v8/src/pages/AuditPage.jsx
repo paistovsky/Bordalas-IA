@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ago } from "../lib/utils";
 
 const FILTERS = [
   ["all", "TODO"],
@@ -33,10 +34,15 @@ function CyclePanel({ cycle = {}, last = {}, competitive = {}, consistency = {} 
       <div className="pan-head">
         <div>
           <h2>ESTE CICLO</h2>
+          {/* LA FECHA ABSOLUTA NO BASTA.
+              «16/8/2026, 18:56» hay que restarlo mentalmente para
+              saber si es de ahora; «hace 26 h» no. Este cuadro
+              enseñó durante más de un día una escritura de la
+              antevíspera bajo un título que dice «este». */}
           <div className="sub">
             {cycle.version || "—"} ·{" "}
             {cycle.timestamp
-              ? new Date(cycle.timestamp).toLocaleString("es-ES")
+              ? `${ago(cycle.timestamp)} · ${new Date(cycle.timestamp).toLocaleString("es-ES")}`
               : "sin marca de tiempo"}
           </div>
         </div>
@@ -44,6 +50,19 @@ function CyclePanel({ cycle = {}, last = {}, competitive = {}, consistency = {} 
           {escribio ? "HA ESCRITO" : "SOLO HA MIRADO"}
         </span>
       </div>
+
+      {/* Este fichero solo se reescribe cuando el motor con
+          permiso de escritura ejecuta. El observador que regenera
+          la pantalla corre mucho más a menudo, así que puede
+          quedarse congelado sin que nada más lo parezca. */}
+      {cycle.stale && (
+        <div className="alert warn" style={{ marginTop: 9 }}>
+          Esto NO es de este ciclo. La última ejecución con permiso de
+          escritura fue {ago(cycle.timestamp)}: desde entonces el
+          dashboard se ha seguido refrescando, pero Pepe no ha escrito
+          nada en Biwenger.
+        </div>
+      )}
 
       {escribio ? (
         <>

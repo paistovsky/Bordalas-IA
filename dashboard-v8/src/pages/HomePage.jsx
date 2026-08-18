@@ -11,6 +11,7 @@ function squadValue(players = []) {
 export default function HomePage({ data }) {
   const lineup = data.lineup || {};
   const guardrail = data.guardrail || {};
+  const mandatory = lineup.mandatory_hierarchy || {};
 
   return (
     <>
@@ -28,6 +29,29 @@ export default function HomePage({ data }) {
               {lineup.playable ?? 0}/11
             </span>
           </div>
+
+          {/* UN DIOS QUE FALTA TIENE QUE EXPLICARSE.
+              La regla es que juegan siempre; la unica excepcion
+              es el 0 % motivado. Asi que cuando uno no esta, el
+              motivo va aqui arriba y no en un log. */}
+          {(mandatory.ruled_out || []).length > 0 && (
+            <div className="godnote crit">
+              FUERA DEL XI:{" "}
+              {mandatory.ruled_out
+                .map((god) => `${god.name} (${god.reason || "sin motivo"})`)
+                .join(" · ")}
+            </div>
+          )}
+
+          {/* Un Dios al 0 % que nadie explica. Juega igual —un
+              dato suelto no es una baja— pero se canta, porque o
+              FF sabe algo que no vemos o el dato está viejo. */}
+          {(mandatory.unexplained || []).length > 0 && (
+            <div className="godnote warn">
+              0 % SIN MOTIVO, JUEGA IGUAL:{" "}
+              {mandatory.unexplained.map((god) => god.name).join(" · ")}
+            </div>
+          )}
 
           <PitchXI lineup={lineup} offers={data.competitive?.offers || []} />
         </section>

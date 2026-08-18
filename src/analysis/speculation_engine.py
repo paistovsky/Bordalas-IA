@@ -1268,6 +1268,8 @@ def calculate_speculation_budget(
         return {
             "enabled": False,
             "total_budget": 0,
+            "cash_budget": 0,
+            "debt_budget": 0,
             "single_operation_limit": 0,
             "reason": (
                 "Existe una puja Franchise activa "
@@ -1292,6 +1294,8 @@ def calculate_speculation_budget(
         return {
             "enabled": False,
             "total_budget": 0,
+            "cash_budget": 0,
+            "debt_budget": 0,
             "single_operation_limit": 0,
             "reason": "Hard Safety activo.",
             "blocked_by": "HARD_SAFETY",
@@ -1339,6 +1343,8 @@ def calculate_speculation_budget(
             return {
                 "enabled": False,
                 "total_budget": 0,
+                "cash_budget": 0,
+                "debt_budget": 0,
                 "single_operation_limit": 0,
                 "reason": (
                     "Saldo negativo y SOLVENCY_GUARANTEE "
@@ -1358,6 +1364,8 @@ def calculate_speculation_budget(
             return {
                 "enabled": False,
                 "total_budget": 0,
+                "cash_budget": 0,
+                "debt_budget": 0,
                 "single_operation_limit": 0,
                 "reason": (
                     "Existe garantia de solvencia, pero "
@@ -1374,6 +1382,8 @@ def calculate_speculation_budget(
             return {
                 "enabled": False,
                 "total_budget": 0,
+                "cash_budget": 0,
+                "debt_budget": 0,
                 "single_operation_limit": 0,
                 "reason": (
                     "MAX_SAFE_DEBT no deja margen "
@@ -1409,6 +1419,8 @@ def calculate_speculation_budget(
             return {
                 "enabled": False,
                 "total_budget": 0,
+                "cash_budget": 0,
+                "debt_budget": 0,
                 "single_operation_limit": 0,
                 "raw_authorized_budget": total_budget,
                 "reason": (
@@ -1428,6 +1440,27 @@ def calculate_speculation_budget(
             "gross_budget": gross_budget,
             "maximum_bid": maximum_bid,
             "single_operation_limit": single_limit,
+
+            # DE QUE ESTA HECHO EL DINERO (18/08/2026)
+            #
+            # Esta rama devolvia el total y nada mas. Las dos
+            # claves que dicen de que esta hecho ese total las
+            # escribia SOLO la rama de saldo positivo, asi que
+            # con saldo negativo llegaban como None, el dashboard
+            # hacia safe_int(None) y la barra de CAJA pintaba
+            # tres franjas de cero.
+            #
+            # No era un cero: eran millones sin etiquetar. Y como
+            # el saldo lleva negativo desde que se decidio operar
+            # con deuda, la barra llevaba apagada desde entonces.
+            #
+            # La respuesta aqui no hay ni que calcularla: con el
+            # saldo en negativo NO hay caja. Todo lo que se puede
+            # gastar es deuda, y por eso total y deuda son el
+            # mismo numero.
+            "cash_budget": 0,
+            "debt_budget": total_budget,
+
             "reason": (
                 "Saldo negativo permitido: SOLVENCY_GUARANTEE "
                 "esta cubierta y existe margen dentro de "
@@ -1562,6 +1595,8 @@ def calculate_speculation_budget(
         return {
             "enabled": False,
             "total_budget": 0,
+            "cash_budget": 0,
+            "debt_budget": 0,
             "single_operation_limit": 0,
             "raw_authorized_budget": total_budget,
             "cash_budget": cash_budget,

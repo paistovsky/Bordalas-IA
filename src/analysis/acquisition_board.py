@@ -109,18 +109,126 @@ def build_acquisition_board(
         )
 
         puja_viva = {}
+        contraparte = {}
 
         for operacion in (exposicion.get("operations") or []):
             for jugador in (operacion.get("player_ids") or []):
+
                 puja_viva[safe_int(jugador)] = safe_int(
                     operacion.get("amount")
                 )
 
+                contraparte[safe_int(jugador)] = {
+                    "id": operacion.get("counterparty_id"),
+                    "name": operacion.get("counterparty_name"),
+                }
+
+        # ------------------------------------------------------
+        # A QUIEN SE LE COMPRA
+        # ------------------------------------------------------
+        #
+        # Esta tabla es "el mercado del Computer": mas abajo se
+        # descartan las ventas de otros managers, porque Pepe
+        # compra ahi y no en las listas de los rivales.
+        #
+        # Pero una puja NUESTRA puede caer fuera de ese mercado:
+        # se puede ofertar por un jugador de un manager sin que
+        # el lo haya publicado. Y esas pujas no tenian donde
+        # salir.
+        #
+        # Lo destapo la propia pantalla el 18/08/2026:
+        #
+        #     Pujas vivas:  Biwenger 2, aqui 1
+        #     Comprometido: Biwenger 2.531.501, aqui 2.068.001
+        #
+        # 463.500 EUR nuestros, vivos, sin una fila donde
+        # aparecer. El dueño leia "solo tengo una puja".
+        #
+        # Asi que la regla pasa a ser: el mercado del Computer
+        # MAS todo aquello en lo que ya hay dinero nuestro. Lo
+        # segundo entra aunque lo venda un rival y aunque no este
+        # publicado, y entra marcado con el nombre de quien vende
+        # -no "un rival", el nombre-, porque de cada manager se
+        # sabe cuanto suele pagar y eso cambia lo que esperas.
+        #
+        # Lo que NO cambia es a quien se compra: estas filas
+        # llevan `decision` propia y nunca son BID, asi que
+        # `best_acquisition_target` no las elige. Se ven, no se
+        # persiguen.
+        # ------------------------------------------------------
+
+        def _vendedor(player_id: int, venta: dict | None) -> dict:
+            """
+            Quien vende: el Computer o un manager con nombre.
+
+            Se pregunta primero a la venta publicada y despues a
+            la puja, porque una oferta directa por un jugador no
+            publicado solo aparece en la segunda.
+            """
+
+            venta = venta or {}
+
+            seller_id = venta.get("seller_user_id")
+            seller_name = venta.get("seller_name")
+
+            if seller_id is None:
+
+                de_la_puja = contraparte.get(
+                    safe_int(player_id)
+                ) or {}
+
+                seller_id = de_la_puja.get("id")
+                seller_name = (
+                    seller_name
+                    or de_la_puja.get("name")
+                )
+
+            if seller_id is None:
+                return {
+                    "seller_kind": "COMPUTER",
+                    "seller_id": None,
+                    "seller_name": "Computer",
+                }
+
+            return {
+                "seller_kind": "MANAGER",
+                "seller_id": safe_int(seller_id),
+
+                # Sin nombre se dice que no se sabe. "Rival" a
+                # secas no informa de nada.
+                "seller_name": (
+                    seller_name
+                    or f"Manager {safe_int(seller_id)}"
+                ),
+            }
+
         filas = []
 
-        for player_id, venta in vendedores.items():
+        # Todo lo que hay que mirar: lo que vende el Computer mas
+        # aquello donde ya hay dinero nuestro puesto.
+        a_mirar = list(vendedores.items())
 
-            if venta.get("seller_user_id") is not None:
+        ya_listados = {safe_int(pid) for pid, _ in a_mirar}
+
+        for jugador_pujado in puja_viva:
+
+            if safe_int(jugador_pujado) not in ya_listados:
+                a_mirar.append((jugador_pujado, {}))
+
+        for player_id, venta in a_mirar:
+
+            fuera_del_computer = (
+                venta.get("seller_user_id") is not None
+                or not venta
+            )
+
+            # Un mercado de otro manager solo entra si ya hay
+            # dinero nuestro dentro. Si no, esta tabla seguiria
+            # siendo el mercado del Computer, como hasta ahora.
+            if (
+                fuera_del_computer
+                and safe_int(player_id) not in puja_viva
+            ):
                 continue
 
             ficha = catalogo.get(safe_int(player_id))
@@ -230,12 +338,35 @@ def build_acquisition_board(
                     safe_int(player_id) in puja_viva
                 ),
 
+                # A QUIEN SE LE COMPRA. Con nombre.
+                **_vendedor(player_id, venta),
+
+                "outside_computer_market": fuera_del_computer,
+
                 "win_probability": None,
                 "expected_value": None,
                 "decision": valoracion.get("decision"),
             }
 
-            if estado not in {"ok", "unknown"}:
+            if fuera_del_computer:
+
+                # Ya hay dinero nuestro aqui, pero no es un
+                # objetivo del ciclo: Pepe compra en el mercado
+                # del Computer. La fila existe para que el euro se
+                # vea, no para que se persiga.
+                #
+                # `decision` distinta de BID es lo que mantiene
+                # esta fila fuera de `best_acquisition_target`.
+                fila["decision"] = "PUJA_FUERA_DEL_COMPUTER"
+
+                fila["reason"] = (
+                    f"Puja nuestra viva por "
+                    f"{fila['live_bid']:,} EUR a "
+                    f"{fila['seller_name']}. Fuera del mercado "
+                    f"del Computer: se enseña, no se persigue."
+                ).replace(",", ".")
+
+            elif estado not in {"ok", "unknown"}:
                 fila["decision"] = "NO_DISPONIBLE"
                 fila["reason"] = f"Estado del jugador: {estado}."
 
@@ -327,7 +458,23 @@ def build_acquisition_board(
 
         return {
             "available": True,
-            "market_size": len(filas),
+
+            # El tamaño del mercado sigue siendo el del Computer.
+            # Las filas de pujas fuera de el se ven en la tabla
+            # pero no engordan este numero, que es el que dice
+            # cuanto habia donde elegir.
+            "market_size": sum(
+                1
+                for f in filas
+                if not f.get("outside_computer_market")
+            ),
+
+            "outside_computer_market": sum(
+                1
+                for f in filas
+                if f.get("outside_computer_market")
+            ),
+
             "biddable": sum(
                 1 for f in filas if f["decision"] == "BID"
             ),

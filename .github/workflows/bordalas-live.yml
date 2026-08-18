@@ -131,6 +131,8 @@ jobs:
           python -m src.analysis.test_rival_bid_model_v1
           python -m src.analysis.test_player_value_v1
           python -m src.analysis.test_acquisition_wiring_v1
+          python -m src.analysis.test_bid_visibility_v1
+          python -m src.analysis.test_dashboard_truth_v1
           python -m src.analysis.test_action_starvation_v1
           python -m src.analysis.test_price_history_store_v1
           python -m src.analysis.test_futbolfantasy_source_v12

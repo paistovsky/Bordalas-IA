@@ -392,6 +392,238 @@ def calculate_lineup_score(
 
 
 # ============================================================
+# CUANTO ESPERO DE ESTE JUGADOR ESTE SABADO
+# ============================================================
+#
+# EL CASO QUE LO DESTAPO (18/08/2026)
+#
+#     Yamal, Dios del Barcelona, 60 % de titular segun FF, se
+#     cayo del once. Entraba en su lugar cualquier titular
+#     confirmado, incluido un Revulsivo al 70 %.
+#
+#     No era un fallo de datos: la jerarquia ya llegaba hasta
+#     aqui -se migro el 17/08- pero no puntuaba. El once se
+#     ordenaba por la ETIQUETA del consenso:
+#
+#         starter_tier * 100.000
+#
+#     y esa etiqueta sale de un corte seco: STARTER a partir del
+#     67 %, BENCH hasta el 40 %, UNCERTAIN en medio. Yamal al
+#     60 % caia en UNCERTAIN -tier 3- y cualquier jugador al
+#     70 % era STARTER -tier 5-. Doscientos mil puntos de
+#     ventaja que el 60 % de Yamal, valorado a 100 por punto, no
+#     podia recortar ni de lejos.
+#
+#     El dueño lo dijo en una linea: "hay que ponerlo en el XI
+#     aunque vaya a jugar unos minutos solo".
+#
+# POR QUE NO BASTA CON ORDENAR POR PORCENTAJE
+#
+#     Porque el porcentaje de FF responde a "¿SALE DE INICIO?",
+#     y esa no es la pregunta del fantasy. La pregunta es
+#     "¿cuantos puntos me hace?". Y ahi hay dos cosas que el
+#     porcentaje solo no dice:
+#
+#     1. Un Dios que no sale de inicio ENTRA. Un coach guarda a
+#        Yamal media hora y lo mete; a un Reserva no lo mete
+#        nunca. El 40 % que le falta a Yamal no es cero: es un
+#        banquillo del que se sale casi siempre.
+#
+#     2. Cuando juegan, no rinden igual. Un Dios en media hora
+#        puede hacer mas que un Rotacion en noventa minutos.
+#
+#     Asi que el valor de la semana son dos factores:
+#
+#         participacion  =  % titular  +  (lo que falta) * cuanto
+#                                          entra desde el banquillo
+#
+#         valor          =  participacion * calidad del escalon
+#
+# ESTOS NUMEROS SON CRITERIO, NO MEDICION
+#
+#     A dia de hoy no hay minutos acumulados suficientes para
+#     medir ninguna de las dos tablas: van dos jornadas. Estan
+#     puestos a ojo, con una forma que se defiende sola -un Dios
+#     entra casi siempre, un Reserva casi nunca, un Revulsivo
+#     entra mas que un Importante porque para eso esta- y se
+#     recalibran con minutos reales en la jornada 6-8, junto con
+#     la escala de puntos que ya esta pendiente.
+#
+#     Lo que NO es criterio es la direccion: que la jerarquia
+#     pese en el once es una de las cuatro decisiones del plan.
+# ============================================================
+
+
+# Cuanto entra desde el banquillo cada escalon, cuando FF no lo
+# da de titular. El Revulsivo esta alto a proposito: entrar es
+# literalmente su oficio.
+HIERARCHY_BENCH_APPEARANCE = {
+    60: 0.70,   # Dios
+    50: 0.50,   # Clave
+    40: 0.35,   # Importante
+    30: 0.20,   # Rotacion
+    25: 0.45,   # Revulsivo
+    20: 0.08,   # Reserva
+    10: 0.03,   # Descarte
+}
+
+
+# Cuanto rinde cada escalon cuando juega.
+HIERARCHY_MATCH_QUALITY = {
+    60: 1.00,   # Dios
+    50: 0.92,   # Clave
+    40: 0.80,   # Importante
+    30: 0.62,   # Rotacion
+    25: 0.50,   # Revulsivo
+    20: 0.38,   # Reserva
+    10: 0.25,   # Descarte
+}
+
+
+# Sin jerarquia NO se asume la peor. Ausencia de dato no es dato:
+# un jugador sin ficha en FF -un recien llegado, un portero
+# suplente- se trata como un escalon medio y se ordena por su
+# porcentaje, que es lo unico que si se sabe de el.
+HIERARCHY_UNKNOWN_VALUE = 30
+
+
+# ============================================================
+# UN DIOS JUEGA SIEMPRE
+# ============================================================
+#
+# LA REGLA (decision del dueño, 18/08/2026)
+#
+#     "Para elegir el XI, hay que hacer que los jerarquia DIOS
+#     jueguen siempre salvo caso de titularidad 0 % asegurada
+#     -lesion, sancion u otro motivo-."
+#
+# POR QUE NO BASTABA CON LO DE ESTA MISMA MAÑANA
+#
+#     Con `weekly_expected_value` a secas, un Dios al 60 % ya
+#     ganaba a un Revulsivo al 70 % -ese era el caso Yamal- pero
+#     seguia siendo una competicion: bastaba con que dos Claves
+#     al 90 % ocupasen su linea para que el Dios volviese al
+#     banquillo. Y un Dios al 20 % perdia contra medio equipo.
+#
+#     El dueño no quiere que compita. Quiere que juegue. Un Dios
+#     con dudas y treinta minutos rinde mas que un Rotacion
+#     confirmado noventa, y sobre todo: si marca, marca el.
+#
+# LO QUE SIGUE SIENDO CIERTO
+#
+#     Esto NO pasa por encima de la disponibilidad. Un Dios que
+#     Biwenger da por no alineable sigue valiendo -1.000.000 y no
+#     entra: el bono se suma DESPUES de comprobar que se le puede
+#     alinear, no antes.
+#
+# EL 0 % TIENE QUE ESTAR MOTIVADO
+#
+#     "Asegurada" es la palabra del dueño y se toma en serio: un
+#     0 % suelto no basta para sentar a un Dios. Hace falta un
+#     motivo -lesionado, sancionado, no disponible, un parte de
+#     baja con jornadas-.
+#
+#     Un Dios al 0 % que FF da como DISPONIBLE y sin parte es una
+#     contradiccion, no una noticia. Ausencia de dato no es dato:
+#     ese juega, y se avisa en el ciclo para poder mirarlo.
+# ============================================================
+
+
+MANDATORY_HIERARCHY_VALUE = 60
+
+
+# Por encima de cualquier score posible de un no-Dios. El maximo
+# alcanzable sin bono ronda 1.000.000 -valor semanal 1,0- mas
+# unos cientos de base, asi que diez millones no deja duda.
+MANDATORY_HIERARCHY_BONUS = 10_000_000.0
+
+
+def god_is_ruled_out(starter: dict) -> tuple[bool, str | None]:
+    """
+    Un Dios solo se sienta con el 0 % MOTIVADO.
+
+    Devuelve (se_sienta, motivo). Sin motivo no se sienta, aunque
+    el porcentaje sea 0: eso es un dato raro, no una baja.
+    """
+
+    probabilidad = starter.get("starter_probability")
+
+    if probabilidad is None or float(probabilidad) > 0:
+        return False, None
+
+    disponibilidad = starter.get("availability") or {}
+
+    if disponibilidad.get("can_play") is False:
+        return True, str(
+            disponibilidad.get("label") or "NO DISPONIBLE"
+        )
+
+    if disponibilidad.get("sanctioned"):
+        return True, "SANCIONADO"
+
+    etiqueta = str(disponibilidad.get("label") or "").upper()
+
+    if etiqueta and etiqueta != "DISPONIBLE":
+        return True, etiqueta
+
+    baja = starter.get("absence") or {}
+
+    if baja.get("matchdays_out") or baja.get("reason"):
+        return True, str(
+            baja.get("reason") or "BAJA"
+        )
+
+    # 0 % y nadie dice por que.
+    return False, None
+
+
+def weekly_expected_value(
+    hierarchy_value: int | None,
+    starter_probability: float | None,
+) -> float:
+    """
+    Lo que espero de este jugador ESTA jornada, de 0 a 1.
+
+    No es una prediccion de puntos: es una vara comun para
+    ordenar el once, la misma para un Dios con dudas y para un
+    Rotacion confirmado.
+
+    Devuelve None-seguro: si no hay porcentaje no se inventa, lo
+    resuelve quien llama.
+    """
+
+    if starter_probability is None:
+        return 0.0
+
+    escalon = (
+        int(hierarchy_value)
+        if hierarchy_value
+        else HIERARCHY_UNKNOWN_VALUE
+    )
+
+    if escalon not in HIERARCHY_MATCH_QUALITY:
+        escalon = HIERARCHY_UNKNOWN_VALUE
+
+    titular = max(
+        0.0,
+        min(
+            1.0,
+            float(starter_probability) / 100.0,
+        ),
+    )
+
+    desde_el_banquillo = HIERARCHY_BENCH_APPEARANCE[escalon]
+
+    participacion = (
+        titular
+        +
+        (1.0 - titular) * desde_el_banquillo
+    )
+
+    return participacion * HIERARCHY_MATCH_QUALITY[escalon]
+
+
+# ============================================================
 # PREPARAR JUGADORES
 # ============================================================
 
@@ -551,82 +783,85 @@ def prepare_players(
             or 0.0
         )
 
+        expected_value = 0.0
+
+        # UN DIOS JUEGA SIEMPRE.
+        #
+        # Se resuelve aqui, con el jugador delante, y no dentro
+        # del score: son tres estados distintos -es Dios y juega,
+        # es Dios y esta de baja motivada, no es Dios- y los tres
+        # tienen que poder contarse luego.
+        jerarquia = starter.get("hierarchy") or {}
+
+        es_dios = (
+            int(jerarquia.get("value") or 0)
+            == MANDATORY_HIERARCHY_VALUE
+        )
+
+        dios_sentado = False
+        dios_motivo = None
+        dios_forzado = False
+        dios_sin_motivo = False
+
+        if es_dios:
+
+            dios_sentado, dios_motivo = god_is_ruled_out(
+                starter
+            )
+
+            dios_forzado = not dios_sentado
+
+            # Un Dios al 0 % que nadie explica. Juega -no se
+            # sienta a un Dios por un dato suelto- pero se canta,
+            # porque o FF sabe algo que no vemos o el dato esta
+            # viejo.
+            dios_sin_motivo = (
+                dios_forzado
+                and
+                starter_probability is not None
+                and
+                starter_probability <= 0
+            )
+
         if lineup_eligible:
 
             if starter_probability is not None:
 
                 # ====================================================
-                # V11.3.1 CONSENSUS CLASS RANKING
+                # JERARQUIA + PORCENTAJE  (18/08/2026)
                 # ====================================================
                 #
-                # Confirmed multi-source STARTER beats:
-                # STARTER_LEAN > UNCERTAIN > BENCH_LEAN > BENCH.
+                # Aqui se ordenaba por la CLASE del consenso
+                # -STARTER > UNCERTAIN > BENCH, 100.000 por
+                # escalon- y el porcentaje solo desempataba dentro
+                # de la clase.
                 #
-                # Probability is only a tie-breaker INSIDE the class.
-                # ====================================================
-
-                starter_consensus = str(
-                    starter.get(
-                        "consensus"
-                    )
-                    or "UNCERTAIN"
-                ).upper()
-
-                starter_tier = int(
-                    starter.get(
-                        "ranking_tier"
-                    )
-                    or {
-                        "STARTER": 5,
-                        "STARTER_LEAN": 4,
-                        "UNCERTAIN": 3,
-                        "BENCH_LEAN": 2,
-                        "BENCH": 1,
-                    }.get(
-                        starter_consensus,
-                        3,
-                    )
-                )
-
-                # ====================================================
-                # V11.3.3 VOTE QUALITY TIEBREAK
-                # ====================================================
+                # Ese corte seco saco a Yamal del once: 60 % es
+                # UNCERTAIN, 70 % es STARTER, y diez puntos de
+                # porcentaje valian doscientos mil de score. El
+                # Dios del Barcelona perdia el sitio contra un
+                # Revulsivo.
                 #
-                # Inside the SAME consensus class:
-                # STARTER votes are positive evidence.
-                # BENCH votes are negative evidence.
+                # Ahora ordena `weekly_expected_value`, que junta
+                # las dos senales de FF -el escalon estructural y
+                # el pronostico de la semana- en un solo numero.
+                # El consenso se conserva para informar, no para
+                # puntuar: la etiqueta no decide nada.
                 #
-                # Example:
-                # 1S/2U/0B > 1S/1U/1B > 0S/2U/1B
+                # La cobertura se queda como desempate porque un
+                # dato con fuente vale mas que uno sin ella, y el
+                # porcentaje crudo debajo, para que dos jugadores
+                # del mismo escalon no queden empatados.
                 # ====================================================
 
-                starter_votes = int(
-                    starter.get(
-                        "starter_votes"
-                    )
-                    or 0
-                )
-
-                bench_votes = int(
-                    starter.get(
-                        "bench_votes"
-                    )
-                    or 0
-                )
-
-                vote_quality = (
-                    starter_votes
-                    * 5_000.0
-                    -
-                    bench_votes
-                    * 5_000.0
+                expected_value = weekly_expected_value(
+                    jerarquia.get("value"),
+                    starter_probability,
                 )
 
                 final_score = (
-                    starter_tier
-                    * 100_000.0
-
-                    + vote_quality
+                    expected_value
+                    * 1_000_000.0
 
                     + starter_coverage
                     * 3_000.0
@@ -643,8 +878,16 @@ def prepare_players(
 
             else:
 
-                # Unknown external status is safer than a known bench,
-                # but worse than a resolved UNCERTAIN.
+                # Sin pronostico de FF. No se inventa un escalon ni
+                # un porcentaje: se le da un valor de 0,25 en la
+                # misma escala, que lo deja por encima de un
+                # suplente conocido -un Reserva al 40 % vale 0,17-
+                # y por debajo de cualquier titular conocido.
+                #
+                # Dicho de otro modo: no saber es peor que saber
+                # que si, y mejor que saber que no.
+                expected_value = 0.25
+
                 final_score = (
                     250_000.0
                     + base_score
@@ -658,6 +901,29 @@ def prepare_players(
             final_score = (
                 -1_000_000.0
             )
+
+            # Un Dios no alineable no es un Dios sentado por
+            # criterio: no lo deja Biwenger. Se anota como tal
+            # para que el informe no diga que se le ha dejado
+            # fuera a proposito.
+            if es_dios and not dios_sentado:
+
+                dios_forzado = False
+                dios_sin_motivo = False
+                dios_sentado = True
+
+                dios_motivo = (
+                    availability.get("label")
+                    or "NO ALINEABLE"
+                )
+
+        # EL BONO VA AQUI, NO DENTRO DEL SCORE.
+        #
+        # Despues de comprobar que se le puede alinear. Un Dios
+        # lesionado sigue valiendo -1.000.000: la regla dice que
+        # juega siempre, no que juegue roto.
+        if dios_forzado and lineup_eligible:
+            final_score += MANDATORY_HIERARCHY_BONUS
 
         external_status = (
             external.get(
@@ -769,6 +1035,30 @@ def prepare_players(
                         "consensus"
                     ),
 
+                # Lo que ordena el once. Viaja hasta el dashboard
+                # para que se pueda ver POR QUE entra cada uno,
+                # que es la cuarta decision del plan: todo lo que
+                # entra tiene que verse.
+                "weekly_expected_value":
+                    expected_value,
+
+                "hierarchy":
+                    starter.get("hierarchy"),
+
+                # Los tres estados de la regla del Dios, para que
+                # el informe pueda decir cual de ellos toco.
+                "mandatory_hierarchy":
+                    dios_forzado,
+
+                "mandatory_hierarchy_ruled_out":
+                    dios_sentado,
+
+                "mandatory_hierarchy_reason":
+                    dios_motivo,
+
+                "mandatory_hierarchy_unexplained":
+                    dios_sin_motivo,
+
                 "starter_confidence":
                     starter.get(
                         "confidence"
@@ -815,6 +1105,29 @@ def prepare_players(
 
                 "lineup_score":
                     final_score,
+
+                # EL MISMO SCORE, SIN EL BONO DEL DIOS
+                #
+                # El bono existe para ELEGIR, no para VALORAR. Si
+                # se colase en el valor deportivo del once, diez
+                # millones de bono inflarian el total y todo lo
+                # demas se volveria barato en comparacion: vender
+                # un Clave pasaria de costar un 15 % del once a
+                # costar un 8 %, y `safe_debt_portfolio_engine`
+                # -que decide a quien se puede soltar mirando ese
+                # porcentaje- se volveria mas permisivo justo por
+                # tener un Dios en plantilla.
+                #
+                # Asi que el bono manda dentro de la busqueda y se
+                # queda fuera de la cuenta.
+                "lineup_score_sporting":
+                    (
+                        final_score
+                        -
+                        MANDATORY_HIERARCHY_BONUS
+                    )
+                    if (dios_forzado and lineup_eligible)
+                    else final_score,
             }
         )
 
@@ -1472,7 +1785,29 @@ def build_lineup(
         "matchday_shortages":
             matchday_shortages,
 
+        # EL VALOR DEPORTIVO DEL ONCE, SIN EL BONO DEL DIOS.
+        #
+        # Lo leen `safe_debt_portfolio_engine` y el motor de
+        # ofertas para medir cuanto se rompe el equipo con cada
+        # venta, y esa medida tiene que seguir significando lo
+        # mismo que ayer.
         "lineup_score":
+            round(
+                sum(
+                    float(
+                        p.get("lineup_score_sporting")
+                        if p.get("lineup_score_sporting")
+                        is not None
+                        else p.get("lineup_score", 0.0)
+                    )
+                    for p in best_lineup
+                ),
+                2,
+            ),
+
+        # El que uso para elegir, con el bono dentro. Para poder
+        # auditar la busqueda sin rehacerla.
+        "lineup_score_with_mandatory":
             best[
                 "score"
             ],
@@ -1520,4 +1855,45 @@ def build_lineup(
 
         "probable_starter_count":
             probable_starters,
+
+        # LA REGLA DEL DIOS, EN EL INFORME
+        #
+        # Un Dios que no aparece en el once tiene que tener una
+        # linea que lo explique. Sin esto, la unica forma de
+        # saber por que falta es reconstruir el score a mano,
+        # que es exactamente lo que hubo que hacer con Yamal.
+        "mandatory_hierarchy": {
+
+            "in_lineup": [
+                {
+                    "id": p["id"],
+                    "name": p.get("name"),
+                }
+                for p in best_lineup
+                if p.get("mandatory_hierarchy")
+            ],
+
+            "ruled_out": [
+                {
+                    "id": p["id"],
+                    "name": p.get("name"),
+                    "reason": p.get(
+                        "mandatory_hierarchy_reason"
+                    ),
+                }
+                for p in players
+                if p.get("mandatory_hierarchy_ruled_out")
+            ],
+
+            # Un Dios al 0 % que nadie explica: juega, pero se
+            # canta.
+            "unexplained": [
+                {
+                    "id": p["id"],
+                    "name": p.get("name"),
+                }
+                for p in players
+                if p.get("mandatory_hierarchy_unexplained")
+            ],
+        },
     }

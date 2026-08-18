@@ -130,6 +130,13 @@ function PlayerCard({ player, watched }) {
   // 92 % de tres no valen lo mismo, y el campo lo dice.
   const coverage = Number(player.starter_source_coverage || 0);
 
+  // Ausencia de dato no es dato: si no viene, no se pinta un 0.
+  const value =
+    player.weekly_expected_value == null ||
+    Number.isNaN(Number(player.weekly_expected_value))
+      ? null
+      : Number(player.weekly_expected_value);
+
   const increment = Number(player.price_increment || 0);
 
   return (
@@ -204,6 +211,17 @@ function PlayerCard({ player, watched }) {
           {confidence != null ? `tit. ${confidence}%` : "sin dato"}
           {confidence != null && coverage === 1 ? "*" : ""}
         </span>
+        {/* POR QUE ESTE Y NO OTRO.
+            El porcentaje solo no explica el once: un Dios al 60 %
+            entra por delante de un Revulsivo al 70 %. Este es el
+            número con el que se ordena de verdad —jerarquía y
+            porcentaje juntos—, para que la suplencia de alguien
+            se pueda auditar sin abrir un log. */}
+        {value != null && (
+          <span className="pev" title="Valor de la semana: jerarquía × pronóstico. Es lo que ordena el once.">
+            {value.toFixed(2)}
+          </span>
+        )}
         <span className="pts">
           {player.points != null ? `${player.points} pt` : "—"}
         </span>

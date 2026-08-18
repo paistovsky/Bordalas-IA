@@ -260,6 +260,72 @@ def build_consistency_report(
         )
 
         # ------------------------------------------------------
+        # 4-bis. Y QUE NO SEA DE ANTEAYER
+        #
+        # La comprobacion de arriba tiene un agujero de nacimiento:
+        # compara `cycle.write_used` contra campos de
+        # `last_execution`, y LOS DOS SALEN DEL MISMO FICHERO. Se
+        # esta comparando consigo misma, asi que no puede fallar.
+        #
+        # Por eso el 17/08/2026 este panel decia "todo lo que Pepe
+        # tiene hecho aparece en pantalla", con las seis en verde,
+        # mientras el cuadro titulado ESTE CICLO enseñaba una
+        # escritura del dia anterior. Un chequeo que no puede
+        # fallar no es un chequeo.
+        #
+        # Esta fila mira otra cosa: la EDAD. Y esa si es
+        # verificable, porque el reloj no sale del fichero.
+        # ------------------------------------------------------
+
+        edad = ciclo.get("age_seconds")
+
+        if edad is None:
+
+            comprobaciones.append(
+                {
+                    **_check(
+                        "last_write_fresh",
+                        "El ciclo que se enseña es de ahora",
+                        "con fecha",
+                        "sin fecha",
+                        (
+                            "El ultimo ciclo no trae marca de "
+                            "tiempo legible, asi que no se puede "
+                            "saber si lo que se enseña es de ahora "
+                            "o de anteayer."
+                        ),
+                    ),
+                    "source": "RELOJ",
+                }
+            )
+
+        else:
+
+            horas = edad / 3600.0
+
+            comprobaciones.append(
+                {
+                    **_check(
+                        "last_write_fresh",
+                        "El ciclo que se enseña es de ahora",
+                        False,
+                        bool(ciclo.get("stale")),
+                        (
+                            f"El cuadro ESTE CICLO tiene "
+                            f"{horas:.1f} h. Ese fichero solo se "
+                            "reescribe cuando el motor con permiso "
+                            "de escritura ejecuta, asi que si se "
+                            "queda viejo la pantalla lo sigue "
+                            "enseñando como si acabara de pasar."
+                        ),
+                    ),
+                    "source": "RELOJ",
+                    "expected_label": "reciente",
+                    "found_label": f"hace {horas:.1f} h",
+                }
+            )
+
+        # ------------------------------------------------------
         # 5. TITULARIDAD DEL ONCE
         # ------------------------------------------------------
 

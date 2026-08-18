@@ -4,7 +4,12 @@ const DECISION = {
   BID: ["ok", "PUJAR"],
   NO_COMPENSA: ["warn", "NO COMPENSA"],
   NO_DISPONIBLE: ["crit", "NO DISPONIBLE"],
-  SIN_VALOR: ["idle", "SIN VALOR"]
+  SIN_VALOR: ["idle", "SIN VALOR"],
+
+  // Dinero nuestro puesto fuera del mercado del Computer. Se
+  // enseña porque es nuestro; no se persigue porque Pepe no
+  // compra en las listas de los rivales.
+  PUJA_FUERA_DEL_COMPUTER: ["live", "FUERA DEL COMPUTER"]
 };
 
 /**
@@ -253,6 +258,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th className="n">TIT.</th>
             <th>JERARQUÍA</th>
             <th className="n">VALE PARA NOSOTROS</th>
+            <th>VENDE</th>
             <th className="n">PUESTO</th>
             <th className="n">PUJARÍAMOS</th>
             <th className="n">GANAR</th>
@@ -305,6 +311,16 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                 </td>
 
                 <td className="n">{formatEuros(target.our_value)}</td>
+
+                {/* A QUIÉN SE LE COMPRA, CON NOMBRE.
+                    "Un rival" no informa de nada: de cada mánager
+                    se sabe cuánto suele pagar, así que saber si es
+                    Prinzipote o Pollo17 cambia lo que esperas que
+                    pase con la puja. */}
+                <td className={target.seller_kind === "MANAGER" ? "rival" : "dim"}>
+                  {target.seller_name || "Computer"}
+                </td>
+
                 <td className="n strong">
                   {viva ? formatEuros(target.live_bid) : "—"}
                 </td>

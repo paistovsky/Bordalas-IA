@@ -1447,9 +1447,7 @@ def test_el_once_usa_la_fuente_unica():
 
         assert votos <= 1, jugador["player_name"]
 
-    # 3. Y que la jerarquia viaje hasta aqui, aunque la seleccion
-    #    todavia no la use: es lo que permitira que un Reserva
-    #    deje de ser titular por definicion.
+    # 3. Y que la jerarquia viaje hasta aqui.
     con_jerarquia = [
         j
         for j in tablero["players"]
@@ -1458,6 +1456,393 @@ def test_el_once_usa_la_fuente_unica():
 
     assert con_jerarquia, (
         "la jerarquia no llega al motor del once"
+    )
+
+
+def test_la_jerarquia_decide_el_once():
+    """
+    Un Dios con dudas juega. Un Revulsivo confirmado, no.
+
+    EL CASO QUE LO DESTAPO
+
+        18/08/2026. Yamal -Dios del Barcelona, 60 % de titular
+        en FF, sano- se cayo del once, y entraba en su sitio
+        cualquier titular confirmado.
+
+        El motor ya leia FF -eso se migro el 17- pero ordenaba
+        por la ETIQUETA del consenso, que sale de un corte seco
+        en el 67 %. Yamal al 60 % era UNCERTAIN y valia tres
+        escalones; un Revulsivo al 70 % era STARTER y valia
+        cinco. La jerarquia llegaba hasta el motor y no puntuaba.
+
+        "Hay que ponerlo en el XI aunque vaya a jugar unos
+        minutos solo."
+
+    QUE SE COMPRUEBA
+
+        Que el orden del once ya no lo decide el corte del 67 %,
+        sino jerarquia y porcentaje juntos: un Dios al 60 % vale
+        mas que un Revulsivo al 70 %, y un Reserva no se cuela
+        por marcar un buen porcentaje puntual.
+
+        Y que la jerarquia no lo tapa todo: por debajo de Clave,
+        el porcentaje sigue mandando.
+    """
+
+    from src.analysis.lineup_engine import weekly_expected_value
+
+    dios_dudoso = weekly_expected_value(60, 60.0)
+    revulsivo_titular = weekly_expected_value(25, 70.0)
+
+    assert dios_dudoso > revulsivo_titular, (
+        f"Yamal otra vez fuera: Dios al 60 % vale "
+        f"{dios_dudoso:.3f} y Revulsivo al 70 % "
+        f"{revulsivo_titular:.3f}"
+    )
+
+    # El caso de Hugo Rincon, por el otro lado.
+    reserva = weekly_expected_value(20, 40.0)
+    importante = weekly_expected_value(40, 70.0)
+
+    assert reserva < importante
+
+    # Y el freno: la jerarquia no es un salvoconducto. Un
+    # Importante al que FF no da de titular pierde contra un
+    # Rotacion confirmado.
+    importante_suplente = weekly_expected_value(40, 40.0)
+    rotacion_titular = weekly_expected_value(30, 90.0)
+
+    assert importante_suplente < rotacion_titular, (
+        "la jerarquia se ha comido al porcentaje"
+    )
+
+    # Sin jerarquia no se asume la peor: se ordena por el
+    # porcentaje, que es lo unico que se sabe.
+    assert (
+        weekly_expected_value(None, 90.0)
+        >
+        weekly_expected_value(None, 20.0)
+    )
+
+    # Sin porcentaje no hay valor que inventar.
+    assert weekly_expected_value(60, None) == 0.0
+
+    # Y que el motor lo use de verdad, no solo lo calcule.
+    import ast
+    import inspect
+
+    from src.analysis import lineup_engine
+
+    fuente = inspect.getsource(lineup_engine.prepare_players)
+
+    assert "weekly_expected_value(" in fuente, (
+        "el once ha vuelto a ordenarse sin la jerarquia"
+    )
+
+    arbol = ast.parse(fuente)
+
+    for nodo in ast.walk(arbol):
+
+        if not isinstance(nodo, ast.Name):
+            continue
+
+        assert nodo.id != "starter_tier", (
+            "ha vuelto el ranking por clase de consenso, que es "
+            "lo que saco a Yamal del once"
+        )
+
+
+def _plantilla_de_prueba(fichas):
+    """
+    Un snapshot minimo y su tablero, para probar el once sin red.
+
+    `fichas` es una lista de (id, nombre, posicion, status,
+    probabilidad, jerarquia, disponibilidad).
+    """
+
+    equipo = []
+    tablero = []
+
+    for (
+        pid,
+        nombre,
+        posicion,
+        status,
+        probabilidad,
+        jerarquia,
+        disponibilidad,
+    ) in fichas:
+
+        equipo.append(
+            {
+                "id": pid,
+                "name": nombre,
+                "position": posicion,
+                "price": 1_000_000,
+                "pointsLastSeason": 50,
+                "status": status,
+                "fitness": [],
+            }
+        )
+
+        tablero.append(
+            {
+                "player_id": pid,
+                "player_name": nombre,
+                "starter_probability": probabilidad,
+                "source_coverage": 1,
+                "consensus": (
+                    "STARTER"
+                    if (probabilidad or 0) >= 67
+                    else "BENCH"
+                ),
+                "hierarchy": jerarquia,
+                "availability": disponibilidad,
+            }
+        )
+
+    snapshot = {
+        "my_team": equipo,
+        "team": {},
+        "players": [],
+    }
+
+    board = {
+        "version": "TEST",
+        "source": "FUTBOLFANTASY",
+        "players": tablero,
+    }
+
+    return snapshot, board
+
+
+def test_un_dios_juega_siempre():
+    """
+    Un Dios entra en el once salvo 0 % con motivo.
+
+    LA REGLA (decision del dueño, 18/08/2026)
+
+        "Para elegir el XI, hay que hacer que los jerarquia DIOS
+        jueguen siempre salvo caso de titularidad 0 % asegurada
+        -lesion, sancion u otro motivo-."
+
+    POR QUE NO BASTABA CON EL VALOR SEMANAL
+
+        Esa misma mañana se hizo que la jerarquia puntuase, y con
+        eso Yamal al 60 % ya ganaba a un Revulsivo al 70 %. Pero
+        seguia siendo una competicion: un Dios al 20 % perdia
+        contra medio equipo, y bastaba con dos Claves al 90 % en
+        su linea para devolverlo al banquillo.
+
+        El dueño no quiere que compita: quiere que juegue.
+
+    LO QUE NO CAMBIA
+
+        La disponibilidad manda. Un Dios que no se puede alinear
+        no se alinea, y ahi no hay bono que valga.
+
+    Y EL 0 % TIENE QUE ESTAR MOTIVADO
+
+        "Asegurada" es la palabra. Un 0 % sin lesion, sancion ni
+        parte de baja es un dato raro, no una baja: el Dios juega
+        igual y el ciclo lo canta.
+    """
+
+    from src.analysis.lineup_engine import (
+        god_is_ruled_out,
+        prepare_players,
+    )
+
+    DIOS = {"value": 60, "label": "Dios", "franchise": True}
+    CLAVE = {"value": 50, "label": "Clave"}
+
+    SANO = {
+        "code": 0,
+        "label": "DISPONIBLE",
+        "can_play": True,
+        "sanctioned": False,
+    }
+
+    LESIONADO = {
+        "code": 50,
+        "label": "LESIONADO",
+        "can_play": False,
+        "sanctioned": False,
+    }
+
+    SANCIONADO = {
+        "code": 100,
+        "label": "SANCIONADO",
+        "can_play": False,
+        "sanctioned": True,
+    }
+
+    # 1. Un Dios hundido gana a dos Claves confirmados.
+    snapshot, board = _plantilla_de_prueba(
+        [
+            (1, "Dios hundido", 4, "ok", 20.0, DIOS, SANO),
+            (2, "Clave A", 4, "ok", 90.0, CLAVE, SANO),
+            (3, "Clave B", 4, "ok", 95.0, CLAVE, SANO),
+        ]
+    )
+
+    fichas = {
+        p["id"]: p
+        for p in prepare_players(snapshot, {"lookup": {}}, board)
+    }
+
+    assert (
+        fichas[1]["lineup_score"]
+        >
+        max(
+            fichas[2]["lineup_score"],
+            fichas[3]["lineup_score"],
+        )
+    ), "un Dios sano ha vuelto a competir por su sitio"
+
+    assert fichas[1]["mandatory_hierarchy"] is True
+    assert fichas[2]["mandatory_hierarchy"] is False
+
+    # 2. El 0 % motivado si lo sienta.
+    for disponibilidad, motivo in (
+        (LESIONADO, "LESIONADO"),
+        (SANCIONADO, "SANCIONADO"),
+    ):
+
+        sentado, razon = god_is_ruled_out(
+            {
+                "starter_probability": 0.0,
+                "availability": disponibilidad,
+            }
+        )
+
+        assert sentado, f"un Dios {motivo} deberia sentarse"
+        assert razon
+
+    # Y un parte de baja con jornadas, aunque FF no marque nada.
+    sentado, razon = god_is_ruled_out(
+        {
+            "starter_probability": 0.0,
+            "availability": SANO,
+            "absence": {
+                "matchdays_out": 6,
+                "reason": "Rotura fibrilar",
+            },
+        }
+    )
+
+    assert sentado and razon
+
+    # 3. El 0 % SIN motivo no lo sienta: juega y se canta.
+    sentado, razon = god_is_ruled_out(
+        {
+            "starter_probability": 0.0,
+            "availability": SANO,
+        }
+    )
+
+    assert not sentado, (
+        "un 0 % suelto no es una baja: ausencia de dato no es dato"
+    )
+    assert razon is None
+
+    snapshot, board = _plantilla_de_prueba(
+        [
+            (1, "Dios raro", 4, "ok", 0.0, DIOS, SANO),
+            (2, "Clave A", 4, "ok", 90.0, CLAVE, SANO),
+        ]
+    )
+
+    fichas = {
+        p["id"]: p
+        for p in prepare_players(snapshot, {"lookup": {}}, board)
+    }
+
+    assert fichas[1]["mandatory_hierarchy"] is True
+    assert fichas[1]["mandatory_hierarchy_unexplained"] is True
+
+    assert (
+        fichas[1]["lineup_score"]
+        >
+        fichas[2]["lineup_score"]
+    )
+
+    # 4. Pero la disponibilidad manda: un Dios que Biwenger no
+    #    deja alinear no se alinea, con bono o sin el.
+    snapshot, board = _plantilla_de_prueba(
+        [
+            (1, "Dios roto", 4, "injured", 0.0, DIOS, LESIONADO),
+            (2, "Clave A", 4, "ok", 90.0, CLAVE, SANO),
+        ]
+    )
+
+    fichas = {
+        p["id"]: p
+        for p in prepare_players(snapshot, {"lookup": {}}, board)
+    }
+
+    assert fichas[1]["lineup_score"] < 0, (
+        "un Dios lesionado se ha colado en el once"
+    )
+
+    assert fichas[1]["mandatory_hierarchy"] is False
+    assert fichas[1]["mandatory_hierarchy_ruled_out"] is True
+    assert fichas[1]["mandatory_hierarchy_reason"]
+
+    # 5. El bono elige, no valora.
+    #
+    #    Si los diez millones se colasen en el valor deportivo
+    #    del once, el total se inflaria y todo lo demas se
+    #    volveria barato en comparacion: vender un Clave costaria
+    #    la mitad de porcentaje solo por tener un Dios en
+    #    plantilla, y `safe_debt_portfolio_engine` -que decide a
+    #    quien se puede soltar mirando ese porcentaje- se
+    #    volveria mas permisivo sin que nadie lo hubiese
+    #    decidido.
+    from src.analysis.lineup_engine import (
+        MANDATORY_HIERARCHY_BONUS,
+    )
+
+    snapshot, board = _plantilla_de_prueba(
+        [
+            (1, "Dios hundido", 4, "ok", 20.0, DIOS, SANO),
+            (2, "Clave A", 4, "ok", 90.0, CLAVE, SANO),
+        ]
+    )
+
+    fichas = {
+        p["id"]: p
+        for p in prepare_players(snapshot, {"lookup": {}}, board)
+    }
+
+    assert (
+        fichas[1]["lineup_score"]
+        -
+        fichas[1]["lineup_score_sporting"]
+        ==
+        MANDATORY_HIERARCHY_BONUS
+    )
+
+    # Y el que no es Dios no lleva dos varas distintas.
+    assert (
+        fichas[2]["lineup_score"]
+        ==
+        fichas[2]["lineup_score_sporting"]
+    )
+
+    # Y que el once publique el valor deportivo, no el de la
+    # busqueda: es el numero que leen el motor de solvencia y el
+    # de ofertas, y tiene que seguir significando lo mismo que
+    # antes de existir el bono.
+    import inspect
+
+    from src.analysis import lineup_engine
+
+    fuente = inspect.getsource(lineup_engine.build_lineup)
+
+    assert "lineup_score_sporting" in fuente, (
+        "build_lineup ha vuelto a publicar el score con el bono "
+        "dentro: eso infla el once y abarata cualquier venta"
     )
 
 
@@ -1481,6 +1866,8 @@ def main():
         test_intencion_de_venta_solo_observa,
         test_se_puede_comprar_con_saldo_negativo,
         test_el_once_usa_la_fuente_unica,
+        test_la_jerarquia_decide_el_once,
+        test_un_dios_juega_siempre,
     ]
 
     for prueba in pruebas:
