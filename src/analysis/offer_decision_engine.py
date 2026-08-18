@@ -19,6 +19,7 @@ from src.analysis.negotiation_state_engine import (
 )
 
 from src.analysis.computer_offer_reroll_engine import (
+    MAX_REROLLS_PER_PLAYER,
     build_computer_offer_reroll_board,
 )
 
@@ -59,6 +60,60 @@ PREMIUM_FAIR = 0.0
 # toca el once.
 ACCEPT_BENCH_SALE_SCORE = 45.0
 ACCEPT_CLEAR_SALE_SCORE = 60.0
+
+
+# ============================================================
+# LA TIERRA DE NADIE ENTRE 0 % Y 3 %
+# ============================================================
+#
+# EL CASO (18/08/2026)
+#
+#     Alvaro Fidalgo, 75 sobre 100 en venta, suplente. El
+#     Computer ofrecio 977.400 EUR, un +1,8 % sobre su precio. En
+#     pantalla salio "Conservar buena oferta" y ahi se quedo, con
+#     33 horas por delante para caducar.
+#
+# POR QUE PASABA
+#
+#     Dos motores con dos definiciones distintas de "buena":
+#
+#         motor de reroll:    prima >= 0 %  -> buena, no la cambies
+#         motor de decision:  prima >= 3 %  -> buena, se puede cobrar
+#
+#     Entre 0 % y 3 % una oferta es demasiado buena para pedir
+#     otra y demasiado floja para cobrarla. No se hace nada con
+#     ella y caduca. La palabra "buena" significaba dos cosas en
+#     dos ficheros.
+#
+#     Y no era un caso raro: de las doce ofertas de aquel dia,
+#     OCHO caian en esa banda. Prima media +1,8 %.
+#
+# COMO SE RESUELVE
+#
+#     La banda tiene que resolverse siempre, en un sentido o en
+#     otro. Con un jugador que claramente sobra:
+#
+#     - Quedan rerolls y queda tiempo -> se pide otra oferta y se
+#       persigue el 3 %. Sobre la muestra de aquel dia, un 25 %
+#       de las ofertas llegan a cobrables; con los tres intentos
+#       que permite el tope, un 58 %.
+#
+#     - Se acabaron los rerolls o queda poco para caducar -> se
+#       cobra igual, aunque sea un +1,8 %. Porque caducar da
+#       CERO, y un +1,8 % sobre 960.000 son 17.400 EUR que no
+#       vuelven.
+#
+#     Lo unico claramente mal era no hacer ninguna de las dos.
+# ============================================================
+
+
+# Por debajo de esto no se cobra una oferta floja ni corriendo:
+# vender por debajo de mercado no es cobrar, es regalar.
+LAST_CALL_MIN_PREMIUM = 0.0
+
+# A partir de aqui ya no da tiempo a perseguir nada mejor. Es el
+# mismo margen que usa el camino de solvencia.
+LAST_CALL_HOURS = 6.0
 
 # Evitamos aceptar una oferta que destruya un activo que
 # claramente sigue en tendencia de revalorizacion.
@@ -217,6 +272,77 @@ def sale_is_worth_it(
         )
 
     return (False, None)
+
+
+def resolve_dead_zone(
+    premium_percent: float,
+    sale_score: float,
+    hours_to_expiry: float | None,
+    rerolls_used: int,
+    max_rerolls: int,
+    reroll_safe: bool,
+) -> tuple[str | None, str | None]:
+    """
+    Que hacer con una oferta que ni se cobra ni se cambia.
+
+    Devuelve (accion, motivo), o (None, None) si esta oferta no
+    esta en la banda o el jugador no sobra.
+
+    Solo actua sobre jugadores que CLARAMENTE sobran. Con el
+    resto, quedarse quieto es la respuesta correcta: no hay prisa
+    por deshacerse de quien no molesta.
+    """
+
+    if sale_score < ACCEPT_CLEAR_SALE_SCORE:
+        return (None, None)
+
+    if premium_percent < LAST_CALL_MIN_PREMIUM:
+        # Por debajo de mercado. Que la cambie el motor de
+        # reroll, que para eso esta.
+        return (None, None)
+
+    if premium_percent >= PREMIUM_GOOD:
+        # No esta en la banda: la cobra `sale_is_worth_it`.
+        return (None, None)
+
+    quedan = max(0, int(max_rerolls) - int(rerolls_used))
+
+    sin_tiempo = (
+        hours_to_expiry is not None
+        and hours_to_expiry <= LAST_CALL_HOURS
+    )
+
+    # ULTIMA LLAMADA. Caducar da cero.
+    if sin_tiempo or quedan <= 0 or not reroll_safe:
+
+        falta = (
+            "se acaba el plazo"
+            if sin_tiempo
+            else (
+                "no quedan rerolls"
+                if quedan <= 0
+                else "rerollear dejaria la caja sin cubrir"
+            )
+        )
+
+        return (
+            "ACCEPT_NOW",
+            (
+                f"Prima de {premium_percent:.1f} % por un jugador "
+                f"que sobra y {falta}. Dejarla caducar seria "
+                f"cobrar cero."
+            ),
+        )
+
+    # Hay margen: se persigue una mejor.
+    return (
+        "REROLL_CANDIDATE",
+        (
+            f"Prima de {premium_percent:.1f} %: ni para cobrarla "
+            f"ni para conservarla. Quedan {quedan} intento(s) "
+            f"para buscar una mejor."
+        ),
+    )
 
 
 def calculate_economic_score(
@@ -606,12 +732,32 @@ def decide_incoming_offer(
                 in_lineup=in_lineup,
             )
 
+            banda_accion, banda_motivo = resolve_dead_zone(
+                premium_percent=premium_percent,
+                sale_score=sale_score,
+                hours_to_expiry=parse_hours_to_expiry(offer),
+                rerolls_used=int(
+                    (reroll_offer or {}).get("reroll_count") or 0
+                ),
+                max_rerolls=MAX_REROLLS_PER_PLAYER,
+                reroll_safe=reroll_safe,
+            )
+
             if compensa:
 
                 action = "ACCEPT_NOW"
                 confidence = 86
 
                 reasons.append(motivo)
+
+            elif banda_accion is not None:
+
+                # Ni se cobraba ni se cambiaba: se quedaba
+                # mirando hasta caducar.
+                action = banda_accion
+                confidence = 82
+
+                reasons.append(banda_motivo)
 
             elif reroll_action == "KEEP_GOOD_OFFER":
 

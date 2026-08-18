@@ -233,6 +233,107 @@ def test_una_sola_regla_para_los_dos_caminos():
     )
 
 
+
+def test_la_tierra_de_nadie_se_resuelve():
+    """
+    Ni se cobra ni se cambia: eso ya no puede pasar.
+
+    EL CASO
+
+        Alvaro Fidalgo, 75 sobre 100 en venta, suplente. El
+        Computer ofrecio 977.400 EUR, un +1,8 %. La pantalla dijo
+        "Conservar buena oferta" y ahi se quedo con 33 horas por
+        delante para caducar.
+
+        Dos motores con dos definiciones de "buena":
+
+            reroll:    prima >= 0 %  -> no la cambies
+            decision:  prima >= 3 %  -> se puede cobrar
+
+        Entre 0 y 3 la oferta era demasiado buena para pedir otra
+        y demasiado floja para cobrarla. De las doce ofertas de
+        aquel dia, OCHO caian ahi.
+    """
+
+    from src.analysis.offer_decision_engine import (
+        LAST_CALL_HOURS,
+        MAX_REROLLS_PER_PLAYER,
+        resolve_dead_zone,
+    )
+
+    def caso(**kw):
+        base = dict(
+            premium_percent=1.8,
+            sale_score=75,
+            hours_to_expiry=33.5,
+            rerolls_used=0,
+            max_rerolls=MAX_REROLLS_PER_PLAYER,
+            reroll_safe=True,
+        )
+        base.update(kw)
+        return resolve_dead_zone(**base)
+
+    # Con margen se persigue una mejor.
+    accion, motivo = caso()
+
+    assert accion == "REROLL_CANDIDATE"
+    assert motivo
+
+    # Sin tiempo se cobra: caducar da cero.
+    assert caso(
+        hours_to_expiry=LAST_CALL_HOURS - 1
+    )[0] == "ACCEPT_NOW"
+
+    # Sin rerolls tambien.
+    assert caso(
+        rerolls_used=MAX_REROLLS_PER_PLAYER
+    )[0] == "ACCEPT_NOW"
+
+    # Y si rerollear dejaria la caja sin cubrir, se cobra lo que
+    # hay en vez de arriesgarla.
+    assert caso(reroll_safe=False)[0] == "ACCEPT_NOW"
+
+    # LO QUE NO TOCA ESTA RAMA
+    #
+    # Por debajo de mercado no se cobra ni corriendo: vender bajo
+    # mercado no es cobrar, es regalar. De eso se encarga el
+    # motor de reroll.
+    assert caso(premium_percent=-1.2)[0] is None
+
+    # Un jugador que no sobra se queda quieto: no hay prisa por
+    # deshacerse de quien no molesta.
+    assert caso(sale_score=0)[0] is None
+
+    # Y una prima ya cobrable la coge `sale_is_worth_it`, no
+    # esta rama.
+    assert caso(premium_percent=4.4)[0] is None
+
+
+def test_la_banda_esta_cableada():
+    """
+    Que la rama del Computer la consulte de verdad.
+    """
+
+    import inspect
+
+    from src.analysis import offer_decision_engine
+
+    fuente = inspect.getsource(
+        offer_decision_engine.decide_incoming_offer
+    )
+
+    assert "resolve_dead_zone(" in fuente, (
+        "la tierra de nadie ha vuelto: una oferta entre 0 y 3 % "
+        "se quedara mirando hasta caducar"
+    )
+
+    # Y que se le pase el plazo de verdad, no un None perpetuo:
+    # sin horas no hay ultima llamada y todo vuelve a caducar.
+    assert "parse_hours_to_expiry(offer)" in fuente, (
+        "no se le esta pasando cuanto queda para que caduque"
+    )
+
+
 def main():
 
     pruebas = [
@@ -241,6 +342,8 @@ def main():
         test_las_doce_ofertas_reales,
         test_el_computer_llega_a_la_regla,
         test_una_sola_regla_para_los_dos_caminos,
+        test_la_tierra_de_nadie_se_resuelve,
+        test_la_banda_esta_cableada,
     ]
 
     for prueba in pruebas:
