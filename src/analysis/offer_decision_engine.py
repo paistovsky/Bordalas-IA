@@ -442,8 +442,35 @@ def decide_incoming_offer(
         or 0
     )
 
+    # LA PRIMA VALIA CERO SIEMPRE (18/08/2026)
+    #
+    # Aqui ponia `offer.get("delta_percent", 0.0)`, y esa clave NO
+    # EXISTE: `build_offer_board` la llama `premium_percent`.
+    #
+    # Consecuencia: la prima de toda oferta valia 0,0 desde
+    # siempre, `classify_offer_quality(0.0)` devolvia FAIR para
+    # todas, y las dos reglas que exigen prima BUENA o EXCELENTE
+    # no podian dispararse jamas. Tampoco el KEEP_GOOD_OFFER de
+    # la rama de managers. Y `calculate_economic_score` sumaba
+    # su tramo de prima como si ninguna oferta valiera nada.
+    #
+    # Se destapo el mismo dia que se arreglo el orden de las
+    # ramas: con el orden ya corregido, Alvaro Fidalgo -75 de 100
+    # en venta, prima real +1,8 %- seguia saliendo como
+    # "Conservar buena oferta". No era el orden: era que la prima
+    # llegaba a cero.
+    #
+    # Es el mismo patron que `lineup.get("score")` cuando la
+    # clave se llama `lineup_score`: una clave que no existe
+    # devuelve el valor por defecto y nadie se entera.
+    #
+    # Se deja `delta_percent` como respaldo por si algun productor
+    # antiguo la usa, pero manda la que existe de verdad.
     premium_percent = float(
-        offer.get("delta_percent", 0.0)
+        offer.get(
+            "premium_percent",
+            offer.get("delta_percent", 0.0),
+        )
         or 0.0
     )
 

@@ -334,6 +334,89 @@ def test_la_banda_esta_cableada():
     )
 
 
+
+def test_la_prima_llega_de_verdad():
+    """
+    La clave que lee el motor tiene que existir en la oferta.
+
+    EL CASO (18/08/2026, la misma tarde)
+
+        Con el orden de las ramas ya arreglado, Alvaro Fidalgo
+        -75 de 100 en venta, prima real +1,8 %- seguia saliendo
+        como "Conservar buena oferta".
+
+        No era el orden. `decide_incoming_offer` leia
+
+            offer.get("delta_percent", 0.0)
+
+        y esa clave NO EXISTE: `build_offer_board` la llama
+        `premium_percent`. La prima de toda oferta valia 0,0
+        desde siempre, `classify_offer_quality(0.0)` devolvia
+        FAIR para todas, y las dos reglas que exigen prima BUENA
+        o EXCELENTE no podian dispararse jamas.
+
+        Es el mismo patron que `lineup.get("score")` cuando la
+        clave se llama `lineup_score`. Una clave que no existe
+        devuelve el valor por defecto y nadie se entera.
+
+    QUE SE COMPRUEBA
+
+        Que la clave que el motor lee este de verdad entre las
+        que produce el generador de ofertas. Comparar nombres de
+        claves es lo unico que caza esta familia de fallo.
+    """
+
+    import ast
+    import inspect
+
+    from src.analysis import offer_analyzer, offer_decision_engine
+
+    # 1. Que el motor lea `premium_percent`.
+    fuente = inspect.getsource(
+        offer_decision_engine.decide_incoming_offer
+    )
+
+    assert 'offer.get(\n            "premium_percent"' in fuente or (
+        '"premium_percent"' in fuente
+    ), (
+        "el motor ha dejado de leer premium_percent: la prima "
+        "vuelve a valer cero para todas las ofertas"
+    )
+
+    # 2. Y que el generador la escriba con ese nombre.
+    generador = inspect.getsource(offer_analyzer)
+
+    assert '"premium_percent"' in generador, (
+        "el generador de ofertas ya no produce premium_percent: "
+        "el motor leera una clave inexistente"
+    )
+
+    # 3. Que una prima de verdad no acabe en FAIR.
+    #
+    #    Es la prueba de humo del fallo: si la lectura vuelve a
+    #    romperse, toda prima se clasificara como FAIR.
+    from src.analysis.offer_decision_engine import (
+        classify_offer_quality,
+    )
+
+    assert classify_offer_quality(4.4) == "GOOD"
+    assert classify_offer_quality(8.5) == "EXCELLENT"
+    assert classify_offer_quality(-1.2) == "BELOW_MARKET"
+
+    # 4. Y el caso completo: una oferta con prima buena por
+    #    alguien que sobra tiene que poder cobrarse.
+    from src.analysis.offer_decision_engine import sale_is_worth_it
+
+    assert sale_is_worth_it(
+        quality=classify_offer_quality(4.4),
+        sale_score=75,
+        in_lineup=False,
+    )[0], (
+        "con prima +4,4 % y 75 de venta no se cobra: la prima no "
+        "esta llegando"
+    )
+
+
 def main():
 
     pruebas = [
@@ -344,6 +427,7 @@ def main():
         test_una_sola_regla_para_los_dos_caminos,
         test_la_tierra_de_nadie_se_resuelve,
         test_la_banda_esta_cableada,
+        test_la_prima_llega_de_verdad,
     ]
 
     for prueba in pruebas:
