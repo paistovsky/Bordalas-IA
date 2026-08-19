@@ -610,12 +610,36 @@ class BiwengerWriteClient:
 
         PUT /api/v2/offers/{offer_id}
 
+        Payload:
+
+            {"status": "accepted"}
+
         La respuesta esperada marca la oferta como:
             status = processed
 
         IMPORTANTE:
         offer_id es el ID de la oferta,
         no el ID del jugador.
+
+        EL CUERPO QUE FALTABA (19/08/2026)
+
+            Esta era la unica escritura del fichero que no
+            mandaba cuerpo. Las otras cinco pasan
+            `json=request["json"]`; esta hacia un PUT pelado a
+            /offers/{id}, y Biwenger contestaba HTTP 500.
+
+            Se vio en el dashboard: "ACCEPT RECOVERY OFFER
+            apartada: ha fallado 4 veces seguidas (HTTP 500)".
+
+            Llevaba asi desde que se escribio, y no se habia
+            notado nunca porque nadie llamaba a esta rama: el
+            camino de cobrar estaba desconectado del orquestador
+            -las cinco paredes del 18/08- y se conecto ayer.
+
+            El endpoint es el mismo que el de rechazar, que si
+            manda {"status": "rejected"} y funciona. Lo unico
+            que cambiaba entre aceptar y rechazar una oferta era
+            justo la palabra que no se enviaba.
         """
 
         if offer_id <= 0:
@@ -627,6 +651,11 @@ class BiwengerWriteClient:
             f"{self.client.BASE_URL}"
             f"/offers/{offer_id}"
         )
+
+        payload = {
+            "status":
+                "accepted",
+        }
 
         return {
             "operation":
@@ -640,6 +669,9 @@ class BiwengerWriteClient:
 
             "headers":
                 self.get_headers_preview(),
+
+            "json":
+                payload,
 
             "offer_id":
                 offer_id,
@@ -679,6 +711,7 @@ class BiwengerWriteClient:
         response = (
             self.client.session.put(
                 request["url"],
+                json=request["json"],
                 timeout=30,
             )
         )
