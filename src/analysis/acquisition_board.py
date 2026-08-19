@@ -72,7 +72,23 @@ def build_acquisition_board(
     """
 
     try:
-        contexto = build_valuation_context(snapshot)
+        # EL ONCE, PARA SABER A QUIEN SE PUEDE TOCAR BARATO
+        #
+        # Sin el, nadie cuenta como titular y los cambios sobre el
+        # once se valorarian con las reglas del suplente, que son
+        # mucho mas blandas. Si el motor del once falla se sigue
+        # sin el: no habra titulares y solo se propondran cambios
+        # sobre el peor de cada posicion, que es exactamente lo
+        # que se hacia hasta hoy.
+        try:
+            from src.analysis.lineup_engine import build_lineup
+
+            once = build_lineup(snapshot)
+
+        except Exception:
+            once = None
+
+        contexto = build_valuation_context(snapshot, lineup=once)
 
         catalogo = {
             safe_int(item.get("id")): item
@@ -255,6 +271,42 @@ def build_acquisition_board(
                 "intent": valoracion.get("intent"),
                 "replaces": (
                     (valoracion.get("replaces") or {}).get("name")
+                ),
+
+                # LO QUE ESTE CAMBIO PROMETE (19/08/2026)
+                #
+                # Un cambio se propone con un numero de puntos en
+                # la mano. Si no queda escrito, dentro de un mes
+                # no habra forma de saber si aquello pago o no, y
+                # la conversacion sera de opiniones.
+                #
+                # `replaces_starter` distingue tocar el once de
+                # cambiar a un suplente: se deciden distinto y hay
+                # que poder revisarlos por separado.
+                "replaces_starter": bool(
+                    (valoracion.get("as_xi") or {}).get(
+                        "replaces_starter"
+                    )
+                ),
+
+                "promised_points": (
+                    (valoracion.get("as_xi") or {}).get(
+                        "promised_points"
+                    )
+                ),
+
+                "cost_per_point": (
+                    (valoracion.get("as_xi") or {}).get(
+                        "cost_per_point"
+                    )
+                ),
+
+                # Un cambio de titular no se paga con el dinero de
+                # una venta que todavia no ha pasado.
+                "needs_sale_first": bool(
+                    (valoracion.get("as_xi") or {}).get(
+                        "needs_sale_first"
+                    )
                 ),
 
                 # Sin esto la pantalla no puede explicar por que

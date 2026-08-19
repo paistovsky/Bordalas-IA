@@ -410,6 +410,42 @@ HIERARCHY_VETO_STEPS = 2
 
 
 # ============================================================
+# CAMBIAR A UN TITULAR (19/08/2026)
+# ============================================================
+#
+# Hasta hoy Pepe solo se planteaba sustituir al PEOR de cada
+# posicion, porque era el unico que se le ofrecia. A un titular
+# mediocre no lo descartaba: no se lo preguntaba nadie.
+#
+# Al abrirlo hay que apretar, porque cambiar a un titular no es
+# lo mismo que cambiar a un suplente:
+#
+#   - se paga con una venta que puede tardar dias
+#   - por medio se juegan jornadas
+#   - y el que sale ya no vuelve
+#
+# El dueño lo dijo asi: "Clave se puede tocar, siempre y cuando
+# sea para fichar otro clave con mas puntos y nos salga rentable
+# el coste/punto".
+
+DIOS_HIERARCHY = 60
+
+# Margen exigido cuando el que sale es titular. El normal es del
+# 10 %; aqui se pide mas del doble, porque un cambio que gana por
+# poco no compensa el riesgo de quedarse a medias.
+STARTER_SWAP_MARGIN = 0.25
+
+# Y una mejora minima en puntos de temporada. Sin esto, un cambio
+# de +1 punto pasaria el filtro del margen por pura aritmetica.
+STARTER_SWAP_MIN_DELTA = 8
+
+# Cuanto mas seguro titular tiene que ser el que entra. Cero
+# significa "al menos igual": cambiar cuatro puntos por menos
+# minutos es como se pierden las ligas.
+STARTER_SWAP_MIN_PROBABILITY_GAIN = 0.0
+
+
+# ============================================================
 # AUSENCIAS
 #
 # Cuantas jornadas se pierde, no si juega el sabado.
@@ -798,6 +834,20 @@ def hierarchy_label(starter: dict | None) -> str | None:
     return (starter or {}).get("hierarchy_label")
 
 
+def hierarchy_value(starter: dict | None) -> int | None:
+    """
+    El numero de FF tal cual, o None si no lo hay.
+
+    Se separa de `hierarchy_rank` a proposito: el rango sirve
+    para medir distancias entre escalones y este para preguntar
+    por uno concreto -"¿es Dios?"-, que no es lo mismo.
+    """
+
+    valor = (starter or {}).get("hierarchy_value")
+
+    return int(valor) if valor else None
+
+
 def expected_points_factor(
     starter: dict | None,
     current_matchday: int | None = None,
@@ -1119,6 +1169,11 @@ def xi_upgrade_value(
     # Sin jornada no se aplica el calendario. Es opcional a
     # proposito: quien no la pase se comporta como antes.
     matchday=None,
+
+    # Si el que saldria esta HOY en el once. Opcional a proposito
+    # por lo mismo: quien no lo pase se comporta como antes de
+    # existir esta regla.
+    replaced_in_lineup: bool = False,
 ) -> dict:
     """
     Lo maximo que pagariamos por un fichaje que mejora el once.
@@ -1195,6 +1250,46 @@ def xi_upgrade_value(
     # Es el error de Castrin dicho en su idioma: no era un
     # problema de porcentaje, era que es Reserva.
     # --------------------------------------------------------
+
+    # --------------------------------------------------------
+    # A UN DIOS NO SE LE TOCA
+    #
+    # El veto por escalones no cubre este caso: de Dios a Clave
+    # hay UN escalon, asi que colaba. Y la regla del dueño no
+    # admite grises: "Yamal no se toca, a no ser que haya otro
+    # DIOS en el mercado con mas puntos".
+    #
+    # Asi que la unica puerta es esa: otro Dios, y con mas
+    # puntos. Cualquier otra cosa se rechaza entera.
+    # --------------------------------------------------------
+
+    if hierarchy_value(replaced_starter) == DIOS_HIERARCHY:
+
+        entra_dios = (
+            hierarchy_value(candidate_starter) == DIOS_HIERARCHY
+        )
+
+        if not entra_dios:
+            return _sin_valor(
+                "NO_SE_TOCA_UN_DIOS",
+                (
+                    f"Sustituiria a un Dios por un "
+                    f"{hierarchy_label(candidate_starter)}. Un "
+                    f"Dios solo se cambia por otro Dios con mas "
+                    f"puntos."
+                ),
+            )
+
+        if safe_int(candidate_points) <= safe_int(replaced_points):
+            return _sin_valor(
+                "NO_SE_TOCA_UN_DIOS",
+                (
+                    f"Los dos son Dios, pero el que entra no suma "
+                    f"mas puntos "
+                    f"({safe_int(candidate_points)} contra "
+                    f"{safe_int(replaced_points)}). No se toca."
+                ),
+            )
 
     rango_sale = hierarchy_rank(replaced_starter)
     rango_entra = hierarchy_rank(candidate_starter)
@@ -1320,6 +1415,54 @@ def xi_upgrade_value(
             ),
         )
 
+    # --------------------------------------------------------
+    # SI EL QUE SALE ES TITULAR, SE APRIETA
+    # --------------------------------------------------------
+    #
+    # Cambiar a un suplente es barato de deshacer: si sale mal, el
+    # que entra se sienta y ya esta. Cambiar a un titular no: se
+    # paga con una venta que tarda, por medio se juegan jornadas,
+    # y el que sale no vuelve.
+    #
+    # Asi que se piden tres cosas a la vez, y las tres tienen que
+    # cumplirse. Un cambio que gana por poco no compensa.
+
+    if replaced_in_lineup:
+
+        if delta < STARTER_SWAP_MIN_DELTA:
+            return _sin_valor(
+                "MEJORA_INSUFICIENTE",
+                (
+                    f"Solo sumaria {delta} puntos y saldria del "
+                    f"once un titular. Para tocar el once hacen "
+                    f"falta {STARTER_SWAP_MIN_DELTA}: un cambio "
+                    f"asi se paga con una venta que tarda dias."
+                ),
+            )
+
+        p_entra = (candidate_starter or {}).get("probability")
+        p_sale = (replaced_starter or {}).get("probability")
+
+        if p_entra is not None and p_sale is not None:
+
+            ganancia = float(p_entra) - float(p_sale)
+
+            if ganancia < STARTER_SWAP_MIN_PROBABILITY_GAIN:
+                return _sin_valor(
+                    "PIERDE_TITULARIDAD",
+                    (
+                        f"Suma {delta} puntos pero juega menos: "
+                        f"{float(p_entra):.0f} % titular contra "
+                        f"{float(p_sale):.0f} % del que sale. Los "
+                        f"puntos estan en la hoja, no en el campo."
+                    ),
+                )
+
+        # El margen normal es del 10 %. Aqui se exige el que sea
+        # mayor de los dos, para que nadie pueda relajarlo pasando
+        # un margen pequeño desde fuera.
+        margin = max(margin, STARTER_SWAP_MARGIN)
+
     justo = int(delta * tarifa)
 
     maximo = int(
@@ -1333,6 +1476,22 @@ def xi_upgrade_value(
         "rate_per_point": tarifa,
         "confidence": confidence,
         "recovered_value": safe_int(recovered_value),
+
+        # Que clase de cambio es. Un cambio de titular hay que
+        # poder distinguirlo en el tablero y en el registro: se
+        # decide distinto y se revisa distinto.
+        "replaces_starter": bool(replaced_in_lineup),
+
+        # Lo que este cambio PROMETE. Se guarda para poder mirar
+        # dentro de un mes si los cambios pagaron, en vez de
+        # discutirlo.
+        "promised_points": delta,
+        "cost_per_point": (
+            int(round((justo - safe_int(recovered_value)) / delta))
+            if delta > 0
+            else None
+        ),
+
         "intent": "XI_UPGRADE",
         "reason": (
             f"Suma {delta} puntos. A precio de mercado "

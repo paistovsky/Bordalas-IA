@@ -74,6 +74,11 @@ def build_valuation_context(
     snapshot: dict,
     velocity_lookup: dict | None = None,
     starter_lookup: dict | None = None,
+
+    # El once de hoy, para saber a quien se puede tocar barato y
+    # a quien no. Opcional: sin el, nadie cuenta como titular y
+    # el comportamiento es el de antes.
+    lineup: dict | None = None,
 ) -> dict:
     """
     Lo que hay que calcular una sola vez por ciclo: el precio del
@@ -107,7 +112,37 @@ def build_valuation_context(
     mercado = calibrate_points_market(catalogo)
     equipos = build_team_strength(catalogo)
 
+    # ==================================================
+    # A QUIEN SE LE PREGUNTA (19/08/2026)
+    # ==================================================
+    #
+    # Aqui solo se guardaba el PEOR de cada posicion, y era el
+    # unico sustituido que `xi_upgrade_value` llegaba a valorar
+    # nunca. Un titular mediocre no estaba descartado: es que no
+    # se le preguntaba.
+    #
+    # Y eso le ponia un techo a Pepe. El dueño pidio que vendiera
+    # "siempre para mejorar el XI o ganar pasta", y con un solo
+    # candidato a salir solo sabia hacer la segunda mitad.
+    #
+    # Ahora se guarda la plantilla entera por posicion. El motor
+    # de cambio ya sabia hacer la cuenta; le faltaba a quien.
+    #
+    # `weakest_by_position` se mantiene porque lo lee mas gente y
+    # sigue significando lo mismo.
+
+    en_el_once = set()
+
+    for jugador in (
+        ((lineup or {}).get("lineup") or {}).get("selected")
+        or (lineup or {}).get("selected")
+        or []
+    ):
+        if isinstance(jugador, dict):
+            en_el_once.add(safe_int(jugador.get("id")))
+
     peor_por_posicion = {}
+    plantilla_por_posicion = {}
 
     for jugador in ((snapshot or {}).get("my_team") or []):
 
@@ -119,35 +154,45 @@ def build_valuation_context(
         if posicion not in (1, 2, 3, 4):
             continue
 
-        titularidad = starter_lookup.get(
-            safe_int(jugador.get("id"))
-        )
+        player_id = safe_int(jugador.get("id"))
+
+        titularidad = starter_lookup.get(player_id)
 
         puntos = estimate_season_points(
             jugador, mercado, equipos, starter=titularidad
         )
 
+        ficha = {
+            "id": player_id,
+            "name": jugador.get("name"),
+            "price": safe_int(jugador.get("price")),
+            "points": puntos["points"],
+            "raw_points": puntos.get("raw_points"),
+            "points_source": puntos["source"],
+            "starter": titularidad,
+            "starter_probability": puntos.get(
+                "starter_probability"
+            ),
+            "starter_consensus": puntos.get(
+                "starter_consensus"
+            ),
+
+            # Si hoy juega. Cambiar a un titular se decide con
+            # otras reglas, mas exigentes.
+            "in_lineup": player_id in en_el_once,
+        }
+
+        plantilla_por_posicion.setdefault(
+            posicion, []
+        ).append(ficha)
+
         actual = peor_por_posicion.get(posicion)
 
         if (
             actual is None
-            or puntos["points"] < actual["points"]
+            or ficha["points"] < actual["points"]
         ):
-            peor_por_posicion[posicion] = {
-                "id": safe_int(jugador.get("id")),
-                "name": jugador.get("name"),
-                "price": safe_int(jugador.get("price")),
-                "points": puntos["points"],
-                "raw_points": puntos.get("raw_points"),
-                "points_source": puntos["source"],
-                "starter": titularidad,
-                "starter_probability": puntos.get(
-                    "starter_probability"
-                ),
-                "starter_consensus": puntos.get(
-                    "starter_consensus"
-                ),
-            }
+            peor_por_posicion[posicion] = ficha
 
     return {
         "velocity": velocity_lookup or {},
@@ -155,6 +200,8 @@ def build_valuation_context(
         "points_market": mercado,
         "team_strength": equipos,
         "weakest_by_position": peor_por_posicion,
+        "squad_by_position": plantilla_por_posicion,
+        "lineup_ids": en_el_once,
         "squad_size": len(
             (snapshot or {}).get("my_team") or []
         ),
@@ -206,19 +253,45 @@ def value_candidate(
         # COMO MEJORA DEL ONCE
         # --------------------------------------------------
 
-        sustituido = peores.get(posicion)
+        # A quien podria sustituir: toda la plantilla de esa
+        # posicion. Si no viene, al peor, como siempre.
+        candidatos_a_salir = (
+            (context or {}).get("squad_by_position") or {}
+        ).get(posicion)
+
+        if not candidatos_a_salir:
+            peor = peores.get(posicion)
+            candidatos_a_salir = [peor] if peor else []
 
         como_xi = None
+        descartes = []
 
-        if sustituido is not None:
+        for sustituido in candidatos_a_salir:
 
+            if sustituido is None:
+                continue
+
+            titular = bool(sustituido.get("in_lineup"))
+
+            # EL DINERO DE UNA VENTA QUE NO HA PASADO NO ES
+            # DINERO (19/08/2026)
+            #
+            # `recovered_value` sube lo que estariamos dispuestos
+            # a pagar contando con lo que entra al vender al
+            # sustituido. Para un suplente vale: se publica y se
+            # vende sin que el once lo note.
+            #
+            # Para un titular no. Comprar es instantaneo y vender
+            # tarda dias, asi que ese cambio se juzga como si el
+            # dinero no fuese a llegar. Si sale rentable igual,
+            # es un buen cambio de verdad.
             recuperado = (
                 sustituido["price"]
-                if assume_replacement_sold
+                if assume_replacement_sold and not titular
                 else 0
             )
 
-            como_xi = xi_upgrade_value(
+            intento = xi_upgrade_value(
                 candidate_points=estimacion["points"],
                 replaced_points=sustituido["points"],
                 points_market=mercado,
@@ -231,9 +304,39 @@ def value_candidate(
                 # le toca: casi nada al principio de temporada,
                 # mucho al final.
                 matchday=(titularidad or {}).get("matchday"),
+
+                replaced_in_lineup=titular,
             )
 
-            como_xi["replaces"] = sustituido
+            intento["replaces"] = sustituido
+
+            if titular and recuperado == 0:
+                intento["needs_sale_first"] = True
+
+            if safe_int(intento.get("value")) <= 0:
+                descartes.append(intento)
+                continue
+
+            # Se queda el cambio que mas valor deja. Empatados,
+            # el que menos toca el once: sustituir a un suplente
+            # es siempre mas barato de deshacer.
+            if (
+                como_xi is None
+                or safe_int(intento["value"])
+                > safe_int(como_xi["value"])
+                or (
+                    safe_int(intento["value"])
+                    == safe_int(como_xi["value"])
+                    and not titular
+                    and como_xi.get("replaces_starter")
+                )
+            ):
+                como_xi = intento
+
+        # Si ninguno sale rentable, se enseña el que menos lejos
+        # se quedo: un "no" sin motivo no se puede revisar.
+        if como_xi is None and descartes:
+            como_xi = descartes[0]
 
         # --------------------------------------------------
         # COMO ESPECULACION
