@@ -10,7 +10,7 @@ import {
 const ITEMS = [
   ["home", "INICIO", Home],
   ["market", "MERCADO", ShoppingCart],
-  ["brain", "CEREBRO", Brain],
+  ["brain", "ESTRATEGIA", Brain],
   ["squad", "PLANTILLA", UsersRound],
   ["league", "LIGA", Trophy],
   ["audit", "AUDITORÍA", ClipboardList]
@@ -26,7 +26,7 @@ export default function Sidebar({ page, setPage, data }) {
         <div className="blogo">B</div>
         <div>
           <b>BORDALÁS IA</b>
-          <small>LA INTELIGENCIA DEL FÚTBOL</small>
+          <small>ESTO ES FÚTBOL, PAPÁ</small>
         </div>
       </div>
 

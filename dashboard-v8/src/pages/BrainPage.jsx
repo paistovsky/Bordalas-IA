@@ -1,7 +1,8 @@
+import StrategyPanel from "../components/StrategyPanel";
 import { formatEuros, formatMoney } from "../lib/utils";
 
 /**
- * CEREBRO: por que Pepe hace lo que hace.
+ * ESTRATEGIA: por que Pepe hace lo que hace.
  *
  * Cuatro columnas que son las cuatro preguntas reales del
  * ciclo: que puede hacer, con que dinero, contra quien, y que
@@ -206,6 +207,10 @@ export default function BrainPage({ data }) {
 
   return (
     <>
+      {/* El plan primero y el mecanismo despues: a corto y largo
+          plazo arriba, y debajo la maquinaria que lo ejecuta. */}
+      <StrategyPanel data={data} />
+
       <section className="pan">
         <h2>CÓMO DECIDE PEPE</h2>
         <div className="sub">Una acción por ciclo · gana la primera ejecutable de la cola</div>

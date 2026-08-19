@@ -13,7 +13,7 @@ import { ago, minutesOld } from "./lib/utils";
 const TITLES = {
   home: "INICIO",
   market: "MERCADO",
-  brain: "CEREBRO",
+  brain: "ESTRATEGIA",
   squad: "PLANTILLA",
   league: "LIGA",
   audit: "AUDITORÍA"
