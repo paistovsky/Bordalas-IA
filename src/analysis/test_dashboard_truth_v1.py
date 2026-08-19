@@ -354,6 +354,135 @@ def test_el_dashboard_recoge_el_bloque_de_ofertas():
     assert "queued_to_collect" in fuente
 
 
+def test_intentar_escribir_no_es_haber_escrito():
+    """
+    La quinta forma de mentir: contar un fallo como una escritura.
+
+    EL CASO (19/08/2026)
+
+        La barra lateral decia "Ultima escritura: cobrar oferta
+        aprobada" y el saldo seguia clavado en -4,00 M. Las dos
+        cosas eran ciertas: se habia mandado la peticion, y
+        Biwenger habia contestado HTTP 500 siete veces seguidas.
+
+        `write_performed` no miente. Significa "se envio una
+        escritura", y vale True aunque falle, porque de eso
+        depende la regla de una sola escritura por ciclo: si no
+        sabemos si llego, no se manda otra. Esa semantica es la
+        correcta y no se toca.
+
+        Quien mentia era la pantalla, que leia ese campo y se
+        saltaba el de al lado, `success`. El dato estaba ahi
+        mismo.
+
+        En una pantalla sobre dinero, "lo ha hecho" y "lo ha
+        intentado" no pueden leerse igual.
+    """
+
+    from src.telemetry.dashboard_state import (
+        build_execution_telemetry,
+    )
+
+    def caso(exito, http):
+        return {
+            "timestamp": "2026-08-19T15:59:43",
+            "version": "V10.13.1",
+            "execution": {
+                "action": "ACCEPT_RECOVERY_OFFER",
+                "status": (
+                    "OFFER_ACCEPTED" if exito else "FAILED"
+                ),
+                "write_performed": True,
+                "success": exito,
+                "http_status": http,
+            },
+            "snapshot_policy": {"legacy_post_write": True},
+        }
+
+    _, fallida = build_execution_telemetry(
+        [],
+        cycle_status=caso(False, 500),
+    )
+
+    assert fallida.get("succeeded") is False
+
+    assert "NO se completó" in fallida.get("label", ""), (
+        "la pantalla vuelve a llamar escritura a un intento que "
+        "fallo"
+    )
+
+    assert "500" in fallida.get("label", ""), (
+        "sin el codigo no hay por donde empezar a mirar"
+    )
+
+    # Verificar despues de una escritura que fallo no verifica
+    # nada, y decir que si es peor que no decir nada.
+    assert fallida.get("verified_post_action") is False
+
+    # Y cuando sale bien, se lee como siempre: sin ruido.
+    _, buena = build_execution_telemetry(
+        [],
+        cycle_status=caso(True, 200),
+    )
+
+    assert buena.get("succeeded") is True
+    assert buena.get("label") == "Cobrar oferta aprobada"
+    assert buena.get("verified_post_action") is True
+
+
+def test_el_historial_prefiere_lo_que_salio_bien():
+    """
+    "Ultima escritura" es la ultima que llego a su destino.
+
+    Si solo hay intentos fallidos se enseña el ultimo, pero
+    diciendo lo que es. Lo que no puede pasar es que un fallo se
+    cuele con la etiqueta limpia solo porque no haya nada mejor.
+    """
+
+    from src.telemetry.dashboard_state import (
+        build_execution_telemetry,
+    )
+
+    vacio = {"timestamp": "2026-08-19T19:21:26", "execution": {}}
+
+    historial = [
+        {
+            "action": "ACCEPT_RECOVERY_OFFER",
+            "write_performed": True,
+            "success": False,
+        },
+        {
+            "action": "SAVE_LINEUP",
+            "write_performed": True,
+            "success": True,
+        },
+    ]
+
+    _, elegida = build_execution_telemetry(
+        historial,
+        cycle_status=vacio,
+    )
+
+    assert elegida.get("action") == "SAVE_LINEUP", (
+        "el historial esta enseñando un intento fallido como si "
+        "fuera la ultima escritura"
+    )
+
+    # Solo fallos: se enseña, pero con su nombre.
+    _, unica = build_execution_telemetry(
+        historial[:1],
+        cycle_status=vacio,
+    )
+
+    assert unica.get("succeeded") is False
+    assert "NO se completó" in unica.get("label", "")
+
+    # Y sin nada, nada.
+    _, ninguna = build_execution_telemetry([], cycle_status=vacio)
+
+    assert ninguna == {}
+
+
 def main():
 
     pruebas = [
@@ -362,6 +491,8 @@ def main():
         test_la_auditoria_puede_fallar,
         test_las_ofertas_las_narra_quien_decide,
         test_el_dashboard_recoge_el_bloque_de_ofertas,
+        test_intentar_escribir_no_es_haber_escrito,
+        test_el_historial_prefiere_lo_que_salio_bien,
     ]
 
     for prueba in pruebas:

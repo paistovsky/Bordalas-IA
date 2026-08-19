@@ -1299,23 +1299,102 @@ def build_execution_telemetry(
         cycle["age_seconds"] > STALE_CYCLE_SECONDS
     )
 
+    # ==================================================
+    # INTENTAR ESCRIBIR NO ES HABER ESCRITO (19/08/2026)
+    # ==================================================
+    #
+    # La barra lateral decia "Ultima escritura: cobrar oferta
+    # aprobada" mientras el saldo seguia clavado en -4,00 M. Y era
+    # verdad a medias: se habia mandado la peticion, y Biwenger
+    # habia contestado HTTP 500 siete veces seguidas.
+    #
+    # `write_performed` no miente: significa "se envio una
+    # escritura", y por eso vale True aunque falle. Esa es la
+    # semantica correcta para la regla de una sola escritura por
+    # ciclo -si no sabemos si llego, no se manda otra- y no se
+    # toca.
+    #
+    # Lo que estaba mal era la pantalla, que llamaba escritura a
+    # un intento fallido. En una pantalla sobre dinero, "lo ha
+    # hecho" y "lo ha intentado" no pueden leerse igual.
+    #
+    # Es la misma familia que el ciclo viejo con cara de reciente
+    # que arreglamos ayer: el dato existia -aqui mismo, en
+    # `execution.success`- y nadie lo miraba al pintar.
+
     if write_used and action:
+
+        salio_bien = bool(
+            execution.get("success")
+        )
+
+        etiqueta = human_action(action)
+
+        if not salio_bien:
+            codigo = execution.get("http_status")
+
+            etiqueta = (
+                f"{etiqueta}: NO se completó"
+                + (f" (HTTP {codigo})" if codigo else "")
+            )
+
         last_execution = {
             **cycle,
             "timestamp": cycle.get("timestamp"),
+
+            # Se mando la peticion. Lo que no sabemos es si el
+            # otro lado hizo algo con ella.
             "write_performed": True,
-            "verified_post_action": post_write_verified,
+
+            # Si el otro lado hizo algo con ella.
+            "succeeded": salio_bien,
+
+            "label": etiqueta,
+
+            # Verificar despues de una escritura que fallo no
+            # verifica nada.
+            "verified_post_action": (
+                post_write_verified and salio_bien
+            ),
         }
         return cycle, last_execution
 
+    # Y en el historial, lo mismo: la ultima escritura de verdad
+    # es la ultima que salio bien. Si no hay ninguna se cae a la
+    # ultima intentada, pero avisando de que no se completo.
     history_execution = next(
         (
             item
             for item in activity
             if item.get("write_performed")
+            and item.get("success")
         ),
-        {},
+        None,
     )
+
+    if history_execution is None:
+
+        intentada = next(
+            (
+                item
+                for item in activity
+                if item.get("write_performed")
+            ),
+            None,
+        )
+
+        if intentada is None:
+            return cycle, {}
+
+        history_execution = {
+            **intentada,
+            "succeeded": False,
+            "label": (
+                f"{human_action(intentada.get('action'))}: "
+                f"NO se completó"
+            ),
+        }
+
     return cycle, history_execution
 
 
