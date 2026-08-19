@@ -650,8 +650,11 @@ def test_el_gatillo_esta_conectado():
         HARD_SAFETY_ALLOWED_ACTIONS,
     )
 
+    # La version sin cache es la que lleva la logica. Desde el
+    # 19/08/2026 `build_global_decision` es una envoltura que
+    # recuerda la ultima decision mientras el snapshot no cambie.
     fuente = inspect.getsource(
-        decision_orchestrator.build_global_decision
+        decision_orchestrator.build_global_decision_uncached
     )
 
     assert "offers_to_collect(" in fuente, (

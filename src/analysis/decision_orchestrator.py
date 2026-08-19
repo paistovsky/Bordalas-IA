@@ -1,3 +1,5 @@
+import copy
+
 from src.actions.franchise_autopilot import (
     build_franchise_autopilot_state,
 )
@@ -957,7 +959,136 @@ def add_temporal_gate(
         )
 
 
+_ULTIMA_DECISION: dict = {
+    "clave": None,
+    "resultado": None,
+}
+
+
+def _clave_de_ciclo(
+    snapshot: dict | None,
+    failure_backoff: dict | None,
+    acquisition_board: dict | None,
+) -> str | None:
+    """
+    Que identifica una decision ya calculada, o None si no se
+    puede identificar con seguridad.
+
+    Solo el snapshot manda, y solo cuando la llamada viene
+    limpia. Si trae `failure_backoff` o `acquisition_board`, el
+    resultado depende de esos datos y no de una cadena: se
+    recalcula y punto. Es justo lo que hace la primera pasada del
+    ciclo, la que debe calcularse siempre.
+
+    `timestamp` viene del propio fichero de snapshot y es unico
+    por descarga. Snapshot nuevo, clave nueva, recalculo. Que es
+    exactamente lo que tiene que pasar despues de escribir en
+    Biwenger.
+    """
+
+    if failure_backoff is not None:
+        return None
+
+    if acquisition_board is not None:
+        return None
+
+    marca = (snapshot or {}).get("timestamp")
+
+    if not marca:
+        # Sin fecha no se cachea. Ausencia de dato no es dato:
+        # dos snapshots sin marca no son el mismo snapshot.
+        return None
+
+    return str(marca)
+
+
+def reset_decision_cache() -> None:
+    """
+    Olvida la ultima decision. Para los tests y para cualquiera
+    que necesite forzar un recalculo dentro del mismo proceso.
+    """
+
+    _ULTIMA_DECISION["clave"] = None
+    _ULTIMA_DECISION["resultado"] = None
+
+
 def build_global_decision(
+    snapshot: dict,
+    failure_backoff: dict | None = None,
+    acquisition_board: dict | None = None,
+) -> dict:
+    """
+    La decision del ciclo, calculada una sola vez por snapshot.
+
+    EL CICLO HACIA EL MISMO TRABAJO CINCO VECES (19/08/2026)
+
+        Los ciclos tardaban 15m44s con el cron cada 30 minutos, y
+        en Actions se acumulaba cola: un ciclo programado llevaba
+        una hora esperando turno.
+
+        `build_global_decision` se llamaba cuatro o cinco veces
+        por ciclo sobre los mismos datos:
+
+            1. run_cycle, analisis inicial          234 s
+            2. run_cycle, recalculo post-escritura  143 s
+            3. V10.6 Position Manager
+            4. el ledger V10.5, dentro de esa misma
+               sincronizacion
+            5. build_dashboard, ya en otro proceso
+
+        Las tres del medio son literalmente la misma llamada con
+        el mismo snapshot. Cada una volvia a montar solvencia,
+        liquidez, ofertas y especulacion, y a refrescar el
+        calendario de LaLiga por HTTP.
+
+        Lo llamativo es que el problema ya se habia visto a
+        medias: `sync_position_manager(refresh=False)`, "V10.7
+        comparte el mismo snapshot; no vuelve a descargar
+        Biwenger". Se compartia el SNAPSHOT y no la DECISION. Se
+        ahorro la descarga y se dejo el calculo entero.
+
+    QUE NO CAMBIA
+
+        Nadie recibe un resultado distinto del que recibia antes.
+        La copia se hace en profundidad al entrar y al salir, asi
+        que un consumidor que modifique lo suyo -y hay al menos
+        uno que lo hace, `result["state"]["sale_intent"]`- no
+        contamina al siguiente.
+
+        Y la caché es de un solo hueco: no crece, no persiste
+        entre procesos y no sobrevive a un snapshot nuevo.
+    """
+
+    clave = _clave_de_ciclo(
+        snapshot,
+        failure_backoff,
+        acquisition_board,
+    )
+
+    if (
+        clave is not None
+        and _ULTIMA_DECISION["clave"] == clave
+    ):
+        return copy.deepcopy(
+            _ULTIMA_DECISION["resultado"]
+        )
+
+    resultado = build_global_decision_uncached(
+        snapshot,
+        failure_backoff=failure_backoff,
+        acquisition_board=acquisition_board,
+    )
+
+    if clave is not None:
+        _ULTIMA_DECISION["clave"] = clave
+        _ULTIMA_DECISION["resultado"] = copy.deepcopy(
+            resultado
+        )
+
+    return resultado
+
+
+def build_global_decision_uncached(
     snapshot: dict,
     failure_backoff: dict | None = None,
     acquisition_board: dict | None = None,

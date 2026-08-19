@@ -37,6 +37,23 @@ from src.analysis.competitive_safety_gate import (
 # DEFECTO 1
 # ============================================================
 
+# Quien construye de verdad el diccionario de la decision.
+#
+# Era `build_global_decision` a secas. Desde el 19/08/2026 ese
+# nombre es una envoltura que recuerda la ultima decision mientras
+# el snapshot no cambie -el ciclo la calculaba cinco veces por
+# ronda y tardaba 15m44s- y la logica vive en la version sin
+# cache.
+#
+# Se miran las dos y se queda con la que de verdad devuelve el
+# diccionario, asi el candado sigue puesto se llame como se llame
+# y no hay que volver aqui cada vez que alguien la envuelva.
+CONSTRUCTORES_DE_LA_DECISION = (
+    "build_global_decision_uncached",
+    "build_global_decision",
+)
+
+
 def _claves_de_build_global_decision() -> tuple[set, set]:
     """
     Lee el arbol sintactico en vez de ejecutar el orquestador,
@@ -56,7 +73,7 @@ def _claves_de_build_global_decision() -> tuple[set, set]:
     for nodo in ast.walk(arbol):
         if not isinstance(nodo, ast.FunctionDef):
             continue
-        if nodo.name != "build_global_decision":
+        if nodo.name not in CONSTRUCTORES_DE_LA_DECISION:
             continue
 
         for ret in ast.walk(nodo):

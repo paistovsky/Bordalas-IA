@@ -20,9 +20,13 @@ jobs:
   live:
     name: Bordalas live controlled cycle
     runs-on: ubuntu-latest
-    # Margen de seguridad para un refresco externo lento. El ciclo normal
-    # debe terminar muy por debajo de este limite tras reutilizar snapshots.
-    timeout-minutes: 20
+    # 18/08: la media real era 16 min contra un techo de 20. Un margen del
+    # 25% se lo come cualquier lentitud de red, y GitHub no corta con
+    # elegancia: mata el job donde este, que puede ser escribiendo el
+    # ledger. Con las guardias en un solo proceso el ciclo baja bastante,
+    # pero el techo se sube igualmente para que un mal dia no deje estado
+    # a medias.
+    timeout-minutes: 30
 
     env:
       TZ: Europe/Madrid
@@ -101,46 +105,13 @@ jobs:
       - name: Validate optimized production cycle
         shell: bash
         run: |
-          python -m src.analysis.test_jp_profile_scope_v114
-          python -m src.analysis.test_multisource_starter_v1124
-          python -m src.analysis.test_v10_full_autonomous_live
-          python -m src.analysis.test_live_solvency_authority_v115
-          python -m src.telemetry.test_dashboard_execution_v121
-
-          # Candados de la auditoria del 15/08/2026.
-          # Deterministas, sin red ni credenciales: si alguien
-          # reintroduce una de estas guardias dormidas, el ciclo
-          # se detiene aqui y no llega a produccion.
-          python -m src.analysis.test_solvency_deadlock_v1
-          python -m src.analysis.test_write_path_guards_v1
-          python -m src.analysis.test_negotiation_persistence_v1
-          python -m src.analysis.test_bid_deduplication_v1
-          python -m src.analysis.test_source_accuracy_v1
-          python -m src.analysis.test_write_verification_v1
-          python -m src.analysis.test_protection_gate_v1
-          python -m src.analysis.test_reroll_memory_v1
-          python -m src.analysis.test_ledger_dedup_v1
-          python -m src.analysis.test_market_clock_v1
-          python -m src.analysis.test_position_guardrail_v1
-          python -m src.analysis.test_speculation_budget_v1
-          python -m src.analysis.test_bid_exposure_v1
-          python -m src.analysis.test_bid_targets_v1
-          python -m src.analysis.test_external_name_safety_v1
-          python -m src.analysis.test_portfolio_budget_v1
-          python -m src.analysis.test_roster_plan_guardrail_v1
-          python -m src.analysis.test_rival_bid_model_v1
-          python -m src.analysis.test_player_value_v1
-          python -m src.analysis.test_acquisition_wiring_v1
-          python -m src.analysis.test_bid_visibility_v1
-          python -m src.analysis.test_dashboard_truth_v1
-          python -m src.analysis.test_intocables_v1
-          python -m src.analysis.test_calendario_v1
-          python -m src.analysis.test_cobrar_ofertas_v1
-          python -m src.analysis.test_ciclo_una_sola_vez_v1
-          python -m src.analysis.test_action_starvation_v1
-          python -m src.analysis.test_price_history_store_v1
-          python -m src.analysis.test_futbolfantasy_source_v12
-          python -m src.analysis.test_starter_aware_xi_v1
+          # 18/08: antes eran 34 lineas `python -m ...`, o sea 34 arranques
+          # de interprete reimportando el paquete entero cada vez (3-4,5 min
+          # por ciclo, 48 veces al dia). El runner ejecuta los mismos 34
+          # modulos, en el mismo orden, con run_name="__main__", en un solo
+          # proceso. Sigue fallando cerrado: si una guardia salta, este paso
+          # termina en != 0 y produccion no se ejecuta.
+          python scripts/run_guard_tests.py
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash
@@ -179,6 +150,24 @@ jobs:
         shell: bash
         run: |
           python scripts/prune_github_state.py
+
+      - name: Trim snapshots before caching
+        if: always()
+        shell: bash
+        run: |
+          # El ciclo solo reutiliza el snapshot mas reciente. Los viejos se
+          # quedaban en la cache: 97 ficheros x ~500 KB = 48 MB guardados en
+          # CADA ejecucion, o sea 2,3 GB al dia contra un limite de 10 GB.
+          # Con eso la cache se pasa la vida evictando y cada restore/save
+          # se paga en minutos.
+          keep=5
+          total=$(ls -1 data/snapshot_*.json 2>/dev/null | wc -l)
+          if [ "$total" -gt "$keep" ]; then
+            ls -1t data/snapshot_*.json | tail -n +$((keep + 1)) | xargs -r rm -f
+            echo "Snapshots podados: $total -> $keep"
+          else
+            echo "Snapshots: $total (nada que podar)"
+          fi
 
       - name: Upload diagnostic log
         if: always()
