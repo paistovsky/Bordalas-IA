@@ -483,6 +483,172 @@ def test_el_historial_prefiere_lo_que_salio_bien():
     assert ninguna == {}
 
 
+def test_se_ven_todas_las_ofertas():
+    """
+    "Biwenger dice 16, aqui sale 15", durante dias.
+
+    EL CASO (19/08/2026)
+
+        Las dos cifras eran correctas. Contaban cosas distintas.
+
+        El chequeo cuenta las ofertas entrantes del snapshot:
+        todas las que no salen de nosotros. La tabla se pintaba
+        desde el tablero del Computer, que por el camino se deja
+        tres tipos: las que no estan en `waiting`, las caducadas,
+        y las de managers, que van a otra lista.
+
+        Ninguna de esas tres es un error del motor. El error era
+        enseñar ESE recuento bajo el titulo "OFERTAS RECIBIDAS" y
+        compararlo con otro.
+
+        Dos recuentos de la misma cosa por caminos distintos
+        acaban discrepando siempre, y el dueño se come un aviso
+        rojo permanente que deja de significar nada. Que es lo
+        peor que le puede pasar a una alarma.
+    """
+
+    import time
+
+    from src.telemetry.dashboard_state import compact_offers
+
+    ahora = time.time()
+
+    NOSOTROS = 14175949
+
+    snapshot = {
+        "market": {
+            "offers": [
+                {
+                    "id": 1,
+                    "amount": 1_047_400,
+                    "status": "waiting",
+                    "from": None,
+                    "until": ahora + 3600 * 5,
+                    "requestedPlayers": [100],
+                },
+                {
+                    "id": 3,
+                    "amount": 500_000,
+                    "status": "waiting",
+                    "from": None,
+                    "until": ahora - 60,
+                    "requestedPlayers": [102],
+                },
+                {
+                    "id": 4,
+                    "amount": 900_000,
+                    "status": "waiting",
+                    "from": {"id": 999, "name": "Mex"},
+                    "until": ahora + 3600 * 3,
+                    "requestedPlayers": [103],
+                },
+                # Una puja NUESTRA: no es una oferta recibida y no
+                # cuenta ni aqui ni en el chequeo.
+                {
+                    "id": 5,
+                    "amount": 111,
+                    "status": "waiting",
+                    "from": {"id": NOSOTROS, "name": "Pepe"},
+                    "until": ahora + 60,
+                    "requestedPlayers": [104],
+                },
+            ]
+        },
+        "my_team": [
+            {"id": 100, "name": "Javi Hernández"},
+            {"id": 102, "name": "El caducado"},
+            {"id": 103, "name": "El de Mex"},
+        ],
+        "catalog": {"data": {"players": {}}},
+    }
+
+    state = {
+        "offer_reroll": {
+            "offers": [
+                {
+                    "offer_id": 1,
+                    "players": [{"name": "Javi Hernández"}],
+                    "amount": 1_047_400,
+                    "premium_percent": 3.7,
+                    "action": "KEEP_GOOD_OFFER",
+                    "hours_to_expiry": 5.0,
+                }
+            ]
+        }
+    }
+
+    filas = compact_offers(
+        state,
+        snapshot=snapshot,
+        current_user_id=NOSOTROS,
+    )
+
+    # 1. Salen las TRES entrantes, no solo la que el tablero del
+    #    Computer sabe analizar.
+    assert len(filas) == 3, (
+        f"la pantalla vuelve a enseñar menos de lo que hay: "
+        f"{len(filas)} de 3"
+    )
+
+    por_nombre = {f["players"][0]: f for f in filas}
+
+    # 2. Y la nuestra no se cuela: es una puja, no una oferta.
+    assert "#104" not in por_nombre
+
+    # 3. Lo que no lleva veredicto dice por que, en vez de
+    #    dejar la casilla en blanco.
+    assert (
+        por_nombre["El caducado"]["action"] == "OFFER_EXPIRED"
+    )
+    assert por_nombre["El caducado"]["expired"] is True
+
+    assert (
+        por_nombre["El de Mex"]["action"] == "MANAGER_OFFER"
+    )
+    assert por_nombre["El de Mex"]["counterparty"] == "Mex"
+
+    # 4. Sin tablero no hay prima, y un 0,0 % se leeria como "no
+    #    sube nada" en vez de como "no se sabe".
+    assert por_nombre["El de Mex"]["premium_percent"] is None
+
+    assert (
+        por_nombre["Javi Hernández"]["premium_percent"] == 3.7
+    )
+
+    # 5. Sin snapshot no se rompe: se comporta como antes.
+    solo_tablero = compact_offers(state)
+
+    assert len(solo_tablero) == 1
+    assert solo_tablero[0]["players"] == ["Javi Hernández"]
+
+
+def test_la_tabla_y_el_chequeo_cuentan_igual():
+    """
+    Que cuadren no puede depender de que nadie los toque.
+
+    Estructural: los dos tienen que aplicar la misma regla -no
+    contar lo que sale de nosotros- sobre la misma lista.
+    """
+
+    import inspect
+
+    from src.telemetry import dashboard_state
+
+    fuente = inspect.getsource(
+        dashboard_state._ofertas_entrantes
+    )
+
+    assert 'get("market")' in fuente, (
+        "la tabla ha dejado de leer las ofertas del snapshot: "
+        "vuelve a contar por su cuenta"
+    )
+
+    assert "current_user_id" in fuente, (
+        "la tabla ya no descarta nuestras propias pujas, que es "
+        "justo lo que hace el chequeo"
+    )
+
+
 def main():
 
     pruebas = [
@@ -493,6 +659,8 @@ def main():
         test_el_dashboard_recoge_el_bloque_de_ofertas,
         test_intentar_escribir_no_es_haber_escrito,
         test_el_historial_prefiere_lo_que_salio_bien,
+        test_se_ven_todas_las_ofertas,
+        test_la_tabla_y_el_chequeo_cuentan_igual,
     ]
 
     for prueba in pruebas:

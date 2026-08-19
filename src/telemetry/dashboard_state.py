@@ -107,6 +107,12 @@ ACTION_LABELS = {
     "REROLL_CANDIDATE": "Pedir otra oferta mejor",
     "HOLD_OFFER": "Esperar",
 
+    # Las que no llevan veredicto, dichas por su nombre en vez de
+    # dejar la casilla en blanco.
+    "OFFER_EXPIRED": "Caducada",
+    "MANAGER_OFFER": "De un mánager: no la decide el motor",
+    "NOT_EVALUATED": "Sin analizar",
+
     "NEVER_SELL": "No vender",
     "KEEP_GOOD_OFFER": "Conservar buena oferta",
     "HOLD_SOLVENCY_RESERVED": "Reservar para solvencia",
@@ -903,10 +909,159 @@ def compact_rivals(intelligence: dict, current_user_id: int | None) -> list[dict
     return rows
 
 
+SIN_ANALIZAR_POR_CADUCADA = "OFFER_EXPIRED"
+SIN_ANALIZAR_POR_MANAGER = "MANAGER_OFFER"
+SIN_ANALIZAR_SIN_MOTIVO = "NOT_EVALUATED"
+
+
+def _por_que_no_se_analiza(entrante: dict) -> str:
+    """
+    Por que una oferta no lleva veredicto, dicho por su nombre.
+
+    Una fila en blanco se lee como un fallo. Una fila que dice
+    "caducada" o "de un manager" se lee como lo que es.
+    """
+
+    if entrante.get("expired"):
+        return SIN_ANALIZAR_POR_CADUCADA
+
+    if entrante.get("counterparty") != "COMPUTER":
+        return SIN_ANALIZAR_POR_MANAGER
+
+    return SIN_ANALIZAR_SIN_MOTIVO
+
+
+def _ofertas_entrantes(
+    snapshot: dict | None,
+    current_user_id=None,
+) -> list[dict]:
+    """
+    Las ofertas de compra por jugadores nuestros, del snapshot.
+
+    MISMA REGLA QUE EL CHEQUEO DE CONSISTENCIA
+
+        Una oferta es entrante si no sale de nosotros. Punto. Es
+        literalmente lo que cuenta `dashboard_consistency`, y por
+        eso se escribe igual aqui: dos recuentos de la misma cosa
+        que se calculan por caminos distintos acaban discrepando
+        siempre, y el dueño se come un aviso rojo permanente que
+        no significa nada.
+    """
+
+    mercado = (snapshot or {}).get("market") or {}
+
+    ahora = datetime.now().timestamp()
+
+    entrantes = []
+
+    for oferta in (mercado.get("offers") or []):
+
+        if not isinstance(oferta, dict):
+            continue
+
+        emisor = oferta.get("from")
+        emisor = emisor if isinstance(emisor, dict) else {}
+
+        if (
+            current_user_id is not None
+            and safe_int(emisor.get("id"))
+            == safe_int(current_user_id)
+        ):
+            continue
+
+        hasta = oferta.get("until")
+
+        horas = None
+        caducada = False
+
+        if hasta is not None:
+            try:
+                horas = round(
+                    (float(hasta) - ahora) / 3600.0,
+                    1,
+                )
+                caducada = horas <= 0
+
+            except (TypeError, ValueError):
+                horas = None
+
+        entrantes.append(
+            {
+                "offer_id": oferta.get("id"),
+
+                "amount": safe_int(oferta.get("amount")),
+
+                "player_names": _nombres_de_jugadores(
+                    snapshot,
+                    oferta.get("requestedPlayers") or [],
+                ),
+
+                # El Computer llega con from=None; un manager
+                # llega con su ficha.
+                "counterparty": (
+                    emisor.get("name")
+                    if emisor
+                    else "COMPUTER"
+                ),
+
+                "status": oferta.get("status"),
+                "expired": caducada,
+                "hours_to_expiry": horas,
+            }
+        )
+
+    return entrantes
+
+
+def _nombres_de_jugadores(
+    snapshot: dict | None,
+    player_ids: list,
+) -> list[str]:
+    """
+    De ids a nombres, mirando primero nuestra plantilla.
+
+    Si un id no aparece por ningun lado se enseña el id y no un
+    interrogante: con el numero se puede seguir tirando del hilo.
+    """
+
+    catalogo = (
+        ((snapshot or {}).get("catalog") or {}).get("data")
+        or {}
+    ).get("players") or {}
+
+    plantilla = {
+        safe_int(j.get("id")): j.get("name")
+        for j in ((snapshot or {}).get("my_team") or [])
+        if isinstance(j, dict)
+    }
+
+    nombres = []
+
+    for player_id in player_ids:
+
+        pid = safe_int(player_id)
+
+        nombre = plantilla.get(pid)
+
+        if not nombre:
+            ficha = (
+                catalogo.get(str(pid))
+                or catalogo.get(pid)
+                or {}
+            )
+            nombre = ficha.get("name")
+
+        nombres.append(nombre or f"#{pid}")
+
+    return nombres
+
+
 def compact_offers(
     state: dict,
     offer_decisions: dict | None = None,
     collecting: dict | None = None,
+    snapshot: dict | None = None,
+    current_user_id=None,
 ) -> list[dict]:
     """
     Las ofertas recibidas, con la respuesta del motor que MANDA.
@@ -964,31 +1119,108 @@ def compact_offers(
         if item.get("offer_id") is not None
     }
 
-    offers = []
+    # ==================================================
+    # LA LISTA SALE DE DONDE SE CUENTA (19/08/2026)
+    # ==================================================
+    #
+    # El aviso rojo llevaba dias diciendo "Biwenger dice 16, aqui
+    # sale 15". Y las dos cifras eran correctas: contaban cosas
+    # distintas.
+    #
+    # El chequeo cuenta las ofertas entrantes del snapshot -todas
+    # las que no salen de nosotros-. La tabla se pintaba desde el
+    # tablero del Computer, que por el camino se deja tres tipos:
+    #
+    #     - las que no estan en `waiting`
+    #     - las caducadas
+    #     - las de managers, que van a otra lista
+    #
+    # Ninguna de esas tres es un error del motor: son decisiones
+    # razonables de un tablero que solo mira ofertas del Computer
+    # vivas. El error era enseñar ESE recuento bajo el titulo
+    # "OFERTAS RECIBIDAS" y luego compararlo con otro.
+    #
+    # Ahora la fila la genera el snapshot, con la misma regla que
+    # usa el chequeo, y el tablero del Computer y V2 entran como
+    # enriquecimiento. Asi el aviso no puede volver por un
+    # desajuste de fuentes: es la misma.
+    #
+    # Lo que no sepamos de una oferta se dice, no se rellena con
+    # ceros. Una prima de 0,0 % inventada es peor que un hueco.
 
-    for offer in offer_reroll.get("offers", []) or []:
-        names = [
-            player.get("name", "?")
-            for player in offer.get("players", []) or []
+    del_computer = {
+        item.get("offer_id"): item
+        for item in (offer_reroll.get("offers") or [])
+        if item.get("offer_id") is not None
+    }
+
+    entrantes = _ofertas_entrantes(snapshot, current_user_id)
+
+    if not entrantes:
+        # Sin snapshot no se inventa una lista: se sigue con lo
+        # que hay, que es como funcionaba hasta hoy.
+        entrantes = [
+            {
+                "offer_id": item.get("offer_id"),
+                "amount": item.get("amount"),
+                "player_names": [
+                    p.get("name", "?")
+                    for p in (item.get("players") or [])
+                ],
+                "counterparty": "COMPUTER",
+                "status": "waiting",
+                "expired": False,
+                "hours_to_expiry": item.get("hours_to_expiry"),
+            }
+            for item in (offer_reroll.get("offers") or [])
         ]
 
-        offer_id = offer.get("offer_id")
+    offers = []
+
+    for entrante in entrantes:
+
+        offer_id = entrante.get("offer_id")
+
+        offer = del_computer.get(offer_id) or {}
+
+        names = entrante.get("player_names") or [
+            player.get("name", "?")
+            for player in (offer.get("players") or [])
+        ]
 
         decision = por_id.get(offer_id) or {}
 
         # La accion que se enseña es la de V2 cuando la hay. Si no
         # la hay se dice cual es, en vez de disfrazar la del otro
         # motor de veredicto.
-        accion = decision.get("decision") or offer.get("action")
+        accion = (
+            decision.get("decision")
+            or offer.get("action")
+            or _por_que_no_se_analiza(entrante)
+        )
 
         offers.append(
             {
                 "players": names,
-                "amount": safe_int(offer.get("amount")),
-                "premium_percent": round(
-                    safe_float(offer.get("premium_percent")),
-                    2,
+
+                "amount": safe_int(
+                    entrante.get("amount")
+                    if entrante.get("amount") is not None
+                    else offer.get("amount")
                 ),
+
+                # Sin tablero no hay prima calculada, y un 0,0 %
+                # se lee como "no sube nada" en vez de como "no
+                # se sabe".
+                "premium_percent": (
+                    round(
+                        safe_float(offer.get("premium_percent")),
+                        2,
+                    )
+                    if offer.get("premium_percent") is not None
+                    else None
+                ),
+
                 "solvency_reserved": bool(
                     offer.get("solvency_reserved")
                 ),
@@ -996,13 +1228,25 @@ def compact_offers(
                 "action": accion,
                 "action_label": human_action(accion),
 
+                # Quien es la otra parte. El Computer y un manager
+                # no se negocian igual, y hasta hoy los de
+                # managers no salian en esta tabla.
+                "counterparty": entrante.get("counterparty"),
+
+                "status": entrante.get("status"),
+                "expired": bool(entrante.get("expired")),
+
                 # De donde sale el veredicto de arriba. Sin esto
                 # vuelve a ser imposible saber quien esta
                 # hablando.
                 "decision_source": (
                     "OFFER_DECISION_V2"
                     if decision
-                    else "REROLL_ENGINE"
+                    else (
+                        "REROLL_ENGINE"
+                        if offer
+                        else "SIN_ANALIZAR"
+                    )
                 ),
 
                 "sale_score": (
@@ -1035,8 +1279,20 @@ def compact_offers(
                 ),
 
                 "hours_to_expiry": (
-                    round(safe_float(offer.get("hours_to_expiry")), 1)
-                    if offer.get("hours_to_expiry") is not None
+                    round(
+                        safe_float(
+                            offer.get("hours_to_expiry")
+                            if offer.get("hours_to_expiry")
+                            is not None
+                            else entrante.get("hours_to_expiry")
+                        ),
+                        1,
+                    )
+                    if (
+                        offer.get("hours_to_expiry") is not None
+                        or entrante.get("hours_to_expiry")
+                        is not None
+                    )
                     else None
                 ),
             }
@@ -2839,6 +3095,11 @@ def build_dashboard_state() -> dict:
                     "queued_to_collect"
                 ),
             },
+
+            # La lista sale del snapshot, que es de donde la
+            # cuenta el chequeo de consistencia.
+            snapshot=snapshot,
+            current_user_id=board.get("current_user_id"),
         ),
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
