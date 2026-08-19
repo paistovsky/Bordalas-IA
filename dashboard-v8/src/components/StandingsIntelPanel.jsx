@@ -57,6 +57,8 @@ export default function StandingsIntelPanel({ data }) {
             <th>MÁNAGER</th>
             <th className="n">PTS</th>
             <th className="n">CAJA</th>
+            <th className="n">PLANTILLA</th>
+            <th className="n">PATRIMONIO</th>
             <th className="n">TOPE</th>
             <th className="n">PUJA</th>
             <th className="n">MÁX. VISTO</th>
@@ -87,7 +89,30 @@ export default function StandingsIntelPanel({ data }) {
                 <td className={Number(balance) < 0 ? "n down" : "n"}>
                   {balance != null ? formatMoney(balance) : "—"}
                 </td>
-                <td className="n strong">{cap != null ? formatMoney(cap) : "—"}</td>
+
+                {/* PLANTILLA y PATRIMONIO viajaban desde hace
+                    tiempo en la telemetria y no se pintaban.
+                    Sin ellos la tabla decia quien tiene dinero
+                    hoy, pero no quien es rico: un manager con la
+                    caja a cero y 60 M en jugadores no es pobre,
+                    es liquido cuando quiere. */}
+                <td className="n dim" title={
+                  intel?.roster_count != null
+                    ? `${intel.roster_count} jugadores`
+                    : undefined
+                }>
+                  {intel?.roster_value
+                    ? formatMoney(intel.roster_value)
+                    : "—"}
+                </td>
+
+                <td className="n strong">
+                  {intel?.net_worth != null
+                    ? formatMoney(intel.net_worth)
+                    : "—"}
+                </td>
+
+                <td className="n">{cap != null ? formatMoney(cap) : "—"}</td>
                 <td className="n">
                   {rival?.never_bids ? (
                     <span className="pill idle">NUNCA</span>
@@ -136,8 +161,10 @@ export default function StandingsIntelPanel({ data }) {
       </table>
 
       <p className="note" style={{ textAlign: "left", marginTop: 9 }}>
-        CAJA = dinero ahora (puede ir en rojo). TOPE = caja + margen de deuda,
-        con el ratio calibrado contra el maximumBid oficial de Pepe. PUJA =
+        CAJA = dinero ahora (puede ir en rojo). PLANTILLA = lo que valen sus
+        jugadores (pasa el ratón para ver cuántos tiene). PATRIMONIO = caja +
+        plantilla, o sea lo que vale el equipo entero. TOPE = caja + margen de
+        deuda, con el ratio calibrado contra el maximumBid oficial de Pepe. PUJA =
         veces que ese mánager puja de verdad, medida sobre el tablón. MÁX.
         VISTO = lo más alto que se le ha visto pagar (pasa el ratón para ver
         sus pujas perdidas). AMENAZA combina las cuatro. Lo que tienen

@@ -742,6 +742,92 @@ def test_partes_de_baja():
         anterior = factor
 
 
+def test_lesion_y_sancion_no_se_pisan():
+    """
+    Un cruzado y dos partidos de sancion no son la misma baja.
+
+    EL CASO (19/08/2026)
+
+        FutbolFantasy nos daba, y nosotros recogiamos, el tipo de
+        lesion, el pronostico en palabras, si la roja fue directa
+        o por acumulacion y cuantos partidos van cumplidos.
+
+        `merge_absences` se quedaba con la ausencia mas larga y
+        de la otra guardaba `also` con el tipo a secas. Asi que de
+        un jugador con el ligamento roto Y sancionado sobrevivia
+        "SUSPENSION" y se perdia todo lo demas.
+
+        Importa porque se decide distinto con cada una: una lesion
+        larga es motivo de venta, una sancion de dos partidos no
+        lo es. Fundirlas en un campo obligaba a tratarlas igual.
+    """
+
+    from src.intelligence.futbolfantasy_absences import (
+        merge_absences,
+    )
+
+    lesiones = {
+        "roto": {
+            "type": "INJURY",
+            "detail": "Rotura del ligamento cruzado",
+            "matchdays_out": 20,
+            "prognosis": "6 meses",
+            "severity_label": "GRAVE",
+        },
+    }
+
+    sanciones = {
+        "roto": {
+            "type": "SUSPENSION",
+            "detail": "Roja directa (0/2)",
+            "matches_total": 2,
+            "matches_served": 0,
+            "matchdays_out": 2,
+        },
+        "solo_sancion": {
+            "type": "SUSPENSION",
+            "detail": "Acumulación de amarillas (0/1)",
+            "matchdays_out": 1,
+        },
+    }
+
+    todas = merge_absences(lesiones, sanciones)
+
+    roto = todas["roto"]
+
+    # Manda la mas larga, como siempre.
+    assert roto["type"] == "INJURY"
+    assert roto["matchdays_out"] == 20
+
+    # Pero la otra ya no se pierde, y con su detalle entero.
+    assert roto["injury"]["detail"] == (
+        "Rotura del ligamento cruzado"
+    )
+    assert roto["injury"]["prognosis"] == "6 meses"
+
+    assert roto["suspension"]["detail"] == "Roja directa (0/2)", (
+        "la sancion vuelve a perderse cuando hay una lesion mas "
+        "larga: en pantalla saldra la casilla vacia"
+    )
+    assert roto["suspension"]["matches_total"] == 2
+
+    # Quien solo tiene una, solo tiene una. Sin inventar la otra.
+    solo = todas["solo_sancion"]
+
+    assert solo.get("injury") is None
+    assert solo["suspension"]["matchdays_out"] == 1
+
+    # Y el orden de los factores no altera el resultado: FF puede
+    # devolver las paginas en cualquier orden.
+    al_reves = merge_absences(sanciones, lesiones)
+
+    assert al_reves["roto"]["injury"]["prognosis"] == "6 meses"
+    assert (
+        al_reves["roto"]["suspension"]["detail"]
+        == "Roja directa (0/2)"
+    )
+
+
 def test_a_quien_se_conserva():
     """
     Un Dios roto hasta marzo se suelta antes que un Clave sano.
@@ -1859,6 +1945,7 @@ def main():
         test_jerarquia_en_los_puntos,
         test_veto_estructural,
         test_partes_de_baja,
+        test_lesion_y_sancion_no_se_pisan,
         test_a_quien_se_conserva,
         test_la_cache_comprueba_a_quien_cubre,
         test_a_quien_se_vende,

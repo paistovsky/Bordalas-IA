@@ -84,6 +84,82 @@ function estadoFisico(target) {
   return estado;
 }
 
+/* LESION Y SANCION SON DOS COSAS (19/08/2026)
+ *
+ * Iban las dos en una linea gris debajo de la jerarquia, y solo
+ * sobrevivia la mas larga. Pero decidir con ellas es distinto:
+ * un ligamento roto es motivo de venta, dos partidos de sancion
+ * no lo son. Ahora cada una tiene su columna y su detalle.
+ *
+ * `merge_absences` guarda las dos fichas enteras desde hoy. Lo
+ * que se lee aqui ya venia de FutbolFantasy y se tiraba por el
+ * camino: el tipo de lesion, el pronostico en palabras, si la
+ * roja fue directa o por acumulacion, cuantos partidos van
+ * cumplidos.
+ */
+
+function jornadas(n) {
+  if (n == null) return null;
+  if (n === 0) return "vuelve ya";
+  return `${n} jornada${n === 1 ? "" : "s"}`;
+}
+
+function Lesion({ absence, availability }) {
+  const parte = absence?.injury;
+
+  if (!parte) {
+    // Tocado sin parte detallado: se dice, no se calla.
+    if (availability === "DUDA") {
+      return <span className="pill warn">DUDA</span>;
+    }
+    return <span className="dim">—</span>;
+  }
+
+  const fuera = jornadas(parte.matchdays_out);
+
+  const grave =
+    Number(parte.matchdays_out || 0) >= 4 ||
+    parte.severity_label === "GRAVE";
+
+  return (
+    <div>
+      <span className={grave ? "pill crit" : "pill warn"}>
+        {parte.detail || "LESIONADO"}
+      </span>
+
+      {(parte.prognosis || fuera) && (
+        <div className="dim" style={{ fontSize: 9, marginTop: 2 }}>
+          {[parte.prognosis, fuera].filter(Boolean).join(" · ")}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Sancion({ absence }) {
+  const parte = absence?.suspension;
+
+  if (!parte) return <span className="dim">—</span>;
+
+  const partidos =
+    parte.matches_total != null
+      ? `${parte.matches_served ?? 0} de ${parte.matches_total} cumplidos`
+      : jornadas(parte.matchdays_out);
+
+  return (
+    <div>
+      <span className="pill crit">{parte.detail || "SANCIONADO"}</span>
+
+      {partidos && (
+        <div className="dim" style={{ fontSize: 9, marginTop: 2 }}>
+          {partidos}
+          {parte.basis === "SUPUESTO" ? " · estimado" : ""}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -257,6 +333,8 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th className="n">MERCADO</th>
             <th className="n">TIT.</th>
             <th>JERARQUÍA</th>
+            <th>LESIÓN</th>
+            <th>SANCIÓN</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th>VENDE</th>
             <th className="n">PUESTO</th>
@@ -300,14 +378,23 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
 
                 {/* Lo estructural, al lado de lo semanal. Un
                     Reserva al 70 % esta semana sigue siendo un
-                    Reserva, y esta columna es la que lo dice. */}
+                    Reserva, y esta columna es la que lo dice.
+
+                    La linea de estado fisico que colgaba de aqui
+                    se ha ido a sus dos columnas propias. */}
                 <td>
                   <Hierarchy label={target.hierarchy} />
-                  {estadoFisico(target) && (
-                    <div className="dim" style={{ fontSize: 9 }}>
-                      {estadoFisico(target)}
-                    </div>
-                  )}
+                </td>
+
+                <td>
+                  <Lesion
+                    absence={target.absence}
+                    availability={target.availability}
+                  />
+                </td>
+
+                <td>
+                  <Sancion absence={target.absence} />
                 </td>
 
                 <td className="n">{formatEuros(target.our_value)}</td>

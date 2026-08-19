@@ -491,6 +491,22 @@ def merge_absences(
     """
     Un jugador puede estar lesionado Y sancionado -FF tiene un
     estado 150 justo para eso-. Manda la ausencia mas larga.
+
+    LAS DOS FICHAS SE GUARDAN ENTERAS (19/08/2026)
+
+        Antes solo sobrevivia la ausencia mas larga, y de la otra
+        quedaba `also` con el tipo a secas. O sea, de un jugador
+        con el ligamento roto y ademas dos partidos de sancion se
+        conservaba "SUSPENSION" y se perdia si era roja directa,
+        acumulacion o cuantos partidos quedaban.
+
+        Y son dos cosas distintas para decidir: una lesion larga
+        es motivo de venta, y una sancion de dos partidos no lo
+        es. Fundirlas en un campo obligaba a tratarlas igual.
+
+        `injury` y `suspension` viajan ahora completas al lado de
+        la que manda. Quien solo quiera saber cuanto falta sigue
+        leyendo `matchdays_out` como siempre.
     """
 
     todas: dict[str, dict] = {}
@@ -502,22 +518,36 @@ def merge_absences(
             actual = todas.get(slug)
 
             if actual is None:
-                todas[slug] = dict(parte)
-                continue
-
-            fuera_actual = actual.get("matchdays_out") or 0
-            fuera_nueva = parte.get("matchdays_out") or 0
-
-            if fuera_nueva > fuera_actual:
                 combinada = dict(parte)
-            else:
-                combinada = dict(actual)
 
-            combinada["also"] = (
-                parte["type"]
-                if combinada["type"] != parte["type"]
-                else combinada.get("also")
-            )
+            else:
+                fuera_actual = actual.get("matchdays_out") or 0
+                fuera_nueva = parte.get("matchdays_out") or 0
+
+                if fuera_nueva > fuera_actual:
+                    combinada = dict(parte)
+                else:
+                    combinada = dict(actual)
+
+                combinada["also"] = (
+                    parte["type"]
+                    if combinada["type"] != parte["type"]
+                    else combinada.get("also")
+                )
+
+            # Cada ficha en su sitio, pase lo que pase con cual
+            # manda. Se copia para que nadie de fuera pueda
+            # cambiar la original sin querer.
+            if parte.get("type") == "INJURY":
+                combinada["injury"] = dict(parte)
+
+            elif parte.get("type") == "SUSPENSION":
+                combinada["suspension"] = dict(parte)
+
+            if actual is not None:
+                for clave in ("injury", "suspension"):
+                    if clave not in combinada and clave in actual:
+                        combinada[clave] = actual[clave]
 
             todas[slug] = combinada
 

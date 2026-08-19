@@ -1,8 +1,23 @@
 import PitchXI from "../components/PitchXI";
 import TimelinePanel from "../components/TimelinePanel";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
-import FranchisePanel from "../components/FranchisePanel";
+import SaleIntentPanel from "../components/SaleIntentPanel";
 import { formatMoney } from "../lib/utils";
+
+/* FICHAJE FRANQUICIA, FUERA DEL INICIO (19/08/2026)
+ *
+ * El panel ocupaba un tercio de la columna derecha para decir,
+ * ciclo tras ciclo, "Pepe no tiene ningun objetivo de franquicia".
+ * Un fichaje franquicia es un Yamal o un Mbappe saliendo al
+ * mercado, y eso no pasa: los que habia ya estan colocados.
+ *
+ * El motor SIGUE calculandose en cada ciclo, asi que el dia que
+ * aparezca uno el dato estara ahi. Lo unico que se ha quitado es
+ * el hueco permanente en la pantalla principal.
+ *
+ * En su sitio va lo que Pepe venderia por iniciativa propia, que
+ * llevaba desde el 17/08 calculandose sin que nadie lo viera.
+ */
 
 function squadValue(players = []) {
   return players.reduce((total, player) => total + Number(player.price || 0), 0);
@@ -58,10 +73,7 @@ export default function HomePage({ data }) {
 
         <div className="stack">
           <TimelinePanel data={data} />
-          <FranchisePanel
-            franchise={data.raw?.franchise || {}}
-            exposure={data.exposure || {}}
-          />
+          <SaleIntentPanel intent={data.sale_intent || {}} />
           <StandingsIntelPanel data={data} />
         </div>
       </div>

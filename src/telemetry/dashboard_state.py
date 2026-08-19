@@ -620,6 +620,17 @@ def compact_lineup(
                     (senal_ff.get("availability") or {}).get("label")
                 ),
                 "absence": senal_ff.get("absence"),
+
+                # CONTRA QUIEN Y DONDE (19/08/2026)
+                #
+                # El motor de valor ya usa el rival y el campo
+                # desde el 18/08 -un partido fuera contra el Barsa
+                # no vale lo mismo que uno en casa contra el
+                # Elche- pero eso se quedaba dentro del calculo.
+                # Para explicar un XI hace falta poder decir a
+                # quien se enfrenta cada uno.
+                "next_match": senal_ff.get("next_match") or {},
+
                 "position": safe_int(
                     player.get(
                         "lineup_position",
@@ -1299,6 +1310,97 @@ def compact_offers(
         )
 
     return offers
+
+
+def compact_sale_intent(snapshot: dict | None) -> dict:
+    """
+    A quien soltaria Pepe si nadie le obligase, para la pantalla.
+
+    Cuatro listas y las cuatro importan:
+
+        proposals   - los que publicaria hoy
+        watch       - los que vigila pero todavia no
+        blocked     - los que soltaria si no rompiese el once
+        untouchable - los que ha mirado y ha decidido no tocar
+
+    Las dos ultimas son las que suelen faltar en pantallas asi, y
+    son justo las que contestan la pregunta que el dueño acaba
+    haciendo: "¿y por que no ha vendido a este?". Un veto
+    silencioso es indistinguible de un olvido.
+
+    Nunca lanza: si el motor falla, la pantalla lo dice y sigue.
+    """
+
+    try:
+        from src.analysis.sale_intent import build_sale_intent
+
+        intent = build_sale_intent(snapshot) or {}
+
+    except Exception as error:
+        return {
+            "available": False,
+            "reason": f"{type(error).__name__}: {error}",
+            "proposals": [],
+            "watch": [],
+            "blocked": [],
+            "untouchable": [],
+        }
+
+    def fila(jugador: dict, extra: str | None = None) -> dict:
+        return {
+            "id": safe_int(jugador.get("id")),
+            "name": jugador.get("name"),
+            "position": safe_int(jugador.get("position")),
+            "price": safe_int(jugador.get("price")),
+
+            "hierarchy": (
+                (jugador.get("hierarchy") or {}).get("label")
+                if isinstance(jugador.get("hierarchy"), dict)
+                else jugador.get("hierarchy")
+            ),
+
+            "starter_probability": jugador.get(
+                "starter_probability"
+            ),
+
+            "sale_score": safe_int(jugador.get("sale_score")),
+            "in_lineup": bool(jugador.get("in_lineup")),
+            "action": jugador.get("action"),
+            "reasons": (jugador.get("reasons") or [])[:3],
+
+            # El motivo por el que NO se propone, cuando lo hay.
+            "held_reason": (
+                jugador.get(extra) if extra else None
+            ),
+        }
+
+    return {
+        "available": bool(intent.get("available")),
+        "reason": intent.get("reason"),
+        "mode": intent.get("mode"),
+
+        "propose_score": intent.get("propose_score"),
+        "watch_score": intent.get("watch_score"),
+        "recovers": safe_int(intent.get("recovers")),
+
+        "proposals": [
+            fila(j) for j in (intent.get("proposals") or [])
+        ],
+
+        "watch": [
+            fila(j) for j in (intent.get("watch") or [])
+        ],
+
+        "blocked": [
+            fila(j, "blocked_reason")
+            for j in (intent.get("blocked") or [])
+        ],
+
+        "untouchable": [
+            fila(j, "untouchable_reason")
+            for j in (intent.get("untouchable") or [])
+        ],
+    }
 
 
 def compact_speculation(state: dict) -> dict:
@@ -3081,6 +3183,19 @@ def build_dashboard_state() -> dict:
         },
         "league_center": league_center,
         "competition": competition,
+
+        # A QUIEN SOLTARIA PEPE SI NADIE LE OBLIGASE
+        #
+        # Se calcula desde el 17/08/2026 y no salia en ninguna
+        # pantalla. El dueño pidio que Pepe vendiera "siempre para
+        # mejorar el XI o ganar pasta", y esa mitad del trabajo
+        # estaba hecha, guardada y ciega.
+        #
+        # Es observacion pura: no publica, no vende, no toca
+        # Biwenger. Pero para poder decidir si se le da permiso
+        # hay que poder ver antes que haria con el.
+        "sale_intent": compact_sale_intent(snapshot),
+
         "offers": compact_offers(
             state,
             offer_decisions=offer_intelligence.get(

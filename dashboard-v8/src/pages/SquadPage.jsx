@@ -1,4 +1,5 @@
 import PitchXI from "../components/PitchXI";
+import LineupPlanPanel from "../components/LineupPlanPanel";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 
 export default function SquadPage({ data }) {
@@ -25,6 +26,8 @@ export default function SquadPage({ data }) {
       </section>
 
       <div className="stack">
+        <LineupPlanPanel lineup={lineup} guardrail={guardrail} />
+
         <section className="pan">
           <h2>PLANTILLA POR POSICIÓN</h2>
           <div className="sub">Cuántos puede vender sin romper el XI</div>
