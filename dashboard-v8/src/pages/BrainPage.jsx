@@ -1,4 +1,5 @@
 import StrategyPanel from "../components/StrategyPanel";
+import SolvencyPlansPanel from "../components/SolvencyPlansPanel";
 import { formatEuros, formatMoney } from "../lib/utils";
 
 /**
@@ -210,6 +211,13 @@ export default function BrainPage({ data }) {
       {/* El plan primero y el mecanismo despues: a corto y largo
           plazo arriba, y debajo la maquinaria que lo ejecuta. */}
       <StrategyPanel data={data} />
+
+      {/* Como piensa tapar la deuda, que es la primera pregunta
+          cuando el saldo esta en rojo. */}
+      <SolvencyPlansPanel
+        solvency={data.solvency || {}}
+        summary={data.summary || {}}
+      />
 
       <section className="pan">
         <h2>CÓMO DECIDE PEPE</h2>

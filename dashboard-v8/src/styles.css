@@ -178,6 +178,28 @@ tr.live td{opacity:1}
 .strat-rule ol{margin:6px 0 0;padding-left:17px}
 .strat-rule li{margin:4px 0}
 
+/* LOS PLANES A / B / C PARA LA DEUDA.
+   En columnas y no en lista: son escalones del mismo problema y
+   lo que importa es compararlos de un vistazo. */
+.plan2-list{
+  display:grid;gap:9px;margin:10px 0 2px;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+}
+.plan2{border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.plan2-head{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.plan2-head b{font-size:10px;letter-spacing:.4px}
+.plan2-who{font-size:11.5px;margin-bottom:6px;line-height:1.4}
+.plan2-warn{font-size:10.5px;color:#fca5a5;margin-top:5px}
+
+/* El reloj de fases: en cual estamos ahora. */
+.fases{display:grid;gap:3px;margin-top:4px}
+.fase{
+  display:flex;gap:8px;font-size:10.5px;color:var(--dim);
+  padding:3px 7px;border-radius:6px;
+}
+.fase b{min-width:96px}
+.fase.on{background:rgba(234,179,8,.12);color:#f3dd94}
+
 /* EL PLAN DE BORDALAS.
    El sistema, por que ese once y que intenciones tiene. */
 .planbox{
