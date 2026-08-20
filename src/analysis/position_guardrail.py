@@ -116,6 +116,43 @@ POSITION_FLOOR = _apply_strategic_floor(
     _derive_floor()
 )   # {1: 1, 2: 3, 3: 3, 4: 2}
 
+
+# ============================================================
+# EL SUELO DE TITULARES (20/08/2026)
+# ============================================================
+#
+# El dueño, despues de encontrarse a Pepe con catorce defensas y
+# planteandose vender un delantero:
+#
+#     "El suelo tiene que ser para TITULARES."
+#
+# Y tenia razon. `POSITION_FLOOR` cuenta CUERPOS: "tengo nueve
+# defensas". Pero cuatro de esos nueve no juegan ni un minuto en
+# su equipo. Un jugador que no juega no cubre nada -no da
+# puntos, no tapa una baja, no sostiene una posicion- y contarlo
+# hacia que la linea pareciera sobrada justo mientras el motor
+# seguia comprando mas.
+#
+# Los numeros los puso el dueño: dos delanteros, dos medios, dos
+# defensas y un portero. Es la columna vertebral, no la
+# formacion.
+#
+# CONVIVEN LOS DOS SUELOS, Y NO ES LO MISMO
+#
+#     POSITION_FLOOR   cuerpos, para que exista un once legal
+#     STARTER_FLOOR    titulares, para que ese once valga algo
+#
+#     Una venta tiene que respetar los dos. Sin el primero, Pepe
+#     podria quedarse con dos defensas en total y no poder
+#     alinear; sin el segundo, con nueve defensas de los que solo
+#     juegan dos.
+STARTER_FLOOR = {
+    1: 1,   # portero
+    2: 2,   # defensas
+    3: 2,   # centrocampistas
+    4: 2,   # delanteros
+}
+
 # Colchon comodo. Por debajo no se bloquea nada, pero se avisa:
 # la posicion esta al limite y conviene reponerla.
 POSITION_DESIRED = {
@@ -281,6 +318,25 @@ def build_position_guardrail(
     bloqueados = {}
     vendibles = set()
 
+    # QUIEN CUENTA COMO TITULAR
+    #
+    # Los que estan en NUESTRO once. Es la poblacion exacta que
+    # el dueño quiere proteger -"los que juegan"- y ya viaja
+    # hasta aqui, sin traer el pronostico de FutbolFantasy a una
+    # funcion que lee media docena de sitios.
+    #
+    # SIN SABER EL ONCE NO SE INVENTA UNO
+    #
+    #     El `my_team` crudo del snapshot no trae `in_lineup`. Si
+    #     no lo trae nadie, el suelo de titulares no se aplica y
+    #     manda solo el de cuerpos, como hasta hoy. Menos exacto,
+    #     pero no paraliza: un guardarrail que lo bloquea todo con
+    #     la caja en rojo es tan malo como no tenerlo.
+    hay_once = any(
+        jugador.get("in_lineup")
+        for jugador in jugadores
+    )
+
     for posicion in (1, 2, 3, 4):
 
         plantel = sorted(
@@ -289,17 +345,56 @@ def build_position_guardrail(
         )
 
         suelo = POSITION_FLOOR[posicion]
+        suelo_titulares = STARTER_FLOOR[posicion]
 
-        # Los primeros del orden ocupan el suelo y no se tocan.
-        # El resto puede venderse.
-        intocables = plantel[:suelo]
-        sobrantes = plantel[suelo:]
+        titulares_pos = [
+            jugador
+            for jugador in plantel
+            if jugador.get("in_lineup")
+        ]
+
+        # Se bloquean dos grupos y se suman:
+        #
+        #   - los primeros del orden, para que exista un once
+        #   - los primeros TITULARES, para que ese once valga
+        #
+        # `_keep_priority` ya pone a los del once delante, asi que
+        # en la practica se solapan casi siempre. Se calculan por
+        # separado porque cuando NO se solapan es justo cuando
+        # importa.
+        intocables = list(plantel[:suelo])
+
+        if hay_once:
+            for jugador in titulares_pos[:suelo_titulares]:
+                if jugador not in intocables:
+                    intocables.append(jugador)
+
+        ids_intocables = {
+            safe_int(j.get("id")) for j in intocables
+        }
+
+        sobrantes = [
+            jugador
+            for jugador in plantel
+            if safe_int(jugador.get("id")) not in ids_intocables
+        ]
 
         for jugador in intocables:
+
+            es_titular = bool(jugador.get("in_lineup"))
+
             bloqueados[safe_int(jugador.get("id"))] = (
-                f"Sin el no quedan {suelo} "
-                f"{POSITION_NAMES[posicion].lower()}s para alinear "
-                f"un once legal."
+                (
+                    f"Sin el no quedan {suelo_titulares} "
+                    f"{POSITION_NAMES[posicion].lower()}s "
+                    f"titulares."
+                )
+                if hay_once and es_titular
+                else (
+                    f"Sin el no quedan {suelo} "
+                    f"{POSITION_NAMES[posicion].lower()}s para "
+                    f"alinear un once legal."
+                )
             )
 
         for jugador in sobrantes:
@@ -309,14 +404,32 @@ def build_position_guardrail(
             "position": posicion,
             "position_name": POSITION_NAMES[posicion],
             "owned": len(plantel),
+
+            # Cuantos de esos juegan de verdad. La distancia entre
+            # los dos numeros es la que explica que una posicion
+            # con nueve cuerpos pueda estar justa.
+            "starters": len(titulares_pos),
+            "starter_floor": suelo_titulares,
+            "counted_on_starters": hay_once,
+
             "floor": suelo,
             "desired": POSITION_DESIRED[posicion],
             "disposable": len(sobrantes),
             "at_floor": len(plantel) <= suelo,
+
+            # Al limite de verdad: quedan los titulares justos.
+            "at_starter_floor": (
+                hay_once
+                and len(titulares_pos) <= suelo_titulares
+            ),
+
+            "below_starter_floor": (
+                hay_once
+                and len(titulares_pos) < suelo_titulares
+            ),
+
             "below_desired": len(plantel) < POSITION_DESIRED[posicion],
-            "locked_ids": [
-                safe_int(j.get("id")) for j in intocables
-            ],
+            "locked_ids": sorted(ids_intocables),
             "disposable_ids": [
                 safe_int(j.get("id")) for j in sobrantes
             ],

@@ -7,6 +7,12 @@ from src.analysis.lineup_engine import (
     prepare_players,
 )
 
+# Quien se puede vender y quien no lo decide el guardarrail, que
+# es el unico sitio donde vive esa regla. Aqui solo se obedece.
+from src.analysis.position_guardrail import (
+    build_position_guardrail,
+)
+
 
 BEAM_WIDTH_PER_TIER = 192
 DEFAULT_TRADING_MAX_LINEUP_LOSS_PERCENT = 5.0
@@ -349,6 +355,48 @@ def build_safe_liquidity_portfolio(
     current_starter_ids = set(current_lineup.get("selected_ids", []) or [])
     current_score = float(current_lineup.get("lineup_score", 0.0) or 0.0)
 
+    # ==================================================
+    # A QUIEN NO SE PUEDE TOCAR (20/08/2026)
+    # ==================================================
+    #
+    # El dueño se encontro un Plan B que proponia vender a Jutgla
+    # teniendo dos delanteros, y dijo lo que faltaba:
+    #
+    #     "El suelo tiene que ser para TITULARES."
+    #
+    # Este motor validaba una sola cosa: "¿sigue habiendo once?".
+    # Y con un delantero se alinea un 5-4-1 perfectamente legal.
+    # La formacion aguantaba; el equipo no.
+    #
+    # No se reescribe aqui la regla: se le pregunta al
+    # guardarrail, que es donde vive y donde el dueño la ve. Si
+    # llegan a existir dos versiones de "cuantos hacen falta",
+    # acabaran diciendo cosas distintas -ya paso con una tercera
+    # lista escondida en `sales_analyzer`-.
+    #
+    # SI EL GUARDARRAIL FALLA, NO SE PARALIZA
+    #
+    #     Sin bloqueados se sigue como antes. Un motor de deuda
+    #     que no propone nada con la caja en rojo es peor que uno
+    #     que propone de mas: al menos el segundo se puede
+    #     revisar.
+
+    try:
+        guardarrail = build_position_guardrail(
+            (snapshot or {}).get("my_team") or [],
+            lineup_ids=current_starter_ids,
+        )
+
+        intocables = {
+            safe_int(player_id)
+            for player_id in (
+                guardarrail.get("locked_ids") or []
+            )
+        }
+
+    except Exception:
+        intocables = set()
+
     base = {
         "tier": "A",
         "amount": 0,
@@ -378,6 +426,12 @@ def build_safe_liquidity_portfolio(
     for source in sources:
         expanded = list(states)
         source_player_ids = set(source["player_ids"])
+
+        # Un intocable no entra en ninguna combinacion. Se corta
+        # aqui, en la fuente, y no plan por plan: asi no hay forma
+        # de que se cuele por una rama.
+        if source_player_ids & intocables:
+            continue
 
         for state in states:
             if state["removed_ids"] & source_player_ids:
