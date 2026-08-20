@@ -2372,6 +2372,39 @@ def execute_autopilot_decision(
                 lineup
             )
 
+            # ================================================
+            # DESPUES DE ESCRIBIR, VOLVER A LEER (20/08/2026)
+            # ================================================
+            #
+            #     "Creo que sí lo ha ajustado, pero ¿por qué
+            #      sigue saliendo el mensaje?"
+            #
+            # Porque el aviso se pintaba con la foto de ANTES de
+            # escribir. El ciclo baja un snapshot al empezar,
+            # escribe el XI, y `build_dashboard` lee ese mismo
+            # snapshot, en el que Biwenger todavia tiene el once
+            # viejo. Resultado: el cartel rojo aguanta un ciclo
+            # entero despues de haberlo arreglado.
+            #
+            # Las otras escrituras -pujas, ofertas, ventas- ya
+            # refrescaban. El XI era la unica que no, asi que era
+            # la unica que se desmentia a si misma en pantalla.
+            #
+            # Blindado: si el refresco falla, la escritura sigue
+            # siendo buena. Lo unico que se pierde es que el
+            # cartel tarde un ciclo mas, que es justo como estaba
+            # hasta hoy.
+            try:
+                refresh_snapshot_for_write_revalidation()
+
+            except Exception as error:              # noqa: BLE001
+                print(
+                    "XI guardado, pero no se pudo releer "
+                    f"Biwenger despues ({error}). El aviso del "
+                    "dashboard puede tardar un ciclo en "
+                    "apagarse."
+                )
+
         return {
             "action":
                 action,

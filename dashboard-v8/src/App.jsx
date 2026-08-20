@@ -124,9 +124,30 @@ export default function App() {
                 .
               </div>
             )}
+            {/* UN CONSEJO IMPOSIBLE ES PEOR QUE NINGUNO
+                (20/08/2026)
+
+                Con la jornada ya cerrada, el aviso seguia
+                diciendo "Pepe lo ajustará en el próximo ciclo" y
+                "cámbialo a mano". Las dos cosas son falsas:
+                `operations_locked` pone a cero la prioridad del
+                cambio de XI, y Biwenger tampoco deja tocarlo.
+
+                Un panel que pide algo que no se puede hacer
+                gasta la confianza igual que uno que miente. */}
             <div style={{ marginTop: 4 }}>
-              Pepe lo ajustará en el próximo ciclo. Si queda poco para el
-              cierre, cámbialo a mano.
+              {data.summary?.operations_locked ? (
+                <>
+                  <b>La jornada ya está cerrada.</b> Ni Pepe ni tú podéis
+                  cambiarlo: se juega con este once. Queda anotado para el
+                  marcador.
+                </>
+              ) : (
+                <>
+                  Pepe lo ajustará en el próximo ciclo. Si queda poco para
+                  el cierre, cámbialo a mano.
+                </>
+              )}
             </div>
           </div>
         )}
