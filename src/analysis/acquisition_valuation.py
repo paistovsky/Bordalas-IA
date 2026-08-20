@@ -253,14 +253,82 @@ def value_candidate(
         # COMO MEJORA DEL ONCE
         # --------------------------------------------------
 
-        # A quien podria sustituir: toda la plantilla de esa
-        # posicion. Si no viene, al peor, como siempre.
-        candidatos_a_salir = (
-            (context or {}).get("squad_by_position") or {}
-        ).get(posicion)
+        # ==================================================
+        # MEJORAR EL ONCE ES QUITARLE EL SITIO A ALGUIEN DEL
+        # ONCE (20/08/2026)
+        # ==================================================
+        #
+        # El dueño tuvo que intervenir a mano: Pepe habia
+        # acumulado CATORCE defensas. "No se que le ha dado con
+        # los defensas, ficha muchos."
+        #
+        # Le habia dado esto. El sustituido se elegia entre toda
+        # la plantilla de la posicion, y con nueve defensas el
+        # que mas diferencia de puntos daba era siempre el PEOR,
+        # que es un suplente que no juega. De ahi salian fichas
+        # como estas, de su propio tablero:
+        #
+        #     Lucas Noubi   sustituye a Yeray            +109 pts
+        #     Alvaro Nuñez  sustituye a Yusi Enriquez     +15 pts
+        #
+        # Yeray y Yusi son suplentes. Fichar a esos dos no habria
+        # cambiado ni un nombre del once que sale el sabado, y el
+        # motor lo contaba como mejora del once y pagaba por
+        # ello.
+        #
+        # Y se realimentaba: compras un defensa porque el peor es
+        # malo, ahora tienes diez, el peor sigue siendo malo,
+        # compras otro. Los defensas son los mas abundantes y
+        # baratos del mercado, asi que munición nunca falta.
+        #
+        # LA REGLA CORRECTA
+        #
+        #     Un fichaje mejora el once si le quita el sitio a
+        #     alguien DEL once. El sustituido es el peor TITULAR
+        #     de esa posicion -el unico que perderia su puesto de
+        #     verdad-, no el peor de la plantilla.
+        #
+        #     Si el candidato no llega a ese, no es una mejora
+        #     del once: es fondo de armario, y vale lo que valga
+        #     su reventa. Esa via sigue abierta mas abajo, en la
+        #     especulacion.
+        #
+        # De paso desaparece el bucle sin prohibir nada: contra
+        # un titular de verdad, la mayoria de esos defensas ya no
+        # cualifican solos.
 
-        if not candidatos_a_salir:
-            peor = peores.get(posicion)
+        plantel_pos = (
+            (context or {}).get("squad_by_position") or {}
+        ).get(posicion) or []
+
+        titulares_pos = [
+            jugador
+            for jugador in plantel_pos
+            if jugador and jugador.get("in_lineup")
+        ]
+
+        if titulares_pos:
+            # El que perderia el puesto: el titular mas flojo.
+            candidatos_a_salir = [
+                min(
+                    titulares_pos,
+                    key=lambda j: safe_int(j.get("points")),
+                )
+            ]
+
+        else:
+            # Sin titulares en esa posicion, cualquiera que
+            # entre juega. Ahi el peor de la plantilla si es el
+            # sustituido real.
+            peor = (
+                min(
+                    plantel_pos,
+                    key=lambda j: safe_int(j.get("points")),
+                )
+                if plantel_pos
+                else peores.get(posicion)
+            )
+
             candidatos_a_salir = [peor] if peor else []
 
         como_xi = None

@@ -315,6 +315,108 @@ def test_no_se_cuenta_dinero_que_no_ha_entrado():
     )
 
 
+def test_mejorar_el_once_es_quitarle_el_sitio_a_alguien_del_once():
+    """
+    Los catorce defensas.
+
+    EL CASO (20/08/2026)
+
+        El dueño tuvo que intervenir a mano: "no se que le ha
+        dado con los defensas, ficha muchos".
+
+        El sustituido se elegia entre TODA la plantilla de la
+        posicion, y con nueve defensas el que mas diferencia
+        daba era siempre el peor, que es un suplente. De su
+        propio tablero:
+
+            Lucas Noubi   sustituye a Yeray          +109 pts
+            Alvaro Nuñez  sustituye a Yusi Enriquez   +15 pts
+
+        Ninguno de los dos habria cambiado un solo nombre del
+        once del sabado. Y se realimentaba: cada compra hacia la
+        posicion mas profunda y el peor seguia siendo malo.
+
+    LA REGLA
+
+        Un fichaje mejora el once si le quita el sitio a alguien
+        DEL once. El sustituido es el peor TITULAR de esa
+        posicion. Si el candidato no llega a ese, es fondo de
+        armario y vale su reventa, no puntos.
+    """
+
+    from src.analysis.acquisition_valuation import value_candidate
+
+    # Cuatro defensas: dos titulares decentes y dos suplentes
+    # malos. El sesgo antiguo elegia a uno de los malos.
+    contexto = {
+        "points_market": {"rate_median": 22_000},
+        "team_strength": {},
+        "weakest_by_position": {},
+        "starter": {},
+        "velocity": {},
+        "squad_by_position": {
+            2: [
+                {
+                    "id": 1, "name": "Titular bueno",
+                    "price": 3_000_000, "points": 150,
+                    "in_lineup": True,
+                    "starter": {
+                        "hierarchy_value": 40,
+                        "hierarchy_label": "Importante",
+                        "probability": 80.0,
+                    },
+                },
+                {
+                    "id": 2, "name": "Titular flojo",
+                    "price": 2_000_000, "points": 120,
+                    "in_lineup": True,
+                    "starter": {
+                        "hierarchy_value": 40,
+                        "hierarchy_label": "Importante",
+                        "probability": 80.0,
+                    },
+                },
+                {
+                    "id": 3, "name": "Suplente malo",
+                    "price": 500_000, "points": 20,
+                    "in_lineup": False,
+                    "starter": {
+                        "hierarchy_value": 20,
+                        "hierarchy_label": "Reserva",
+                        "probability": 15.0,
+                    },
+                },
+            ]
+        },
+    }
+
+    # Un defensa mediocre: mejor que el suplente malo, peor que
+    # cualquier titular. Antes entraba por la puerta de atras.
+    mediocre = {
+        "id": 99,
+        "name": "Defensa del monton",
+        "position": 2,
+        "price": 1_000_000,
+        "pointsLastSeason": 60,
+    }
+
+    resultado = value_candidate(mediocre, contexto)
+
+    como_xi = resultado.get("as_xi") or {}
+
+    assert como_xi.get("intent") != "XI_UPGRADE", (
+        "un jugador que no entra en el once se sigue valorando "
+        "como mejora del once: vuelve el bucle de los defensas"
+    )
+
+    sustituido = (como_xi.get("replaces") or {}).get("name")
+
+    assert sustituido == "Titular flojo", (
+        f"se compara contra {sustituido!r} en vez de contra el "
+        f"peor titular: si es un suplente, la mejora es ficticia"
+    )
+
+
 def main():
 
     pruebas = [
@@ -325,6 +427,7 @@ def main():
         test_el_cambio_deja_escrito_lo_que_promete,
         test_se_pregunta_por_toda_la_plantilla,
         test_no_se_cuenta_dinero_que_no_ha_entrado,
+        test_mejorar_el_once_es_quitarle_el_sitio_a_alguien_del_once,
     ]
 
     for prueba in pruebas:
