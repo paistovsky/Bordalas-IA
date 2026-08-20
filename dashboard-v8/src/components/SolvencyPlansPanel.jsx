@@ -55,8 +55,12 @@ function Plan({ plan }) {
   const tono = TIER_TONE[tier] || "idle";
   const perdida = Number(plan.lineup_score_loss_percent || 0);
 
+  /* VERDE, AMARILLO Y ROJO, Y QUE SE VEA (20/08/2026)
+     El color iba solo en una pastilla de nueve pixeles. Estos
+     tres cuadros se leen de un vistazo o no se leen: el semaforo
+     tiene que ser la tarjeta entera. */
   return (
-    <div className="plan2">
+    <div className={`plan2 plan2-${tono}`}>
       <div className="plan2-head">
         <span className={`pill ${tono}`}>{tier}</span>
         <b>{TIER_TITULO[tier] || plan.plan_kind}</b>
