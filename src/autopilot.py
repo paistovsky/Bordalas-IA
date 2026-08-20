@@ -3052,6 +3052,42 @@ def ensure_lineup_baseline(
     result: dict,
 ) -> bool:
     """
+    La libreta se escribe DESPUES de escribir en Biwenger.
+
+    EL CASO (20/08/2026)
+
+        Esta funcion guardaba el XI recomendado en
+        `data/lineup_monitor/state.json` la primera vez que
+        corria, "para tener una linea base". Nunca lo enviaba a
+        Biwenger.
+
+        A partir de ahi la recomendacion coincidia con la libreta,
+        el monitor decia KEEP_LINEUP y no se escribia jamas. El
+        dueño se encontro un 5-3-2 en el dashboard, un 4-3-3 en
+        Biwenger y un 11/11 en verde diciendo que todo estaba
+        bien.
+
+        Una libreta que se adelanta a la realidad es peor que no
+        tener libreta: convierte "no lo he hecho" en "ya estaba
+        hecho".
+
+    QUE HACE AHORA
+
+        Nada. El estado lo guarda `autopilot_executor` justo
+        despues de que Biwenger confirme la escritura, que es el
+        unico momento en el que es verdad.
+
+        Se conserva la funcion -y su hueco en el ciclo- para no
+        mover el orquestador: devuelve False siempre.
+    """
+
+    return False
+
+
+def _ensure_lineup_baseline_LEGACY(
+    result: dict,
+) -> bool:
+    """
     Crear baseline local no modifica Biwenger.
     """
 

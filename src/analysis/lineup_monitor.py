@@ -658,6 +658,197 @@ def compare_lineups(
 
 
 # ============================================================
+# EL ONCE QUE HAY DE VERDAD EN BIWENGER
+# ============================================================
+#
+# EL CASO (20/08/2026, dos horas antes del cierre)
+#
+#     "Tengo esta alineación en Biwenger y esta es la que tiene
+#      Pepe. ¿Qué está pasando?"
+#
+#     Pepe recomendaba un 5-3-2 con Bigas. En Biwenger habia un
+#     4-3-3 con Lucas Cepeda. Y el dashboard decia 11/11 en verde.
+#
+#     El monitor comparaba el XI recomendado de hoy contra el
+#     ultimo XI que EL MISMO se habia anotado en
+#     `data/lineup_monitor/state.json`. Nunca contra Biwenger.
+#
+#     Peor: la primera vez, el autopilot guardaba esa "linea base"
+#     en el fichero SIN haberla enviado. Desde ese momento la
+#     recomendacion coincidia con su propia libreta, salia
+#     KEEP_LINEUP y no se escribia nunca mas. Se estaba comparando
+#     consigo mismo.
+#
+# LA REGLA NUEVA, EN PALABRAS DEL DUEÑO
+#
+#     "Que haga lo que tenga que hacer, pero que siempre lea lo
+#      que hay en Biwenger y luego lo ajuste."
+#
+#     Es read-before-write, la misma regla que ya gobierna las
+#     compras y las ventas. La verdad esta fuera, no en un fichero
+#     nuestro.
+#
+# DONDE ESTABA EL DATO
+#
+#     En el snapshot, desde el primer dia:
+#     `rounds.data.league.standings[<mi id>].lineup` trae
+#     `players` -mi once puesto- y `type` -mi dibujo-. Y mi id
+#     esta en `league.user.id`.
+#
+#     Novena vez que el dato existe, se guarda y no lo mira nadie.
+
+
+def _safe_int(value, default: int = 0) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return default
+
+
+def live_lineup(snapshot: dict) -> dict | None:
+    """El XI que Biwenger tiene puesto ahora mismo.
+
+    Devuelve None cuando NO SE SABE -no hay clasificacion, o no
+    aparece nuestra fila-. None no significa "no hay once": si la
+    fila existe y viene sin jugadores, eso si es un once vacio y
+    se devuelve como tal, porque hay que ponerlo.
+    """
+
+    if not isinstance(snapshot, dict):
+        return None
+
+    user_id = _safe_int(
+        ((snapshot.get("league") or {}).get("user") or {}).get("id")
+    )
+
+    if not user_id:
+        return None
+
+    filas = (
+        (snapshot.get("rounds") or {})
+        .get("data", {})
+        .get("league", {})
+        .get("standings")
+        or []
+    )
+
+    for fila in filas:
+
+        if not isinstance(fila, dict):
+            continue
+
+        if _safe_int(fila.get("id")) != user_id:
+            continue
+
+        alineacion = fila.get("lineup") or {}
+
+        return {
+            "known": True,
+            "formation": alineacion.get("type"),
+            "player_ids": sorted(
+                _safe_int(p)
+                for p in (alineacion.get("players") or [])
+                if _safe_int(p)
+            ),
+            "date": alineacion.get("date"),
+        }
+
+    return None
+
+
+def compare_with_live(
+    live: dict | None,
+    selected: list,
+    formation_name: str | None,
+) -> dict:
+    """Lo recomendado contra lo que hay puesto de verdad.
+
+    Se comparan las dos cosas que Biwenger guarda: quienes juegan
+    y con que dibujo. Un mismo once declarado con otra formacion
+    no es el mismo once.
+    """
+
+    recomendados = sorted(
+        _safe_int(p.get("id"))
+        for p in (selected or [])
+        if _safe_int(p.get("id"))
+    )
+
+    nombres = {
+        _safe_int(p.get("id")): p.get("name")
+        for p in (selected or [])
+    }
+
+    if not live:
+        return {
+            "known": False,
+            "matches": None,
+            "reason": (
+                "No se ha podido leer el XI que hay puesto en "
+                "Biwenger. No se da por bueno: se sigue con la "
+                "comparacion contra el ultimo XI escrito."
+            ),
+            "recommended_ids": recomendados,
+        }
+
+    puestos = live.get("player_ids") or []
+
+    faltan = [
+        {"id": pid, "name": nombres.get(pid)}
+        for pid in recomendados
+        if pid not in set(puestos)
+    ]
+
+    sobran = [
+        {"id": pid}
+        for pid in puestos
+        if pid not in set(recomendados)
+    ]
+
+    dibujo_distinto = bool(
+        live.get("formation")
+        and formation_name
+        and live["formation"] != formation_name
+    )
+
+    coincide = (
+        not faltan
+        and not sobran
+        and not dibujo_distinto
+    )
+
+    if not puestos:
+        motivo = "No hay ningun XI puesto en Biwenger."
+    elif coincide:
+        motivo = "El XI puesto en Biwenger ya es el recomendado."
+    else:
+        motivo = (
+            f"El XI puesto en Biwenger no es el recomendado: "
+            f"{len(faltan)} por entrar, {len(sobran)} por salir"
+            + (
+                f", dibujo {live.get('formation')} en vez de "
+                f"{formation_name}"
+                if dibujo_distinto
+                else ""
+            )
+            + "."
+        )
+
+    return {
+        "known": True,
+        "matches": coincide,
+        "live_formation": live.get("formation"),
+        "live_player_ids": puestos,
+        "recommended_formation": formation_name,
+        "recommended_ids": recomendados,
+        "missing_in_biwenger": faltan,
+        "extra_in_biwenger": sobran,
+        "formation_differs": dibujo_distinto,
+        "reason": motivo,
+    }
+
+
+# ============================================================
 # BUILD
 # ============================================================
 
@@ -697,6 +888,26 @@ def build_lineup_monitor_state(
         == 11
     )
 
+    # ========================================================
+    # LO QUE MANDA ES BIWENGER
+    # ========================================================
+    #
+    # `comparison` sigue calculandose porque explica bien QUE ha
+    # cambiado en la recomendacion -quien entra, quien sale-, y
+    # eso es lo que se cuenta en pantalla.
+    #
+    # Pero ya no decide. Decide `live`: si el once que hay puesto
+    # no es el recomendado, se escribe. Da igual que la
+    # recomendacion lleve tres dias sin moverse.
+
+    live = live_lineup(snapshot)
+
+    live_comparison = compare_with_live(
+        live,
+        lineup.get("selected", []) or [],
+        lineup.get("formation_name"),
+    )
+
     if not complete:
 
         action = (
@@ -705,10 +916,33 @@ def build_lineup_monitor_state(
 
         should_save = False
 
+    elif live_comparison["known"]:
+
+        # El camino normal desde el 20/08: se lee lo que hay y se
+        # ajusta si no coincide.
+        if live_comparison["matches"]:
+
+            action = (
+                "KEEP_LINEUP"
+            )
+
+            should_save = False
+
+        else:
+
+            action = (
+                "UPDATE_LINEUP"
+            )
+
+            should_save = True
+
     elif comparison[
         "baseline"
     ]:
 
+        # Sin poder leer Biwenger no se inventa nada: se cae al
+        # comportamiento de siempre y se deja dicho que se esta
+        # decidiendo a ciegas.
         action = (
             "CREATE_BASELINE"
         )
@@ -742,6 +976,12 @@ def build_lineup_monitor_state(
 
         "comparison":
             comparison,
+
+        # El XI real y en que se diferencia del recomendado. Esto
+        # tiene que llegar a pantalla: el dueño se encontro un
+        # 11/11 en verde con otro equipo puesto.
+        "live":
+            live_comparison,
 
         "complete":
             complete,

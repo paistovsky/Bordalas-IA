@@ -105,6 +105,39 @@ export default function App() {
           </div>
         )}
 
+        {/* EL 11/11 EN VERDE MENTIA (20/08/2026)
+            Un XI recomendado que no es el que hay puesto en
+            Biwenger es el fallo mas caro posible: se juega la
+            jornada con otro equipo y la pantalla dice que todo
+            va bien. Va arriba y en rojo. */}
+        {data.lineup?.live?.known && data.lineup.live.matches === false && (
+          <div className="alert crit">
+            <b>EL XI DE BIWENGER NO ES ESTE.</b> {data.lineup.live.reason}
+            {(data.lineup.live.missing_in_biwenger || []).length > 0 && (
+              <div style={{ marginTop: 4 }}>
+                Deberían entrar:{" "}
+                <b>
+                  {data.lineup.live.missing_in_biwenger
+                    .map((jugador) => jugador.name || `#${jugador.id}`)
+                    .join(", ")}
+                </b>
+                .
+              </div>
+            )}
+            <div style={{ marginTop: 4 }}>
+              Pepe lo ajustará en el próximo ciclo. Si queda poco para el
+              cierre, cámbialo a mano.
+            </div>
+          </div>
+        )}
+
+        {data.lineup?.live?.known === false && (
+          <div className="alert warn">
+            No se ha podido leer qué XI hay puesto en Biwenger, así que no
+            se puede garantizar que sea este. No se da por bueno.
+          </div>
+        )}
+
         {data.consistency?.available && !data.consistency.ok && (
           <div className="alert crit">
             <b>ESTA PANTALLA NO CUADRA CON BIWENGER.</b>{" "}

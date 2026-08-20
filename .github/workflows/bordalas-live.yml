@@ -142,6 +142,7 @@ jobs:
           python -m src.analysis.test_suelo_de_titulares_v1
           python -m src.analysis.test_marcador_v1
           python -m src.analysis.test_plantillas_rivales_v1
+          python -m src.analysis.test_once_real_v1
           python -m src.analysis.test_action_starvation_v1
           python -m src.analysis.test_price_history_store_v1
           python -m src.analysis.test_futbolfantasy_source_v12

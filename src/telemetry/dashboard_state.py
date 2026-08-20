@@ -857,8 +857,39 @@ def compact_lineup(
 
     cache_tablero = tablero.get("cache") or {}
 
+    # EL 11/11 EN VERDE MENTIA (20/08/2026)
+    #
+    # El dueño se encontro un 5-3-2 en esta pantalla, un 4-3-3 en
+    # Biwenger y esta cabecera diciendo 11/11 tan contenta. El
+    # 11/11 era del once IMAGINADO; el que iba a jugar era otro.
+    #
+    # Se compara con lo que hay puesto de verdad y se publica la
+    # diferencia. Blindado: si falla, se pintan menos columnas,
+    # pero no se tumba la telemetria.
+    try:
+        from src.analysis.lineup_monitor import (
+            compare_with_live,
+            live_lineup,
+        )
+
+        once_real = compare_with_live(
+            live_lineup(snapshot),
+            lineup.get("selected", []) or [],
+            lineup.get("formation_name"),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        once_real = {
+            "known": False,
+            "matches": None,
+            "reason": f"No se pudo leer el XI real: {error}",
+        }
+
     return {
         "formation": lineup.get("formation_name"),
+
+        # Lo que hay puesto en Biwenger y en que se diferencia.
+        "live": once_real,
 
         # LA REGLA DEL DIOS (18/08/2026)
         #
