@@ -8,6 +8,51 @@ import json
 
 DEFAULT_INITIAL_BALANCE = 23_300_000
 
+
+# ============================================================
+# EL ABONO DE LA JORNADA (20/08/2026)
+# ============================================================
+#
+#     "Estos bonos tienen que registrarse como ingreso a los
+#      rivales tambien, para no perder el tracking de su
+#      economia."
+#
+# Al cerrar cada jornada, Biwenger abona 30.000 EUR por punto.
+# Comprobado en las siete filas de la jornada 1, exacto y sin
+# tramos:
+#
+#     42 pts -> 1.260.000      21 pts -> 630.000
+#     31 pts ->   930.000      14 pts -> 420.000
+#     29 pts ->   870.000      10 pts -> 300.000
+#
+# POR QUE IMPORTA MAS EN LOS RIVALES QUE EN NOSOTROS
+#
+#     Nuestro saldo lo dice Biwenger. El de ellos NO: en esta
+#     liga `settings.balance` esta en `hidden`, asi que este
+#     libro es la unica estimacion que hay y nada lo corrige.
+#
+#     Sin el abono, el saldo estimado de cada rival se aleja de
+#     la realidad hasta 1,26 M CADA JORNADA. En cinco jornadas el
+#     modelo de "cuanto puede pujar" no vale nada.
+#
+# POR QUE SE REEXPRESA Y NO SE SUMA
+#
+#     Los puntos son PROVISIONALES mientras haya partidos
+#     aplazados, y se ajustan despues. Si el abono se apuntase
+#     como asiento que se añade, cada correccion duplicaria el
+#     ingreso.
+#
+#     Aqui se calcula siempre como `puntos totales x 30.000`
+#     sobre el libro recien construido, asi que una correccion de
+#     puntos corrige el abono sola.
+#
+# LO QUE ESTO NO ES
+#
+#     No es dinero disponible para decidir. El abono llega DESPUES
+#     de cerrar la jornada, y el plan de solvencia sigue contando
+#     solo lo que hay en la cuenta. Esto es contabilidad, no caja.
+EUROS_POR_PUNTO = 30_000
+
 KNOWN_NON_ECONOMIC_TYPES = {
     "adminText",
     "leagueReset",
@@ -324,6 +369,63 @@ def initialize_manager(
         "acquisition_cost_known_count":
             0,
     }
+
+
+def matchday_bonus(points) -> int:
+    """Lo que Biwenger abona por los puntos de la temporada.
+
+    Puntos negativos existen -un jugador puede restar-, pero un
+    abono negativo no: Biwenger no cobra por jugar mal.
+    """
+
+    return max(0, safe_int(points)) * EUROS_POR_PUNTO
+
+
+def apply_matchday_bonus(managers: dict) -> dict:
+    """Mete el abono en el libro de cada manager.
+
+    REEXPRESION, no asiento: se recalcula entero desde los puntos
+    totales cada vez. Llamarlo dos veces sobre el mismo libro
+    seria un error, y por eso se llama en un solo sitio, sobre el
+    libro recien construido.
+
+    No se toca `transactions`: ahi van los movimientos del tablon,
+    que son hechos observados uno a uno. El abono es una
+    derivacion de los puntos y se guarda aparte, para que se
+    pueda ver de donde sale y auditar el numero.
+    """
+
+    aplicados = {}
+
+    for user_id, manager in managers.items():
+
+        if not isinstance(manager, dict):
+            continue
+
+        puntos = safe_int(manager.get("points"))
+
+        abono = matchday_bonus(puntos)
+
+        manager["matchday_bonus"] = abono
+        manager["matchday_bonus_points"] = puntos
+        manager["matchday_bonus_rate"] = EUROS_POR_PUNTO
+
+        aplicados[user_id] = abono
+
+        if not abono:
+            continue
+
+        manager["income"] = (
+            safe_int(manager.get("income"))
+            + abono
+        )
+
+        manager["balance"] = (
+            safe_int(manager.get("balance"))
+            + abono
+        )
+
+    return aplicados
 
 
 def add_income(
@@ -1942,6 +2044,17 @@ def build_rival_intelligence(
         ] = profile
 
     # --------------------------------------------------------
+    # EL ABONO DE LAS JORNADAS JUGADAS
+    # --------------------------------------------------------
+    #
+    # Va aqui, sobre el libro ya construido con el tablon y justo
+    # antes del cuadre, para que la validacion contable mida el
+    # libro COMPLETO. Si el abono se quedase fuera, el cuadre
+    # diria que fallamos por 870.000 EUR y no sabriamos de que.
+
+    abonos_aplicados = apply_matchday_bonus(managers)
+
+    # --------------------------------------------------------
     # VALIDACION CONTABLE PEPE
     # --------------------------------------------------------
 
@@ -2023,13 +2136,57 @@ def build_rival_intelligence(
             official_balance
         )
 
+        # ¿BIWENGER CUENTA EL ABONO COMO "EARNINGS"?
+        #
+        # No lo sabemos con certeza y no se va a suponer. Se
+        # publican las dos diferencias -con el abono apuntado y
+        # sin el- y la que salga cero contesta la pregunta sola.
+        #
+        # Antes del abono el cuadre era EXACTO. Asi que si al
+        # apuntarlo se rompe, el que sobra es el abono, y aqui se
+        # ve en una linea en vez de en una tarde de depuracion.
+        abono_propio = safe_int(
+            abonos_aplicados.get(current_user_id)
+        )
+
+        diferencia_sin_abono = (
+            difference
+            - abono_propio
+        )
+
+        # LA VERDAD DE VERDAD ES EL SALDO
+        #
+        # `earnings` y `expenses` son resumenes de Biwenger y
+        # pueden contar el abono o no. El saldo de la cuenta no
+        # opina: es el dinero que hay. Si el libro con el abono
+        # apuntado coincide con el saldo real, el abono es real y
+        # esta bien puesto.
+        diferencia_contra_saldo = (
+            ledger_balance - safe_int(own_balance)
+            if own_balance is not None
+            else None
+        )
+
         validation = {
             "available":
                 True,
 
+            # El libro esta explicado si cuadra con cualquiera de
+            # las dos cifras oficiales. Un rojo falso en pantalla
+            # gasta la confianza igual que un verde falso.
             "exact":
-                difference
-                == 0,
+                difference == 0
+                or diferencia_contra_saldo == 0,
+
+            "real_balance":
+                (
+                    safe_int(own_balance)
+                    if own_balance is not None
+                    else None
+                ),
+
+            "difference_vs_real_balance":
+                diferencia_contra_saldo,
 
             "official_initial_balance":
                 official_initial,
@@ -2048,6 +2205,25 @@ def build_rival_intelligence(
 
             "difference":
                 difference,
+
+            # El abono de la jornada, aparte, para poder
+            # auditarlo sin desmontar el libro.
+            "matchday_bonus":
+                abono_propio,
+
+            "difference_without_bonus":
+                diferencia_sin_abono,
+
+            "bonus_in_official_earnings":
+                (
+                    True
+                    if difference == 0
+                    else
+                    False
+                    if diferencia_sin_abono == 0
+                    else
+                    None
+                ),
         }
 
     # --------------------------------------------------------

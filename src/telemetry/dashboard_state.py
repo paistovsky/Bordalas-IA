@@ -941,6 +941,17 @@ def compact_rivals(intelligence: dict, current_user_id: int | None) -> list[dict
                 "points": safe_int(manager.get("points")),
                 "rank": manager.get("points_rank"),
                 "balance": safe_int(manager.get("balance")),
+
+                # EL ABONO DE LAS JORNADAS (20/08/2026)
+                #
+                # 30.000 EUR por punto, que Biwenger paga al
+                # cerrar cada jornada. Es la mitad de la economia
+                # del juego y hasta hoy no estaba en ningun
+                # libro. Sale en pantalla porque explica una
+                # parte grande del saldo de cada rival.
+                "matchday_bonus": safe_int(
+                    manager.get("matchday_bonus")
+                ),
                 "roster_count": safe_int(manager.get("roster_count")),
                 "roster_value": safe_int(manager.get("roster_value")),
                 "net_worth": safe_int(manager.get("net_worth")),

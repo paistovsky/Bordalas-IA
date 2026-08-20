@@ -13,6 +13,24 @@ export default function LeaguePage({ data }) {
     ])
   );
 
+  /* EL ABONO DE LAS JORNADAS (20/08/2026)
+   *
+   * 30.000 EUR por punto, que Biwenger paga al cerrar cada
+   * jornada. En la jornada 1 fueron entre 300.000 y 1.260.000
+   * segun el manager.
+   *
+   * Sale aqui porque explica una parte grande del saldo de cada
+   * rival, y hasta hoy no estaba en ningun libro: el saldo
+   * estimado de los rivales se alejaba de la realidad hasta
+   * 1,26 M cada jornada. Y en esta liga su saldo esta oculto,
+   * asi que nada lo corregia. */
+  const abono = new Map(
+    (data.rivalIntel?.managers || []).map((manager) => [
+      manager.name,
+      manager.matchday_bonus
+    ])
+  );
+
   return (
     <>
       <StandingsIntelPanel data={data} />
@@ -35,6 +53,7 @@ export default function LeaguePage({ data }) {
                 <tr>
                   <th>MÁNAGER</th>
                   <th className="n">PATRIM.</th>
+                  <th className="n">ABONOS</th>
                   <th className="n">PLANTILLA</th>
                   <th className="n">DEL SORTEO</th>
                   <th className="n">FICHADOS</th>
@@ -52,6 +71,7 @@ export default function LeaguePage({ data }) {
                         {manager.is_us && <span className="pill me" style={{ marginLeft: 6 }}>TÚ</span>}
                       </td>
                       <td className="n">{formatEuros(worth.get(manager.name) || 0)}</td>
+                      <td className="n up">{formatEuros(abono.get(manager.name) || 0)}</td>
                       <td className="n">{manager.roster_size}</td>
                       <td className="n">{manager.from_initial_draft}</td>
                       <td className="n">{manager.acquired}</td>
