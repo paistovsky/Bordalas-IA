@@ -79,6 +79,15 @@ export function normalizeStatus(raw = {}) {
     rivalIntel: raw.rival_intelligence || { managers: [] },
     backoff: raw.backoff || { blocked: [], blocked_count: 0 },
 
+    // EL MARCADOR (20/08/2026)
+    //
+    // La nota del once jornada a jornada: lo que puntuo contra lo
+    // que podia haber puntuado con la misma plantilla. Llega
+    // siempre, aunque no haya ninguna jornada cerrada, para que
+    // la seccion pueda decir "todavia no hay nada" en vez de
+    // desaparecer.
+    marcador: raw.marcador || { available: false },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] }

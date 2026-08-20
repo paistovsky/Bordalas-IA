@@ -4,6 +4,7 @@ import {
   Brain,
   UsersRound,
   Trophy,
+  Gauge,
   ClipboardList
 } from "lucide-react";
 
@@ -13,6 +14,11 @@ const ITEMS = [
   ["brain", "ESTRATEGIA", Brain],
   ["squad", "PLANTILLA", UsersRound],
   ["league", "LIGA", Trophy],
+
+  // El marcador va antes de AUDITORIA a proposito: auditoria es
+  // para cuando algo huele mal, el marcador es para el lunes.
+  ["marcador", "MARCADOR", Gauge],
+
   ["audit", "AUDITORÍA", ClipboardList]
 ];
 

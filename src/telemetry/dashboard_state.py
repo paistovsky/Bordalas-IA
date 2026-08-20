@@ -28,6 +28,10 @@ from src.analysis.historical_price_lookup import (
 )
 
 from src.analysis.rival_bid_model import build_bid_model, optimal_bid
+from src.analysis.marcador import (
+    observar as anotar_jornada,
+    estado_para_dashboard as build_marcador,
+)
 from src.analysis.intelligent_bid_engine import (
     build_market_seller_lookup,
 )
@@ -2804,6 +2808,23 @@ def build_dashboard_state() -> dict:
 
     board = collect_board_history()
 
+    # El marcador. `/rounds/league` solo devuelve la jornada en
+    # curso: cuando cierra y salta a la siguiente, sus puntos
+    # desaparecen de la API. Si nadie los anota en el momento, no
+    # se recuperan. Por eso se anota en cada ciclo, aqui, que es
+    # donde ya esta el snapshot cargado.
+    #
+    # Observador puro: solo escribe su propio fichero. Si falla,
+    # el dashboard sigue: un termometro roto no puede parar el
+    # equipo.
+    try:
+        anotar_jornada(
+            snapshot,
+            current_user_id=board.get("current_user_id"),
+        )
+    except Exception as error:                      # noqa: BLE001
+        print(f"Marcador: no se pudo anotar la jornada ({error}).")
+
     market_status = (
         snapshot.get("market", {})
         .get("status", {})
@@ -3121,6 +3142,13 @@ def build_dashboard_state() -> dict:
         "acquisition": acquisition,
         "points_market": points_market,
         "ledger_audit": compact_ledger_audit(ledger_audit),
+
+        # El marcador. La nota del once jornada a jornada. Se
+        # publica aunque este vacio: la pantalla tiene que poder
+        # decir "todavia no hay jornadas cerradas" en vez de
+        # desaparecer y dejar al dueño sin saber si mide o no.
+        "marcador": build_marcador(),
+
         "priorities": candidates,
         "activity": activity,
         "competitive": competitive,

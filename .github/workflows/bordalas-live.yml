@@ -1,4 +1,4 @@
-name: Bordalas IA Live
+﻿name: Bordalas IA Live
 
 on:
   workflow_dispatch:
@@ -140,6 +140,7 @@ jobs:
           python -m src.analysis.test_escrituras_con_cuerpo_v1
           python -m src.analysis.test_cambiar_titular_v1
           python -m src.analysis.test_suelo_de_titulares_v1
+          python -m src.analysis.test_marcador_v1
           python -m src.analysis.test_action_starvation_v1
           python -m src.analysis.test_price_history_store_v1
           python -m src.analysis.test_futbolfantasy_source_v12

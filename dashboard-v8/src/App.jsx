@@ -6,6 +6,7 @@ import MarketPage from "./pages/MarketPage";
 import BrainPage from "./pages/BrainPage";
 import SquadPage from "./pages/SquadPage";
 import LeaguePage from "./pages/LeaguePage";
+import MarcadorPage from "./pages/MarcadorPage";
 import AuditPage from "./pages/AuditPage";
 import { fetchStatus, normalizeStatus } from "./lib/status";
 import { ago, minutesOld } from "./lib/utils";
@@ -16,6 +17,7 @@ const TITLES = {
   brain: "ESTRATEGIA",
   squad: "PLANTILLA",
   league: "LIGA",
+  marcador: "MARCADOR",
   audit: "AUDITORÍA"
 };
 
@@ -62,6 +64,7 @@ export default function App() {
     brain: <BrainPage data={data} />,
     squad: <SquadPage data={data} />,
     league: <LeaguePage data={data} />,
+    marcador: <MarcadorPage data={data} />,
     audit: <AuditPage data={data} />
   };
 
