@@ -1,38 +1,40 @@
-import { formatMoney } from "../lib/utils";
-
 /**
- * EL PLAN DE BORDALAS: que sistema, por que ese once, que busca.
+ * EL PLAN DE BORDALAS: las once elecciones, no la lista.
  *
- * POR QUE HACE FALTA
+ * POR QUE SE REHIZO (20/08/2026)
  *
- *   El campo enseña once caras y una formacion. Lo que no
- *   enseñaba es el razonamiento: por que un 5-3-2 y no un 4-4-2,
- *   por que ese lateral y no el otro, y de donde espera sacar
- *   los puntos.
+ *   "El plan de Bordalás no me convence. La info es inútil."
  *
- *   Todo eso ya estaba calculado. El motor de alineacion elige
- *   por valor esperado semanal -jerarquia por probabilidad de
- *   ser titular- y desde el 18/08 mete tambien el rival y el
- *   campo. Ninguno de esos numeros llegaba a una frase.
+ *   Tenia razon. El panel contaba la titularidad media del once,
+ *   el valor del once, los tres de mas valor esperado y los tres
+ *   de mas jerarquia. Cuatro agregados de una tabla que estaba
+ *   justo debajo —y que desde hoy trae jerarquia, porcentaje,
+ *   lesion y sancion jugador a jugador—.
+ *
+ *   Un panel que resume lo que ya se ve entero no informa:
+ *   ocupa.
+ *
+ * QUE CUENTA AHORA
+ *
+ *   Lo unico que la tabla no puede contar: LA DECISION.
+ *
+ *   El once no es una lista de once nombres, son once
+ *   elecciones, y de esas solo dos o tres estuvieron reñidas.
+ *   Esas son las discutibles —"¿no compensa meter al delantero
+ *   del Elche en vez de a Bigas?"— y para discutirlas hace falta
+ *   ver al que entro y al que se quedo, con su numero al lado.
+ *
+ *   El cambio se plantea dentro de la posicion porque ahi
+ *   siempre es legal: cualquier titular se puede cambiar por un
+ *   suplente de su misma posicion sin tocar el dibujo.
  *
  * LO QUE NO HACE
  *
- *   No decide nada ni recalcula: lee lo que el motor ya decidio
- *   y lo cuenta. Si mañana cambia la regla, cambia el texto.
+ *   No recalcula nada. `weekly_expected_value` es la funcion con
+ *   la que el motor ordena el once; aqui solo se lee.
  */
 
 const POSICIONES = { 1: "POR", 2: "DEF", 3: "MC", 4: "DEL" };
-
-const ORDEN_JERARQUIA = {
-  DIOS: 6,
-  CLAVE: 5,
-  IMPORTANTE: 4,
-  ROTACION: 3,
-  "ROTACIÓN": 3,
-  REVULSIVO: 2,
-  RESERVA: 1,
-  DESCARTE: 0
-};
 
 function porPosicion(players = []) {
   const cuenta = { 1: 0, 2: 0, 3: 0, 4: 0 };
@@ -56,7 +58,7 @@ function formaDelEquipo(cuenta) {
   const del = cuenta[4];
 
   if (def >= 5 && del <= 2) {
-    return "Repliegue: mayoria atras y el peso ofensivo en pocas botas.";
+    return "Repliegue: mayoría atrás y el peso ofensivo en pocas botas.";
   }
 
   if (del >= 3) {
@@ -67,18 +69,42 @@ function formaDelEquipo(cuenta) {
     return "Control por dentro: el centro del campo manda.";
   }
 
-  return "Reparto equilibrado entre lineas.";
+  return "Reparto equilibrado entre líneas.";
 }
 
-function partido(player) {
-  const match = player.next_match;
+function partido(jugador) {
+  const match = jugador?.next_match;
 
   if (!match || !match.rival) return null;
 
   return `${match.away ? "fuera" : "en casa"} vs ${match.rival}`;
 }
 
-export default function LineupPlanPanel({ lineup, guardrail }) {
+function Ficha({ jugador, tono }) {
+  return (
+    <div>
+      <b className={tono}>{jugador.name}</b>{" "}
+      <span className="mono dim">
+        {jugador.weekly_expected_value != null
+          ? jugador.weekly_expected_value.toFixed(3)
+          : "—"}
+      </span>
+      <div className="dim" style={{ fontSize: 10 }}>
+        {[
+          jugador.hierarchy,
+          jugador.starter_probability != null
+            ? `${Math.round(jugador.starter_probability)}% titular`
+            : "sin pronóstico",
+          partido(jugador)
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      </div>
+    </div>
+  );
+}
+
+export default function LineupPlanPanel({ lineup, debate }) {
   const players = lineup?.players || [];
 
   if (players.length === 0) {
@@ -92,63 +118,19 @@ export default function LineupPlanPanel({ lineup, guardrail }) {
 
   const cuenta = porPosicion(players);
 
-  const conProbabilidad = players.filter(
-    (p) => p.starter_probability != null
-  );
-
-  const probabilidadMedia = conProbabilidad.length
-    ? Math.round(
-        conProbabilidad.reduce(
-          (total, p) => total + Number(p.starter_probability || 0),
-          0
-        ) / conProbabilidad.length
-      )
-    : null;
-
-  const seguros = players.filter(
-    (p) => Number(p.starter_probability || 0) >= 80
-  ).length;
-
-  const dudosos = players
-    .filter(
-      (p) =>
-        p.starter_probability != null &&
-        Number(p.starter_probability) < 60
-    )
-    .sort(
-      (a, b) =>
-        Number(a.starter_probability) - Number(b.starter_probability)
-    );
-
-  /* Los que sostienen la jornada: mas valor esperado. No es el
-     mas caro ni el de mas jerarquia, es el que mas puntos se
-     espera que traiga ESTA semana. */
-  const pilares = [...players]
-    .filter((p) => p.weekly_expected_value != null)
-    .sort(
-      (a, b) =>
-        Number(b.weekly_expected_value) - Number(a.weekly_expected_value)
-    )
-    .slice(0, 3);
-
-  const jerarquias = [...players].sort(
-    (a, b) =>
-      (ORDEN_JERARQUIA[String(b.hierarchy || "").toUpperCase()] ?? -1) -
-      (ORDEN_JERARQUIA[String(a.hierarchy || "").toUpperCase()] ?? -1)
-  );
-
-  const columna = jerarquias.slice(0, 3);
+  const duelos = debate?.duelos || [];
+  const reñidos = duelos.filter((d) => d.discutible);
+  const riesgo = debate?.riesgo || [];
+  const sinDato = debate?.sin_dato || [];
 
   const fuera = lineup?.mandatory_hierarchy?.ruled_out || [];
-
-  const sinDato = players.length - conProbabilidad.length;
 
   return (
     <section className="pan">
       <div className="pan-head">
         <div>
           <h2>EL PLAN DE BORDALÁS</h2>
-          <div className="sub">POR QUÉ ESTE ONCE Y NO OTRO</div>
+          <div className="sub">LAS ELECCIONES QUE ESTUVIERON REÑIDAS</div>
         </div>
         <span className={lineup.missing ? "pill crit" : "pill ok"}>
           {lineup.playable ?? 0}/11
@@ -160,78 +142,91 @@ export default function LineupPlanPanel({ lineup, guardrail }) {
         <div className="planbox-shape">{formaDelEquipo(cuenta)}</div>
       </div>
 
-      <div className="kv">
-        <span>Titularidad media del once</span>
-        <b className={probabilidadMedia >= 70 ? "up" : "down"}>
-          {probabilidadMedia != null ? `${probabilidadMedia}%` : "—"}
+      <p className="note" style={{ textAlign: "left", marginTop: 8 }}>
+        El dibujo no se elige antes: sale de coger a los once con más
+        valor esperado y ver en qué formación caben.
+      </p>
+
+      {/* LA PARTE QUE IMPORTA */}
+      <div className="planwhy">
+        <b>
+          {reñidos.length > 0
+            ? "DECISIONES AJUSTADAS"
+            : "NINGUNA DECISIÓN AJUSTADA"}
         </b>
+
+        {duelos.length === 0 ? (
+          <p className="dim" style={{ fontSize: 11, marginTop: 6 }}>
+            No hay suplentes con pronóstico en ninguna posición, así que
+            no había nada que elegir.
+          </p>
+        ) : (
+          <ul>
+            {(reñidos.length > 0 ? reñidos : duelos.slice(0, 1)).map(
+              (duelo) => (
+                <li key={duelo.position} style={{ marginBottom: 8 }}>
+                  <div className="dim" style={{ fontSize: 10 }}>
+                    {duelo.position_name.toUpperCase()} · margen{" "}
+                    <b className={duelo.margen < 0 ? "down" : ""}>
+                      {duelo.margen.toFixed(3)}
+                    </b>
+                  </div>
+                  <Ficha jugador={duelo.entra} tono="up" />
+                  <div className="dim" style={{ fontSize: 10, margin: "2px 0" }}>
+                    por delante de
+                  </div>
+                  <Ficha jugador={duelo.se_queda} tono="down" />
+                </li>
+              )
+            )}
+          </ul>
+        )}
+
+        {reñidos.length === 0 && duelos.length > 0 && (
+          <p className="dim" style={{ fontSize: 11, marginTop: 4 }}>
+            El titular más justo saca {duelos[0].margen.toFixed(3)} al mejor
+            suplente de su posición. No estaba cerca.
+          </p>
+        )}
       </div>
 
-      <div className="kv">
-        <span>Titulares seguros (80% o más)</span>
-        <b>{seguros} de 11</b>
-      </div>
-
-      <div className="kv">
-        <span>Valor del once</span>
-        <b className="mono">{formatMoney(lineup.total_value)}</b>
-      </div>
-
-      {/* Sin dato no es dato: si a alguien le falta el pronostico
-          se dice, porque la media de arriba se calcula sin el. */}
-      {sinDato > 0 && (
-        <div className="kv">
-          <span>Sin pronóstico de titular</span>
-          <b className="down">{sinDato}</b>
+      {riesgo.length > 0 && (
+        <div className="planwhy">
+          <b>LO QUE PUEDE SALIR MAL</b>
+          <ul>
+            {riesgo.slice(0, 4).map((jugador) => (
+              <li key={jugador.id}>
+                <b>{jugador.name}</b>{" "}
+                <span className="dim">
+                  ({POSICIONES[jugador.position] || "?"}
+                  {jugador.starter_probability != null
+                    ? ` · solo ${Math.round(jugador.starter_probability)}% de salir`
+                    : ""}
+                  {jugador.availability &&
+                  jugador.availability !== "DISPONIBLE"
+                    ? ` · ${jugador.availability}`
+                    : ""}
+                  )
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
-      <div className="planwhy">
-        <b>DE DÓNDE ESPERA LOS PUNTOS</b>
-        <ul>
-          {pilares.map((p) => (
-            <li key={p.id}>
-              <b>{p.name}</b>{" "}
-              <span className="dim">
-                ({POSICIONES[p.position] || "?"}
-                {p.hierarchy ? ` · ${p.hierarchy}` : ""}
-                {p.starter_probability != null
-                  ? ` · ${Math.round(p.starter_probability)}% titular`
-                  : ""}
-                {partido(p) ? ` · ${partido(p)}` : ""})
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="planwhy">
-        <b>LA COLUMNA VERTEBRAL</b>
-        <ul>
-          {columna.map((p) => (
-            <li key={p.id}>
-              <b>{p.name}</b>{" "}
-              <span className="dim">
-                {p.hierarchy || "sin escalón"} en {p.team_name || "su equipo"}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {dudosos.length > 0 && (
+      {/* Sin dato no es dato: si a alguien del once le falta el
+          pronostico, esa eleccion se tomo a ciegas y hay que
+          decirlo. */}
+      {sinDato.length > 0 && (
         <div className="planwhy">
-          <b>LO QUE LE PREOCUPA</b>
+          <b>ELEGIDOS SIN PRONÓSTICO</b>
           <ul>
-            {dudosos.slice(0, 3).map((p) => (
-              <li key={p.id}>
-                <b>{p.name}</b>{" "}
+            {sinDato.map((jugador) => (
+              <li key={jugador.id}>
+                <b>{jugador.name}</b>{" "}
                 <span className="dim">
-                  solo {Math.round(p.starter_probability)}% de salir
-                  {p.availability && p.availability !== "DISPONIBLE"
-                    ? ` · ${p.availability}`
-                    : ""}
-                  {partido(p) ? ` · ${partido(p)}` : ""}
+                  ({POSICIONES[jugador.position] || "?"}) — entró por valor y
+                  puntos, no por quién va a jugar
                 </span>
               </li>
             ))}
@@ -251,11 +246,10 @@ export default function LineupPlanPanel({ lineup, guardrail }) {
       )}
 
       <p className="note" style={{ textAlign: "left" }}>
-        El sistema no se elige antes: sale de coger a los once con más valor
-        esperado esta semana y ver en qué formación caben. Valor esperado =
-        lo que puntúa su escalón en el equipo × lo probable que es que salga
-        de inicio, ajustado por el rival y por si juega en casa.
-        {guardrail?.goalkeeper_warning ? ` ${guardrail.goalkeeper_warning}` : ""}
+        El número es el valor esperado de la semana, de 0 a 1: lo que
+        puntúa su escalón en el equipo × lo probable que es que salga de
+        inicio. El motor desempata además por rival, campo y penaltis, y
+        eso no cabe en esta cifra.
       </p>
     </section>
   );

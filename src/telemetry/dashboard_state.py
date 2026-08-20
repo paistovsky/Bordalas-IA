@@ -28,6 +28,11 @@ from src.analysis.historical_price_lookup import (
 )
 
 from src.analysis.rival_bid_model import build_bid_model, optimal_bid
+from src.telemetry.squads import (
+    build_lineup_debate,
+    build_rival_squads,
+    enrich_roster,
+)
 from src.analysis.marcador import (
     observar as anotar_jornada,
     estado_para_dashboard as build_marcador,
@@ -2905,6 +2910,20 @@ def build_dashboard_state() -> dict:
         snapshot
     )
 
+    # LA PLANTILLA TAMBIEN SABE (20/08/2026)
+    #
+    # La tabla de PLANTILLA enseñaba nombre, posicion, valor y
+    # titular/suplente. La jerarquia, el pronostico de salir y el
+    # parte de lesion o sancion ya se calculaban, pero solo
+    # llegaban al XI -once de dieciseis- y al mercado.
+    roster = enrich_roster(
+        compact_roster(
+            snapshot,
+            state.get("lineup", {}) or {},
+            photo_lookup,
+        )
+    )
+
     competitive = load_competitive_dashboard_state()
     solvency_plans = build_dashboard_solvency_plans(state)
     activity = load_activity_feed()
@@ -3096,10 +3115,19 @@ def build_dashboard_state() -> dict:
             snapshot,
             photo_lookup,
         ),
-        "roster": compact_roster(
+        "roster": roster,
+
+        # Las once elecciones del once, no la lista. De esas solo
+        # dos o tres estuvieron reñidas, y son las unicas que se
+        # pueden discutir.
+        "lineup_debate": build_lineup_debate(roster),
+
+        # Las plantillas de los seis rivales, con la misma ficha.
+        # Salen de `standings[].lineup.players + discarded`, que ya
+        # venia en el snapshot y no miraba nadie.
+        "rival_squads": build_rival_squads(
             snapshot,
-            state.get("lineup", {}) or {},
-            photo_lookup,
+            current_user_id=board.get("current_user_id"),
         ),
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),

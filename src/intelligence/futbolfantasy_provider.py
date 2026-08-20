@@ -391,6 +391,69 @@ def build_targets(snapshot: dict) -> list[dict]:
             "MARKET",
         )
 
+    # ------------------------------------------------------
+    # LAS PLANTILLAS DE LOS RIVALES (20/08/2026)
+    #
+    # "Sabes lo que no veo? La plantilla del rival."
+    #
+    # Las paginas de equipo de FutbolFantasy ya se bajan ENTERAS
+    # -las 19, con 26 a 29 jugadores cada una- y traen la
+    # jerarquia y el pronostico de todo el mundo. Lo unico que
+    # limitaba la cobertura era a quien se le buscaba pareja: la
+    # plantilla propia y el mercado.
+    #
+    # Los rivales salen del propio snapshot: `lineup.players` es
+    # su once y `lineup.discarded` su banquillo, o sea la
+    # plantilla completa. Cero descargas nuevas, cero decisiones
+    # cambiadas -nadie valora a un jugador que no esta en venta-;
+    # solo se deja de tirar a la basura lo que ya estaba en el
+    # disco.
+    # ------------------------------------------------------
+
+    clasificacion = (
+        ((snapshot or {}).get("rounds") or {})
+        .get("data", {})
+        .get("league", {})
+        .get("standings")
+        or []
+    )
+
+    for fila in clasificacion:
+
+        if not isinstance(fila, dict):
+            continue
+
+        alineacion = fila.get("lineup") or {}
+
+        plantilla_rival = list(
+            alineacion.get("players") or []
+        ) + list(
+            alineacion.get("discarded") or []
+        )
+
+        for player_id in plantilla_rival:
+
+            if player_id is None:
+                continue
+
+            try:
+                player_id = int(player_id)
+            except (TypeError, ValueError):
+                continue
+
+            # Un jugador nuestro o del mercado ya tiene su sitio
+            # y su scope. El rival no lo degrada.
+            if player_id in objetivos:
+                continue
+
+            anota(
+                player_id,
+                None,
+                None,
+                None,
+                "RIVAL",
+            )
+
     return list(objetivos.values())
 
 

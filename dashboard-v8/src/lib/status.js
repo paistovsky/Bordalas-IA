@@ -79,6 +79,18 @@ export function normalizeStatus(raw = {}) {
     rivalIntel: raw.rival_intelligence || { managers: [] },
     backoff: raw.backoff || { blocked: [], blocked_count: 0 },
 
+    // LAS PLANTILLAS DE LA LIGA (20/08/2026)
+    //
+    // La propia y las seis de los rivales, con la misma ficha:
+    // jerarquia, pronostico de titularidad, lesion y sancion.
+    // Salen de `standings[].lineup.players + discarded`, que ya
+    // venia en el snapshot y no miraba nadie.
+    rivalSquads: raw.rival_squads || { available: false, managers: [] },
+
+    // Las once elecciones del once. De esas solo dos o tres
+    // estuvieron reñidas, y son las unicas discutibles.
+    lineupDebate: raw.lineup_debate || { available: false, duelos: [] },
+
     // EL MARCADOR (20/08/2026)
     //
     // La nota del once jornada a jornada: lo que puntuo contra lo
