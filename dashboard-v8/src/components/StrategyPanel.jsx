@@ -1,34 +1,46 @@
 import { formatEuros, formatMoney } from "../lib/utils";
 
 /**
- * LA ESTRATEGIA DE PEPE, A CORTO Y A LARGO.
+ * LA ESTRATEGIA DE PEPE: QUE VA A HACER, EN QUE ORDEN Y CUANDO.
  *
- * UNA HONESTIDAD POR DELANTE
+ * QUE FALLABA EN LA PRIMERA VERSION (20/08/2026)
  *
- *   Pepe no tiene un plan de temporada escrito en ningun sitio.
- *   Tiene una regla que aplica cada media hora, y la suma de esas
- *   aplicaciones ES la estrategia. Este cuadro no inventa un plan:
- *   coge la regla y la cuenta en palabras, con los numeros del
- *   ciclo de ahora mismo.
+ *   "No me entero bien del plan."
  *
- *   Por eso cada cifra de aqui sale de un campo publicado y no de
- *   una estimacion escrita a mano. Si mañana cambia el motor,
- *   cambia el cuadro solo. Un panel de estrategia que se escribe
- *   aparte del motor envejece en una semana y miente en dos.
+ *   Y tenia razon. Habia tres parrafos de prosa con los numeros
+ *   metidos dentro de las frases, y debajo cuatro reglas
+ *   generales que son las mismas todos los dias. Eso no es un
+ *   plan, es un manifiesto: describe la POSTURA de Pepe, no lo
+ *   que va a hacer esta tarde.
  *
- * LOS TRES HORIZONTES
+ *   Ademas repetia en prosa lo que la tira de arriba ya dice en
+ *   numeros grandes: saldo, cierre, reset, pujas.
  *
- *   Hoy      - la jornada que se cierra en unas horas
- *   Mercado  - hasta el proximo reset del Computer
- *   Temporada- donde estamos y de que depende ganar
+ * QUE HACE AHORA
+ *
+ *   Contesta tres preguntas en este orden, y cada una con
+ *   nombres propios en vez de cantidades abstractas:
+ *
+ *     1. Lo siguiente que va a hacer, y por que gana esa y no
+ *        otra de la cola.
+ *     2. A quien quiere fichar antes de que se cierre el
+ *        mercado, con lo que promete cada uno.
+ *     3. Que le esta frenando ahora mismo.
+ *
+ *   La regla general se queda, pero al final y en una linea. Es
+ *   contexto, no noticia.
  */
 
-function Bloque({ eyebrow, title, children }) {
+const POSICIONES = { 1: "POR", 2: "DEF", 3: "MC", 4: "DEL" };
+
+function Paso({ n, titulo, tono = "", children }) {
   return (
-    <div className="strat">
-      <div className="strat-eyebrow">{eyebrow}</div>
-      <div className="strat-title">{title}</div>
-      <div className="strat-body">{children}</div>
+    <div className="paso">
+      <div className={`paso-n ${tono}`}>{n}</div>
+      <div className="paso-cuerpo">
+        <div className="paso-titulo">{titulo}</div>
+        <div className="paso-detalle">{children}</div>
+      </div>
     </div>
   );
 }
@@ -39,160 +51,202 @@ export default function StrategyPanel({ data }) {
   const market = data.points_market || {};
   const exposure = data.exposure || {};
   const clock = data.market_clock || {};
-  const competition = data.competition || {};
   const solvency = data.solvency || {};
   const acquisition = data.acquisition || {};
 
-  const standings = competition.standings || [];
+  const siguiente = data.nextAction || {};
+  const cola = data.priorities || [];
 
-  const yo = standings.find((row) => row.is_current_user);
-  const lider = standings[0];
+  /* Lo que de verdad quiere fichar, con nombre. "Quiere 3
+     jugadores" no dice nada; "quiere a Bigas por 2,28 M porque
+     suma 15 puntos" si. */
+  const objetivos = (acquisition.targets || [])
+    .filter(
+      (t) => t.decision === "BID" || Number(t.live_bid || 0) > 0
+    )
+    .slice(0, 4);
 
-  /* El valor de plantilla si discrimina desde el minuto uno; los
-     puntos, en la jornada 2, valen todos cero. Decir "vas sexto"
-     sin decir eso seria enseñar una posicion que no significa
-     nada todavia. */
-  const porValor = [...standings]
-    .filter((row) => row.team_value != null)
-    .sort((a, b) => Number(b.team_value) - Number(a.team_value));
-
-  const puestoValor =
-    porValor.findIndex((row) => row.is_current_user) + 1;
-
-  const puntosRepartidos = standings.some(
-    (row) => Number(row.points || 0) > 0
-  );
-
-  const objetivos = acquisition.targets || [];
-
-  const quiere = objetivos.filter(
-    (t) => t.decision === "BID" || Number(t.live_bid || 0) > 0
+  /* Lo que le frena: de la cola, lo que NO puede ejecutar. Es la
+     respuesta a "¿y por que no ha hecho tal cosa?". */
+  const frenados = cola.filter(
+    (item) =>
+      !item.executable &&
+      item.type !== "IDLE" &&
+      item.type !== siguiente.type
   );
 
   const precioPunto = market.rate_median;
+  const horas = Number(summary.hours_to_deadline || 0);
 
   return (
     <section className="pan">
       <div className="pan-head">
         <div>
           <h2>LA ESTRATEGIA DE PEPE</h2>
-          <div className="sub">CÓMO PIENSA GANAR ESTO</div>
+          <div className="sub">QUÉ VA A HACER Y EN QUÉ ORDEN</div>
         </div>
         {precioPunto ? (
           <span className="pill ok">{formatEuros(precioPunto)} / PUNTO</span>
         ) : null}
       </div>
 
-      <Bloque
-        eyebrow="HOY"
-        title={
-          lineup.missing
-            ? `El once está incompleto: ${lineup.missing} hueco(s)`
-            : "El once está cerrado"
+      {/* ---------------------------------------------------
+          1. LO SIGUIENTE
+          --------------------------------------------------- */}
+      <Paso
+        n="1"
+        tono={siguiente.executable ? "ok" : "idle"}
+        titulo={
+          siguiente.label
+            ? `Ahora: ${siguiente.label.toLowerCase()}`
+            : "Ahora: nada que ejecutar"
         }
       >
-        Quedan <b>{Number(summary.hours_to_deadline || 0).toFixed(1)} h</b> para
-        el cierre de la jornada {summary.target_matchday ?? "—"}. Riesgo del
-        once: <b>{summary.lineup_risk || "—"}</b>. Mientras la jornada no
-        empiece, cualquier cambio en las alineaciones previstas puede mover el
-        once, y por eso se recalcula cada media hora en vez de dejarlo hecho.
-      </Bloque>
+        {siguiente.reason ||
+          "Ninguna acción de la cola es ejecutable en este ciclo."}
+        {cola.length > 0 && (
+          <div className="paso-cola">
+            {cola
+              .filter((item) => item.type !== "IDLE")
+              .map((item, i) => (
+                <span
+                  key={i}
+                  className={
+                    item.type === siguiente.type
+                      ? "colita on"
+                      : item.executable
+                      ? "colita"
+                      : "colita off"
+                  }
+                >
+                  {item.label}
+                </span>
+              ))}
+          </div>
+        )}
+      </Paso>
 
-      <Bloque
-        eyebrow="ESTE MERCADO"
-        title={
-          quiere.length
-            ? `Quiere ${quiere.length} jugador(es) antes del reset`
-            : "Nada que fichar a este precio"
+      {/* ---------------------------------------------------
+          2. A QUIEN QUIERE, CON NOMBRE
+          --------------------------------------------------- */}
+      <Paso
+        n="2"
+        tono={objetivos.length ? "warn" : "idle"}
+        titulo={
+          objetivos.length
+            ? `Antes del reset quiere ${objetivos.length} jugador(es)`
+            : "No hay nadie que valga la pena al precio de hoy"
         }
       >
-        El mercado del Computer se resetea{" "}
-        {clock.hours_to_reset != null ? (
+        {objetivos.length > 0 ? (
           <>
-            en <b>{Number(clock.hours_to_reset).toFixed(1)} h</b>
+            <div className="paso-fichas">
+              {objetivos.map((t) => (
+                <div className="ficha" key={t.id}>
+                  <b>{t.name}</b>
+                  <span className="dim">
+                    {POSICIONES[t.position] || "?"} ·{" "}
+                    {formatMoney(t.our_bid || t.market_price)}
+                    {t.promised_points
+                      ? ` · +${t.promised_points} pts`
+                      : ""}
+                    {t.win_probability != null
+                      ? ` · gana ${Math.round(
+                          Number(t.win_probability) * 100
+                        )} %`
+                      : ""}
+                  </span>
+                  {t.replaces && (
+                    <span className="dim">
+                      sustituye a {t.replaces}
+                      {t.replaces_starter ? " (titular)" : ""}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="paso-nota">
+              Quedan{" "}
+              <b>
+                {clock.hours_to_reset != null
+                  ? `${Number(clock.hours_to_reset).toFixed(1)} h`
+                  : "—"}
+              </b>{" "}
+              para el reset y lo que no se puje hoy se pierde. Disponible{" "}
+              <b>{formatMoney(exposure.available_budget)}</b>
+              {exposure.mode === "DEBT" ? " de margen de deuda" : ""}.
+            </div>
           </>
         ) : (
-          "una vez al día"
-        )}
-        , y lo que no se puja hoy se pierde: esos jugadores no vuelven.
-        Comprometidos <b>{formatMoney(exposure.committed_total)}</b> en{" "}
-        <b>{exposure.operation_count || 0}</b> puja(s) viva(s), y quedan{" "}
-        <b>{formatMoney(exposure.available_budget)}</b> por gastar
-        {exposure.mode === "DEBT" ? " (de margen de deuda, no de caja)" : ""}.
-        {solvency.needed ? (
           <>
-            {" "}
-            Con el saldo en rojo la prioridad es taparlo:{" "}
-            <b>{formatMoney(solvency.deficit)}</b> de déficit contra{" "}
-            <b>{solvency.incoming_offers || 0}</b> oferta(s) sobre la mesa.
+            El mercado se resetea{" "}
+            {clock.hours_to_reset != null
+              ? `en ${Number(clock.hours_to_reset).toFixed(1)} h`
+              : "una vez al día"}
+            . Ninguno de los que hay baja de los{" "}
+            {precioPunto ? formatEuros(precioPunto) : "—"} por punto que
+            cuesta en el mercado.
           </>
-        ) : null}
-      </Bloque>
+        )}
+      </Paso>
 
-      <Bloque
-        eyebrow="LA TEMPORADA"
-        title={
-          puntosRepartidos
-            ? `${yo?.rank ?? "—"}º de ${standings.length} · ${
-                yo?.points ?? 0
-              } puntos`
-            : "Todavía no se han repartido puntos"
+      {/* ---------------------------------------------------
+          3. QUE LE FRENA
+          --------------------------------------------------- */}
+      <Paso
+        n="3"
+        tono={solvency.needed ? "crit" : "idle"}
+        titulo={
+          solvency.needed
+            ? `Tiene que sanear ${formatMoney(solvency.deficit)}`
+            : "Nada le está frenando"
         }
       >
-        {/* Sin puntos repartidos, la clasificacion no dice nada y
-            decir "vas sexto" seria hacerle creer al dueño algo que
-            no ha pasado. Lo que si discrimina ya es el valor. */}
-        {!puntosRepartidos && (
+        {solvency.needed ? (
           <>
-            La clasificación va toda a cero, así que el puesto no significa nada
-            aún. Lo que sí se puede comparar es el equipo:{" "}
+            Con el saldo en rojo, tapar el agujero manda sobre fichar. Hay{" "}
+            <b>{solvency.incoming_offers || 0}</b> oferta(s) sobre la mesa y{" "}
+            <b>{solvency.listed || 0}</b> jugador(es) publicados. El plan
+            concreto está justo debajo.
           </>
+        ) : frenados.length > 0 ? (
+          <>
+            {frenados.map((f) => f.label).join(", ")} — calculado pero no
+            ejecutable en este ciclo.
+          </>
+        ) : (
+          "Puede operar con normalidad."
         )}
-        Plantilla de <b>{formatMoney(yo?.team_value)}</b>,{" "}
-        <b>{puestoValor > 0 ? `${puestoValor}º` : "—"}</b> de{" "}
-        {porValor.length} por valor
-        {lider && !lider.is_current_user ? (
-          <>
-            {" "}
-            (el más caro es {lider.name === yo?.name ? "el nuestro" : porValor[0]?.name}{" "}
-            con {formatMoney(porValor[0]?.team_value)})
-          </>
-        ) : null}
-        .
-      </Bloque>
+      </Paso>
 
-      <div className="strat-rule">
-        <b>LA REGLA QUE APLICA CADA MEDIA HORA</b>
-        <ol>
-          <li>
-            Alinear a los once con más puntos esperados esta semana —escalón en
-            su equipo × probabilidad de ser titular, ajustado por rival y campo.
-          </li>
-          <li>
-            Fichar solo cuando el punto salga más barato que en el mercado
-            {precioPunto ? (
-              <>
-                {" "}
-                (<b>{formatEuros(precioPunto)}</b> de mediana hoy)
-              </>
-            ) : null}
-            , contando lo que se recupera vendiendo al que sustituye.
-          </li>
-          <li>
-            Cobrar las ofertas buenas por quien no juega, y no soltar nunca a un
-            Dios salvo lesión o sanción.
-          </li>
-          <li>
-            No quedarse sin poder alinear: hay un suelo por posición que ninguna
-            venta puede romper.
-          </li>
-        </ol>
+      {/* ---------------------------------------------------
+          EL RELOJ, QUE ES LO QUE ORDENA TODO
+          --------------------------------------------------- */}
+      <div className="paso-reloj">
+        <span>
+          Cierre de la jornada {summary.target_matchday ?? "—"} en{" "}
+          <b>{horas.toFixed(1)} h</b>
+        </span>
+        <span className="dim">·</span>
+        <span>
+          Once <b className={lineup.missing ? "down" : "up"}>
+            {lineup.playable ?? 0}/11
+          </b>
+        </span>
+        <span className="dim">·</span>
+        <span>
+          Fase <b>{summary.phase || "—"}</b>
+        </span>
       </div>
 
       <p className="note" style={{ textAlign: "left" }}>
+        La regla que aplica cada media hora: alinear a los once con más puntos
+        esperados —escalón × probabilidad de ser titular, ajustado por rival y
+        campo—; fichar solo si el punto sale por debajo de mercado contando lo
+        que se recupera del sustituido; cobrar las ofertas buenas por quien no
+        juega y no soltar nunca a un Dios; y no bajar del suelo por posición.
         Pepe no tiene un plan de temporada escrito: tiene esa regla, y la suma
-        de aplicarla 48 veces al día <b>es</b> la estrategia. Este cuadro no la
-        inventa, la lee del ciclo de ahora mismo.
+        de aplicarla 48 veces al día <b>es</b> la estrategia.
       </p>
     </section>
   );

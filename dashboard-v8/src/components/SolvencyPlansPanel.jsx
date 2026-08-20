@@ -41,8 +41,6 @@ const FASES = [
   ["HARD_SAFETY", "pasado el T-90", "Solo genera liquidez y guarda el XI."]
 ];
 
-const TIER_TONE = { A: "ok", B1: "warn", B: "warn", C: "crit" };
-
 const TIER_TITULO = {
   A: "PLAN A · sin tocar el once",
   B1: "PLAN B · toca el once, sigue habiendo once",
@@ -50,20 +48,69 @@ const TIER_TITULO = {
   C: "PLAN C · emergencia, se rompe el once"
 };
 
-function Plan({ plan }) {
+/* EL COLOR TIENE QUE DECIR SI FUNCIONA (20/08/2026)
+ *
+ * Estaba pintado por escalon: A verde, B amarillo, C rojo. Y el
+ * dueño se encontro un plan A en verde que decia, en gris y
+ * pequeño, "no llega a tapar el agujero".
+ *
+ * Verde tiene un significado y es "esto vale". Un plan que no
+ * cubre el deficit no vale, sea del escalon que sea. Asi que el
+ * semaforo pasa a medir dos cosas en este orden:
+ *
+ *   1. ¿tapa el agujero?  si no, gris y fuera de juego
+ *   2. ¿cuanto cuesta?    ninguno verde, algo amarillo, roto rojo
+ */
+function tonoDelPlan(plan) {
+  if (!plan.restores_solvency) return "off";
+
+  if (!plan.lineup_complete) return "crit";
+
+  return Number(plan.lineup_score_loss_percent || 0) > 0
+    ? "warn"
+    : "ok";
+}
+
+/* Cual usaria Pepe: el primero que tape el agujero dejando once
+   completo, y de esos el que menos puntos cueste. */
+function planElegido(lista) {
+  const validos = (lista || []).filter(
+    (p) => p.restores_solvency && p.lineup_complete
+  );
+
+  if (validos.length === 0) {
+    return (lista || []).find((p) => p.restores_solvency) || null;
+  }
+
+  return validos.reduce((mejor, p) =>
+    Number(p.lineup_score_loss_percent || 0) <
+    Number(mejor.lineup_score_loss_percent || 0)
+      ? p
+      : mejor
+  );
+}
+
+function Plan({ plan, elegido }) {
   const tier = String(plan.tier || plan.plan_kind || "").toUpperCase();
-  const tono = TIER_TONE[tier] || "idle";
+  const tono = tonoDelPlan(plan);
   const perdida = Number(plan.lineup_score_loss_percent || 0);
 
   /* VERDE, AMARILLO Y ROJO, Y QUE SE VEA (20/08/2026)
      El color iba solo en una pastilla de nueve pixeles. Estos
-     tres cuadros se leen de un vistazo o no se leen: el semaforo
+     cuadros se leen de un vistazo o no se leen: el semaforo
      tiene que ser la tarjeta entera. */
   return (
-    <div className={`plan2 plan2-${tono}`}>
+    <div
+      className={
+        `plan2 plan2-${tono}` + (elegido ? " plan2-elegido" : "")
+      }
+    >
       <div className="plan2-head">
-        <span className={`pill ${tono}`}>{tier}</span>
+        <span className={`pill ${tono === "off" ? "idle" : tono}`}>
+          {tier}
+        </span>
         <b>{TIER_TITULO[tier] || plan.plan_kind}</b>
+        {elegido && <span className="pill ok">ESTE</span>}
       </div>
 
       <div className="plan2-who">
@@ -145,6 +192,11 @@ export default function SolvencyPlansPanel({ solvency, summary }) {
   const fase = summary?.phase;
   const horas = Number(summary?.hours_to_deadline || 0);
 
+  const elegido = planElegido(lista);
+  const perdidaElegido = Number(
+    elegido?.lineup_score_loss_percent || 0
+  );
+
   return (
     <section className="pan">
       <div className="pan-head">
@@ -154,6 +206,47 @@ export default function SolvencyPlansPanel({ solvency, summary }) {
         </div>
         <span className="pill crit">{formatMoney(solvency.deficit)}</span>
       </div>
+
+      {/* LA RESPUESTA PRIMERO (20/08/2026)
+          Antes habia tres tarjetas y el dueño tenia que comparar
+          y deducir cual iba a usar Pepe. Un panel que enseña
+          opciones no es un plan: es un menu. El plan es una
+          frase y va arriba. */}
+      {elegido ? (
+        <div className="plan2-lead">
+          <div className="plan2-lead-eyebrow">EL PLAN AHORA MISMO</div>
+          <div className="plan2-lead-title">
+            {TIER_TITULO[
+              String(elegido.tier || "").toUpperCase()
+            ] || elegido.plan_kind}
+          </div>
+          <div className="plan2-lead-body">
+            Vender <b>{(elegido.player_names || []).join(" y ")}</b> por{" "}
+            <b>{formatMoney(elegido.total_amount)}</b>. El saldo queda en{" "}
+            <b className={Number(elegido.post_balance) >= 0 ? "up" : "down"}>
+              {formatMoney(elegido.post_balance)}
+            </b>{" "}
+            y el once
+            {elegido.lineup_complete
+              ? " sigue completo"
+              : ` se queda en ${elegido.playable_count}/11`}
+            {perdidaElegido > 0 ? (
+              <>
+                , a costa de <b className="down">−{perdidaElegido.toFixed(1)} %</b> de
+                calidad
+              </>
+            ) : (
+              <> sin coste deportivo</>
+            )}
+            .
+          </div>
+        </div>
+      ) : (
+        <div className="alert" style={{ marginTop: 10 }}>
+          Ningún plan tapa el agujero entero. Hace falta más liquidez de la
+          que hay sobre la mesa.
+        </div>
+      )}
 
       <div className="kv">
         <span>Ofertas sobre la mesa</span>
@@ -180,7 +273,11 @@ export default function SolvencyPlansPanel({ solvency, summary }) {
 
       <div className="plan2-list">
         {lista.map((plan, i) => (
-          <Plan key={plan.plan_kind || i} plan={plan} />
+          <Plan
+            key={plan.plan_kind || i}
+            plan={plan}
+            elegido={plan === elegido}
+          />
         ))}
       </div>
 

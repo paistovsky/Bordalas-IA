@@ -51,6 +51,18 @@ export function normalizeStatus(raw = {}) {
     cycle: raw.cycle || {},
     lastExecution,
     nextAction: raw.next_action || {},
+
+    // LA COLA DE DECISIONES SALIA VACIA (20/08/2026)
+    //
+    // `priorities` llega en el JSON con las entradas del ciclo y
+    // este normalizador no la copiaba. La columna "COLA DE
+    // DECISIONES" se pintaba en blanco, y es justo la que
+    // explica por que Pepe hace una cosa y no otra.
+    //
+    // Septima vez en dos dias que un dato se calcula, se publica
+    // y se pierde en el ultimo metro.
+    priorities: raw.priorities || [],
+
     decision: raw.decision || {},
     league,
     competition,
