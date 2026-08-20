@@ -87,10 +87,6 @@ export function normalizeStatus(raw = {}) {
     // venia en el snapshot y no miraba nadie.
     rivalSquads: raw.rival_squads || { available: false, managers: [] },
 
-    // Las once elecciones del once. De esas solo dos o tres
-    // estuvieron reñidas, y son las unicas discutibles.
-    lineupDebate: raw.lineup_debate || { available: false, duelos: [] },
-
     // EL MARCADOR (20/08/2026)
     //
     // La nota del once jornada a jornada: lo que puntuo contra lo

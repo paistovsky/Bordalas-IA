@@ -186,154 +186,6 @@ def enrich_roster(roster: dict) -> dict:
 
 
 # ============================================================
-# EL DEBATE DEL ONCE
-# ============================================================
-
-
-POSICIONES = {1: "Portero", 2: "Defensa", 3: "Medio", 4: "Delantero"}
-
-
-# Por debajo de esto la decision estaba reñida y merece contarse.
-# Por encima, el suplente no estaba ni cerca y decirlo seria
-# ruido.
-MARGEN_DISCUTIBLE = 0.12
-
-
-def build_lineup_debate(roster: dict) -> dict:
-    """Las decisiones ajustadas del once, posicion por posicion.
-
-    POR QUE ESTO Y NO MAS NUMEROS
-
-        El panel del plan contaba la media de titularidad, el
-        valor del once y quien tenia mas jerarquia. Todo eso ya
-        sale, jugador a jugador, en la tabla de abajo. Repetirlo
-        agregado no informa: ocupa.
-
-        Lo que la tabla NO puede contar es la DECISION. El once
-        no es una lista, es once elecciones, y de esas solo dos o
-        tres estuvieron reñidas. Esas son las que hay que poder
-        discutir —"¿no compensa meter al delantero del Elche en
-        vez de a Bigas?"— y para discutirlas hace falta ver al que
-        entro y al que se quedo, con su numero al lado.
-
-        El cambio se plantea DENTRO DE LA POSICION porque ahi
-        siempre es legal: cualquier titular se puede cambiar por
-        un suplente de su misma posicion sin tocar el dibujo.
-    """
-
-    jugadores = (roster or {}).get("players") or []
-
-    titulares = [
-        j for j in jugadores
-        if isinstance(j, dict) and j.get("is_starter")
-    ]
-
-    suplentes = [
-        j for j in jugadores
-        if isinstance(j, dict) and not j.get("is_starter")
-    ]
-
-    def valor(jugador):
-        return jugador.get("weekly_expected_value")
-
-    duelos = []
-
-    for posicion in (1, 2, 3, 4):
-
-        dentro = [
-            j for j in titulares
-            if safe_int(j.get("position")) == posicion
-            and valor(j) is not None
-        ]
-
-        fuera = [
-            j for j in suplentes
-            if safe_int(j.get("position")) == posicion
-            and valor(j) is not None
-        ]
-
-        if not dentro or not fuera:
-            continue
-
-        peor_dentro = min(dentro, key=valor)
-        mejor_fuera = max(fuera, key=valor)
-
-        margen = round(
-            valor(peor_dentro) - valor(mejor_fuera),
-            3,
-        )
-
-        duelos.append({
-            "position": posicion,
-            "position_name": POSICIONES.get(posicion, "?"),
-
-            "entra": _ficha_de_duelo(peor_dentro),
-            "se_queda": _ficha_de_duelo(mejor_fuera),
-
-            "margen": margen,
-
-            # Un margen negativo no es un fallo: el motor tambien
-            # mira rival, campo y penaltis, y esos desempates no
-            # caben en este numero. Pero si sale negativo hay que
-            # poder verlo.
-            "discutible": margen < MARGEN_DISCUTIBLE,
-        })
-
-    duelos.sort(key=lambda item: item["margen"])
-
-    # El riesgo de la jornada: quien del once puede no salir.
-    riesgo = [
-        _ficha_de_duelo(j)
-        for j in titulares
-        if (
-            j.get("starter_probability") is not None
-            and float(j["starter_probability"]) < 60
-        )
-        or (
-            j.get("availability")
-            and j["availability"] != "DISPONIBLE"
-        )
-    ]
-
-    riesgo.sort(
-        key=lambda item: (
-            item.get("starter_probability")
-            if item.get("starter_probability") is not None
-            else 999
-        )
-    )
-
-    sin_dato = [
-        _ficha_de_duelo(j)
-        for j in titulares
-        if j.get("starter_probability") is None
-    ]
-
-    return {
-        "available": bool(titulares),
-        "duelos": duelos,
-        "riesgo": riesgo,
-        "sin_dato": sin_dato,
-    }
-
-
-def _ficha_de_duelo(jugador: dict) -> dict:
-    return {
-        "id": safe_int(jugador.get("id")),
-        "name": jugador.get("name"),
-        "position": safe_int(jugador.get("position")),
-        "hierarchy": jugador.get("hierarchy"),
-        "starter_probability": jugador.get("starter_probability"),
-        "weekly_expected_value": jugador.get(
-            "weekly_expected_value"
-        ),
-        "availability": jugador.get("availability"),
-        "team_name": jugador.get("team_name"),
-        "next_match": jugador.get("next_match") or {},
-    }
-
-
-# ============================================================
 # LAS DE LOS RIVALES
 # ============================================================
 
@@ -427,6 +279,11 @@ def build_rival_squads(
                     "name": ficha.get("name") or f"#{player_id}",
 
                     "position": safe_int(ficha.get("position")),
+
+                    # Para el escudo del campo. Sin esto el XI
+                    # del rival se pinta sin equipo.
+                    "team_id": safe_int(ficha.get("teamID")),
+
                     "price": safe_int(ficha.get("price")),
                     "price_increment": safe_int(
                         ficha.get("priceIncrement")

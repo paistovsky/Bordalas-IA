@@ -74,8 +74,11 @@ export default function SquadTable({ players = [], showStarterColumn = true }) {
     return <div className="empty">Sin jugadores que enseñar.</div>;
   }
 
+  // Once columnas no caben en media pantalla. Antes que quitar
+  // datos, se deja rodar en horizontal: el dueño pidio MAS
+  // informacion, no menos.
   return (
-    <div className="scroll">
+    <div className="scroll" style={{ overflowX: "auto" }}>
       <table>
         <thead>
           <tr>

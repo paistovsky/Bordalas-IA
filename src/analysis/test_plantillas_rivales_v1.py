@@ -42,10 +42,8 @@ import ast
 from pathlib import Path
 
 from src.telemetry.squads import (
-    build_lineup_debate,
     build_rival_squads,
     enrich,
-    enrich_roster,
 )
 
 
@@ -251,111 +249,6 @@ def test_el_valor_semanal_es_el_del_motor():
 
 
 # ============================================================
-# EL DEBATE DEL ONCE
-# ============================================================
-
-
-def roster_para_el_debate():
-    """
-    Un once y un banquillo con un duelo reñido en el medio y otro
-    holgado en la defensa.
-    """
-
-    jugadores = []
-
-    def add(player_id, posicion, nombre, titular, valor):
-        jugadores.append({
-            "id": player_id,
-            "name": nombre,
-            "position": posicion,
-            "is_starter": titular,
-            "weekly_expected_value": valor,
-            "starter_probability": 70.0,
-            "hierarchy": "Importante",
-            "availability": "DISPONIBLE",
-        })
-
-    add(100, 1, "Portero", True, 0.75)
-
-    for i in range(4):
-        add(200 + i, 2, f"DEF{i}", True, 0.60)
-
-    add(210, 2, "DEF suplente", False, 0.20)
-
-    for i in range(4):
-        add(300 + i, 3, f"MC{i}", True, 0.50)
-
-    # El medio flojo del once saca solo 0.02 al mejor suplente.
-    add(303, 3, "MC justo", True, 0.42)
-    add(310, 3, "MC suplente bueno", False, 0.40)
-
-    add(400, 4, "DEL0", True, 0.65)
-    add(401, 4, "DEL1", True, 0.62)
-
-    return {"players": jugadores}
-
-
-def test_el_duelo_no_cambia_de_posicion():
-    """
-    Un cambio solo es legal sin tocar el dibujo si el que entra
-    juega donde el que sale. Proponer un delantero por un central
-    es proponer otra formacion.
-    """
-
-    debate = build_lineup_debate(roster_para_el_debate())
-
-    for duelo in debate["duelos"]:
-        assert (
-            duelo["entra"]["position"]
-            == duelo["se_queda"]["position"]
-            == duelo["position"]
-        ), "el duelo propone un cambio que no es legal"
-
-
-def test_el_duelo_es_el_peor_dentro_contra_el_mejor_fuera():
-    """
-    Cualquier otro par no es una decision: es un par cualquiera.
-    """
-
-    debate = build_lineup_debate(roster_para_el_debate())
-
-    medio = next(
-        d for d in debate["duelos"] if d["position"] == 3
-    )
-
-    assert medio["entra"]["name"] == "MC justo"
-    assert medio["se_queda"]["name"] == "MC suplente bueno"
-    assert round(medio["margen"], 3) == 0.02
-    assert medio["discutible"] is True
-
-
-def test_una_decision_holgada_no_se_vende_como_reñida():
-    """
-    Un panel que marca todo como discutible no marca nada.
-    """
-
-    debate = build_lineup_debate(roster_para_el_debate())
-
-    defensa = next(
-        d for d in debate["duelos"] if d["position"] == 2
-    )
-
-    assert defensa["margen"] > 0.3
-    assert defensa["discutible"] is False
-
-
-def test_sin_suplentes_en_esa_posicion_no_hay_duelo():
-    """
-    Con los dos delanteros dentro no habia nada que elegir, y no
-    se puede fabricar un duelo para llenar el hueco.
-    """
-
-    debate = build_lineup_debate(roster_para_el_debate())
-
-    assert all(d["position"] != 4 for d in debate["duelos"])
-
-
-# ============================================================
 # QUE SIGA SIENDO UN TERMOMETRO
 # ============================================================
 
@@ -446,10 +339,6 @@ def main():
         test_la_ficha_del_rival_y_la_mia_son_la_misma,
         test_sin_señal_no_se_inventa_un_porcentaje,
         test_el_valor_semanal_es_el_del_motor,
-        test_el_duelo_no_cambia_de_posicion,
-        test_el_duelo_es_el_peor_dentro_contra_el_mejor_fuera,
-        test_una_decision_holgada_no_se_vende_como_reñida,
-        test_sin_suplentes_en_esa_posicion_no_hay_duelo,
         test_las_plantillas_no_tocan_biwenger,
         test_futbolfantasy_cubre_a_los_rivales,
     ]

@@ -29,7 +29,6 @@ from src.analysis.historical_price_lookup import (
 
 from src.analysis.rival_bid_model import build_bid_model, optimal_bid
 from src.telemetry.squads import (
-    build_lineup_debate,
     build_rival_squads,
     enrich_roster,
 )
@@ -3116,11 +3115,6 @@ def build_dashboard_state() -> dict:
             photo_lookup,
         ),
         "roster": roster,
-
-        # Las once elecciones del once, no la lista. De esas solo
-        # dos o tres estuvieron reñidas, y son las unicas que se
-        # pueden discutir.
-        "lineup_debate": build_lineup_debate(roster),
 
         # Las plantillas de los seis rivales, con la misma ficha.
         # Salen de `standings[].lineup.players + discarded`, que ya
