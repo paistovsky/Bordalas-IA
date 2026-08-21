@@ -1,4 +1,3 @@
-import { Lesion, Sancion } from "../components/AbsenceCells";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 
 const DECISION = {
@@ -92,10 +91,74 @@ function estadoFisico(target) {
  * un ligamento roto es motivo de venta, dos partidos de sancion
  * no lo son. Ahora cada una tiene su columna y su detalle.
  *
- * Las dos celdas viven en `components/AbsenceCells` desde el
- * 20/08, cuando la tabla de PLANTILLA pidio lo mismo. Una
- * segunda copia habria sido una copia que se desincroniza.
+ * `merge_absences` guarda las dos fichas enteras desde hoy. Lo
+ * que se lee aqui ya venia de FutbolFantasy y se tiraba por el
+ * camino: el tipo de lesion, el pronostico en palabras, si la
+ * roja fue directa o por acumulacion, cuantos partidos van
+ * cumplidos.
  */
+
+function jornadas(n) {
+  if (n == null) return null;
+  if (n === 0) return "vuelve ya";
+  return `${n} jornada${n === 1 ? "" : "s"}`;
+}
+
+function Lesion({ absence, availability }) {
+  const parte = absence?.injury;
+
+  if (!parte) {
+    // Tocado sin parte detallado: se dice, no se calla.
+    if (availability === "DUDA") {
+      return <span className="pill warn">DUDA</span>;
+    }
+    return <span className="dim">—</span>;
+  }
+
+  const fuera = jornadas(parte.matchdays_out);
+
+  const grave =
+    Number(parte.matchdays_out || 0) >= 4 ||
+    parte.severity_label === "GRAVE";
+
+  return (
+    <div>
+      <span className={grave ? "pill crit" : "pill warn"}>
+        {parte.detail || "LESIONADO"}
+      </span>
+
+      {(parte.prognosis || fuera) && (
+        <div className="dim" style={{ fontSize: 9, marginTop: 2 }}>
+          {[parte.prognosis, fuera].filter(Boolean).join(" · ")}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Sancion({ absence }) {
+  const parte = absence?.suspension;
+
+  if (!parte) return <span className="dim">—</span>;
+
+  const partidos =
+    parte.matches_total != null
+      ? `${parte.matches_served ?? 0} de ${parte.matches_total} cumplidos`
+      : jornadas(parte.matchdays_out);
+
+  return (
+    <div>
+      <span className="pill crit">{parte.detail || "SANCIONADO"}</span>
+
+      {partidos && (
+        <div className="dim" style={{ fontSize: 9, marginTop: 2 }}>
+          {partidos}
+          {parte.basis === "SUPUESTO" ? " · estimado" : ""}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ClockPanel({ clock }) {
   if (!clock?.available) {
@@ -226,6 +289,18 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
 
   const cobertura = acquisition.starter_coverage || {};
 
+  /* UN TOPE QUE NO SE ANUNCIA ES UNA MENTIRA POR OMISION
+     (21/08/2026)
+
+     La cabecera decia "20 VALORADOS" y la tabla enseñaba doce.
+     Los otros ocho estaban valorados y ordenados, y se caian en
+     la ultima linea antes de la pantalla. El dueño lo descubrio
+     comparando el mercado de Biwenger a mano.
+
+     Ahora caben todos; pero si algun dia vuelve a recortar, se
+     dice. */
+  const recortados = Number(acquisition.hidden || 0);
+
   // Con cero pronósticos, la regla del once bloquea todas las
   // mejoras y "0 POR PUJAR" parecería que no hay chollos. No es
   // eso: es que falta el dato para poder juzgarlos.
@@ -240,6 +315,9 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
           <h2>OBJETIVOS DE HOY</h2>
           <div className="sub">
             {acquisition.market_size} valorados ·{" "}
+            {acquisition.shown != null
+              ? `${acquisition.shown} en la tabla · `
+              : ""}
             {pointsMarket?.calibrated
               ? `un punto cuesta ${formatEuros(pointsMarket.rate_median)}`
               : "precio del punto sin calibrar"}
@@ -368,6 +446,15 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
           })}
         </tbody>
       </table>
+
+      {recortados > 0 && (
+        <div className="alert warn">
+          Esta tabla enseña {acquisition.shown} de{" "}
+          {acquisition.valued} jugadores valorados.{" "}
+          <b>{recortados} se quedan fuera</b> por el tope de la lista, no
+          porque Pepe no los haya mirado.
+        </div>
+      )}
 
       {sinPronostico && (
         <div className="alert warn" style={{ marginTop: 10 }}>

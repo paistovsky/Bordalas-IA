@@ -60,7 +60,7 @@ def build_acquisition_board(
     rival_intelligence: dict,
     current_user_id,
     available_budget: int | None,
-    limit: int = 12,
+    limit: int = 60,
 ) -> dict:
     """
     Que hay en el mercado del Computer, cuanto vale para nosotros y
@@ -488,21 +488,42 @@ def build_acquisition_board(
             if f.get("xi_decision") in VETOS_DEL_ONCE
         )
 
-        # El recorte no puede esconder nuestro propio dinero.
+        # EL RECORTE MUDO (21/08/2026)
         #
-        # Con `limit=12` sobre 20 valorados, dos de las tres pujas
-        # vivas caian fuera de la lista y la pantalla no tenia
-        # forma de ensenarlas aunque quisiera. Lo que ya esta
-        # comprometido entra siempre.
+        #     "Mira los jugadores del mercado y mira los que ve
+        #      Pepe. No ve todos, ¿por qué?"
+        #
+        #     Si los veia: la cabecera decia "20 VALORADOS" y la
+        #     tabla enseñaba doce. Los otros ocho estaban
+        #     valorados, puntuados y ordenados, y se tiraban en la
+        #     ultima linea antes de la pantalla.
+        #
+        #     Un recorte que no se anuncia se lee como "esto es
+        #     todo lo que hay". El dueño reviso el mercado a mano
+        #     para descubrirlo.
+        #
+        # El mercado del Computer son veinte jugadores al dia. No
+        # hay ninguna razon para no enseñarlos todos, asi que el
+        # limite sube a un tamaño que no recorta nada real y se
+        # queda solo como freno ante un mercado anomalo.
+        #
+        # Y si algun dia recorta, LO DICE: `hidden` sale en el
+        # payload y la pantalla lo canta. Un tope silencioso es
+        # una mentira por omision.
         mostradas = filas[:limit]
 
         vistos = {f["id"] for f in mostradas}
 
+        # Lo que ya esta comprometido entra siempre, aunque el
+        # recorte lo hubiera dejado fuera: el recorte no puede
+        # esconder nuestro propio dinero.
         mostradas.extend(
             f
             for f in filas
             if f.get("has_live_bid") and f["id"] not in vistos
         )
+
+        ocultas = len(filas) - len(mostradas)
 
         con_puja_viva = [
             f for f in filas if f.get("has_live_bid")
@@ -549,6 +570,13 @@ def build_acquisition_board(
                 "total": len(filas),
                 "blocked_by_starter_rule": bloqueados,
             },
+            # Cuantos valorados NO llegan a la tabla. Cero casi
+            # siempre; si deja de serlo, la pantalla lo dice en
+            # vez de callarse.
+            "valued": len(filas),
+            "shown": len(mostradas),
+            "hidden": max(0, ocultas),
+
             "premium_model": modelo.get("premium"),
             "data_coverage": modelo.get("data_coverage"),
             "ledger_trusted": modelo.get("ledger_trusted"),
