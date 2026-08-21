@@ -29,6 +29,10 @@ NO CAMBIA NADA POR SI SOLO
     escribe en Biwenger.
 """
 
+from src.analysis.acquisition_budget import (
+    budget_for_intent,
+)
+
 from src.analysis.acquisition_valuation import (
     build_valuation_context,
     value_candidate,
@@ -86,6 +90,7 @@ def build_acquisition_board(
     current_user_id,
     available_budget: int | None,
     limit: int = 60,
+    acquisition_budget: int | None = None,
 ) -> dict:
     """
     Que hay en el mercado del Computer, cuanto vale para nosotros y
@@ -94,6 +99,21 @@ def build_acquisition_board(
     Es la vista que responde a "que va a hacer Pepe hoy". Antes no
     existia: el panel de especulacion solo mostraba nombres y
     scores, sin decir cuanto ni por que.
+
+    DOS PRESUPUESTOS, NO UNO (21/08/2026)
+
+        `available_budget` es el de ESPECULAR: el 15 % de la caja
+        mas el 60 % del margen de deuda. `acquisition_budget` es
+        el de FICHAR: la caja entera mas el margen entero, con el
+        techo de Biwenger.
+
+        Cada fila usa el suyo segun su `intent`. Antes las dos
+        vias pasaban por el estrecho, y por eso un candidato de
+        2,58 M salia SUPERA_PRESUPUESTO teniendo 13 M de puja
+        maxima.
+
+        Si no se pasa el de fichajes se sigue usando el viejo:
+        peor, pero igual que ayer.
     """
 
     try:
@@ -485,16 +505,41 @@ def build_acquisition_board(
 
             elif valoracion.get("value", 0) > 0:
 
+                # EL PRESUPUESTO QUE TOCA
+                #
+                # Mejorar el once no se paga con el limite de las
+                # apuestas. La eleccion vive en
+                # `acquisition_budget.budget_for_intent` para que
+                # produccion y dashboard no puedan contestar
+                # distinto.
+                presupuesto = budget_for_intent(
+                    intent=valoracion.get("intent"),
+                    speculation_budget=available_budget,
+                    acquisition_budget=acquisition_budget,
+                )
+
                 plan = optimal_bid(
                     price=safe_int(ficha.get("price")),
                     value=valoracion["value"],
                     model=modelo,
-                    available_budget=available_budget,
+                    available_budget=presupuesto,
 
                     # El dashboard tiene que enseñar la misma
                     # decision que toma produccion, no una
                     # parecida.
                     intent=valoracion.get("intent"),
+                )
+
+                # Que techo se le aplico y de que bolsillo sale.
+                # Sin esto, un SUPERA_PRESUPUESTO vuelve a ser un
+                # numero que nadie sabe de donde sale.
+                fila["budget_applied"] = presupuesto
+                fila["budget_source"] = (
+                    "FICHAJES"
+                    if str(valoracion.get("intent") or "").upper()
+                    == "XI_UPGRADE"
+                    and acquisition_budget is not None
+                    else "ESPECULACION"
                 )
 
                 fila["decision"] = plan.get("decision")
@@ -592,6 +637,17 @@ def build_acquisition_board(
 
         return {
             "available": True,
+
+            # CON QUE DINERO SE HA DECIDIDO
+            #
+            # Los dos numeros, juntos y visibles. Mientras solo se
+            # publicaba uno, nadie podia ver que se estaba usando
+            # el que no era.
+            "budgets": {
+                "acquisition": acquisition_budget,
+                "speculation": available_budget,
+                "separated": acquisition_budget is not None,
+            },
 
             # El tamaño del mercado sigue siendo el del Computer.
             # Las filas de pujas fuera de el se ven en la tabla

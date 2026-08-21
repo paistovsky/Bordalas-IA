@@ -65,6 +65,9 @@ export default function StrategyPanel({ data }) {
    *   Un `|| {}` es comodo y silencia justo esto. */
   const market = data.pointsMarket || {};
   const exposure = data.exposure || {};
+
+  // El bolsillo de fichar, que es otro. Ver el paso 2.
+  const fichajes = exposure.acquisition || {};
   const clock = data.marketClock || {};
   const solvency = data.solvency || {};
   const acquisition = data.acquisition || {};
@@ -187,9 +190,46 @@ export default function StrategyPanel({ data }) {
                   ? `${Number(clock.hours_to_reset).toFixed(1)} h`
                   : "—"}
               </b>{" "}
-              para el reset y lo que no se puje hoy se pierde. Disponible{" "}
-              <b>{formatMoney(exposure.available_budget)}</b>
-              {exposure.mode === "DEBT" ? " de margen de deuda" : ""}.
+              para el reset y lo que no se puje hoy se pierde.
+              {/* DOS BOLSILLOS, NO UNO (21/08/2026)
+               *
+               *   Aqui salia el presupuesto de ESPECULAR -15 % de
+               *   la caja y 60 % del margen de deuda- debajo de
+               *   una lista de fichajes. El dueño leyo "solo
+               *   quedan 1.497.444" teniendo 1,5 M en la cuenta y
+               *   13 M de puja maxima, y con razon no lo entendio.
+               *
+               *   Este paso va de fichar. El numero que manda aqui
+               *   es el de fichar. */}
+              {fichajes.available ? (
+                <>
+                  {" "}
+                  Para fichar dispone de{" "}
+                  <b>{formatMoney(fichajes.available_budget)}</b>
+                  {fichajes.debt_budget > 0
+                    ? ` (${formatMoney(
+                        fichajes.cash_budget
+                      )} de caja y ${formatMoney(
+                        fichajes.debt_budget
+                      )} de deuda segura)`
+                    : ""}
+                  {fichajes.capped_by_biwenger
+                    ? `, recortado por el máximo de Biwenger`
+                    : ""}
+                  . Para especular, aparte,{" "}
+                  <b>{formatMoney(exposure.available_budget)}</b>.
+                </>
+              ) : (
+                <>
+                  {" "}
+                  Disponible{" "}
+                  <b>{formatMoney(exposure.available_budget)}</b>
+                  {exposure.mode === "DEBT"
+                    ? " de margen de deuda"
+                    : ""}
+                  .
+                </>
+              )}
             </div>
           </>
         ) : (

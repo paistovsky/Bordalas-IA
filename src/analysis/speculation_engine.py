@@ -20,6 +20,15 @@ from src.analysis.bid_exposure_engine import (
     build_bid_exposure,
 )
 
+# El presupuesto de fichar vive fuera de este fichero a proposito.
+# Este motor es el de ESPECULAR y sus porcentajes son los de una
+# apuesta; el 21/08/2026 se estaban aplicando tambien a mejorar el
+# once, que no lo es. Se calcula aqui al lado porque aqui ya estan
+# la solvencia, la puja Franchise y las pujas vivas.
+from src.analysis.acquisition_budget import (
+    calculate_acquisition_budget,
+)
+
 from src.analysis.strategic_target_engine import (
     build_strategic_target_board,
 )
@@ -1753,6 +1762,20 @@ def build_speculation_board(
     )
 
     # ==================================================
+    # PRESUPUESTO PARA MEJORAR EL ONCE
+    # ==================================================
+    #
+    # Mismas puertas, otra cantidad. Ver `acquisition_budget`:
+    # fichar un titular no es una apuesta y no puede pasar por el
+    # limite de las apuestas.
+    acquisition_budget = calculate_acquisition_budget(
+        snapshot=snapshot,
+        solvency=solvency,
+        active_franchise_bid=active_franchise_bid,
+        exposure=bid_exposure,
+    )
+
+    # ==================================================
     # PLAYERS
     # ==================================================
 
@@ -2082,6 +2105,9 @@ def build_speculation_board(
 
         "budget":
             budget,
+
+        "acquisition_budget":
+            acquisition_budget,
 
         "bid_exposure":
             bid_exposure,

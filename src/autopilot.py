@@ -941,6 +941,23 @@ def build_cycle_acquisition_board(
             presupuesto.get("total_budget"),
         )
 
+        # EL DINERO DE FICHAR (21/08/2026)
+        #
+        # `presupuesto` es el de especular: 15 % de la caja y 60 %
+        # del margen de deuda. Mejorar el once no es una apuesta y
+        # tiene el suyo, con las mismas puertas y otra cantidad.
+        # Si no llega se sigue con el viejo, como hasta hoy.
+        fichajes = speculation.get("acquisition_budget") or {}
+
+        para_fichar = (
+            fichajes.get(
+                "available_budget",
+                fichajes.get("total_budget"),
+            )
+            if fichajes.get("enabled")
+            else None
+        )
+
         tablero = build_acquisition_board(
             snapshot=snapshot,
             rival_intelligence=inteligencia,
@@ -948,6 +965,7 @@ def build_cycle_acquisition_board(
                 "current_user_id"
             ),
             available_budget=disponible,
+            acquisition_budget=para_fichar,
         )
 
         # Que se vea de donde salio el pronostico con el que se ha

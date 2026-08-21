@@ -2501,6 +2501,18 @@ def build_global_decision_uncached(
         or {}
     )
 
+    # EL OTRO BOLSILLO (21/08/2026)
+    #
+    # `budget` es el de especular. Mejorar el once tiene el suyo,
+    # con las mismas puertas de solvencia y otra cantidad detras.
+    acquisition_budget = (
+        speculation.get(
+            "acquisition_budget",
+            {},
+        )
+        or {}
+    )
+
     executable_buys = (
         speculation.get(
             "executable_buys",
@@ -2549,14 +2561,55 @@ def build_global_decision_uncached(
     # pregunta correcta en un fantasy.
     # ============================================================
 
+    # ============================================================
+    # LA QUINTA PARED (21/08/2026)
+    #
+    # La puerta de entrada a comprar era:
+    #
+    #     budget["enabled"] and executable_buys
+    #
+    # Las dos cosas son de ESPECULAR. `budget` es el presupuesto
+    # de apuestas y `executable_buys` es la lista del scoring
+    # antiguo. O sea: para fichar un titular habia que tener antes
+    # permiso para apostar y una apuesta pendiente.
+    #
+    # Con el presupuesto de especulacion por debajo de 150.000 EUR
+    # -que es lo normal con la caja baja- esta puerta se cerraba
+    # entera y el tablero de adquisicion no llegaba ni a mirarse,
+    # tuviera lo que tuviera dentro.
+    #
+    # Ahora hay dos llaves. La de especular es la de siempre y no
+    # se toca. La de fichar exige su propio presupuesto y que el
+    # tablero traiga algo pujable. Ninguna de las dos abre nada
+    # que las puertas de solvencia no hayan abierto ya: Hard
+    # Safety, la ventana de deuda y MAX_SAFE_DEBT siguen delante
+    # de las dos.
+    # ============================================================
+
+    hay_lista_de_especulacion = bool(executable_buys)
+
+    hay_objetivo_de_fichaje = bool(
+        (acquisition_board or {}).get("available")
+        and int(
+            (acquisition_board or {}).get("biddable") or 0
+        )
+        > 0
+    )
+
     if (
         speculation_phase_allowed
         and
-        budget.get(
-            "enabled"
+        (
+            (
+                budget.get("enabled")
+                and hay_lista_de_especulacion
+            )
+            or
+            (
+                acquisition_budget.get("enabled")
+                and hay_objetivo_de_fichaje
+            )
         )
-        and
-        executable_buys
         and
         not hard_safety_mode
     ):
@@ -2580,10 +2633,18 @@ def build_global_decision_uncached(
             not in players_with_live_bid(speculation)
         ]
 
+        # Sin lista antigua no hay respaldo, y ahora se puede
+        # llegar aqui sin ella: la via de fichajes no la necesita.
+        # `executable_buys[0]` sobre una lista vacia reventaba el
+        # ciclo entero.
         objetivo = (
             pendientes_legacy[0]
             if pendientes_legacy
-            else executable_buys[0]
+            else (
+                executable_buys[0]
+                if executable_buys
+                else None
+            )
         )
 
         fuente_objetivo = "SPECULATION_SCORING"
@@ -2721,6 +2782,16 @@ def build_global_decision_uncached(
 
                     "budget":
                         budget,
+
+                    # El presupuesto de fichar viaja con la
+                    # decision para que quien escribe en Biwenger
+                    # revalide contra el mismo numero con el que
+                    # se decidio, y no contra el de especular.
+                    "acquisition_budget":
+                        acquisition_budget,
+
+                    "intent":
+                        (mejor or {}).get("intent"),
 
                     "target_source":
                         fuente_objetivo,

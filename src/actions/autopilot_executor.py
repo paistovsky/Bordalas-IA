@@ -1971,14 +1971,29 @@ def execute_autopilot_decision(
 
         if listed_price > catalog_price:
 
+            datos = decision.get("data") or {}
+
+            # Mismo criterio que abajo: el limite que se aplica es
+            # el de la via por la que se decidio la puja.
+            via_xi = str(
+                datos.get("intent")
+                or (datos.get("acquisition_target") or {}).get(
+                    "intent"
+                )
+                or ""
+            ).upper() == "XI_UPGRADE"
+
+            bolsillo = (
+                datos.get("acquisition_budget") or {}
+                if via_xi
+                else {}
+            )
+
+            if not bolsillo.get("enabled"):
+                bolsillo = datos.get("budget") or {}
+
             authorised = int(
-                (
-                    (
-                        decision.get("data")
-                        or {}
-                    ).get("budget")
-                    or {}
-                ).get(
+                bolsillo.get(
                     "single_operation_limit",
                     0,
                 )
@@ -2025,8 +2040,50 @@ def execute_autopilot_decision(
                     fresh_snapshot_file,
             }
 
+        # ----------------------------------------------------
+        # CONTRA QUE PRESUPUESTO SE REVALIDA (21/08/2026)
+        # ----------------------------------------------------
+        #
+        # Aqui se comprobaba SIEMPRE contra el presupuesto de
+        # especulacion. Una puja para mejorar el once decidida con
+        # el presupuesto de fichajes -mucho mayor- llegaba a esta
+        # linea y se caia sola con SPECULATION_BUDGET_CHANGED.
+        #
+        # El presupuesto se elige por la misma via por la que se
+        # decidio la puja. Es lectura fresca igual que antes: sale
+        # del tablero recien construido, no del que viajaba en la
+        # decision.
+        intento = str(
+            (
+                (decision.get("data") or {}).get("intent")
+                or (
+                    (decision.get("data") or {}).get(
+                        "acquisition_target"
+                    )
+                    or {}
+                ).get("intent")
+                or ""
+            )
+        ).upper()
+
+        if intento == "XI_UPGRADE":
+
+            presupuesto_via = (
+                fresh_board.get("acquisition_budget")
+                or {}
+            )
+
+            # Si el presupuesto de fichajes no esta disponible o
+            # viene bloqueado, se vuelve al de especulacion. Mas
+            # estrecho, pero nunca sin techo.
+            if not presupuesto_via.get("enabled"):
+                presupuesto_via = fresh_budget
+
+        else:
+            presupuesto_via = fresh_budget
+
         single_limit = int(
-            fresh_budget.get(
+            presupuesto_via.get(
                 "single_operation_limit",
                 0,
             )
@@ -2034,7 +2091,7 @@ def execute_autopilot_decision(
         )
 
         total_budget = int(
-            fresh_budget.get(
+            presupuesto_via.get(
                 "total_budget",
                 0,
             )
@@ -2046,7 +2103,7 @@ def execute_autopilot_decision(
         # pasar una puja nueva cada 30 minutos sobre el mismo
         # presupuesto entero.
         available_budget = int(
-            fresh_budget.get(
+            presupuesto_via.get(
                 "available_budget",
                 total_budget,
             )

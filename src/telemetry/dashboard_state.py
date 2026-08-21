@@ -2789,6 +2789,48 @@ def compact_exposure(state: dict) -> dict:
         "mode": budget.get("mode"),
         "blocked_by": budget.get("blocked_by"),
         "reason": budget.get("reason"),
+
+        # EL OTRO BOLSILLO (21/08/2026)
+        #
+        # Todo lo de arriba es el limite de ESPECULAR. Fichar para
+        # mejorar el once tiene el suyo, mucho mayor, y hasta hoy
+        # no se veia en ninguna pantalla porque no existia.
+        "acquisition": compact_acquisition_budget(
+            speculation.get("acquisition_budget") or {}
+        ),
+    }
+
+
+def compact_acquisition_budget(budget: dict) -> dict:
+    """
+    Con cuanto dinero puede Pepe mejorar el once.
+    """
+
+    if not budget:
+        return {"available": False}
+
+    return {
+        "available": True,
+        "enabled": bool(budget.get("enabled")),
+        "cash_budget": safe_int(budget.get("cash_budget")),
+        "debt_budget": safe_int(budget.get("debt_budget")),
+        "gross_budget": safe_int(budget.get("gross_budget")),
+        "total_budget": safe_int(budget.get("total_budget")),
+        "available_budget": safe_int(
+            budget.get(
+                "available_budget",
+                budget.get("total_budget"),
+            )
+        ),
+        "maximum_bid": safe_int(budget.get("maximum_bid")),
+        "committed_total": safe_int(budget.get("committed_total")),
+        "capped_by_biwenger": bool(budget.get("capped_by_biwenger")),
+        "mode": budget.get("mode"),
+        "blocked_by": budget.get("blocked_by"),
+        "reason": budget.get("reason"),
+        "debt_unavailable_reason": budget.get(
+            "debt_unavailable_reason"
+        ),
     }
 
 
@@ -2936,11 +2978,27 @@ def build_dashboard_state() -> dict:
 
     exposure = compact_exposure(state)
 
+    # El dashboard tiene que decidir con el MISMO dinero que
+    # produccion. Si aqui se pasara solo el de especular, la
+    # pantalla volveria a enseñar una decision que el ciclo no
+    # toma.
+    fichajes = exposure.get("acquisition") or {}
+
+    presupuesto_fichajes = (
+        (
+            fichajes.get("available_budget")
+            or fichajes.get("total_budget")
+        )
+        if fichajes.get("enabled")
+        else None
+    )
+
     acquisition = build_acquisition_board(
         snapshot=snapshot,
         rival_intelligence=rival_intelligence,
         current_user_id=board.get("current_user_id"),
         available_budget=exposure.get("available_budget") or None,
+        acquisition_budget=presupuesto_fichajes or None,
     )
 
     points_market = calibrate_points_market(
