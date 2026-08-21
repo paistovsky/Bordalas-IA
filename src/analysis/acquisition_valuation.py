@@ -63,6 +63,19 @@ from src.analysis.player_value_engine import (
 DEFAULT_SPECULATION_HORIZON = 3
 
 
+# Cuanto se cuenta del titular que sale, al valorar el cambio.
+#
+# El Computer hace oferta por todo jugador publicado en cada
+# reset, y en la ultima tanda observada pago entre -0,6 % y
+# +4,5 % del precio de mercado. Se cuenta el 80 % igualmente: el
+# dinero llega en el reset y no hoy, y el precio puede moverse.
+#
+# Subirlo hace a Pepe mas agresivo fichando; bajarlo lo vuelve a
+# paralizar. A cero -como estuvo del 19 al 21/08- no puede
+# mejorar el once nunca.
+RECUPERACION_TITULAR = 0.80
+
+
 def safe_int(value, default: int = 0) -> int:
     try:
         return int(value or 0)
@@ -341,23 +354,69 @@ def value_candidate(
 
             titular = bool(sustituido.get("in_lineup"))
 
-            # EL DINERO DE UNA VENTA QUE NO HA PASADO NO ES
-            # DINERO (19/08/2026)
+            # EL TITULAR QUE SALE TAMBIEN VALE DINERO
+            # (21/08/2026)
             #
-            # `recovered_value` sube lo que estariamos dispuestos
-            # a pagar contando con lo que entra al vender al
-            # sustituido. Para un suplente vale: se publica y se
-            # vende sin que el once lo note.
+            #     "Lo que quiero ver es si Pepe pelea las pujas
+            #      por jugadores que mejoren el XI."
             #
-            # Para un titular no. Comprar es instantaneo y vender
-            # tarda dias, asi que ese cambio se juzga como si el
-            # dinero no fuese a llegar. Si sale rentable igual,
-            # es un buen cambio de verdad.
-            recuperado = (
-                sustituido["price"]
-                if assume_replacement_sold and not titular
-                else 0
-            )
+            # No las peleaba. Cero pujas de veinte candidatos,
+            # dias seguidos, y no era prudencia: era aritmetica
+            # imposible.
+            #
+            # Desde el 19/08, al cambiar un TITULAR se ponia
+            # `recuperado = 0`: el dinero del que sale no contaba.
+            # Asi la cuenta quedaba en
+            #
+            #     mejora marginal   vs   precio entero
+            #
+            # y una mejora marginal NUNCA supera un precio
+            # entero. No es que compensara pocas veces: es que no
+            # podia compensar nunca. Affengruber, 90 % titular y
+            # Clave, costaba 3,74 M y aportaba 2,13 M sobre
+            # Yeray. NO COMPENSA. Y Yeray, que valia 1,85 M,
+            # contaba como cero.
+            #
+            # La operacion real es comprar Y vender:
+            #
+            #     pagas ..........  3,74 M
+            #     recuperas ......  1,85 M
+            #     coste neto .....  1,89 M   <  2,13 M de mejora
+            #
+            # POR QUE AHORA SI SE PUEDE CONTAR
+            #
+            #     Porque vender dejo de ser una incognita. En cada
+            #     reset el Computer hace oferta por TODO jugador
+            #     publicado -lo dice nuestra propia linea
+            #     temporal-, asi que el riesgo no es quedarse
+            #     pegado con el saliente: es cobrar algo menos.
+            #
+            #     Un riesgo de precio se cubre con un descuento.
+            #     Uno de liquidez, no. Antes se cubria el
+            #     equivocado, y con el descuento maximo posible:
+            #     contar cero.
+            #
+            # EL DESCUENTO
+            #
+            #     Las ofertas observadas del Computer rondan el
+            #     precio de mercado -en la ultima tanda, entre
+            #     -0,6 % y +4,5 %-. Aun asi se cuenta el 80 %, y a
+            #     proposito: el dinero llega en el reset, no hoy,
+            #     y el precio puede moverse. Si el cambio solo
+            #     sale a favor con el precio de escaparate, no
+            #     sale.
+            recuperado = 0
+
+            if assume_replacement_sold:
+
+                recuperado = int(
+                    safe_int(sustituido["price"])
+                    * (
+                        1.0
+                        if not titular
+                        else RECUPERACION_TITULAR
+                    )
+                )
 
             intento = xi_upgrade_value(
                 candidate_points=estimacion["points"],
@@ -378,8 +437,17 @@ def value_candidate(
 
             intento["replaces"] = sustituido
 
-            if titular and recuperado == 0:
+            # SIGUE HACIENDO FALTA VENDER (21/08/2026)
+            #
+            # La condicion era `recuperado == 0`, que dejo de
+            # cumplirse en cuanto el saliente empezo a contar. Y
+            # el aviso hace mas falta que antes: ahora la puja se
+            # apoya en ese dinero, asi que la venta no es un
+            # detalle, es parte de la operacion.
+            if titular:
                 intento["needs_sale_first"] = True
+                intento["recovered_value"] = recuperado
+                intento["recovered_from"] = sustituido.get("name")
 
             if safe_int(intento.get("value")) <= 0:
                 descartes.append(intento)
