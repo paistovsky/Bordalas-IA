@@ -69,8 +69,10 @@ export default function HomePage({ data }) {
         </section>
 
         <div className="stack">
-          <TimelinePanel data={data} />
+          {/* La clasificacion primero: lo que se abre a mirar es
+              como voy, no que va a pasar en el reset. */}
           <StandingsIntelPanel data={data} />
+          <TimelinePanel data={data} />
         </div>
       </div>
 

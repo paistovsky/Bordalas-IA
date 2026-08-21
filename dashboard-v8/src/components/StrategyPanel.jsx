@@ -48,9 +48,24 @@ function Paso({ n, titulo, tono = "", children }) {
 export default function StrategyPanel({ data }) {
   const summary = data.summary || {};
   const lineup = data.lineup || {};
-  const market = data.points_market || {};
+  /* DOS BLOQUES LEIDOS CON EL NOMBRE EQUIVOCADO (21/08/2026)
+   *
+   *   `data` sale del normalizador, que renombra `points_market`
+   *   a `pointsMarket` y `market_clock` a `marketClock`. Aqui se
+   *   pedian con el nombre del JSON crudo, asi que los dos
+   *   llegaban vacios SIN FALLAR: quedaban en `{}` y la pantalla
+   *   se caia a los textos de reserva.
+   *
+   *   Resultado visible: "Ninguno de los que hay baja de los —
+   *   por punto", con un guion donde va el precio, y "el mercado
+   *   se resetea una vez al dia" en vez de las horas que faltan.
+   *   Tambien desaparecia la etiqueta de EUR/PUNTO de la
+   *   cabecera.
+   *
+   *   Un `|| {}` es comodo y silencia justo esto. */
+  const market = data.pointsMarket || {};
   const exposure = data.exposure || {};
-  const clock = data.market_clock || {};
+  const clock = data.marketClock || {};
   const solvency = data.solvency || {};
   const acquisition = data.acquisition || {};
 
@@ -196,9 +211,20 @@ export default function StrategyPanel({ data }) {
       <Paso
         n="3"
         tono={solvency.needed ? "crit" : "idle"}
+        /* LA PANTALLA DISCUTIENDO CON LA PANTALLA (21/08/2026)
+         *
+         *   El titulo decia "Nada le esta frenando" mientras la
+         *   columna de al lado listaba tres frenos. Miraba solo
+         *   si habia deuda; los frenos no los miraba nadie.
+         *
+         *   Un panel que se contradice consigo mismo gasta mas
+         *   confianza que uno que se equivoca: si no se cree ni
+         *   el, por que iba a creerselo el dueño. */
         titulo={
           solvency.needed
             ? `Tiene que sanear ${formatMoney(solvency.deficit)}`
+            : frenados.length > 0
+            ? `${frenados.length} cosa(s) le están frenando`
             : "Nada le está frenando"
         }
       >
