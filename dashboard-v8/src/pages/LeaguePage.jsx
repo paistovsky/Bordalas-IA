@@ -84,14 +84,11 @@ export default function LeaguePage({ data }) {
                 })}
               </tbody>
             </table>
-            <p className="note" style={{ textAlign: "left" }}>
-              {audit.reason}
-              {" "}
-              ABONOS = lo que Biwenger ha pagado a cada mánager por sus
-              puntos, a 30.000 € cada uno. <b>Ya está sumado</b> a la caja
-              de la tabla de arriba; la columna solo dice cuánta de esa
-              caja viene de ahí.
-            </p>
+            {/* LA LEYENDA, FUERA (21/08/2026)
+                El aviso de que hay mánagers sin explicar no se
+                pierde: sigue en la etiqueta CON_HUECOS de la
+                cabecera y en la columna de cobertura, que dice
+                cuál y cuánto. La prosa solo lo repetía. */}
           </>
         ) : (
           <div className="empty">{audit.reason || "Sin reconciliación disponible."}</div>

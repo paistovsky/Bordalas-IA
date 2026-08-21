@@ -174,18 +174,11 @@ export default function StandingsIntelPanel({ data }) {
         </tbody>
       </table>
 
-      <p className="note" style={{ textAlign: "left", marginTop: 9 }}>
-        CAJA = dinero ahora (puede ir en rojo), <b>abonos incluidos</b> —30.000 €
-        por punto, pasa el ratón para ver cuántos—. PLANTILLA = lo que valen sus
-        jugadores (pasa el ratón para ver cuántos tiene). PATRIMONIO = caja +
-        plantilla, o sea lo que vale el equipo entero. TOPE = caja + margen de
-        deuda, con el ratio calibrado contra el maximumBid oficial de Pepe. PUJA =
-        veces que ese mánager puja de verdad, medida sobre el tablón. MÁX.
-        VISTO = lo más alto que se le ha visto pagar (pasa el ratón para ver
-        sus pujas perdidas). AMENAZA combina las cuatro. Lo que tienen
-        publicado en venta <b>no</b> suma al tope: en el reset las pujas se
-        resuelven antes de que el Computer haga ofertas.
-      </p>
+      {/* LA LEYENDA, FUERA (21/08/2026)
+          Once lineas de texto explicando siete columnas ocupaban
+          mas que la tabla. Lo que explicaba de verdad sigue
+          estando: cada celda lo cuenta al pasar el raton, que es
+          cuando hace falta y no antes. */}
     </section>
   );
 }
