@@ -107,10 +107,13 @@ export default function MarcadorPage({ data }) {
           </div>
 
           <div className="kpi">
-            <div className="l">JORNADAS MEDIDAS</div>
-            <div className="v">{resumen.jornadas_medibles ?? 0}</div>
+            <div className="l">JORNADAS QUE CUENTAN</div>
+            <div className="v">{resumen.jornadas_fiables ?? 0}</div>
             <div className="s">
               de {resumen.jornadas_observadas ?? 0} anotadas
+              {resumen.jornadas_descartadas
+                ? ` · ${resumen.jornadas_descartadas} descartada(s) por no cuadrar`
+                : ""}
             </div>
           </div>
         </div>
@@ -230,17 +233,33 @@ export default function MarcadorPage({ data }) {
                     <td className="mono">{jornada.mejor_formacion}</td>
                     <td className="n mono">{jornada.mejor_puntos}</td>
                     <td className="n">
-                      <span
-                        className={
-                          jornada.eficiencia >= 85
-                            ? "pill ok"
-                            : jornada.eficiencia >= 70
-                            ? "pill warn"
-                            : "pill crit"
-                        }
-                      >
-                        {jornada.eficiencia} %
-                      </span>
+                      {/* UNA NOTA QUE NO CUADRA NO ES UNA NOTA
+                          (21/08/2026)
+
+                          Pintarla en rojo con su porcentaje la
+                          hace parecer un mal resultado. No lo
+                          es: es un numero invalido, y el ojo
+                          tiene que distinguir las dos cosas. */}
+                      {jornada.cuadra ? (
+                        <span
+                          className={
+                            jornada.eficiencia >= 85
+                              ? "pill ok"
+                              : jornada.eficiencia >= 70
+                              ? "pill warn"
+                              : "pill crit"
+                          }
+                        >
+                          {jornada.eficiencia} %
+                        </span>
+                      ) : (
+                        <span
+                          className="dim"
+                          title={`Reconstruimos ${jornada.puntos_once} puntos y Biwenger pagó ${jornada.puntos_biwenger}. El once que anotamos no es el que jugó.`}
+                        >
+                          no cuadra
+                        </span>
+                      )}
                     </td>
                     <td className="n mono down">
                       {jornada.puntos_perdidos || 0}

@@ -296,6 +296,42 @@ def observar(
     mi_fila = _mi_fila(snapshot, current_user_id)
     alineacion = mi_fila.get("lineup") or {}
 
+    # LOS NOMBRES, DEL CATALOGO Y NO DE LA PLANTILLA (21/08/2026)
+    #
+    # La pantalla enseñaba "jugaron en su lugar: 38194, 25322,
+    # 9065, 1599". Son ids, no jugadores.
+    #
+    # El nombre se buscaba en la plantilla del dia, y un jugador
+    # que alineo el sabado y se vendio el domingo ya no esta ahi.
+    # El catalogo si lo tiene: son los 500 y pico de La Liga.
+    catalogo = (
+        (snapshot.get("catalog") or {})
+        .get("data", {})
+        .get("players")
+        or {}
+    )
+
+    nombres = {
+        str(j["id"]): j["name"]
+        for j in plantilla
+    }
+
+    for player_id in (alineacion.get("players") or []):
+
+        clave = str(safe_int(player_id))
+
+        if clave in nombres:
+            continue
+
+        ficha = (
+            catalogo.get(clave)
+            if isinstance(catalogo, dict)
+            else None
+        ) or {}
+
+        if ficha.get("name"):
+            nombres[clave] = str(ficha["name"])
+
     ledger = cargar_ledger()
 
     ledger["jornadas"][str(round_id)] = {
@@ -312,6 +348,10 @@ def observar(
         },
         "plantilla": plantilla,
         "totales": totales,
+
+        # Nombre de todo el que sale en la foto, incluidos los
+        # que ya no estan en la plantilla.
+        "nombres": nombres,
     }
 
     ledger["updated_at"] = datetime.now().isoformat()
@@ -584,6 +624,7 @@ def marcador() -> dict:
                 actual.get("plantilla") or [],
                 alineados,
                 techo.get("players") or [],
+                actual.get("nombres") or {},
             ),
 
             "puntos_biwenger": mios,
@@ -593,8 +634,24 @@ def marcador() -> dict:
             ),
 
             "media_rivales": media_rivales,
+
+            # CONTRA LA LIGA SE COMPARA CON EL DATO OFICIAL
+            # (21/08/2026)
+            #
+            # Salia -11,5 cuando la verdad era +4,5. Se estaba
+            # restando NUESTRA reconstruccion del once (13) a la
+            # media de los rivales, en vez de los puntos que
+            # Biwenger le dio de verdad (29).
+            #
+            # La reconstruccion solo hace falta para el
+            # contrafactual. Lo que puntuo Pepe es un hecho y no
+            # hay que deducirlo.
             "diferencia_liga": (
-                round(puntos_alineados - media_rivales, 1)
+                round(
+                    (mios if mios is not None else puntos_alineados)
+                    - media_rivales,
+                    1,
+                )
                 if media_rivales is not None
                 else None
             ),
@@ -602,9 +659,32 @@ def marcador() -> dict:
 
     medibles = [f for f in filas if f.get("medible")]
 
+    # UNA JORNADA QUE NO CUADRA NO PUNTUA (21/08/2026)
+    #
+    #     La jornada 1 salio con 61,9 % en rojo grande y "NO
+    #     CUADRA" en pequeño al lado. Los dos numeros no pueden
+    #     convivir: si la reconstruccion del once no suma lo que
+    #     Biwenger pago, esa nota no mide nada.
+    #
+    #     Y en ese caso concreto la nota estaba mal de verdad: el
+    #     once que anotamos no era el que jugo -se anoto un dia
+    #     tarde, con la alineacion ya cambiada-, asi que salian 13
+    #     puntos donde Biwenger pago 29.
+    #
+    #     El cuadre existe justo para eso. Lo que faltaba era que
+    #     tuviera consecuencias: una jornada que no cuadra sale de
+    #     la media, no se promedia con las buenas.
+    #
+    # La diferencia contra la liga SI se conserva: sale de los
+    # puntos oficiales, que son un hecho, y no depende de que
+    # nuestra reconstruccion sea buena.
+    fiables = [f for f in medibles if f.get("cuadra")]
+
     resumen = {
         "jornadas_observadas": len(jornadas),
         "jornadas_medibles": len(medibles),
+        "jornadas_fiables": len(fiables),
+        "jornadas_descartadas": len(medibles) - len(fiables),
         "eficiencia_media": None,
         "diferencia_media": None,
         "cuadra_todo": all(
@@ -617,7 +697,7 @@ def marcador() -> dict:
 
         eficiencias = [
             f["eficiencia"]
-            for f in medibles
+            for f in fiables
             if f.get("eficiencia") is not None
         ]
 
@@ -637,10 +717,19 @@ def marcador() -> dict:
                 sum(diferencias) / len(diferencias), 1
             )
 
-        resumen["veredicto"] = _veredicto(
-            resumen["eficiencia_media"],
-            len(medibles),
-        )
+        if eficiencias:
+            resumen["veredicto"] = _veredicto(
+                resumen["eficiencia_media"],
+                len(eficiencias),
+            )
+
+        elif resumen["jornadas_descartadas"]:
+            resumen["veredicto"] = (
+                f"{resumen['jornadas_descartadas']} jornada(s) "
+                f"cerrada(s), pero ninguna cuadra con Biwenger: "
+                f"el once que anotamos no es el que jugo. Sin "
+                f"nota hasta que coincidan."
+            )
 
     return {
         "resumen": resumen,
@@ -653,6 +742,7 @@ def _detalle(
     plantilla: list,
     alineados: list,
     del_techo: list,
+    nombres: dict | None = None,
 ) -> dict:
     """Quien debio jugar y no jugo, y al reves.
 
@@ -665,11 +755,24 @@ def _detalle(
         for j in (plantilla or [])
     }
 
+    nombres = nombres or {}
+
     def describir(player_id):
         jugador = ficha.get(player_id) or {}
+
+        # Un jugador que alineo el sabado y se vendio el domingo
+        # ya no esta en la plantilla del dia. Su nombre si, en el
+        # mapa que se anota con la foto. Enseñar un id no informa
+        # de nada.
+        nombre = (
+            jugador.get("name")
+            or nombres.get(str(player_id))
+        )
+
         return {
             "id": safe_int(player_id),
-            "name": jugador.get("name") or str(player_id),
+            "name": nombre or f"#{player_id}",
+            "sold": nombre is None or not jugador,
             "position": safe_int(jugador.get("position")),
             "points": safe_int(puntos.get(player_id)),
         }

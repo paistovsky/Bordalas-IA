@@ -400,6 +400,150 @@ def test_el_cuadre_avisa_cuando_el_marcador_miente():
     assert datos["resumen"]["cuadra_todo"] is False
 
 
+def test_una_jornada_que_no_cuadra_no_puntua():
+    """
+    EL CASO (21/08/2026)
+
+        La pantalla enseño "61,9 %" en rojo grande y, al lado y
+        en pequeño, "NO CUADRA". Los dos numeros no pueden
+        convivir: si la reconstruccion del once no suma lo que
+        Biwenger pago, esa nota no mide nada.
+
+        Y estaba mal de verdad: el once anotado no era el que
+        jugo, asi que salian 13 puntos donde Biwenger pago 29.
+
+    El cuadre ya avisaba. Lo que faltaba era que tuviera
+    consecuencias.
+    """
+
+    with ledger_temporal() as fichero:
+
+        totales = sin_puntos()
+        totales[300] = 7
+
+        once = [
+            100, 200, 201, 202, 203,
+            300, 301, 302, 303, 400, 401,
+        ]
+
+        j1 = jornada(4899, totales, once, puntos_biwenger=99)
+        j2 = jornada(4900, totales, once, puntos_biwenger=0)
+
+        escribir_ledger(fichero, [j1, j2])
+
+        datos = M.marcador()
+
+    resumen = datos["resumen"]
+
+    assert resumen["jornadas_medibles"] == 1
+    assert resumen["jornadas_fiables"] == 0
+    assert resumen["jornadas_descartadas"] == 1
+
+    assert resumen["eficiencia_media"] is None, (
+        "se esta promediando una nota que el propio marcador "
+        "declara invalida"
+    )
+
+    assert "ninguna cuadra" in resumen["veredicto"]
+
+
+def test_contra_la_liga_manda_el_dato_oficial():
+    """
+    EL CASO (21/08/2026)
+
+        Salia -11,5 cuando la verdad era +4,5. Se restaba
+        NUESTRA reconstruccion del once a la media de los
+        rivales, en vez de los puntos que Biwenger le dio.
+
+    Lo que puntuo Pepe es un hecho publicado. No hay que
+    deducirlo, y menos con una reconstruccion que puede fallar.
+    """
+
+    with ledger_temporal() as fichero:
+
+        totales = sin_puntos()
+        totales[300] = 7          # la reconstruccion dara 7
+
+        once = [
+            100, 200, 201, 202, 203,
+            300, 301, 302, 303, 400, 401,
+        ]
+
+        # Biwenger pago 29. Los rivales hicieron 10, 20 y 30:
+        # media 20. La diferencia real es +9.
+        j1 = jornada(
+            4899,
+            totales,
+            once,
+            puntos_biwenger=29,
+            puntos_rivales=(10, 20, 30),
+        )
+        j2 = jornada(4900, totales, once, puntos_biwenger=0)
+
+        escribir_ledger(fichero, [j1, j2])
+
+        datos = M.marcador()
+
+    fila = datos["jornadas"][0]
+
+    assert fila["media_rivales"] == 20.0
+    assert fila["diferencia_liga"] == 9.0, (
+        "la comparacion con la liga sigue saliendo de la "
+        "reconstruccion y no del dato oficial"
+    )
+
+    # Y aunque la nota se descarte, la diferencia se conserva:
+    # no depende de que la reconstruccion sea buena.
+    assert fila["cuadra"] is False
+    assert datos["resumen"]["diferencia_media"] == 9.0
+
+
+def test_un_jugador_vendido_conserva_su_nombre():
+    """
+    EL CASO (21/08/2026)
+
+        "Jugaron en su lugar: 38194, 25322, 9065, 1599."
+
+        Son ids. El nombre se buscaba en la plantilla del dia, y
+        un jugador que alineo el sabado y se vendio el domingo ya
+        no esta ahi.
+    """
+
+    plantel = plantilla()
+
+    # El que jugo y ya no esta: no aparece en `plantilla`, pero
+    # si en el mapa de nombres que se anota con la foto.
+    detalle = M._detalle(
+        puntos={"999": 6, "300": 1},
+        plantilla=[
+            j for j in plantel
+            if j["id"] == 300
+        ],
+        alineados=["999"],
+        del_techo=["300"],
+        nombres={"999": "Ximo Navarro"},
+    )
+
+    vendido = detalle["sobraron"][0]
+
+    assert vendido["name"] == "Ximo Navarro", (
+        "se esta enseñando un id en vez de un jugador"
+    )
+    assert vendido["sold"] is True
+
+    # Y sin nombre por ningun lado, se dice que es un id y no se
+    # inventa uno.
+    ciego = M._detalle(
+        puntos={"777": 3},
+        plantilla=[],
+        alineados=["777"],
+        del_techo=[],
+        nombres={},
+    )
+
+    assert ciego["sobraron"][0]["name"] == "#777"
+
+
 def test_el_marcador_no_toca_biwenger():
     """
     Es un observador. Si alguien le mete un cliente de escritura
@@ -487,6 +631,9 @@ def main():
         test_la_jornada_en_curso_no_cuenta,
         test_el_contrafactual_dice_lo_que_se_dejo_en_el_banquillo,
         test_el_cuadre_avisa_cuando_el_marcador_miente,
+        test_una_jornada_que_no_cuadra_no_puntua,
+        test_contra_la_liga_manda_el_dato_oficial,
+        test_un_jugador_vendido_conserva_su_nombre,
         test_el_marcador_no_toca_biwenger,
         test_observar_guarda_la_ultima_foto_de_la_jornada,
     ]
