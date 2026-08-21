@@ -138,7 +138,23 @@ th{
 th.n{text-align:right}
 td{padding:4px 5px;border-bottom:1px solid rgba(255,255,255,.04)}
 tr.me td{background:rgba(34,197,94,.07)}
-tr.off td{opacity:.55}
+/* UNA FILA APAGADA SE LEE COMO UNA FILA ROTA (21/08/2026)
+   El .55 de opacidad hacia que los jugadores que Pepe descarta
+   pareciesen datos a medio cargar. No lo son: estan valorados y
+   la decision es firme. Se distinguen por su etiqueta, no por
+   estar medio borrados. */
+tr.off td{opacity:.88}
+
+/* La fila entera se enciende al pasar por encima, para poder
+   seguirla de lado a lado sin perderse de columna. */
+tbody tr:hover td{
+  background:rgba(59,130,246,.13);
+  box-shadow:inset 0 -1px 0 rgba(59,130,246,.28),
+             inset 0  1px 0 rgba(59,130,246,.28);
+}
+tbody tr:hover td:first-child{box-shadow:inset 2px 0 0 var(--blue),
+  inset 0 -1px 0 rgba(59,130,246,.28), inset 0 1px 0 rgba(59,130,246,.28)}
+tbody tr:hover td{opacity:1}
 
 .pill{display:inline-block;font-size:9px;font-weight:750;letter-spacing:.05em;padding:1.5px 6px;border-radius:9px;white-space:nowrap}
 .pill.ok{background:rgba(34,197,94,.16);color:var(--ok)}

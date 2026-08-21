@@ -9,6 +9,17 @@
  *   FutbolFantasy cambie el parte, una pantalla lo cuenta bien y
  *   la otra miente.
  *
+ * EL DETALLE NO VIVE EN LA TABLA (21/08/2026)
+ *
+ *   El pronostico y los partidos cumplidos iban en gris pequeño
+ *   debajo de la etiqueta, en todas las filas a la vez. Con
+ *   veinte jugadores eso es una pared de letra menuda que tapa
+ *   lo unico que se lee de un vistazo: la etiqueta.
+ *
+ *   Ahora el detalle va en el recuadro que sale al pasar el
+ *   raton. Sigue estando; deja de estorbar. `detalle` lo trae de
+ *   vuelta a la linea para quien lo quiera.
+ *
  * LA REGLA
  *
  *   Un jugador sin parte y disponible sale con una raya, no con
@@ -22,7 +33,7 @@ function jornadas(n) {
   return `${n} jornada${n === 1 ? "" : "s"}`;
 }
 
-export function Lesion({ absence, availability }) {
+export function Lesion({ absence, availability, detalle = false }) {
   const parte = absence?.injury;
 
   if (!parte) {
@@ -39,22 +50,24 @@ export function Lesion({ absence, availability }) {
     Number(parte.matchdays_out || 0) >= 4 ||
     parte.severity_label === "GRAVE";
 
+  const pie = [parte.prognosis, fuera].filter(Boolean).join(" · ");
+
   return (
-    <div>
+    <div title={pie || undefined}>
       <span className={grave ? "pill crit" : "pill warn"}>
         {parte.detail || "LESIONADO"}
       </span>
 
-      {(parte.prognosis || fuera) && (
+      {detalle && pie && (
         <div className="dim" style={{ fontSize: 9, marginTop: 2 }}>
-          {[parte.prognosis, fuera].filter(Boolean).join(" · ")}
+          {pie}
         </div>
       )}
     </div>
   );
 }
 
-export function Sancion({ absence }) {
+export function Sancion({ absence, detalle = false }) {
   const parte = absence?.suspension;
 
   if (!parte) return <span className="dim">—</span>;
@@ -64,14 +77,17 @@ export function Sancion({ absence }) {
       ? `${parte.matches_served ?? 0} de ${parte.matches_total} cumplidos`
       : jornadas(parte.matchdays_out);
 
+  const pie = partidos
+    ? `${partidos}${parte.basis === "SUPUESTO" ? " · estimado" : ""}`
+    : "";
+
   return (
-    <div>
+    <div title={pie || undefined}>
       <span className="pill crit">{parte.detail || "SANCIONADO"}</span>
 
-      {partidos && (
+      {detalle && pie && (
         <div className="dim" style={{ fontSize: 9, marginTop: 2 }}>
-          {partidos}
-          {parte.basis === "SUPUESTO" ? " · estimado" : ""}
+          {pie}
         </div>
       )}
     </div>

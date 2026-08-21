@@ -393,8 +393,18 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
               <tr
                 key={target.id}
                 className={viva ? "live" : bids ? "" : "off"}
+                /* TODO EL PORQUE, EN UN SOLO SITIO (21/08/2026)
+                   Las letras pequeñas debajo de cada etiqueta
+                   convertian la tabla en una pared de gris. El
+                   detalle vive aqui, en el recuadro que sale al
+                   pasar el raton por la fila. */
                 title={
-                  [estadoFisico(target), target.xi_reason, target.reason]
+                  [
+                    MOTIVO_DEL_ONCE[target.xi_decision],
+                    estadoFisico(target),
+                    target.xi_reason,
+                    target.reason
+                  ]
                     .filter(Boolean)
                     .join("  —  ") || undefined
                 }
@@ -492,18 +502,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                   {viva ? (
                     <span className="pill live">PUJA PUESTA</span>
                   ) : (
-                    <>
-                      <span className={`pill ${tone}`}>{label}</span>
-                      {target.decision === "SIN_VALOR" &&
-                        MOTIVO_DEL_ONCE[target.xi_decision] && (
-                          <div
-                            className="dim"
-                            style={{ fontSize: 9, marginTop: 2 }}
-                          >
-                            {MOTIVO_DEL_ONCE[target.xi_decision]}
-                          </div>
-                        )}
-                    </>
+                    <span className={`pill ${tone}`}>{label}</span>
                   )}
                 </td>
               </tr>
