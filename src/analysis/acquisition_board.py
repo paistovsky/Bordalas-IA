@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+# El precio del punto vive en un solo sitio. Si algun dia
+# Biwenger cambia el abono, cambia ahi y cambia en todas partes.
+from src.analysis.rival_intelligence_engine import EUROS_POR_PUNTO
+
 """
 Que hay en el mercado, cuanto vale y cuanto pujariamos.
 
@@ -53,6 +57,27 @@ def safe_int(value, default: int = 0) -> int:
         return int(value or 0)
     except (TypeError, ValueError):
         return default
+
+
+def _se_paga_solo(cost_per_point) -> bool | None:
+    """¿El abono cubre el fichaje?
+
+    None cuando no se puede decir: sin coste por punto no hay
+    respuesta, y un `False` ahi seria una respuesta inventada.
+    """
+
+    if cost_per_point is None:
+        return None
+
+    try:
+        coste = float(cost_per_point)
+    except (TypeError, ValueError):
+        return None
+
+    if coste <= 0:
+        return None
+
+    return coste < EUROS_POR_PUNTO
 
 
 def build_acquisition_board(
@@ -296,6 +321,42 @@ def build_acquisition_board(
                 ),
 
                 "cost_per_point": (
+                    (valoracion.get("as_xi") or {}).get(
+                        "cost_per_point"
+                    )
+                ),
+
+                # ============================================
+                # LO QUE EL FICHAJE DEVUELVE EN CAJA
+                # ============================================
+                #
+                # Biwenger abona 30.000 EUR por punto al cerrar
+                # cada jornada. Hasta hoy la unica vara era
+                # "cuanto pide el mercado por un punto" -22.058
+                # EUR de mediana-, que dice si algo esta caro
+                # COMPARADO CON OTROS. No decia si se paga solo.
+                #
+                # Y un punto es un punto: da igual en que jornada
+                # llegue, paga lo mismo. Asi que las dos cifras
+                # son directamente comparables sin inventar
+                # horizontes:
+                #
+                #     cost_per_point < 30.000  -> el abono solo
+                #                                 ya cubre el
+                #                                 fichaje
+                #
+                # Lo que sobra es beneficio, y encima queda el
+                # jugador para revenderlo.
+                "abono_return": (
+                    safe_int(
+                        (valoracion.get("as_xi") or {}).get(
+                            "promised_points"
+                        )
+                    )
+                    * EUROS_POR_PUNTO
+                ),
+
+                "pays_for_itself": _se_paga_solo(
                     (valoracion.get("as_xi") or {}).get(
                         "cost_per_point"
                     )

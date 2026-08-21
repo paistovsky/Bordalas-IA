@@ -319,8 +319,8 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
               ? `${acquisition.shown} en la tabla · `
               : ""}
             {pointsMarket?.calibrated
-              ? `un punto cuesta ${formatEuros(pointsMarket.rate_median)}`
-              : "precio del punto sin calibrar"}
+              ? `un punto cuesta ${formatEuros(pointsMarket.rate_median)} y abona 30.000 €`
+              : "un punto abona 30.000 €"}
             {cobertura.total
               ? ` · ${cobertura.with_forecast}/${cobertura.total} con pronóstico de titular`
               : ""}
@@ -351,6 +351,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th>LESIÓN</th>
             <th>SANCIÓN</th>
             <th className="n">VALE PARA NOSOTROS</th>
+            <th className="n">SE PAGA SOLO</th>
             <th>VENDE</th>
             <th className="n">PUESTO</th>
             <th className="n">PUJARÍAMOS</th>
@@ -413,6 +414,37 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                 </td>
 
                 <td className="n">{formatEuros(target.our_value)}</td>
+
+                {/* LO QUE EL FICHAJE DEVUELVE EN CAJA (21/08/2026)
+
+                    Biwenger abona 30.000 € por punto al cerrar
+                    cada jornada. La columna MERCADO dice si algo
+                    está caro comparado con otros; ésta dice si se
+                    paga solo.
+
+                    Un punto es un punto: da igual en qué jornada
+                    llegue, paga lo mismo. Por eso el coste por
+                    punto y el abono son comparables sin inventar
+                    horizontes. */}
+                <td className="n">
+                  {target.pays_for_itself == null ? (
+                    <span className="dim">—</span>
+                  ) : target.pays_for_itself ? (
+                    <span
+                      className="pill ok"
+                      title={`Cuesta ${formatEuros(target.cost_per_point)} por punto y cada punto abona 30.000 €. Devuelve ${formatEuros(target.abono_return)} solo en abonos.`}
+                    >
+                      SÍ · {formatEuros(target.abono_return)}
+                    </span>
+                  ) : (
+                    <span
+                      className="dim"
+                      title={`Cuesta ${formatEuros(target.cost_per_point)} por punto y cada punto abona 30.000 €.`}
+                    >
+                      no
+                    </span>
+                  )}
+                </td>
 
                 {/* A QUIÉN SE LE COMPRA, CON NOMBRE.
                     "Un rival" no informa de nada: de cada mánager

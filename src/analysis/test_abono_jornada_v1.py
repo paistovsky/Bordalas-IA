@@ -244,6 +244,83 @@ def test_el_abono_no_entra_en_el_plan_de_solvencia():
     assert "EUROS_POR_PUNTO" not in fuente
 
 
+
+# ============================================================
+# LO QUE EL ABONO SIGNIFICA AL FICHAR
+# ============================================================
+
+
+def test_un_fichaje_se_paga_solo_por_debajo_de_30k_el_punto():
+    """
+    LA VARA QUE FALTABA (21/08/2026)
+
+        Hasta hoy la unica referencia era "lo que pide el mercado
+        por un punto" -22.058 EUR de mediana-. Eso dice si algo
+        esta CARO COMPARADO CON OTROS, no si merece la pena.
+
+        El abono si: si un fichaje cuesta menos de 30.000 EUR por
+        punto que de verdad va a sumar, el abono solo ya lo
+        cubre. Lo que sobra es beneficio, y encima queda el
+        jugador para revenderlo.
+
+        Un punto es un punto: da igual en que jornada llegue,
+        paga lo mismo. Por eso las dos cifras son comparables sin
+        inventar horizontes.
+    """
+
+    from src.analysis.acquisition_board import _se_paga_solo
+
+    # El precio de mercado tipico esta por debajo del abono: la
+    # mayoria de fichajes razonables se pagan solos.
+    assert _se_paga_solo(22_058) is True
+    assert _se_paga_solo(29_999) is True
+
+    assert _se_paga_solo(30_000) is False
+    assert _se_paga_solo(37_500) is False
+
+
+def test_sin_coste_por_punto_no_se_contesta():
+    """
+    Ausencia de dato != dato. Un `False` aqui se leeria como "no
+    se paga", cuando la verdad es que no se sabe.
+    """
+
+    from src.analysis.acquisition_board import _se_paga_solo
+
+    assert _se_paga_solo(None) is None
+    assert _se_paga_solo(0) is None
+    assert _se_paga_solo(-100) is None
+    assert _se_paga_solo("cualquier cosa") is None
+
+
+def test_el_precio_del_punto_vive_en_un_solo_sitio():
+    """
+    Si Biwenger cambia el abono, tiene que cambiar en un sitio y
+    valer para todo. Dos constantes iguales acaban siendo dos
+    constantes distintas.
+    """
+
+    from src.analysis import acquisition_board
+    from src.analysis import rival_intelligence_engine
+
+    assert (
+        acquisition_board.EUROS_POR_PUNTO
+        is rival_intelligence_engine.EUROS_POR_PUNTO
+        or acquisition_board.EUROS_POR_PUNTO
+        == rival_intelligence_engine.EUROS_POR_PUNTO
+    )
+
+    fuente = (
+        Path(__file__).parent / "acquisition_board.py"
+    ).read_text(encoding="utf-8")
+
+    assert "from src.analysis.rival_intelligence_engine import" in fuente, (
+        "el tablero de fichajes se ha hecho su propia copia del "
+        "precio del punto"
+    )
+
+
+
 def main():
 
     pruebas = [
@@ -254,6 +331,9 @@ def main():
         test_se_reexpresa_y_no_se_acumula,
         test_el_abono_no_toca_los_movimientos_del_tablon,
         test_el_abono_no_entra_en_el_plan_de_solvencia,
+        test_un_fichaje_se_paga_solo_por_debajo_de_30k_el_punto,
+        test_sin_coste_por_punto_no_se_contesta,
+        test_el_precio_del_punto_vive_en_un_solo_sitio,
     ]
 
     for prueba in pruebas:
