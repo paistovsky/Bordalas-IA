@@ -128,7 +128,16 @@ main{flex:1;padding:14px 16px;min-width:0}
 .pan h2{font:700 13px/1 sans-serif;letter-spacing:.06em;margin-bottom:3px}
 .pan .sub{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:9px}
 .pan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.stack{display:grid;gap:11px}
+/* EL PANEL QUE SE ESTIRABA (21/08/2026)
+   La columna del campo es alta, y la rejilla estira la columna
+   de al lado para igualarla. Con filas automaticas, ese hueco
+   sobrante se repartia DENTRO de los paneles: la clasificacion
+   acababa con media pantalla de vacio debajo de la tabla.
+
+   `align-content:start` deja que cada panel mida lo que mide y
+   el sobrante se quede al final de la columna, que es donde no
+   molesta. */
+.stack{display:grid;gap:11px;align-content:start}
 
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{
