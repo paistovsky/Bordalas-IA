@@ -29,6 +29,9 @@ export default function KpiStrip({ data }) {
   const lineup = data.lineup || {};
   const acquisition = data.acquisition || {};
 
+  // El bolsillo de fichar. Otro numero, otra cosa.
+  const fichajes = exposure.acquisition || {};
+
   const balance = Number(summary.balance || 0);
   const hoursReset = Number(clock.hours_to_reset || 0);
 
@@ -40,11 +43,40 @@ export default function KpiStrip({ data }) {
         sub={`puja máx. ${formatMoney(summary.maximum_bid)}`}
         tone={balance < 0 ? "bad" : ""}
       />
+      {/* PUEDE GASTAR EN QUE (21/08/2026)
+        *
+        *   Enseñaba el presupuesto de ESPECULAR y ponia "0 €" la
+        *   misma noche en que Pepe puso una puja de 2,08 M para
+        *   mejorar el once. El numero de cabecera desmentia al
+        *   bot.
+        *
+        *   Manda el de fichar, que es con el que se decide
+        *   comprar. El de especular va en el subtitulo. */}
       <Kpi
         label="Puede gastar"
-        value={formatMoney(exposure.available_budget)}
-        sub={exposure.mode ? String(exposure.mode).replaceAll("_", " ").toLowerCase() : "sin presupuesto"}
-        tone={Number(exposure.available_budget || 0) > 0 ? "good" : "bad"}
+        value={formatMoney(
+          fichajes.available
+            ? fichajes.available_budget
+            : exposure.available_budget
+        )}
+        sub={
+          fichajes.available
+            ? `fichar · especular ${formatMoney(
+                exposure.available_budget
+              )}`
+            : exposure.mode
+            ? String(exposure.mode).replaceAll("_", " ").toLowerCase()
+            : "sin presupuesto"
+        }
+        tone={
+          Number(
+            (fichajes.available
+              ? fichajes.available_budget
+              : exposure.available_budget) || 0
+          ) > 0
+            ? "good"
+            : "bad"
+        }
       />
       <Kpi
         label="Reset del mercado"

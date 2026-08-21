@@ -240,33 +240,95 @@ function CashPanel({ exposure }) {
     );
   }
 
-  const total = Number(exposure.total_budget || 1);
-  const cash = Number(exposure.cash_budget || 0);
-  const debt = Number(exposure.debt_budget || 0);
+  /* EL BOLSILLO QUE MANDA AQUI (21/08/2026)
+   *
+   *   Este panel enseñaba el presupuesto de ESPECULAR: 15 % de la
+   *   caja y 60 % del margen de deuda. Debajo de una tabla de
+   *   fichajes.
+   *
+   *   Esa misma noche Pepe puso una puja de 2,08 M -con el de
+   *   fichar, que es el que decide- y este panel seguia diciendo
+   *   "Libre 0 €" porque 2,08 M ya se pasaba del techo de
+   *   apostar. El numero de al lado contradecia lo que el bot
+   *   acababa de hacer.
+   *
+   *   Manda el de fichar. El de especular se queda debajo, con su
+   *   nombre puesto. */
+  const fichajes = exposure.acquisition || {};
+  const hayFichajes = Boolean(fichajes.available);
+
+  const bolsillo = hayFichajes ? fichajes : exposure;
+
+  const cash = Number(bolsillo.cash_budget || 0);
+  const debt = Number(bolsillo.debt_budget || 0);
   const committed = Number(exposure.committed_total || 0);
+
+  /* El bruto, no el autorizado.
+   *
+   *   El denominador era `total_budget`, que ya viene con lo
+   *   comprometido descontado, y ademas se pintaba lo
+   *   comprometido como un tramo mas. La barra sumaba mas del
+   *   100 % y salia llena siempre. */
+  const bruto = Math.max(cash + debt, 1);
+
+  const ancho = (valor) =>
+    `${Math.min((Math.max(valor, 0) / bruto) * 100, 100)}%`;
+
+  const libre = Number(
+    bolsillo.available_budget ?? Math.max(bruto - committed, 0)
+  );
 
   return (
     <section className="pan">
       <h2>CAJA</h2>
-      <div className="sub">De dónde sale lo que puede gastar</div>
+      <div className="sub">
+        {hayFichajes
+          ? "De dónde sale lo que puede gastar en fichar"
+          : "De dónde sale lo que puede gastar"}
+      </div>
 
       <div className="bar">
-        <i style={{ width: `${(cash / total) * 100}%`, background: "#22c55e" }} />
-        <i style={{ width: `${(debt / total) * 100}%`, background: "#3b82f6" }} />
-        <i style={{ width: `${(committed / total) * 100}%`, background: "#eab308" }} />
+        <i style={{ width: ancho(cash), background: "#22c55e" }} />
+        <i style={{ width: ancho(debt), background: "#3b82f6" }} />
       </div>
       <div className="legend">
         <span style={{ color: "#22c55e" }}>caja {formatMoney(cash)}</span>
-        <span style={{ color: "#3b82f6" }}>deuda segura {formatMoney(debt)}</span>
-        <span style={{ color: "#eab308" }}>comprometido {formatMoney(committed)}</span>
+        <span style={{ color: "#3b82f6" }}>
+          deuda segura {formatMoney(debt)}
+        </span>
       </div>
 
       <div className="kv" style={{ marginTop: 8 }}>
         <span>Pujas vivas</span><b className="mono">{exposure.operation_count || 0}</b>
       </div>
       <div className="kv">
-        <span>Libre</span><b className="mono up">{formatEuros(exposure.available_budget)}</b>
+        <span>Comprometido</span>
+        <b className="mono">{formatEuros(committed)}</b>
       </div>
+      <div className="kv">
+        <span>Libre para fichar</span>
+        <b className="mono up">{formatEuros(libre)}</b>
+      </div>
+
+      {hayFichajes && (
+        <>
+          <div className="kv">
+            <span>Libre para especular</span>
+            <b className="mono">
+              {formatEuros(exposure.available_budget)}
+            </b>
+          </div>
+
+          {fichajes.capped_by_biwenger && (
+            <div className="kv">
+              <span>Techo de Biwenger</span>
+              <b className="mono">
+                {formatEuros(fichajes.maximum_bid)}
+              </b>
+            </div>
+          )}
+        </>
+      )}
     </section>
   );
 }

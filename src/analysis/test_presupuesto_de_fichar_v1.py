@@ -428,6 +428,43 @@ def test_la_revalidacion_de_escritura_mira_el_mismo_bolsillo():
     assert "presupuesto_via" in fuente
 
 
+def test_la_pantalla_no_desmiente_al_bot():
+    """
+    LA NOCHE DEL 21/08/2026, DESPUES DE ARREGLARLO.
+
+    Pepe puso una puja de 2.079.001 EUR por Pablo Ibáñez para
+    sustituir a Mangala. Funciono. Y a la vez, en la misma
+    pantalla:
+
+        PUEDE GASTAR   0 €
+        CAJA · Libre   0 €
+
+    Los dos widgets seguian leyendo el presupuesto de especular,
+    que con 2,08 M comprometidos se habia quedado a cero. La
+    cabecera decia que no habia dinero justo despues de gastarlo.
+
+    Es la duodecima vez que aparece lo mismo: el dato existe, se
+    calcula bien y la pantalla mira otro.
+    """
+
+    dashboard = (
+        Path(__file__).parents[2] / "dashboard-v8" / "src"
+    )
+
+    for ruta in (
+        dashboard / "components" / "KpiStrip.jsx",
+        dashboard / "pages" / "MarketPage.jsx",
+        dashboard / "components" / "StrategyPanel.jsx",
+    ):
+
+        fuente = ruta.read_text(encoding="utf-8")
+
+        assert "exposure.acquisition" in fuente, (
+            f"{ruta.name} ha vuelto a enseñar el presupuesto de "
+            f"especular donde manda el de fichar"
+        )
+
+
 def test_el_ciclo_puede_fichar_sin_permiso_para_apostar():
     """
     LA QUINTA PARED.
@@ -527,6 +564,7 @@ def main():
         test_sin_presupuesto_de_fichajes_todo_sigue_como_ayer,
         test_la_eleccion_de_bolsillo_vive_en_un_solo_sitio,
         test_la_revalidacion_de_escritura_mira_el_mismo_bolsillo,
+        test_la_pantalla_no_desmiente_al_bot,
         test_el_ciclo_puede_fichar_sin_permiso_para_apostar,
     ]
 
