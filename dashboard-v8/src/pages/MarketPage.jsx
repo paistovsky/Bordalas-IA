@@ -1,5 +1,27 @@
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 
+/* POR QUE UN "CLAVE" SALE SIN VALOR (21/08/2026)
+ *
+ *   "Ya veo a Sergio Herrera. Me dice clave y sin valorar. ¿Por?"
+ *
+ *   SIN VALOR no quiere decir que el jugador sea malo: quiere
+ *   decir que no vale NADA PARA NOSOTROS, casi siempre porque esa
+ *   posicion ya esta cubierta mejor de lo que el la cubriria.
+ *
+ *   El motivo se calculaba y viajaba en `xi_decision`, y solo se
+ *   veia pasando el raton por la fila. Un motivo que hay que
+ *   cazar con el raton es un motivo que nadie lee.
+ */
+const MOTIVO_DEL_ONCE = {
+  MEJORA_INSUFICIENTE: "no mejora lo bastante el XI",
+  NO_SE_TOCA_UN_DIOS: "no se toca a un Dios",
+  PIERDE_TITULARIDAD: "jugaría menos que el que sale",
+  NO_MEJORA_TITULARIDAD: "no mejora la titularidad",
+  NO_MEJORA_JERARQUIA: "no mejora la jerarquía",
+  SIN_PRONOSTICO: "sin pronóstico de titular",
+  SIN_HUECO: "no hay hueco en su posición"
+};
+
 const DECISION = {
   BID: ["ok", "PUJAR"],
   NO_COMPENSA: ["warn", "NO COMPENSA"],
@@ -470,7 +492,18 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                   {viva ? (
                     <span className="pill live">PUJA PUESTA</span>
                   ) : (
-                    <span className={`pill ${tone}`}>{label}</span>
+                    <>
+                      <span className={`pill ${tone}`}>{label}</span>
+                      {target.decision === "SIN_VALOR" &&
+                        MOTIVO_DEL_ONCE[target.xi_decision] && (
+                          <div
+                            className="dim"
+                            style={{ fontSize: 9, marginTop: 2 }}
+                          >
+                            {MOTIVO_DEL_ONCE[target.xi_decision]}
+                          </div>
+                        )}
+                    </>
                   )}
                 </td>
               </tr>

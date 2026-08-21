@@ -86,7 +86,21 @@ export default function StandingsIntelPanel({ data }) {
                   )}
                 </td>
                 <td className="n">{row.points}</td>
-                <td className={Number(balance) < 0 ? "n down" : "n"}>
+                {/* LA CAJA YA LLEVA LOS ABONOS DENTRO
+                    (21/08/2026)
+
+                    Se pregunto dos veces si estaban sumados, y
+                    con razon: una columna de ABONOS en otra
+                    tabla hace pensar que van aparte. Van dentro,
+                    y ahora la propia celda lo dice. */}
+                <td
+                  className={Number(balance) < 0 ? "n down" : "n"}
+                  title={
+                    intel?.matchday_bonus
+                      ? `Incluye ${formatMoney(intel.matchday_bonus)} de abonos (${row.points} puntos x 30.000 €).`
+                      : "Sin abonos todavía en este libro."
+                  }
+                >
                   {balance != null ? formatMoney(balance) : "—"}
                 </td>
 
@@ -161,7 +175,8 @@ export default function StandingsIntelPanel({ data }) {
       </table>
 
       <p className="note" style={{ textAlign: "left", marginTop: 9 }}>
-        CAJA = dinero ahora (puede ir en rojo). PLANTILLA = lo que valen sus
+        CAJA = dinero ahora (puede ir en rojo), <b>abonos incluidos</b> —30.000 €
+        por punto, pasa el ratón para ver cuántos—. PLANTILLA = lo que valen sus
         jugadores (pasa el ratón para ver cuántos tiene). PATRIMONIO = caja +
         plantilla, o sea lo que vale el equipo entero. TOPE = caja + margen de
         deuda, con el ratio calibrado contra el maximumBid oficial de Pepe. PUJA =
