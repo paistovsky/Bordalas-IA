@@ -204,8 +204,22 @@ export default function StrategyPanel({ data }) {
               {fichajes.available ? (
                 <>
                   {" "}
-                  Para fichar dispone de{" "}
-                  <b>{formatMoney(fichajes.available_budget)}</b>
+                  {/* LA FRASE QUE NO CUADRABA
+                    *
+                    *   Decia "dispone de 1,14 M (970k de caja y
+                    *   2,25 M de deuda segura)". Los parentesis
+                    *   sumaban 3,22 M y el titular decia 1,14: se
+                    *   estaba mezclando el bruto con el neto sin
+                    *   nombrar lo que hay en medio, que son los
+                    *   2,08 M ya comprometidos.
+                    *
+                    *   Se dice la resta entera o no se dice. */}
+                  Para fichar tiene{" "}
+                  <b>
+                    {formatMoney(
+                      fichajes.cash_budget + fichajes.debt_budget
+                    )}
+                  </b>
                   {fichajes.debt_budget > 0
                     ? ` (${formatMoney(
                         fichajes.cash_budget
@@ -213,6 +227,13 @@ export default function StrategyPanel({ data }) {
                         fichajes.debt_budget
                       )} de deuda segura)`
                     : ""}
+                  {Number(fichajes.committed_total || 0) > 0
+                    ? `, menos ${formatMoney(
+                        fichajes.committed_total
+                      )} ya comprometidos`
+                    : ""}
+                  : le quedan{" "}
+                  <b>{formatMoney(fichajes.available_budget)}</b>
                   {fichajes.capped_by_biwenger
                     ? `, recortado por el máximo de Biwenger`
                     : ""}

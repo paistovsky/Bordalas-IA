@@ -147,6 +147,7 @@ jobs:
           python -m src.analysis.test_pujar_por_el_xi_v1
           python -m src.analysis.test_once_real_v1
           python -m src.analysis.test_presupuesto_de_fichar_v1
+          python -m src.analysis.test_reventa_al_computer_v1
           python -m src.analysis.test_action_starvation_v1
           python -m src.analysis.test_price_history_store_v1
           python -m src.analysis.test_futbolfantasy_source_v12

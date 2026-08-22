@@ -392,6 +392,10 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
     Number(cobertura.total || 0) > 0 &&
     Number(cobertura.with_forecast || 0) === 0;
 
+  // Cuánto paga el Computer por encima del mercado, y si ya se
+  // sabe con muestras suficientes.
+  const reventa = acquisition.computer_premium || {};
+
   return (
     <section className="pan">
       <div className="pan-head">
@@ -407,6 +411,16 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
               : "un punto abona 30.000 €"}
             {cobertura.total
               ? ` · ${cobertura.with_forecast}/${cobertura.total} con pronóstico de titular`
+              : ""}
+            {/* La segunda vía de reventa. Si está apagada, se
+              * dice: 15 de 20 salían SIN VALOR el 21/08 justo
+              * porque esta pregunta no se hacía. */}
+            {reventa.available
+              ? reventa.calibrated
+                ? ` · el Computer paga ${
+                    reventa.median_percent > 0 ? "+" : ""
+                  }${reventa.median_percent} % sobre mercado`
+                : ` · reventa al Computer sin medir (${reventa.priced}/${reventa.min_samples})`
               : ""}
           </div>
         </div>

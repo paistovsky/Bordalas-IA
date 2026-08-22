@@ -695,6 +695,14 @@ def build_acquisition_board(
             "hidden": max(0, ocultas),
 
             "premium_model": modelo.get("premium"),
+
+            # LA SEGUNDA VIA DE REVENTA
+            #
+            # Cuanto paga el Computer por encima del mercado, y si
+            # se sabe ya con muestras suficientes. Mientras salga
+            # sin calibrar, esa via de ingresos esta apagada y
+            # tiene que verse que lo esta.
+            "computer_premium": contexto.get("computer_premium"),
             "data_coverage": modelo.get("data_coverage"),
             "ledger_trusted": modelo.get("ledger_trusted"),
             "rivals": [

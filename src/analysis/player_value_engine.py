@@ -1605,6 +1605,104 @@ def estimate_resale_price(
     }
 
 
+def computer_resale_value(
+    price: int,
+    premium: float | None,
+    margin: float = DEFAULT_SPECULATION_MARGIN,
+) -> dict:
+    """
+    Lo maximo que pagariamos por comprar a mercado y vendersela al
+    Computer.
+
+    LA SEGUNDA FORMA DE GANAR DINERO CON UNA REVENTA
+
+        `speculation_value` solo conoce una: que el precio del
+        jugador SUBA. Esta conoce la otra: que el Computer pague
+        por encima del mercado por cualquier cosa publicada. Son
+        independientes -esta funciona con un jugador cuyo precio
+        no se mueve- y por eso se valoran aparte.
+
+    SIN PRIMA MEDIDA NO HAY VALOR
+
+        `premium=None` significa "no se sabe cuanto paga". Eso no
+        es un cero: es un hueco, y de un hueco no sale una compra.
+
+    EL DESFASE
+
+        El dinero no llega hoy. Se compra, se publica, y la oferta
+        del Computer llega en el reset siguiente. Por eso se exige
+        margen sobre la ganancia igual que en la especulacion: si
+        la operacion solo sale con la prima clavada, no sale.
+    """
+
+    base = safe_int(price)
+
+    if base <= 0:
+        return _sin_valor(
+            "PRECIO_INVALIDO",
+            "El jugador no tiene un precio de mercado valido.",
+        )
+
+    if premium is None:
+        return _sin_valor(
+            "PRIMA_SIN_MEDIR",
+            (
+                "Todavia no se sabe cuanto paga el Computer por "
+                "encima del mercado. Sin esa medida no se compra "
+                "para revender."
+            ),
+        )
+
+    try:
+        prima = float(premium)
+    except (TypeError, ValueError):
+        return _sin_valor(
+            "PRIMA_SIN_MEDIR",
+            "La prima medida no es un numero.",
+        )
+
+    if prima <= 0:
+        return _sin_valor(
+            "SIN_PRIMA",
+            (
+                "El Computer no paga por encima del mercado: "
+                "comprar para revenderle no deja nada."
+            ),
+        )
+
+    objetivo = int(base * (1.0 + prima))
+
+    ganancia = objetivo - base
+
+    maximo = int(objetivo - ganancia * margin)
+
+    if maximo <= base:
+        return _sin_valor(
+            "MARGEN_INSUFICIENTE",
+            (
+                f"El Computer paga un {prima * 100:+.1f} % de "
+                f"media y eso no deja margen sobre el precio."
+            ),
+        )
+
+    return {
+        "value": maximo,
+        "resale_estimate": objetivo,
+        "expected_gain": ganancia,
+        "premium_percent": round(prima * 100, 2),
+        "intent": "SPECULATION",
+        "route": "COMPUTER_RESALE",
+        "reason": (
+            f"El Computer paga una mediana de "
+            f"{prima * 100:+.1f} % sobre el mercado. Comprando a "
+            f"{base:,} y publicandolo, la oferta esperada es "
+            f"{objetivo:,}. Exigiendo un {margin * 100:.0f} % de "
+            f"la ganancia como margen, pagariamos hasta "
+            f"{maximo:,} EUR."
+        ).replace(",", "."),
+    }
+
+
 def speculation_value(
     price: int,
     daily_increment: int,

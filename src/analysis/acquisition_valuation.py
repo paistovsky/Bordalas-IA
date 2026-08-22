@@ -47,9 +47,15 @@ from src.analysis.player_velocity_lookup import (
     build_velocity_lookup,
 )
 
+from src.analysis.computer_resale_premium import (
+    measure_computer_resale_premium,
+    usable_premium,
+)
+
 from src.analysis.player_value_engine import (
     build_team_strength,
     calibrate_points_market,
+    computer_resale_value,
     estimate_season_points,
     speculation_value,
     xi_upgrade_value,
@@ -92,6 +98,11 @@ def build_valuation_context(
     # a quien no. Opcional: sin el, nadie cuenta como titular y
     # el comportamiento es el de antes.
     lineup: dict | None = None,
+
+    # Cuanto paga el Computer por encima del mercado. Se mide una
+    # vez por ciclo, como el resto: leer el tablon entero por cada
+    # candidato seria absurdo.
+    computer_premium: dict | None = None,
 ) -> dict:
     """
     Lo que hay que calcular una sola vez por ciclo: el precio del
@@ -207,11 +218,28 @@ def build_valuation_context(
         ):
             peor_por_posicion[posicion] = ficha
 
+    # LA SEGUNDA VIA DE REVENTA (21/08/2026)
+    #
+    # Si falla, sale sin calibrar y esa via queda cerrada. Nunca
+    # tumba el ciclo por no poder leer el tablon.
+    if computer_premium is None:
+        try:
+            computer_premium = measure_computer_resale_premium()
+
+        except Exception as error:
+            computer_premium = {
+                "available": False,
+                "calibrated": False,
+                "median_percent": None,
+                "reason": f"{type(error).__name__}: {error}",
+            }
+
     return {
         "velocity": velocity_lookup or {},
         "starter": starter_lookup,
         "points_market": mercado,
         "team_strength": equipos,
+        "computer_premium": computer_premium,
         "weakest_by_position": peor_por_posicion,
         "squad_by_position": plantilla_por_posicion,
         "lineup_ids": en_el_once,
@@ -498,11 +526,34 @@ def value_candidate(
         )
 
         # --------------------------------------------------
-        # LA MAYOR DE LAS DOS
+        # COMO REVENTA AL COMPUTER
+        # --------------------------------------------------
+        #
+        # La otra forma de ganar dinero con una reventa: no que el
+        # jugador suba, sino que el Computer pague por encima del
+        # mercado por cualquier cosa publicada.
+        #
+        # Hasta el 21/08 esta via no existia, y por eso 15 de 20
+        # candidatos salian SIN VALOR: no eran malos, es que solo
+        # se les preguntaba si iban a subir.
+        #
+        # Cerrada mientras la prima no este medida con muestras
+        # suficientes. `usable_premium` devuelve None y de un None
+        # no sale una compra.
+
+        como_reventa = computer_resale_value(
+            price=precio,
+            premium=usable_premium(
+                (context or {}).get("computer_premium")
+            ),
+        )
+
+        # --------------------------------------------------
+        # LA MAYOR DE LAS TRES
         # --------------------------------------------------
 
         opciones = [
-            o for o in (como_xi, como_trading)
+            o for o in (como_xi, como_trading, como_reventa)
             if o and safe_int(o.get("value")) > 0
         ]
 
@@ -519,6 +570,11 @@ def value_candidate(
                     f"como especulacion, "
                     f"{como_trading.get('decision', '?')}"
                 )
+            if como_reventa:
+                motivos.append(
+                    f"como reventa al Computer, "
+                    f"{como_reventa.get('decision', '?')}"
+                )
 
             return _sin_valor(
                 "SIN_VALOR",
@@ -530,6 +586,7 @@ def value_candidate(
                 points=estimacion,
                 as_xi=como_xi,
                 as_speculation=como_trading,
+                as_computer_resale=como_reventa,
                 starter=titularidad,
             )
 
@@ -547,6 +604,13 @@ def value_candidate(
             "starter": titularidad,
             "as_xi": como_xi,
             "as_speculation": como_trading,
+            "as_computer_resale": como_reventa,
+
+            # Por que via se valora. Sin esto, una compra para
+            # revenderle al Computer se leeria en pantalla igual
+            # que una para mejorar el once.
+            "route": mejor.get("route"),
+
             "replaces": mejor.get("replaces"),
             "reason": mejor.get("reason"),
             "reasons": [
@@ -568,6 +632,7 @@ def _sin_valor(
     points: dict | None = None,
     as_xi: dict | None = None,
     as_speculation: dict | None = None,
+    as_computer_resale: dict | None = None,
     starter: dict | None = None,
 ) -> dict:
     """
@@ -592,5 +657,6 @@ def _sin_valor(
         "starter": starter,
         "as_xi": as_xi,
         "as_speculation": as_speculation,
+        "as_computer_resale": as_computer_resale,
         "reasons": [reason],
     }

@@ -35,16 +35,54 @@ function Queue({ priorities, next }) {
 }
 
 function Money({ exposure, solvency }) {
+  /* EL TERCER WIDGET (21/08/2026)
+   *
+   *   La cabecera y CAJA ya enseñaban el bolsillo de fichar. Este
+   *   se quedo atras y seguia diciendo "0 € disponible" con una
+   *   puja de 2,08 M puesta encima de la mesa. */
+  const fichajes = exposure.acquisition || {};
+  const hayFichajes = Boolean(fichajes.available);
+
   return (
     <div className="col">
       <h4>Con qué dinero</h4>
       <div className="node">
-        <div className="t">{formatMoney(exposure.available_budget)}</div>
-        <div className="d">disponible tras descontar pujas vivas</div>
+        <div className="t">
+          {formatMoney(
+            hayFichajes
+              ? fichajes.available_budget
+              : exposure.available_budget
+          )}
+        </div>
+        <div className="d">
+          {hayFichajes
+            ? "para fichar, tras descontar pujas vivas"
+            : "disponible tras descontar pujas vivas"}
+        </div>
         <div className="m">
-          caja {formatMoney(exposure.cash_budget)} + deuda {formatMoney(exposure.debt_budget)}
+          caja{" "}
+          {formatMoney(
+            hayFichajes ? fichajes.cash_budget : exposure.cash_budget
+          )}{" "}
+          + deuda{" "}
+          {formatMoney(
+            hayFichajes ? fichajes.debt_budget : exposure.debt_budget
+          )}
         </div>
       </div>
+
+      {hayFichajes && (
+        <div className="node">
+          <div className="t">
+            {formatMoney(exposure.available_budget)}
+          </div>
+          <div className="d">para especular, que es otra cosa</div>
+          <div className="m">
+            caja {formatMoney(exposure.cash_budget)} + deuda{" "}
+            {formatMoney(exposure.debt_budget)}
+          </div>
+        </div>
+      )}
       <div className={Number(exposure.committed_total || 0) > 0 ? "node wait" : "node"}>
         <div className="t">{formatMoney(exposure.committed_total)}</div>
         <div className="d">comprometido en {exposure.operation_count || 0} puja(s) viva(s)</div>
@@ -159,6 +197,27 @@ function Limits({ data }) {
       tone: "wait",
       title: "Curva de primas sin calibrar",
       detail: premium.reason
+    });
+  }
+
+  /* LA VIA DE REVENTA AL COMPUTER (21/08/2026)
+   *
+   *   El Computer paga por encima del mercado por lo que se
+   *   publica -medido en el tablon-. Comprar a mercado y
+   *   vendérselo es una vía de ingresos entera que hasta hoy no
+   *   estaba en el código.
+   *
+   *   Mientras la prima no esté medida con muestras suficientes,
+   *   la vía está apagada. Y una vía apagada tiene que verse
+   *   apagada: si no, parece que Pepe la descarta cuando lo que
+   *   pasa es que no la conoce. */
+  const reventa = data.acquisition?.computer_premium || {};
+
+  if (reventa.available && !reventa.calibrated) {
+    limits.push({
+      tone: "wait",
+      title: "Reventa al Computer sin medir",
+      detail: reventa.reason
     });
   }
 

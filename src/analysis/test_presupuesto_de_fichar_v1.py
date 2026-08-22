@@ -455,6 +455,7 @@ def test_la_pantalla_no_desmiente_al_bot():
         dashboard / "components" / "KpiStrip.jsx",
         dashboard / "pages" / "MarketPage.jsx",
         dashboard / "components" / "StrategyPanel.jsx",
+        dashboard / "pages" / "BrainPage.jsx",
     ):
 
         fuente = ruta.read_text(encoding="utf-8")
