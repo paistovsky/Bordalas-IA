@@ -46,9 +46,13 @@ def collect_league_snapshot() -> None:
     print("Obteniendo alineación actual...")
 
     try:
+        # `lineup(*)` a secas devolvia el bloque sin la lista de
+        # jugadores, y el lector se quedaba en cero: el cartel
+        # paso a decir "no hay ningun XI puesto" teniendo uno.
+        # Se piden los jugadores explicitamente.
         lineup_response = client.session.get(
             f"{client.BASE_URL}/user",
-            params={"fields": "*,lineup(*)"},
+            params={"fields": "*,lineup(*,players(*))"},
         )
         lineup_response.raise_for_status()
         user_lineup = lineup_response.json()

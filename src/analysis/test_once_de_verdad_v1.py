@@ -205,6 +205,93 @@ def test_sin_el_dato_se_dice_que_no_se_sabe():
     assert comparacion["matches"] is None
 
 
+def test_los_jugadores_pueden_venir_como_fichas():
+    """
+    EL SEGUNDO SINTOMA (22/08/2026)
+
+        Con el arreglo ya subido, el cartel cambio de queja: paso
+        de "falta Pablo Ibáñez" a "No hay ningun XI puesto en
+        Biwenger", y listaba los once.
+
+        El campo llegaba; lo que no se sabia leer era la lista.
+        `lineup(*)` no devuelve numeros sueltos, y con fichas
+        dentro el lector se quedaba en cero.
+    """
+
+    fichas = [{"id": i, "name": f"J{i}"} for i in EL_ONCE_BUENO]
+
+    once = live_lineup({
+        "user_lineup": {
+            "lineup": {"type": "4-4-2", "players": fichas}
+        }
+    })
+
+    assert once is not None, (
+        "con la lista en fichas se esta contestando 'no se sabe'"
+    )
+    assert once["player_ids"] == sorted(EL_ONCE_BUENO)
+
+    # Y con el jugador anidado un nivel mas, que es como vienen
+    # los huecos de la alineacion en algunas respuestas.
+    huecos = [
+        {"position": n, "player": {"id": i}}
+        for n, i in enumerate(EL_ONCE_BUENO)
+    ]
+
+    otra = live_lineup({
+        "user_lineup": {
+            "lineup": {"type": "4-4-2", "players": huecos}
+        }
+    })
+
+    assert otra is not None
+    assert otra["player_ids"] == sorted(EL_ONCE_BUENO)
+
+
+def test_no_saber_leer_la_lista_no_es_un_once_vacio():
+    """
+    LA PARTE QUE IMPORTA.
+
+    Cero jugadores no es un dato neutro: significa "hay que poner
+    el once entero", y eso es una ESCRITURA. Un fallo de lectura
+    no puede disparar una escritura.
+
+    Con cosas dentro que no se saben leer, se contesta "no se
+    sabe" y manda la memoria del ultimo XI escrito.
+    """
+
+    once = live_lineup({
+        "user_lineup": {
+            "lineup": {
+                "type": "4-4-2",
+                "players": [
+                    {"formato": "raro"},
+                    {"otro": "campo"},
+                ],
+            }
+        }
+    })
+
+    assert once is None, (
+        "una lista ilegible se esta tomando por un once vacio: "
+        "Pepe escribiria el once entero cada media hora"
+    )
+
+
+def test_un_once_vacio_de_verdad_si_es_un_once_vacio():
+    """
+    Y la otra cara: si de verdad no hay nadie puesto, hay que
+    ponerlo. Eso no cambia.
+    """
+
+    once = live_lineup({
+        "user_lineup": {"lineup": {"type": "4-4-2", "players": []}}
+    })
+
+    assert once is not None
+    assert once["player_ids"] == []
+
+
 def test_da_igual_como_venga_envuelto():
     """
     La respuesta puede llegar con `data` o sin el segun como se
@@ -312,6 +399,9 @@ def main():
         test_con_la_foto_vieja_habria_dicho_que_falta_pablo_ibanez,
         test_sin_el_dato_se_dice_que_no_se_sabe,
         test_da_igual_como_venga_envuelto,
+        test_los_jugadores_pueden_venir_como_fichas,
+        test_no_saber_leer_la_lista_no_es_un_once_vacio,
+        test_un_once_vacio_de_verdad_si_es_un_once_vacio,
         test_la_clasificacion_ya_no_es_fuente_del_once_propio,
         test_el_colector_pide_la_alineacion,
     ]

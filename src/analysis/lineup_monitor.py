@@ -753,21 +753,91 @@ def live_lineup(snapshot: dict) -> dict | None:
     if alineacion is None:
         return None
 
+    bruto = _raw_player_list(alineacion)
+
+    ids = sorted({
+        pid
+        for pid in (_player_id(p) for p in bruto)
+        if pid
+    })
+
+    # ============================================================
+    # UN ONCE QUE NO SE SABE LEER NO ES UN ONCE VACIO
+    # ============================================================
+    #
+    # El 22/08, con el arreglo ya subido, el cartel paso de decir
+    # "falta Pablo Ibáñez" a decir "No hay ningun XI puesto en
+    # Biwenger" y listar los once. El dueño tenia su XI puesto: lo
+    # que pasaba es que la lista venia en un formato que este
+    # lector no sabia deshacer y se quedaba en cero.
+    #
+    # Y cero jugadores no es un dato neutro: significa "hay que
+    # poner el once entero", que es una escritura. Un fallo de
+    # lectura no puede disparar una escritura.
+    #
+    # Asi que: lista vacia de verdad -> once vacio, y hay que
+    # ponerlo. Lista con cosas dentro que no se saben leer ->
+    # NO SE SABE, y manda la memoria del ultimo XI escrito.
+    if bruto and not ids:
+        return None
+
     return {
         "known": True,
         "source": "USER",
         "formation": alineacion.get("type"),
-        "player_ids": sorted(
-            _safe_int(p)
-            for p in (
-                alineacion.get("playersID")
-                or alineacion.get("players")
-                or []
-            )
-            if _safe_int(p)
-        ),
+        "player_ids": ids,
         "date": alineacion.get("date"),
     }
+
+
+def _raw_player_list(alineacion: dict) -> list:
+    """
+    La lista de jugadores, se llame como se llame.
+
+    `playersID` es como se ESCRIBE. Al leer, Biwenger puede
+    devolverla como `players`, y dentro puede haber numeros o
+    fichas enteras segun como se pida el campo.
+    """
+
+    for clave in (
+        "playersID",
+        "players",
+        "playersId",
+        "playerIDs",
+        "ids",
+    ):
+        valor = alineacion.get(clave)
+
+        if isinstance(valor, list) and valor:
+            return valor
+
+    return []
+
+
+def _player_id(item) -> int:
+    """
+    El id de un jugador, venga como venga: un numero, una ficha
+    con `id`, o un hueco de la alineacion con el jugador dentro.
+    """
+
+    if isinstance(item, dict):
+
+        for clave in ("id", "playerID", "player", "playerId"):
+
+            valor = item.get(clave)
+
+            # `player` puede ser a su vez una ficha.
+            if isinstance(valor, dict):
+                valor = valor.get("id")
+
+            numero = _safe_int(valor)
+
+            if numero:
+                return numero
+
+        return 0
+
+    return _safe_int(item)
 
 
 def _current_lineup_block(snapshot: dict) -> dict | None:
