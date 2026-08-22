@@ -708,50 +708,92 @@ def _safe_int(value, default: int = 0) -> int:
 def live_lineup(snapshot: dict) -> dict | None:
     """El XI que Biwenger tiene puesto ahora mismo.
 
-    Devuelve None cuando NO SE SABE -no hay clasificacion, o no
-    aparece nuestra fila-. None no significa "no hay once": si la
-    fila existe y viene sin jugadores, eso si es un once vacio y
-    se devuelve como tal, porque hay que ponerlo.
+    SE LEE DONDE SE ESCRIBE (22/08/2026)
+
+        Esto leia el once de
+        `rounds.data.league.standings[].lineup`, que NO es el once
+        de ahora: es el que quedo congelado en una jornada YA
+        JUGADA. En el snapshot del 17/08 ese bloque apuntaba a
+        `round.id 4899`, la jornada 1.
+
+        El dueño lo vio de la forma mas simple posible: su
+        Biwenger tenia el 4-4-2 correcto, con Pablo Ibáñez dentro,
+        y el cartel seguia diciendo "dibujo 5-3-2, deberia entrar
+        Pablo Ibáñez". Era su alineacion de la jornada 1, cuando
+        ni siquiera tenia a ese jugador.
+
+        Pepe escribe el once con `PUT /user`. Leerlo de la
+        clasificacion de una jornada cerrada era escribir en un
+        sitio y leer en otro: no podian coincidir nunca desde el
+        momento en que la plantilla cambia.
+
+        Y no era solo el cartel. Desde el 21/08 la decision de
+        reescribir el once depende de esta comparacion, asi que un
+        "no coincide" eterno se lleva por delante la unica accion
+        que Pepe hace por ciclo -alinear va a prioridad 760 y
+        fichar a 400- cada media hora, para siempre.
+
+    LO QUE NO SE SABE, NO SE INVENTA
+
+        Si el once real no viene en el snapshot se devuelve None.
+        Antes se caia al de la jornada vieja, y comparar contra un
+        dato equivocado es peor que no comparar: `compare_with_live`
+        sabe tratar el None y vuelve a la memoria del ultimo XI
+        escrito.
+
+        El colector lo pide en cada ciclo, asi que esto se cura
+        solo en media hora.
     """
 
     if not isinstance(snapshot, dict):
         return None
 
-    user_id = _safe_int(
-        ((snapshot.get("league") or {}).get("user") or {}).get("id")
-    )
+    alineacion = _current_lineup_block(snapshot)
 
-    if not user_id:
+    if alineacion is None:
         return None
 
-    filas = (
-        (snapshot.get("rounds") or {})
-        .get("data", {})
-        .get("league", {})
-        .get("standings")
-        or []
-    )
+    return {
+        "known": True,
+        "source": "USER",
+        "formation": alineacion.get("type"),
+        "player_ids": sorted(
+            _safe_int(p)
+            for p in (
+                alineacion.get("playersID")
+                or alineacion.get("players")
+                or []
+            )
+            if _safe_int(p)
+        ),
+        "date": alineacion.get("date"),
+    }
 
-    for fila in filas:
 
-        if not isinstance(fila, dict):
+def _current_lineup_block(snapshot: dict) -> dict | None:
+    """
+    El bloque `lineup` de `GET /user`, que es donde Biwenger
+    guarda la alineacion de la jornada que viene.
+
+    Se aceptan varias formas porque la respuesta puede venir
+    envuelta en `data` segun como se pida.
+    """
+
+    bruto = snapshot.get("user_lineup")
+
+    for capa in (bruto, (bruto or {}).get("data")):
+
+        if not isinstance(capa, dict):
             continue
 
-        if _safe_int(fila.get("id")) != user_id:
-            continue
+        alineacion = capa.get("lineup")
 
-        alineacion = fila.get("lineup") or {}
+        if isinstance(alineacion, dict):
+            return alineacion
 
-        return {
-            "known": True,
-            "formation": alineacion.get("type"),
-            "player_ids": sorted(
-                _safe_int(p)
-                for p in (alineacion.get("players") or [])
-                if _safe_int(p)
-            ),
-            "date": alineacion.get("date"),
-        }
+        # Ya viene desenvuelto.
+        if capa.get("playersID") or capa.get("players"):
+            return capa
 
     return None
 
@@ -790,6 +832,11 @@ def compare_with_live(
             ),
             "recommended_ids": recomendados,
         }
+
+    # De donde salio el once con el que se compara. Si un dia
+    # vuelve a leerse del sitio equivocado, se vera aqui antes que
+    # en un cartel rojo que nadie sabe explicar.
+    origen = live.get("source")
 
     puestos = live.get("player_ids") or []
 
@@ -837,6 +884,7 @@ def compare_with_live(
     return {
         "known": True,
         "matches": coincide,
+        "source": origen,
         "live_formation": live.get("formation"),
         "live_player_ids": puestos,
         "recommended_formation": formation_name,

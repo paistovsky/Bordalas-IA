@@ -25,6 +25,41 @@ def collect_league_snapshot() -> None:
     rounds.raise_for_status()
     rounds_data = rounds.json()
 
+    # ==================================================
+    # LA ALINEACION DE VERDAD (22/08/2026)
+    # ==================================================
+    #
+    # `rounds/league` trae el once que quedo CONGELADO en una
+    # jornada ya jugada. No es el que hay puesto para la que
+    # viene, y usarlo para comprobar lo que hay en Biwenger hacia
+    # que el cartel de divergencia estuviese rojo para siempre:
+    # el dueño tenia su 4-4-2 correcto y se le decia que le
+    # faltaba un jugador que compro despues de aquella jornada.
+    #
+    # Pepe escribe el once con `PUT /user?fields=*,lineup(date)`.
+    # Se lee del mismo sitio, que es la unica forma de que
+    # read-before-write signifique algo.
+    #
+    # Si falla no se tumba el ciclo: se queda a None y
+    # `live_lineup` devuelve "no se sabe", que es mejor que
+    # comparar contra un dato equivocado.
+    print("Obteniendo alineación actual...")
+
+    try:
+        lineup_response = client.session.get(
+            f"{client.BASE_URL}/user",
+            params={"fields": "*,lineup(*)"},
+        )
+        lineup_response.raise_for_status()
+        user_lineup = lineup_response.json()
+
+    except Exception as error:
+        print(
+            f"  No se pudo leer la alineación actual: "
+            f"{type(error).__name__}: {error}"
+        )
+        user_lineup = None
+
     print("Obteniendo mercado...")
     market = client.get_market()
 
@@ -48,6 +83,9 @@ def collect_league_snapshot() -> None:
         "league": league,
 
         "rounds": rounds_data,
+
+        # El once de la jornada que viene, leido donde se escribe.
+        "user_lineup": user_lineup,
 
         "market": market,
 

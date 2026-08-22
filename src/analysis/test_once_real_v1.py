@@ -31,6 +31,21 @@ LA REGLA, EN PALABRAS DEL DUEÑO
 
     "Que haga lo que tenga que hacer, pero que siempre lea lo
      que hay en Biwenger y luego lo ajuste."
+
+CORRECCION DEL 22/08/2026
+
+    Este fichero nacio dando por bueno que el once que hay puesto
+    vivia en `standings[<mi id>].lineup`. No: eso es el once
+    CONGELADO de una jornada ya jugada.
+
+    El once de la jornada que viene se lee donde se escribe,
+    `GET /user?fields=*,lineup(*)`, y el snapshot lo trae en
+    `user_lineup`. El caso entero esta en
+    `test_once_de_verdad_v1`.
+
+    Lo que se comprueba aqui sigue valiendo igual -leer antes de
+    escribir, no fiarse de la libreta-; lo que cambia es de donde
+    sale el dato.
 """
 
 from __future__ import annotations
@@ -49,30 +64,59 @@ MI_ID = 14175949
 
 
 def snapshot(once_puesto, dibujo="4-3-3", con_fila=True):
+    """
+    Un snapshot con la alineacion de verdad dentro.
 
-    filas = []
+    Se conserva tambien la clasificacion, con OTRO once, para que
+    quede probado que no se cuela: si alguien vuelve a leer de
+    ahi, estas pruebas se caen.
+    """
+
+    datos = {
+        "league": {"user": {"id": MI_ID}},
+
+        # La foto congelada de una jornada ya jugada. Existe en el
+        # snapshot de verdad y NO es lo que hay puesto ahora.
+        "rounds": {
+            "data": {
+                "round": {"id": 4899},
+                "league": {
+                    "standings": [
+                        {
+                            "id": MI_ID,
+                            "name": "Pepe Bordalás",
+                            "lineup": {
+                                "type": "5-4-1",
+                                "players": list(range(90, 101)),
+                                "discarded": [],
+                            },
+                        },
+                        {
+                            "id": 777,
+                            "name": "Otro",
+                            "lineup": {
+                                "type": "4-4-2",
+                                "players": [],
+                                "discarded": [],
+                            },
+                        },
+                    ]
+                },
+            }
+        },
+    }
 
     if con_fila:
-        filas.append({
-            "id": MI_ID,
-            "name": "Pepe Bordalás",
-            "lineup": {
-                "type": dibujo,
-                "players": once_puesto,
-                "discarded": [],
-            },
-        })
+        datos["user_lineup"] = {
+            "data": {
+                "lineup": {
+                    "type": dibujo,
+                    "playersID": once_puesto,
+                }
+            }
+        }
 
-    filas.append({
-        "id": 777,
-        "name": "Otro",
-        "lineup": {"type": "4-4-2", "players": [], "discarded": []},
-    })
-
-    return {
-        "league": {"user": {"id": MI_ID}},
-        "rounds": {"data": {"league": {"standings": filas}}},
-    }
+    return datos
 
 
 def once(ids):
@@ -89,8 +133,11 @@ ONCE_A = list(range(1, 12))
 
 def test_se_lee_el_once_que_hay_puesto():
     """
-    El dato estaba en el snapshot desde el primer dia:
-    `standings[<mi id>].lineup`. Solo habia que mirarlo.
+    El once de la jornada que viene, leido de `user_lineup`, que
+    es donde Pepe lo escribe.
+
+    Y con la clasificacion delante trayendo otro distinto: si se
+    colase, esto se caeria.
     """
 
     live = live_lineup(snapshot(ONCE_A, "5-3-2"))
@@ -100,16 +147,22 @@ def test_se_lee_el_once_que_hay_puesto():
     assert live["player_ids"] == ONCE_A
 
 
-def test_no_se_confunde_mi_fila_con_la_de_un_rival():
+def test_sin_alineacion_no_se_inventa_una():
     """
-    Coger la fila equivocada seria comparar mi once con el de
-    otro y escribir sin parar.
+    Ausencia de dato != dato.
+
+    Antes, sin el once real se caia al de la jornada cerrada y se
+    comparaba contra el. Comparar contra un dato equivocado es
+    peor que no comparar: ahora se contesta "no se sabe" y manda
+    la memoria del ultimo XI escrito.
     """
 
-    base = snapshot(ONCE_A)
-    base["league"]["user"]["id"] = 999_999
+    base = snapshot(ONCE_A, con_fila=False)
 
-    assert live_lineup(base) is None
+    assert live_lineup(base) is None, (
+        "sin alineacion de verdad se esta cogiendo la de la "
+        "jornada ya jugada"
+    )
 
 
 # ============================================================
@@ -266,7 +319,7 @@ def main():
 
     pruebas = [
         test_se_lee_el_once_que_hay_puesto,
-        test_no_se_confunde_mi_fila_con_la_de_un_rival,
+        test_sin_alineacion_no_se_inventa_una,
         test_si_lo_puesto_ya_es_lo_recomendado_no_se_toca,
         test_un_jugador_distinto_obliga_a_escribir,
         test_el_mismo_once_con_otro_dibujo_no_es_el_mismo_once,
