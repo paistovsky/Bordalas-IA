@@ -278,6 +278,38 @@ def test_no_saber_leer_la_lista_no_es_un_once_vacio():
     )
 
 
+def test_sin_la_clave_players_no_se_sabe_nada():
+    """
+    MEDIDO CONTRA BIWENGER EL 22/08/2026.
+
+        fields=*,lineup(*,players(*))  -> `players`: 11 fichas
+        fields=*,lineup(*)             -> el bloque llega SIN
+                                          `players`
+
+    Pedir mal el campo no devuelve una lista vacia: devuelve un
+    bloque sin la clave. Confundir las dos cosas es decir "no hay
+    once puesto" cuando lo que pasa es que no se ha preguntado, y
+    eso dispara una escritura del once entero.
+    """
+
+    once = live_lineup({
+        "user_lineup": {
+            "data": {
+                "lineup": {
+                    "type": "4-4-2",
+                    "count": 1,
+                    "date": 1787388369,
+                }
+            }
+        }
+    })
+
+    assert once is None, (
+        "un bloque sin la clave `players` se esta tomando por un "
+        "once vacio"
+    )
+
+
 def test_un_once_vacio_de_verdad_si_es_un_once_vacio():
     """
     Y la otra cara: si de verdad no hay nadie puesto, hay que
@@ -401,6 +433,7 @@ def main():
         test_da_igual_como_venga_envuelto,
         test_los_jugadores_pueden_venir_como_fichas,
         test_no_saber_leer_la_lista_no_es_un_once_vacio,
+        test_sin_la_clave_players_no_se_sabe_nada,
         test_un_once_vacio_de_verdad_si_es_un_once_vacio,
         test_la_clasificacion_ya_no_es_fuente_del_once_propio,
         test_el_colector_pide_la_alineacion,

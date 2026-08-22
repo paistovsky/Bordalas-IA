@@ -755,6 +755,23 @@ def live_lineup(snapshot: dict) -> dict | None:
 
     bruto = _raw_player_list(alineacion)
 
+    # ============================================================
+    # QUE NO VENGA LA LISTA NO ES QUE ESTE VACIA
+    # ============================================================
+    #
+    # Medido contra Biwenger el 22/08/2026:
+    #
+    #   fields=*,lineup(*,players(*))  -> `players`: 11 fichas
+    #   fields=*,lineup(*)             -> el bloque NO trae
+    #                                     `players` en absoluto
+    #
+    # O sea que pedir mal el campo no devuelve una lista vacia:
+    # devuelve un bloque SIN la clave. Y sin la clave no se sabe
+    # nada del once, que es muy distinto de saber que no hay
+    # ninguno.
+    if bruto is None:
+        return None
+
     ids = sorted({
         pid
         for pid in (_player_id(p) for p in bruto)
@@ -790,28 +807,48 @@ def live_lineup(snapshot: dict) -> dict | None:
     }
 
 
-def _raw_player_list(alineacion: dict) -> list:
+def _raw_player_list(alineacion: dict) -> list | None:
     """
     La lista de jugadores, se llame como se llame.
 
-    `playersID` es como se ESCRIBE. Al leer, Biwenger puede
-    devolverla como `players`, y dentro puede haber numeros o
-    fichas enteras segun como se pida el campo.
+    `playersID` es como se ESCRIBE. Al leer, Biwenger la devuelve
+    como `players` y con fichas enteras dentro -medido el
+    22/08/2026-.
+
+    Devuelve None cuando NINGUNA de las claves existe, que es el
+    caso de pedir `lineup(*)` sin los jugadores. Una lista vacia
+    de verdad se devuelve como lista vacia: eso si es un once sin
+    poner.
     """
 
-    for clave in (
+    CLAVES = (
         "playersID",
         "players",
         "playersId",
         "playerIDs",
         "ids",
-    ):
+    )
+
+    encontrada = None
+
+    for clave in CLAVES:
+
+        if clave not in alineacion:
+            continue
+
         valor = alineacion.get(clave)
 
-        if isinstance(valor, list) and valor:
+        if not isinstance(valor, list):
+            continue
+
+        if valor:
             return valor
 
-    return []
+        # Existe pero esta vacia. Se recuerda y se sigue mirando
+        # por si otra clave si trae gente.
+        encontrada = []
+
+    return encontrada
 
 
 def _player_id(item) -> int:
