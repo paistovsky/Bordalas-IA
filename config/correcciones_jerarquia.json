@@ -1,0 +1,29 @@
+{
+  "_comentario": [
+    "Correcciones manuales del ESCALON de FutbolFantasy.",
+    "",
+    "Solo se corrige la jerarquia -lo estructural-. El porcentaje",
+    "de titularidad de la semana NO se toca: eso es pronostico",
+    "fresco y falsearlo es otra cosa.",
+    "",
+    "Escalones validos: DIOS, CLAVE, IMPORTANTE, ROTACION,",
+    "REVULSIVO, RESERVA, DESCARTE.",
+    "",
+    "`motivo` es obligatorio: una correccion sin explicacion no se",
+    "puede revisar dentro de tres semanas, y no se aplica.",
+    "",
+    "`caduca` es opcional; por defecto 30 dias desde `desde`.",
+    "Caducada = se ignora, y la pantalla lo dice."
+  ],
+
+  "correcciones": [
+    {
+      "player_id": 41606,
+      "jugador": "Mangala",
+      "jerarquia": "IMPORTANTE",
+      "motivo": "Este ano es titular fijo en el Getafe. FF lo sigue teniendo como Rotacion y por eso el plan de deuda lo eligio para venderlo con 'coste deportivo ninguno' siendo el que mas puntos llevaba del once.",
+      "desde": "2026-08-22",
+      "caduca": "2026-09-21"
+    }
+  ]
+}

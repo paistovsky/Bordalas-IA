@@ -624,6 +624,18 @@ def compact_lineup(
                 "hierarchy_value": jerarquia_ff.get("value"),
                 "franchise": bool(jerarquia_ff.get("franchise")),
 
+                # UNA JERARQUIA TOCADA A MANO TIENE QUE VERSE
+                # TOCADA A MANO (22/08/2026)
+                #
+                # Es lo unico que separa una correccion de una
+                # mentira. Si en pantalla se pinta igual que la de
+                # FF, dentro de tres semanas nadie sabra cual es
+                # cual -ni yo-.
+                "hierarchy_source": senal_ff.get("hierarchy_source"),
+                "hierarchy_override": senal_ff.get(
+                    "hierarchy_override"
+                ),
+
                 "availability": (
                     (senal_ff.get("availability") or {}).get("label")
                 ),

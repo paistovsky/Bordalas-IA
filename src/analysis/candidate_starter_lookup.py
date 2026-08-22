@@ -80,12 +80,28 @@ def _files_key() -> tuple:
     pronostico de la jornada de antes sin enterarse.
     """
 
-    try:
-        estado = BOARD_FILE.stat()
-        return (str(BOARD_FILE), estado.st_mtime_ns, estado.st_size)
+    firma = []
 
-    except OSError:
-        return (str(BOARD_FILE), None, None)
+    # Las correcciones manuales entran en la firma. Si no, editar
+    # el fichero no tendria efecto hasta que FF reescribiese el
+    # tablero: la correccion estaria puesta y no se aplicaria, que
+    # es la peor de las dos mentiras posibles.
+    from src.intelligence.correcciones_jerarquia import (
+        ARCHIVO as CORRECCIONES_FILE,
+    )
+
+    for fichero in (BOARD_FILE, CORRECCIONES_FILE):
+
+        try:
+            estado = fichero.stat()
+            firma.append(
+                (str(fichero), estado.st_mtime_ns, estado.st_size)
+            )
+
+        except OSError:
+            firma.append((str(fichero), None, None))
+
+    return tuple(firma)
 
 
 def _load(path: Path) -> dict | None:
@@ -193,6 +209,30 @@ def build_starter_lookup(board: dict | None = None) -> dict:
             "inferred": False,
             "parser_role": (row.get("match") or {}).get("method"),
         }
+
+    # ========================================================
+    # CUANDO FF SE EQUIVOCA DE ESCALON (22/08/2026)
+    # ========================================================
+    #
+    # Se aplica AQUI y en ningun otro sitio a proposito: este es
+    # el unico punto por el que pasan el once, el tablero de
+    # fichajes, el plan de deuda y la pantalla. Corregir en varios
+    # sitios seria garantizar que un dia dos de ellos digan cosas
+    # distintas del mismo jugador.
+    #
+    # Cada ficha tocada queda marcada con `hierarchy_source` en
+    # MANUAL y la correccion entera colgando. Si falla, se sigue
+    # con lo que dice FF: una correccion que no se puede leer no
+    # puede tumbar el ciclo.
+    try:
+        from src.intelligence.correcciones_jerarquia import (
+            apply_corrections,
+        )
+
+        apply_corrections(lookup)
+
+    except Exception:
+        pass
 
     return lookup
 

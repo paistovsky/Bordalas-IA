@@ -169,12 +169,36 @@ function PlayerCard({ player, watched }) {
           que tiene que estar donde se mira la plantilla. */}
       {player.hierarchy && (
         <div className="phier">
+          {/* CORREGIDA A MANO (22/08/2026)
+            *
+            *   FF tenía a Mangala como Rotación siendo titular
+            *   fijo del Getafe, y con esa etiqueta el plan de
+            *   deuda lo eligió para venderlo "sin coste
+            *   deportivo" siendo el que más puntos llevaba.
+            *
+            *   Una jerarquía tocada a mano que se pinte igual que
+            *   una de FF es una mentira silenciosa. El asterisco
+            *   y el motivo son lo que la convierten en una
+            *   corrección. */}
           <span
             className={`pill ${
               HIERARCHY_TONE[String(player.hierarchy).toUpperCase()] || "idle"
             }`}
+            title={
+              player.hierarchy_source === "MANUAL"
+                ? `Corregida a mano: FF dice ${
+                    player.hierarchy_override?.hierarchy_before ||
+                    "otra cosa"
+                  }. ${
+                    player.hierarchy_override?.motivo || ""
+                  } (caduca ${
+                    player.hierarchy_override?.caduca || "?"
+                  })`
+                : undefined
+            }
           >
             {String(player.hierarchy).toUpperCase()}
+            {player.hierarchy_source === "MANUAL" ? " ✎" : ""}
           </span>
         </div>
       )}
