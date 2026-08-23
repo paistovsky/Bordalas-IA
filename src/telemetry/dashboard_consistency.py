@@ -225,6 +225,46 @@ def build_consistency_report(
         #
         # Si el ciclo escribio, la pantalla tiene que poder decir
         # que escribio.
+        #
+        # LA FALSA ALARMA DEL 23/08/2026
+        #
+        #     "ESTA PANTALLA NO CUADRA CON BIWENGER. La ultima
+        #      escritura esta contada: Biwenger dice true, aqui
+        #      sale false."
+        #
+        #     Y la pantalla la tenia contada, entera:
+        #
+        #         action   RAISE_COUNTER
+        #         success  true
+        #         http     200
+        #         status   null      <- lo unico vacio
+        #
+        #     Esta guarda exigia `status`, que no es el desenlace:
+        #     es un campo opcional que solo rellenan algunas vias
+        #     de escritura -`_compact_execution` lo copia con
+        #     `result.get("status")`- y la contraoferta no lo trae.
+        #     El desenlace de verdad son `success` y `http_status`.
+        #
+        #     Pedir un campo que no todas las vias rellenan es
+        #     confundir "no lo se" con "no ha pasado". Esa es
+        #     exactamente la regla que este fichero existe para
+        #     defender, y aqui estaba rota del lado contrario:
+        #     acusando a la pantalla de esconder algo que si
+        #     enseñaba.
+        #
+        # LO QUE SE EXIGE AHORA
+        #
+        #     Dos cosas, las mismas que promete el texto de la
+        #     fila: el QUE -un nombre de accion- y el COMO ACABO
+        #     -cualquiera de los campos que si describen el
+        #     desenlace-.
+        #
+        #     Y una tercera que antes no estaba: que la escritura
+        #     enseñada sea la de ESTE ciclo. Cuando `last_execution`
+        #     se cae al historial porque el ciclo no supo nombrar
+        #     lo que hizo, la pantalla enseña una escritura vieja
+        #     con cara de reciente. Eso si es el fallo que esta
+        #     fila deberia haber cazado.
         # ------------------------------------------------------
 
         ciclo = dashboard.get("cycle") or {}
@@ -232,9 +272,27 @@ def build_consistency_report(
 
         escribio = bool(ciclo.get("write_used"))
 
+        accion_enseñada = ultima.get("action")
+
+        # El COMO ACABO. Basta con uno: no todas las vias de
+        # escritura rellenan los mismos campos.
+        dice_como_acabo = (
+            ultima.get("succeeded") is not None
+            or ultima.get("success") is not None
+            or bool(ultima.get("status"))
+            or ultima.get("http_status") is not None
+        )
+
+        # Y que sea la de este ciclo, no una del historial.
+        es_de_este_ciclo = (
+            accion_enseñada is not None
+            and accion_enseñada == ciclo.get("action")
+        )
+
         contada = bool(
-            ultima.get("action")
-            and ultima.get("status")
+            accion_enseñada
+            and dice_como_acabo
+            and es_de_este_ciclo
         )
 
         comprobaciones.append(
