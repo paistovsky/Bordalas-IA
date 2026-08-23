@@ -55,6 +55,38 @@ from __future__ import annotations
 ACTIVE_BID_STATUS = frozenset({"waiting", "pending", ""})
 
 
+# ============================================================
+# UNA CONTRAOFERTA NO ES UNA PUJA (23/08/2026)
+# ============================================================
+#
+# El dueño lo vio en su propia pantalla:
+#
+#     "A Andrés Castrín ya le tengo y dice que está en el mercado
+#      y que ha pujado por él??"
+#
+# Medido contra Biwenger ese mismo dia:
+#
+#     type=purchase       from=Pollo17  to=YO   977.000   pide 38072
+#     type=counterOffer   from=YO  to=Pollo17 1.190.038   pide 38072
+#     type=purchase       from=YO  to=null      424.350   pide 37726
+#
+# Las tres tienen `from` distinto y solo la ultima es una puja
+# nuestra. La del medio es la respuesta a Pollo17: le pedimos
+# 1.190.038 por NUESTRO Andrés Castrín.
+#
+# El filtro miraba solo `from == nosotros`, y una contraoferta la
+# hacemos nosotros: pasaba con todas las de la ley.
+#
+# Y no es solo una etiqueta mal puesta: esta del REVES. Este
+# contador responde a "cuanto dinero mio esta comprometido y ya no
+# puedo gastar". Una contraoferta es dinero que ENTRA si la
+# aceptan. Contarla como compromiso le quito 1,19 M al presupuesto
+# de fichar por una operacion que, si sale bien, se lo suma.
+OUR_BID_TYPES = frozenset({"purchase"})
+
+COUNTER_OFFER_TYPES = frozenset({"counteroffer"})
+
+
 def safe_int(value, default: int = 0) -> int:
     try:
         return int(value or 0)
@@ -155,7 +187,21 @@ def build_bid_exposure(
             or []
         )
 
+        # LOS QUE YA SON NUESTROS
+        #
+        # La segunda guarda, y la que no depende de como llame
+        # Biwenger a las cosas: por un jugador que ya tenemos no
+        # se puja. Si un dia `counterOffer` pasa a llamarse otra
+        # cosa, esto lo sigue cazando.
+        mios = {
+            safe_int(jugador.get("id"))
+            for jugador in ((snapshot.get("my_team") or []))
+            if isinstance(jugador, dict)
+            and safe_int(jugador.get("id"))
+        }
+
         operaciones = []
+        contraofertas = []
 
         for oferta in ofertas:
 
@@ -175,6 +221,45 @@ def build_bid_exposure(
             importe = safe_int(oferta.get("amount"))
 
             if importe <= 0:
+                continue
+
+            tipo = str(oferta.get("type") or "").lower()
+
+            pedidos = _requested_player_ids(oferta)
+
+            # Salida nuestra, o entrada nuestra. No es lo mismo y
+            # no puede contarse igual.
+            es_contraoferta = (
+                tipo in COUNTER_OFFER_TYPES
+                or (mios and set(pedidos) <= mios)
+            )
+
+            if es_contraoferta:
+
+                destino_c = oferta.get("to")
+
+                if not isinstance(destino_c, dict):
+                    destino_c = {}
+
+                contraofertas.append({
+                    "offer_id": (
+                        oferta.get("offer_id") or oferta.get("id")
+                    ),
+                    "amount": importe,
+                    "player_ids": pedidos,
+                    "status": estado or "waiting",
+                    "until": oferta.get("until"),
+                    "counterparty_id": (
+                        safe_int(destino_c.get("id")) or None
+                    ),
+                    "counterparty_name": destino_c.get("name"),
+                })
+
+                continue
+
+            # Y lo que no sabemos que es, tampoco se cuenta como
+            # dinero comprometido. Ausencia de dato != dato.
+            if tipo and tipo not in OUR_BID_TYPES:
                 continue
 
             # A QUIEN LE PUJAMOS
@@ -216,16 +301,39 @@ def build_bid_exposure(
             item["amount"] for item in operaciones
         )
 
+        pedido_en_contra = sum(
+            item["amount"] for item in contraofertas
+        )
+
         return {
             "available": True,
             "committed_total": comprometido,
             "operation_count": len(operaciones),
             "operations": operaciones,
+
+            # Las contraofertas viajan aparte, no se tiran. Que
+            # haya una negociacion abierta por un jugador nuestro
+            # -y por cuanto- es informacion util; lo que no es, es
+            # dinero comprometido.
+            "counter_offers": contraofertas,
+            "counter_offer_count": len(contraofertas),
+            "counter_offer_total": pedido_en_contra,
+
             "reason": (
-                f"{len(operaciones)} puja(s) viva(s) por "
-                f"{comprometido:,} EUR.".replace(",", ".")
-                if operaciones
-                else "No hay pujas vivas."
+                (
+                    f"{len(operaciones)} puja(s) viva(s) por "
+                    f"{comprometido:,} EUR.".replace(",", ".")
+                    if operaciones
+                    else "No hay pujas vivas."
+                )
+                + (
+                    f" Ademas hay {len(contraofertas)} "
+                    f"contraoferta(s) nuestra(s) sobre la mesa por "
+                    + f"{pedido_en_contra:,}".replace(",", ".")
+                    + " EUR, que es dinero a COBRAR y no a pagar."
+                    if contraofertas
+                    else ""
+                )
             ),
         }
 

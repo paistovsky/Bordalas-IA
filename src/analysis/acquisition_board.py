@@ -184,6 +184,27 @@ def build_acquisition_board(
                     "name": operacion.get("counterparty_name"),
                 }
 
+        # LO QUE LE PEDIMOS POR UNO NUESTRO (23/08/2026)
+        #
+        # Una contraoferta salia aqui como PUJA PUESTA sobre un
+        # jugador que ya es nuestro. El dueño lo leyo asi: "a
+        # Andrés Castrín ya le tengo y dice que ha pujado por él".
+        #
+        # Es lo contrario de una puja: Pollo17 ofrecio 977.000 por
+        # Castrín y le pedimos 1.190.038. Dinero a cobrar.
+        contra_oferta = {}
+
+        for operacion in (exposicion.get("counter_offers") or []):
+            for jugador in (operacion.get("player_ids") or []):
+
+                contra_oferta[safe_int(jugador)] = {
+                    "amount": safe_int(operacion.get("amount")),
+                    "counterparty_name": operacion.get(
+                        "counterparty_name"
+                    ),
+                    "until": operacion.get("until"),
+                }
+
         # ------------------------------------------------------
         # A QUIEN SE LE COMPRA
         # ------------------------------------------------------
@@ -275,6 +296,18 @@ def build_acquisition_board(
 
             if safe_int(jugador_pujado) not in ya_listados:
                 a_mirar.append((jugador_pujado, {}))
+                ya_listados.add(safe_int(jugador_pujado))
+
+        # Y las negociaciones abiertas por uno NUESTRO. Antes
+        # entraban de rebote, porque una contraoferta se contaba
+        # como puja; al dejar de contarse, la fila desaparecia de
+        # la pantalla entera. Y el dueño pidio justo lo contrario:
+        # que se vea, pero llamada por su nombre.
+        for jugador_negociado in contra_oferta:
+
+            if safe_int(jugador_negociado) not in ya_listados:
+                a_mirar.append((jugador_negociado, {}))
+                ya_listados.add(safe_int(jugador_negociado))
 
         for player_id, venta in a_mirar:
 
@@ -289,6 +322,7 @@ def build_acquisition_board(
             if (
                 fuera_del_computer
                 and safe_int(player_id) not in puja_viva
+                and safe_int(player_id) not in contra_oferta
             ):
                 continue
 
@@ -471,6 +505,12 @@ def build_acquisition_board(
                     safe_int(player_id) in puja_viva
                 ),
 
+                # Lo que le PEDIMOS a un rival por este jugador,
+                # que es nuestro. Nada que ver con pujar.
+                "counter_offer": contra_oferta.get(
+                    safe_int(player_id)
+                ),
+
                 # A QUIEN SE LE COMPRA. Con nombre.
                 **_vendedor(player_id, venta),
 
@@ -481,7 +521,27 @@ def build_acquisition_board(
                 "decision": valoracion.get("decision"),
             }
 
-            if fuera_del_computer:
+            if fila["counter_offer"]:
+
+                # NEGOCIANDO UNA VENTA, NO UNA COMPRA
+                #
+                # Este jugador es NUESTRO y hay una contraoferta
+                # nuestra encima. No se puja por lo que ya se
+                # tiene: la fila existe para que se vea la
+                # negociacion abierta y por cuanto.
+                detalle = fila["counter_offer"]
+
+                fila["decision"] = "CONTRAOFERTA"
+
+                fila["reason"] = (
+                    f"Es nuestro. Le hemos pedido "
+                    + f"{detalle['amount']:,}".replace(",", ".")
+                    + " EUR a "
+                    + str(detalle.get("counterparty_name") or "un rival")
+                    + " por el. Es dinero a cobrar, no a pagar."
+                )
+
+            elif fuera_del_computer:
 
                 # Ya hay dinero nuestro aqui, pero no es un
                 # objetivo del ciclo: Pepe compra en el mercado
