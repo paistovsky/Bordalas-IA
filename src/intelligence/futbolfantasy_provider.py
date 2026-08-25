@@ -681,7 +681,30 @@ def _aliases(target: dict) -> list[str]:
     return aliases
 
 
-def _contains_name(largo: str, corto: str) -> bool:
+# Un token de menos de esto no identifica a nadie el solo.
+MIN_TOKEN_LEN = 4
+
+# Por debajo de esto no hay nombre, hay una inicial.
+ABSOLUTE_MIN_TOKEN_LEN = 3
+
+# Cuanto vale que el nombre de Biwenger este contenido, entero,
+# en el de FutbolFantasy.
+FULL_NAME_CONTAINMENT = 0.95
+
+# Y cuanto vale cuando ese nombre entero son tres letras.
+#
+# Pasa el 0,45 que pide la via del VALOR -donde el euro ya ha
+# dicho quien es- y NO llega al 0,82 que pide la via del NOMBRE
+# a secas. Tres letras no identifican solas; lo que no pueden es
+# tumbar una identidad ya confirmada por el precio.
+SHORT_NAME_CONTAINMENT = 0.60
+
+
+def _contains_name(
+    largo: str,
+    corto: str,
+    permitir_corto: bool = False,
+) -> bool:
     """
     ¿Esta el nombre corto dentro del largo, entero y en orden?
 
@@ -697,6 +720,32 @@ def _contains_name(largo: str, corto: str) -> bool:
     Se exige la secuencia COMPLETA y CONTIGUA de palabras, no un
     apellido suelto compartido: asi "Lo Celso" entra y dos
     "Garcia" distintos no se confunden.
+
+    EL CASO OSO (25/08/2026)
+
+        FF:        "Joaquín Oso"
+        Biwenger:  "Oso"
+        parecido:   0,4286
+
+        La guarda de longitud de aqui abajo se escribio contra
+        los apellidos sueltos compartidos, y hace bien. Pero
+        tambien tumbaba un nombre de Biwenger ENTERO por tener
+        tres letras, y ahi ya no protege de nada: no es un trozo
+        que alguien haya partido, es como se llama el jugador.
+
+        Con la contencion cerrada, la unica via era el parecido
+        de cadenas. 0,4286 contra el 0,45 que pide la via del
+        valor: fuera por catorce milesimas, teniendo el precio
+        cuadrado al euro.
+
+        Costo el noveno maximo puntuador de la liga -16 puntos,
+        95 la temporada pasada, libre en el Computer- saliendo
+        "sin dato" en la pantalla.
+
+    `permitir_corto` no relaja la comparacion: sigue siendo por
+    palabras enteras -"cardoso" nunca contiene "oso"-. Solo deja
+    de descartar de entrada. Quien llama decide cuanto vale ese
+    acierto.
     """
 
     if not largo or not corto:
@@ -709,8 +758,16 @@ def _contains_name(largo: str, corto: str) -> bool:
         return False
 
     # Un solo token muy corto no basta para identificar a nadie.
-    if len(palabras_corto) == 1 and len(palabras_corto[0]) < 4:
-        return False
+    if len(palabras_corto) == 1:
+
+        minimo = (
+            ABSOLUTE_MIN_TOKEN_LEN
+            if permitir_corto
+            else MIN_TOKEN_LEN
+        )
+
+        if len(palabras_corto[0]) < minimo:
+            return False
 
     for inicio in range(len(palabras_largo) - len(palabras_corto) + 1):
 
@@ -749,10 +806,32 @@ def _name_score(record: dict, target: dict) -> float:
             # "Andres" de Andres Castrin emparejaria con cualquier
             # Andres de la pagina: seria adivinar, no identificar.
             if alias in principales and (
-                _contains_name(candidato, alias)
-                or _contains_name(alias, candidato)
+                _contains_name(
+                    candidato,
+                    alias,
+                    permitir_corto=True,
+                )
+                or _contains_name(
+                    alias,
+                    candidato,
+                    permitir_corto=True,
+                )
             ):
-                mejor = max(mejor, 0.95)
+                # Un nombre de tres letras acierta menos que uno
+                # de ocho, aunque los dos esten contenidos. Se
+                # puntua distinto para que el umbral de cada via
+                # decida: el valor lo acepta, el nombre solo no.
+                es_corto = (
+                    len(alias.split()) == 1
+                    and len(alias) < MIN_TOKEN_LEN
+                )
+
+                mejor = max(
+                    mejor,
+                    SHORT_NAME_CONTAINMENT
+                    if es_corto
+                    else FULL_NAME_CONTAINMENT,
+                )
                 continue
 
             mejor = max(

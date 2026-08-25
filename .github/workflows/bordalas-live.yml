@@ -152,6 +152,7 @@ jobs:
           python -m src.analysis.test_correccion_jerarquia_v1
           python -m src.analysis.test_contraoferta_v1
           python -m src.analysis.test_escritura_contada_v1
+          python -m src.analysis.test_nombre_corto_v1
           python -m src.analysis.test_action_starvation_v1
           python -m src.analysis.test_price_history_store_v1
           python -m src.analysis.test_futbolfantasy_source_v12
