@@ -253,6 +253,31 @@ def get_starter_lookup() -> dict:
     return _CACHE
 
 
+def board_stamps() -> dict:
+    """
+    Los sellos de raiz del tablero: cache, jornada y generado.
+
+    POR QUE EXISTE
+
+        `build_starter_lookup` devuelve solo {player_id: senal}, asi
+        que los sellos de la raiz del JSON se quedaban por el camino y
+        el dashboard los pintaba como "None". El sello que mas importa
+        es `matchday`: es el guardarrail contra usar datos de una
+        jornada en otra, que es justo el fallo del 16/08/2026.
+
+        Devuelve siempre las tres claves. Si el tablero no se puede
+        leer, valen None y la pantalla ensena "?" en vez de mentir.
+    """
+
+    board = _load(BOARD_FILE) or {}
+
+    return {
+        "cache": board.get("cache") or {},
+        "matchday": board.get("matchday"),
+        "updated_at": board.get("updated_at"),
+    }
+
+
 def describe_lookup(lookup: dict | None = None) -> dict:
 
     if lookup is None:

@@ -72,6 +72,7 @@ def board_from_single_source() -> dict:
     """
 
     from src.analysis.candidate_starter_lookup import (
+        board_stamps,
         get_starter_lookup,
     )
 
@@ -116,9 +117,18 @@ def board_from_single_source() -> dict:
             }
         )
 
+    # Los sellos viajan con el tablero. Sin ellos el dashboard no
+    # puede decir de que jornada son los datos ni cuando se generaron,
+    # y `matchday` es el guardarrail contra repetir el fallo del
+    # 16/08/2026 (datos de la jornada 1 aplicados a la 2).
+    sellos = board_stamps()
+
     return {
         "version": "V12.0_SINGLE_SOURCE",
         "source": "FUTBOLFANTASY",
+        "cache": sellos["cache"],
+        "matchday": sellos["matchday"],
+        "updated_at": sellos["updated_at"],
         "players": jugadores,
     }
 
