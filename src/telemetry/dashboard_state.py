@@ -8,6 +8,10 @@ from pathlib import Path
 
 import requests
 
+from src.intelligence.bid_outcome_ledger import (
+    summary as bid_outcome_summary,
+)
+
 from src.analysis.decision_orchestrator import build_global_decision
 from src.analysis.acquisition_board import build_acquisition_board
 from src.analysis.market_analyzer import get_latest_snapshot, load_snapshot
@@ -3282,6 +3286,9 @@ def build_dashboard_state() -> dict:
         # decir "todavia no hay jornadas cerradas" en vez de
         # desaparecer y dejar al dueño sin saber si mide o no.
         "marcador": build_marcador(),
+
+        # Lo que Pepe hizo al pujar, no solo lo que pensaba pujar.
+        "bid_outcomes": bid_outcome_summary(),
 
         "priorities": candidates,
         "activity": activity,

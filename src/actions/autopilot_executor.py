@@ -2192,6 +2192,47 @@ def execute_autopilot_decision(
             )
         )
 
+        # El libro de pujas. Apunta que pusimos y con que expectativa,
+        # para poder cerrarlo despues contra el tablon y saber por
+        # cuanto nos ganan. Hoy nadie comprueba si el 83 % de la
+        # columna GANAR se cumple: esto es lo que lo hara comprobable.
+        #
+        # Fase observador: no decide nada. Y blindado, porque una
+        # escritura ya confirmada por Biwenger no puede caerse por un
+        # fallo apuntandola.
+        if success:
+
+            try:
+                from src.intelligence.bid_outcome_ledger import (
+                    record_bid,
+                )
+
+                fila = (
+                    data.get(
+                        "acquisition_target"
+                    )
+                    or {}
+                )
+
+                record_bid(
+                    int(requested_player_id),
+                    int(bid_amount),
+                    player_name=fresh_player.get("name"),
+                    our_value=fila.get("our_value"),
+                    win_probability=fila.get("win_probability"),
+                    market_price=fila.get("market_price"),
+                    recommended_bid=recommended_bid,
+                    intent=(
+                        data.get("intent")
+                        or fila.get("intent")
+                    ),
+                    target_source=data.get("target_source"),
+                    seller_user_id=seller_user_id,
+                )
+
+            except Exception:
+                pass
+
         return {
             "action":
                 action,

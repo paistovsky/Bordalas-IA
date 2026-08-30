@@ -73,6 +73,10 @@ from src.analysis.rival_intelligence_engine import (
     build_rival_intelligence,
 )
 
+from src.intelligence.bid_outcome_ledger import (
+    sync_bid_outcomes,
+)
+
 from src.intelligence.source_accuracy_ledger import (
     load_ledger,
     save_ledger,
@@ -3875,6 +3879,28 @@ def run_cycle(
         print(
             f"Libro de fuentes: puntuadas las jornadas "
             f"{source_accuracy['scored']}."
+        )
+
+    # El libro de pujas se cierra aqui, en la misma fase que el de
+    # fuentes: post-ejecucion, leyendo el tablon ya persistido en vez
+    # de volver a pedirlo por red.
+    bid_outcomes = sync_bid_outcomes(
+        (
+            (
+                snapshot.get("league")
+                or {}
+            ).get("user")
+            or {}
+        ).get("id")
+    )
+
+    if bid_outcomes.get("lost_with_margin"):
+        print()
+        print(
+            f"Libro de pujas: {bid_outcomes['won']} ganadas y "
+            f"{bid_outcomes['lost']} perdidas; nos ganan por "
+            f"{bid_outcomes['median_lost_margin']:,} de mediana."
+            .replace(",", ".")
         )
 
     negotiation_persistence = (
