@@ -157,6 +157,7 @@ jobs:
           python -m src.analysis.test_price_history_store_v1
           python -m src.analysis.test_futbolfantasy_source_v12
           python -m src.analysis.test_starter_aware_xi_v1
+          python -m src.analysis.test_bid_outcome_ledger_v1
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash
