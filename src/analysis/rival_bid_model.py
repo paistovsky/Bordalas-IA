@@ -144,12 +144,52 @@ MIN_WIN_PROBABILITY = 0.15
 #   renovaciones rotas, aplicada al valor en vez de a la
 #   prioridad.
 #
+# 03/09/2026: los dos umbrales estaban calibrados para otro
+# negocio, y entre los dos dejaban la rueda parada del todo.
+#
+# LO QUE SE MIDIO
+#
+#     Los 22 candidatos del tablero rendian EXACTAMENTE lo mismo:
+#     0,22 %. No es una estimacion por jugador, es una constante,
+#     y no es un fallo: el negocio es asi. No se trata de adivinar
+#     que jugador sube, sino de arbitraje: se compra a mercado y
+#     el Computer recompra por encima.
+#
+#         computer_premium, calibrado con 122 ventas (90 con
+#         precio): mediana +1,98 % sobre mercado, positivo en
+#         el 78 % de los casos.
+#
+#     Margen fino, igual para todos, que se gana repitiendolo.
+#
+# POR QUE BLOQUEABAN TODO
+#
+#     El umbral de rendimiento pedia un 3 %: catorce veces el
+#     margen que existe.
+#
+#     El de ganancia minima pedia 25.000 EUR. Con el tope por
+#     operacion (40 % de un bolsillo de ~3,5 M = 1,4 M), la
+#     ganancia maxima posible es 1.400.000 x 0,22 % = 3.080 EUR.
+#     Aunque el primero se bajara a cero, este seguiria
+#     bloqueandolo todo.
+#
+# LOS VALORES NUEVOS
+#
+#     Rendimiento: 0,15 %, dos tercios del margen medido. Pasa
+#     hoy y vuelve a cerrar la rueda si el Computer deja de pagar
+#     su prima. No es un numero redondo por gusto: esta atado a
+#     una medicion, y test_speculation_thresholds_v1 lo vigila.
+#
+#     Ganancia: 2.000 EUR, que a este margen equivale a
+#     operaciones de ~900.000 EUR para arriba. Las de 150.000
+#     -que dejarian 337 EUR- se siguen descartando: eso si es
+#     ruido, y el ciclo solo ejecuta una accion por vuelta.
+#
 # Solo se aplican a la ESPECULACION. Una mejora del once se paga
 # en puntos, no en euros de reventa, y exigirle rendimiento de
 # caja seria medirla con la regla equivocada.
-MIN_SPECULATION_YIELD = 0.03
+MIN_SPECULATION_YIELD = 0.0015
 
-MIN_SPECULATION_EXPECTED_VALUE = 25_000
+MIN_SPECULATION_EXPECTED_VALUE = 2_000
 
 SPECULATION_INTENT = "SPECULATION"
 
@@ -738,7 +778,7 @@ def optimal_bid(
                         f"({mejor['expected_value']:,} EUR sobre "
                         f"{mejor['bid']:,} inmovilizados) y se "
                         f"exige al menos un "
-                        f"{MIN_SPECULATION_YIELD * 100:.0f} %. "
+                        f"{MIN_SPECULATION_YIELD * 100:.2f} %. "
                         f"Por debajo de eso la subida estimada "
                         f"esta dentro del ruido del precio y el "
                         f"dinero rinde mas en otra operacion."
