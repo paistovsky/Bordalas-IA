@@ -1204,6 +1204,93 @@ def board_age_seconds(board: dict, now: datetime | None = None) -> float | None:
     ).total_seconds()
 
 
+def _misma_jornada(una, otra) -> bool:
+    """
+    Compara jornadas sin fiarse del tipo.
+
+    Un `"3"` y un `3` son la misma jornada, y un `None` no es
+    ninguna: un tablero sin jornada NO se da por bueno.
+    """
+
+    if una is None or otra is None:
+        return False
+
+    try:
+        return int(una) == int(otra)
+    except (TypeError, ValueError):
+        return False
+
+
+def stale_fallback(
+    cache: dict,
+    matchday: int,
+    ttl_seconds: int,
+    motivo: str,
+) -> dict:
+    """
+    Servir el tablero anterior cuando el de ahora no se pudo
+    construir. Con una condicion: que sea de ESTA jornada.
+
+    EL FALLO DEL 16/08/2026, POR LA OTRA PUERTA (04/09/2026)
+
+        La via HIT comprueba `matchday` desde el principio. Las
+        dos vias de respaldo -snapshot sin objetivos, y scrapeo
+        sin un solo emparejamiento- devolvian el tablero anterior
+        SIN comprobarla.
+
+        O sea: el tablero de la jornada 3 podia alimentar la 4, y
+        salir en verde. Es exactamente el fallo que costo alinear
+        a gente que no jugaba, entrando por la puerta de al lado.
+
+        Un tablero de otra jornada no es un dato viejo: es un dato
+        de otra pregunta. Asi que no se sirven sus jugadores. Se
+        devuelve vacio, con la jornada real que tenia y el estado
+        que lo explica, para que quien lo lea vea que no hay
+        pronostico en vez de creerse el de la semana pasada.
+    """
+
+    edad = board_age_seconds(cache)
+
+    if _misma_jornada(cache.get("matchday"), matchday):
+
+        salida = dict(cache)
+        salida["cache"] = {
+            "status": "STALE_FALLBACK",
+            "age_seconds": edad,
+            "ttl_seconds": ttl_seconds,
+            "error": motivo,
+        }
+        return salida
+
+    return {
+        "version": cache.get("version") or "V12.0",
+        "updated_at": cache.get("updated_at"),
+
+        # La del tablero, no la que se pidio. Si aqui se
+        # escribiera la jornada de hoy, el tablero de la 3
+        # pasaria por tablero de la 4 con solo mirarlo.
+        "matchday": cache.get("matchday"),
+        "requested_matchday": matchday,
+
+        "metadata": {},
+        "teams": {},
+        "players": [],
+
+        "cache": {
+            "status": "STALE_WRONG_MATCHDAY",
+            "age_seconds": edad,
+            "ttl_seconds": ttl_seconds,
+            "error": (
+                f"{motivo} El tablero anterior es de la jornada "
+                f"{cache.get('matchday')} y estamos en la "
+                f"{matchday}: no se sirve. Un pronostico de otra "
+                "jornada no es un dato viejo, es la respuesta a "
+                "otra pregunta."
+            ),
+        },
+    }
+
+
 def refresh_board(
     snapshot: dict,
     matchday: int,
@@ -1303,14 +1390,12 @@ def refresh_board(
         )
 
         if cache and (cache.get("players") or []):
-            salida = dict(cache)
-            salida["cache"] = {
-                "status": "STALE_FALLBACK",
-                "age_seconds": board_age_seconds(cache),
-                "ttl_seconds": ttl_seconds,
-                "error": motivo,
-            }
-            return salida
+            return stale_fallback(
+                cache,
+                matchday,
+                ttl_seconds,
+                motivo,
+            )
 
         return {
             "version": "V12.0",
@@ -1408,16 +1493,12 @@ def refresh_board(
     # porque parece dato.
     if not jugadores and cache and (cache.get("players") or []):
 
-        salida = dict(cache)
-        salida["cache"] = {
-            "status": "STALE_FALLBACK",
-            "age_seconds": board_age_seconds(cache),
-            "ttl_seconds": ttl_seconds,
-            "error": (
-                "FutbolFantasy no devolvio ni un jugador emparejado."
-            ),
-        }
-        return salida
+        return stale_fallback(
+            cache,
+            matchday,
+            ttl_seconds,
+            "FutbolFantasy no devolvio ni un jugador emparejado.",
+        )
 
     # Al completar, lo bajado ahora se suma a lo que ya habia. Se
     # conserva solo a quien sigue siendo objetivo: un jugador que

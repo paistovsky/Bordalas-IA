@@ -384,10 +384,59 @@ def build_consistency_report(
             )
 
         # ------------------------------------------------------
-        # 5. TITULARIDAD DEL ONCE
+        # 5. LA JORNADA DEL TABLERO DE TITULARIDAD
+        #
+        # Contar jugadores no basta. Un tablero de la jornada 3
+        # con sus 59 jugadores dentro cuadra en el recuento y
+        # esta contestando a otra pregunta: ese fue el fallo del
+        # 16/08/2026, y costo alinear a gente que no jugaba.
+        #
+        # Aqui no se compara contra Biwenger: se comparan dos
+        # partes de la propia pantalla que tienen que decir la
+        # misma jornada.
         # ------------------------------------------------------
 
         alineacion = dashboard.get("lineup") or {}
+        resumen = dashboard.get("summary") or {}
+
+        jornada_hoy = resumen.get("target_matchday")
+        jornada_tablero = alineacion.get("starter_board_matchday")
+
+        comprobaciones.append(
+            {
+                **_check(
+                    "starter_board_matchday",
+                    "El tablero de titularidad es de esta jornada",
+                    safe_int(jornada_hoy),
+                    safe_int(jornada_tablero),
+                    (
+                        "El pronostico de titularidad tiene que ser "
+                        "de la jornada que se juega. Un tablero de "
+                        "otra jornada no es un dato viejo: es la "
+                        "respuesta a otra pregunta, y se parece "
+                        "demasiado a un dato bueno como para "
+                        "dejarlo pasar contando cabezas. "
+                        f"Cache: {alineacion.get('starter_cache_status')}, "
+                        f"generado {alineacion.get('starter_board_updated_at')}."
+                    ),
+                ),
+                "source": "CALENDARIO",
+                "expected_label": (
+                    f"jornada {jornada_hoy}"
+                    if jornada_hoy is not None
+                    else "jornada desconocida"
+                ),
+                "found_label": (
+                    f"tablero de la jornada {jornada_tablero}"
+                    if jornada_tablero is not None
+                    else "sin tablero"
+                ),
+            }
+        )
+
+        # ------------------------------------------------------
+        # 6. TITULARIDAD DEL ONCE
+        # ------------------------------------------------------
 
         total_xi = safe_int(alineacion.get("starter_data_total"))
         con_dato = safe_int(
@@ -396,7 +445,7 @@ def build_consistency_report(
 
         # OJO CON EL TEXTO DE ESTA FILA.
         #
-        # Las cuatro de arriba comparan contra Biwenger. Esta no:
+        # Las cuatro primeras comparan contra Biwenger. Esta no:
         # compara el tamano del XI contra cuantos de esos once
         # tienen pronostico. Decir "Biwenger dice 11" aqui seria
         # mentir sobre el origen del numero, en un panel cuyo
