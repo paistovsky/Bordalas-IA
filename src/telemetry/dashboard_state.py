@@ -3063,6 +3063,55 @@ def build_dashboard_state() -> dict:
             "managers": [],
         }
 
+    acquisition = build_acquisition_board(
+        snapshot=snapshot,
+        rival_intelligence=rival_intelligence,
+        current_user_id=board.get("current_user_id"),
+        available_budget=exposure.get("available_budget") or None,
+        acquisition_budget=presupuesto_fichajes or None,
+    )
+
+    points_market = calibrate_points_market(
+        snapshot.get("catalog", {})
+    )
+
+    photo_lookup = build_player_photo_lookup(
+        snapshot
+    )
+
+    # LA SEGUNDA OPINION, A HORIZONTE DE TEMPORADA (05/09/2026)
+    #
+    # La misma lista de candidatos, valorada por lo que van a dar
+    # de aqui a la jornada 38 en vez de por lo que valga su
+    # reventa el jueves.
+    #
+    # FASE OBSERVADOR: se escribe AL LADO de la valoracion de
+    # siempre, sobre copias de las filas. El tablero que decide
+    # sigue siendo bit a bit el mismo, y ninguna ruta de decision
+    # importa este modulo.
+    try:
+        from src.analysis.season_horizon_shadow import (
+            build_season_horizon_shadow,
+        )
+
+        season_horizon = build_season_horizon_shadow(
+            acquisition,
+            race,
+            points_market,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        season_horizon = {
+            "available": False,
+            "observer_only": True,
+            "reason": (
+                f"No se pudo valorar a temporada: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "rows": [],
+            "biggest_gaps": [],
+        }
+
     competition = compact_biwenger_competition(
         snapshot=snapshot,
         current_user_id=board.get("current_user_id"),
@@ -3107,22 +3156,6 @@ def build_dashboard_state() -> dict:
         )
         if fichajes.get("enabled")
         else None
-    )
-
-    acquisition = build_acquisition_board(
-        snapshot=snapshot,
-        rival_intelligence=rival_intelligence,
-        current_user_id=board.get("current_user_id"),
-        available_budget=exposure.get("available_budget") or None,
-        acquisition_budget=presupuesto_fichajes or None,
-    )
-
-    points_market = calibrate_points_market(
-        snapshot.get("catalog", {})
-    )
-
-    photo_lookup = build_player_photo_lookup(
-        snapshot
     )
 
     # LA PLANTILLA TAMBIEN SABE (20/08/2026)
@@ -3343,6 +3376,10 @@ def build_dashboard_state() -> dict:
         # El marcador de la temporada. Observador puro: ningun
         # motor lo lee.
         "race": race,
+
+        # La valoracion a horizonte de temporada, al lado de la
+        # de siempre. Observador puro tambien.
+        "season_horizon": season_horizon,
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),
             "maximum_bid_calibration": rival_intelligence.get(
