@@ -3112,6 +3112,7 @@ def build_dashboard_state() -> dict:
             "biggest_gaps": [],
         }
 
+
     competition = compact_biwenger_competition(
         snapshot=snapshot,
         current_user_id=board.get("current_user_id"),
@@ -3142,6 +3143,37 @@ def build_dashboard_state() -> dict:
         }
 
     exposure = compact_exposure(state)
+
+    # QUE FICHARIA SI PUDIERA LLENAR UN HUECO (05/09/2026)
+    #
+    # Hoy a cada candidato solo se le compara con un jugador: el
+    # peor titular de su posicion. No existe "fichar y punto", y
+    # Pepe tiene 14 fichas contra las 17 del mayor de la liga.
+    #
+    # FASE OBSERVADOR: una lista al margen. No ficha, no puja y
+    # no toca `acquisition_valuation.py`.
+    try:
+        from src.analysis.roster_expansion_shadow import (
+            build_roster_expansion_shadow,
+        )
+
+        roster_expansion = build_roster_expansion_shadow(
+            season_horizon,
+            compact_ledger_audit(ledger_audit),
+            (exposure or {}).get("acquisition"),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        roster_expansion = {
+            "available": False,
+            "observer_only": True,
+            "reason": (
+                f"No se pudo calcular la via de ampliar plantilla: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "candidates": [],
+            "slots": {"known": False},
+        }
 
     # El dashboard tiene que decidir con el MISMO dinero que
     # produccion. Si aqui se pasara solo el de especular, la
@@ -3380,6 +3412,10 @@ def build_dashboard_state() -> dict:
         # La valoracion a horizonte de temporada, al lado de la
         # de siempre. Observador puro tambien.
         "season_horizon": season_horizon,
+
+        # Que ficharia si pudiera llenar un hueco de plantilla.
+        # Una lista al margen: no ficha nada.
+        "roster_expansion": roster_expansion,
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),
             "maximum_bid_calibration": rival_intelligence.get(
