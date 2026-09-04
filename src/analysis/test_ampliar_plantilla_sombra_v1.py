@@ -40,6 +40,7 @@ from src.analysis.roster_expansion_shadow import (
     blocked_reason,
     build_roster_expansion_shadow,
     count_free_slots,
+    not_signable_reason,
 )
 
 
@@ -196,6 +197,95 @@ def test_quien_si_entra_al_once_no_esta_bloqueado() -> None:
     assert motivo is None, (
         "quien ya ficha para el once no necesita una via nueva"
     )
+
+
+
+# ============================================================
+# A QUIEN NO SE PUEDE FICHAR
+# ============================================================
+
+
+def test_un_jugador_nuestro_no_es_un_fichaje() -> None:
+    """
+    SALIO CON LA FOTO DE PRODUCCION (05/09/2026).
+
+    La lista proponia fichar a Gustavo Puerta. Es NUESTRO: la
+    fila esta en el tablero porque Luismi_Haz nos ha ofrecido
+    4,47 M por el. "Es dinero a cobrar, no a pagar."
+    """
+
+    motivo = not_signable_reason(
+        _fila("Gustavo Puerta", 3_126_281, decision="CONTRAOFERTA")
+    )
+
+    assert motivo is not None
+    assert "nuestro" in motivo
+
+
+def test_lo_nuestro_se_reconoce_tambien_por_el_vendedor() -> None:
+    motivo = not_signable_reason(
+        _fila("Mio", 1_000_000, seller_id=14175949),
+        current_user_id=14175949,
+    )
+
+    assert motivo is not None and "nuestro" in motivo
+
+
+def test_un_lesionado_no_ocupa_una_ficha_libre() -> None:
+    """
+    Calero salia como el mejor chollo por punto de todo el
+    tablero -11.649 EUR el punto contra 21.758 del mercado-. Esta
+    lesionado.
+    """
+
+    for fila in (
+        _fila("Calero", 1_923_865, decision="NO_DISPONIBLE",
+              status="injured"),
+        _fila("Otro", 1_000_000, status="injured"),
+        _fila("Sancionado", 1_000_000, status="sanctioned"),
+    ):
+        motivo = not_signable_reason(fila)
+        assert motivo is not None, f"{fila['name']} deberia quedar fuera"
+        assert "no puede jugar" in motivo
+
+
+def test_un_fichable_normal_si_pasa() -> None:
+    assert not_signable_reason(_fila("Fulano", 1_000_000)) is None
+
+
+def test_los_no_fichables_no_llegan_a_la_lista() -> None:
+    filas = [
+        _fila("Nuestro", 9_000_000, decision="CONTRAOFERTA"),
+        _fila("Lesionado", 8_000_000, decision="NO_DISPONIBLE",
+              status="injured"),
+        _fila("Fichable", 1_000_000),
+    ]
+
+    r = build_roster_expansion_shadow(_sombra(filas), _ledger())
+
+    nombres = [c["name"] for c in r["candidates"]]
+
+    assert nombres == ["Fichable"], (
+        f"proponer fichar a alguien nuestro o lesionado: {nombres}"
+    )
+
+
+def test_se_dice_a_quien_se_ha_dejado_fuera_y_por_que() -> None:
+    """
+    Una lista mas corta sin explicacion parece una lista pobre.
+    """
+
+    r = build_roster_expansion_shadow(
+        _sombra([
+            _fila("Nuestro", 9_000_000, decision="CONTRAOFERTA"),
+            _fila("Fichable", 1_000_000),
+        ]),
+        _ledger(),
+    )
+
+    assert len(r["not_signable"]) == 1
+    assert r["not_signable"][0]["name"] == "Nuestro"
+    assert r["not_signable"][0]["reason"]
 
 
 # ============================================================
@@ -400,6 +490,12 @@ TESTS = [
     test_el_veto_del_once_es_una_puerta,
     test_el_intent_por_euros_es_la_otra,
     test_quien_si_entra_al_once_no_esta_bloqueado,
+    test_un_jugador_nuestro_no_es_un_fichaje,
+    test_lo_nuestro_se_reconoce_tambien_por_el_vendedor,
+    test_un_lesionado_no_ocupa_una_ficha_libre,
+    test_un_fichable_normal_si_pasa,
+    test_los_no_fichables_no_llegan_a_la_lista,
+    test_se_dice_a_quien_se_ha_dejado_fuera_y_por_que,
     test_entran_los_mejores_a_temporada_y_solo_los_que_caben,
     test_la_lista_dice_por_que_no_entran_hoy,
     test_la_lista_arrastra_los_peros_de_la_valoracion,

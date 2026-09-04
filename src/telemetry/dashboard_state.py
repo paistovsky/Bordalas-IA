@@ -3176,6 +3176,7 @@ def build_dashboard_state() -> dict:
             season_horizon,
             compact_ledger_audit(ledger_audit),
             (exposure or {}).get("acquisition"),
+            current_user_id=board.get("current_user_id"),
         )
 
     except Exception as error:                      # noqa: BLE001

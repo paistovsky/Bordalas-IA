@@ -137,6 +137,22 @@ export default function RosterExpansionPanel({ data }) {
         </div>
       )}
 
+      {/* A QUIEN SE HA DEJADO FUERA, Y POR QUE
+       *
+       *   La primera version de esta lista proponia fichar a
+       *   Gustavo Puerta —que ya es nuestro— y marcaba a Calero
+       *   —lesionado— como el mejor chollo del tablero. Ahora se
+       *   filtran, y se dice a quien, porque una lista mas corta
+       *   sin explicacion parece una lista pobre. */}
+      {(via.not_signable || []).length > 0 && (
+        <div className="dim" style={{ marginTop: 8 }}>
+          Fuera de la lista:{" "}
+          {via.not_signable
+            .map((fila) => `${fila.name} (${fila.reason})`)
+            .join(" · ")}
+        </div>
+      )}
+
       <p className="note" style={{ textAlign: "left" }}>
         Pepe <b>no</b> puede hacer esto hoy: no existe la operación
         «fichar para llenar un hueco», y esta lista no la crea. De{" "}
