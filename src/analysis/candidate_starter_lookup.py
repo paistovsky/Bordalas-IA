@@ -64,6 +64,106 @@ _CACHE: dict | None = None
 _CACHE_KEY: tuple | None = None
 
 
+# ============================================================
+# LA JORNADA QUE SE ESTA JUGANDO  (05/09/2026)
+# ============================================================
+#
+#     El 04/09 se tapo la mitad de este agujero: el proveedor ya
+#     no SIRVE un tablero de otra jornada cuando FutbolFantasy
+#     falla. Pero esta es la otra mitad, y es la que decide: aqui
+#     se lee el fichero del disco directamente, y hasta hoy no se
+#     miraba de que jornada era.
+#
+#     El propio `board_stamps` lo decia por escrito -"`matchday`
+#     es el guardarrail contra usar datos de una jornada en otra,
+#     que es justo el fallo del 16/08/2026"- y lo unico que hacia
+#     era publicarlo. Lo cargaba; no lo aplicaba.
+#
+#     Quien sabe en que jornada estamos son los dos procesos que
+#     entran: el ciclo -que ya la calcula para bajar el tablero- y
+#     la telemetria. Cada uno la deja dicha aqui.
+#
+#     SIN SABERLA NO SE RECHAZA NADA. Es a proposito: rechazar
+#     contra una expectativa que no tenemos seria inventarse un
+#     motivo. Sin expectativa, esto se comporta exactamente como
+#     ayer.
+_EXPECTED_MATCHDAY: int | None = None
+
+
+def set_expected_matchday(matchday) -> None:
+    """La jornada contra la que hay que validar el tablero."""
+
+    global _EXPECTED_MATCHDAY
+
+    try:
+        _EXPECTED_MATCHDAY = (
+            int(matchday) if matchday is not None else None
+        )
+
+    except (TypeError, ValueError):
+        _EXPECTED_MATCHDAY = None
+
+    reset_starter_lookup_cache()
+
+
+def expected_matchday() -> int | None:
+    return _EXPECTED_MATCHDAY
+
+
+def board_rejection(board: dict | None) -> dict | None:
+    """
+    ¿Hay que tirar este tablero? Y si si, por que, con palabras
+    que pueda leer el dueño en la pantalla.
+
+    Devuelve None cuando el tablero vale.
+    """
+
+    esperada = _EXPECTED_MATCHDAY
+
+    if esperada is None:
+        return None
+
+    if not board:
+        return None
+
+    del_tablero = (board or {}).get("matchday")
+
+    try:
+        misma = (
+            del_tablero is not None
+            and int(del_tablero) == esperada
+        )
+
+    except (TypeError, ValueError):
+        misma = False
+
+    if misma:
+        return None
+
+    if del_tablero is None:
+        return {
+            "rejected": True,
+            "board_matchday": None,
+            "expected_matchday": esperada,
+            "reason": (
+                f"El tablero de titularidad no dice de que jornada "
+                f"es y estamos en la {esperada}: no se usa ningun "
+                f"pronostico hasta que se refresque."
+            ),
+        }
+
+    return {
+        "rejected": True,
+        "board_matchday": del_tablero,
+        "expected_matchday": esperada,
+        "reason": (
+            f"El tablero es de la jornada {del_tablero} y estamos "
+            f"en la {esperada}: sin pronosticos hasta que se "
+            f"refresque."
+        ),
+    }
+
+
 def reset_starter_lookup_cache() -> None:
     global _CACHE, _CACHE_KEY
     _CACHE = None
@@ -100,6 +200,12 @@ def _files_key() -> tuple:
 
         except OSError:
             firma.append((str(fichero), None, None))
+
+    # La jornada esperada entra en la firma. Si cambia sin que
+    # cambie el fichero -y pasa: el tablero se queda rancio
+    # mientras el calendario avanza- la respuesta correcta es otra
+    # y la cache tiene que soltarla.
+    firma.append(("matchday", _EXPECTED_MATCHDAY, None))
 
     return tuple(firma)
 
@@ -138,6 +244,22 @@ def build_starter_lookup(board: dict | None = None) -> dict:
 
     if board is None:
         board = _load(BOARD_FILE) or {}
+
+    # EL TABLERO DE OTRA JORNADA NO SE SIRVE (05/09/2026)
+    #
+    #     Se devuelve el lookup vacio, que es el mismo estado que
+    #     cuando no hay tablero: nadie recibe pronostico, el XI se
+    #     elige por valor y puntos, y la regla del once bloquea
+    #     los fichajes. Pepe se queda quieto.
+    #
+    #     Quedarse quieto es lo correcto -alinear con el
+    #     pronostico de la semana pasada costo dinero el
+    #     16/08/2026- pero quedarse quieto EN SILENCIO no lo es:
+    #     el dueño se pasaria dias preguntandose por que no hace
+    #     nada. Por eso el motivo sale por `board_stamps()` y de
+    #     ahi al dashboard.
+    if board_rejection(board):
+        return {}
 
     lookup: dict[int, dict] = {}
 
@@ -271,10 +393,32 @@ def board_stamps() -> dict:
 
     board = _load(BOARD_FILE) or {}
 
+    rechazo = board_rejection(board)
+
+    cache = dict(board.get("cache") or {})
+
+    # EL MOTIVO VIAJA POR DONDE YA MIRA LA PANTALLA
+    #
+    #     `compact_lineup` publica `starter_source_error` desde
+    #     `cache.error`. Escribirlo aqui es lo que convierte
+    #     "Pepe no hace nada" en "Pepe no hace nada porque el
+    #     tablero es de la jornada 3". Y se pisa el error que
+    #     hubiera: el de la jornada manda, porque es el que
+    #     explica que no hay NI UN pronostico.
+    if rechazo:
+        cache["status"] = "REJECTED_WRONG_MATCHDAY"
+        cache["error"] = rechazo["reason"]
+
     return {
-        "cache": board.get("cache") or {},
+        "cache": cache,
         "matchday": board.get("matchday"),
         "updated_at": board.get("updated_at"),
+
+        # Explicito, para que la pantalla no tenga que adivinarlo
+        # leyendo un texto.
+        "rejected": bool(rechazo),
+        "rejection_reason": (rechazo or {}).get("reason"),
+        "expected_matchday": _EXPECTED_MATCHDAY,
     }
 
 

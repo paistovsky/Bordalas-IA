@@ -879,6 +879,16 @@ def refresh_starter_intelligence(
         # El lookup cachea por firma de fichero. Si el tablero se
         # ha reescrito en esta misma llamada, hay que soltar la
         # copia vieja antes de valorar.
+        #
+        # Y de paso se le dice contra que jornada tiene que
+        # validar lo que lea del disco: aqui es donde se sabe.
+        # `set_expected_matchday` suelta la cache por su cuenta.
+        from src.analysis.candidate_starter_lookup import (
+            set_expected_matchday,
+        )
+
+        set_expected_matchday(jornada)
+
         reset_starter_lookup_cache()
 
         meta = tablero.get("metadata") or {}

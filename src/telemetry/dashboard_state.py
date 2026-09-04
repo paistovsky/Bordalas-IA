@@ -938,6 +938,20 @@ def compact_lineup(
             cache_tablero.get("error")
             or tablero.get("error")
         ),
+
+        # EL TABLERO RECHAZADO SE DICE EN ALTO (05/09/2026)
+        #
+        # Si es de otra jornada, no alimenta nada: ni el XI, ni la
+        # valoracion de fichajes. Pepe se queda quieto a
+        # proposito. Fallar cerrado esta bien; fallar en silencio
+        # dejaria al dueño dias preguntandose que le pasa.
+        "starter_board_rejected": bool(tablero.get("rejected")),
+        "starter_board_rejection_reason": tablero.get(
+            "rejection_reason"
+        ),
+        "starter_expected_matchday": tablero.get(
+            "expected_matchday"
+        ),
         "players": players,
     }
 
@@ -2910,6 +2924,36 @@ def compact_ledger_audit(audit: dict) -> dict:
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
+
+    # LA JORNADA, ANTES DE RECALCULAR NADA (05/09/2026)
+    #
+    # El ciclo valida el tablero de titularidad contra la jornada
+    # que se juega. La telemetria corre en OTRO proceso y tiene
+    # que validar contra la misma, o las dos pantallas contarian
+    # cosas distintas del mismo tablero: el ciclo quieto y el
+    # dashboard tan contento con el pronostico de la semana
+    # pasada.
+    #
+    # Va antes de `build_global_decision` a proposito: ese
+    # recalculo ya usa el lookup.
+    #
+    # Blindado: si el calendario no se puede leer, no se fija
+    # expectativa y el lookup se comporta como siempre. Un
+    # termometro no puede tumbar la telemetria.
+    try:
+        from src.analysis.calendar_state import build_calendar_state
+        from src.analysis.candidate_starter_lookup import (
+            set_expected_matchday,
+        )
+
+        set_expected_matchday(
+            (build_calendar_state(snapshot) or {}).get(
+                "target_matchday"
+            )
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        print(f"Jornada esperada: no se pudo fijar ({error}).")
 
     # Observer puro: recalcula, pero no ejecuta.
     result = build_global_decision(snapshot)

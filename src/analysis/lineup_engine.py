@@ -129,6 +129,14 @@ def board_from_single_source() -> dict:
         "cache": sellos["cache"],
         "matchday": sellos["matchday"],
         "updated_at": sellos["updated_at"],
+
+        # Cuando el tablero es de otra jornada no se sirve ni un
+        # pronostico, y eso tiene que poder decirse con una
+        # bandera y no solo escondido en un texto de error.
+        "rejected": sellos.get("rejected", False),
+        "rejection_reason": sellos.get("rejection_reason"),
+        "expected_matchday": sellos.get("expected_matchday"),
+
         "players": jugadores,
     }
 

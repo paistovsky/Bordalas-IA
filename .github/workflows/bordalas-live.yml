@@ -163,6 +163,7 @@ jobs:
           python -m src.analysis.test_plantillas_rivales_llenas_v1
           python -m src.analysis.test_penaltis_apagados_v1
           python -m src.analysis.test_tope_por_operacion_v1
+          python -m src.analysis.test_jornada_en_la_valoracion_v1
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash
