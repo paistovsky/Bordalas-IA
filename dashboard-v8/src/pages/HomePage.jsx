@@ -1,4 +1,5 @@
 import PitchXI from "../components/PitchXI";
+import RacePanel from "../components/RacePanel";
 import TimelinePanel from "../components/TimelinePanel";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
 import { formatMoney } from "../lib/utils";
@@ -27,6 +28,11 @@ export default function HomePage({ data }) {
 
   return (
     <>
+      {/* LA CARRERA, LO PRIMERO (05/09/2026)
+          Pepe no sabia que iba cuarto. Lo primero que se abre
+          a mirar es como voy, no que va a pasar en el reset. */}
+      <RacePanel data={data} />
+
       <div className="grid g23">
         <section className="pan pan-pitch">
           <div className="pan-head">

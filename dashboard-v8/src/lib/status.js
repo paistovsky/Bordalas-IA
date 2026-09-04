@@ -96,6 +96,31 @@ export function normalizeStatus(raw = {}) {
     // desaparecer.
     marcador: raw.marcador || { available: false },
 
+    // EL LIBRO DE PUJAS (05/09/2026)
+    //
+    // Se escribe desde el 03/09 y no lo leia esta pantalla. Es lo
+    // unico que contesta a "¿por cuanto nos ganan?". Llega
+    // siempre, aunque venga a cero, para poder decir "todavia no
+    // hay nada" en vez de desaparecer.
+    bidOutcomes: raw.bid_outcomes || { available: false, placed: 0 },
+
+    // EN QUE CARRERA VA PEPE (05/09/2026)
+    //
+    // Puesto, distancia al lider, ritmo necesario y brecha de
+    // plantilla. FASE OBSERVADOR: ningun motor lo lee, y esta
+    // pantalla tampoco decide con ello.
+    race: raw.race || { available: false, managers: [] },
+
+    // La segunda opinion: que vale cada candidato de aqui a la
+    // jornada 38, al lado de lo que vale hoy.
+    seasonHorizon: raw.season_horizon || { available: false, rows: [] },
+
+    // A quien ficharia si pudiera llenar un hueco de plantilla.
+    rosterExpansion: raw.roster_expansion || {
+      available: false,
+      candidates: []
+    },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] }

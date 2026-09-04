@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import BidOutcomesPanel from "../components/BidOutcomesPanel";
 import { ago } from "../lib/utils";
 
 const FILTERS = [
@@ -146,6 +147,12 @@ export default function AuditPage({ data }) {
         competitive={data.competitive || {}}
         consistency={data.consistency || {}}
       />
+
+      {/* EL LIBRO DE PUJAS (05/09/2026)
+          Se escribe desde el 03/09 y no lo enseñaba nadie. Va en
+          AUDITORIA porque es exactamente eso: lo que Pepe hizo al
+          pujar, no lo que pensaba pujar. */}
+      <BidOutcomesPanel data={data} />
 
       {Boolean((backoff.blocked || []).length) && (
         <section className="pan">

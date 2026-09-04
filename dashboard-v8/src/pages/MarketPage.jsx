@@ -1,3 +1,5 @@
+import RosterExpansionPanel from "../components/RosterExpansionPanel";
+import SeasonHorizonPanel from "../components/SeasonHorizonPanel";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 
 /* POR QUE UN "CLAVE" SALE SIN VALOR (21/08/2026)
@@ -230,7 +232,7 @@ function ClockPanel({ clock }) {
   );
 }
 
-function CashPanel({ exposure }) {
+function CashPanel({ exposure, especulacion = {} }) {
   if (!exposure?.available) {
     return (
       <section className="pan">
@@ -328,6 +330,29 @@ function CashPanel({ exposure }) {
             </div>
           )}
         </>
+      )}
+
+      {/* EL TOPE POR OPERACION (05/09/2026)
+       *
+       *   El motor lo publica desde siempre como
+       *   `single_operation_limit`. El lector del dashboard
+       *   buscaba `max_operation`, que no existia en ningun sitio,
+       *   asi que la pantalla decia 0: lo contrario de lo que
+       *   decia el motor. Se arreglo en el lector el 04/09 y
+       *   hasta hoy no se veia por ninguna parte.
+       *
+       *   Va aqui porque un presupuesto sin tope por operacion se
+       *   lee como "puedes gastarlo de una vez", y no. */}
+      {Number(especulacion.max_operation || 0) > 0 && (
+        <div className="kv">
+          <span>Tope por operación</span>
+          <b
+            className="mono"
+            title="Lo máximo que puede irse en una sola operación especulativa: el 40 % del bolsillo."
+          >
+            {formatEuros(especulacion.max_operation)}
+          </b>
+        </div>
       )}
     </section>
   );
@@ -708,7 +733,10 @@ export default function MarketPage({ data }) {
     <>
       <div className="grid g3">
         <ClockPanel clock={data.marketClock} />
-        <CashPanel exposure={data.exposure} />
+        <CashPanel
+          exposure={data.exposure}
+          especulacion={data.speculation}
+        />
         <ListingsPanel listings={data.listings} />
       </div>
 
@@ -717,6 +745,23 @@ export default function MarketPage({ data }) {
         pointsMarket={data.pointsMarket}
         exposure={data.exposure}
       />
+
+      {/* LAS DOS SEGUNDAS OPINIONES, DEBAJO DE LA TABLA QUE
+          COMENTAN (05/09/2026)
+
+          Van aqui y no en otra pagina a proposito: comparar "lo
+          que Pepe valora" con "lo que valdria a temporada"
+          obliga a tener las dos cosas delante. En pantallas
+          separadas nadie las compara.
+
+          Ninguna de las dos decide nada. */}
+      <div style={{ marginTop: 11 }}>
+        <SeasonHorizonPanel data={data} />
+      </div>
+
+      <div style={{ marginTop: 11 }}>
+        <RosterExpansionPanel data={data} />
+      </div>
 
       <div style={{ marginTop: 11 }}>
         <OffersPanel offers={data.offers || []} />
