@@ -3026,6 +3026,43 @@ def build_dashboard_state() -> dict:
         rival_intelligence=rival_intelligence,
     )
 
+    # Las plantillas de los siete, con la misma ficha. Se saca a
+    # una variable porque de ella cuelga el estado de carrera.
+    rival_squads = build_rival_squads(
+        snapshot,
+        current_user_id=board.get("current_user_id"),
+        rival_intelligence=rival_intelligence,
+    )
+
+    # EN QUE CARRERA VA PEPE (05/09/2026)
+    #
+    # Puesto, distancia al lider, jornadas restantes, ritmo
+    # necesario y brecha de plantilla. Nada de esto entra en
+    # ninguna decision: Pepe sigue pujando igual fuese primero o
+    # ultimo.
+    #
+    # FASE OBSERVADOR. Se calcula, se pinta, y ahi acaba. Ningun
+    # motor importa `race_state`.
+    #
+    # Blindado: nunca lanza por su cuenta, pero el envoltorio se
+    # queda por si el import falla. Un marcador roto no puede
+    # tumbar la telemetria.
+    try:
+        from src.analysis.race_state import build_race_state
+
+        race = build_race_state(rival_squads)
+
+    except Exception as error:                      # noqa: BLE001
+        race = {
+            "available": False,
+            "observer_only": True,
+            "reason": (
+                f"No se pudo construir el estado de carrera: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "managers": [],
+        }
+
     competition = compact_biwenger_competition(
         snapshot=snapshot,
         current_user_id=board.get("current_user_id"),
@@ -3301,11 +3338,11 @@ def build_dashboard_state() -> dict:
         # desde los perfiles de usuario. `standings[].lineup` queda
         # de respaldo: venia vacio en los siete managers, y la
         # pantalla publicaba `available: true` con `players: []`.
-        "rival_squads": build_rival_squads(
-            snapshot,
-            current_user_id=board.get("current_user_id"),
-            rival_intelligence=rival_intelligence,
-        ),
+        "rival_squads": rival_squads,
+
+        # El marcador de la temporada. Observador puro: ningun
+        # motor lo lee.
+        "race": race,
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),
             "maximum_bid_calibration": rival_intelligence.get(
