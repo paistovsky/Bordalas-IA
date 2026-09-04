@@ -3063,6 +3063,53 @@ def build_dashboard_state() -> dict:
             "managers": [],
         }
 
+    competition = compact_biwenger_competition(
+        snapshot=snapshot,
+        current_user_id=board.get("current_user_id"),
+    )
+
+    deadline = state.get("deadline", {}) or {}
+    temporal_gate = state.get("temporal_gate", {}) or {}
+    liquidity = state.get("liquidity", {}) or {}
+    recovery = liquidity.get("recovery", {}) or {}
+    franchise = state.get("franchise", {}) or {}
+    target = franchise.get("target", {}) or {}
+
+    candidates = [
+        human_candidate(candidate)
+        for candidate in result.get("candidates", [])[:7]
+    ]
+
+    # El otro reloj: el reset del Computer. La operativa diaria
+    # depende de el, no del deadline de jornada.
+    try:
+        market_clock = build_market_clock(snapshot)
+
+    except Exception as clock_error:
+        market_clock = {
+            "available": False,
+            "window_state": "UNKNOWN",
+            "reason": f"{type(clock_error).__name__}: {clock_error}",
+        }
+
+    exposure = compact_exposure(state)
+
+
+    # El dashboard tiene que decidir con el MISMO dinero que
+    # produccion. Si aqui se pasara solo el de especular, la
+    # pantalla volveria a enseñar una decision que el ciclo no
+    # toma.
+    fichajes = exposure.get("acquisition") or {}
+
+    presupuesto_fichajes = (
+        (
+            fichajes.get("available_budget")
+            or fichajes.get("total_budget")
+        )
+        if fichajes.get("enabled")
+        else None
+    )
+
     acquisition = build_acquisition_board(
         snapshot=snapshot,
         rival_intelligence=rival_intelligence,
@@ -3112,38 +3159,6 @@ def build_dashboard_state() -> dict:
             "biggest_gaps": [],
         }
 
-
-    competition = compact_biwenger_competition(
-        snapshot=snapshot,
-        current_user_id=board.get("current_user_id"),
-    )
-
-    deadline = state.get("deadline", {}) or {}
-    temporal_gate = state.get("temporal_gate", {}) or {}
-    liquidity = state.get("liquidity", {}) or {}
-    recovery = liquidity.get("recovery", {}) or {}
-    franchise = state.get("franchise", {}) or {}
-    target = franchise.get("target", {}) or {}
-
-    candidates = [
-        human_candidate(candidate)
-        for candidate in result.get("candidates", [])[:7]
-    ]
-
-    # El otro reloj: el reset del Computer. La operativa diaria
-    # depende de el, no del deadline de jornada.
-    try:
-        market_clock = build_market_clock(snapshot)
-
-    except Exception as clock_error:
-        market_clock = {
-            "available": False,
-            "window_state": "UNKNOWN",
-            "reason": f"{type(clock_error).__name__}: {clock_error}",
-        }
-
-    exposure = compact_exposure(state)
-
     # QUE FICHARIA SI PUDIERA LLENAR UN HUECO (05/09/2026)
     #
     # Hoy a cada candidato solo se le compara con un jugador: el
@@ -3174,21 +3189,6 @@ def build_dashboard_state() -> dict:
             "candidates": [],
             "slots": {"known": False},
         }
-
-    # El dashboard tiene que decidir con el MISMO dinero que
-    # produccion. Si aqui se pasara solo el de especular, la
-    # pantalla volveria a enseñar una decision que el ciclo no
-    # toma.
-    fichajes = exposure.get("acquisition") or {}
-
-    presupuesto_fichajes = (
-        (
-            fichajes.get("available_budget")
-            or fichajes.get("total_budget")
-        )
-        if fichajes.get("enabled")
-        else None
-    )
 
     # LA PLANTILLA TAMBIEN SABE (20/08/2026)
     #

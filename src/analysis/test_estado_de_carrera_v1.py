@@ -219,6 +219,73 @@ def test_la_frase_que_lee_el_dueño() -> None:
 # 2. LOS CASOS FEOS
 # ============================================================
 
+def test_con_todos_a_cero_no_hay_carrera() -> None:
+    """
+    SALIO CON DATOS DE VERDAD (05/09/2026).
+
+    Con el snapshot local del 17/08 -temporada sin empezar, los
+    siete a cero- la frase salia "Vas 7º, a 0 puntos" con
+    urgencia LIDER: dos cosas contradictorias en el mismo
+    renglon. `max()` con empate devuelve el primero de la lista,
+    y ahi nos coronaba.
+    """
+
+    managers = _managers()
+    for m in managers:
+        m["points"] = 0
+
+    r = build_race_state(
+        _squads(managers), calendar=_calendario(), now=AHORA
+    )
+
+    assert r["season_started"] is False, "nadie ha puntuado"
+    assert r["is_leader"] is False, (
+        "ir empatado a cero con seis mas no es ir primero"
+    )
+    assert r["urgency"] == "SIN_DATOS", (
+        "decir COMODA aqui seria tranquilizar por falta de datos"
+    )
+    assert "no ha empezado" in r["headline"]
+
+
+def test_empatado_a_puntos_no_es_ir_primero() -> None:
+    managers = _managers()
+    for m in managers:
+        m["is_current_user"] = m["name"] == "Pollo17"
+    # Mex iguala al lider.
+    for m in managers:
+        if m["name"] == "Mex":
+            m["points"] = 146
+
+    r = build_race_state(
+        _squads(managers), calendar=_calendario(), now=AHORA
+    )
+
+    assert r["is_leader"] is False, (
+        "empatado arriba no es ir por delante"
+    )
+    assert r["points_ahead"] is None, "y no hay ventaja que contar"
+
+
+def test_la_frase_esta_bien_puntuada() -> None:
+    """
+    El `.replace(".", ",")` de la coma decimal se comia tambien
+    el punto que separaba las dos frases: salia "0,00 por
+    jornada, Tu plantilla vale...".
+    """
+
+    frase = build_race_state(
+        _squads(), calendar=_calendario(), now=AHORA
+    )["headline"]
+
+    assert ", Tu plantilla" not in frase, (
+        f"punto convertido en coma: {frase}"
+    )
+    assert ". Tu plantilla" in frase, frase
+    assert frase.endswith("."), frase
+
+
+
 
 def test_ir_primero_no_es_ir_a_menos_cero() -> None:
     managers = _managers()
@@ -417,6 +484,9 @@ TESTS = [
     test_la_brecha_de_plantilla,
     test_la_frase_que_lee_el_dueño,
     test_ir_primero_no_es_ir_a_menos_cero,
+    test_con_todos_a_cero_no_hay_carrera,
+    test_empatado_a_puntos_no_es_ir_primero,
+    test_la_frase_esta_bien_puntuada,
     test_sin_calendario_no_se_inventa_el_ritmo,
     test_sin_clasificacion_se_dice_que_no_hay,
     test_sin_saber_quienes_somos_no_hay_carrera,

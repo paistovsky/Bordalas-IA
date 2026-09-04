@@ -250,6 +250,17 @@ def _headline(datos: dict) -> str:
             "carrera que contar."
         )
 
+    # Antes que nada: si nadie ha puntuado, no hay carrera. La
+    # distancia es cero porque no se ha jugado, no porque vayamos
+    # bien, y contarlo como ir bien seria tranquilizar por falta
+    # de datos.
+    if not datos.get("season_started", True):
+        return (
+            f"La temporada no ha empezado: los "
+            f"{datos.get('managers_count') or 0} managers estan a "
+            f"cero. Todavia no hay carrera que medir."
+        )
+
     if datos.get("is_leader"):
         cabeza = f"Vas 1º, con {datos.get('points_ahead') or 0} de ventaja"
 
@@ -272,7 +283,7 @@ def _headline(datos: dict) -> str:
         # Coma decimal: esta frase la lee una persona, en español.
         medio = (
             f", quedan {restantes} jornadas: necesitas sacarle "
-            f"{ritmo:.2f}".replace(".", ",")
+            + f"{ritmo:.2f}".replace(".", ",")
             + " por jornada"
         )
 
@@ -283,17 +294,15 @@ def _headline(datos: dict) -> str:
 
     elif brecha > 0:
         cola = (
-            f". Tu plantilla vale {brecha / 1_000_000:.1f}".replace(
-                ".", ","
-            )
+            ". Tu plantilla vale "
+            + f"{brecha / 1_000_000:.1f}".replace(".", ",")
             + " M menos que la del lider."
         )
 
     elif brecha < 0:
         cola = (
-            f". Tu plantilla vale {abs(brecha) / 1_000_000:.1f}".replace(
-                ".", ","
-            )
+            ". Tu plantilla vale "
+            + f"{abs(brecha) / 1_000_000:.1f}".replace(".", ",")
             + " M mas que la del lider."
         )
 
@@ -362,21 +371,43 @@ def build_race_state(
         nuestros_puntos = safe_int(nosotros.get("points"))
         puntos_lider = safe_int(lider.get("points"))
 
-        somos_lider = bool(lider.get("is_current_user"))
-
-        distancia = max(puntos_lider - nuestros_puntos, 0)
-
-        # La ventaja solo tiene sentido si vamos primeros: es lo
-        # que le sacamos al segundo.
-        segundo = sorted(
+        # LOS OTROS SEIS, PARA NO CONFUNDIR EMPATE CON VENTAJA
+        otros = sorted(
             (m for m in managers if not m.get("is_current_user")),
             key=lambda m: -safe_int(m.get("points")),
         )
 
+        mejor_de_los_otros = (
+            safe_int(otros[0].get("points")) if otros else 0
+        )
+
+        # IR PRIMERO ES IR POR DELANTE, NO IR IGUALADO
+        #
+        #     `max()` con empate devuelve el primero de la lista.
+        #     Con toda la liga a cero eso nos coronaba lideres, y
+        #     la frase salia "Vas 7º, a 0 puntos" con urgencia
+        #     LIDER: dos cosas contradictorias en el mismo
+        #     renglon.
+        somos_lider = bool(
+            otros and nuestros_puntos > mejor_de_los_otros
+        )
+
+        distancia = max(puntos_lider - nuestros_puntos, 0)
+
         ventaja = (
-            nuestros_puntos - safe_int(segundo[0].get("points"))
-            if somos_lider and segundo
+            nuestros_puntos - mejor_de_los_otros
+            if somos_lider
             else None
+        )
+
+        # LA TEMPORADA NO HA EMPEZADO
+        #
+        #     Si nadie ha puntuado todavia no hay carrera que
+        #     medir: la distancia es cero porque no se ha jugado,
+        #     no porque vayamos bien. Decir "COMODA" ahi seria
+        #     tranquilizar por falta de datos.
+        temporada_empezada = (
+            max(safe_int(m.get("points")) for m in managers) > 0
         )
 
         # ------------------------------------------------------
@@ -455,6 +486,11 @@ def build_race_state(
             "points": nuestros_puntos,
             "is_leader": somos_lider,
 
+            # Sin una sola jornada jugada no hay carrera que
+            # medir, y hay que decirlo antes que cualquier
+            # otra cosa.
+            "season_started": temporada_empezada,
+
             "leader_name": lider.get("name"),
             "leader_points": puntos_lider,
             "points_behind": distancia,
@@ -494,7 +530,11 @@ def build_race_state(
             ),
         }
 
-        datos["urgency"] = _urgency(exigencia, distancia, restantes)
+        datos["urgency"] = (
+            _urgency(exigencia, distancia, restantes)
+            if temporada_empezada
+            else URGENCY_UNKNOWN
+        )
         datos["urgency_scale"] = [
             etiqueta for _, etiqueta in URGENCY_THRESHOLDS
         ] + ["FUERA_DE_ALCANCE"]
