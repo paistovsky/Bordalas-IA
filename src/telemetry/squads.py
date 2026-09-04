@@ -213,15 +213,69 @@ def _standings(snapshot: dict) -> list:
     return [f for f in filas if isinstance(f, dict)]
 
 
+def _rosters_del_ledger(rival_intelligence: dict | None) -> dict:
+    """
+    La plantilla de cada manager segun el ledger de rivales.
+
+    LA SEGUNDA FUENTE, QUE ES LA QUE FUNCIONA (04/09/2026)
+
+        `standings[].lineup` es la alineacion que dejo puesta cada
+        manager. Puede venir vacia -y venia: en la foto de
+        produccion los SIETE managers salian con `squad_size: 0` y
+        `players: []`, y aun asi `available: true`-.
+
+        El ledger de rivales reconstruye la plantilla desde los
+        perfiles de usuario, que es de donde salen los 17/14/13/12
+        jugadores que ya conocia `ledger_audit`. Dos fuentes en
+        casa y se estaba pintando la vacia.
+
+        Se prefiere el ledger: la alineacion dice a quien puso el
+        sabado, el perfil dice a quien TIENE, y una plantilla es
+        lo segundo.
+    """
+
+    rosters = {}
+
+    for manager in ((rival_intelligence or {}).get("managers") or []):
+
+        if not isinstance(manager, dict):
+            continue
+
+        identificador = safe_int(
+            manager.get("user_id") or manager.get("id")
+        )
+
+        if not identificador:
+            continue
+
+        ids = [
+            safe_int(jugador.get("id"))
+            for jugador in (manager.get("roster") or [])
+            if isinstance(jugador, dict)
+        ]
+
+        ids = [player_id for player_id in ids if player_id]
+
+        if ids:
+            rosters[identificador] = ids
+
+    return rosters
+
+
 def build_rival_squads(
     snapshot: dict,
     current_user_id=None,
+    rival_intelligence: dict | None = None,
 ) -> dict:
     """La plantilla de cada manager de la liga, con la misma ficha.
 
     Incluye la propia con `is_current_user: True`, para que la
     pantalla pueda tratarlas igual y el dueño compare sin cambiar
     de sitio.
+
+    `rival_intelligence` es opcional a proposito: sin el se cae a
+    `standings[].lineup`, que es lo que habia. Con el, se pinta la
+    plantilla entera.
     """
 
     filas = _standings(snapshot)
@@ -238,6 +292,8 @@ def build_rival_squads(
 
     catalogo = _catalog(snapshot)
     mi_id = safe_int(current_user_id)
+
+    rosters = _rosters_del_ledger(rival_intelligence)
 
     managers = []
 
@@ -257,12 +313,30 @@ def build_rival_squads(
 
         titulares_set = set(titulares)
 
+        del_ledger = rosters.get(safe_int(fila.get("id")))
+
+        if del_ledger:
+            fuente = "LEDGER"
+            plantilla = del_ledger
+
+        elif titulares or banquillo:
+            fuente = "LINEUP"
+            plantilla = titulares + banquillo
+
+        else:
+            fuente = "NINGUNA"
+            plantilla = []
+
         jugadores = []
 
-        for player_id in titulares + banquillo:
+        vistos = set()
 
-            if not player_id:
+        for player_id in plantilla:
+
+            if not player_id or player_id in vistos:
                 continue
+
+            vistos.add(player_id)
 
             ficha = (
                 catalogo.get(str(player_id))
@@ -329,6 +403,19 @@ def build_rival_squads(
             "squad_size": len(jugadores),
             "players": jugadores,
 
+            # De donde salio esta plantilla, y -si esta vacia- por
+            # que. Una tabla en blanco sin motivo se lee como "no
+            # tiene jugadores" en vez de "no lo sabemos".
+            "squad_source": fuente,
+            "squad_reason": (
+                None
+                if jugadores
+                else (
+                    "Ni el ledger de rivales ni la alineacion "
+                    "publicada traen su plantilla."
+                )
+            ),
+
             # Cuanta de esa plantilla sabemos explicar. Sin esto,
             # una pantalla a medias parece una pantalla completa.
             "with_starter_data": sum(
@@ -340,8 +427,35 @@ def build_rival_squads(
 
     managers.sort(key=lambda item: item.get("rank", 9999))
 
+    con_jugadores = [m for m in managers if m["squad_size"] > 0]
+
+    # PUBLICAR "DISPONIBLE" SIN DATOS ES PEOR QUE DECIR QUE NO HAY
+    #
+    #     La foto de produccion salia con `available: true` y los
+    #     siete managers a `squad_size: 0`. Quien lee eso ve una
+    #     pantalla en blanco y entiende "no hay nada que ver",
+    #     cuando lo que pasaba es que la fuente estaba vacia. Es
+    #     la mentira mas barata de contar y la mas cara de
+    #     detectar.
+    if not con_jugadores:
+        return {
+            "available": False,
+            "reason": (
+                "Hay clasificacion, pero ninguna plantilla: ni el "
+                "ledger de rivales ni las alineaciones publicadas "
+                "traen jugadores."
+            ),
+            "managers": managers,
+        }
+
     return {
         "available": True,
         "reason": None,
         "managers": managers,
+
+        # Cuantos de los que salen en la tabla traen plantilla de
+        # verdad. Si es menor que el total, la pantalla esta a
+        # medias y tiene que poder decirlo.
+        "managers_with_squad": len(con_jugadores),
+        "managers_total": len(managers),
     }

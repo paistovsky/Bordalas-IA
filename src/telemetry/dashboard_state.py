@@ -3233,11 +3233,15 @@ def build_dashboard_state() -> dict:
         "roster": roster,
 
         # Las plantillas de los seis rivales, con la misma ficha.
-        # Salen de `standings[].lineup.players + discarded`, que ya
-        # venia en el snapshot y no miraba nadie.
+        #
+        # Salen del ledger de rivales, que reconstruye la plantilla
+        # desde los perfiles de usuario. `standings[].lineup` queda
+        # de respaldo: venia vacio en los siete managers, y la
+        # pantalla publicaba `available: true` con `players: []`.
         "rival_squads": build_rival_squads(
             snapshot,
             current_user_id=board.get("current_user_id"),
+            rival_intelligence=rival_intelligence,
         ),
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),
