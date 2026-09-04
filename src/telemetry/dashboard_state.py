@@ -1429,8 +1429,27 @@ def compact_speculation(state: dict) -> dict:
                 budget.get("budget"),
             )
         ),
+        # EL TOPE POR OPERACION SE LLAMA `single_operation_limit`
+        #
+        #     El motor lo devuelve con ese nombre desde siempre
+        #     -`speculation_engine.py`, las dos ramas de
+        #     presupuesto-. El lector buscaba `max_operation` y
+        #     `max_single_operation`, que no existen en ningun
+        #     sitio, asi que la pantalla enseñaba `max_operation:
+        #     0`.
+        #
+        #     Y cero era falso: el tope real es el 40 % del
+        #     bolsillo. Un cero en pantalla se lee como "no puedes
+        #     hacer ni una operacion", que es lo contrario de lo
+        #     que decia el motor.
+        #
+        #     Se arregla en el lector, y punto: el motor no se
+        #     toca. Los dos nombres viejos se dejan detras por si
+        #     algun estado guardado los trae.
         "max_operation": safe_int(
-            budget.get(
+            budget.get("single_operation_limit")
+            if budget.get("single_operation_limit") is not None
+            else budget.get(
                 "max_operation",
                 budget.get("max_single_operation"),
             )
