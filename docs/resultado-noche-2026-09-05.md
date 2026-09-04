@@ -6,7 +6,10 @@ Rama `noche/2026-09-05`, subida. `main` sin tocar.
 por tarea más dos por fallos que salieron al comprobar el trabajo
 contra datos reales.
 
-`npm run build` pasa. **No se ha desplegado nada.**
+`npm run build` pasa. **No se ha desplegado nada**, y `dashboard-v8/dist/`
+se ha dejado como estaba: el workflow de despliegue construye por su
+cuenta y solo corre sobre `main`, asi que subir mi build seria ruido en
+el diff sin ganar nada.
 
 Ninguna decisión de Pepe cambia esta noche, con una excepción
 ordenada por el encargo y explicada abajo (tarea 1).
