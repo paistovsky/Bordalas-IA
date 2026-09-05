@@ -521,6 +521,145 @@ def test_lo_ambiguo_no_entra_al_libro() -> None:
     )
 
 
+# ============================================================
+# 7. DOS VECES AL DIA, NO CUARENTA Y OCHO
+# ============================================================
+
+
+def _en_disco(informe: dict):
+    """
+    Escribe un informe en un fichero temporal y devuelve la ruta.
+    """
+
+    import json
+    import tempfile
+
+    destino = Path(tempfile.gettempdir()) / "press_report_guardia.json"
+
+    destino.write_text(
+        json.dumps(informe, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    return destino
+
+
+class _SesionQueGrita:
+    """
+    Si alguien sale a la calle cuando no toca, se entera.
+    """
+
+    def get(self, *args, **kwargs):
+        raise AssertionError(
+            "se ha salido a la red teniendo un informe fresco en "
+            "disco"
+        )
+
+
+def test_con_el_informe_fresco_no_se_sale_a_la_calle() -> None:
+    """
+    El ciclo corre 48 veces al dia y las noticias no cambian cada
+    media hora. TTL de doce horas.
+    """
+
+    from datetime import datetime, timedelta, timezone
+
+    ahora = datetime(2026, 9, 5, 18, 0, tzinfo=timezone.utc)
+
+    ruta = _en_disco(
+        {
+            "version": press.VERSION,
+            "generated_at": (ahora - timedelta(hours=2)).isoformat(),
+            "headlines": 10,
+            "players": {},
+        }
+    )
+
+    salida = press.refresh_press(
+        CATALOGO,
+        path=ruta,
+        now=ahora,
+        session=_SesionQueGrita(),
+    )
+
+    assert salida["cache"]["status"] == "HIT"
+    assert salida["cache"]["ttl_seconds"] == press.DEFAULT_TTL_SECONDS
+    assert press.DEFAULT_TTL_SECONDS == 12 * 3600
+
+
+def test_un_informe_vacio_no_pisa_al_anterior() -> None:
+    """
+    Un informe recien escrito sin ni un titular es peor que uno de
+    hace doce horas: parece dato y no lo es. Es la misma regla que
+    ya tiene el ojeador de mercado.
+    """
+
+    from datetime import datetime, timedelta, timezone
+
+    ahora = datetime(2026, 9, 5, 18, 0, tzinfo=timezone.utc)
+
+    ruta = _en_disco(
+        {
+            "version": press.VERSION,
+            "generated_at": (ahora - timedelta(days=2)).isoformat(),
+            "headlines": 163,
+            "players_with_signal": 12,
+            "players": {},
+        }
+    )
+
+    class SesionMuda:
+        def get(self, *args, **kwargs):
+            raise RuntimeError("no contesta ninguna web")
+
+    salida = press.refresh_press(
+        CATALOGO,
+        path=ruta,
+        now=ahora,
+        session=SesionMuda(),
+    )
+
+    assert salida["cache"]["status"] == "STALE_FALLBACK"
+    assert salida["headlines"] == 163, (
+        "se ha pisado el informe bueno con uno vacio"
+    )
+    assert salida["cache"]["error"]
+
+
+def test_el_ruido_se_publica_en_vez_de_esconderse() -> None:
+    """
+    Los contadores tienen que salir en el informe: cuantos
+    titulares se leyeron, cuantos jugadores se mencionan, cuantos
+    traen señal de verdad y cuantos se quedaron sin emparejar.
+
+    Sin esos cuatro numeros, doce señales parecen doce aciertos.
+    """
+
+    informe = _informe(
+        [
+            ("Lobete se rompe el cruzado", ""),
+            ("El Betis gana en Sevilla", ""),
+            ("Cucurella cumple 200 partidos", ""),
+        ]
+    )
+
+    for clave in (
+        "headlines",
+        "players_mentioned",
+        "players_with_signal",
+        "unmatched_total",
+        "too_old",
+    ):
+        assert clave in informe, f"el informe no publica `{clave}`"
+
+    assert informe["headlines"] == 3
+    assert informe["unmatched_total"] == 1
+    assert informe["players_mentioned"] == 2
+    assert informe["players_with_signal"] == 1, (
+        "una mencion sin señal se esta contando como señal"
+    )
+
+
 TESTS = [
     test_el_nombre_tiene_que_ir_en_mayuscula,
     test_los_nombres_de_tres_letras_no_se_buscan,
@@ -543,6 +682,9 @@ TESTS = [
     test_al_libro_solo_van_las_apuestas_de_verdad,
     test_la_fuente_del_libro_lleva_el_medio_dentro,
     test_lo_ambiguo_no_entra_al_libro,
+    test_con_el_informe_fresco_no_se_sale_a_la_calle,
+    test_un_informe_vacio_no_pisa_al_anterior,
+    test_el_ruido_se_publica_en_vez_de_esconderse,
 ]
 
 
