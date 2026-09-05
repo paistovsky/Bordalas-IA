@@ -154,6 +154,80 @@ def test_sin_señales_no_hay_direccion() -> None:
     assert c["agreement"] == "NONE"
 
 
+
+def test_no_se_promedian_porcentajes_con_denominadores_distintos() -> None:
+    """
+    SALIO MIDIENDO (06/09/2026).
+
+    Las tres fuentes coinciden AL EURO en cuanto se movio un
+    jugador, y dan porcentajes distintos porque FutbolFantasy
+    divide por el valor ANTERIOR y Analitica y Comuniate por el
+    ACTUAL. Sobre Gimenez, +250.000 EUR:
+
+        250.000 / 1.040.000 = 24,04 %   (FutbolFantasy)
+        250.000 / 1.290.000 = 19,38 %   (las otras dos)
+
+    Promediar esos dos numeros da 20,9 %, que no es ninguno de
+    los dos: no es una media, es un numero nuevo.
+    """
+
+    señales = [
+        {
+            **_señal("FUTBOLFANTASY", "UP", 24.038),
+            "magnitude_eur": 250_000,
+            "source_market_value": 1_290_000,
+        },
+        {
+            **_señal("ANALITICA", "UP", 19.38),
+            "magnitude_eur": 250_000,
+            "source_market_value": 1_290_000,
+        },
+    ]
+
+    c = _consensus(señales)
+
+    assert c["mean_magnitude_eur"] == 250_000, (
+        "los euros si son comparables, y es donde coinciden"
+    )
+    assert abs(c["mean_magnitude_percent"] - 19.38) < 0.01, (
+        f"salio {c['mean_magnitude_percent']}: se han promediado dos "
+        f"porcentajes que no miden lo mismo"
+    )
+
+
+def test_lo_que_dijo_cada_fuente_se_conserva_sin_tocar() -> None:
+    """
+    Normalizar para comparar no puede borrar lo que dijo cada
+    una: sin eso no se puede auditar una discrepancia.
+    """
+
+    señales = [
+        {
+            **_señal("FUTBOLFANTASY", "UP", 24.038),
+            "magnitude_eur": 250_000,
+            "source_market_value": 1_290_000,
+        },
+        {
+            **_señal("ANALITICA", "UP", 19.38),
+            "magnitude_eur": 250_000,
+            "source_market_value": 1_290_000,
+        },
+    ]
+
+    c = _consensus(señales)
+
+    assert c["percent_by_source"]["FUTBOLFANTASY"] == 24.038
+    assert c["percent_by_source"]["ANALITICA"] == 19.38
+
+
+def test_sin_valor_de_la_fuente_se_usa_lo_que_dijo() -> None:
+    """Normalizar es mejor cuando se puede; nunca es obligatorio."""
+
+    c = _consensus([_señal("FUTBOLFANTASY", "UP", 5.0)])
+
+    assert c["mean_magnitude_percent"] == 5.0
+
+
 # ============================================================
 # 2. NO SALE A LA CALLE EN CADA CICLO
 # ============================================================
@@ -593,6 +667,9 @@ TESTS = [
     test_se_queda_el_horizonte_mas_corto,
     test_el_pulso_no_vota,
     test_sin_señales_no_hay_direccion,
+    test_no_se_promedian_porcentajes_con_denominadores_distintos,
+    test_lo_que_dijo_cada_fuente_se_conserva_sin_tocar,
+    test_sin_valor_de_la_fuente_se_usa_lo_que_dijo,
     test_el_ttl_por_defecto_son_seis_horas,
     test_un_informe_reciente_no_se_vuelve_a_bajar,
     test_un_informe_viejo_si,

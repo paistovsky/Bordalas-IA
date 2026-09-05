@@ -253,16 +253,47 @@ def _consensus(signals: list) -> dict:
     direccion = max(conteo, key=lambda clave: conteo[clave])
     de_acuerdo = conteo[direccion]
 
-    porcentajes = [
-        v["magnitude_percent"]
-        for v in votos
-        if v.get("direction") == direccion
-        and v.get("magnitude_percent") is not None
+    conformes = [
+        v for v in votos if v.get("direction") == direccion
     ]
 
+    # LOS EUROS SI SON COMPARABLES
+    #
+    #     Las tres fuentes coinciden al euro en cuanto se movio.
+    #     Es el numero solido, y el que se promedia.
+    euros = [
+        v["magnitude_eur"]
+        for v in conformes
+        if v.get("magnitude_eur") is not None
+    ]
+
+    media_euros = (
+        int(round(sum(euros) / len(euros))) if euros else None
+    )
+
+    # EL PORCENTAJE, NORMALIZADO ANTES DE PROMEDIAR
+    #
+    #     Cada fuente lo divide por un denominador distinto. Se
+    #     recalcula contra el valor que la PROPIA fuente dice que
+    #     tiene el jugador hoy, que es el mismo criterio para las
+    #     tres. Lo que dijo cada una se conserva intacto en su
+    #     señal: aqui solo se hacen comparables.
+    normalizados = []
+
+    for voto in conformes:
+
+        base = voto.get("source_market_value")
+        cambio = voto.get("magnitude_eur")
+
+        if base and cambio is not None:
+            normalizados.append(cambio * 100.0 / base)
+
+        elif voto.get("magnitude_percent") is not None:
+            normalizados.append(float(voto["magnitude_percent"]))
+
     media = (
-        round(sum(porcentajes) / len(porcentajes), 3)
-        if porcentajes
+        round(sum(normalizados) / len(normalizados), 3)
+        if normalizados
         else None
     )
 
@@ -296,6 +327,17 @@ def _consensus(signals: list) -> dict:
         "sources_agreeing": de_acuerdo,
         "sources_total": len(votos),
         "mean_magnitude_percent": media,
+
+        # Los euros, que es donde las tres coinciden de verdad.
+        "mean_magnitude_eur": media_euros,
+
+        # Y lo que dijo cada una, sin tocar, para poder ver la
+        # diferencia de denominador con los ojos.
+        "percent_by_source": {
+            v["source"]: v.get("magnitude_percent")
+            for v in conformes
+        },
+
         "agreement": acuerdo,
         "note": nota,
     }
@@ -417,7 +459,31 @@ def build_report(
             )
 
             for señal in registro.get("signals") or []:
-                ficha["signals"].append(señal)
+
+                # EL DENOMINADOR NO ES EL MISMO EN LAS TRES
+                # (06/09/2026)
+                #
+                #     Se midio: los tres coinciden AL EURO en
+                #     cuanto se movio -250.000 en Gimenez- y dan
+                #     porcentajes distintos, porque FutbolFantasy
+                #     divide por el valor ANTERIOR y Analitica y
+                #     Comuniate por el ACTUAL:
+                #
+                #         250.000 / 1.040.000 = 24,04 %   (FF)
+                #         250.000 / 1.290.000 = 19,38 %   (las otras)
+                #
+                #     Promediar esos dos numeros da 20,9 %, que no
+                #     es ninguno de los dos. Asi que el valor de la
+                #     fuente viaja con la señal y el consenso
+                #     normaliza antes de promediar.
+                ficha["signals"].append(
+                    {
+                        **señal,
+                        "source_market_value": registro.get(
+                            "market_value"
+                        ),
+                    }
+                )
 
             # Como se identifico a este jugador en esta fuente.
             # Es lo que permite auditar un emparejamiento raro sin
