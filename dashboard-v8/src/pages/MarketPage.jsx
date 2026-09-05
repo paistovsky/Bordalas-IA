@@ -243,6 +243,46 @@ function ScoutVerdict({ scout }) {
   );
 }
 
+
+/* LA DIVERGENCIA, EN UNA CELDA (07/09/2026)
+ *
+ *   El precio bajo y la gente esta comprando, o al reves. Es lo
+ *   unico del ojeador que no es una copia del precio de Biwenger.
+ *
+ *   NO ES UNA RECOMENDACION. El estudio del 07/09 midio que el
+ *   precio de Biwenger tiene un momento enorme -el 83,8 % de los
+ *   jugadores no cambia de direccion en seis dias- asi que esto es
+ *   una apuesta a que una rampa se gira, y esa apuesta no esta
+ *   medida todavia.
+ */
+const DIVERGENCIA = {
+  PRECIO_BAJA_DEMANDA_SUBE: ["pill warn", "BAJA / COMPRAN"],
+  PRECIO_SUBE_DEMANDA_BAJA: ["pill idle", "SUBE / VENDEN"]
+};
+
+function Divergencia({ divergence }) {
+  if (!divergence) return <span className="dim">—</span>;
+
+  const [tono, etiqueta] =
+    DIVERGENCIA[divergence.kind] || ["pill idle", divergence.kind];
+
+  const detalle = [
+    divergence.note,
+    `Precio ${divergence.price_change_percent} %, demanda neta ${divergence.demand_net} puntos.`,
+    divergence.trend_days
+      ? `Lleva ${Math.abs(divergence.trend_days)} día(s) en la misma dirección.`
+      : null
+  ]
+    .filter(Boolean)
+    .join("  —  ");
+
+  return (
+    <span className={tono} title={detalle}>
+      {etiqueta}
+    </span>
+  );
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -539,6 +579,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                 columnas juntas. */}
             <th className="n">PEPE DICE</th>
             <th className="n">OJEADOR</th>
+            <th>DIVERGE</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th className="n">SE PAGA SOLO</th>
             <th>VENDE</th>
@@ -614,6 +655,14 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                     segunda opinion escrita al lado. */}
                 <td className="n">
                   <ScoutVerdict scout={target.scout} />
+                </td>
+
+                {/* PRECIO CONTRA DEMANDA (07/09/2026)
+                    Cuando el precio se mueve a un lado y la gente
+                    puja al otro. Es una HIPOTESIS sin comprobar:
+                    el libro empieza a medirla hoy. */}
+                <td>
+                  <Divergencia divergence={target.divergence} />
                 </td>
 
                 <td>

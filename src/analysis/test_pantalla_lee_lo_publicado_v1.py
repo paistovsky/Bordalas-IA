@@ -321,6 +321,50 @@ def test_el_ojeador_publica_a_quien_no_pudo_identificar() -> None:
     assert "fila.reason" in fuente, "ni el motivo de cada uno"
 
 
+
+
+def test_la_divergencia_se_ve_en_mercado_y_no_como_recomendacion() -> None:
+    """
+    Es una HIPOTESIS. El estudio del 07/09 midio que el precio de
+    Biwenger tiene un momento enorme, asi que una divergencia es
+    una apuesta a que una rampa se gira — y esa apuesta no esta
+    medida.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "DIVERGE" in mercado, "falta la columna de divergencia"
+    assert "target.divergence" in mercado, (
+        "la tabla no lee la divergencia de la fila"
+    )
+
+    panel = _lee(DASHBOARD / "components" / "ScoutPanel.jsx")
+
+    assert "Hipótesis sin comprobar" in panel, (
+        "el panel no avisa de que la divergencia no esta medida"
+    )
+    assert "scout.divergence" in panel, (
+        "el panel no lee el estudio de la divergencia"
+    )
+
+
+def test_la_diferencia_contra_el_control_no_se_pinta_sin_muestra() -> None:
+    """
+    Que un divergente suba no dice nada si ese dia subieron
+    todos. Pintar la diferencia antes de tener muestra seria
+    presentar ruido como hallazgo.
+    """
+
+    panel = _lee(DASHBOARD / "components" / "ScoutPanel.jsx")
+
+    assert "enough_sample" in panel, (
+        "el panel pinta la diferencia sin mirar si hay muestra"
+    )
+    assert "sin muestra" in panel, (
+        "y sin decirlo cuando no la hay"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -332,6 +376,8 @@ TESTS = [
     test_las_dos_opiniones_estan_pegadas_en_mercado,
     test_sin_veredicto_no_se_pinta_un_cero,
     test_el_ojeador_publica_a_quien_no_pudo_identificar,
+    test_la_divergencia_se_ve_en_mercado_y_no_como_recomendacion,
+    test_la_diferencia_contra_el_control_no_se_pinta_sin_muestra,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

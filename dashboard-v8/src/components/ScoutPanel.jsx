@@ -66,6 +66,7 @@ export default function ScoutPanel({ data }) {
   const fuentes = Object.entries(scout.sources || {});
   const acuerdos = scout.agreement_counts || {};
   const libro = scout.accuracy || { available: false };
+  const estudio = scout.divergence || { available: false, horizons: {} };
 
   return (
     <>
@@ -310,6 +311,98 @@ export default function ScoutPanel({ data }) {
             </tbody>
           </table>
         )}
+      </section>
+
+
+      {/* EL ESTUDIO DE LA DIVERGENCIA (07/09/2026)
+          La hipotesis: que cuando el precio y la demanda apuntan
+          a lados distintos, pase algo despues. NO ESTA MEDIDA.
+          El libro empieza a guardarla hoy, y hasta que haya
+          muestra de los DOS grupos esto no dice nada. */}
+      <section className="pan" style={{ marginTop: 11 }}>
+        <div className="pan-head">
+          <div>
+            <h2>PRECIO CONTRA DEMANDA</h2>
+            <div className="sub">
+              Hipótesis en estudio: ¿anticipa algo que el precio baje
+              mientras la gente compra?
+            </div>
+          </div>
+          <span className={estudio.divergent_total ? "pill warn" : "pill idle"}>
+            {estudio.divergent_total || 0} HOY
+          </span>
+        </div>
+
+        <div className="alert warn">
+          <b>Hipótesis sin comprobar.</b> {estudio.caveat}
+        </div>
+
+        <div className="kv">
+          <span>Observaciones apuntadas</span>
+          <b className="mono">{estudio.recorded_total || 0}</b>
+        </div>
+        <div className="kv">
+          <span>Ya cerradas (7 días)</span>
+          <b className="mono">{estudio.closed_total || 0}</b>
+        </div>
+
+        <table style={{ marginTop: 8 }}>
+          <thead>
+            <tr>
+              <th>HORIZONTE</th>
+              <th className="n">DIVERGENTES</th>
+              <th className="n">RINDEN</th>
+              <th className="n">CONTROL</th>
+              <th className="n">RINDE</th>
+              <th className="n">DIFERENCIA</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.values(estudio.horizons || {}).map((h) => (
+              <tr key={h.horizon_days}>
+                <td>{h.horizon_days} días</td>
+                <td className="n dim">{h.divergent_n}</td>
+                <td className="n">
+                  {h.divergent_mean_return_percent != null
+                    ? `${h.divergent_mean_return_percent} %`
+                    : "—"}
+                </td>
+                <td className="n dim">{h.control_n}</td>
+                <td className="n">
+                  {h.control_mean_return_percent != null
+                    ? `${h.control_mean_return_percent} %`
+                    : "—"}
+                </td>
+                <td className="n strong">
+                  {/* La diferencia contra el control es TODO el
+                      resultado: que un divergente suba no dice
+                      nada si ese dia subieron todos. Y no se
+                      pinta mientras no haya muestra. */}
+                  {h.enough_sample && h.difference_percent != null ? (
+                    <span
+                      className={h.difference_percent > 0 ? "up" : "down"}
+                    >
+                      {h.difference_percent > 0 ? "+" : ""}
+                      {h.difference_percent} pp
+                    </span>
+                  ) : (
+                    <span className="dim" title={h.reason}>
+                      sin muestra
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <p className="note" style={{ textAlign: "left" }}>
+          La demanda la publica <b>solo Comuniate</b> (compras 24 h
+          menos ventas): es una medida, no un consenso. Y el precio de
+          Biwenger tiene mucho momento —el 83,8 % de los jugadores no
+          cambia de dirección en seis días—, así que una divergencia es
+          una apuesta a que una rampa se gira.
+        </p>
       </section>
 
       {/* LOS QUE NO SE PUDIERON IDENTIFICAR.
