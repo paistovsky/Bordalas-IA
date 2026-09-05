@@ -151,6 +151,16 @@ export function normalizeStatus(raw = {}) {
       blocked: []
     },
 
+    // EL RELOJ DE LA SOLVENCIA (12/09/2026)
+    //
+    // Cuanto queda para el plazo -T-6h del primer partido-, si
+    // la deuda llega tapada y quien gana el desempate.
+    solvencyClock: raw.solvency_clock || {
+      available: false,
+      state: null,
+      recommended_sale: null
+    },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] }

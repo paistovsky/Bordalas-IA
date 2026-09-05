@@ -3352,6 +3352,41 @@ def build_dashboard_state() -> dict:
             "blocked": [],
         }
 
+    # EL RELOJ DE LA SOLVENCIA (12/09/2026)
+    #
+    #     "No quiero salir de rojo hoy. Con estar en positivo 6
+    #      horas antes del inicio de jornada es suficiente."
+    #
+    # La solvencia deja de ser un estado y pasa a ser un plazo.
+    # Lejos del cierre un deficit es una posicion legitima; cerca,
+    # una emergencia. Y de ahi sale el desempate del punto 2: quien
+    # gana cuando el motor de solvencia dice "vende" y el de
+    # ofertas dice "conserva".
+    #
+    # Observador: calcula y publica. Quien ejecuta es el camino de
+    # siempre, ACCEPT_RECOVERY_OFFER.
+    try:
+        from src.analysis.solvency_clock import build_solvency_clock
+
+        solvency_clock = build_solvency_clock(
+            state.get("balance"),
+            state.get("hours_to_deadline"),
+            offers=offers_compactas,
+            market_clock=market_clock,
+            sale_order=sale_order,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        solvency_clock = {
+            "available": False,
+            "reason": (
+                f"No se pudo calcular el reloj de solvencia: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "state": None,
+            "recommended_sale": None,
+        }
+
     competitive = load_competitive_dashboard_state()
     solvency_plans = build_dashboard_solvency_plans(state)
     activity = load_activity_feed()
@@ -3572,6 +3607,10 @@ def build_dashboard_state() -> dict:
         # A quien le toca salir cuando haga falta caja, en orden y
         # con el motivo. Observador puro: no vende nada.
         "sale_order": sale_order,
+
+        # Cuanto queda para el plazo de solvencia -T-6h del primer
+        # partido-, si la deuda llega tapada y con que venta.
+        "solvency_clock": solvency_clock,
 
         # Que ficharia si pudiera llenar un hueco de plantilla.
         # Una lista al margen: no ficha nada.

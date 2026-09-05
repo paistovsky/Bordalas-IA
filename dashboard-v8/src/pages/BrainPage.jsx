@@ -1,6 +1,7 @@
 import ScoutPanel from "../components/ScoutPanel";
 import StrategyPanel from "../components/StrategyPanel";
 import SolvencyPlansPanel from "../components/SolvencyPlansPanel";
+import SolvencyClockPanel from "../components/SolvencyClockPanel";
 import { formatEuros, formatMoney } from "../lib/utils";
 
 /**
@@ -274,6 +275,12 @@ export default function BrainPage({ data }) {
 
       {/* Como piensa tapar la deuda, que es la primera pregunta
           cuando el saldo esta en rojo. */}
+      {/* EL RELOJ DE LA SOLVENCIA (12/09/2026)
+          Va JUSTO ENCIMA de los planes porque es lo que les da
+          sentido: los tres planes llevaban dias calculados y sin
+          ejecutar porque nadie decia cuando tocaba. */}
+      <SolvencyClockPanel data={data} />
+
       <SolvencyPlansPanel
         solvency={data.solvency || {}}
         summary={data.summary || {}}

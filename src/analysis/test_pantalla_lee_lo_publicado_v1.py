@@ -99,6 +99,12 @@ CADENAS = [
         "SaleOrderPanel",
         ["SquadPage.jsx"],
     ),
+    (
+        "solvency_clock",
+        "solvencyClock",
+        "SolvencyClockPanel",
+        ["BrainPage.jsx"],
+    ),
 ]
 
 
@@ -204,6 +210,47 @@ def test_cada_componente_esta_montado_en_su_pagina() -> None:
             )
             assert f"<{componente}" in fuente, (
                 f"{pagina} importa {componente} y no lo monta"
+            )
+
+
+def test_la_pagina_donde_se_monta_esta_viva() -> None:
+    """
+    EL ULTIMO METRO TIENE UN METRO MAS (12/09/2026)
+
+        `AnalysisPage.jsx` existe, importa siete paneles y NO
+        ESTA ENRUTADA en `App.jsx`. Es codigo muerto.
+
+        El reloj de solvencia se monto ahi, la guardia de arriba
+        se puso verde -la pagina importa el componente y lo
+        monta- y el panel no salia por ninguna pantalla. Se
+        descubrio mirando el bundle: la cadena "RELOJ DE
+        SOLVENCIA" no aparecia en `dist/`.
+
+        Comprobar que el componente esta en UNA pagina no basta.
+        Hay que comprobar que esa pagina existe para la app.
+    """
+
+    app = _lee(DASHBOARD / "App.jsx")
+
+    paginas_vivas = {
+        f"{nombre}.jsx"
+        for nombre in re.findall(r"from \"\./pages/(\w+)\"", app)
+        if f"<{nombre}" in app
+    }
+
+    assert paginas_vivas, (
+        "no se ha podido leer ninguna pagina enrutada en App.jsx"
+    )
+
+    for _, _, componente, paginas in CADENAS:
+
+        for pagina in paginas:
+
+            assert pagina in paginas_vivas, (
+                f"{componente} se monta en {pagina}, que NO esta "
+                f"enrutada en App.jsx: es codigo muerto y el panel "
+                f"no lo ve nadie. Paginas vivas: "
+                f"{sorted(paginas_vivas)}"
             )
 
 
@@ -567,12 +614,51 @@ def test_el_orden_de_venta_se_ve_entero() -> None:
     )
 
 
+def test_el_desempate_se_ve_con_su_motivo() -> None:
+    """
+    El encargo lo pide con estas palabras: "que el motivo del
+    desempate se vea en pantalla — se vende a Cepeda pese al HOLD
+    porque quedan 5 h y el saldo es -421.792".
+
+    Un desempate sin motivo es una venta que aparece de la nada.
+    """
+
+    panel = _lee(DASHBOARD / "components" / "SolvencyClockPanel.jsx")
+
+    assert "override_reason" in panel, (
+        "no se pinta el motivo del desempate"
+    )
+    assert "solvency_overrides_hold" in panel, (
+        "no se ve quien manda: la solvencia o el motor de ofertas"
+    )
+    assert "SOLVENCIA" in panel and "MOTOR DE OFERTAS" in panel, (
+        "no se distingue en pantalla cual de los dos gana"
+    )
+
+    assert "recommended_sale" in panel, (
+        "no se ve con que venta se taparia el agujero"
+    )
+
+    for campo in (
+        "hours_to_solvency_deadline",
+        "hours_to_deadline",
+        "covered_at_deadline",
+    ):
+        assert campo in panel, (
+            f"el reloj no enseña `{campo}`: sin eso no se puede "
+            f"saber si llega a tiempo"
+        )
+
+    assert "reason_text" in panel, "el reloj no dice que va a hacer"
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
     test_lo_que_no_se_sabe_llega_diciendo_que_no_se_sabe,
     test_cada_bloque_tiene_componente_que_lo_lee,
     test_cada_componente_esta_montado_en_su_pagina,
+    test_la_pagina_donde_se_monta_esta_viva,
     test_los_paneles_nuevos_avisan_cuando_no_hay_dato,
     test_el_tope_por_operacion_se_ve,
     test_las_dos_opiniones_estan_pegadas_en_mercado,
@@ -589,6 +675,7 @@ TESTS = [
     test_el_interruptor_se_ve_apagado_en_pantalla,
     test_la_concentracion_avisa_y_dice_el_motivo,
     test_el_orden_de_venta_se_ve_entero,
+    test_el_desempate_se_ve_con_su_motivo,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

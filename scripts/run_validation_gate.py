@@ -128,6 +128,8 @@ TESTS = [
     "src.analysis.test_confianza_por_via_v1",
     "src.analysis.test_despliegue_v1",
     "src.analysis.test_orden_de_venta_v1",
+    "src.analysis.test_reloj_solvencia_v1",
+    "src.analysis.test_venta_ejecutable_v1",
 ]
 
 
