@@ -283,6 +283,58 @@ function Divergencia({ divergence }) {
   );
 }
 
+
+/* ANTES Y AHORA (08/09/2026)
+ *
+ *   Hasta hoy la valoracion especulativa daba el mismo numero a
+ *   un jugador que subio un 17 % y a uno que bajo un 2 %: la via
+ *   que ganaba era la de reventa al Computer, cuyo premium es una
+ *   medida de mercado igual para todos.
+ *
+ *   Ahora manda el ritmo observado del jugador, y quien cae no se
+ *   compra. Esta columna es la unica forma de ver que ha cambiado
+ *   sin leer el codigo.
+ */
+const COMPUERTA = {
+  RITMO_OBSERVADO: ["up", "ritmo propio"],
+  PRECIO_CAYENDO: ["down", "cae: no se compra"],
+  SIN_RITMO_OBSERVADO: ["dim", "sin ritmo medido"],
+  RACHA_SIN_DEMANDA: ["warn-text", "racha sin demanda"]
+};
+
+function AntesAhora({ gate, valor }) {
+  if (!gate) return <span className="dim">—</span>;
+
+  const antes = Number(gate.value_before || 0);
+  const ahora = Number(valor || 0);
+
+  const [tono, etiqueta] = COMPUERTA[gate.gate] || ["dim", gate.gate];
+
+  const detalle = [
+    gate.gate_reason,
+    gate.rate_percent_per_day != null
+      ? `Ritmo observado: ${gate.rate_percent_per_day} %/día.`
+      : null,
+    gate.trend_days ? `Racha: ${gate.trend_days} día(s).` : null,
+    gate.demand_net != null ? `Demanda neta: ${gate.demand_net}.` : null
+  ]
+    .filter(Boolean)
+    .join("  —  ");
+
+  return (
+    <span title={detalle}>
+      <span className="dim">{formatMoney(antes)}</span>
+      {" → "}
+      <span className={ahora === antes ? "dim" : ahora > 0 ? "up" : "down"}>
+        {formatMoney(ahora)}
+      </span>
+      <div className={tono} style={{ fontSize: 9 }}>
+        {etiqueta}
+      </div>
+    </span>
+  );
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -580,6 +632,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th className="n">PEPE DICE</th>
             <th className="n">OJEADOR</th>
             <th>DIVERGE</th>
+            <th className="n">ANTES / AHORA</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th className="n">SE PAGA SOLO</th>
             <th>VENDE</th>
@@ -663,6 +716,15 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                     el libro empieza a medirla hoy. */}
                 <td>
                   <Divergencia divergence={target.divergence} />
+                </td>
+
+                {/* LO QUE CAMBIA CON LAS REGLAS NUEVAS (08/09/2026)
+                    Este es el primer cambio de la semana que mueve
+                    dinero de verdad. El dueño tiene que poder ver
+                    que decidia Pepe antes y que decide ahora, fila
+                    a fila, antes de que se gaste un euro. */}
+                <td className="n">
+                  <AntesAhora gate={target.market_gate} valor={target.our_value} />
                 </td>
 
                 <td>
