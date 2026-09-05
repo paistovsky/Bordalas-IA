@@ -3250,6 +3250,35 @@ def build_dashboard_state() -> dict:
             "accuracy": {"available": False},
         }
 
+    # EL OJEADOR DE PRENSA (05/09/2026)
+    #
+    # Lo unico que no copia el precio de Biwenger. Se LEE del
+    # disco, igual que el ojeador de mercado: quien sale a la
+    # calle es el ciclo, dos veces al dia. La telemetria nunca
+    # raspa.
+    #
+    # FASE OBSERVADOR: ningun motor lee este bloque.
+    try:
+        from src.intelligence.scout.press import (
+            build_press_block,
+            load_press_report,
+        )
+
+        press = build_press_block(load_press_report())
+
+    except Exception as error:                      # noqa: BLE001
+        press = {
+            "available": False,
+            "observer_only": True,
+            "reason": (
+                f"No se pudo leer el informe de prensa: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "sources": {},
+            "items": [],
+            "unmatched": [],
+        }
+
     # LA CONCENTRACION DE LA PLANTILLA (10/09/2026)
     #
     # Cuanto pesa el jugador mas caro y cuantos hay del mismo
@@ -3599,6 +3628,11 @@ def build_dashboard_state() -> dict:
         # El ojeador de mercado: lo que dicen las webs del precio
         # de cada jugador. Observador puro.
         "scout": scout,
+
+        # Lo que dice la PRENSA de los jugadores de Biwenger.
+        # Partes medicos, convocatorias y declaraciones: lo unico
+        # que no esta ya dentro del precio. Observador puro.
+        "press": press,
 
         # Cuanto pesa el jugador mas caro y cuantos hay
         # del mismo club. Observador: avisa y acota.

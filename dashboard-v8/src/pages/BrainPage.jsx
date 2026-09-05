@@ -1,4 +1,5 @@
 import ScoutPanel from "../components/ScoutPanel";
+import PressPanel from "../components/PressPanel";
 import StrategyPanel from "../components/StrategyPanel";
 import SolvencyPlansPanel from "../components/SolvencyPlansPanel";
 import SolvencyClockPanel from "../components/SolvencyClockPanel";
@@ -331,6 +332,12 @@ export default function BrainPage({ data }) {
           veredicto fila a fila esta en MERCADO, pegada a la
           de Pepe. */}
       <div style={{ marginTop: 11 }}>
+        {/* LA PRENSA, ENCIMA DEL OJEADOR DE PRECIO (05/09/2026)
+            Va primero porque es la unica fuente que no copia el
+            precio de Biwenger: lo de abajo es la misma medida
+            repetida tres veces. */}
+        <PressPanel data={data} />
+
         <ScoutPanel data={data} />
       </div>
     </>

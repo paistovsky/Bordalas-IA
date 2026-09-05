@@ -105,6 +105,12 @@ CADENAS = [
         "SolvencyClockPanel",
         ["BrainPage.jsx"],
     ),
+    (
+        "press",
+        "press",
+        "PressPanel",
+        ["BrainPage.jsx"],
+    ),
 ]
 
 
@@ -254,6 +260,129 @@ def test_la_pagina_donde_se_monta_esta_viva() -> None:
             )
 
 
+def _componentes_alcanzables() -> set:
+    """
+    Los componentes a los que se llega desde `App.jsx`.
+
+    Se sigue el grafo de imports de verdad, resolviendo la ruta
+    relativa: `SquadTable` importa `./AbsenceCells` sin decir
+    `components/`, y una version anterior de esta guardia lo daba
+    por huerfano estando vivo.
+    """
+
+    componentes = DASHBOARD / "components"
+
+    def importados(ruta: Path) -> set:
+        nombres = set()
+
+        for spec in re.findall(r'from "([^"]+)"', _lee(ruta)):
+
+            if not spec.startswith("."):
+                continue
+
+            destino = (ruta.parent / spec).resolve()
+
+            try:
+                relativa = destino.relative_to(componentes.resolve())
+
+            except ValueError:
+                continue
+
+            nombres.add(relativa.as_posix())
+
+        return nombres
+
+    app = _lee(DASHBOARD / "App.jsx")
+
+    vivas = {
+        nombre
+        for nombre in re.findall(r'from "\./pages/(\w+)"', app)
+        if f"<{nombre}" in app
+    }
+
+    alcanzables: set = set()
+    vistos: set = set()
+
+    frontera = [DASHBOARD / "App.jsx"] + [
+        DASHBOARD / "pages" / f"{nombre}.jsx" for nombre in vivas
+    ]
+
+    while frontera:
+
+        fichero = frontera.pop()
+
+        if fichero in vistos or not fichero.exists():
+            continue
+
+        vistos.add(fichero)
+
+        for nombre in importados(fichero):
+
+            if nombre not in alcanzables:
+                alcanzables.add(nombre)
+                frontera.append(componentes / f"{nombre}.jsx")
+
+    return alcanzables
+
+
+def test_no_queda_ni_una_pagina_muerta() -> None:
+    """
+    EL CASO (05/09/2026)
+
+        `AnalysisPage.jsx` importaba siete paneles y NO estaba
+        enrutada en `App.jsx`. `NegotiationsPage.jsx` tampoco.
+        Dos paginas enteras que el dueño no podia abrir.
+
+        La noche del 12/09 casi se publica ahi el reloj de
+        solvencia: la guardia de "esta montado en su pagina" se
+        puso verde y el panel no salia por ninguna pantalla.
+    """
+
+    app = _lee(DASHBOARD / "App.jsx")
+
+    vivas = {
+        f"{nombre}.jsx"
+        for nombre in re.findall(r'from "\./pages/(\w+)"', app)
+        if f"<{nombre}" in app
+    }
+
+    todas = {
+        ruta.name for ruta in (DASHBOARD / "pages").glob("*.jsx")
+    }
+
+    muertas = sorted(todas - vivas)
+
+    assert not muertas, (
+        f"paginas que no estan enrutadas en App.jsx y nadie puede "
+        f"abrir: {muertas}. O se enrutan o se borran."
+    )
+
+
+def test_no_queda_ni_un_componente_huerfano() -> None:
+    """
+    Un panel que no se alcanza desde `App.jsx` es informacion que
+    el dueño cree tener y no le llega. Y ademas envejece: los
+    doce paneles que se borraron esta tarde seguian el sistema de
+    diseño anterior (`ui/Card`) mientras el resto de la pantalla
+    llevaba meses en otro.
+
+    Si algun dia hace falta uno, esta en el historial de git. Lo
+    que no puede quedarse es a medio camino.
+    """
+
+    todos = {
+        ruta.stem for ruta in (DASHBOARD / "components").glob("*.jsx")
+    }
+
+    huerfanos = sorted(todos - _componentes_alcanzables())
+
+    assert not huerfanos, (
+        f"componentes que no se alcanzan desde App.jsx: "
+        f"{huerfanos}. O se montan en una pagina viva o se "
+        f"borran; a medias no."
+    )
+
+
 def test_los_paneles_nuevos_avisan_cuando_no_hay_dato() -> None:
     """
     Un panel que se esconde cuando falla es un panel que no se
@@ -306,6 +435,7 @@ def test_ningun_panel_nuevo_decide_nada() -> None:
         ("SeasonHorizonPanel", "el motor decide"),
         ("RosterExpansionPanel", "no</b> puede hacer esto hoy"),
         ("ScoutPanel", "Esto no manda todavía"),
+        ("PressPanel", "NO DECIDE"),
     ):
         fuente = _lee(DASHBOARD / "components" / f"{componente}.jsx")
 
@@ -652,6 +782,35 @@ def test_el_desempate_se_ve_con_su_motivo() -> None:
     assert "reason_text" in panel, "el reloj no dice que va a hacer"
 
 
+def test_la_prensa_enseña_la_cita_y_separa_dato_de_deduccion() -> None:
+    """
+    "La cita literal siempre. Si mañana la señal falla, hay que
+    poder ver quien lo dijo y con que palabras."
+
+    Y la otra mitad: el titular es dato, la clase es deduccion, y
+    en pantalla tienen que verse como cosas distintas.
+    """
+
+    panel = _lee(DASHBOARD / "components" / "PressPanel.jsx")
+
+    assert "item.quote" in panel, "no se pinta la cita literal"
+    assert "item.url" in panel, "la cita no lleva su enlace"
+    assert "item.source" in panel, "no se ve que medio lo publico"
+
+    assert "dato" in panel and "deducción" in panel.lower(), (
+        "la pantalla no separa lo que publico el medio de lo que "
+        "deduce el bot"
+    )
+
+    assert "press.sources" in panel, (
+        "no se ven los canales, asi que una fuente apagada no se "
+        "distingue de una olvidada"
+    )
+    assert "NO ENTRA" in panel, (
+        "un canal apagado a proposito no se dice en pantalla"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -659,6 +818,8 @@ TESTS = [
     test_cada_bloque_tiene_componente_que_lo_lee,
     test_cada_componente_esta_montado_en_su_pagina,
     test_la_pagina_donde_se_monta_esta_viva,
+    test_no_queda_ni_una_pagina_muerta,
+    test_no_queda_ni_un_componente_huerfano,
     test_los_paneles_nuevos_avisan_cuando_no_hay_dato,
     test_el_tope_por_operacion_se_ve,
     test_las_dos_opiniones_estan_pegadas_en_mercado,
@@ -676,6 +837,7 @@ TESTS = [
     test_la_concentracion_avisa_y_dice_el_motivo,
     test_el_orden_de_venta_se_ve_entero,
     test_el_desempate_se_ve_con_su_motivo,
+    test_la_prensa_enseña_la_cita_y_separa_dato_de_deduccion,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

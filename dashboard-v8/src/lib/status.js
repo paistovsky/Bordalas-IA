@@ -129,6 +129,17 @@ export function normalizeStatus(raw = {}) {
     // tampoco decide con ello.
     scout: raw.scout || { available: false, sources: {}, unmatched: [] },
 
+    // EL OJEADOR DE PRENSA (05/09/2026)
+    //
+    // Lo unico que no copia el precio de Biwenger. Observador:
+    // se publica al lado, no decide.
+    press: raw.press || {
+      available: false,
+      sources: {},
+      items: [],
+      unmatched: []
+    },
+
     // LA CONCENTRACION (10/09/2026)
     //
     // Cuanto pesa el jugador mas caro y cuantos hay del

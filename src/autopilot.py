@@ -3440,6 +3440,78 @@ def confirm_negotiation_transitions(
 
 
 
+def sync_press(
+    snapshot: dict,
+) -> dict:
+    """
+    El ojeador de PRENSA: lo unico que no copia el precio.
+
+    POR QUE DOS VECES AL DIA Y NO CUARENTA Y OCHO
+
+        El ciclo corre cada media hora y las noticias no cambian
+        cada media hora. TTL de doce horas: si el informe de
+        disco vale, no se sale a la calle.
+
+    QUE APORTA QUE NO APORTEN LAS OTRAS
+
+        Las tres webs de mercado dan la misma medida repetida
+        -cero discrepancias en 288 jugadores el 06/09-. La prensa
+        trae partes medicos, convocatorias y declaraciones de
+        entrenador, que todavia no estan en ningun precio.
+
+    FASE OBSERVADOR: no influye en ninguna decision.
+
+    Blindado: un fallo del ojeador jamas puede detener un ciclo.
+    """
+
+    try:
+        from src.intelligence.scout.accuracy import (
+            sync_scout_accuracy,
+        )
+        from src.intelligence.scout.press import (
+            as_accuracy_report,
+            refresh_press,
+        )
+
+        informe = refresh_press(snapshot.get("catalog") or {})
+
+        precios = {
+            str(player_id): (ficha or {}).get("price")
+            for player_id, ficha in (
+                (snapshot.get("catalog") or {})
+                .get("data", {})
+                .get("players")
+                or {}
+            ).items()
+            if isinstance(ficha, dict)
+        }
+
+        # El MISMO libro que las webs de precio. Un libro aparte
+        # para la prensa seria una segunda forma de contar los
+        # aciertos, y con dos formas siempre gana la que mejor
+        # queda.
+        acierto = sync_scout_accuracy(
+            as_accuracy_report(informe),
+            precios,
+        )
+
+        return {
+            "status": (informe.get("cache") or {}).get("status"),
+            "headlines": informe.get("headlines"),
+            "players": informe.get("players_mentioned"),
+            "with_signal": informe.get("players_with_signal"),
+            "unmatched": informe.get("unmatched_total"),
+            "accuracy_recorded": acierto.get("recorded_total"),
+            "error": (informe.get("cache") or {}).get("error"),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "status": "ERROR",
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+
 def sync_scout(
     snapshot: dict,
     cycle_state: dict | None = None,
@@ -3984,6 +4056,9 @@ def run_cycle(
     # le pregunta; si el informe esta fresco, ni toca la red.
     ojeador = sync_scout(snapshot, cycle_state)
 
+    # LA PRENSA (05/09/2026). Dos veces al dia, por TTL.
+    prensa = sync_press(snapshot)
+
     if ojeador.get("players"):
         print()
         print(
@@ -4005,6 +4080,17 @@ def run_cycle(
     elif ojeador.get("error"):
         print()
         print(f"Ojeador: no disponible ({ojeador['error']}).")
+
+    if prensa.get("headlines"):
+        print(
+            f"Prensa: {prensa['headlines']} titulares, "
+            f"{prensa.get('with_signal')} jugadores con señal de "
+            f"{prensa.get('players')} mencionados "
+            f"({prensa.get('status')})."
+        )
+
+    elif prensa.get("error"):
+        print(f"Prensa: no disponible ({prensa['error']}).")
 
     # El libro de pujas se cierra aqui, en la misma fase que el de
     # fuentes: post-ejecucion, leyendo el tablon ya persistido en vez
