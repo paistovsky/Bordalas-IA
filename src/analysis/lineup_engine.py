@@ -168,12 +168,67 @@ def build_starter_intelligence_for_snapshot(
         board = board_from_single_source()
 
         if not board.get("players"):
+
+            # DOS CAUSAS DISTINTAS, DOS MENSAJES DISTINTOS
+            # (05/09/2026)
+            #
+            #     Aqui se tiraba el tablero entero y se ponia
+            #     "esta vacio", pasase lo que pasase. Pero sin
+            #     pronosticos se puede llegar por dos caminos que
+            #     no tienen nada que ver:
+            #
+            #         el tablero es de OTRA JORNADA
+            #             -> el guardarrail del 05/09 haciendo su
+            #                trabajo. Se arregla refrescando.
+            #
+            #         el tablero esta VACIO de verdad
+            #             -> la fuente no ha devuelto nada. Se
+            #                arregla mirando por que.
+            #
+            #     El 10/09 costo un diagnostico falso: se leyo
+            #     "esta vacio" y se concluyo que FutbolFantasy
+            #     estaba caido, cuando lo que pasaba es que la
+            #     foto local era de la jornada 2 y el calendario
+            #     iba por la 5.
+            #
+            #     Los sellos ya viajaban dentro del tablero; lo
+            #     que faltaba era no tirarlos a la basura.
+
+            rechazado = bool(board.get("rejected"))
+
             board = {
-                "version": "V12.0_EMPTY",
-                "error": (
-                    "El tablero de FutbolFantasy esta vacio: se "
-                    "alinea sin pronostico."
+                "version": (
+                    "V12.0_REJECTED_MATCHDAY"
+                    if rechazado
+                    else "V12.0_EMPTY"
                 ),
+
+                "error": (
+                    board.get("rejection_reason")
+                    or (
+                        f"El tablero es de la jornada "
+                        f"{board.get('matchday')} y estamos en la "
+                        f"{board.get('expected_matchday')}: sin "
+                        f"pronosticos hasta que se refresque."
+                    )
+                    if rechazado
+                    else (
+                        "El tablero de FutbolFantasy esta vacio: "
+                        "se alinea sin pronostico."
+                    )
+                ),
+
+                # Los sellos siguen viajando. Sin ellos la
+                # pantalla no puede decir de que jornada era el
+                # tablero que se rechazo, que es justo el dato que
+                # convierte el aviso en accionable.
+                "cache": board.get("cache"),
+                "matchday": board.get("matchday"),
+                "updated_at": board.get("updated_at"),
+                "rejected": rechazado,
+                "rejection_reason": board.get("rejection_reason"),
+                "expected_matchday": board.get("expected_matchday"),
+
                 "players": [],
             }
 
