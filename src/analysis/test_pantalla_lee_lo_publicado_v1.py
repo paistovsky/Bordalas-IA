@@ -93,6 +93,12 @@ CADENAS = [
         "ConcentrationPanel",
         ["SquadPage.jsx"],
     ),
+    (
+        "sale_order",
+        "saleOrder",
+        "SaleOrderPanel",
+        ["SquadPage.jsx"],
+    ),
 ]
 
 
@@ -524,6 +530,43 @@ def test_la_concentracion_avisa_y_dice_el_motivo() -> None:
     )
 
 
+def test_el_orden_de_venta_se_ve_entero() -> None:
+    """
+    SINTOMA
+
+        En la foto del 05/09 a las 14:03 el saldo esta en
+        -421.792, la prioridad declarada es "recuperar solvencia"
+        y hay doce ofertas sobre la mesa. El dueño no puede ver en
+        ninguna pantalla a quien le tocaria salir.
+
+    Tiene que verse la cola ENTERA: los que estan, los que no se
+    proponen y los que aparta el suelo de su posicion. Media cola
+    es peor que ninguna, porque parece completa.
+    """
+
+    panel = _lee(DASHBOARD / "components" / "SaleOrderPanel.jsx")
+
+    assert "orden.queue" in panel, "no se pinta la cola"
+    assert "orden.excluded" in panel, (
+        "no se ve quien NO se propone: un apartado en silencio es "
+        "el problema que este repo lleva una semana arreglando"
+    )
+    assert "orden.blocked" in panel, (
+        "no se ve a quien aparta el suelo de su posicion"
+    )
+
+    assert "fila.reason" in panel, "las filas no llevan su motivo"
+
+    assert "cash_one_cycle" in panel and "cash_on_the_table" in panel, (
+        "no se distingue la caja de este ciclo de la que hay sobre "
+        "la mesa"
+    )
+
+    assert "NO VENDE" in panel, (
+        "la cola no avisa de que Pepe no la ejecuta"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -545,6 +588,7 @@ TESTS = [
     test_el_bolsillo_se_ve_en_mercado,
     test_el_interruptor_se_ve_apagado_en_pantalla,
     test_la_concentracion_avisa_y_dice_el_motivo,
+    test_el_orden_de_venta_se_ve_entero,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

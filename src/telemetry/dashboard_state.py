@@ -3290,6 +3290,68 @@ def build_dashboard_state() -> dict:
         )
     )
 
+    offers_compactas = compact_offers(
+        state,
+        offer_decisions=offer_intelligence.get(
+            "offer_decisions"
+        ),
+        collecting={
+            "offer_id": (
+                offer_intelligence.get("offer") or {}
+            ).get("offer_id"),
+
+            "queued": offer_intelligence.get(
+                "queued_to_collect"
+            ),
+        },
+
+        # La lista sale del snapshot, que es de donde la cuenta el
+        # chequeo de consistencia.
+        snapshot=snapshot,
+        current_user_id=board.get("current_user_id"),
+    )
+
+    # A QUIEN LE TOCA SALIR (10/09/2026)
+    #
+    # Hoy nadie decide esto: `sales_analyzer` puntua,
+    # `sale_intent` propone y se imprime en un terminal que no
+    # mira nadie, y el motor de ofertas contesta HOLD a las doce
+    # mientras el saldo esta en -421.792.
+    #
+    # Esto es una COLA con el motivo escrito, para que el dueño
+    # pueda leerla ANTES de que pase. Observador puro: no vende.
+    #
+    # Se le pasan las ofertas compactadas para poder distinguir la
+    # caja de este ciclo -oferta viva- de la caja de cuando
+    # alguien compre.
+    try:
+        from src.analysis.sale_order import build_sale_order
+
+        sale_order = build_sale_order(
+            roster.get("players") or [],
+            lineup_ids=[
+                jugador.get("id")
+                for jugador in (
+                    (state.get("lineup", {}) or {}).get("players")
+                    or []
+                )
+            ],
+            offers=offers_compactas,
+            concentration=concentration,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        sale_order = {
+            "available": False,
+            "reason": (
+                f"No se pudo ordenar la venta: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "queue": [],
+            "excluded": [],
+            "blocked": [],
+        }
+
     competitive = load_competitive_dashboard_state()
     solvency_plans = build_dashboard_solvency_plans(state)
     activity = load_activity_feed()
@@ -3507,6 +3569,10 @@ def build_dashboard_state() -> dict:
         # del mismo club. Observador: avisa y acota.
         "concentration": concentration,
 
+        # A quien le toca salir cuando haga falta caja, en orden y
+        # con el motivo. Observador puro: no vende nada.
+        "sale_order": sale_order,
+
         # Que ficharia si pudiera llenar un hueco de plantilla.
         # Una lista al margen: no ficha nada.
         "roster_expansion": roster_expansion,
@@ -3523,26 +3589,7 @@ def build_dashboard_state() -> dict:
         "league_center": league_center,
         "competition": competition,
 
-        "offers": compact_offers(
-            state,
-            offer_decisions=offer_intelligence.get(
-                "offer_decisions"
-            ),
-            collecting={
-                "offer_id": (
-                    offer_intelligence.get("offer") or {}
-                ).get("offer_id"),
-
-                "queued": offer_intelligence.get(
-                    "queued_to_collect"
-                ),
-            },
-
-            # La lista sale del snapshot, que es de donde la
-            # cuenta el chequeo de consistencia.
-            snapshot=snapshot,
-            current_user_id=board.get("current_user_id"),
-        ),
+        "offers": offers_compactas,
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
         "market_clock": market_clock,

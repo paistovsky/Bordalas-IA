@@ -1,4 +1,5 @@
 import ConcentrationPanel from "../components/ConcentrationPanel";
+import SaleOrderPanel from "../components/SaleOrderPanel";
 import { useState } from "react";
 import PitchXI from "../components/PitchXI";
 import SquadTable from "../components/SquadTable";
@@ -203,6 +204,12 @@ export default function SquadPage({ data }) {
           del suelo por posicion: los dos son guardarrailes de
           como esta repartida. */}
       <ConcentrationPanel data={data} />
+
+      {/* A QUIEN LE TOCA SALIR (11/09/2026)
+          Va aqui, debajo de la concentracion y encima del suelo
+          por posicion, porque los tres hablan de lo mismo: como
+          esta repartida la plantilla y que se puede tocar. */}
+      <SaleOrderPanel data={data} />
 
       {/* EL SUELO ES UNA REGLA MIA.
           Aplicada a la plantilla de otro no significa nada, asi

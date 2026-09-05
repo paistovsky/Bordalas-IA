@@ -140,6 +140,17 @@ export function normalizeStatus(raw = {}) {
       breaches: []
     },
 
+    // EL ORDEN DE VENTA (11/09/2026)
+    //
+    // A quien le toca salir cuando haga falta caja. Observador:
+    // se calcula y se enseña, no vende.
+    saleOrder: raw.sale_order || {
+      available: false,
+      queue: [],
+      excluded: [],
+      blocked: []
+    },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] }
