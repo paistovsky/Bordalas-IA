@@ -53,6 +53,12 @@ from src.analysis.player_velocity_lookup import (
     build_velocity_lookup,
 )
 
+from src.analysis.deployment import (
+    DEPLOYMENT_ENABLED,
+    classify_operation,
+    roster_fill_veto,
+)
+
 from src.analysis.route_confidence import (
     premium_confidence,
     streak_confidence,
@@ -119,6 +125,12 @@ def build_valuation_context(
     # El ritmo observado por jugador. Sin el, la via especulativa
     # no valora: ver `market_rate_gate`.
     market_rates: dict | None = None,
+
+    # Cuantas fichas de plantilla estan vacias. Sin huecos, la
+    # via de relleno no se abre.
+    free_roster_slots: int | None = None,
+    rival_intelligence: dict | None = None,
+    current_user_id=None,
 ) -> dict:
     """
     Lo que hay que calcular una sola vez por ciclo: el precio del
@@ -156,6 +168,50 @@ def build_valuation_context(
     # vez y se reparte, como el resto de lookups.
     if market_rates is None:
         market_rates = build_market_rates()
+
+    # LAS FICHAS LIBRES (10/09/2026)
+    #
+    # Se reutiliza `roster_expansion_shadow.count_free_slots`,
+    # que lleva calculandolo en sombra desde el 05/09 y que ya
+    # trae la honestidad puesta: el tope real de plantilla de
+    # Biwenger NO esta en el codigo ni comprobado, asi que se
+    # cuenta contra la plantilla mas grande de la liga y el
+    # resultado es una COTA INFERIOR.
+    #
+    # Blindado: sin ledger de rivales, cero huecos y la via de
+    # relleno no se abre. Que es lo correcto — no inventarse un
+    # hueco es mejor que fichar contra uno que no existe.
+    if free_roster_slots is None:
+
+        try:
+            from src.analysis.roster_expansion_shadow import (
+                count_free_slots,
+            )
+            from src.analysis.rival_ledger_audit import (
+                audit_rival_ledger,
+            )
+
+            free_roster_slots = safe_int(
+                count_free_slots(
+                    {
+                        "by_manager": [
+                            {**datos, "is_us": datos.get("is_us")}
+                            for datos in (
+                                (
+                                    audit_rival_ledger(
+                                        rival_intelligence,
+                                        own_user_id=current_user_id,
+                                    ).get("by_manager")
+                                    or {}
+                                ).values()
+                            )
+                        ]
+                    }
+                ).get("free_slots")
+            )
+
+        except Exception:                           # noqa: BLE001
+            free_roster_slots = 0
 
     mercado = calibrate_points_market(catalogo)
     equipos = build_team_strength(catalogo)
@@ -261,6 +317,7 @@ def build_valuation_context(
     return {
         "velocity": velocity_lookup or {},
         "market_rates": market_rates or {},
+        "free_roster_slots": safe_int(free_roster_slots),
         "starter": starter_lookup,
         "points_market": mercado,
         "team_strength": equipos,
@@ -490,6 +547,10 @@ def value_candidate(
 
             intento["replaces"] = sustituido
 
+            # `xi_upgrade_value` no se etiqueta: sin `route` no se
+            # puede decir que via gana ni de que bolsillo sale.
+            intento.setdefault("route", "XI_UPGRADE")
+
             # SIGUE HACIENDO FALTA VENDER (21/08/2026)
             #
             # La condicion era `recuperado == 0`, que dejo de
@@ -526,6 +587,72 @@ def value_candidate(
         # se quedo: un "no" sin motivo no se puede revisar.
         if como_xi is None and descartes:
             como_xi = descartes[0]
+
+        # --------------------------------------------------
+        # COMO FICHA VACIA (10/09/2026)
+        # --------------------------------------------------
+        #
+        # Pepe tiene 14 fichas de 17: tres huecos que no puntuan.
+        # Cuando hay hueco, el candidato no le quita el sitio a
+        # nadie, asi que se le compara contra el CERO de la ficha
+        # vacia en vez de contra un titular.
+        #
+        # Sin el veto de "no mejora el once" -no esta desplazando
+        # a nadie- pero CON los que si tocan: jerarquia minima,
+        # titularidad y disponibilidad. Ese filtro es lo que corta
+        # el bucle de las catorce defensas, avisado el 05/09.
+
+        huecos = safe_int((context or {}).get("free_roster_slots"))
+
+        como_relleno = None
+
+        if huecos > 0:
+
+            veto = roster_fill_veto(titularidad)
+
+            if veto:
+                como_relleno = _sin_valor("FICHA_NO_APTA", veto)
+
+            else:
+                como_relleno = xi_upgrade_value(
+                    candidate_points=estimacion["points"],
+
+                    # Contra el hueco: una ficha vacia aporta cero.
+                    replaced_points=0,
+
+                    points_market=mercado,
+                    confidence=estimacion["confidence"],
+
+                    # No sale nadie, asi que no se recupera nada.
+                    recovered_value=0,
+
+                    candidate_starter=titularidad,
+
+                    # EL HUECO ES UN DATO, NO UNA INCOGNITA
+                    #
+                    #     `xi_upgrade_value` exige pronostico DEL
+                    #     QUE SALE, y con `None` veta con
+                    #     SIN_PRONOSTICO: es un guardarrail contra
+                    #     fichar a ciegas y esta bien puesto.
+                    #
+                    #     Pero de un hueco no se ignora nada: una
+                    #     ficha vacia juega el 0 % de los minutos,
+                    #     con certeza. Se le pasa esa señal, que
+                    #     es la verdad, en vez de un hueco de
+                    #     informacion que dispararia un veto
+                    #     pensado para otra cosa.
+                    replaced_starter={
+                        "probability": 0.0,
+                        "hierarchy_value": 0,
+                        "hierarchy_label": "FICHA VACIA",
+                    },
+
+                    matchday=(titularidad or {}).get("matchday"),
+                    replaced_in_lineup=False,
+                )
+
+                como_relleno["route"] = "ROSTER_FILL"
+                como_relleno["free_slots"] = huecos
 
         # --------------------------------------------------
         # COMO ESPECULACION
@@ -787,10 +914,52 @@ def value_candidate(
             else None
         )
 
+        # ==================================================
+        # LA CLASE DE OPERACION, Y DE QUE BOLSILLO SALE
+        # ==================================================
+        #
+        # El `intent` salia de la via que diera MAS EUROS, no de
+        # que clase de operacion era. Como la reventa al Computer
+        # ganaba en 21 de 22, los 22 salian SPECULATION y se
+        # median contra los 3,5 M de especular mientras los 8,5 M
+        # de fichar seguian intactos.
+        #
+        # Bajo interruptor: con `DEPLOYMENT_ENABLED` apagado esto
+        # se calcula, se publica y NO manda.
+
+        clase = classify_operation(
+            como_xi,
+            como_relleno,
+            como_trading,
+            como_reventa,
+        )
+
+        despliegue = {
+            **clase,
+            "free_roster_slots": huecos,
+            "roster_fill_value": safe_int(
+                (como_relleno or {}).get("value")
+            ),
+            "roster_fill_decision": (
+                (como_relleno or {}).get("decision")
+                or (como_relleno or {}).get("route")
+            ),
+            "enabled": DEPLOYMENT_ENABLED,
+            "observer_only": not DEPLOYMENT_ENABLED,
+        }
+
         # La via que gana HOY. Se calcula aqui, antes de la
         # comparacion, porque la comparacion la necesita.
+        # CON EL INTERRUPTOR APAGADO, LA LISTA ES LA DE SIEMPRE.
+        # La via de ficha vacia se calcula igual -para poder
+        # publicarla- pero no entra a competir.
         opciones_hoy = [
-            o for o in (como_xi, como_trading, como_reventa)
+            o
+            for o in (
+                (como_xi, como_relleno, como_trading, como_reventa)
+                if DEPLOYMENT_ENABLED
+                else (como_xi, como_trading, como_reventa)
+            )
             if o and safe_int(o.get("value")) > 0
         ]
 
@@ -928,6 +1097,8 @@ def value_candidate(
                 starter=titularidad,
                 market_gate=comparacion,
                 confidence_shadow=confianza_sombra,
+                deployment=despliegue,
+                as_roster_fill=como_relleno,
             )
 
         mejor = max(
@@ -937,7 +1108,15 @@ def value_candidate(
 
         return {
             "value": safe_int(mejor["value"]),
-            "intent": mejor.get("intent"),
+
+            # EL BOLSILLO. Con el interruptor encendido lo decide
+            # la CLASE de operacion; apagado, la via que dio mas
+            # euros, que es lo que se hacia hasta hoy.
+            "intent": (
+                clase["intent"]
+                if DEPLOYMENT_ENABLED and clase["intent"]
+                else mejor.get("intent")
+            ),
             "decision": "VALUED",
             "market_price": precio,
             "points": estimacion,
@@ -958,6 +1137,11 @@ def value_candidate(
             # Que valdria con cada via llevando SU confianza.
             # Observador puro: el `value` de arriba no lo mira.
             "confidence_shadow": confianza_sombra,
+
+            # Que clase de operacion es, de que bolsillo sale y
+            # cuanto valdria llenando una ficha vacia.
+            "deployment": despliegue,
+            "as_roster_fill": como_relleno,
 
             "replaces": mejor.get("replaces"),
             "reason": mejor.get("reason"),
@@ -984,6 +1168,8 @@ def _sin_valor(
     starter: dict | None = None,
     market_gate: dict | None = None,
     confidence_shadow: dict | None = None,
+    deployment: dict | None = None,
+    as_roster_fill: dict | None = None,
 ) -> dict:
     """
     EL PRONOSTICO VIAJA TAMBIEN CUANDO SE DICE QUE NO.
@@ -1010,5 +1196,7 @@ def _sin_valor(
         "as_computer_resale": as_computer_resale,
         "market_gate": market_gate,
         "confidence_shadow": confidence_shadow,
+        "deployment": deployment,
+        "as_roster_fill": as_roster_fill,
         "reasons": [reason],
     }

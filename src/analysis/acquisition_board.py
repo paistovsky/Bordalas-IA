@@ -29,6 +29,8 @@ NO CAMBIA NADA POR SI SOLO
     escribe en Biwenger.
 """
 
+from src.analysis.deployment import DEPLOYMENT_ENABLED
+
 from src.analysis.acquisition_budget import (
     budget_for_intent,
 )
@@ -133,7 +135,37 @@ def build_acquisition_board(
         except Exception:
             once = None
 
-        contexto = build_valuation_context(snapshot, lineup=once)
+        contexto = build_valuation_context(
+            snapshot,
+            lineup=once,
+
+            # Para contar las fichas libres: el tamaño de
+            # plantilla sale del ledger de rivales, que es
+            # quien sabe cuantos jugadores tiene cada uno.
+            rival_intelligence=rival_intelligence,
+            current_user_id=current_user_id,
+        )
+
+        # LA CONCENTRACION DE HOY (10/09/2026)
+        #
+        # Yamal son el 41 % de la plantilla. Mientras Pepe no
+        # compraba eso era una foto; en cuanto despliegue caja,
+        # cada compra decide si se concentra mas o se reparte.
+        #
+        # Blindado: sin plantilla no acota nada.
+        try:
+            from src.analysis.concentration_guardrail import (
+                build_concentration,
+                check_purchase,
+            )
+
+            concentracion = build_concentration(
+                snapshot.get("my_team")
+            )
+
+        except Exception:                           # noqa: BLE001
+            concentracion = {"available": False}
+            check_purchase = None
 
         catalogo = {
             safe_int(item.get("id")): item
@@ -508,6 +540,11 @@ def build_acquisition_board(
                     "confidence_shadow"
                 ),
 
+                # Que clase de operacion es, de que bolsillo
+                # sale y cuanto valdria llenando una ficha
+                # vacia. Bajo interruptor: hoy no manda.
+                "deployment": valoracion.get("deployment"),
+
                 # `bid` es lo que pujariamos. `live_bid` es lo que
                 # YA tenemos puesto en Biwenger. Dos numeros
                 # distintos que la pantalla estaba mezclando en
@@ -590,6 +627,37 @@ def build_acquisition_board(
                     speculation_budget=available_budget,
                     acquisition_budget=acquisition_budget,
                 )
+
+                # EL TOPE DE CONCENTRACION
+                #
+                # Acota, no prohibe: si esta compra dejaria al
+                # jugador por encima del 35 % de la plantilla o
+                # metiera un quinto del mismo club, se recorta el
+                # presupuesto de esa fila y se dice por que.
+                #
+                # Bajo interruptor, como el resto.
+                tope = (
+                    check_purchase(
+                        concentracion,
+                        safe_int(ficha.get("price")),
+                        team_id=safe_int(ficha.get("teamID")),
+                    )
+                    if check_purchase is not None
+                    else {"capped": False}
+                )
+
+                fila["concentration"] = tope
+
+                if (
+                    DEPLOYMENT_ENABLED
+                    and tope.get("capped")
+                    and tope.get("allowed") is not None
+                ):
+                    presupuesto = (
+                        min(presupuesto, tope["allowed"])
+                        if presupuesto is not None
+                        else tope["allowed"]
+                    )
 
                 plan = optimal_bid(
                     price=safe_int(ficha.get("price")),

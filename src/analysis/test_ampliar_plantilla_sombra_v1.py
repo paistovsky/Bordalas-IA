@@ -381,13 +381,42 @@ def test_nunca_lanza() -> None:
 
 
 def test_no_se_ha_tocado_la_valoracion() -> None:
+    """
+    ESTA GUARDIA SE ESTRECHO EL 10/09/2026, A PROPOSITO.
+
+    Hasta esa noche exigia que la palabra `roster_expansion` no
+    apareciese en `acquisition_valuation.py`: la via de ampliar
+    plantilla era pura sombra y no podia rozar la ruta que decide.
+
+    El 10/09 el dueño encargo lo contrario -"añade la via" y
+    "reutiliza `roster_expansion_shadow` en vez de reescribirlo"-
+    con un interruptor. Asi que la valoracion importa ahora UNA
+    sola cosa de ese modulo: `count_free_slots`, que cuenta
+    huecos y no propone a nadie.
+
+    Lo que se sigue protegiendo, que es lo que de verdad
+    importaba:
+
+      - la lista de candidatos (`build_roster_expansion_shadow`)
+        NO entra en la valoracion. Contar huecos es un dato;
+        proponer a quien fichar es una decision.
+      - la regla del peor TITULAR sigue intacta. Es la que evito
+        el bucle de las catorce defensas.
+      - y la via nueva esta bajo interruptor.
+    """
+
     fuente = Path("src/analysis/acquisition_valuation.py").read_text(
         encoding="utf-8"
     )
 
-    assert "roster_expansion" not in fuente, (
-        "la via de ampliar plantilla ha entrado en la valoracion "
-        "que decide"
+    assert "build_roster_expansion_shadow" not in fuente, (
+        "la LISTA de a quien fichar ha entrado en la valoracion "
+        "que decide. Contar huecos vale; proponer nombres no."
+    )
+
+    assert "count_free_slots" in fuente, (
+        "la valoracion ha dejado de reutilizar el contador de "
+        "huecos y lo estara reescribiendo por su cuenta"
     )
 
     # Y la regla del once sigue donde estaba: comparar contra el
@@ -395,6 +424,10 @@ def test_no_se_ha_tocado_la_valoracion() -> None:
     # defensas.
     assert "peor TITULAR" in fuente, (
         "la regla del once ha cambiado: eso es cambiar decisiones"
+    )
+
+    assert "DEPLOYMENT_ENABLED" in fuente, (
+        "la via de ficha vacia ha dejado de estar bajo interruptor"
     )
 
 
@@ -414,17 +447,27 @@ MOTORES = [
 
 
 def test_ningun_motor_lee_la_lista() -> None:
+    """
+    Estrechada igual que la de arriba, y por lo mismo: desde el
+    10/09 la valoracion puede CONTAR huecos, pero ninguna ruta de
+    decision puede leer la LISTA de a quien fichar.
+
+    La diferencia no es formal. `count_free_slots` devuelve un
+    numero medido; `build_roster_expansion_shadow` devuelve
+    nombres ordenados, que es una propuesta.
+    """
+
     culpables = [
         ruta
         for ruta in MOTORES
         if Path(ruta).exists()
-        and "roster_expansion_shadow" in Path(ruta).read_text(
+        and "build_roster_expansion_shadow" in Path(ruta).read_text(
             encoding="utf-8"
         )
     ]
 
     assert not culpables, (
-        f"la via de ampliar plantilla ha entrado en una ruta de "
+        f"la LISTA de a quien fichar ha entrado en una ruta de "
         f"decision: {culpables}"
     )
 
