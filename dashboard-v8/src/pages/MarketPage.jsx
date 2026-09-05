@@ -335,6 +335,74 @@ function AntesAhora({ gate, valor }) {
   );
 }
 
+
+/* CADA APUESTA CON SU CONFIANZA (09/09/2026)
+ *
+ *   Hasta hoy `speculation_value` se descontaba por la certeza
+ *   sobre los PUNTOS del jugador —una apuesta de precio penalizada
+ *   con la incertidumbre de otra cosa— y `computer_resale_value`
+ *   no se descontaba por nada, aunque falla una de cada cuatro
+ *   veces.
+ *
+ *   Por eso la via que no mira al jugador ganaba en 21 de 22, y
+ *   todo salia plano.
+ *
+ *   ESTO NO MANDA. Es la segunda opinion, al lado, para que se
+ *   pueda decir "esto si, esto no" antes de mover un euro.
+ */
+const VIA = {
+  PRICE_TREND: ["up", "tendencia"],
+  COMPUTER_RESALE: ["dim", "Computer"],
+  XI_UPGRADE: ["ok", "el once"]
+};
+
+function Via({ nombre }) {
+  if (!nombre) return <span className="dim">—</span>;
+  const [tono, etiqueta] = VIA[nombre] || ["dim", nombre];
+  return <span className={tono}>{etiqueta}</span>;
+}
+
+function ConSuConfianza({ sombra, gate, valor }) {
+  if (!sombra) return <span className="dim">—</span>;
+
+  const hoy = Number(valor || 0);
+  const nuevo = Number(sombra.value || 0);
+  const delta = nuevo - hoy;
+
+  const viaHoy = gate?.route_now;
+  const cambiaVia = viaHoy && sombra.route && viaHoy !== sombra.route;
+
+  const detalle = [
+    sombra.streak_basis,
+    sombra.premium_basis,
+    `Con su confianza: tendencia ${formatMoney(sombra.speculation_value)}, ` +
+      `Computer ${formatMoney(sombra.computer_resale_value)}, ` +
+      `once ${formatMoney(sombra.xi_value)}.`
+  ]
+    .filter(Boolean)
+    .join("  —  ");
+
+  return (
+    <span title={detalle}>
+      <b>{formatMoney(nuevo)}</b>
+      {delta !== 0 && (
+        <span className={delta > 0 ? "up" : "down"} style={{ marginLeft: 4 }}>
+          {delta > 0 ? "+" : "−"}
+          {formatMoney(Math.abs(delta))}
+        </span>
+      )}
+      <div style={{ fontSize: 9 }}>
+        <Via nombre={sombra.route} />
+        {cambiaVia && (
+          <span className="pill warn" style={{ marginLeft: 4 }}>
+            CAMBIA
+          </span>
+        )}
+      </div>
+    </span>
+  );
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -633,6 +701,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th className="n">OJEADOR</th>
             <th>DIVERGE</th>
             <th className="n">ANTES / AHORA</th>
+            <th className="n">CON SU CONFIANZA</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th className="n">SE PAGA SOLO</th>
             <th>VENDE</th>
@@ -725,6 +794,19 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                     a fila, antes de que se gaste un euro. */}
                 <td className="n">
                   <AntesAhora gate={target.market_gate} valor={target.our_value} />
+                </td>
+
+                {/* CADA VIA CON SU CONFIANZA (09/09/2026)
+                    En sombra: el motor sigue decidiendo con la
+                    columna de al lado. Aqui se ve que via ganaria
+                    y por cuanto si cada apuesta llevase la
+                    confianza de lo que de verdad apuesta. */}
+                <td className="n">
+                  <ConSuConfianza
+                    sombra={target.confidence_shadow}
+                    gate={target.market_gate}
+                    valor={target.our_value}
+                  />
                 </td>
 
                 <td>
