@@ -123,6 +123,8 @@ TESTS = [
     "src.analysis.test_ojeador_informe_v1",
     "src.analysis.test_divergencia_v1",
     "src.analysis.test_puerta_una_sola_lista_v1",
+    "src.analysis.test_freno_acelerador_v1",
+    "src.analysis.test_freno_de_mano_v1",
 ]
 
 

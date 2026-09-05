@@ -2228,6 +2228,23 @@ def execute_autopilot_decision(
                     ),
                     target_source=data.get("target_source"),
                     seller_user_id=seller_user_id,
+
+                    # El ritmo con el que se decidio comprar. Sin
+                    # esto no se podra saber si la regla nueva
+                    # funciono.
+                    market_rate_percent_per_day=(
+                        (fila.get("market_gate") or {}).get(
+                            "rate_percent_per_day"
+                        )
+                    ),
+                    market_gate=(
+                        (fila.get("market_gate") or {}).get("gate")
+                    ),
+                    trend_days=(
+                        (fila.get("market_gate") or {}).get(
+                            "trend_days"
+                        )
+                    ),
                 )
 
             except Exception:

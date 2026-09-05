@@ -365,6 +365,50 @@ def test_la_diferencia_contra_el_control_no_se_pinta_sin_muestra() -> None:
     )
 
 
+
+
+def test_se_ve_lo_que_decidia_antes_y_lo_que_decide_ahora() -> None:
+    """
+    Este es el primer cambio que mueve dinero de verdad. El dueño
+    tiene que poder ver que cambia ANTES de que se gaste un euro,
+    fila a fila y sin leer el codigo.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "ANTES / AHORA" in mercado, (
+        "falta la columna de comparacion"
+    )
+    assert "target.market_gate" in mercado, (
+        "la tabla no lee la compuerta"
+    )
+    assert "value_before" in mercado, (
+        "no se pinta lo que se valoraba antes: sin eso no se ve el "
+        "cambio"
+    )
+
+
+def test_el_motivo_del_freno_viaja_a_la_pantalla() -> None:
+    """
+    Un "no se compra" sin motivo no se puede discutir. Cada
+    veto tiene que llegar con su razon.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    for codigo in (
+        "RITMO_OBSERVADO",
+        "PRECIO_CAYENDO",
+        "SIN_RITMO_OBSERVADO",
+        "RACHA_SIN_DEMANDA",
+    ):
+        assert codigo in mercado, f"la pantalla no sabe pintar {codigo}"
+
+    assert "gate_reason" in mercado, (
+        "el motivo del veto no llega a la pantalla"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -378,6 +422,8 @@ TESTS = [
     test_el_ojeador_publica_a_quien_no_pudo_identificar,
     test_la_divergencia_se_ve_en_mercado_y_no_como_recomendacion,
     test_la_diferencia_contra_el_control_no_se_pinta_sin_muestra,
+    test_se_ve_lo_que_decidia_antes_y_lo_que_decide_ahora,
+    test_el_motivo_del_freno_viaja_a_la_pantalla,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

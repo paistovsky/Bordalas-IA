@@ -106,6 +106,17 @@ def record_bid(
     intent: str | None = None,
     target_source: str | None = None,
     seller_user_id: int | None = None,
+
+    # EL RITMO CON EL QUE SE COMPRO (08/09/2026)
+    #
+    # Desde el 08/09 una compra especulativa solo se hace con un
+    # ritmo observado del jugador. Apuntarlo aqui es lo unico que
+    # permitira contestar dentro de una semana a "¿comprar rachas
+    # funciono?", en vez de discutirlo.
+    market_rate_percent_per_day: float | None = None,
+    market_gate: str | None = None,
+    trend_days: int | None = None,
+
     placed_at: str | None = None,
     ledger: dict | None = None,
     path: Path | None = None,
@@ -137,6 +148,15 @@ def record_bid(
         ),
         "intent": intent,
         "target_source": target_source,
+
+        # Con que se compro, para poder puntuar la regla despues.
+        "market_rate_percent_per_day": (
+            float(market_rate_percent_per_day)
+            if market_rate_percent_per_day is not None
+            else None
+        ),
+        "market_gate": market_gate,
+        "trend_days": trend_days,
         # None = mercado del Computer; un id = puja a un rival.
         "seller_user_id": seller_user_id,
         "placed_at": puesta_en,

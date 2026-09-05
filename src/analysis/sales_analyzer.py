@@ -90,6 +90,29 @@ def _ff_signal(player_id) -> dict:
 def analyze_sales(snapshot: dict) -> list[dict]:
     team = snapshot["my_team"]
 
+    # EL FRENO DE MANO (08/09/2026)
+    #
+    # Una posicion abierta para revender cuyo precio se ha
+    # girado se suelta: el 90,7 % de los que bajan siguen
+    # bajando. Se cargan una vez, no por jugador.
+    #
+    # Blindado: sin libro de posiciones o sin ojeador, esto no
+    # hace nada y el resto puntua como siempre.
+    try:
+        from src.analysis.market_rate_gate import build_market_rates
+        from src.analysis.speculative_exit import (
+            build_speculative_positions,
+            evaluate_exit,
+        )
+
+        posiciones_especulativas = build_speculative_positions()
+        ritmos_de_mercado = build_market_rates()
+
+    except Exception:                               # noqa: BLE001
+        posiciones_especulativas = {}
+        ritmos_de_mercado = {}
+        evaluate_exit = None
+
     lineup = build_lineup(snapshot)
     team_analysis = analyze_team(snapshot)
 
@@ -286,6 +309,28 @@ def analyze_sales(snapshot: dict) -> list[dict]:
             else:
                 sale_score -= 15
 
+        # --------------------------------------------------
+        # EL FRENO DE MANO
+        # --------------------------------------------------
+        #
+        # Solo para lo que compramos PARA REVENDER. Un jugador
+        # del once que baja de precio no es una posicion girada:
+        # es un futbolista, y se decide con puntos.
+
+        salida = None
+
+        if evaluate_exit is not None and posiciones_especulativas:
+
+            salida = evaluate_exit(
+                player_id,
+                posiciones_especulativas,
+                ritmos_de_mercado,
+            )
+
+            if salida:
+                sale_score += salida["score"]
+                reasons.append(salida["reason"])
+
         sale_score = max(
             sale_score,
             0,
@@ -309,6 +354,12 @@ def analyze_sales(snapshot: dict) -> list[dict]:
 
         results.append(
             {
+                # Lo que dice el freno de mano, cuando dice algo.
+                # Sin esto la fila subiria 60 puntos sin explicar
+                # de donde salen.
+                "speculative_exit":
+                    salida,
+
                 "id":
                     player_id,
 

@@ -495,6 +495,11 @@ def build_acquisition_board(
 
                 "reason": valoracion.get("reason"),
 
+                # Lo que decidia antes y lo que decide ahora,
+                # con el motivo. Esto mueve dinero: tiene que
+                # poder mirarse fila a fila.
+                "market_gate": valoracion.get("market_gate"),
+
                 # `bid` es lo que pujariamos. `live_bid` es lo que
                 # YA tenemos puesto en Biwenger. Dos numeros
                 # distintos que la pantalla estaba mezclando en

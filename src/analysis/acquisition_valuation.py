@@ -43,6 +43,12 @@ from src.analysis.candidate_starter_lookup import (
     get_starter_lookup,
 )
 
+from src.analysis.market_rate_gate import (
+    FALLING as FALLING_RATE_CODE,
+    build_market_rates,
+    evaluate as evaluate_market_rate,
+)
+
 from src.analysis.player_velocity_lookup import (
     build_velocity_lookup,
 )
@@ -103,6 +109,10 @@ def build_valuation_context(
     # vez por ciclo, como el resto: leer el tablon entero por cada
     # candidato seria absurdo.
     computer_premium: dict | None = None,
+
+    # El ritmo observado por jugador. Sin el, la via especulativa
+    # no valora: ver `market_rate_gate`.
+    market_rates: dict | None = None,
 ) -> dict:
     """
     Lo que hay que calcular una sola vez por ciclo: el precio del
@@ -132,6 +142,14 @@ def build_valuation_context(
         starter_lookup = get_starter_lookup()
 
     starter_lookup = starter_lookup or {}
+
+    # EL RITMO OBSERVADO DE CADA JUGADOR (08/09/2026)
+    #
+    # Se lee del informe del ojeador, que esta en disco: quien
+    # sale a la calle es el ciclo, cada seis horas. Se carga una
+    # vez y se reparte, como el resto de lookups.
+    if market_rates is None:
+        market_rates = build_market_rates()
 
     mercado = calibrate_points_market(catalogo)
     equipos = build_team_strength(catalogo)
@@ -236,6 +254,7 @@ def build_valuation_context(
 
     return {
         "velocity": velocity_lookup or {},
+        "market_rates": market_rates or {},
         "starter": starter_lookup,
         "points_market": mercado,
         "team_strength": equipos,
@@ -512,18 +531,71 @@ def value_candidate(
             safe_int(player.get("id"))
         )
 
-        como_trading = speculation_value(
+        # ==================================================
+        # FRENO Y ACELERADOR (08/09/2026)
+        # ==================================================
+        #
+        # El ritmo que se proyecta es el OBSERVADO del jugador, y
+        # si no lo hay, no se especula. Ver `market_rate_gate`
+        # para las tres reglas y los numeros que las sostienen.
+        #
+        # Se calculan las dos valoraciones -la de antes y la de
+        # ahora- porque este cambio mueve dinero de verdad y el
+        # dueño tiene que poder ver que cambia antes de que se
+        # gaste un euro. Las dos son aritmetica pura: no cuesta
+        # nada tenerlas.
+
+        compuerta = evaluate_market_rate(
+            player.get("id"),
+            (context or {}).get("market_rates"),
+        )
+
+        # LO QUE SE HACIA ANTES, para poder compararlo.
+        antes_trading = speculation_value(
             price=precio,
             daily_increment=safe_int(
                 player.get("priceIncrement")
             ),
             horizon_days=horizon_days,
             confidence=estimacion["confidence"],
-
-            # Medida sobre varios dias cuando la hay; si no,
-            # dentro se cae al incremento de ayer y lo dice.
             velocity_percent_per_day=velocidad,
         )
+
+        if compuerta["allow"]:
+
+            como_trading = speculation_value(
+                price=precio,
+                daily_increment=safe_int(
+                    player.get("priceIncrement")
+                ),
+                horizon_days=horizon_days,
+                confidence=estimacion["confidence"],
+
+                # EL ACELERADOR. Ya no es el incremento de ayer ni
+                # una velocidad de respaldo: es el ritmo que tres
+                # webs han observado en este jugador.
+                velocity_percent_per_day=compuerta[
+                    "rate_percent_per_day"
+                ],
+            )
+
+        else:
+            # SI LA VIA YA SE CERRABA SOLA, MANDA SU MOTIVO
+            #
+            #     La compuerta explica por que no se especula con
+            #     este jugador. Pero si la via ya decia que no por
+            #     algo suyo -precio invalido, sin revalorizacion-
+            #     ese motivo es mas concreto y no se pisa: tapar
+            #     un "por que" bueno con otro peor no arregla
+            #     nada, y se descubrio porque una guardia salto.
+            como_trading = (
+                antes_trading
+                if safe_int(antes_trading.get("value")) <= 0
+                else _sin_valor(
+                    compuerta["code"],
+                    compuerta["reason"],
+                )
+            )
 
         # --------------------------------------------------
         # COMO REVENTA AL COMPUTER
@@ -541,16 +613,96 @@ def value_candidate(
         # suficientes. `usable_premium` devuelve None y de un None
         # no sale una compra.
 
-        como_reventa = computer_resale_value(
+        antes_reventa = computer_resale_value(
             price=precio,
             premium=usable_premium(
                 (context or {}).get("computer_premium")
             ),
         )
 
+        # AQUI SOLO FRENA EL PRECIO QUE CAE, Y NO LO DEMAS
+        #
+        #     Esta via es la que ganaba en 21 de los 22 candidatos
+        #     del 04/09, y su premium es una medida de MERCADO: la
+        #     misma para todos por construccion. Por eso Nico
+        #     Guillen valia precio x 1,0132 mientras se desplomaba
+        #     un 2,33 % diario.
+        #
+        #     PERO NO APUESTA A QUE EL JUGADOR SUBA. Apuesta a que
+        #     el Computer paga por encima del mercado en el reset.
+        #     Son dos tesis distintas:
+        #
+        #       - la de tendencia necesita un ritmo que proyectar,
+        #         y sin ritmo no se valora;
+        #       - esta no proyecta nada, asi que exigirle un ritmo
+        #         seria importarle una dependencia que no tiene, y
+        #         apagaria una via de ingresos entera para mas de
+        #         la mitad del tablero solo porque el ojeador no
+        #         empareja a ese jugador.
+        #
+        #     Lo que si la frena es que el precio VENGA CAYENDO:
+        #     el Computer paga sobre el precio de mercado del
+        #     reset, y sobre una base que encoge el premium vale
+        #     menos. Eso es comprar un cuchillo cayendo con otro
+        #     nombre.
+        #
+        #     Lo destapo una guardia -`test_reventa_al_computer_v1`-
+        #     que se puso en rojo al frenar esta via por falta de
+        #     ritmo. Tenia razon ella.
+        if compuerta["code"] != FALLING_RATE_CODE:
+            como_reventa = antes_reventa
+
+        else:
+            # Si la via ya se cerraba sola -prima sin medir-, ese
+            # motivo es mas concreto y no se pisa.
+            como_reventa = (
+                antes_reventa
+                if safe_int(antes_reventa.get("value")) <= 0
+                else _sin_valor(
+                    compuerta["code"],
+                    compuerta["reason"],
+                )
+            )
+
         # --------------------------------------------------
         # LA MAYOR DE LAS TRES
         # --------------------------------------------------
+
+        # LA COMPARACION, PARA QUE SE PUEDA VER EL CAMBIO
+        #
+        #     `before` es lo que Pepe habria valorado ayer con las
+        #     mismas cuentas; `after`, lo que vale hoy. La
+        #     diferencia es exactamente lo que introduce esta
+        #     noche, y sale al dashboard fila a fila.
+        antes_opciones = [
+            o for o in (como_xi, antes_trading, antes_reventa)
+            if o and safe_int(o.get("value")) > 0
+        ]
+
+        antes_mejor = (
+            max(antes_opciones, key=lambda o: safe_int(o.get("value")))
+            if antes_opciones
+            else None
+        )
+
+        comparacion = {
+            "gate": compuerta["code"],
+            "gate_reason": compuerta["reason"],
+            "rate_percent_per_day": compuerta.get(
+                "rate_percent_per_day"
+            ),
+            "trend_days": compuerta.get("trend_days"),
+            "demand_net": compuerta.get("demand_net"),
+
+            "value_before": (
+                safe_int(antes_mejor.get("value"))
+                if antes_mejor
+                else 0
+            ),
+            "intent_before": (
+                antes_mejor.get("intent") if antes_mejor else None
+            ),
+        }
 
         opciones = [
             o for o in (como_xi, como_trading, como_reventa)
@@ -588,6 +740,7 @@ def value_candidate(
                 as_speculation=como_trading,
                 as_computer_resale=como_reventa,
                 starter=titularidad,
+                market_gate=comparacion,
             )
 
         mejor = max(
@@ -610,6 +763,10 @@ def value_candidate(
             # revenderle al Computer se leeria en pantalla igual
             # que una para mejorar el once.
             "route": mejor.get("route"),
+
+            # Lo que decidia antes y lo que decide ahora, con el
+            # motivo. Esto mueve dinero: tiene que poder mirarse.
+            "market_gate": comparacion,
 
             "replaces": mejor.get("replaces"),
             "reason": mejor.get("reason"),
@@ -634,6 +791,7 @@ def _sin_valor(
     as_speculation: dict | None = None,
     as_computer_resale: dict | None = None,
     starter: dict | None = None,
+    market_gate: dict | None = None,
 ) -> dict:
     """
     EL PRONOSTICO VIAJA TAMBIEN CUANDO SE DICE QUE NO.
@@ -658,5 +816,6 @@ def _sin_valor(
         "as_xi": as_xi,
         "as_speculation": as_speculation,
         "as_computer_resale": as_computer_resale,
+        "market_gate": market_gate,
         "reasons": [reason],
     }
