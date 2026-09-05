@@ -121,6 +121,14 @@ export function normalizeStatus(raw = {}) {
       candidates: []
     },
 
+    // EL OJEADOR (06/09/2026)
+    //
+    // Lo que tres webs dicen del precio de cada jugador, con su
+    // libro de acierto y los que no se pudieron emparejar.
+    // FASE OBSERVADOR: ningun motor lo lee, y esta pantalla
+    // tampoco decide con ello.
+    scout: raw.scout || { available: false, sources: {}, unmatched: [] },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] }

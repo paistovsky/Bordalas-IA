@@ -184,6 +184,65 @@ function Sancion({ absence }) {
   );
 }
 
+
+/* EL VEREDICTO DEL OJEADOR, EN UNA CELDA (06/09/2026)
+ *
+ *   Direccion, tamaño y cuantas fuentes lo dicen. El detalle
+ *   entero -quien lo dijo, con que racha y como se identifico al
+ *   jugador- va en el recuadro del raton: una tabla de veinte
+ *   columnas no aguanta mas texto.
+ *
+ *   Sin veredicto NO se pinta un cero. "Sin dato" y "no se mueve"
+ *   son cosas distintas y confundirlas seria justo el fallo que
+ *   este panel viene a arreglar.
+ */
+function ScoutVerdict({ scout }) {
+  if (!scout || !scout.direction) {
+    return <span className="dim">sin dato</span>;
+  }
+
+  const tono =
+    scout.direction === "UP"
+      ? "up"
+      : scout.direction === "DOWN"
+      ? "down"
+      : "dim";
+
+  const flecha =
+    scout.direction === "UP" ? "▲" : scout.direction === "DOWN" ? "▼" : "=";
+
+  const detalle = [
+    scout.note,
+    scout.trend_days
+      ? `Racha: ${Math.abs(scout.trend_days)} día(s) seguidos.`
+      : null,
+    scout.demand_direction
+      ? `Demanda 24 h: ${scout.demand_direction} (${scout.demand_pressure} puntos de presión).`
+      : null,
+    ...(scout.matches || []).map(
+      (m) =>
+        `${m.source}: emparejado por ${m.method} (${m.score}) como "${m.source_name}".`
+    )
+  ]
+    .filter(Boolean)
+    .join("  —  ");
+
+  return (
+    <span className={tono} title={detalle || undefined}>
+      {flecha}
+      {scout.mean_magnitude_percent != null && (
+        <>
+          {" "}
+          {String(Number(scout.mean_magnitude_percent).toFixed(1)).replace(".", ",")} %
+        </>
+      )}
+      <span className="dim" style={{ marginLeft: 4, fontSize: 9 }}>
+        {scout.sources_agreeing}/{scout.sources_total}
+      </span>
+    </span>
+  );
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -473,6 +532,13 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th>JERARQUÍA</th>
             <th>LESIÓN</th>
             <th>SANCIÓN</th>
+            {/* LAS DOS OPINIONES, PEGADAS (06/09/2026)
+                Pepe le da el mismo 0,17 % a uno que subio un
+                17 % ayer y a uno que bajo un 2 %. El ojeador
+                los separa. Eso solo se ve con las dos
+                columnas juntas. */}
+            <th className="n">PEPE DICE</th>
+            <th className="n">OJEADOR</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th className="n">SE PAGA SOLO</th>
             <th>VENDE</th>
@@ -533,6 +599,21 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                     se ha ido a sus dos columnas propias. */}
                 <td>
                   <Hierarchy label={target.hierarchy} />
+                </td>
+
+                {/* Lo que Pepe espera que rinda. Sale de su
+                    propia explicacion; si algun dia deja de
+                    decirlo, aqui pone "—" y no se inventa. */}
+                <td className="n dim" title="Rendimiento esperado por el motor de especulación.">
+                  {target.pepe_yield_percent != null
+                    ? `${String(target.pepe_yield_percent).replace(".", ",")} %`
+                    : "—"}
+                </td>
+
+                {/* Y lo que dicen las webs. No manda: es una
+                    segunda opinion escrita al lado. */}
+                <td className="n">
+                  <ScoutVerdict scout={target.scout} />
                 </td>
 
                 <td>

@@ -81,6 +81,12 @@ CADENAS = [
         "RosterExpansionPanel",
         ["MarketPage.jsx"],
     ),
+    (
+        "scout",
+        "scout",
+        "ScoutPanel",
+        ["BrainPage.jsx"],
+    ),
 ]
 
 
@@ -240,6 +246,7 @@ def test_ningun_panel_nuevo_decide_nada() -> None:
         ("RacePanel", "no</b> lo usa para decidir"),
         ("SeasonHorizonPanel", "el motor decide"),
         ("RosterExpansionPanel", "no</b> puede hacer esto hoy"),
+        ("ScoutPanel", "Esto no manda todavía"),
     ):
         fuente = _lee(DASHBOARD / "components" / f"{componente}.jsx")
 
@@ -247,6 +254,71 @@ def test_ningun_panel_nuevo_decide_nada() -> None:
             f"{componente} no avisa de que es un termometro: "
             f"falta «{aviso}»"
         )
+
+
+
+
+def test_las_dos_opiniones_estan_pegadas_en_mercado() -> None:
+    """
+    Lo que hay que ver es la DIFERENCIA: Pepe le da el mismo
+    0,17 % a uno que subio un 17 % ayer y a uno que bajo un 2 %.
+    En columnas separadas por media tabla, nadie las compara.
+    """
+
+    fuente = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "PEPE DICE" in fuente, "falta la columna de Pepe"
+    assert "OJEADOR" in fuente, "falta la columna del ojeador"
+    assert "target.scout" in fuente, (
+        "la tabla no lee el veredicto del ojeador"
+    )
+    assert "pepe_yield_percent" in fuente, (
+        "la tabla no lee lo que Pepe dice que rinde"
+    )
+
+    # Las cabeceras, contiguas. Se compara sobre el `<th>` y no
+    # sobre la palabra suelta: "OJEADOR" tambien sale en los
+    # comentarios del fichero, y ahi el indice no significa nada.
+    cabecera_pepe = '<th className="n">PEPE DICE</th>'
+    cabecera_ojeador = '<th className="n">OJEADOR</th>'
+
+    assert cabecera_pepe in fuente and cabecera_ojeador in fuente
+
+    hueco = fuente.index(cabecera_ojeador) - (
+        fuente.index(cabecera_pepe) + len(cabecera_pepe)
+    )
+
+    assert 0 <= hueco < 40, (
+        f'las dos columnas se han separado ({hueco} caracteres)'
+    )
+
+
+def test_sin_veredicto_no_se_pinta_un_cero() -> None:
+    """
+    "Sin dato" y "no se mueve" son cosas distintas. Confundirlas
+    seria justo el fallo que este panel viene a arreglar.
+    """
+
+    fuente = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "sin dato" in fuente, (
+        "un candidato sin veredicto tiene que decir 'sin dato', no "
+        "un 0 %"
+    )
+
+
+def test_el_ojeador_publica_a_quien_no_pudo_identificar() -> None:
+    """
+    Un emparejamiento que no se hizo y no se cuenta es un agujero
+    invisible.
+    """
+
+    fuente = _lee(DASHBOARD / "components" / "ScoutPanel.jsx")
+
+    assert "unmatched" in fuente, (
+        "el panel no enseña los que se quedaron sin emparejar"
+    )
+    assert "fila.reason" in fuente, "ni el motivo de cada uno"
 
 
 TESTS = [
@@ -257,6 +329,9 @@ TESTS = [
     test_cada_componente_esta_montado_en_su_pagina,
     test_los_paneles_nuevos_avisan_cuando_no_hay_dato,
     test_el_tope_por_operacion_se_ve,
+    test_las_dos_opiniones_estan_pegadas_en_mercado,
+    test_sin_veredicto_no_se_pinta_un_cero,
+    test_el_ojeador_publica_a_quien_no_pudo_identificar,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

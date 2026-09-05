@@ -1,3 +1,4 @@
+import ScoutPanel from "../components/ScoutPanel";
 import StrategyPanel from "../components/StrategyPanel";
 import SolvencyPlansPanel from "../components/SolvencyPlansPanel";
 import { formatEuros, formatMoney } from "../lib/utils";
@@ -316,6 +317,15 @@ export default function BrainPage({ data }) {
           ))}
         </section>
       )}
+
+      {/* EL OJEADOR (06/09/2026)
+          Va en ESTRATEGIA porque es inteligencia sobre el
+          mercado, no operativa del dia. La columna con su
+          veredicto fila a fila esta en MERCADO, pegada a la
+          de Pepe. */}
+      <div style={{ marginTop: 11 }}>
+        <ScoutPanel data={data} />
+      </div>
     </>
   );
 }
