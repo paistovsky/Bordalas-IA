@@ -63,6 +63,56 @@ def pepe_yield_percent(fila: dict):
         return None
 
 
+def divergence_of(ficha: dict | None) -> dict | None:
+    """
+    Si en este jugador el precio y la demanda no dicen lo mismo.
+
+    Se calcula con la MISMA funcion que usa el libro, para que la
+    pantalla no pueda marcar como divergente a uno que el libro
+    no apunto. Dos criterios para la misma cosa acaban siendo dos
+    cosas distintas.
+    """
+
+    if not ficha:
+        return None
+
+    from src.intelligence.scout.divergence import classify
+
+    consenso = ficha.get("consensus") or {}
+    demanda = ficha.get("demand") or {}
+
+    pct = consenso.get("mean_magnitude_percent")
+
+    if pct is None:
+        return None
+
+    if consenso.get("direction") == "DOWN":
+        pct = -abs(float(pct))
+
+    presion = demanda.get("pressure_points")
+
+    divergente, tipo = classify(pct, presion)
+
+    if not divergente:
+        return None
+
+    return {
+        "kind": tipo,
+        "price_change_percent": round(float(pct), 3),
+        "demand_net": presion,
+        "trend_days": ficha.get("trend_days"),
+
+        # Que no se lea como una recomendacion. El estudio del
+        # 07/09 dice que el precio tiene mucho momento, asi que
+        # esto es una apuesta a que una rampa se gira, y no esta
+        # medida.
+        "note": (
+            "Hipotesis sin comprobar: el precio y la demanda "
+            "apuntan a lados distintos."
+        ),
+    }
+
+
 def _verdict(ficha: dict | None) -> dict | None:
     """El veredicto del ojeador sobre un jugador, resumido."""
 
@@ -117,9 +167,12 @@ def annotate_targets(rows: list | None, report: dict | None) -> list:
 
         nueva = dict(fila)
 
-        nueva["scout"] = _verdict(
-            jugadores.get(str(safe_int(fila.get("id"))))
-        )
+        ficha = jugadores.get(str(safe_int(fila.get("id"))))
+
+        nueva["scout"] = _verdict(ficha)
+
+        # La divergencia del dia, marcada en la propia fila.
+        nueva["divergence"] = divergence_of(ficha)
 
         # Lo que dice Pepe, en el mismo sitio, para que la
         # pantalla pueda poner los dos numeros juntos sin volver

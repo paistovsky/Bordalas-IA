@@ -3222,6 +3222,15 @@ def build_dashboard_state() -> dict:
             acquisition_rows,
         )
 
+        # EL ESTUDIO DE LA DIVERGENCIA (07/09/2026)
+        #
+        # Se LEE del libro; quien lo alimenta es el ciclo. Va
+        # dentro del bloque del ojeador porque es su hipotesis,
+        # no un modulo aparte.
+        from src.intelligence.scout.divergence import study as divergence_study
+
+        scout["divergence"] = divergence_study()
+
         # Las filas anotadas sustituyen a las que se PINTAN. El
         # tablero que decidio sigue intacto: `annotate_targets`
         # devuelve copias.

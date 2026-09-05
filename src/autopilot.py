@@ -3468,6 +3468,7 @@ def sync_scout(
         from src.intelligence.scout.accuracy import (
             sync_scout_accuracy,
         )
+        from src.intelligence.scout.divergence import sync_divergence
         from src.intelligence.scout.report import refresh_report
 
         jornada = (cycle_state or {}).get("target_matchday")
@@ -3492,6 +3493,17 @@ def sync_scout(
 
         acierto = sync_scout_accuracy(informe, precios)
 
+        # EL LIBRO DE LA DIVERGENCIA (07/09/2026)
+        #
+        # Precio contra demanda. Se apunta la foto de hoy -los
+        # divergentes Y el grupo de control- y se cierra lo que
+        # cumple 3 y 7 dias.
+        #
+        # No hay historico de demanda porque las fuentes publican
+        # la de hoy y no una serie: por eso hay que empezar a
+        # guardarla.
+        divergencia = sync_divergence(informe, precios)
+
         return {
             "status": (informe.get("cache") or {}).get("status"),
             "players": informe.get("players_count"),
@@ -3500,6 +3512,9 @@ def sync_scout(
             "sources_total": informe.get("sources_total"),
             "accuracy_recorded": acierto.get("recorded_total"),
             "accuracy_decided": acierto.get("decided_total"),
+            "divergent_today": divergencia.get("divergent_total"),
+            "divergence_recorded": divergencia.get("recorded_total"),
+            "divergence_closed": divergencia.get("closed_total"),
             "error": (informe.get("cache") or {}).get("error"),
         }
 
@@ -3978,6 +3993,14 @@ def run_cycle(
             f"({ojeador.get('status')}), "
             f"{ojeador.get('unmatched')} sin emparejar."
         )
+
+        if ojeador.get("divergent_today") is not None:
+            print(
+                f"Divergencia: {ojeador['divergent_today']} jugadores "
+                f"con el precio y la demanda en contra "
+                f"({ojeador.get('divergence_closed')} cerradas de "
+                f"{ojeador.get('divergence_recorded')} apuntadas)."
+            )
 
     elif ojeador.get("error"):
         print()
