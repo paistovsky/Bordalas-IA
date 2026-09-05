@@ -3439,6 +3439,78 @@ def confirm_negotiation_transitions(
     }
 
 
+
+def sync_scout(
+    snapshot: dict,
+    cycle_state: dict | None = None,
+) -> dict:
+    """
+    El ojeador de mercado: que dicen las webs de cada jugador.
+
+    POR QUE NO SALE EN CADA CICLO
+
+        El ciclo corre 48 veces al dia y las noticias de mercado
+        no cambian cada cuarto de hora. El informe se refresca por
+        TTL de seis horas, y ademas se fuerza cuando el que hay en
+        disco es de antes del reset de las 07:00: un informe de
+        las 06:50 habla del mercado de ayer aunque solo tenga
+        veinte minutos.
+
+        Si esta fresco, se lee del disco y no se toca la red.
+
+    FASE OBSERVADOR: no influye en ninguna decision.
+
+    Blindado a proposito, igual que `sync_source_accuracy`: un
+    fallo del ojeador jamas puede detener un ciclo de produccion.
+    """
+
+    try:
+        from src.intelligence.scout.accuracy import (
+            sync_scout_accuracy,
+        )
+        from src.intelligence.scout.report import refresh_report
+
+        jornada = (cycle_state or {}).get("target_matchday")
+
+        informe = refresh_report(
+            snapshot.get("catalog") or {},
+            matchday=jornada,
+        )
+
+        # Los precios de HOY, que son la unica verdad contra la
+        # que se puede puntuar lo que dijeron ayer.
+        precios = {
+            str(player_id): (ficha or {}).get("price")
+            for player_id, ficha in (
+                (snapshot.get("catalog") or {})
+                .get("data", {})
+                .get("players")
+                or {}
+            ).items()
+            if isinstance(ficha, dict)
+        }
+
+        acierto = sync_scout_accuracy(informe, precios)
+
+        return {
+            "status": (informe.get("cache") or {}).get("status"),
+            "players": informe.get("players_count"),
+            "unmatched": informe.get("unmatched_count"),
+            "sources_ok": informe.get("sources_ok"),
+            "sources_total": informe.get("sources_total"),
+            "accuracy_recorded": acierto.get("recorded_total"),
+            "accuracy_decided": acierto.get("decided_total"),
+            "error": (informe.get("cache") or {}).get("error"),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "status": "FAILED",
+            "players": None,
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+
 def sync_source_accuracy(
     cycle_state: dict,
 ) -> dict:
@@ -3890,6 +3962,26 @@ def run_cycle(
             f"Libro de fuentes: puntuadas las jornadas "
             f"{source_accuracy['scored']}."
         )
+
+    # EL OJEADOR (06/09/2026)
+    #
+    # Sale a la calle como mucho cada seis horas. Aqui solo se
+    # le pregunta; si el informe esta fresco, ni toca la red.
+    ojeador = sync_scout(snapshot, cycle_state)
+
+    if ojeador.get("players"):
+        print()
+        print(
+            f"Ojeador: {ojeador['players']} jugadores con señal de "
+            f"{ojeador.get('sources_ok')} de "
+            f"{ojeador.get('sources_total')} fuentes "
+            f"({ojeador.get('status')}), "
+            f"{ojeador.get('unmatched')} sin emparejar."
+        )
+
+    elif ojeador.get("error"):
+        print()
+        print(f"Ojeador: no disponible ({ojeador['error']}).")
 
     # El libro de pujas se cierra aqui, en la misma fase que el de
     # fuentes: post-ejecucion, leyendo el tablon ya persistido en vez

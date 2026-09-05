@@ -3191,6 +3191,56 @@ def build_dashboard_state() -> dict:
             "slots": {"known": False},
         }
 
+
+    # EL OJEADOR (06/09/2026)
+    #
+    # Lo que tres webs dicen del precio de cada jugador, al lado
+    # de lo que dice Pepe. Se LEE del disco: quien sale a la
+    # calle es el ciclo, cada seis horas. La telemetria nunca
+    # raspa.
+    #
+    # FASE OBSERVADOR: se anota sobre copias de las filas del
+    # tablero, y ningun motor lee este bloque.
+    try:
+        from src.intelligence.scout.accuracy import summary as scout_summary
+        from src.intelligence.scout.report import load_report
+        from src.intelligence.scout.view import (
+            annotate_targets,
+            build_scout_block,
+        )
+
+        scout_report = load_report() or {}
+
+        acquisition_rows = annotate_targets(
+            (acquisition or {}).get("targets"),
+            scout_report,
+        )
+
+        scout = build_scout_block(
+            scout_report,
+            scout_summary(),
+            acquisition_rows,
+        )
+
+        # Las filas anotadas sustituyen a las que se PINTAN. El
+        # tablero que decidio sigue intacto: `annotate_targets`
+        # devuelve copias.
+        if acquisition_rows:
+            acquisition = {**(acquisition or {}), "targets": acquisition_rows}
+
+    except Exception as error:                      # noqa: BLE001
+        scout = {
+            "available": False,
+            "observer_only": True,
+            "reason": (
+                f"No se pudo leer el informe del ojeador: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "sources": {},
+            "unmatched": [],
+            "accuracy": {"available": False},
+        }
+
     # LA PLANTILLA TAMBIEN SABE (20/08/2026)
     #
     # La tabla de PLANTILLA enseñaba nombre, posicion, valor y
@@ -3413,6 +3463,10 @@ def build_dashboard_state() -> dict:
         # La valoracion a horizonte de temporada, al lado de la
         # de siempre. Observador puro tambien.
         "season_horizon": season_horizon,
+
+        # El ojeador de mercado: lo que dicen las webs del precio
+        # de cada jugador. Observador puro.
+        "scout": scout,
 
         # Que ficharia si pudiera llenar un hueco de plantilla.
         # Una lista al margen: no ficha nada.
