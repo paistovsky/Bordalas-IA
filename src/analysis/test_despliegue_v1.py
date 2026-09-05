@@ -65,9 +65,41 @@ def test_apagado_de_serie() -> None:
     """
     Esto cambia lo que Pepe compra. Se enciende por la mañana,
     despues de leer la lista, y no antes.
+
+    SIGUE APAGADO EL 11/09/2026, Y AHORA POR UN MOTIVO MEDIDO
+
+        El encargo del 11/09 venia a encenderlo, con la deuda
+        segura incluida, y traia su propia puerta delante:
+
+            "si no puedes demostrar que Pepe vende, deja
+             DEPLOYMENT_ENABLED apagado."
+
+        No se pudo. En la foto de produccion del 05/09 a las
+        14:03:
+
+            saldo                    -421.792 EUR
+            prioridad declarada      "recuperar solvencia"
+            ofertas sobre la mesa    12, por 45.746.500 EUR
+            cobrables ahora          0
+            planes de solvencia      3 calculados, 0 ejecutados
+            proxima accion           BUY_SPECULATION
+
+        `accept_offer` no ha devuelto un 200 ni una sola vez desde
+        que se le arreglo el cuerpo el 19/08. No porque falle:
+        porque nadie se lo ha pedido.
+
+        Endeudarse para fichar exige poder deshacer la posicion en
+        un ciclo, y lo unico que se puede demostrar hoy es que
+        Pepe PUBLICA en el mercado, no que COBRE.
+
+        Quien lo encienda que lea antes
+        `docs/resultado-sin-miedo-2026-09-11.md`.
     """
 
-    assert DEPLOYMENT_ENABLED is False
+    assert DEPLOYMENT_ENABLED is False, (
+        "el interruptor esta encendido y la puerta del 11/09 no "
+        "esta pasada: no hay ninguna venta ejecutada por Pepe"
+    )
 
 
 def test_el_interruptor_esta_en_UN_solo_sitio() -> None:
