@@ -28,11 +28,6 @@ export default function HomePage({ data }) {
 
   return (
     <>
-      {/* LA CARRERA, LO PRIMERO (05/09/2026)
-          Pepe no sabia que iba cuarto. Lo primero que se abre
-          a mirar es como voy, no que va a pasar en el reset. */}
-      <RacePanel data={data} />
-
       <div className="grid g23">
         <section className="pan pan-pitch">
           <div className="pan-head">
@@ -111,6 +106,12 @@ export default function HomePage({ data }) {
           )}
         </section>
       )}
+
+      {/* LA CARRERA, ABAJO (05/09/2026, tarde)
+          El dueño: "que lo baje abajo, que esta descuadrado".
+          Es contexto de temporada, no lo primero que uno mira
+          al abrir el panel. */}
+      <RacePanel data={data} />
     </>
   );
 }

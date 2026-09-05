@@ -8,21 +8,32 @@ import { formatMoney } from "../lib/utils";
  *   ventaja que ultimo a cuarenta.
  *
  *   Este panel no cambia eso —el motor sigue decidiendo igual—
- *   pero pone el marcador delante: puesto, distancia, lo que
- *   queda de temporada, cuanto hay que sacarle al lider cada
- *   jornada, y la brecha de plantilla contra los seis.
+ *   pero pone el marcador delante.
+ *
+ * MENOS CAJA Y MAS LINEA (05/09/2026, tarde)
+ *
+ *   El dueño: "me ha metido un cuadro 'La Carrera' que no me
+ *   gusta nada. Al menos, que lo baje abajo, que esta
+ *   descuadrado."
+ *
+ *   Lo de descuadrado era literal y tenia una causa exacta:
+ *   `.poswrap` es `repeat(4, 1fr)` en la hoja de estilos y aqui
+ *   habia CINCO `.poscel`. El quinto caia solo a una segunda
+ *   fila y dejaba media fila vacia. Encima el titular iba en un
+ *   `.godnote` sin modificador, y esa clase solo tiene fondo y
+ *   borde en sus variantes `.crit` y `.warn`: quedaba un bloque
+ *   de texto en negrita flotando.
+ *
+ *   Los cinco cajones decian lo mismo que la frase que ya
+ *   calcula el backend. Asi que se quedan la frase y la tabla,
+ *   que es el dato que no esta en ningun otro sitio: la brecha
+ *   de plantilla contra los seis rivales.
  *
  * POR QUE EL RITMO Y NO SOLO LA DISTANCIA
  *
  *   "A 13 puntos" no dice nada sin saber cuanta temporada queda.
  *   Trece puntos en la jornada 4 y trece en la 35 son la misma
  *   distancia y no son el mismo problema.
- *
- * LA COLUMNA DE PLANTILLA ES LA BRECHA DE VERDAD
- *
- *   47,7 M contra 69 M. Es lo que explica por que arriba pueden
- *   pujar por lo que Pepe no puede, y estaba repartida en dos
- *   tablas distintas sin que nadie las restara.
  */
 
 const URGENCIA = {
@@ -34,14 +45,6 @@ const URGENCIA = {
   FUERA_DE_ALCANCE: ["pill crit", "FUERA DE ALCANCE"],
   SIN_DATOS: ["pill idle", "SIN DATOS"]
 };
-
-/** Un porcentaje pequeño con la precisión que le hace falta. */
-function porcentaje(share) {
-  if (share == null) return null;
-  const n = Number(share) * 100;
-  if (!Number.isFinite(n)) return null;
-  return `${n < 1 ? n.toFixed(2) : n.toFixed(1)} %`.replace(".", ",");
-}
 
 function diferencia(valor, formato) {
   const n = Number(valor || 0);
@@ -69,71 +72,21 @@ export default function RacePanel({ data }) {
   }
 
   const [tono, etiqueta] = URGENCIA[race.urgency] || URGENCIA.SIN_DATOS;
-  const exigencia = porcentaje(race.required_pace_share);
 
   return (
     <section className="pan">
       <div className="pan-head">
         <div>
           <h2>LA CARRERA</h2>
-          <div className="sub">
-            Dónde va Pepe y cuánto le queda por recuperar
+
+          {/* La frase, y ya. Es lo que se lee de un vistazo y es
+              la misma que calcula el backend: no se rearma aqui
+              con cinco cajones para decir lo mismo. */}
+          <div className="sub" style={{ textTransform: "none" }}>
+            {race.headline}
           </div>
         </div>
         <span className={tono}>{etiqueta}</span>
-      </div>
-
-      {/* La frase primero. Es lo que se lee de un vistazo. */}
-      <div className="godnote" style={{ marginBottom: 10 }}>
-        {race.headline}
-      </div>
-
-      <div className="poswrap" style={{ marginBottom: 10 }}>
-        <div className="poscel">
-          <b>PUESTO</b>
-          <span className="big">{race.position ?? "—"}º</span>
-          <small>{race.points} puntos</small>
-        </div>
-
-        <div className="poscel">
-          <b>AL LÍDER</b>
-          <span className="big">
-            {race.is_leader ? `+${race.points_ahead ?? 0}` : race.points_behind}
-          </span>
-          <small>{race.leader_name || "—"}</small>
-        </div>
-
-        <div className="poscel">
-          <b>QUEDAN</b>
-          <span className="big">{race.matchdays_remaining ?? "—"}</span>
-          <small>
-            de {race.matchdays_total} · {race.matchdays_played ?? "?"} jugadas
-          </small>
-        </div>
-
-        <div className="poscel">
-          <b>RITMO</b>
-          <span className="big">
-            {race.required_pace != null
-              ? String(race.required_pace.toFixed(2)).replace(".", ",")
-              : "—"}
-          </span>
-          <small>
-            {exigencia ? `${exigencia} de una jornada` : "por jornada"}
-          </small>
-        </div>
-
-        <div className="poscel">
-          <b>PLANTILLA</b>
-          <span className="big">{formatMoney(race.team_value)}</span>
-          <small>
-            {race.value_gap_to_leader != null
-              ? `${formatMoney(Math.abs(race.value_gap_to_leader))} ${
-                  race.value_gap_to_leader > 0 ? "menos" : "más"
-                } que el líder`
-              : "sin comparación"}
-          </small>
-        </div>
       </div>
 
       {/* Ausencia de dato != dato: si no hay calendario no hay
