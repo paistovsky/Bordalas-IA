@@ -87,6 +87,12 @@ CADENAS = [
         "ScoutPanel",
         ["BrainPage.jsx"],
     ),
+    (
+        "concentration",
+        "concentration",
+        "ConcentrationPanel",
+        ["SquadPage.jsx"],
+    ),
 ]
 
 
@@ -448,6 +454,76 @@ def test_la_sombra_dice_que_no_manda() -> None:
     )
 
 
+def test_el_bolsillo_se_ve_en_mercado() -> None:
+    """
+    SINTOMA
+
+        Los 22 candidatos salian SPECULATION y se median contra
+        los 3,5 M de especular mientras los 8,5 M de fichar
+        seguian intactos. Cinco se rechazaron por "supera
+        presupuesto" teniendo el dinero al lado.
+
+    La columna INTENCION enseña la etiqueta, pero no de donde
+    sale. Si el dueño no ve que clase de operacion es, no puede
+    saber si el bolsillo elegido es el correcto.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "BOLSILLO" in mercado, "falta la columna del bolsillo"
+    assert "target.deployment" in mercado, (
+        "la tabla no lee la clase de operacion"
+    )
+    assert "target.concentration" in mercado, (
+        "la tabla no lee el tope de concentracion de la fila"
+    )
+
+    for palabra in ("FICHAR", "COMERCIAR", "HUECO"):
+        assert palabra in mercado, (
+            f"la columna del bolsillo no sabe pintar «{palabra}»"
+        )
+
+    assert "roster_fill_value" in mercado, (
+        "no se puede ver cuanto valdria llenando una ficha vacia"
+    )
+
+
+def test_el_interruptor_se_ve_apagado_en_pantalla() -> None:
+    """
+    Un bloque en sombra que no dice que esta en sombra se lee
+    como una decision tomada. El interruptor de esta noche tiene
+    que verse desde la propia tabla.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "observer_only" in mercado, (
+        "la pantalla no mira si el despliegue esta en sombra"
+    )
+    assert "en sombra" in mercado, (
+        "no se avisa en la fila de que el bolsillo aun no manda"
+    )
+
+
+def test_la_concentracion_avisa_y_dice_el_motivo() -> None:
+    """
+    Como el resto de guardarrailes de la casa: avisa y acota, no
+    prohibe en silencio. Un tope que recorta sin decir por que es
+    el mismo problema que este repo lleva una semana arreglando.
+    """
+
+    panel = _lee(DASHBOARD / "components" / "ConcentrationPanel.jsx")
+
+    assert "b.reason" in panel or "breach.reason" in panel, (
+        "el panel no pinta el motivo de cada aviso"
+    )
+    assert "limit_player_share" in panel, "no se ve el tope por jugador"
+    assert "limit_same_team" in panel, "no se ve el tope por club"
+    assert "avisa" in panel and "acota" in panel, (
+        "el panel no dice que avisa y acota en vez de prohibir"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -466,6 +542,9 @@ TESTS = [
     test_se_ve_que_via_gana_con_cada_esquema,
     test_las_tres_vias_se_pintan_con_nombre,
     test_la_sombra_dice_que_no_manda,
+    test_el_bolsillo_se_ve_en_mercado,
+    test_el_interruptor_se_ve_apagado_en_pantalla,
+    test_la_concentracion_avisa_y_dice_el_motivo,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

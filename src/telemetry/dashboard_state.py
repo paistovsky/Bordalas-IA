@@ -3250,6 +3250,32 @@ def build_dashboard_state() -> dict:
             "accuracy": {"available": False},
         }
 
+    # LA CONCENTRACION DE LA PLANTILLA (10/09/2026)
+    #
+    # Cuanto pesa el jugador mas caro y cuantos hay del mismo
+    # club. Yamal son el 41 % de la plantilla, y no habia ningun
+    # tope que lo mirase.
+    #
+    # Avisa y acota, no prohibe: no obliga a vender a nadie.
+    try:
+        from src.analysis.concentration_guardrail import (
+            build_concentration,
+        )
+
+        concentration = build_concentration(snapshot.get("my_team"))
+
+    except Exception as error:                      # noqa: BLE001
+        concentration = {
+            "available": False,
+            "reason": (
+                f"No se pudo medir la concentracion: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "players": [],
+            "teams": [],
+            "breaches": [],
+        }
+
     # LA PLANTILLA TAMBIEN SABE (20/08/2026)
     #
     # La tabla de PLANTILLA enseñaba nombre, posicion, valor y
@@ -3476,6 +3502,10 @@ def build_dashboard_state() -> dict:
         # El ojeador de mercado: lo que dicen las webs del precio
         # de cada jugador. Observador puro.
         "scout": scout,
+
+        # Cuanto pesa el jugador mas caro y cuantos hay
+        # del mismo club. Observador: avisa y acota.
+        "concentration": concentration,
 
         # Que ficharia si pudiera llenar un hueco de plantilla.
         # Una lista al margen: no ficha nada.

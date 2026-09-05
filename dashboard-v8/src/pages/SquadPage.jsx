@@ -1,3 +1,4 @@
+import ConcentrationPanel from "../components/ConcentrationPanel";
 import { useState } from "react";
 import PitchXI from "../components/PitchXI";
 import SquadTable from "../components/SquadTable";
@@ -196,6 +197,12 @@ export default function SquadPage({ data }) {
           </p>
         </section>
       </div>
+
+      {/* LA CONCENTRACION (10/09/2026)
+          Va en PLANTILLA porque habla de la plantilla, y al lado
+          del suelo por posicion: los dos son guardarrailes de
+          como esta repartida. */}
+      <ConcentrationPanel data={data} />
 
       {/* EL SUELO ES UNA REGLA MIA.
           Aplicada a la plantilla de otro no significa nada, asi

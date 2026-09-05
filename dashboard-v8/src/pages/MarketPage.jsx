@@ -403,6 +403,75 @@ function ConSuConfianza({ sombra, gate, valor }) {
   );
 }
 
+/**
+ * DE QUE BOLSILLO SALE (10/09/2026)
+ *
+ *   El `intent` salia de la via que diera MAS EUROS. Como la
+ *   reventa al Computer ganaba en 21 de 22 candidatos, los 22
+ *   se median contra los 3,5 M de especular mientras los 8,5 M
+ *   de fichar seguian intactos.
+ *
+ *   Esta columna dice que clase de operacion es —fichaje o
+ *   comercio—, de que bolsillo sale, y cuanto valdria llenando
+ *   una de las fichas vacias. Con el interruptor apagado se
+ *   calcula y se enseña; no manda.
+ */
+function Bolsillo({ deployment, concentration }) {
+  if (!deployment) return <span className="dim">—</span>;
+
+  const ficha = deployment.operation_class === "SIGNING";
+  const relleno = deployment.route === "ROSTER_FILL";
+
+  const detalle = [
+    deployment.reason,
+    deployment.value_route && deployment.value_route !== deployment.route
+      ? `El valor sale de la via ${deployment.value_route}; la clase, de para que se le quiere.`
+      : null,
+    deployment.roster_fill_value
+      ? `Llenando una ficha vacia valdria ${formatMoney(deployment.roster_fill_value)}.`
+      : null,
+    deployment.free_roster_slots != null
+      ? `${deployment.free_roster_slots} fichas libres.`
+      : null,
+    deployment.observer_only
+      ? "Interruptor APAGADO: se calcula y se publica, no decide."
+      : "Interruptor ENCENDIDO: esto elige el bolsillo.",
+    concentration?.capped ? concentration.reason : null
+  ]
+    .filter(Boolean)
+    .join("  —  ");
+
+  return (
+    <span title={detalle}>
+      {deployment.operation_class ? (
+        <span className={ficha ? "pill ok" : "pill idle"}>
+          {ficha ? "FICHAR" : "COMERCIAR"}
+        </span>
+      ) : (
+        <span className="dim">—</span>
+      )}
+
+      {relleno && (
+        <span className="pill warn" style={{ marginLeft: 4 }}>
+          HUECO
+        </span>
+      )}
+
+      {concentration?.capped && (
+        <span className="pill crit" style={{ marginLeft: 4 }}>
+          TOPE
+        </span>
+      )}
+
+      {deployment.observer_only && (
+        <div className="dim" style={{ fontSize: 9 }}>
+          en sombra
+        </div>
+      )}
+    </span>
+  );
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -709,6 +778,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th className="n">PUJARÍAMOS</th>
             <th className="n">GANAR</th>
             <th>INTENCIÓN</th>
+            <th>BOLSILLO</th>
             <th>SUSTITUYE</th>
             <th></th>
           </tr>
@@ -872,6 +942,17 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                     : "—"}
                 </td>
                 <td className="dim">{target.intent || "—"}</td>
+
+                {/* DE QUE BOLSILLO SALE (10/09/2026)
+                    La columna de al lado dice la intencion; esta
+                    dice por que es esa y cuanto valdria llenando
+                    un hueco. En sombra hasta que se encienda. */}
+                <td>
+                  <Bolsillo
+                    deployment={target.deployment}
+                    concentration={target.concentration}
+                  />
+                </td>
                 <td className="dim">{target.replaces || "—"}</td>
                 <td>
                   {viva ? (

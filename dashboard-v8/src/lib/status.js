@@ -129,6 +129,17 @@ export function normalizeStatus(raw = {}) {
     // tampoco decide con ello.
     scout: raw.scout || { available: false, sources: {}, unmatched: [] },
 
+    // LA CONCENTRACION (10/09/2026)
+    //
+    // Cuanto pesa el jugador mas caro y cuantos hay del
+    // mismo club. Yamal son el 41 % de la plantilla.
+    concentration: raw.concentration || {
+      available: false,
+      players: [],
+      teams: [],
+      breaches: []
+    },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] }
