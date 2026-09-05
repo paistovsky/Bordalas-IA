@@ -409,6 +409,45 @@ def test_el_motivo_del_freno_viaja_a_la_pantalla() -> None:
     )
 
 
+
+
+def test_se_ve_que_via_gana_con_cada_esquema() -> None:
+    """
+    El encargo lo pide asi: el dueño tiene que poder mirar la
+    lista y decir "esto si, esto no" antes de que se mueva un
+    euro. Sin ver que via gana con cada uno, no se puede.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "CON SU CONFIANZA" in mercado, "falta la columna de la sombra"
+    assert "target.confidence_shadow" in mercado, (
+        "la tabla no lee la valoracion con confianzas por via"
+    )
+    assert "gate?.route_now" in mercado or "gate.route_now" in mercado, (
+        "no se compara con la via que gana HOY"
+    )
+    assert "CAMBIA" in mercado, (
+        "no se marca cuando el candidato cambia de via, que es lo "
+        "que hay que mirar primero"
+    )
+
+
+def test_las_tres_vias_se_pintan_con_nombre() -> None:
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    for via in ("PRICE_TREND", "COMPUTER_RESALE", "XI_UPGRADE"):
+        assert via in mercado, f"la pantalla no sabe pintar {via}"
+
+
+def test_la_sombra_dice_que_no_manda() -> None:
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "NO MANDA" in mercado, (
+        "la columna nueva no avisa de que es una segunda opinion"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -424,6 +463,9 @@ TESTS = [
     test_la_diferencia_contra_el_control_no_se_pinta_sin_muestra,
     test_se_ve_lo_que_decidia_antes_y_lo_que_decide_ahora,
     test_el_motivo_del_freno_viaja_a_la_pantalla,
+    test_se_ve_que_via_gana_con_cada_esquema,
+    test_las_tres_vias_se_pintan_con_nombre,
+    test_la_sombra_dice_que_no_manda,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

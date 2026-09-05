@@ -53,6 +53,12 @@ from src.analysis.player_velocity_lookup import (
     build_velocity_lookup,
 )
 
+from src.analysis.route_confidence import (
+    premium_confidence,
+    streak_confidence,
+    value_with_confidence_on_gain,
+)
+
 from src.analysis.computer_resale_premium import (
     measure_computer_resale_premium,
     usable_premium,
@@ -668,6 +674,132 @@ def value_candidate(
         # LA MAYOR DE LAS TRES
         # --------------------------------------------------
 
+        # ==================================================
+        # CADA APUESTA CON SU CONFIANZA (09/09/2026)
+        # ==================================================
+        #
+        # EN SOMBRA. Se calcula al lado y NO decide: el motor
+        # sigue con el esquema de arriba. Aqui solo se responde a
+        # "¿que pasaria si cada via llevase la confianza de lo que
+        # de verdad apuesta?".
+        #
+        #   tendencia -> la de la RACHA, que es la continuacion
+        #                medida el 07/09
+        #   Computer  -> la del PREMIUM, que falla una de cada
+        #                cuatro veces y hoy no lleva descuento
+        #   el once   -> la de los puntos, sin tocar: ahi la
+        #                confianza de puntos SI es la que toca
+
+        conf_racha, base_racha = streak_confidence(
+            compuerta.get("trend_days"),
+            compuerta.get("sources"),
+        )
+
+        conf_prima, base_prima = premium_confidence(
+            (context or {}).get("computer_premium")
+        )
+
+        # LA CONFIANZA VA SOBRE LA GANANCIA, NO SOBRE EL CAPITAL
+        #
+        #     Al calcular esto salio que TODAS las vias caian a
+        #     cero, y el motivo no era el numero sino donde se
+        #     multiplica. Hoy el motor hace:
+        #
+        #         maximo = (objetivo - ganancia x margen) x confianza
+        #
+        #     que multiplica el precio ENTERO. Con la via del
+        #     Computer, cuya ventaja es del 1,76 %, una confianza
+        #     de 0,72 deja el maximo por debajo del propio precio.
+        #
+        #     Pero el principal no esta en riesgo: si la apuesta
+        #     falla sigues teniendo un jugador que vale lo que
+        #     vale. Lo incierto es la GANANCIA. Ver
+        #     `route_confidence.value_with_confidence_on_gain`.
+        #
+        #     Esto se hace SOLO en la sombra. Cambiar la semantica
+        #     del motor mueve dinero y lo decide el dueño.
+
+        if compuerta["allow"]:
+
+            pleno_trading = speculation_value(
+                price=precio,
+                daily_increment=safe_int(
+                    player.get("priceIncrement")
+                ),
+                horizon_days=horizon_days,
+                confidence=1.0,
+                velocity_percent_per_day=compuerta[
+                    "rate_percent_per_day"
+                ],
+            )
+
+            sombra_trading = {
+                **pleno_trading,
+
+                # `speculation_value` no se etiqueta a si misma, y
+                # sin etiqueta la sombra no puede decir que via
+                # gana — que es toda la pregunta.
+                "route": "PRICE_TREND",
+
+                "value": value_with_confidence_on_gain(
+                    precio,
+                    pleno_trading.get("expected_gain"),
+                    conf_racha,
+                ),
+                "confidence": conf_racha,
+                "confidence_basis": base_racha,
+            }
+
+        else:
+            sombra_trading = como_trading
+
+        if compuerta["code"] != FALLING_RATE_CODE:
+
+            pleno_reventa = computer_resale_value(
+                price=precio,
+                premium=usable_premium(
+                    (context or {}).get("computer_premium")
+                ),
+            )
+
+            sombra_reventa = {
+                **pleno_reventa,
+                "value": value_with_confidence_on_gain(
+                    precio,
+                    pleno_reventa.get("expected_gain"),
+                    conf_prima if conf_prima is not None else 0.0,
+                ),
+                "confidence": conf_prima,
+                "confidence_basis": base_prima,
+            }
+
+        else:
+            sombra_reventa = como_reventa
+
+        sombra_opciones = [
+            o for o in (como_xi, sombra_trading, sombra_reventa)
+            if o and safe_int(o.get("value")) > 0
+        ]
+
+        sombra_mejor = (
+            max(sombra_opciones, key=lambda o: safe_int(o.get("value")))
+            if sombra_opciones
+            else None
+        )
+
+        # La via que gana HOY. Se calcula aqui, antes de la
+        # comparacion, porque la comparacion la necesita.
+        opciones_hoy = [
+            o for o in (como_xi, como_trading, como_reventa)
+            if o and safe_int(o.get("value")) > 0
+        ]
+
+        mejor_actual = (
+            max(opciones_hoy, key=lambda o: safe_int(o.get("value")))
+            if opciones_hoy
+            else None
+        )
+
         # LA COMPARACION, PARA QUE SE PUEDA VER EL CAMBIO
         #
         #     `before` es lo que Pepe habria valorado ayer con las
@@ -704,10 +836,64 @@ def value_candidate(
             ),
         }
 
-        opciones = [
-            o for o in (como_xi, como_trading, como_reventa)
-            if o and safe_int(o.get("value")) > 0
-        ]
+        # La via que gana HOY, con nombre. Misma razon: sin
+        # etiqueta no se puede comparar con la de la sombra.
+        ruta_hoy = (
+            (
+                mejor_actual.get("route")
+                or (
+                    "XI_UPGRADE"
+                    if mejor_actual.get("intent") == "XI_UPGRADE"
+                    else "PRICE_TREND"
+                )
+            )
+            if mejor_actual
+            else None
+        )
+
+        comparacion["route_now"] = ruta_hoy
+
+        # EL ESQUEMA NUEVO, AL LADO Y SIN MANDAR
+        confianza_sombra = {
+            "streak_confidence": conf_racha,
+            "streak_basis": base_racha,
+            "premium_confidence": conf_prima,
+            "premium_basis": base_prima,
+
+            "value": (
+                safe_int(sombra_mejor.get("value"))
+                if sombra_mejor
+                else 0
+            ),
+            "route": (
+                (
+                    sombra_mejor.get("route")
+                    or (
+                        "XI_UPGRADE"
+                        if sombra_mejor.get("intent") == "XI_UPGRADE"
+                        else "PRICE_TREND"
+                    )
+                )
+                if sombra_mejor
+                else None
+            ),
+            "intent": (
+                sombra_mejor.get("intent") if sombra_mejor else None
+            ),
+
+            # Lo que cada via valdria con su confianza propia.
+            "speculation_value": safe_int(
+                (sombra_trading or {}).get("value")
+            ),
+            "computer_resale_value": safe_int(
+                (sombra_reventa or {}).get("value")
+            ),
+            "xi_value": safe_int((como_xi or {}).get("value")),
+
+            "observer_only": True,
+        }
+
+        opciones = opciones_hoy
 
         if not opciones:
             motivos = []
@@ -741,6 +927,7 @@ def value_candidate(
                 as_computer_resale=como_reventa,
                 starter=titularidad,
                 market_gate=comparacion,
+                confidence_shadow=confianza_sombra,
             )
 
         mejor = max(
@@ -768,6 +955,10 @@ def value_candidate(
             # motivo. Esto mueve dinero: tiene que poder mirarse.
             "market_gate": comparacion,
 
+            # Que valdria con cada via llevando SU confianza.
+            # Observador puro: el `value` de arriba no lo mira.
+            "confidence_shadow": confianza_sombra,
+
             "replaces": mejor.get("replaces"),
             "reason": mejor.get("reason"),
             "reasons": [
@@ -792,6 +983,7 @@ def _sin_valor(
     as_computer_resale: dict | None = None,
     starter: dict | None = None,
     market_gate: dict | None = None,
+    confidence_shadow: dict | None = None,
 ) -> dict:
     """
     EL PRONOSTICO VIAJA TAMBIEN CUANDO SE DICE QUE NO.
@@ -817,5 +1009,6 @@ def _sin_valor(
         "as_speculation": as_speculation,
         "as_computer_resale": as_computer_resale,
         "market_gate": market_gate,
+        "confidence_shadow": confidence_shadow,
         "reasons": [reason],
     }

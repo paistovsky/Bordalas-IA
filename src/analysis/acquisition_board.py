@@ -500,6 +500,14 @@ def build_acquisition_board(
                 # poder mirarse fila a fila.
                 "market_gate": valoracion.get("market_gate"),
 
+                # Y que valdria si cada via llevase la
+                # confianza de lo que de verdad apuesta.
+                # Observador puro: el `our_value` de arriba
+                # no lo mira.
+                "confidence_shadow": valoracion.get(
+                    "confidence_shadow"
+                ),
+
                 # `bid` es lo que pujariamos. `live_bid` es lo que
                 # YA tenemos puesto en Biwenger. Dos numeros
                 # distintos que la pantalla estaba mezclando en

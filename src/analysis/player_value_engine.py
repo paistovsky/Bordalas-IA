@@ -1609,6 +1609,19 @@ def computer_resale_value(
     price: int,
     premium: float | None,
     margin: float = DEFAULT_SPECULATION_MARGIN,
+
+    # LA CONFIANZA DE ESTA VIA (09/09/2026)
+    #
+    #     Por defecto 1,0: sin pasarla, esta funcion se comporta
+    #     exactamente como antes y ninguna decision cambia.
+    #
+    #     Existe porque esta via apuesta a que el Computer
+    #     recompra por encima del mercado, y eso falla una de
+    #     cada cuatro veces (`positive_ratio` 0,745 sobre 102
+    #     ventas). Hasta hoy no llevaba descuento ninguno,
+    #     mientras que la via de tendencia si — y por eso ganaba
+    #     siempre.
+    confidence: float = 1.0,
 ) -> dict:
     """
     Lo maximo que pagariamos por comprar a mercado y vendersela al
@@ -1674,14 +1687,23 @@ def computer_resale_value(
 
     ganancia = objetivo - base
 
-    maximo = int(objetivo - ganancia * margin)
+    maximo = int(
+        (objetivo - ganancia * margin)
+        * max(min(float(confidence), 1.0), 0.0)
+    )
 
     if maximo <= base:
         return _sin_valor(
             "MARGEN_INSUFICIENTE",
             (
                 f"El Computer paga un {prima * 100:+.1f} % de "
-                f"media y eso no deja margen sobre el precio."
+                f"media y eso no deja margen sobre el precio"
+                + (
+                    f" con una confianza de {confidence:.3f}"
+                    if confidence < 1.0
+                    else ""
+                )
+                + "."
             ),
         )
 
@@ -1690,6 +1712,7 @@ def computer_resale_value(
         "resale_estimate": objetivo,
         "expected_gain": ganancia,
         "premium_percent": round(prima * 100, 2),
+        "confidence": round(float(confidence), 4),
         "intent": "SPECULATION",
         "route": "COMPUTER_RESALE",
         "reason": (
