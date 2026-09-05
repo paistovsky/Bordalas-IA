@@ -235,9 +235,17 @@ def position_floor_lookup(snapshot: dict | None) -> dict:
     return bloqueados
 
 
+def safe_int(value, default: int = 0) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return default
+
+
 def offers_to_collect(
     actionable: list[dict] | None,
     position_floor: dict | None = None,
+    deficit: int = 0,
 ) -> list[dict]:
     """
     De las ofertas que el motor ya ha aprobado, cuales se pueden
@@ -284,13 +292,42 @@ def offers_to_collect(
 
         return bool(suelo[player_id])
 
+    # VENDER LO JUSTO, NO LO MAS GORDO (12/09/2026)
+    #
+    #     Medido en produccion el 05/09: deficit de 421.792 y la
+    #     oferta reservada para taparlo era la de Gustavo Puerta,
+    #     3.377.100 — ocho veces lo que hacia falta, y ademas es
+    #     el plan C del motor de solvencia, el que deja el once
+    #     incompleto. El plan A era Lucas Cepeda por 471.200, sin
+    #     tocar el once.
+    #
+    #     La reserva elige por prima, que es razonable para el
+    #     precio y ciego para el tamaño. Aqui, entre ofertas YA
+    #     APROBADAS, se prefiere la mas pequeña que tape el
+    #     agujero. Es el mismo criterio que la cola de venta del
+    #     11/09: sacar de la plantilla lo menos posible.
+    #
+    #     Sin deficit el orden es el de siempre.
+
     def orden(item):
+
+        importe = safe_int(item.get("amount"))
+
+        tapa = bool(deficit > 0 and importe >= deficit)
+
         return (
             # ACCEPT_FOR_SOLVENCY primero: ahi el dinero hace
             # falta, no solo compensa.
             0
             if item.get("decision") == "ACCEPT_FOR_SOLVENCY"
             else 1,
+
+            # Las que tapan el agujero, antes que las que no.
+            0 if tapa else 1,
+
+            # Y de las que tapan, la mas pequeña. De las que no,
+            # la mas grande, que es la que mas se acerca.
+            importe if tapa else -importe,
 
             -float(item.get("premium_percent") or 0.0),
         )
@@ -1973,6 +2010,10 @@ def build_global_decision_uncached(
         cobrables = offers_to_collect(
             actionable,
             position_floor=position_floor_lookup(snapshot),
+
+            # Con el saldo en rojo, entre las ofertas ya
+            # aprobadas se cobra la mas pequeña que lo tape.
+            deficit=max(-safe_int(balance), 0),
         )
 
         a_cobrar = cobrables[0] if cobrables else None
