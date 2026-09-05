@@ -2,7 +2,7 @@
 
 Rama `tarde-noche/2026-09-05`. **Puerta: 77 de 77 en verde** (73 al
 empezar). `main` intacto. `npm run build` pasa. Nada desplegado. **El
-push lo das tú.** Cinco commits.
+push lo das tú.** Seis commits.
 
 Nada de esto decide con dinero. `DEPLOYMENT_ENABLED` sigue apagado
 esperando el examen del día 11.
@@ -328,9 +328,9 @@ entrenador que anuncia rotaciones mueve el precio de sus jugadores.
 
 ```
 rama          tarde-noche/2026-09-05   (sin subir: el push lo das tu)
-main          intacto
+main          intacto (lo dejaste en f6456a0 al mergear el reloj)
 puerta        77/77 en verde  (73 al empezar, 4 guardias nuevas)
-commits       5
+commits       6
 frontend      npm run build OK · NO desplegado · dist/ intacto
 
 1. La Carrera     abajo, sin los cinco cajones, causa del descuadre
@@ -351,6 +351,25 @@ X (Twitter)       NO. Los cuatro caminos probados, con evidencia.
 umbrales          ninguno tocado
 DEPLOYMENT_ENABLED = False
 ```
+
+## Comprobado en vivo antes de cerrar
+
+`sync_press` corre dentro del ciclo sin tocar la red cuando el
+informe es fresco, y deja las predicciones apuntadas:
+
+```
+sync_press -> status HIT · 163 titulares · 12 con señal · 8 apuntadas
+
+libro de acierto:  PRENSA_MARCA             3
+                   PRENSA_MUNDO_DEPORTIVO   5
+                   vencen el 08/09, todas PENDING
+```
+
+Con la noche que sobraba no empecé nada nuevo: tres guardias más
+para la prensa —que el TTL se respete, que un informe vacío no pise
+al bueno, y que los cuatro contadores del ruido se publiquen—. Sin
+ellos, doce señales parecen doce aciertos cuando salen de 163
+titulares y 95 descartes.
 
 **La frase para mañana:** Pepe ya lee prensa, y lo primero que ha
 encontrado es que a Lobete se le rompió el cruzado y está en el mercado
