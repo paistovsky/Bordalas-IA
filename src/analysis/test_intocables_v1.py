@@ -70,6 +70,52 @@ def test_los_de_arriba_no_se_tocan():
     ) is None
 
 
+def test_el_portero_titular_lo_es_se_llame_como_se_llame():
+    """
+    EL ACCIDENTE DEL 12/09/2026
+
+        Esta regla miraba solo `in_lineup`, y el roster del
+        dashboard trae ese dato como `is_starter`. Con la
+        plantilla de pantalla, Dituro -unico portero, titular- NO
+        salia como intocable. Lo unico que impedia venderlo era el
+        guardarrail posicional, que es exactamente el accidente
+        contra el que avisa el docstring del modulo.
+
+        El dia que entre un segundo portero, esa proteccion
+        desaparece sola.
+    """
+
+    from src.analysis.sale_intent import untouchable_reason
+
+    portero = {
+        "position": GOALKEEPER_POSITION,
+        "hierarchy_value": 40,
+        "is_starter": True,          # el nombre del dashboard
+    }
+
+    motivo = untouchable_reason(portero)
+
+    assert motivo is not None, (
+        "el portero titular vuelve a estar vendible cuando el "
+        "dato se llama `is_starter`"
+    )
+    assert "portero" in motivo
+
+    # Y el segundo portero SIGUE siendo vendible con los dos
+    # nombres: si no, no se podria rotar nunca.
+    for campo in ("in_lineup", "is_starter"):
+        suplente = {
+            "position": GOALKEEPER_POSITION,
+            "hierarchy_value": 40,
+            campo: False,
+        }
+
+        assert untouchable_reason(suplente) is None, (
+            f"el segundo portero se ha vuelto intocable con "
+            f"`{campo}`"
+        )
+
+
 def test_el_portero_titular_va_aparte():
     """
     No por escalon, por puesto.
@@ -223,6 +269,7 @@ def main():
     pruebas = [
         test_los_de_arriba_no_se_tocan,
         test_el_portero_titular_va_aparte,
+        test_el_portero_titular_lo_es_se_llame_como_se_llame,
         test_sin_escalon_no_se_vende,
         test_el_veto_va_antes_que_la_puntuacion,
         test_los_vetados_se_ven,

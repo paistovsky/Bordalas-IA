@@ -108,6 +108,39 @@ UNTOUCHABLE_HIERARCHY = 50
 GOALKEEPER_POSITION = 1
 
 
+# EL MISMO DATO CON DOS NOMBRES (12/09/2026)
+#
+#     Esta regla miraba solo `in_lineup`. El roster del dashboard
+#     trae ese dato como `is_starter`, asi que con la plantilla de
+#     pantalla el portero titular NO salia como intocable: lo
+#     unico que impedia venderlo era que hubiera exactamente uno,
+#     y eso lo bloquea el guardarrail posicional.
+#
+#     Es palabra por palabra el accidente contra el que avisa el
+#     comentario de arriba:
+#
+#         "hoy Yamal solo esta a salvo por accidente: el
+#          guardarrail posicional bloquea la venta porque hay
+#          exactamente dos delanteros. El dia que entre un
+#          tercero, esa proteccion desaparece sola y nadie se
+#          entera."
+#
+#     Con la venta ya demostrada de punta a punta, el accidente
+#     deja de ser teorico. Se resuelve donde tiene que resolverse:
+#     el dato se llama de dos formas y la regla entiende las dos.
+
+
+def is_starter(jugador: dict) -> bool:
+    """
+    ¿Esta puesto en el once? Da igual como se llame el campo.
+    """
+
+    return bool(
+        jugador.get("in_lineup")
+        or jugador.get("is_starter")
+    )
+
+
 def untouchable_reason(jugador: dict) -> str | None:
     """
     Por que este jugador no se propone. None si se puede.
@@ -130,7 +163,7 @@ def untouchable_reason(jugador: dict) -> str | None:
     if (
         int(jugador.get("position") or 0) == GOALKEEPER_POSITION
         and
-        jugador.get("in_lineup")
+        is_starter(jugador)
     ):
         return "portero titular: no se rota y no se improvisa"
 
