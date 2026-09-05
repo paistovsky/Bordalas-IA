@@ -101,77 +101,19 @@ jobs:
       - name: Validate optimized production cycle
         shell: bash
         run: |
-          python -m src.analysis.test_jp_profile_scope_v114
-          python -m src.analysis.test_multisource_starter_v1124
-          python -m src.analysis.test_v10_full_autonomous_live
-          python -m src.analysis.test_live_solvency_authority_v115
-          python -m src.telemetry.test_dashboard_execution_v121
-
-          # Candados de la auditoria del 15/08/2026.
-          # Deterministas, sin red ni credenciales: si alguien
-          # reintroduce una de estas guardias dormidas, el ciclo
-          # se detiene aqui y no llega a produccion.
-          python -m src.analysis.test_solvency_deadlock_v1
-          python -m src.analysis.test_write_path_guards_v1
-          python -m src.analysis.test_negotiation_persistence_v1
-          python -m src.analysis.test_bid_deduplication_v1
-          python -m src.analysis.test_source_accuracy_v1
-          python -m src.analysis.test_write_verification_v1
-          python -m src.analysis.test_protection_gate_v1
-          python -m src.analysis.test_reroll_memory_v1
-          python -m src.analysis.test_ledger_dedup_v1
-          python -m src.analysis.test_market_clock_v1
-          python -m src.analysis.test_position_guardrail_v1
-          python -m src.analysis.test_speculation_budget_v1
-          python -m src.analysis.test_bid_exposure_v1
-          python -m src.analysis.test_bid_targets_v1
-          python -m src.analysis.test_external_name_safety_v1
-          python -m src.analysis.test_portfolio_budget_v1
-          python -m src.analysis.test_roster_plan_guardrail_v1
-          python -m src.analysis.test_rival_bid_model_v1
-          python -m src.analysis.test_player_value_v1
-          python -m src.analysis.test_acquisition_wiring_v1
-          python -m src.analysis.test_bid_visibility_v1
-          python -m src.analysis.test_dashboard_truth_v1
-          python -m src.analysis.test_intocables_v1
-          python -m src.analysis.test_calendario_v1
-          python -m src.analysis.test_cobrar_ofertas_v1
-          python -m src.analysis.test_ciclo_una_sola_vez_v1
-          python -m src.analysis.test_escrituras_con_cuerpo_v1
-          python -m src.analysis.test_cambiar_titular_v1
-          python -m src.analysis.test_suelo_de_titulares_v1
-          python -m src.analysis.test_marcador_v1
-          python -m src.analysis.test_plantillas_rivales_v1
-          python -m src.analysis.test_abono_jornada_v1
-          python -m src.analysis.test_mercado_completo_v1
-          python -m src.analysis.test_pujar_por_el_xi_v1
-          python -m src.analysis.test_once_real_v1
-          python -m src.analysis.test_presupuesto_de_fichar_v1
-          python -m src.analysis.test_reventa_al_computer_v1
-          python -m src.analysis.test_once_de_verdad_v1
-          python -m src.analysis.test_correccion_jerarquia_v1
-          python -m src.analysis.test_contraoferta_v1
-          python -m src.analysis.test_escritura_contada_v1
-          python -m src.analysis.test_nombre_corto_v1
-          python -m src.analysis.test_action_starvation_v1
-          python -m src.analysis.test_price_history_store_v1
-          python -m src.analysis.test_futbolfantasy_source_v12
-          python -m src.analysis.test_starter_aware_xi_v1
-          python -m src.analysis.test_bid_outcome_ledger_v1
-          python -m src.analysis.test_etiqueta_vigilar_v1
-          python -m src.analysis.test_jornada_del_tablero_v1
-          python -m src.analysis.test_plantillas_rivales_llenas_v1
-          python -m src.analysis.test_penaltis_apagados_v1
-          python -m src.analysis.test_tope_por_operacion_v1
-          python -m src.analysis.test_jornada_en_la_valoracion_v1
-          python -m src.analysis.test_estado_de_carrera_v1
-          python -m src.analysis.test_valor_temporada_sombra_v1
-          python -m src.analysis.test_ampliar_plantilla_sombra_v1
-          python -m src.analysis.test_dashboard_orden_de_variables_v1
-          python -m src.analysis.test_pantalla_lee_lo_publicado_v1
-          python -m src.analysis.test_ojeador_fuentes_v1
-          python -m src.analysis.test_ojeador_emparejamiento_v1
-          python -m src.analysis.test_ojeador_informe_v1
+          # LA LISTA VIVE EN UN SOLO SITIO (07/09/2026)
+          #
+          # Aqui habia 66 lineas escritas a mano, una por guardia,
+          # y el script de la puerta las leia de este fichero. Cada
+          # guardia nueva habia que acordarse de ponerla en los dos
+          # sitios, y el dia que se olvidase, CI habria corrido
+          # menos que el dueño en local SIN AVISAR DE NADA.
+          #
+          # Ahora la lista esta en `scripts/run_validation_gate.py`
+          # y aqui solo se le llama. El script devuelve != 0 si
+          # falla cualquiera, asi que este paso sigue parando el
+          # ciclo exactamente igual que antes.
+          python scripts/run_validation_gate.py
 
       - name: Run Bordalas V10 PRODUCTION
         shell: bash
