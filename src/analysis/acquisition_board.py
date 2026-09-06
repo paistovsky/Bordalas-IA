@@ -65,6 +65,79 @@ from src.analysis.rival_bid_model import (
 )
 
 
+# ============================================================
+# EL MERCADO DE LOS RIVALES: VERLO SIN PODER COMPRARLO
+# ============================================================
+#
+# EL SINTOMA (24/09/2026)
+#
+#     El dueño pregunto "cuantos jugadores se pueden comprar
+#     hoy" y la pantalla dijo veinte. Eran cuarenta y siete.
+#     Los otros veintisiete los vendian managers, y un filtro
+#     nuestro -no de Biwenger- los tiraba antes de mirarlos.
+#
+#     Peor que esconderlos: al no crearles fila, nadie les
+#     pedia nunca el ritmo ni la racha. Del 56 % del escaparate
+#     no se sabia absolutamente nada, y "no se sabe" se leia
+#     como "no hay".
+#
+# LO QUE CAMBIA, Y LO QUE NO
+#
+#     CAMBIA: entran en la tabla, con el nombre de quien vende,
+#     lo que pide, su ritmo y su racha. Y se valoran con el
+#     MISMO codigo que los del Computer -no un camino paralelo-,
+#     porque un numero calculado aparte no sirve para decidir
+#     si merece la pena abrir esta puerta de verdad.
+#
+#     NO CAMBIA: no se compran. La puerta se cierra en UN solo
+#     sitio, al final y despues de valorar, para que la fila
+#     publique lo que HABRIA decidido -`would_be_decision`- sin
+#     que eso pueda ejecutarse nunca.
+#
+# POR QUE VALORAR Y LUEGO CERRAR, Y NO CORTAR ANTES
+#
+#     Porque la pregunta que paga las noches es "cuantos
+#     pasarian el liston", y solo la responde el camino de
+#     produccion entero. Cortar antes daria una tabla bonita y
+#     ningun numero.
+#
+# LO QUE NO ESTA GARANTIZADO AQUI (y si con el Computer)
+#
+#     Al Computer se le compra al precio pedido. A un manager
+#     se le OFRECE, y acepta o no. La salida sigue valiendo
+#     -una vez el jugador es nuestro da igual a quien se le
+#     compro-, pero la ENTRADA no. De la tasa de aceptacion
+#     tenemos una sola observacion, y con una no se abre nada.
+#
+# EL INTERRUPTOR
+#
+#     `BORDALAS_SIN_MERCADO_RIVALES=1` devuelve el filtro de
+#     antes: la tabla vuelve a ser solo el mercado del
+#     Computer. Una linea, como todo lo demas.
+DISABLE_ENV = "BORDALAS_SIN_MERCADO_RIVALES"
+
+
+# La decision que llevan las filas de rivales que no se pueden
+# comprar. Cualquier cosa distinta de BID las mantiene fuera de
+# `best_acquisition_target`; se le da nombre propio para que la
+# pantalla no las confunda con un rechazo por valor.
+MERCADO_DE_RIVAL = "MERCADO_DE_RIVAL"
+
+
+def _mercado_de_rivales_visible() -> bool:
+    """
+    Si los mercados de otros managers entran en la tabla.
+
+    Encendido por defecto. Verlos no compra nada.
+    """
+
+    import os
+
+    return str(
+        os.environ.get(DISABLE_ENV, "")
+    ).strip().lower() not in {"1", "true", "si", "yes"}
+
+
 def safe_int(value, default: int = 0) -> int:
     try:
         return int(value or 0)
@@ -394,13 +467,56 @@ def build_acquisition_board(
                 or not venta
             )
 
-            # Un mercado de otro manager solo entra si ya hay
-            # dinero nuestro dentro. Si no, esta tabla seguiria
-            # siendo el mercado del Computer, como hasta ahora.
+            # DE UN RIVAL, Y SIN DINERO NUESTRO DENTRO
+            #
+            #     Estos son los que el filtro tiraba. Ahora
+            #     entran, se valoran igual que los del Computer y
+            #     se les cierra la compra al final.
+            #
+            #     Se calcula ANTES de cualquier `continue` para
+            #     que la bandera exista siempre: es la que decide
+            #     tanto la rama de la decision como la puerta.
+            # NUESTRO PROPIO ESCAPARATE NO ES UN MERCADO
+            #
+            #     De las 61 ventas del tablon, 14 son NUESTRAS.
+            #     Al levantar el filtro entraron tambien, y
+            #     Mangala -jugador de la casa, publicado por
+            #     nosotros- salio con `would_pass: True`.
+            #
+            #     Un "pasaria el liston" sobre algo que ya es
+            #     tuyo es exactamente la familia que llevamos
+            #     seis arreglando: un dato correcto contestando
+            #     una pregunta que no era la suya. Lo canto la
+            #     primera pasada de la sonda y no llego a
+            #     ninguna pantalla.
+            vende_uno_de_los_nuestros = (
+                venta.get("seller_user_id") is not None
+                and safe_int(venta.get("seller_user_id"))
+                == safe_int(current_user_id)
+            )
+
+            de_rival_sin_dinero = (
+                fuera_del_computer
+                and not vende_uno_de_los_nuestros
+                and safe_int(player_id) not in puja_viva
+                and safe_int(player_id) not in contra_oferta
+            )
+
+            # El filtro de siempre, intacto. Lo unico que cambia
+            # es que ahora tiene una salida: el mercado de un
+            # rival, con la puerta de mirar abierta.
+            #
+            # Con `BORDALAS_SIN_MERCADO_RIVALES=1` esa salida se
+            # cierra y la tabla es exactamente la de antes del
+            # 24/09.
             if (
                 fuera_del_computer
                 and safe_int(player_id) not in puja_viva
                 and safe_int(player_id) not in contra_oferta
+                and not (
+                    de_rival_sin_dinero
+                    and _mercado_de_rivales_visible()
+                )
             ):
                 continue
 
@@ -620,6 +736,21 @@ def build_acquisition_board(
 
                 "outside_computer_market": fuera_del_computer,
 
+                # DE UN RIVAL Y SIN DINERO NUESTRO DENTRO
+                #
+                #     La columna que separa "se puede comprar" de
+                #     "solo se puede mirar". Sin ella la pantalla
+                #     enseñaria cuarenta y siete filas iguales y
+                #     ninguna diria cual es cual.
+                "rival_market": de_rival_sin_dinero,
+
+                # Lo que PIDE el vendedor, que no es el precio de
+                # mercado. Los dos numeros juntos: el hueco entre
+                # ellos es la mitad de la conversacion.
+                "asking_price": safe_int(
+                    (venta.get("raw_sale") or {}).get("price")
+                ) or None,
+
                 "win_probability": None,
                 "expected_value": None,
                 "decision": valoracion.get("decision"),
@@ -645,12 +776,17 @@ def build_acquisition_board(
                     + " por el. Es dinero a cobrar, no a pagar."
                 )
 
-            elif fuera_del_computer:
+            elif fuera_del_computer and not de_rival_sin_dinero:
 
                 # Ya hay dinero nuestro aqui, pero no es un
                 # objetivo del ciclo: Pepe compra en el mercado
                 # del Computer. La fila existe para que el euro se
                 # vea, no para que se persiga.
+                #
+                # `and not de_rival_sin_dinero` (24/09/2026): sin
+                # esa mitad, los veintisiete recien admitidos
+                # caerian aqui y saldrian sin valorar, que es
+                # justo el numero que hemos venido a buscar.
                 #
                 # `decision` distinta de BID es lo que mantiene
                 # esta fila fuera de `best_acquisition_target`.
@@ -825,6 +961,59 @@ def build_acquisition_board(
                 if plan.get("decision") != "BID":
                     fila["reason"] = plan.get("reason")
 
+            # ==================================================
+            # LA PUERTA: SE MIRA, NO SE COMPRA
+            # ==================================================
+            #
+            #     UN solo sitio, el ultimo, y despues de haber
+            #     valorado. Antes de esta linea la fila ha pasado
+            #     por el mismo camino que un jugador del
+            #     Computer; a partir de ella no puede comprarse
+            #     pase lo que pase, porque `decision` deja de ser
+            #     BID y `best_acquisition_target` solo elige BID.
+            #
+            #     Lo que HABRIA decidido se guarda en vez de
+            #     tirarse: es la unica forma de contestar
+            #     "cuantos pasarian el liston" sin abrir la
+            #     compra para averiguarlo.
+            if de_rival_sin_dinero:
+
+                fila["would_be_decision"] = fila["decision"]
+                fila["would_pass"] = fila["decision"] == "BID"
+                fila["would_bid"] = safe_int(fila.get("bid"))
+
+                fila["decision"] = MERCADO_DE_RIVAL
+
+                # Y el importe a cero. Un numero en la columna de
+                # puja sobre una fila que no se puede pujar es
+                # exactamente la familia de fallos que llevamos
+                # cinco arreglando.
+                fila["bid"] = 0
+
+                pedido = fila.get("asking_price")
+
+                fila["reason"] = (
+                    f"Lo vende {fila['seller_name']}"
+                    + (
+                        " y pide "
+                        + f"{pedido:,}".replace(",", ".")
+                        + " EUR"
+                        if pedido
+                        else ""
+                    )
+                    + ". "
+                    + (
+                        "Pasaria el liston"
+                        if fila["would_pass"]
+                        else "No pasaria el liston"
+                    )
+                    + " ("
+                    + str(fila["would_be_decision"])
+                    + "), pero la compra a managers esta cerrada: "
+                    "se ofrece, no se compra, y la tasa de "
+                    "aceptacion no esta medida. Se mira."
+                )
+
             filas.append(fila)
 
         # Primero lo que se puede ejecutar HOY, y dentro de eso lo
@@ -928,6 +1117,19 @@ def build_acquisition_board(
             if f.get("has_live_bid") and f["id"] not in vistos
         )
 
+        vistos.update(f["id"] for f in mostradas)
+
+        # Y lo mismo con el rival que SI pasaria el liston
+        # (24/09/2026). Estas filas nunca son BID, asi que el
+        # orden las manda al final y serian las primeras en caer
+        # por el recorte. Justo las unicas por las que se ha
+        # abierto esta puerta.
+        mostradas.extend(
+            f
+            for f in filas
+            if f.get("would_pass") and f["id"] not in vistos
+        )
+
         ocultas = len(filas) - len(mostradas)
 
         con_puja_viva = [
@@ -966,6 +1168,40 @@ def build_acquisition_board(
 
             "biddable": sum(
                 1 for f in filas if f["decision"] == "BID"
+            ),
+
+            # EL ESCAPARATE, CON SUS DOS MITADES (24/09/2026)
+            #
+            #     `market_size` cuenta solo el Computer y asi se
+            #     queda: es lo que dice donde se puede comprar
+            #     HOY. Pero "cuantos hay a la venta" y "a cuantos
+            #     se les puede comprar" son dos preguntas, y la
+            #     pantalla contestaba las dos con el mismo numero.
+            #
+            #     `would_pass` es el que decide si merece la pena
+            #     abrir esta puerta: cuantos de los del rival
+            #     habrian salido BID si se pudiese.
+            "rival_market": {
+                "shown": sum(
+                    1 for f in filas if f.get("rival_market")
+                ),
+                "would_pass": sum(
+                    1 for f in filas if f.get("would_pass")
+                ),
+                "sellers": sorted({
+                    str(f.get("seller_name"))
+                    for f in filas
+                    if f.get("rival_market")
+                }),
+                "buying_closed": True,
+                "visible": _mercado_de_rivales_visible(),
+            },
+
+            "buyable_universe": sum(
+                1
+                for f in filas
+                if not f.get("outside_computer_market")
+                or f.get("rival_market")
             ),
 
             # Lo que YA tenemos puesto, frente a lo que se podria

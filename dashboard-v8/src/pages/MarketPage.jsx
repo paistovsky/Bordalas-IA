@@ -34,7 +34,11 @@ const DECISION = {
   // Dinero nuestro puesto fuera del mercado del Computer. Se
   // enseña porque es nuestro; no se persigue porque Pepe no
   // compra en las listas de los rivales.
-  PUJA_FUERA_DEL_COMPUTER: ["live", "FUERA DEL COMPUTER"]
+  PUJA_FUERA_DEL_COMPUTER: ["live", "FUERA DEL COMPUTER"],
+
+  // Lo vende un mánager y la compra está cerrada (24/09/2026).
+  // Se mira: entró en la tabla justamente para poder mirarlo.
+  MERCADO_DE_RIVAL: ["idle", "SOLO MIRAR"]
 };
 
 /**
@@ -781,13 +785,33 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
   // sabe con muestras suficientes.
   const reventa = acquisition.computer_premium || {};
 
+  /* EL ESCAPARATE TIENE DOS MITADES (24/09/2026)
+
+     "¿Cuántos se pueden comprar hoy?" — "Veinte". Eran cuarenta
+     y siete: los otros veintisiete los vendían mánagers y un
+     filtro nuestro los tiraba antes de mirarlos.
+
+     Ahora entran y se valoran igual, pero NO se compran: a un
+     mánager se le ofrece y acepta o no, y de esa tasa tenemos
+     una sola observación. `would_pass` es cuántos habrían salido
+     a pujar si se pudiera — el número que decide si esta puerta
+     se abre del todo algún día. */
+  const rivales = acquisition.rival_market || {};
+
   return (
     <section className="pan">
       <div className="pan-head">
         <div>
           <h2>OBJETIVOS DE HOY</h2>
           <div className="sub">
-            {acquisition.market_size} valorados ·{" "}
+            {acquisition.market_size} del Computer
+            {rivales.shown > 0
+              ? ` + ${rivales.shown} de mánagers (solo mirar${
+                  rivales.would_pass > 0
+                    ? `, ${rivales.would_pass} pasarían el listón`
+                    : ""
+                })`
+              : ""}{" · "}
             {acquisition.shown != null
               ? `${acquisition.shown} en la tabla · `
               : ""}
