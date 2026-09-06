@@ -1,142 +1,129 @@
 # EL PLAN
 
-**2026-09-22** — En qué orden se le enseña a Pepe lo que sabemos, y por qué ese
-orden.
+**Versión 2 — 2026-09-22.** Sustituye a la versión del mismo día.
 
-Acompaña a `docs/DOCTRINA.md` v1.4. La doctrina dice **qué** hay que hacer; esto
-dice **en qué orden** y **cómo sabremos si funciona**.
+La estrategia general de Pepe, con los dos vídeos dentro, puesta en orden de
+trabajo. La doctrina (`docs/DOCTRINA.md` v1.5) dice **qué**; esto dice **en qué
+orden** y **cómo sabremos si funciona**.
 
 ---
 
-## El número que juzga todo esto
+## La estrategia, en cinco frases
+
+1. **Los puntos salen del once, y solo del once.** Once plazas, más delanteros y
+   medios con gol que defensas, nunca sin portero de repuesto, y el que tira los
+   penaltis y las faltas vale más de lo que parece.
+2. **El dinero sale de la rueda**, y es otro juego: se compra al que **se está
+   revalorizando** —da igual que no vaya a jugar—, se aguanta tres días y se
+   vende al Computer, que paga un +1,7 % sobre mercado.
+3. **Se puede ir en rojo de lunes a jueves.** El viernes se vende y se vuelve a
+   verde para poder puntuar. Esa es la única fecha que importa.
+4. **La ventaja está en llegar antes.** La rampa te dice quién ya sube; la
+   noticia te dice quién subirá mañana. El que compra con la noticia se lleva la
+   subida entera.
+5. **No te cases con nadie.** Si empieza a caer, fuera. Ya se recompra.
+
+Nada de esto es opinión mía: son los cinco consejos del vídeo de La Media
+Inglesa y los siete del de MANYOTUBEPIC, cruzados con lo que hemos medido en
+esta liga.
+
+---
+
+## El número que juzga todo
 
 ```
-13 puntos de diferencia con Pollo  ÷  35 jornadas  =  0,371 por jornada
+13 puntos con Pollo  ÷  35 jornadas  =  0,371 por jornada
 ```
 
-Cuatro décimas. Todo lo que sigue se mide contra eso, y con dos cifras que se
-publican cada jornada:
-
-1. **Puntos dejados en el banquillo** — lo que hizo el once que pusimos contra el
-   mejor once posible con la plantilla que teníamos. Sola, esta cifra ya valió
-   **8 puntos en una jornada**.
-2. **Puntos por jornada contra Pollo.**
-
-**Si en tres jornadas esas dos cifras no se mueven, nada de lo que estamos
-haciendo importa**, por bonito que sea el código. Este plan se juzga ahí y en
-ningún otro sitio.
+Y dos cifras publicadas cada jornada: **puntos dejados en el banquillo** (sola
+valió 8 en una jornada) y **puntos por jornada contra Pollo**. **Si en tres
+jornadas no se mueven, nada de esto importa.**
 
 ---
 
 ## Regla cero: lo que está en una rama no juega
 
-Hay **tres ramas sin fusionar**. Todo el trabajo de la semana —la calidad medida,
-la portería, la derogación de los intocables, la sonda de pujas— está en el
-disco, no en producción. Pepe hoy juega con el cerebro de hace cuatro días más
-los factores de posición.
-
-**La mayor distancia entre lo que sabemos y lo que Pepe hace es una fusión de
-git.** Antes de construir nada nuevo, subir lo construido.
+Cuatro ramas encadenadas sin fusionar. La calidad medida, la portería, los
+intocables retirados, la sonda de pujas. **La mayor distancia entre lo que
+sabemos y lo que Pepe hace sigue siendo una fusión de git.**
 
 ---
 
 ## La cola
 
-Ordenada por lo que mueve el marcador, no por lo que apetece.
+### 1. ¿Es `NO_MEJORA_EL_ONCE` un rechazo terminal?
 
-### 1. Subir lo que ya está hecho
+**Lo primero, y puede hacer sobrar la mitad de lo demás.** De 20 objetivos, **12
+mueren ahí**. Si un jugador descartado para el once no se vuelve a evaluar por la
+vía de comerciar, **el filtro del once está matando la rueda entera** — y eso
+explicaría solo, sin más causas, por qué Pepe lleva semanas sin fichar teniendo
+el permiso, el dinero y la máquina.
 
-Las tres ramas. Con una verificación antes: **el veredicto sobre la oferta de
-21.099.500 € por Yamal con la lista de intocables ya retirada.** Si sale
-cualquier cosa distinta de "no vender", no se fusiona.
+Los doce casos, uno a uno, y por qué vía se evaluó cada uno.
 
-### 2. Balón parado (regla 2)
+### 2. ¿Cuánto puede dar la rueda?
 
-El truco nº 1 del vídeo y sigue apagado. Un lanzador de penaltis convierte un −2
-en nueve puntos. El módulo existe; lo que falta es la fuente, y las tres webs que
-ya leemos cada ciclo lo publican.
+Ocho fichas libres (cota inferior), ciclo de tres días, bolsillo de especular de
+2.433.987 € más la deuda autorizada, +4,47 % de mediana por operación, salida
+garantizada al Computer a +1,7 %.
 
-**Primero es lo más rentable, y va sin medir por delante:** no tenemos el dato
-para medirlo hasta que lo tengamos. Se enciende como bono marcado como decretado,
-y se mide en cuanto haya jornadas.
+**Un número al mes.** Si son doscientos mil, es un entretenimiento caro. Si son
+tres millones, es la liga. Nadie lo ha calculado nunca y decide cuánto esfuerzo
+merece todo lo demás.
 
-### 3. El ranking de la liga por euros/punto (regla 10)
+Con los límites dichos, no escondidos: cada operación **ocupa una ficha**, el
++4,47 % se midió en **una semana de agosto**, y el capital tiene techo.
 
-Lo que el dueño enseñó el 22/09: **Biwenger ya publica los 521 jugadores
-ordenados por puntos, con su precio.** La cuenta que sale de ahí:
+### 3. Balón parado
 
-| | € por punto |
-|---|---:|
-| Camello (4,30 M, 48 pts) | **89.583** |
-| Aubameyang (11,21 M, 44) | 254.773 |
-| Raphinha (18,80 M, 61) | 308.197 |
-| Yamal (21,21 M, 45) | 471.333 |
+El truco nº 1 de un vídeo y el nº 5 del otro. Sigue apagado, cinco noches
+aplazado, y no depende de nada de lo anterior. **El valor está en el lanzador
+barato**, no en el crack que además los tira.
 
-Camello rinde **cinco veces** lo que Yamal por euro.
+### 4. Encender la rueda
 
-Pepe hoy solo juzga a los ~20 del escaparate. Con esta tabla dentro pasa de
-reaccionar a **saber a quién quiere**. Dos columnas que la pantalla no tiene y
-son las que la hacen útil:
+Solo después de 1 y 2. La vía de comerciar libre del filtro del once, volumen en
+vez de una operación perfecta, deuda de lunes a jueves y verde el viernes.
 
-- **quién es el dueño** — si nadie lo vende, no es una alternativa, es una
-  fantasía (la lección de los porteros: los titulares valen 2,65-5,74 M y
-  **ninguno estaba en venta**);
-- **cuánto de esos puntos es sostenible** — Camello lleva 9,6 por jornada siendo
-  un delantero de 4,3 M: o ha dado un salto, o está en racha, y eso lo distingue
-  la calidad medida.
+Sin tocar el 3 % por consejo: **si el volumen paga más que el margen, que lo diga
+el retrotest** comparando cartera de muchas operaciones finas contra pocas
+gruesas, con nuestro capital.
 
-### 4. Encender la calidad medida (regla 6)
+### 5. La intel — llegar antes que la rampa
 
-Construida y sin encender: 19,1 % → 23,5 %. Va después del ranking porque es lo
-que le da sentido: sin ella, la tabla del punto 3 ordena por puntos pasados.
+Las dos mitades:
 
-Con interruptor de una línea y con el marcador de cada jornada.
+- **El ranking de los 521** por euros/punto, con **quién es el dueño** y **cuánto
+  de esos puntos es sostenible**. Sin la primera columna es una fantasía.
+- **Las noticias de cesiones y traspasos**, sin filtrar por precio. Caché diaria
+  tras el reset de las 07:00, cruce prensa→jugadores.
 
-### 5. Centrocampistas ofensivos (regla 5)
+### 6. Los remates
 
-Separar el mediocentro del mediapunta dentro de la línea de medios. El factor de
-hoy (×1,147) los trata igual. **Un factor encima de otro factor**: primero hay
-que ver cómo va el primero.
-
-### 6. Las noticias de los baratos (regla 10, la otra mitad)
-
-Anticipación en vez de momento: el que subirá mañana porque el Málaga lo busca.
-Necesita la caché diaria de las ~570 fichas tras el reset de las 07:00 y el cruce
-prensa→jugadores. Tres noches aplazado, y con razón: hacerlo mal revienta el
-ciclo.
-
-### 7. Rotar (regla 14)
-
-Vender para comprar lo que ya sabemos que compensa. Va el último **a propósito**:
-sin el ranking del punto 3, rotar es mover dinero sin saber hacia dónde. Amatucci
-a +0,57 —proyección contra medición— no es una operación, es movimiento.
+- Centrocampistas **con gol**, separados de los de contención.
+- Recién ascendidos: de marcador a factor cuando haya muestra (hoy n=36).
+- **Al lesionado, fuera rápido**: tramo propio en la cola de ventas.
+- Dos porteros del mismo club, cuando salga a cuenta.
 
 ---
 
-## Lo que NO está resuelto, y conviene no olvidarlo
+## Lo que NO está resuelto
 
 - **Explicamos el 23,5 % de los puntos de un jugador.** Tres cuartas partes de lo
-  que decide la liga siguen sin modelo. Todo lo de arriba se mueve dentro de ese
-  cuarto.
-- **El +4,47 % de la rampa se midió en una semana de agosto.** Es la semana rara
-  del año: mercado recién cerrado y precios recolocándose.
-- **Los recién ascendidos suben más, con n=36.** Marcador, no factor.
-- **Las pujas de los rivales son invisibles.** Comprobado y cerrado: hay que
-  seguir estimando.
-- **Un dato con dos nombres nos ha mordido cuatro veces.** `in_lineup` contra
-  `is_starter` dejó al único portero sin proteger.
+  que decide la liga siguen sin modelo.
+- **El +4,47 % se midió en una semana de agosto**, la más rara del año.
+- **Los recién ascendidos suben más con n=36.** Marcador, no factor.
+- **Las pujas de los rivales son invisibles.** Cerrado en negativo.
+- **Un dato con dos nombres nos ha mordido cuatro veces.**
 
 ---
 
 ## Cómo se trabaja
 
-No cambia:
+Una rama por encargo, `main` limpio. La verja encadenada con
+`if ($LASTEXITCODE -eq 0)`, el push lo da el dueño. Cada arreglo con su guardia,
+nombrada por el incidente real. Ninguna guardia lee `data/`. Ninguna función
+cambia de forma según los datos. Ningún umbral sin un número detrás.
 
-- una rama por encargo, `main` limpio;
-- la verja encadenada con `if ($LASTEXITCODE -eq 0)`, el push lo da el dueño;
-- cada arreglo con su guardia, nombrada por el incidente real;
-- ninguna guardia lee `data/`;
-- ninguna función cambia de forma según los datos;
-- ningún umbral sin un número detrás;
-- **y si la medición contradice el plan, gana la medición.** Ha pasado seis veces
-  en dos semanas y las seis tenía razón la medición.
+**Y si la medición contradice el plan, gana la medición.** Ha pasado seis veces
+en dos semanas y las seis tenía razón la medición.
