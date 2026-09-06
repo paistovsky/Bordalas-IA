@@ -162,6 +162,13 @@ export function normalizeStatus(raw = {}) {
       blocked: []
     },
 
+    // LA VARA DEL ONCE (18/09/2026)
+    //
+    // Los factores por posicion, de cuantas fichas sale cada uno,
+    // el once que sale con ellos y el que salia sin ellos, y la
+    // linea para apagarlos. Esto SI decide: elige el once.
+    vara: raw.vara || { available: false, rows: [], active: null },
+
     // ¿SIGUE RESPALDADA LA VIA TENER? (17/09/2026)
     //
     // El tramo que la sostiene, comprobado en cada ciclo contra

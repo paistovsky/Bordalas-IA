@@ -111,9 +111,132 @@ def _motivo(fila: dict) -> str:
     return "Cuenta."
 
 
+def con_la_plantilla_de_hoy(fila: dict, plantilla_actual) -> dict:
+    """
+    De los puntos que se dejaron sentados, cuantos podriamos
+    recuperar HOY.
+
+    POR QUE DOS CIFRAS Y NO UNA (18/09/2026)
+
+        Los 8 puntos de la J4901 salian de dos cambios:
+
+            Yusi Enriquez (4) por Djene (-1)     -> +5
+            Lucas Cepeda  (3) por Pablo Duran (0) -> +3
+
+        Yusi Enriquez ya no es nuestro: se traspaso a Prinzipote.
+        Asi que cinco de esos ocho los aportaba alguien que hoy
+        no tenemos.
+
+        La primera cifra JUZGA al motor -eso se dejo, con la
+        plantilla que habia-. La segunda es la que vale dinero
+        -eso se podria ganar manaña-. Mezclarlas seria prometer
+        un margen que no existe.
+
+    Nunca lanza.
+    """
+
+    try:
+        nuestros = set()
+
+        for jugador in (plantilla_actual or []):
+
+            if isinstance(jugador, dict):
+                nuestros.add(safe_int(jugador.get("id")))
+            else:
+                nuestros.add(safe_int(jugador))
+
+        detalle = fila.get("detalle") or {}
+
+        faltaron = list(detalle.get("faltaron") or [])
+        sobraron = list(detalle.get("sobraron") or [])
+
+        # El cambio se empareja por posicion: el que debio jugar
+        # ocupa el hueco del que jugo en su misma linea.
+        cambios = []
+
+        pendientes = list(sobraron)
+
+        for entra in sorted(
+            faltaron,
+            key=lambda j: -safe_int(j.get("points")),
+        ):
+            pareja = None
+
+            for indice, sale in enumerate(pendientes):
+                if safe_int(sale.get("position")) == safe_int(
+                    entra.get("position")
+                ):
+                    pareja = pendientes.pop(indice)
+                    break
+
+            if pareja is None:
+                continue
+
+            gana = safe_int(entra.get("points")) - safe_int(
+                pareja.get("points")
+            )
+
+            sigue = safe_int(entra.get("id")) in nuestros
+
+            cambios.append({
+                "in": entra.get("name"),
+                "in_id": safe_int(entra.get("id")),
+                "out": pareja.get("name"),
+                "position": safe_int(entra.get("position")),
+                "points": gana,
+                "still_ours": sigue,
+            })
+
+        historico = sum(c["points"] for c in cambios)
+
+        de_hoy = sum(
+            c["points"]
+            for c in cambios
+            if c["still_ours"]
+        )
+
+        perdidos = [c for c in cambios if not c["still_ours"]]
+
+        return {
+            "available": bool(cambios),
+
+            "historical": historico,
+            "with_todays_squad": de_hoy,
+
+            "changes": cambios,
+            "no_longer_ours": [c["in"] for c in perdidos],
+
+            "reason": (
+                f"{historico} puntos con la plantilla de "
+                f"entonces; {de_hoy} con la de hoy."
+                + (
+                    " Ya no son nuestros: "
+                    + ", ".join(c["in"] for c in perdidos)
+                    + "."
+                    if perdidos
+                    else ""
+                )
+            ),
+        }
+
+    except Exception as error:                       # noqa: BLE001
+        return {
+            "available": False,
+            "historical": None,
+            "with_todays_squad": None,
+            "changes": [],
+            "no_longer_ours": [],
+            "reason": (
+                f"No se pudo recalcular: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def puntos_en_el_banquillo(
     marcador: dict | None,
     race: dict | None = None,
+    plantilla_actual=None,
 ) -> dict:
     """
     Cuantos puntos se dejaron sentados, y si eso es la liga.
@@ -180,6 +303,26 @@ def puntos_en_el_banquillo(
                     )
                 ],
             }
+
+            entrada["hoy"] = con_la_plantilla_de_hoy(
+                fila,
+                plantilla_actual,
+            )
+
+            # LOS TRES NUMEROS DEL BLOQUE 2
+            entrada["puntos_vara_vieja"] = fila.get(
+                "puntos_vara_vieja"
+            )
+            entrada["formacion_vara_vieja"] = fila.get(
+                "formacion_vara_vieja"
+            )
+            entrada["vara_gana"] = (
+                fila.get("puntos_once")
+                - fila.get("puntos_vara_vieja")
+                if fila.get("puntos_vara_vieja") is not None
+                and fila.get("puntos_once") is not None
+                else None
+            )
 
             descuadre = fila.get("descuadre_percent")
 
@@ -271,6 +414,26 @@ def puntos_en_el_banquillo(
                 else None
             ),
 
+            # LA RED: EL ACUMULADO DE LOS TRES NUMEROS
+            #
+            #     Si tras tres jornadas la vara nueva va por
+            #     detras de la vieja, esto lo dice sin que haya
+            #     que discutirlo.
+            "net": _red(detalle),
+
+            # Los 8 puntos, separados: lo que juzga al motor y lo
+            # que se puede ganar manaña. Nunca sumados.
+            "historical_points": sum(
+                (j.get("hoy") or {}).get("historical") or 0
+                for j in detalle
+                if j.get("cuenta") or j.get("casi")
+            ),
+            "todays_points": sum(
+                (j.get("hoy") or {}).get("with_todays_squad") or 0
+                for j in detalle
+                if j.get("cuenta") or j.get("casi")
+            ),
+
             "jornadas": detalle,
             "veredicto": _veredicto(
                 jugados,
@@ -294,6 +457,82 @@ def puntos_en_el_banquillo(
                 f"{type(error).__name__}: {error}"
             ),
         }
+
+
+def _red(detalle: list) -> dict:
+    """
+    El acumulado de los tres numeros, desde que hay con que.
+
+    Solo cuentan las jornadas que TIENEN once alternativo
+    anotado: las anteriores al cambio de vara no se pueden
+    comparar, y meterlas como ceros diria que la vara nueva no
+    aporto nada cuando en realidad no existia.
+    """
+
+    comparables = [
+        j
+        for j in detalle
+        if j.get("puntos_vara_vieja") is not None
+        and (j.get("cuenta") or j.get("casi"))
+    ]
+
+    if not comparables:
+        return {
+            "available": False,
+            "matchdays": 0,
+            "reason": (
+                "Todavia no hay ninguna jornada jugada con los "
+                "factores puestos: la comparacion empieza en la "
+                "proxima."
+            ),
+        }
+
+    alineado = sum(
+        safe_int(j.get("puntos_once")) for j in comparables
+    )
+    vieja = sum(
+        safe_int(j.get("puntos_vara_vieja")) for j in comparables
+    )
+    techo = sum(
+        safe_int(j.get("mejor_puntos")) for j in comparables
+    )
+
+    diferencia = alineado - vieja
+
+    if diferencia > 0:
+        veredicto = (
+            f"La vara nueva va {diferencia} puntos POR DELANTE "
+            f"de la vieja en {len(comparables)} jornada(s)."
+        )
+    elif diferencia < 0:
+        veredicto = (
+            f"LA VARA NUEVA VA {abs(diferencia)} PUNTOS POR "
+            f"DETRAS DE LA VIEJA en {len(comparables)} "
+            f"jornada(s). Si esto se mantiene, se apaga con "
+            f"BORDALAS_VARA_PLANA=1."
+        )
+    else:
+        veredicto = (
+            f"Empate entre las dos varas en "
+            f"{len(comparables)} jornada(s)."
+        )
+
+    if len(comparables) < 3:
+        veredicto += (
+            " Con menos de tres jornadas es un aviso, no una "
+            "conclusion."
+        )
+
+    return {
+        "available": True,
+        "matchdays": len(comparables),
+        "aligned": alineado,
+        "old_vara": vieja,
+        "best_possible": techo,
+        "difference": diferencia,
+        "behind": diferencia < 0,
+        "reason": veredicto,
+    }
 
 
 def _veredicto(

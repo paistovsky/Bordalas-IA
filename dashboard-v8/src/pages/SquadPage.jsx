@@ -1,4 +1,5 @@
 import ConcentrationPanel from "../components/ConcentrationPanel";
+import VaraPanel from "../components/VaraPanel";
 import SaleOrderPanel from "../components/SaleOrderPanel";
 import { useState } from "react";
 import PitchXI from "../components/PitchXI";
@@ -203,6 +204,12 @@ export default function SquadPage({ data }) {
           Va en PLANTILLA porque habla de la plantilla, y al lado
           del suelo por posicion: los dos son guardarrailes de
           como esta repartida. */}
+      {/* LA VARA, ANTES DE LA CONCENTRACION (18/09/2026)
+          Va pegada al campo porque es lo que decide quien sale
+          en el: los factores por posicion eligen el once de
+          verdad desde esta noche. */}
+      <VaraPanel data={data} />
+
       <ConcentrationPanel data={data} />
 
       {/* A QUIEN LE TOCA SALIR (11/09/2026)

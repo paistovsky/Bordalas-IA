@@ -294,7 +294,19 @@ def manager_scoreboard(
                 else None
             ),
 
-            "reason": None,
+            # UN VACIO MUDO NO INFORMA (18/09/2026)
+            #
+            #     `available: False` sin motivo deja al que mira
+            #     sin saber si es que no se movio o que fallo
+            #     algo.
+            "reason": (
+                None
+                if (compras or ventas)
+                else (
+                    f"{manager} no aparece comprando ni vendiendo "
+                    f"en la ventana del tablon."
+                )
+            ),
         }
 
     except Exception as error:                       # noqa: BLE001
@@ -335,7 +347,14 @@ def value_versus_points(status: dict | None) -> dict:
         if len(managers) < 3:
             return {
                 "available": False,
-                "reason": "Menos de tres managers con plantilla.",
+            "managers": 0,
+            "r_value_points": None,
+            "r_squad_size_points": None,
+            "critical_r": None,
+            "significant": None,
+                "reason": (
+                    "Menos de tres managers con plantilla."
+                ),
             }
 
         puntos = [safe_int(m.get("points")) for m in managers]
@@ -396,6 +415,11 @@ def value_versus_points(status: dict | None) -> dict:
     except Exception as error:                       # noqa: BLE001
         return {
             "available": False,
+            "managers": 0,
+            "r_value_points": None,
+            "r_squad_size_points": None,
+            "critical_r": None,
+            "significant": None,
             "reason": (
                 f"No se pudo correlacionar: "
                 f"{type(error).__name__}: {error}"

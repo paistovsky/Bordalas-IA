@@ -141,6 +141,8 @@ TESTS = [
     "src.analysis.test_verja_determinista_v1",
     "src.analysis.test_once_v1",
     "src.analysis.test_interruptor_tener_v1",
+    "src.analysis.test_vara_v1",
+    "src.analysis.test_forma_estable_v1",
 ]
 
 

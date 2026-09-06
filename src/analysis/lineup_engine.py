@@ -653,13 +653,27 @@ def god_is_ruled_out(starter: dict) -> tuple[bool, str | None]:
 def weekly_expected_value(
     hierarchy_value: int | None,
     starter_probability: float | None,
+    position: int | None = None,
 ) -> float:
     """
-    Lo que espero de este jugador ESTA jornada, de 0 a 1.
+    Lo que espero de este jugador ESTA jornada.
 
-    No es una prediccion de puntos: es una vara comun para
-    ordenar el once, la misma para un Dios con dudas y para un
-    Rotacion confirmado.
+    No es una prediccion de puntos: es una vara para ordenar el
+    once, la misma para un Dios con dudas y para un Rotacion
+    confirmado.
+
+    LA VARA MEDIA DISTINTO SEGUN LA LINEA (18/09/2026)
+
+        Con la misma marca, un medio entregaba 8,51 puntos por
+        jornada y un defensa 5,82. La vara los trataba como
+        iguales y el motor alineaba defensas: el once salia
+        5-4-1, y eso costo 8 puntos de banquillo en una jornada.
+
+        Con `position` se corrige. SIN `position` la vara es
+        exactamente la de siempre, que es lo que necesitan los
+        sitios donde se publica el numero crudo -si alli se
+        corrigiera, la proxima medicion del sesgo se estaria
+        midiendo a si misma-.
 
     Devuelve None-seguro: si no hay porcentaje no se inventa, lo
     resuelve quien llama.
@@ -693,7 +707,14 @@ def weekly_expected_value(
         (1.0 - titular) * desde_el_banquillo
     )
 
-    return participacion * HIERARCHY_MATCH_QUALITY[escalon]
+    vara = participacion * HIERARCHY_MATCH_QUALITY[escalon]
+
+    if position is None:
+        return vara
+
+    from src.analysis.position_factor import factor_for
+
+    return vara * factor_for(position)
 
 
 # ============================================================
@@ -927,9 +948,18 @@ def prepare_players(
                 # del mismo escalon no queden empatados.
                 # ====================================================
 
+                # LA POSICION ENTRA EN LA VARA (18/09/2026)
+                #
+                #     Aqui si, porque este es el sitio donde se
+                #     ELIGE el once. Donde solo se publica el
+                #     numero -las fichas de plantilla- se sigue
+                #     pasando sin posicion, para que la medicion
+                #     del sesgo siga midiendo la vara cruda y no
+                #     su propia correccion.
                 expected_value = weekly_expected_value(
                     jerarquia.get("value"),
                     starter_probability,
+                    position=player.get("position"),
                 )
 
                 final_score = (

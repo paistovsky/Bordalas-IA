@@ -241,6 +241,7 @@ def _mi_fila(snapshot: dict, current_user_id) -> dict:
 def observar(
     snapshot: dict,
     current_user_id=None,
+    once_alternativo: dict | None = None,
 ) -> dict:
     """Anota la jornada en curso tal y como se ve ahora mismo.
 
@@ -349,6 +350,36 @@ def observar(
         "plantilla": plantilla,
         "totales": totales,
 
+        # LA RED DE LOS FACTORES POR POSICION (18/09/2026)
+        #
+        #     Los factores se aplicaron sin fase observador. La
+        #     contrapartida: cada jornada se anota TAMBIEN el
+        #     once que habria elegido la vara vieja, para poder
+        #     comparar con puntos de verdad en vez de discutirlo.
+        #
+        #     Se anota aunque venga vacio -asi la clave existe
+        #     siempre- y las jornadas anteriores al cambio salen
+        #     sin comparacion en vez de con un cero que mentiria.
+        "once_alternativo": (
+            {
+                "formation": (once_alternativo or {}).get(
+                    "formation"
+                ),
+                "players": [
+                    safe_int(p)
+                    for p in (
+                        (once_alternativo or {}).get("players")
+                        or []
+                    )
+                ],
+                "vara": (once_alternativo or {}).get(
+                    "vara", "plana"
+                ),
+            }
+            if once_alternativo
+            else None
+        ),
+
         # Nombre de todo el que sale en la foto, incluidos los
         # que ya no estan en la plantilla.
         "nombres": nombres,
@@ -367,6 +398,71 @@ def observar(
         ),
         "jornadas_en_ledger": len(ledger["jornadas"]),
     }
+
+
+def anotar_once_alternativo(
+    round_id,
+    once: dict | None,
+) -> dict:
+    """
+    Añade a la jornada ya observada el once de la vara vieja.
+
+    POR QUE EN DOS PASOS (18/09/2026)
+
+        La jornada se anota nada mas cargar el snapshot, que es
+        donde se puede. El once de la vara vieja necesita la
+        plantilla ya enriquecida -jerarquia y probabilidad de
+        titular-, que llega mas tarde en el ciclo.
+
+        Reordenar el ciclo por esto seria arriesgar la anotacion
+        de los puntos, que es el dato que no se recupera. Asi que
+        se completa despues.
+
+    Nunca lanza.
+    """
+
+    try:
+        clave = str(safe_int(round_id))
+
+        if not clave or clave == "0" or not once:
+            return {"anotado": False, "motivo": "Sin once."}
+
+        ledger = cargar_ledger()
+
+        jornada = (ledger.get("jornadas") or {}).get(clave)
+
+        if not jornada:
+            return {
+                "anotado": False,
+                "motivo": f"La jornada {clave} no esta observada.",
+            }
+
+        jornada["once_alternativo"] = {
+            "formation": once.get("formation"),
+            "players": [
+                safe_int(j.get("id") if isinstance(j, dict) else j)
+                for j in (once.get("players") or [])
+            ],
+            "vara": once.get("vara", "plana"),
+        }
+
+        guardar_ledger(ledger)
+
+        return {
+            "anotado": True,
+            "round_id": clave,
+            "jugadores": len(
+                jornada["once_alternativo"]["players"]
+            ),
+        }
+
+    except Exception as error:                       # noqa: BLE001
+        return {
+            "anotado": False,
+            "motivo": (
+                f"{type(error).__name__}: {error}"
+            ),
+        }
 
 
 # ============================================================
@@ -512,6 +608,24 @@ def _puntos_de_la_jornada(
         )
 
     return puntos
+
+
+def _puntos_del_once(puntos: dict, once) -> int | None:
+    """
+    Lo que sumo un once concreto esa jornada.
+
+    Devuelve None si ese once no se anoto: una jornada anterior
+    al cambio de vara no tiene con que compararse, y un cero
+    mentiria.
+    """
+
+    if not once:
+        return None
+
+    return sum(
+        safe_int(puntos.get(str(safe_int(p))))
+        for p in once
+    )
 
 
 def _puntos_de_la_clasificacion(
@@ -755,6 +869,23 @@ def marcador() -> dict:
                 alineados,
                 techo.get("players") or [],
                 actual.get("nombres") or {},
+            ),
+
+            # LOS TRES NUMEROS JUNTOS (18/09/2026)
+            #
+            #     Alineamos / habria alineado la vara vieja /
+            #     mejor posible. Sin los tres no se puede saber
+            #     si los factores por posicion suman o restan.
+            "puntos_vara_vieja": _puntos_del_once(
+                puntos,
+                (actual.get("once_alternativo") or {}).get(
+                    "players"
+                ),
+            ),
+            "formacion_vara_vieja": (
+                (actual.get("once_alternativo") or {}).get(
+                    "formation"
+                )
             ),
 
             "puntos_biwenger": mios,

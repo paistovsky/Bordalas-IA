@@ -240,7 +240,28 @@ def comparar_con(
         ):
             return {
                 "available": False,
-                "observer_only": True,
+            "observer_only": True,
+            "rival": {"available": False},
+            "us": {"available": False},
+            "market": {
+                "buys": 0,
+                "sells": 0,
+                "lost_bids": None,
+                "quiet": None,
+                "window": (
+                    "El tablon solo guarda unos dias: 'quieto' "
+                    "significa quieto en esa ventana, no en toda "
+                    "la temporada."
+                ),
+            },
+            "points_gap": None,
+            "value_gap": None,
+            "lineup_points_gap": None,
+            "attacking_half_gap": None,
+            "caveat": (
+                "Comparacion de HOY. El tablon no guarda que once "
+                "puso cada manager en las jornadas pasadas."
+            ),
                 "reason": (
                     f"No se ve la plantilla de {rival} o la "
                     f"nuestra: sin comparacion. Prefiero decirlo "
@@ -286,6 +307,27 @@ def comparar_con(
         return {
             "available": False,
             "observer_only": True,
+            "rival": {"available": False},
+            "us": {"available": False},
+            "market": {
+                "buys": 0,
+                "sells": 0,
+                "lost_bids": None,
+                "quiet": None,
+                "window": (
+                    "El tablon solo guarda unos dias: 'quieto' "
+                    "significa quieto en esa ventana, no en toda "
+                    "la temporada."
+                ),
+            },
+            "points_gap": None,
+            "value_gap": None,
+            "lineup_points_gap": None,
+            "attacking_half_gap": None,
+            "caveat": (
+                "Comparacion de HOY. El tablon no guarda que once "
+                "puso cada manager en las jornadas pasadas."
+            ),
             "reason": (
                 f"No se pudo comparar: "
                 f"{type(error).__name__}: {error}"

@@ -98,6 +98,8 @@ def bucket_backing(calibration: dict | None, bucket: str) -> dict:
                 "loss_rate": None,
                 "n": (datos or {}).get("n"),
                 "required": MIN_TENER_YIELD,
+                "max_loss_rate": MAX_TENER_LOSS_RATE,
+                "margin": None,
                 "reason": (
                     f"El tramo «{bucket}» no tiene muestra "
                     f"suficiente: no se puede decir ni que "
@@ -166,6 +168,12 @@ def bucket_backing(calibration: dict | None, bucket: str) -> dict:
             "bucket": bucket,
             "backed": None,
             "measured": False,
+            "median": None,
+            "loss_rate": None,
+            "n": None,
+            "required": MIN_TENER_YIELD,
+            "max_loss_rate": MAX_TENER_LOSS_RATE,
+            "margin": None,
             "reason": (
                 f"No se pudo comprobar el respaldo: "
                 f"{type(error).__name__}: {error}"
@@ -198,6 +206,11 @@ def route_state(
                 "on": None,
                 "horizon_days": horizon_days,
                 "required": MIN_TENER_YIELD,
+                "max_loss_rate": MAX_TENER_LOSS_RATE,
+                "backing": [],
+                "switched_off": [],
+                "unmeasured": [],
+                "closest": None,
                 "buckets": [],
                 "reason": (
                     calibrado.get("reason")
@@ -277,6 +290,13 @@ def route_state(
         return {
             "available": False,
             "on": None,
+            "horizon_days": horizon_days,
+            "required": MIN_TENER_YIELD,
+            "max_loss_rate": MAX_TENER_LOSS_RATE,
+            "backing": [],
+            "switched_off": [],
+            "unmeasured": [],
+            "closest": None,
             "buckets": [],
             "reason": (
                 f"No se pudo leer el estado de la via: "

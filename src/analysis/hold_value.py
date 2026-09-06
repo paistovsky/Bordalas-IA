@@ -380,6 +380,7 @@ def _sin_valor(decision: str, motivo: str) -> dict:
         "reason": motivo,
         "horizon_days": DEFAULT_HORIZON_DAYS,
 
+        "rate_percent_per_day": None,
         "raw_gain": 0,
         "gain_before_clamp": 0,
         "value_unclamped": 0,

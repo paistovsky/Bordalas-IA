@@ -3329,6 +3329,129 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # LA CONCENTRACION DE LA PLANTILLA (10/09/2026)
+    #
+    # Cuanto pesa el jugador mas caro y cuantos hay del mismo
+    # club. Yamal son el 41 % de la plantilla, y no habia ningun
+    # tope que lo mirase.
+    #
+    # Avisa y acota, no prohibe: no obliga a vender a nadie.
+    try:
+        from src.analysis.concentration_guardrail import (
+            build_concentration,
+        )
+
+        concentration = build_concentration(snapshot.get("my_team"))
+
+    except Exception as error:                      # noqa: BLE001
+        concentration = {
+            "available": False,
+            "reason": (
+                f"No se pudo medir la concentracion: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "players": [],
+            "teams": [],
+            "breaches": [],
+        }
+
+    # LA PLANTILLA TAMBIEN SABE (20/08/2026)
+    #
+    # La tabla de PLANTILLA enseñaba nombre, posicion, valor y
+    # titular/suplente. La jerarquia, el pronostico de salir y el
+    # parte de lesion o sancion ya se calculaban, pero solo
+    # llegaban al XI -once de dieciseis- y al mercado.
+    roster = enrich_roster(
+        compact_roster(
+            snapshot,
+            state.get("lineup", {}) or {},
+            photo_lookup,
+        )
+    )
+
+    # ============================================================
+    # DE AQUI EN ADELANTE HACE FALTA LA PLANTILLA ENRIQUECIDA
+    # ============================================================
+    #
+    #     La vara, el banquillo y la via TENER necesitan
+    #     `roster`: jerarquia, probabilidad de titular y puntos
+    #     de cada ficha.
+    #
+    #     Estaban mas arriba, antes de que `roster` existiera. No
+    #     reventaban -cada bloque tiene su try- pero se publicaban
+    #     vacios con un NameError dentro, que es la peor forma de
+    #     fallar: en silencio y con la clave puesta.
+
+    # ============================================================
+    # LA VARA CON FACTORES POR POSICION (18/09/2026)
+    # ============================================================
+    #
+    #     Con la misma marca de la vara, un medio entregaba 8,51
+    #     puntos por jornada y un defensa 5,82. El motor, que los
+    #     trataba igual, alineaba defensas: 5-4-1, con un lateral
+    #     de 0 puntos titular y dos delanteros en el banquillo.
+    #
+    #     Los factores se aplican en el motor. Aqui se publica lo
+    #     que hacen, con su muestra y con la linea para apagarlos.
+    try:
+        from src.analysis.position_factor import (
+            state as vara_state,
+        )
+        from src.analysis.vara_comparada import (
+            comparar as comparar_onces,
+            elegir_once,
+        )
+
+        vara = vara_state()
+
+        vara["lineups"] = comparar_onces(
+            (roster or {}).get("players") or []
+        )
+
+        # LA RED: se anota el once que habria elegido la vara
+        # vieja, para poder compararlo con puntos de verdad
+        # cuando la jornada cierre.
+        try:
+            from src.analysis.marcador import (
+                anotar_once_alternativo,
+                jornada_en_curso,
+            )
+
+            alternativo = elegir_once(
+                (roster or {}).get("players") or [],
+                con_factores=False,
+            )
+
+            if alternativo.get("available"):
+                anotar_once_alternativo(
+                    jornada_en_curso(snapshot),
+                    {
+                        "formation": alternativo["formation"],
+                        "players": alternativo["players"],
+                        "vara": "plana",
+                    },
+                )
+
+        except Exception as error:                  # noqa: BLE001
+            print(
+                f"Vara: no se pudo anotar el once alternativo "
+                f"({error})."
+            )
+
+    except Exception as error:                      # noqa: BLE001
+        vara = {
+            "available": False,
+            "active": None,
+            "rows": [],
+            "window": {},
+            "disable_with": "BORDALAS_VARA_PLANA=1",
+            "lineups": {"available": False},
+            "reason": (
+                f"No se pudo leer la vara: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     # ============================================================
     # ¿SIGUE RESPALDADA LA VIA TENER? (17/09/2026)
     # ============================================================
@@ -3406,6 +3529,13 @@ def build_dashboard_state() -> dict:
             "bench": puntos_en_el_banquillo(
                 marcador_estado,
                 race,
+
+                # Para separar lo que se dejo entonces de lo que
+                # se podria ganar hoy: Yusi Enriquez aportaba 5 de
+                # aquellos 8 puntos y ya es de Prinzipote.
+                plantilla_actual=(
+                    (roster or {}).get("players") or []
+                ),
             ),
 
             # BLOQUE 2: ¿la vara mide igual en las cuatro
@@ -3434,46 +3564,6 @@ def build_dashboard_state() -> dict:
                 f"{type(error).__name__}: {error}"
             ),
         }
-
-    # LA CONCENTRACION DE LA PLANTILLA (10/09/2026)
-    #
-    # Cuanto pesa el jugador mas caro y cuantos hay del mismo
-    # club. Yamal son el 41 % de la plantilla, y no habia ningun
-    # tope que lo mirase.
-    #
-    # Avisa y acota, no prohibe: no obliga a vender a nadie.
-    try:
-        from src.analysis.concentration_guardrail import (
-            build_concentration,
-        )
-
-        concentration = build_concentration(snapshot.get("my_team"))
-
-    except Exception as error:                      # noqa: BLE001
-        concentration = {
-            "available": False,
-            "reason": (
-                f"No se pudo medir la concentracion: "
-                f"{type(error).__name__}: {error}"
-            ),
-            "players": [],
-            "teams": [],
-            "breaches": [],
-        }
-
-    # LA PLANTILLA TAMBIEN SABE (20/08/2026)
-    #
-    # La tabla de PLANTILLA enseñaba nombre, posicion, valor y
-    # titular/suplente. La jerarquia, el pronostico de salir y el
-    # parte de lesion o sancion ya se calculaban, pero solo
-    # llegaban al XI -once de dieciseis- y al mercado.
-    roster = enrich_roster(
-        compact_roster(
-            snapshot,
-            state.get("lineup", {}) or {},
-            photo_lookup,
-        )
-    )
 
     offers_compactas = compact_offers(
         state,
@@ -3841,6 +3931,11 @@ def build_dashboard_state() -> dict:
         # El once: los puntos sentados, el sesgo por posicion y
         # el equipo que habia que mirar. No decide nada.
         "once": once_bloque,
+
+        # La vara del once: los factores por posicion, su
+        # muestra, el once que sale con ellos y el que salia sin
+        # ellos, y la linea para apagarlos.
+        "vara": vara,
 
         # La via TENER y el tramo que la sostiene. Esta SI
         # decide: si el tramo de un jugador esta medido y rinde

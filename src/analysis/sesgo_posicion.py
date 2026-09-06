@@ -153,12 +153,29 @@ def sesgo_por_posicion(status: dict | None) -> dict:
         if not filas:
             return {
                 "available": False,
-                "observer_only": True,
+            "observer_only": True,
+            "applied": False,
+            "matchdays": 0,
+            "sample": 0,
+            "sample_total": 0,
+            "minimum_expected": VALOR_MINIMO,
+            "minimum_sample": MUESTRA_MINIMA,
+            "global_points_per_expected": None,
+            "rows": [],
+            "tie_band": {
+                "from": FRANJA_EMPATE[0],
+                "to": FRANJA_EMPATE[1],
+                "rows": [],
+                "gap_percent": None,
+            },
+            "caveat": (
+                "Sin muestra: no se mide nada y no se propone "
+                "ningun factor."
+            ),
                 "reason": (
                     "Sin plantillas de la liga o sin jornadas "
                     "jugadas: no hay con que comparar."
                 ),
-                "rows": [],
             }
 
         alineables = [
@@ -170,12 +187,29 @@ def sesgo_por_posicion(status: dict | None) -> dict:
         if not alineables:
             return {
                 "available": False,
-                "observer_only": True,
+            "observer_only": True,
+            "applied": False,
+            "matchdays": 0,
+            "sample": 0,
+            "sample_total": 0,
+            "minimum_expected": VALOR_MINIMO,
+            "minimum_sample": MUESTRA_MINIMA,
+            "global_points_per_expected": None,
+            "rows": [],
+            "tie_band": {
+                "from": FRANJA_EMPATE[0],
+                "to": FRANJA_EMPATE[1],
+                "rows": [],
+                "gap_percent": None,
+            },
+            "caveat": (
+                "Sin muestra: no se mide nada y no se propone "
+                "ningun factor."
+            ),
                 "reason": (
                     f"Ningun jugador llega al valor minimo de "
                     f"{VALOR_MINIMO}."
                 ),
-                "rows": [],
             }
 
         total_valor = sum(f["expected"] for f in alineables)
@@ -290,7 +324,24 @@ def sesgo_por_posicion(status: dict | None) -> dict:
         return {
             "available": False,
             "observer_only": True,
+            "applied": False,
+            "matchdays": 0,
+            "sample": 0,
+            "sample_total": 0,
+            "minimum_expected": VALOR_MINIMO,
+            "minimum_sample": MUESTRA_MINIMA,
+            "global_points_per_expected": None,
             "rows": [],
+            "tie_band": {
+                "from": FRANJA_EMPATE[0],
+                "to": FRANJA_EMPATE[1],
+                "rows": [],
+                "gap_percent": None,
+            },
+            "caveat": (
+                "Sin muestra: no se mide nada y no se propone "
+                "ningun factor."
+            ),
             "reason": (
                 f"No se pudo medir el sesgo: "
                 f"{type(error).__name__}: {error}"

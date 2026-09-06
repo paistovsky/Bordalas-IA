@@ -82,6 +82,12 @@ CADENAS = [
         ["MarketPage.jsx"],
     ),
     (
+        "vara",
+        "vara",
+        "VaraPanel",
+        ["SquadPage.jsx"],
+    ),
+    (
         "season_horizon",
         "seasonHorizon",
         "SeasonHorizonPanel",
