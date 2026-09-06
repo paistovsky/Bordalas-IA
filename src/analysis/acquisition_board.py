@@ -29,7 +29,12 @@ NO CAMBIA NADA POR SI SOLO
     escribe en Biwenger.
 """
 
-from src.analysis.deployment import DEPLOYMENT_ENABLED
+from src.analysis.deployment import (
+    DEPLOYMENT_ENABLED,
+    PURE_SPECULATION,
+)
+
+from src.analysis.bid_jitter import apply_bid_jitter
 
 from src.analysis.acquisition_budget import (
     budget_for_intent,
@@ -315,6 +320,27 @@ def build_acquisition_board(
                     or f"Manager {safe_int(seller_id)}"
                 ),
             }
+
+        # LA JORNADA, PARA LA SEMILLA DEL DESVIO (13/09/2026)
+        #
+        #     El desvio de puja se siembra con jugador, fecha,
+        #     jornada y sal. La jornada tiene que ser la MISMA que
+        #     use el ejecutor, o el importe que enseña la pantalla
+        #     no seria el que se puja.
+        #
+        #     Si no se puede leer, va None y la semilla se queda
+        #     con fecha y jugador: se degrada, no se rompe.
+        try:
+            from src.analysis.calendar_state import (
+                build_calendar_state,
+            )
+
+            jornada_para_el_desvio = (
+                build_calendar_state(snapshot) or {}
+            ).get("target_matchday")
+
+        except Exception:                           # noqa: BLE001
+            jornada_para_el_desvio = None
 
         filas = []
 
@@ -689,6 +715,38 @@ def build_acquisition_board(
                 fila["expected_value"] = plan.get("expected_value")
                 fila["bid_reasons"] = plan.get("reasons", [])
 
+                # EL DESVIO, EN PANTALLA (13/09/2026)
+                #
+                #     El dueño lo pidio asi: "quiero poder mirar la
+                #     pantalla y ver cuanto nos esta costando el
+                #     seguro. Si en un mes ha costado mas de lo que
+                #     ha ganado, se apaga."
+                #
+                #     Es la MISMA funcion que usa el ejecutor y con
+                #     los mismos argumentos, asi que el numero de
+                #     aqui es el que se va a pujar de verdad: si
+                #     fuese otro, la pantalla estaria enseñando una
+                #     puja que no existe.
+                if plan.get("decision") == "BID":
+
+                    desvio = apply_bid_jitter(
+                        safe_int(plan.get("bid")),
+                        safe_int(ficha.get("price")),
+                        ceiling=presupuesto,
+                        player_id=safe_int(ficha.get("id")),
+                        matchday=jornada_para_el_desvio,
+                    )
+
+                    fila["bid"] = safe_int(desvio["bid"])
+                    fila["bid_clean"] = safe_int(desvio["clean_bid"])
+                    fila["bid_jitter"] = safe_int(desvio["jitter"])
+                    fila["bid_jitter_ceiling"] = safe_int(
+                        desvio["jitter_ceiling"]
+                    )
+                    fila["bid_salt_from_env"] = bool(
+                        desvio["salt_from_env"]
+                    )
+
                 if plan.get("decision") != "BID":
                     fila["reason"] = plan.get("reason")
 
@@ -698,10 +756,35 @@ def build_acquisition_board(
         # que todavia no tiene puja nuestra. Asi la primera fila
         # de la tabla es la que el ciclo va a ejecutar de verdad,
         # que es como se lee en la consola.
+        # EL ORDEN DE PRIORIDAD (13/09/2026)
+        #
+        #     Primero lo ejecutable HOY, y dentro de eso lo que
+        #     todavia no tiene puja nuestra: asi la primera fila
+        #     es la que el ciclo va a ejecutar de verdad.
+        #
+        #     Y entre las ejecutables manda el ESCALON antes que
+        #     el valor esperado. Es lo que hace Pollo: llenar
+        #     fichas antes que especular, porque una ficha vacia
+        #     es capital al 0 % y el dinero parado no se
+        #     revaloriza.
+        #
+        #     Con el despliegue apagado el escalon vale igual para
+        #     todos y el orden es exactamente el de antes.
+        def _escalon(item) -> int:
+
+            if not DEPLOYMENT_ENABLED:
+                return 0
+
+            return safe_int(
+                (item.get("deployment") or {}).get("priority"),
+                default=PURE_SPECULATION,
+            )
+
         filas.sort(
             key=lambda item: (
                 item["decision"] != "BID",
                 bool(item.get("has_live_bid")),
+                _escalon(item),
                 -(item.get("expected_value") or 0),
                 -item["our_value"],
             )

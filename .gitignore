@@ -44,3 +44,6 @@ jp_*_probe.py
 jp_*_probe_output.txt
 backups/
 *.bak
+
+secrets/
+diagnostico/

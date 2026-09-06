@@ -62,9 +62,40 @@ import os
 # EL INTERRUPTOR
 # ============================================================
 
+# ENCENDIDO EL 13/09/2026, POR ORDEN EXPRESA DEL DUEÑO
+#
+#     "Activa lo que haga falta."
+#
+#     Estuvo apagado desde el 10/09 esperando una prueba: que se
+#     pudiera demostrar que Pepe deshace una posicion antes de
+#     dejarle endeudarse para fichar. Esa prueba existe desde el
+#     12/09 -`test_venta_ejecutable_v1` recorre los siete tramos
+#     hasta el `PUT /offers/{id}` con cuerpo- y ademas el saldo
+#     volvio a positivo: +1.725.383 EUR en la foto del 06/09.
+#
+# COMO SE APAGA, EN UNA LINEA
+#
+#     Por entorno, sin tocar codigo:
+#
+#         DEPLOYMENT_ENABLED=0
+#
+#     En PowerShell, para la sesion en curso:
+#
+#         $env:DEPLOYMENT_ENABLED = "0"
+#
+#     Y para apagarlo de forma permanente, cambiar el "1" de
+#     `DEPLOYMENT_DEFAULT` por un "0". Al apagarlo vuelve
+#     exactamente lo de antes: el `intent` se elige por euros, un
+#     fichaje se mide contra el bolsillo de especular y la via de
+#     ficha vacia no compite.
+
+DEPLOYMENT_DEFAULT = "1"
+
 DEPLOYMENT_ENABLED = (
-    os.getenv("DEPLOYMENT_ENABLED", "").strip().lower()
-    in {"1", "true", "si", "sí", "yes"}
+    os.getenv("DEPLOYMENT_ENABLED", DEPLOYMENT_DEFAULT)
+    .strip()
+    .lower()
+    not in {"0", "false", "no", "off", ""}
 )
 
 
@@ -191,9 +222,121 @@ def classify_operation(
         "operation_class": clase,
         "intent": INTENT_BY_CLASS[clase],
         "route": elegida.get("route"),
+
+        # LO QUE VALE POR TODAS LAS VIAS. Informativo: el jugador
+        # vale al menos esto, y por eso se sigue publicando.
         "value": safe_int(mejor.get("value")),
         "value_route": mejor.get("route"),
+
+        # LO QUE VALE POR LA VIA CON LA QUE SE LE VA A PAGAR
+        # (13/09/2026)
+        #
+        #     Esto es lo que decide, y no lo de arriba.
+        #
+        #     Lo destapo `test_acquisition_wiring_v1` en cuanto se
+        #     encendio el interruptor: un jugador de 9.000.000 que
+        #     suma 6 puntos salia PUJAR a 9.000.001. Su valor como
+        #     fichaje eran 2.068.000; los 9.092.475 con los que se
+        #     justificaba la puja venian de la via de REVENTA.
+        #
+        #     O sea: se pagaba dinero de fichar amparandose en un
+        #     numero de comerciar, y encima sin el liston de
+        #     rendimiento que esa via tiene que pasar. Es la misma
+        #     mezcla que ya costo dos noches: el valor de una via
+        #     medido con la vara de otra.
+        #
+        #     La regla: el bolsillo, el liston Y el valor salen
+        #     todos de la misma via.
+        "decision_value": safe_int(elegida.get("value")),
+
         "reason": motivo,
+    }
+
+
+# ============================================================
+# EL ORDEN DE PRIORIDAD (13/09/2026)
+# ============================================================
+#
+#     LO QUE HACE POLLO, MEDIDO
+#
+#         Siete compras en la ventana observada por 21.198.020
+#         EUR, repartidas por todas las bandas de precio -de
+#         277.000 a 6.450.000- y con la prima MEDIANA pegada a
+#         cero. No paga de mas: simplemente compra.
+#
+#         Tiene 22 fichas. Pepe tiene 14 y ocho huecos.
+#
+#     El dinero parado no se revaloriza; los jugadores si. Cada
+#     ficha vacia es capital al 0 %.
+#
+#     Asi que cuando el bolsillo de fichar no llegue para todo,
+#     el orden es este, y no el del valor esperado:
+#
+#         0  llena ficha Y mejora el once
+#         1  llena ficha Y se revaloriza
+#         2  cualquier otro fichaje
+#         3  especulacion pura
+#
+#     Repartido en varias operaciones, que ademas es lo que
+#     reparte el riesgo de concentracion. El ciclo ejecuta una
+#     accion por vuelta, asi que ordenar ya reparte: no hace
+#     falta ningun mecanismo nuevo para eso.
+
+FILL_AND_XI = 0
+FILL_AND_RISING = 1
+OTHER_SIGNING = 2
+PURE_SPECULATION = 3
+
+PRIORITY_LABEL = {
+    FILL_AND_XI: "Llena ficha y mejora el once",
+    FILL_AND_RISING: "Llena ficha y se revaloriza",
+    OTHER_SIGNING: "Fichaje",
+    PURE_SPECULATION: "Especulacion",
+}
+
+
+def signing_priority(
+    operation: dict | None,
+    *,
+    as_xi: dict | None = None,
+    price_increment=None,
+) -> dict:
+    """
+    En que escalon entra esta operacion.
+
+    `operation` es lo que devuelve `classify_operation`.
+    """
+
+    clase = (operation or {}).get("operation_class")
+    via = (operation or {}).get("route")
+
+    if clase != SIGNING:
+        escalon = PURE_SPECULATION
+
+    elif via == "ROSTER_FILL":
+
+        if as_xi and safe_int(as_xi.get("value")) > 0:
+            escalon = FILL_AND_XI
+
+        elif safe_int(price_increment) > 0:
+            escalon = FILL_AND_RISING
+
+        else:
+            escalon = OTHER_SIGNING
+
+    else:
+        escalon = OTHER_SIGNING
+
+    return {
+        "priority": escalon,
+        "priority_label": PRIORITY_LABEL[escalon],
+        "priority_reason": (
+            "Con ocho fichas vacias, llenar una vale mas que una "
+            "especulacion: el dinero parado no se revaloriza y una "
+            "ficha vacia es capital al 0 %."
+            if escalon < PURE_SPECULATION
+            else "No entra a la plantilla: va detras de los fichajes."
+        ),
     }
 
 

@@ -54,6 +54,7 @@ from src.analysis.player_velocity_lookup import (
 )
 
 from src.analysis.deployment import (
+    signing_priority,
     DEPLOYMENT_ENABLED,
     classify_operation,
     roster_fill_veto,
@@ -936,6 +937,22 @@ def value_candidate(
 
         despliegue = {
             **clase,
+
+            # EL ESCALON DE PRIORIDAD (13/09/2026)
+            #
+            #     Cuando el bolsillo de fichar no llega para todo,
+            #     primero se llenan fichas y despues se especula.
+            #     Lo decide `deployment`, no el tablero: el
+            #     tablero solo ordena por lo que le digan.
+            **signing_priority(
+                clase,
+                as_xi=como_xi,
+                price_increment=safe_int(
+                    player.get("price_increment")
+                    or player.get("priceIncrement")
+                ),
+            ),
+
             "free_roster_slots": huecos,
             "roster_fill_value": safe_int(
                 (como_relleno or {}).get("value")
@@ -1107,7 +1124,25 @@ def value_candidate(
         )
 
         return {
-            "value": safe_int(mejor["value"]),
+            # EL VALOR CON EL QUE SE DECIDE (13/09/2026)
+            #
+            #     Con el interruptor encendido, el de la via por
+            #     la que se va a pagar. Apagado, el mayor de
+            #     todas, que es lo que se hacia hasta hoy.
+            #
+            #     El motivo esta escrito entero en `deployment`:
+            #     pagar dinero de fichar amparandose en un numero
+            #     de reventa —y sin el liston de esa via— es la
+            #     mezcla que destapo `test_acquisition_wiring_v1`
+            #     con un jugador de 9.000.000 que sumaba 6 puntos.
+            "value": (
+                safe_int(clase["decision_value"])
+                if DEPLOYMENT_ENABLED and clase.get("decision_value")
+                else safe_int(mejor["value"])
+            ),
+
+            # Lo que vale por TODAS las vias, para poder mirarlo.
+            "value_all_routes": safe_int(mejor["value"]),
 
             # EL BOLSILLO. Con el interruptor encendido lo decide
             # la CLASE de operacion; apagado, la via que dio mas
@@ -1128,7 +1163,11 @@ def value_candidate(
             # Por que via se valora. Sin esto, una compra para
             # revenderle al Computer se leeria en pantalla igual
             # que una para mejorar el once.
-            "route": mejor.get("route"),
+            "route": (
+                clase.get("route")
+                if DEPLOYMENT_ENABLED and clase.get("route")
+                else mejor.get("route")
+            ),
 
             # Lo que decidia antes y lo que decide ahora, con el
             # motivo. Esto mueve dinero: tiene que poder mirarse.

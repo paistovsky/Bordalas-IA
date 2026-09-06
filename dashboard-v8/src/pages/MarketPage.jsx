@@ -463,11 +463,18 @@ function Bolsillo({ deployment, concentration }) {
         </span>
       )}
 
-      {deployment.observer_only && (
+      {deployment.observer_only ? (
         <div className="dim" style={{ fontSize: 9 }}>
           en sombra
         </div>
-      )}
+      ) : deployment.priority_label ? (
+        /* EL ORDEN DE PRIORIDAD (13/09/2026)
+           Con ocho fichas vacias, llenar una vale mas que una
+           especulacion: el dinero parado no se revaloriza. */
+        <div className="dim" style={{ fontSize: 9 }}>
+          {deployment.priority_label.toLowerCase()}
+        </div>
+      ) : null}
     </span>
   );
 }
@@ -935,7 +942,37 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                 <td className="n strong">
                   {viva ? formatEuros(target.live_bid) : "—"}
                 </td>
-                <td className="n">{bids ? formatEuros(target.bid) : "—"}</td>
+                {/* EL DESVIO, CON SU PRECIO (13/09/2026)
+                    "Quiero poder mirar la pantalla y ver cuanto
+                    nos esta costando el seguro. Si en un mes ha
+                    costado mas de lo que ha ganado, se apaga."
+
+                    Arriba lo que se puja de verdad; debajo, lo
+                    que habria salido sin desvio y la diferencia
+                    en euros. */}
+                <td className="n">
+                  {bids ? (
+                    <>
+                      <b>{formatEuros(target.bid)}</b>
+                      {target.bid_jitter ? (
+                        <div
+                          className="dim"
+                          style={{ fontSize: 9 }}
+                          title={`Sin desvio serian ${formatEuros(
+                            target.bid_clean
+                          )}. El desvio impide que la puja se pueda enumerar desde la curva de primas publicada.`}
+                        >
+                          limpia {formatEuros(target.bid_clean)} ·{" "}
+                          <span className="down">
+                            +{formatEuros(target.bid_jitter)}
+                          </span>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </td>
                 <td className="n">
                   {target.win_probability != null
                     ? `${Math.round(target.win_probability * 100)}%`
@@ -996,8 +1033,11 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
 
       <p className="note" style={{ textAlign: "left" }}>
         <b>PUESTO</b> es lo que ya hay comprometido en Biwenger ahora mismo.{" "}
-        <b>PUJARÍAMOS</b> es lo que el modelo recomienda si no hubiera puja.
-        Pasa el ratón por una fila para ver el porqué completo.
+        <b>PUJARÍAMOS</b> es lo que el modelo recomienda si no hubiera puja,
+        ya con el desvío aleatorio aplicado: debajo va el importe limpio y lo
+        que cuesta el desvío. Existe porque la curva de primas se publica en
+        este mismo JSON y con ella cualquiera puede enumerar nuestras pujas
+        candidatas. Pasa el ratón por una fila para ver el porqué completo.
       </p>
     </section>
   );

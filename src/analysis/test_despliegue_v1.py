@@ -61,44 +61,82 @@ from src.analysis.deployment import (
 # ============================================================
 
 
-def test_apagado_de_serie() -> None:
+def test_encendido_por_orden_del_dueño() -> None:
     """
-    Esto cambia lo que Pepe compra. Se enciende por la mañana,
-    despues de leer la lista, y no antes.
+    ESTUVO APAGADO, Y LA GUARDIA TENIA RAZON
 
-    SIGUE APAGADO EL 11/09/2026, Y AHORA POR UN MOTIVO MEDIDO
+        Del 10/09 al 12/09 este test afirmaba lo contrario: que
+        el interruptor estaba en False. El motivo estaba escrito
+        aqui dentro y era bueno — endeudarse para fichar exige
+        poder deshacer la posicion, y el 11/09 no se podia
+        demostrar que Pepe cobrase una sola oferta.
 
-        El encargo del 11/09 venia a encenderlo, con la deuda
-        segura incluida, y traia su propia puerta delante:
+    QUE HA CAMBIADO, MEDIDO
 
-            "si no puedes demostrar que Pepe vende, deja
-             DEPLOYMENT_ENABLED apagado."
+        1. La prueba existe desde el 12/09.
+           `test_venta_ejecutable_v1` recorre los siete tramos
+           hasta el `PUT /api/v2/offers/{id}` con
+           `{"status": "accepted"}` dentro.
 
-        No se pudo. En la foto de produccion del 05/09 a las
-        14:03:
+        2. El deficit se acabo. En la foto de produccion del
+           06/09/2026 a las 09:33 el saldo es +1.725.383 EUR, no
+           -421.792.
 
-            saldo                    -421.792 EUR
-            prioridad declarada      "recuperar solvencia"
-            ofertas sobre la mesa    12, por 45.746.500 EUR
-            cobrables ahora          0
-            planes de solvencia      3 calculados, 0 ejecutados
-            proxima accion           BUY_SPECULATION
+        3. El dueño lo ordena, literal: "Activa lo que haga
+           falta."
 
-        `accept_offer` no ha devuelto un 200 ni una sola vez desde
-        que se le arreglo el cuerpo el 19/08. No porque falle:
-        porque nadie se lo ha pedido.
+    COMO SE APAGA
 
-        Endeudarse para fichar exige poder deshacer la posicion en
-        un ciclo, y lo unico que se puede demostrar hoy es que
-        Pepe PUBLICA en el mercado, no que COBRE.
+        DEPLOYMENT_ENABLED=0
 
-        Quien lo encienda que lea antes
-        `docs/resultado-sin-miedo-2026-09-11.md`.
+        Y este test se pone rojo, que es lo que tiene que pasar:
+        apagarlo es una decision, no un descuido.
     """
 
-    assert DEPLOYMENT_ENABLED is False, (
-        "el interruptor esta encendido y la puerta del 11/09 no "
-        "esta pasada: no hay ninguna venta ejecutada por Pepe"
+    assert DEPLOYMENT_ENABLED is True, (
+        "el interruptor esta apagado. Si es a proposito, cambia "
+        "este test y escribe el motivo aqui dentro; si no, "
+        "revisa DEPLOYMENT_ENABLED en el entorno"
+    )
+
+
+def test_se_puede_apagar_en_una_linea() -> None:
+    """
+    El dueño pidio "como se apaga en una sola linea de comando,
+    escrita entera y copiable". Que exista de verdad se
+    comprueba, no se promete.
+    """
+
+    import subprocess
+    import sys
+
+    guion = (
+        "from src.analysis.deployment import DEPLOYMENT_ENABLED; "
+        "print(DEPLOYMENT_ENABLED)"
+    )
+
+    entorno = dict(os.environ)
+    entorno["DEPLOYMENT_ENABLED"] = "0"
+
+    salida = subprocess.run(
+        [sys.executable, "-c", guion],
+        capture_output=True,
+        text=True,
+        env=entorno,
+        cwd=str(Path.cwd()),
+    )
+
+    assert salida.stdout.strip() == "False", (
+        f"con DEPLOYMENT_ENABLED=0 el interruptor sigue "
+        f"encendido: {salida.stdout!r} {salida.stderr[-300:]!r}"
+    )
+
+    fuente = Path(
+        "src/analysis/deployment.py"
+    ).read_text(encoding="utf-8")
+
+    assert "DEPLOYMENT_ENABLED=0" in fuente, (
+        "la linea para apagarlo no esta escrita en el modulo"
     )
 
 
@@ -535,12 +573,116 @@ def test_no_se_ha_subido_ningun_tope() -> None:
     assert MAX_DEBT_SPECULATION_PERCENT == 0.60
 
 
+def test_el_valor_que_decide_es_el_de_la_via_que_paga() -> None:
+    """
+    LO QUE DESTAPO ENCENDER EL INTERRUPTOR (13/09/2026)
+
+        `test_acquisition_wiring_v1` se puso rojo en cuanto se
+        encendio esto. Un jugador de 9.000.000 que sumaba 6
+        puntos salia PUJAR a 9.000.001.
+
+        El motivo: su valor como fichaje eran 2.068.000, y los
+        9.092.475 con los que se justificaba la puja venian de la
+        via de REVENTA. Se pagaba dinero del bolsillo de fichar
+        amparandose en un numero de comerciar, y encima sin el
+        liston de rendimiento que esa via tiene que pasar.
+
+        La regla: el bolsillo, el liston Y el valor salen todos
+        de la misma via.
+    """
+
+    clase = classify_operation(
+        {"route": "XI_UPGRADE", "value": 2_068_000},
+        None,
+        None,
+        {"route": "COMPUTER_RESALE", "value": 9_092_475},
+    )
+
+    assert clase["operation_class"] == SIGNING
+    assert clase["route"] == "XI_UPGRADE"
+
+    # Lo que vale por todas las vias se sigue publicando...
+    assert clase["value"] == 9_092_475
+    assert clase["value_route"] == "COMPUTER_RESALE"
+
+    # ...pero lo que DECIDE es lo que vale por la via que paga.
+    assert clase["decision_value"] == 2_068_000, (
+        "se sigue decidiendo con el valor de la via de reventa "
+        "mientras se cobra del bolsillo de fichar"
+    )
+
+
+def test_produccion_usa_el_valor_de_la_via_que_paga() -> None:
+    """
+    Y que la valoracion lo lea de verdad, no solo que exista.
+    """
+
+    fuente = Path(
+        "src/analysis/acquisition_valuation.py"
+    ).read_text(encoding="utf-8")
+
+    assert 'clase["decision_value"]' in fuente, (
+        "la valoracion sigue decidiendo con el maximo de todas "
+        "las vias"
+    )
+    assert '"value_all_routes"' in fuente, (
+        "se ha dejado de publicar lo que vale por todas las vias"
+    )
+
+
+def test_una_infraccion_viva_no_bloquea_las_compras() -> None:
+    """
+    LA SOSPECHA DEL ENCARGO DEL 13/09, COMPROBADA
+
+        "Si la guardia bloquea toda compra mientras exista una
+         infraccion, estamos atrapados, porque comprar es
+         precisamente lo que baja el porcentaje de Yamal."
+
+    NO estaba pasando. `check_purchase` mide la participacion
+    RESULTANTE -`P / (total + P)`- y no mira `breaches` para
+    nada. Con la plantilla de produccion del 06/09 -49.540.000
+    en 14 fichas, Yamal al 42,81 % con el tope en el 35 %- el
+    tope por compra sale en 26.675.384 EUR: por encima de
+    cualquier cosa que haya en el mercado.
+
+    Este test existe para que siga sin pasar.
+    """
+
+    plantilla = [
+        {"id": 1, "name": "Yamal", "price": 21_200_000, "team_id": 1},
+    ] + [
+        {"id": i, "name": f"jugador {i}", "price": 2_180_000, "team_id": i}
+        for i in range(2, 15)
+    ]
+
+    estado = build_concentration(plantilla)
+
+    assert estado["breach_count"] >= 1, (
+        "la plantilla de prueba ya no infringe nada: el caso que "
+        "este test vigila ha dejado de existir"
+    )
+
+    for precio in (250_000, 1_730_000, 2_930_000, 3_670_000):
+
+        salida = check_purchase(estado, precio)
+
+        assert salida["capped"] is False, (
+            f"con una infraccion viva se bloquea una compra de "
+            f"{precio:,} EUR: comprar es justo lo que baja el "
+            f"porcentaje del mas caro"
+        )
+
+
 TESTS = [
-    test_apagado_de_serie,
+    test_encendido_por_orden_del_dueño,
+    test_se_puede_apagar_en_una_linea,
     test_el_interruptor_esta_en_UN_solo_sitio,
     test_encendido_cambia_de_verdad_lo_que_decide,
     test_un_fichaje_es_un_fichaje_aunque_la_reventa_de_mas,
     test_el_valor_sigue_siendo_el_mayor_de_todas_las_vias,
+    test_el_valor_que_decide_es_el_de_la_via_que_paga,
+    test_produccion_usa_el_valor_de_la_via_que_paga,
+    test_una_infraccion_viva_no_bloquea_las_compras,
     test_llenar_un_hueco_tambien_es_fichar,
     test_lo_que_solo_vale_para_revender_es_comerciar,
     test_sin_ninguna_via_no_se_inventa_una_clase,

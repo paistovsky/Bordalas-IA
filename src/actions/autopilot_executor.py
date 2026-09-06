@@ -33,6 +33,10 @@ from src.biwenger.write_client import (
     BiwengerWriteClient,
 )
 
+# EL DESVIO DE PUJA (13/09/2026). Ultima capa, sobre el importe
+# que ya eligio el motor. No toca la matematica de `optimal_bid`.
+from src.analysis.bid_jitter import apply_bid_jitter
+
 
 HARD_SAFETY_ALLOWED_ACTIONS = {
     "LIST_FOR_LIQUIDITY",
@@ -251,6 +255,36 @@ def build_noop_result(
         "response":
             None,
     }
+
+
+def _jornada_para_el_desvio(snapshot, decision) -> int | None:
+    """
+    La jornada que siembra el desvio de puja.
+
+    Tiene que ser la MISMA que usa `acquisition_board` al pintar
+    la pantalla: si no, el importe que se ve y el que se puja
+    serian distintos, y la pantalla estaria mintiendo sobre lo
+    que va a pasar.
+
+    Sale del calendario, como alli. Si no se puede leer, va None
+    y la semilla se queda con jugador y fecha: degradar, nunca
+    romper.
+    """
+
+    try:
+        from src.analysis.calendar_state import build_calendar_state
+
+        jornada = (build_calendar_state(snapshot) or {}).get(
+            "target_matchday"
+        )
+
+        if jornada is not None:
+            return jornada
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+    return ((decision or {}).get("data") or {}).get("matchday")
 
 
 def validate_temporal_write_gate(
@@ -2133,6 +2167,53 @@ def execute_autopilot_decision(
                 "speculation":
                     fresh_board,
             }
+
+        # ================================================
+        # EL DESVIO, LA ULTIMA CAPA (13/09/2026)
+        # ================================================
+        #
+        #     "Pollo se llevo a Natan por 7 euros. Eso es que sabe
+        #      que Pepe puja a 0 o a 5 clavaos."
+        #
+        #     La curva de primas se publica en `status.json` y el
+        #     precio de mercado lo ve toda la liga: con esos dos
+        #     datos se enumera nuestro conjunto de pujas
+        #     candidatas con una calculadora.
+        #
+        #     Va AQUI, despues de que el motor haya decidido y
+        #     despues de que el presupuesto haya dado el visto
+        #     bueno, por dos motivos:
+        #
+        #       - la matematica de `optimal_bid` no se toca;
+        #       - el techo que se le pasa ya lleva dentro los tres
+        #         limites que acaban de comprobarse, asi que el
+        #         desvio no puede provocar el rechazo que la linea
+        #         de arriba acaba de evitar.
+        techo_desvio = min(
+            valor
+            for valor in (
+                single_limit,
+                total_budget,
+                available_budget,
+            )
+            if valor > 0
+        ) if any(
+            valor > 0
+            for valor in (single_limit, total_budget, available_budget)
+        ) else bid_amount
+
+        desvio = apply_bid_jitter(
+            bid_amount,
+            catalog_price or listed_price or bid_amount,
+            ceiling=techo_desvio,
+            player_id=requested_player_id,
+            matchday=_jornada_para_el_desvio(
+                fresh_snapshot,
+                decision,
+            ),
+        )
+
+        bid_amount = int(desvio["bid"])
 
         seller = (
             fresh_sale.get(

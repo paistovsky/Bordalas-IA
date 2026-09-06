@@ -811,6 +811,29 @@ def test_la_prensa_enseña_la_cita_y_separa_dato_de_deduccion() -> None:
     )
 
 
+def test_el_desvio_de_puja_se_ve_con_su_precio() -> None:
+    """
+    "Quiero poder mirar la pantalla y ver cuanto nos esta
+    costando el seguro. Si en un mes ha costado mas de lo que ha
+    ganado, se apaga."
+
+    Un seguro cuyo coste no se puede leer no se puede apagar a
+    tiempo.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "target.bid_clean" in mercado, (
+        "no se ve el importe que habria salido sin desvio"
+    )
+    assert "target.bid_jitter" in mercado, (
+        "no se ve lo que cuesta el desvio en euros"
+    )
+    assert "curva de primas" in mercado, (
+        "no se explica por que existe el desvio"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -838,6 +861,7 @@ TESTS = [
     test_el_orden_de_venta_se_ve_entero,
     test_el_desempate_se_ve_con_su_motivo,
     test_la_prensa_enseña_la_cita_y_separa_dato_de_deduccion,
+    test_el_desvio_de_puja_se_ve_con_su_precio,
     test_ningun_panel_nuevo_decide_nada,
 ]
 
