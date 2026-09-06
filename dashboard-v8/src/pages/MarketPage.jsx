@@ -479,6 +479,54 @@ function Bolsillo({ deployment, concentration }) {
   );
 }
 
+/**
+ * LO QUE VALE TENERLO (14/09/2026)
+ *
+ *   La cuarta vía. Las otras tres —mejorar el once, especular a
+ *   corto y revenderle al Computer— se cobran el mismo día.
+ *   Ésta se cobra por quedarse el activo montado en la rampa.
+ *
+ *   El horizonte y los cortes salen del retrotest del 14/09
+ *   sobre 5.577 operaciones del almacén de precios, no de una
+ *   intuición.
+ *
+ * NO LLEVA PRIMA DE REVENTA DENTRO
+ *
+ *   La prima del Computer se mide contra el precio del momento;
+ *   si el precio sube, parte de esa prima ya es la rampa.
+ *   Sumarlas sería contar el mismo euro dos veces.
+ */
+function Tener({ hold, precio }) {
+  if (!hold) return <span className="dim">—</span>;
+
+  if (!hold.value) {
+    return (
+      <span className="dim" title={hold.reason}>
+        {hold.decision === "CAE" ? "cae" : "—"}
+      </span>
+    );
+  }
+
+  const margen = Number(hold.value) - Number(precio || 0);
+  const rinde = precio ? (margen / Number(precio)) * 100 : null;
+
+  return (
+    <span title={`${hold.reason}  —  ${hold.confidence_basis || ""}`}>
+      <b>{formatMoney(hold.value)}</b>
+      <div style={{ fontSize: 9 }} className={margen > 0 ? "up" : "down"}>
+        +{formatMoney(margen)}
+        {rinde != null
+          ? ` · ${String(rinde.toFixed(2)).replace(".", ",")} %`
+          : ""}
+      </div>
+      <div className="dim" style={{ fontSize: 9 }}>
+        {String(hold.rate_percent_per_day).replace(".", ",")} %/día ·{" "}
+        {hold.horizon_days} d
+      </div>
+    </span>
+  );
+}
+
 function ClockPanel({ clock }) {
   if (!clock?.available) {
     return (
@@ -778,6 +826,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th>DIVERGE</th>
             <th className="n">ANTES / AHORA</th>
             <th className="n">CON SU CONFIANZA</th>
+            <th className="n">TENER</th>
             <th className="n">VALE PARA NOSOTROS</th>
             <th className="n">SE PAGA SOLO</th>
             <th>VENDE</th>
@@ -884,6 +933,16 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                     gate={target.market_gate}
                     valor={target.our_value}
                   />
+                </td>
+
+                {/* LA CUARTA VIA (14/09/2026)
+                    Las otras tres se cobran el mismo dia; esta se
+                    cobra por quedarse el activo en la rampa.
+                    Sale del retrotest: comprar a mas del 1 %/dia y
+                    vender a tres dias da +4,47 % de mediana con un
+                    5 % de operaciones en perdida. */}
+                <td className="n">
+                  <Tener hold={target.as_hold} precio={target.market_price} />
                 </td>
 
                 <td>

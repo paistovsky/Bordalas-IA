@@ -834,6 +834,49 @@ def test_el_desvio_de_puja_se_ve_con_su_precio() -> None:
     )
 
 
+def test_las_cuatro_vias_se_ven_una_al_lado_de_otra() -> None:
+    """
+    El encargo del 14/09 lo pidio asi. Sin la cuarta al lado de
+    las otras tres, "la mejor de las vias" es una afirmacion que
+    no se puede comprobar mirando.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "target.as_hold" in mercado, (
+        "la tabla no lee la via TENER"
+    )
+    assert "TENER" in mercado, "falta la columna de la cuarta via"
+
+    assert "rate_percent_per_day" in mercado, (
+        "no se ve el ritmo que sostiene la via"
+    )
+    assert "horizon_days" in mercado, (
+        "no se ve a cuantos dias se esta valorando tener"
+    )
+
+    assert "prima de reventa" in mercado.lower(), (
+        "no se avisa de que la rampa no lleva prima dentro"
+    )
+
+
+def test_el_ritmo_neto_de_la_plantilla_se_ve() -> None:
+    """
+    "Quiero poder mirar eso y saber si el dinero esta trabajando
+    o durmiendo."
+    """
+
+    panel = _lee(DASHBOARD / "components" / "SaleOrderPanel.jsx")
+
+    assert "net_rate_eur_per_day" in panel, (
+        "no se ve el ritmo neto de la plantilla"
+    )
+    assert "rising_count" in panel and "falling_count" in panel, (
+        "no se ve cuantos suben y cuantos caen: un neto positivo "
+        "puede esconder seis que sangran"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -862,6 +905,8 @@ TESTS = [
     test_el_desempate_se_ve_con_su_motivo,
     test_la_prensa_enseña_la_cita_y_separa_dato_de_deduccion,
     test_el_desvio_de_puja_se_ve_con_su_precio,
+    test_las_cuatro_vias_se_ven_una_al_lado_de_otra,
+    test_el_ritmo_neto_de_la_plantilla_se_ve,
     test_ningun_panel_nuevo_decide_nada,
 ]
 

@@ -94,15 +94,36 @@ from src.analysis.sale_intent import untouchable_reason
 # LOS ESCALONES
 # ============================================================
 
+# EL TRAMO NUEVO, POR ENCIMA DE TODOS (14/09/2026)
+#
+#     La plantilla gana 30.000 EUR al dia en neto, y solo porque
+#     siete suben mas de lo que seis bajan. Jutgla pierde 50.000
+#     CADA DIA -un 1,49 % sobre 3.350.000- y no es titular.
+#
+#     El retrotest del 14/09 mide lo que pasa con quien cae:
+#
+#         cae, racha 1 dia, vendido a 1 dia   -1,62 %   88 % en perdida
+#         cae, racha 1 dia, vendido a 3 dias  -4,76 %   95 % en perdida
+#
+#     Es el mismo freno que ya impide COMPRAR en rampa bajista,
+#     mirando hacia dentro. Un activo que cae y ademas no juega
+#     no tiene ninguna de las dos formas de pagar: ni puntos ni
+#     revalorizacion.
+#
+#     Va por encima de "no juega" a secas porque el que cae tiene
+#     ademas prisa: cada dia que pasa vale menos.
+CAE_SIN_JUGAR = "CAE_SIN_JUGAR"
+
 NO_JUEGA = "NO_JUEGA"
 CARO_POR_PUNTO = "CARO_POR_PUNTO"
 
 TIER_LABEL = {
+    CAE_SIN_JUGAR: "Cae y no juega",
     NO_JUEGA: "No juega",
     CARO_POR_PUNTO: "Caro por punto",
 }
 
-TIER_ORDER = {NO_JUEGA: 0, CARO_POR_PUNTO: 1}
+TIER_ORDER = {CAE_SIN_JUGAR: 0, NO_JUEGA: 1, CARO_POR_PUNTO: 2}
 
 
 # Por debajo de esto no es titular. Es el mismo corte que usa el
@@ -240,11 +261,48 @@ def _row(jugador: dict, ofertas) -> dict:
     coste = euros_per_point(jugador)
     ritmo = momentum(jugador)
 
-    tier = CARO_POR_PUNTO if juega else NO_JUEGA
+    # "CAE DE PRECIO Y NO ES TITULAR"
+    #
+    #     "No es titular" se mide por donde esta HOY, no por el
+    #     pronostico. Jutgla es el caso que abrio esto: fuera del
+    #     once, -50.000 EUR al dia, y con el pronostico clavado en
+    #     el 40,0 % — exactamente el corte de suplente.
+    #
+    #     Con `_plays()` sale que juega, porque 40,0 no es menor
+    #     que 40,0. Y mover `BENCH_PERCENT` para que Jutgla entre
+    #     seria ajustar la regla al caso, que es justo lo que no
+    #     se hace aqui.
+    #
+    #     Asi que este tramo mira el hecho observable: no esta en
+    #     el once. Un suplente al 90 % que ademas cae tampoco
+    #     tiene con que pagar hoy, y esta cola no vende nada:
+    #     ordena y enseña.
+    cae = ritmo["direction"] == "CAE"
+
+    en_el_once = bool(
+        jugador.get("in_lineup") or jugador.get("is_starter")
+    )
+
+    if cae and not en_el_once:
+        tier = CAE_SIN_JUGAR
+
+    elif not juega:
+        tier = NO_JUEGA
+
+    else:
+        tier = CARO_POR_PUNTO
 
     oferta = _offer_for(ofertas, jugador)
 
-    if tier == NO_JUEGA:
+    if tier == CAE_SIN_JUGAR:
+        motivo = (
+            "Cae de precio y ademas no juega: no tiene ninguna de "
+            "las dos formas de pagar. En el retrotest del 14/09, "
+            "quien cae vuelve a caer el 88 % de las veces al dia "
+            "siguiente y el 95 % a tres dias."
+        )
+
+    elif tier == NO_JUEGA:
         probabilidad = jugador.get("starter_probability")
 
         motivo = (
@@ -493,9 +551,50 @@ def build_sale_order(
         caja_mesa = sum(f["cash_now"] for f in cola)
         caja_mercado = sum(f["price"] for f in cola)
 
+        # EL RITMO NETO DE LA PLANTILLA (14/09/2026)
+        #
+        #     "Quiero poder mirar eso y saber si el dinero esta
+        #      trabajando o durmiendo."
+        #
+        #     La suma de los incrementos diarios. En la foto del
+        #     06/09 son +30.000 EUR/dia sobre 49.540.000: un
+        #     +0,06 % diario, y solo porque siete suben mas de lo
+        #     que seis bajan.
+        neto = sum(
+            safe_int(j.get("price_increment"))
+            for j in jugadores
+        )
+
+        valor_total = sum(safe_int(j.get("price")) for j in jugadores)
+
+        suben = [
+            j for j in jugadores
+            if safe_int(j.get("price_increment")) > 0
+        ]
+        bajan = [
+            j for j in jugadores
+            if safe_int(j.get("price_increment")) < 0
+        ]
+
         return {
             "available": True,
             "reason": None,
+
+            "net_rate_eur_per_day": neto,
+            "net_rate_percent_per_day": (
+                round(neto / valor_total * 100, 4)
+                if valor_total > 0
+                else None
+            ),
+            "squad_value": valor_total,
+            "rising_count": len(suben),
+            "falling_count": len(bajan),
+            "rising_eur_per_day": sum(
+                safe_int(j.get("price_increment")) for j in suben
+            ),
+            "falling_eur_per_day": sum(
+                safe_int(j.get("price_increment")) for j in bajan
+            ),
 
             "queue": cola,
             "excluded": excluidos,

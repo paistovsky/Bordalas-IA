@@ -51,6 +51,34 @@ export default function SaleOrderPanel({ data }) {
         <span className="pill idle">NO VENDE</span>
       </div>
 
+      {/* EL RITMO NETO DE LA PLANTILLA (14/09/2026)
+          "Quiero poder mirar eso y saber si el dinero esta
+          trabajando o durmiendo." Una linea, arriba del todo. */}
+      {orden.net_rate_eur_per_day != null && (
+        <div className="kv">
+          <span>Ritmo neto de la plantilla</span>
+          <b
+            className={
+              orden.net_rate_eur_per_day > 0 ? "mono up" : "mono down"
+            }
+            title={`${orden.rising_count} suben (+${formatMoney(
+              orden.rising_eur_per_day
+            )}/día) y ${orden.falling_count} caen (${formatMoney(
+              orden.falling_eur_per_day
+            )}/día).`}
+          >
+            {orden.net_rate_eur_per_day > 0 ? "+" : "−"}
+            {formatMoney(Math.abs(orden.net_rate_eur_per_day))}/día
+            {orden.net_rate_percent_per_day != null
+              ? ` · ${String(orden.net_rate_percent_per_day).replace(
+                  ".",
+                  ","
+                )} %`
+              : ""}
+          </b>
+        </div>
+      )}
+
       {cola.length === 0 ? (
         <div className="empty">
           Nadie entra en la cola: todos están apartados. Mira la

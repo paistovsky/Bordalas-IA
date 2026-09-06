@@ -60,6 +60,8 @@ from src.analysis.deployment import (
     roster_fill_veto,
 )
 
+from src.analysis.hold_value import hold_value
+
 from src.analysis.route_confidence import (
     premium_confidence,
     streak_confidence,
@@ -799,7 +801,41 @@ def value_candidate(
             )
 
         # --------------------------------------------------
-        # LA MAYOR DE LAS TRES
+        # COMO TENER (14/09/2026)
+        # --------------------------------------------------
+        #
+        #     La cuarta via. Las otras tres se cobran el mismo
+        #     dia; esta se cobra por quedarse el activo montado en
+        #     la rampa.
+        #
+        #     Sale del retrotest del 14/09: 5.577 operaciones del
+        #     almacen de precios, y comprar a mas del 1 %/dia y
+        #     vender tres dias despues da una mediana de +4,47 %
+        #     con solo un 5 % de operaciones en perdida.
+        #
+        #     Pasa por el MISMO freno que las otras: si la
+        #     compuerta dice que el ritmo no vale, esta via
+        #     tampoco se abre.
+
+        if compuerta["allow"]:
+
+            como_tener = hold_value(
+                price=precio,
+                rate_percent_per_day=compuerta.get(
+                    "rate_percent_per_day"
+                ),
+                trend_days=compuerta.get("trend_days"),
+                sources=compuerta.get("sources"),
+            )
+
+        else:
+            como_tener = _sin_valor(
+                compuerta["code"],
+                compuerta["reason"],
+            )
+
+        # --------------------------------------------------
+        # LA MAYOR DE LAS CUATRO
         # --------------------------------------------------
 
         # ==================================================
@@ -933,6 +969,12 @@ def value_candidate(
             como_relleno,
             como_trading,
             como_reventa,
+
+            # La cuarta via, y el precio: una via de fichaje que
+            # no llega al precio no convierte la operacion en un
+            # fichaje. Ver el comentario en `classify_operation`.
+            as_hold=como_tener,
+            price=precio,
         )
 
         despliegue = {
@@ -973,7 +1015,13 @@ def value_candidate(
         opciones_hoy = [
             o
             for o in (
-                (como_xi, como_relleno, como_trading, como_reventa)
+                (
+                    como_xi,
+                    como_relleno,
+                    como_trading,
+                    como_reventa,
+                    como_tener,
+                )
                 if DEPLOYMENT_ENABLED
                 else (como_xi, como_trading, como_reventa)
             )
@@ -1116,6 +1164,7 @@ def value_candidate(
                 confidence_shadow=confianza_sombra,
                 deployment=despliegue,
                 as_roster_fill=como_relleno,
+                as_hold=como_tener,
             )
 
         mejor = max(
@@ -1182,6 +1231,11 @@ def value_candidate(
             "deployment": despliegue,
             "as_roster_fill": como_relleno,
 
+            # LA CUARTA VIA, AL LADO DE LAS OTRAS TRES
+            # (14/09/2026). El encargo lo pidio asi: las cuatro
+            # visibles una junto a otra en cada objetivo.
+            "as_hold": como_tener,
+
             "replaces": mejor.get("replaces"),
             "reason": mejor.get("reason"),
             "reasons": [
@@ -1209,6 +1263,7 @@ def _sin_valor(
     confidence_shadow: dict | None = None,
     deployment: dict | None = None,
     as_roster_fill: dict | None = None,
+    as_hold: dict | None = None,
 ) -> dict:
     """
     EL PRONOSTICO VIAJA TAMBIEN CUANDO SE DICE QUE NO.
@@ -1237,5 +1292,7 @@ def _sin_valor(
         "confidence_shadow": confidence_shadow,
         "deployment": deployment,
         "as_roster_fill": as_roster_fill,
+        "as_hold": as_hold,
+        "as_hold": as_hold,
         "reasons": [reason],
     }

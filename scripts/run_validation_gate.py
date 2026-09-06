@@ -133,6 +133,8 @@ TESTS = [
     "src.analysis.test_ojeador_prensa_v1",
     "src.analysis.test_motivo_del_tablero_v1",
     "src.analysis.test_puja_impredecible_v1",
+    "src.analysis.test_retrotest_rampa_v1",
+    "src.analysis.test_no_contar_dos_veces_v1",
 ]
 
 

@@ -54,6 +54,7 @@ from src.analysis.position_guardrail import (
 )
 
 from src.analysis.sale_order import (
+    CAE_SIN_JUGAR,
     BENCH_PERCENT,
     CARO_POR_PUNTO,
     NO_JUEGA,
@@ -680,12 +681,162 @@ def test_no_reimplementa_los_intocables_ni_el_suelo() -> None:
         )
 
 
+def test_el_que_cae_y_no_juega_sale_el_primero() -> None:
+    """
+    EL TRAMO NUEVO (14/09/2026)
+
+        La plantilla gana 30.000 EUR al dia en neto y solo porque
+        siete suben mas de lo que seis bajan. Jutgla pierde
+        50.000 CADA DIA -un 1,49 %- y no esta en el once.
+
+        El retrotest del mismo dia mide lo que pasa con quien
+        cae: -1,62 % al dia siguiente con un 88 % de operaciones
+        en perdida, y -4,76 % a tres dias con un 95 %.
+
+        Un activo que cae y ademas no juega no tiene ninguna de
+        las dos formas de pagar.
+    """
+
+    cola = build_sale_order(
+        [
+            {
+                "id": 1,
+                "name": "Cae y no juega",
+                "position": 3,
+                "price": 3_350_000,
+                "points": 11,
+                "price_increment": -50_000,
+                "hierarchy_value": 40,
+                "starter_probability": 40.0,
+                "is_starter": False,
+            },
+            {
+                "id": 2,
+                "name": "Cae pero juega",
+                "position": 3,
+                "price": 2_630_000,
+                "points": 11,
+                "price_increment": -30_000,
+                "hierarchy_value": 40,
+                "starter_probability": 90.0,
+                "is_starter": True,
+            },
+            {
+                "id": 3,
+                "name": "No juega pero no cae",
+                "position": 3,
+                "price": 480_000,
+                "points": 8,
+                "price_increment": 0,
+                "hierarchy_value": 25,
+                "starter_probability": 30.0,
+                "is_starter": False,
+            },
+        ]
+        + _relleno(6)
+    )
+
+    primero = cola["queue"][0]
+
+    assert primero["name"] == "Cae y no juega", (
+        f"sale primero {primero['name']}: el tramo de «cae y no "
+        f"juega» no manda sobre los demas"
+    )
+    assert primero["tier"] == CAE_SIN_JUGAR
+
+    por_nombre = {f["name"]: f for f in cola["queue"]}
+
+    # Un titular que cae NO entra en este tramo: sigue puntuando.
+    assert por_nombre["Cae pero juega"]["tier"] != CAE_SIN_JUGAR
+
+    # Y el que no juega pero no cae, tampoco: no tiene prisa.
+    assert por_nombre["No juega pero no cae"]["tier"] == NO_JUEGA
+
+
+def test_el_tramo_mira_el_once_y_no_el_pronostico() -> None:
+    """
+    Jutgla tiene el pronostico clavado en el 40,0 %, que es
+    exactamente el corte de suplente: con `_plays()` sale que
+    juega, porque 40,0 no es menor que 40,0.
+
+    Mover `BENCH_PERCENT` para que entrase habria sido ajustar la
+    regla al caso. El tramo mira el hecho observable —no esta en
+    el once— y `BENCH_PERCENT` se queda donde estaba.
+    """
+
+    from src.analysis.sale_order import BENCH_PERCENT
+
+    assert BENCH_PERCENT == 40.0
+
+    cola = build_sale_order(
+        [
+            {
+                "id": 1,
+                "name": "Justo en el corte",
+                "position": 3,
+                "price": 3_350_000,
+                "points": 11,
+                "price_increment": -50_000,
+                "hierarchy_value": 40,
+                "starter_probability": BENCH_PERCENT,
+                "is_starter": False,
+            },
+        ]
+        + _relleno(6)
+    )
+
+    assert cola["queue"][0]["tier"] == CAE_SIN_JUGAR
+
+
+def test_el_ritmo_neto_de_la_plantilla_se_publica() -> None:
+    """
+    "Quiero poder mirar eso y saber si el dinero esta trabajando
+    o durmiendo."
+    """
+
+    cola = build_sale_order(
+        [
+            {
+                "id": 1,
+                "name": "Sube",
+                "position": 3,
+                "price": 1_000_000,
+                "points": 10,
+                "price_increment": 40_000,
+                "hierarchy_value": 40,
+                "starter_probability": 80.0,
+                "is_starter": True,
+            },
+            {
+                "id": 2,
+                "name": "Baja",
+                "position": 3,
+                "price": 1_000_000,
+                "points": 10,
+                "price_increment": -10_000,
+                "hierarchy_value": 40,
+                "starter_probability": 80.0,
+                "is_starter": True,
+            },
+        ]
+        + _relleno(6)
+    )
+
+    assert cola["net_rate_eur_per_day"] == 30_000
+    assert cola["rising_count"] == 1
+    assert cola["falling_count"] == 1
+    assert cola["net_rate_percent_per_day"] is not None
+
+
 TESTS = [
     test_ningun_intocable_entra_en_la_cola,
     test_el_portero_titular_no_se_salva_por_accidente,
     test_sin_escalon_conocido_no_se_vende,
     test_pararse_en_cualquier_punto_deja_el_once_en_pie,
     test_el_bloqueado_no_se_cuela_mas_abajo,
+    test_el_que_cae_y_no_juega_sale_el_primero,
+    test_el_tramo_mira_el_once_y_no_el_pronostico,
+    test_el_ritmo_neto_de_la_plantilla_se_publica,
     test_primero_quien_no_juega,
     test_dentro_del_escalon_manda_el_coste_por_punto,
     test_el_que_cae_sale_antes_que_el_que_sube,

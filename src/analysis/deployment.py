@@ -140,6 +140,8 @@ def classify_operation(
     as_roster_fill: dict | None,
     as_speculation: dict | None,
     as_computer_resale: dict | None,
+    as_hold: dict | None = None,
+    price=None,
 ) -> dict:
     """
     Que clase de operacion es esto, y de que bolsillo sale.
@@ -173,11 +175,39 @@ def classify_operation(
 
     comercio = [
         via
-        for via in (as_speculation, as_computer_resale)
+        for via in (as_speculation, as_computer_resale, as_hold)
         if vale(via)
     ]
 
     todas = fichaje + comercio
+
+    # LA CLASE LA DECIDE LA VIA QUE JUSTIFICA LA COMPRA
+    # (14/09/2026)
+    #
+    #     Hasta hoy bastaba con que una via de fichaje diera
+    #     valor, aunque ese valor fuera MENOR que el precio.
+    #     Amatucci lo enseño: vale 2.716.842 como fichaje, cuesta
+    #     3.670.000, y salia clasificado SIGNING — asi que se
+    #     decidia con 2.716.842 y se rechazaba, sin llegar a
+    #     mirar si por otra via si compensaba.
+    #
+    #     Decir "entra a la plantilla para jugar" de alguien por
+    #     el que NO pagariamos su precio para que juegue es
+    #     falso. Si ninguna via de fichaje llega al precio, la
+    #     operacion no es un fichaje.
+    #
+    #     Sin `price` el comportamiento es el de antes, para no
+    #     mover nada que no haga falta mover.
+    if price is not None and fichaje:
+
+        compensan = [
+            via
+            for via in fichaje
+            if safe_int(via.get("value")) > safe_int(price)
+        ]
+
+        if not compensan:
+            fichaje = []
 
     if not todas:
         return {
