@@ -1,4 +1,4 @@
-name: Bordalas IA Live
+﻿name: Bordalas IA Live
 
 on:
   workflow_dispatch:
@@ -32,6 +32,7 @@ jobs:
       BIWENGER_USERNAME: ${{ secrets.BIWENGER_USERNAME }}
       BIWENGER_PASSWORD: ${{ secrets.BIWENGER_PASSWORD }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BORDALAS_BID_SALT: ${{ secrets.BORDALAS_BID_SALT }}
 
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
