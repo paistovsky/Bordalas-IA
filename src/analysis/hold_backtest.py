@@ -586,6 +586,26 @@ def calibration(resultado: dict | None, horizon: int) -> dict:
 
         ultima = None
 
+        # CADA BANDA POR SEPARADO (24/09/2026)
+        #
+        #     `ultima` se queda con la banda de racha MAS LARGA
+        #     que tenga muestra, y eso esta bien para el recorte:
+        #     a una racha de 50 dias se le reconoce como mucho lo
+        #     que rindio la mas larga medida.
+        #
+        #     Pero el interruptor de la via reutilizaba ese mismo
+        #     numero para decidir si el tramo esta respaldado, y
+        #     ahi manda otra cosa: la racha que de verdad se
+        #     compra. En el tramo 1-2 % eso costaba tenerlo
+        #     apagado:
+        #
+        #         racha 1 dia   +3,22 %   <- la que se compra
+        #         racha 2 dias  +1,80 %   <- la que decidia
+        #
+        #     Asi que ahora se publican las dos, y cada consumidor
+        #     coge la suya.
+        bandas = {}
+
         for banda in orden:
 
             celda = celdas.get(f"{tramo}|{banda}|{horizon}")
@@ -593,10 +613,21 @@ def calibration(resultado: dict | None, horizon: int) -> dict:
             if celda and celda.get("enough"):
                 ultima = (banda, celda)
 
+                bandas[banda] = {
+                    "median": celda["median"],
+                    "loss_rate": celda["loss_rate"],
+                    "n": celda["n"],
+                }
+
         if ultima is None:
             por_tramo[tramo] = {
                 "calibrated": False,
+                "band": None,
                 "max_streak": None,
+                "median": None,
+                "loss_rate": None,
+                "n": 0,
+                "bands": {},
                 "reason": (
                     f"Sin ninguna banda de racha con muestra "
                     f"suficiente a {horizon} dias."
@@ -621,9 +652,17 @@ def calibration(resultado: dict | None, horizon: int) -> dict:
             "calibrated": True,
             "band": banda,
             "max_streak": observada,
+
+            # El de la banda mas larga: es el techo del recorte.
             "median": celda["median"],
             "loss_rate": celda["loss_rate"],
             "n": celda["n"],
+
+            # Y todas las bandas, para quien necesite la que de
+            # verdad se compra en vez del techo.
+            "bands": bandas,
+
+            "reason": None,
         }
 
     return {

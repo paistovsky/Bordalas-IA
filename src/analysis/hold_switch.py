@@ -64,6 +64,18 @@ MIN_TENER_YIELD = MIN_SPECULATION_YIELD
 MAX_TENER_LOSS_RATE = 0.20
 
 
+# LA RACHA CON LA QUE SE JUZGA LA VIA EN EL TABLERO
+#
+#     La doctrina compra racha corta -"comprar a alguien que sube
+#     mas del 1 % diario con racha corta y venderlo a tres
+#     dias"-. Asi que el estado que se publica es el de esa
+#     racha, no el de una que no se compraria.
+#
+#     Cada jugador se juzga con la SUYA; esto es solo para el
+#     titular del tablero.
+RACHA_QUE_SE_COMPRA = 1
+
+
 def safe_float(value, default=None):
     try:
         return float(value)
@@ -76,9 +88,58 @@ def safe_float(value, default=None):
 # ============================================================
 
 
-def bucket_backing(calibration: dict | None, bucket: str) -> dict:
+# DE RACHA A BANDA DEL RETROTEST
+#
+#     Las mismas de `hold_backtest.STREAK_BUCKETS`. Se importan
+#     en vez de copiarse: si alli se parten, aqui tiene que
+#     seguirlas.
+def _banda_de_la_racha(racha) -> str | None:
+
+    try:
+        from src.analysis.hold_backtest import STREAK_BUCKETS
+
+        dias = abs(int(racha))
+
+        for nombre, minimo, maximo in STREAK_BUCKETS:
+            if dias >= minimo and (maximo is None or dias <= maximo):
+                return nombre
+
+        return None
+
+    except (TypeError, ValueError):
+        return None
+
+
+def bucket_backing(
+    calibration: dict | None,
+    bucket: str,
+    streak=None,
+) -> dict:
     """
     ¿Sostiene este tramo a la via TENER, ahora mismo?
+
+    LA CELDA QUE SE MIRA (24/09/2026)
+
+        Esto miraba la mediana de bloque, que `calibration`
+        rellena con la banda de racha MAS LARGA con muestra. Para
+        el recorte esta bien -a una racha de 50 dias se le
+        reconoce como mucho lo que rindio la mas larga medida-,
+        pero para decidir si la via esta respaldada manda otra
+        cosa: la racha que de verdad se compra.
+
+        En el tramo 1-2 % la diferencia lo tenia todo apagado:
+
+            racha 1 dia   +3,22 %   <- la que compra la doctrina
+            racha 2 dias  +1,80 %   <- la que decidia
+
+        Y ese tramo es donde cabe el 100 % del capital: 1,24 M al
+        mes contra los 310.000 del tramo de arriba.
+
+        El liston del 3 % NO se ha movido. Lo que cambia es
+        contra que numero se compara.
+
+    Sin `streak` se comporta como siempre, para no cambiar a
+    quien no le pase la racha.
 
     Nunca lanza. Sin calibracion o sin muestra devuelve
     `backed=None`, que NO es lo mismo que `False`.
@@ -99,6 +160,8 @@ def bucket_backing(calibration: dict | None, bucket: str) -> dict:
                 "n": (datos or {}).get("n"),
                 "required": MIN_TENER_YIELD,
                 "max_loss_rate": MAX_TENER_LOSS_RATE,
+                "band": None,
+                "streak": streak,
                 "margin": None,
                 "reason": (
                     f"El tramo «{bucket}» no tiene muestra "
@@ -107,8 +170,21 @@ def bucket_backing(calibration: dict | None, bucket: str) -> dict:
                 ),
             }
 
-        mediana = safe_float(datos.get("median"))
-        perdidas = safe_float(datos.get("loss_rate"))
+        # La celda que se compra, si se sabe cual es.
+        banda = _banda_de_la_racha(streak)
+
+        celda = (datos.get("bands") or {}).get(banda)
+
+        if celda:
+            mediana = safe_float(celda.get("median"))
+            perdidas = safe_float(celda.get("loss_rate"))
+            muestra = celda.get("n")
+            mirada = banda
+        else:
+            mediana = safe_float(datos.get("median"))
+            perdidas = safe_float(datos.get("loss_rate"))
+            muestra = datos.get("n")
+            mirada = datos.get("band")
 
         rinde = mediana is not None and mediana >= MIN_TENER_YIELD
 
@@ -122,7 +198,8 @@ def bucket_backing(calibration: dict | None, bucket: str) -> dict:
                 f"El tramo «{bucket}» rinde un "
                 f"{mediana * 100:.2f} % de mediana con un "
                 f"{(perdidas or 0) * 100:.0f} % de operaciones en "
-                f"perdida sobre {datos.get('n')}: respalda la via."
+                f"perdida sobre {muestra}, mirando la racha de "
+                f"«{mirada}»: respalda la via."
             )
 
         elif not rinde:
@@ -148,7 +225,9 @@ def bucket_backing(calibration: dict | None, bucket: str) -> dict:
             "measured": True,
             "median": mediana,
             "loss_rate": perdidas,
-            "n": datos.get("n"),
+            "n": muestra,
+            "band": mirada,
+            "streak": streak,
             "required": MIN_TENER_YIELD,
             "max_loss_rate": MAX_TENER_LOSS_RATE,
 
@@ -173,6 +252,8 @@ def bucket_backing(calibration: dict | None, bucket: str) -> dict:
             "n": None,
             "required": MIN_TENER_YIELD,
             "max_loss_rate": MAX_TENER_LOSS_RATE,
+            "band": None,
+            "streak": None,
             "margin": None,
             "reason": (
                 f"No se pudo comprobar el respaldo: "
@@ -219,8 +300,14 @@ def route_state(
                 ),
             }
 
+        # LA RACHA QUE SE COMPRA (24/09/2026)
+        #
+        #     El tablero enseña el estado de la via para la racha
+        #     corta, que es la unica que la doctrina compra. Con
+        #     la mediana de bloque, el tramo 1-2 % salia apagado
+        #     por una banda de racha que nunca compraríamos.
         tramos = [
-            bucket_backing(calibrado, nombre)
+            bucket_backing(calibrado, nombre, streak=RACHA_QUE_SE_COMPRA)
             for nombre in (calibrado.get("by_rate_bucket") or {})
         ]
 

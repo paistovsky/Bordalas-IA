@@ -205,6 +205,16 @@ def hold_value(
             tasa,
             horizon_days,
             calibration_override=calibration_override,
+
+            # LA RACHA DEL JUGADOR, QUE ES LA CELDA QUE SE COMPRA
+            # (24/09/2026)
+            #
+            #     Sin esto el interruptor juzgaba la via con la
+            #     banda de racha mas larga medida, que incluye
+            #     compras que la doctrina nunca haria. El tramo
+            #     1-2 % salia apagado a 1,80 % cuando a racha 1
+            #     rinde 3,22 %.
+            streak=trend_days,
         )
 
         if respaldo.get("backed") is False:
@@ -445,6 +455,7 @@ def _respaldo_del_tramo(
     tasa: float,
     horizon_days: int,
     calibration_override: dict | None = None,
+    streak=None,
 ) -> dict:
     """
     ¿Sigue rindiendo el tramo de este jugador lo que la via exige?
@@ -462,7 +473,9 @@ def _respaldo_del_tramo(
             else calibration_for(horizon_days)
         )
 
-        return bucket_backing(calibrado, rate_bucket_of(tasa))
+        return bucket_backing(
+            calibrado, rate_bucket_of(tasa), streak=streak
+        )
 
     except Exception:                                # noqa: BLE001
         return {"backed": None}

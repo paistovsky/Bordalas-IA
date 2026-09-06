@@ -51,28 +51,30 @@ sabemos y lo que Pepe hace sigue siendo una fusión de git.**
 
 ## La cola
 
-### 1. ¿Es `NO_MEJORA_EL_ONCE` un rechazo terminal?
+### 1. ~~¿Es `NO_MEJORA_EL_ONCE` un rechazo terminal?~~ — RESUELTO 23/09, y era falso
 
-**Lo primero, y puede hacer sobrar la mitad de lo demás.** De 20 objetivos, **12
-mueren ahí**. Si un jugador descartado para el once no se vuelve a evaluar por la
-vía de comerciar, **el filtro del once está matando la rueda entera** — y eso
-explicaría solo, sin más causas, por qué Pepe lleva semanas sin fichar teniendo
-el permiso, el dinero y la máquina.
+**La sospecha estaba mal y salía de una etiqueta mal leída.** `SIN_VALOR` no
+significa "no mejora el once": significa que ninguna vía lo quiere, y cada
+objetivo publica el veredicto de todas. Los doce estaban evaluados por todas.
+Mueren porque **ocho caen y cuatro están planos, ninguno sube**. La rueda los
+rechaza bien.
 
-Los doce casos, uno a uno, y por qué vía se evaluó cada uno.
+### 2. ¿Cuánto puede dar la rueda? — MEDIDO 23/09
 
-### 2. ¿Cuánto puede dar la rueda?
+| Escenario | Al mes |
+|---|---:|
+| optimista (lo medido) | 1.555.885 € |
+| prudente (la mitad) | 997.714 € |
+| pesimista (un cuarto) | 718.629 € |
 
-Ocho fichas libres (cota inferior), ciclo de tres días, bolsillo de especular de
-2.433.987 € más la deuda autorizada, +4,47 % de mediana por operación, salida
-garantizada al Computer a +1,7 %.
+**Es la liga, no un entretenimiento.** Lo limita el capital (2,50 M disponibles
+contra 7,79 M que cabrían en ocho fichas), no las fichas ni el tope.
 
-**Un número al mes.** Si son doscientos mil, es un entretenimiento caro. Si son
-tres millones, es la liga. Nadie lo ha calculado nunca y decide cuánto esfuerzo
-merece todo lo demás.
-
-Con los límites dichos, no escondidos: cada operación **ocupa una ficha**, el
-+4,47 % se midió en **una semana de agosto**, y el capital tiene techo.
+**Pero es un techo y hoy no se alcanza: no hay qué comprar.** De los veinte del
+escaparate, once cayendo, uno en el tramo 2-4 % y **ninguno por encima del 4 %**.
+Eso explica por sí solo las semanas sin fichar. **La pregunta que decide todo
+pasa a ser: ¿el universo comprable son solo los ~20 diarios del Computer, o los
+521?**
 
 ### 3. Balón parado
 
