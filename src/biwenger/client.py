@@ -28,6 +28,22 @@ class BiwengerClient:
 
         self.session = requests.Session()
 
+        # CONTAR Y AGUANTAR (27/09/2026)
+        #
+        #     Cada peticion queda anotada por endpoint, y un 429
+        #     se reintenta con espera creciente en vez de tumbar
+        #     el ciclo. No cambia ninguna llamada: le pone un
+        #     contador delante y un reintento detras.
+        #
+        #     Va aqui, en el constructor, para que valga para
+        #     TODO el que use este cliente -incluidos los
+        #     colectores, que llaman a `client.session.get`
+        #     directamente- y no solo para los metodos de esta
+        #     clase.
+        from src.biwenger.peticiones import envolver
+
+        envolver(self.session)
+
         self.session.headers.update(
             {
                 "Content-Type": "application/json",

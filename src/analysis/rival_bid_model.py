@@ -131,12 +131,62 @@ MIN_WIN_PROBABILITY = 0.15
 # capital hay que inmovilizar para conseguirla. Estas dos
 # barreras lo miran:
 #
-#   RENDIMIENTO. Por debajo de este porcentaje la tesis esta
-#   dentro del ruido del propio estimador: los precios de
-#   Biwenger se mueven a saltos de 10.000 EUR, que sobre un
-#   jugador de precio medio son justo un 3 %. Si la ganancia
-#   esperada no supera un salto de precio, no estamos midiendo
-#   nada, estamos redondeando.
+#   RENDIMIENTO. Por debajo de este porcentaje la operacion no
+#   merece el turno.
+#
+#   LO QUE ESTA FRASE DECIA ANTES, Y ERA FALSO (27/09/2026)
+#
+#       Decia: "los precios de Biwenger se mueven a saltos de
+#       10.000 EUR, que sobre un jugador de precio medio son
+#       justo un 3 %".
+#
+#       Medido sobre el catalogo entero -578 jugadores- eso solo
+#       es cierto para los mas baratos:
+#
+#           p25       370.000 EUR   ->  10.000 son el 2,70 %
+#           MEDIANA 1.570.000 EUR   ->  10.000 son el 0,64 %
+#           p75     3.250.000 EUR   ->  10.000 son el 0,31 %
+#
+#       Un salto de 10.000 EUR son el 3 % solo por debajo de
+#       333.333 EUR: 135 jugadores de 578, el 23 %. Para el
+#       jugador mediano el suelo de ruido real es 0,64 %, casi
+#       cinco veces menos.
+#
+#       El numero estaba bien; la frase que lo explicaba, no. Y
+#       una etiqueta que miente es peor que ninguna: quien
+#       fuera a mover este umbral leeria que esta tocando un
+#       suelo de ruido cuando estaria tocando otra cosa. Es la
+#       misma familia que `raw_points`, que parecia de esta
+#       temporada y era de la anterior.
+#
+#   LO QUE DE VERDAD LO JUSTIFICA, CON SU NUMERO
+#
+#       1. EL SUELO DE RUIDO, donde de verdad muerde. Para los
+#          135 jugadores por debajo de 333.333 EUR un solo salto
+#          de precio ya es 3 % o mas, asi que por debajo del 3 %
+#          en ESE tramo no se esta midiendo nada, se esta
+#          redondeando. Para el resto el suelo es mas bajo y el
+#          3 % no es ruido: es exigencia.
+#
+#       2. QUE SEPARA LO QUE PAGA DE LO QUE NO, medido sobre
+#          81.788 operaciones del retrotest a tres dias con
+#          racha corta (27/09/2026):
+#
+#              0,25-0,5 %   +1,91 %  |
+#              0,5-1 %      +2,50 %  |  por DEBAJO del 3 %
+#              ---------------------------  <- el liston
+#              1-2 %        +4,37 %  |
+#              2-4 %        +8,33 %  |  por ENCIMA
+#              > 4 %       +24,44 %  |
+#
+#          Ningun tramo queda a caballo: el 3 % cae exactamente
+#          en la frontera entre el tramo que no paga y el que
+#          si. Ese es el motivo principal, y esta medido.
+#
+#       3. EL COSTE DEL TURNO. El ciclo ejecuta UNA accion por
+#          vuelta. Una operacion que rinde menos que la
+#          siguiente de la cola cuesta lo que habria dado la
+#          siguiente, no cero.
 #
 #   GANANCIA MINIMA. El ciclo ejecuta UNA accion por vuelta. Una
 #   operacion que deja menos que esto no merece el turno cuando
