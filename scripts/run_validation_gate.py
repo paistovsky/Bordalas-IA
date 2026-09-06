@@ -103,6 +103,7 @@ TESTS = [
     #     el "sin escalon no se vende" y que los vetados se vean-.
     "src.analysis.test_calidad_y_porteria_v1",
     "src.analysis.test_encender_calidad_v1",
+    "src.analysis.test_rueda_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
     "src.analysis.test_ciclo_una_sola_vez_v1",
