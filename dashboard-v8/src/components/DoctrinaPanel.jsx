@@ -227,6 +227,43 @@ export default function DoctrinaPanel({ data }) {
       )}
 
       {/* ============================================================
+          REGLA 3 — LA PORTERÍA NUNCA A UNO
+          ============================================================ */}
+      {doctrina.goalkeeping?.available && (
+        <div
+          className={
+            doctrina.goalkeeping.uncovered ? "alert crit" : "alert"
+          }
+        >
+          <b>
+            Portería: {doctrina.goalkeeping.keepers} portero
+            {doctrina.goalkeeping.keepers === 1 ? "" : "s"}
+            {doctrina.goalkeeping.uncovered && " · PRIORIDAD PRIMERA"}
+          </b>{" "}
+          {doctrina.goalkeeping.reason}
+        </div>
+      )}
+
+      {/* ============================================================
+          REGLA 6 — LA CALIDAD MEDIDA, MEDIDA Y NO ENCENDIDA
+          ============================================================ */}
+      {doctrina.measured_quality?.available && (
+        <>
+          <div className="kv" style={{ marginTop: 10 }}>
+            <span>Varianza que explica la vara (hoy → medida)</span>
+            <b className="mono">
+              {coma(doctrina.measured_quality.variance_old)} % →{" "}
+              {coma(doctrina.measured_quality.variance_new)} %
+              {!doctrina.measured_quality.applied && " · sin encender"}
+            </b>
+          </div>
+          <p className="note" style={{ textAlign: "left" }}>
+            {doctrina.measured_quality.reason}
+          </p>
+        </>
+      )}
+
+      {/* ============================================================
           REGLA 15 — EL ACTIVO QUE PESA DEMASIADO
           ============================================================ */}
       {grande.available && (

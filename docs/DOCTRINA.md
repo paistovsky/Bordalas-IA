@@ -1,6 +1,6 @@
 # LA DOCTRINA DE PEPE
 
-**Versión 1.2 — 2026-09-19**
+**Versión 1.3 — 2026-09-21**
 
 Cómo juega Pepe. Cada regla dice de dónde sale y en qué estado está.
 
@@ -164,8 +164,15 @@ aleatorio para no ser adivinables.
 Nosotros llevamos semanas construyendo un modelo estadístico para **estimar** lo
 que el juego deja **ver** por unas monedas.
 
-**Estado: no existe, y hay que comprobar si se puede.** No sé si tenemos monedas,
-cómo se consiguen, ni si la API lo expone. Antes de ilusionarse, verificar.
+**Comprobado el 20/09, y mejor de lo que decía el vídeo:** en esta liga **no
+existen las monedas** —Biwenger solo vende PremiumLeague y UltraLeague con dinero
+real— pero los ajustes de la liga traen `marketShowBids = true`. **Ya está
+encendido y es gratis.** Lo que falla es que pedimos las ventas a un sitio que no
+devuelve las pujas.
+
+**Estado: la información existe y no la estamos leyendo.** Si la llamada correcta
+devuelve pujas, `rival_bid_model` entero —48 pujas calibradas, curva de primas,
+probabilidad de que nos superen— **sobra**: se pasa de estimar a saber.
 
 ### 13. No comprar lo que cae, y soltar lo propio que cae
 
@@ -185,13 +192,70 @@ plantilla: 7 suben, 6 caen.
 
 **POLLO.** Vendió a Vinícius y bajó de 85 M a 67,8 M. No se enamoró del cromo.
 
-**La pregunta que abre:** Yamal es el **42,81 %** de nuestra plantilla
-(21.210.000 € de 49.540.000), **50 %** de titularidad, y sube 40.000 €/día — un
-**0,19 % diario**, por debajo del mercado. Y está por encima del tope de
-concentración del 35 %.
+**Medido el 20/09, y la respuesta es NO vender a Yamal.** Es el 42,81 % del
+dinero por el 19,0 % de los puntos, y cuesta 2.272.500 € por punto y jornada
+contra los 714.202 € del resto: 3,2 veces peor. **Pero hace 9,33 puntos por
+jornada, el doble que el segundo**, y la mejor cesta que cabe con sus 21,21 M
+deja el once **2,93 puntos por jornada peor** — porque solo puntúan once, y meter
+cinco fichas desplaza a cuatro titulares. Además sus 9,33 están medidos y los de
+la cesta son proyección.
 
-**Estado: sin medir.** No digo que haya que venderlo. Digo que nadie lo ha
-calculado nunca.
+**Estado: resuelto, y la regla se afina.** Recoger beneficio, sí; pero un activo
+grande solo se suelta si lo que entra **cabe en el once**. Con tres jornadas de
+muestra, se revisa.
+
+---
+
+---
+
+## LO QUE FALTABA EN LA DOCTRINA
+
+Descubierto el 20/09 al obligar a cada decisión a citar su regla: **38 de 45
+citaban, y las que no revelaron cuatro huecos.** Ésta es la parte más útil del
+documento, porque son cosas que Pepe hace todos los días sin que nadie las haya
+escrito.
+
+### 19. Las ofertas que entran
+
+**Es lo que más veces hace el ciclo y no aparecía en ninguna regla.** Cuando un
+rival o el Computer ofrece dinero por uno de los nuestros, ¿cuándo se coge?
+
+Principio, a falta de medición: **se vende cuando el que sale no juega, o cuando
+lo que entra mejora el once** (reglas 1 y 15). Lo demás es liquidez, y la
+liquidez solo importa a T−6 h (regla 16).
+
+**Estado: sin doctrina.** Hay motor (Offer Decision Engine V2, hoy vigilando 12
+ofertas) y no hay regla escrita que lo gobierne.
+
+### 20. Lo que no está disponible no se compra ni se alinea
+
+Lesionados, sancionados, tocados. **Es una barandilla, no una preferencia**, y
+por eso nunca se saltó ni se escribió. Gorosabel rendía un 8,49 % y quedó vetado
+por estar tocado: bien hecho.
+
+### 21. Ningún bolsillo se vacía en una operación
+
+El tope por operación existe y no estaba en la doctrina, y por eso
+`SUPERA_PRESUPUESTO` era una decisión sin regla. Viene de la lección de Soler:
+81 % del presupuesto en un jugador.
+
+**Con el dato del 20/09 delante:** de los 20 objetivos, **cero mueren por el
+tope**. No es el freno que creíamos.
+
+### 22. Los intocables — DEROGADA
+
+Había una lista de jugadores que Pepe no podía tocar, por orden del dueño del
+18/08. **El dueño la retira el 21/09/2026.** Pepe puede vender a cualquiera si
+los números lo dicen.
+
+**Lo que la sustituye no es otra lista, es la prueba que ya usamos con Yamal:**
+un jugador grande solo se suelta si **lo que entra cabe en el once** (regla 15).
+Esa cuenta es la que dijo que Yamal se queda, y lo dijo mejor que cualquier lista
+de nombres — porque una lista protege al favorito aunque deje de rendir, y la
+cuenta lo suelta el día que deje de rendir.
+
+Siguen en pie, y no son negociables: concentración del 35 %, cuatro por club,
+suelos de posición, reloj de solvencia y disponibilidad (regla 20).
 
 ---
 
@@ -239,16 +303,36 @@ ninguno por encima de los demás.
 | 5 | Centrocampistas con gol | **no hecho** |
 | 6 | Calidad medida | **pendiente** |
 | 7 | Calidad sobre seguridad | a medias |
-| 8 | Recién ascendidos | **no existe** |
+| 8 | Recién ascendidos | **marcador puesto** 20/09 |
 | 9 | Comprar lo que sube | construido, no dispara |
-| 10 | Los baratos y las noticias de cesión | a medias |
+| 10 | Los baratos y las noticias de cesión | **a medias** |
 | 11 | No pagar de más | hecho |
-| 12 | Ver las pujas con monedas | **por comprobar** |
+| 12 | Ver las pujas | **gratis y sin leer** |
 | 13 | No comprar lo que cae | hecho |
 | 14 | Rotar, no acumular | **no hecho** |
-| 15 | Recoger beneficio en los grandes | **sin medir** |
+| 15 | Recoger beneficio en los grandes | resuelto: Yamal se queda |
 | 16 | Positivo a T−6 h | hecho |
-| 17 | Cada decisión cita su regla | **no hecho** |
+| 17 | Cada decisión cita su regla | **hecho** 20/09 — 38 de 45 |
 | 18 | Ningún umbral sin número | práctica establecida |
+| 19 | Las ofertas que entran | **sin doctrina** |
+| 20 | Lo no disponible no se toca | hecho, sin escribir |
+| 21 | Ningún bolsillo se vacía de golpe | hecho, sin escribir |
+| 22 | Los intocables | **derogada** 21/09 |
 
-**Seis hechas. Doce por hacer.**
+**Diez hechas. Doce por hacer.**
+
+### El embudo, medido el 20/09
+
+De los 20 objetivos del escaparate:
+
+| Causa de muerte | N | % |
+|---|---:|---:|
+| No mejora el once | 12 | 60 % |
+| Precio (no hay caja) | 3 | 15 % |
+| Rendimiento | 3 | 15 % |
+| Disponibilidad | 2 | 10 % |
+| **Tope por operación** | **0** | **0 %** |
+
+**Los tres que mueren por precio —Pedri, Roro, Amatucci— valen más de lo que
+cuestan.** Son compras positivas bloqueadas solo por falta de caja. Eso apunta a
+la regla 14, no al tope.

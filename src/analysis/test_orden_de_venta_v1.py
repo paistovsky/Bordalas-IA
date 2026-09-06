@@ -104,9 +104,32 @@ def _cola_de_produccion():
 # ============================================================
 
 
-def test_ningun_intocable_entra_en_la_cola() -> None:
+def test_el_apartado_no_esta_ademas_en_la_cola() -> None:
     """
-    "Que no me venda a Yamal ni haga locuras."
+    Un jugador no puede estar apartado y en la cola a la vez: o
+    se vende o no se vende.
+
+    LO QUE ESTA PRUEBA COMPROBABA ANTES, Y YA NO (21/09/2026)
+
+        Se llamaba `test_ningun_intocable_entra_en_la_cola` y
+        exigia que Yamal, Djene y Olasagasti no aparecieran nunca
+        en la cola, citando "que no me venda a Yamal ni haga
+        locuras" -orden del dueño del 18/08-.
+
+        El dueño derogo esa lista el 21/09. De Clave para arriba
+        ya se puede vender, y por eso los tres nombres salen de
+        aqui: mantenerlos seria conservar la lista por la puerta
+        de atras.
+
+        Lo que los protege ahora no es estar en una cola o fuera
+        de ella, sino la cuenta de `soltar_un_grande`: un activo
+        grande solo se suelta si lo que entra CABE EN EL ONCE. Con
+        Yamal esa cuenta da -0,97 puntos por jornada y dice que no
+        se vende, igual que decia la lista, pero por el motivo
+        correcto y con fecha de caducidad.
+
+    Lo que si se queda es el invariante estructural de abajo, que
+    nunca tuvo nada que ver con la lista.
     """
 
     cola = _cola_de_produccion()
@@ -121,12 +144,6 @@ def test_ningun_intocable_entra_en_la_cola() -> None:
     for jugador in cola["excluded"]:
         assert jugador["name"] not in nombres, (
             f"{jugador['name']} esta apartado y ademas en la cola"
-        )
-
-    # Los cuatro casos concretos de esta plantilla.
-    for quien in ("Yamal", "Djen", "Olasagasti"):
-        assert not any(quien in n for n in nombres), (
-            f"{quien} es intocable y esta en la cola de venta"
         )
 
 
@@ -829,7 +846,7 @@ def test_el_ritmo_neto_de_la_plantilla_se_publica() -> None:
 
 
 TESTS = [
-    test_ningun_intocable_entra_en_la_cola,
+    test_el_apartado_no_esta_ademas_en_la_cola,
     test_el_portero_titular_no_se_salva_por_accidente,
     test_sin_escalon_conocido_no_se_vende,
     test_pararse_en_cualquier_punto_deja_el_once_en_pie,

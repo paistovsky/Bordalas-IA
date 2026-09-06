@@ -154,11 +154,25 @@ def untouchable_reason(jugador: dict) -> str | None:
             "deshace"
         )
 
-    if int(escalon) >= UNTOUCHABLE_HIERARCHY:
-        return (
-            f"{jugador.get('hierarchy') or 'escalon alto'}: "
-            f"intocable por decision del dueño"
-        )
+    # LA LISTA DE INTOCABLES, DEROGADA (dueño, 21/09/2026)
+    #
+    #     Estaba aqui el veto por escalon: de Clave para arriba,
+    #     nadie se vendia. Nacio el 18/08 de "que no me venda a
+    #     Yamal ni haga locuras", y protegia a cinco de catorce.
+    #
+    #     Se retira porque una lista protege al favorito aunque
+    #     deje de rendir. Lo que la sustituye es la cuenta que se
+    #     hizo con Yamal el 20/09 -un grande solo se suelta si lo
+    #     que entra CABE EN EL ONCE-, y esa cuenta lo soltaria el
+    #     dia que dejase de rendir, cosa que la lista nunca haria.
+    #
+    #     Ver `src/analysis/soltar_un_grande.py`.
+    #
+    #     Lo que NO se va, porque nunca fue una lista de nombres:
+    #     el portero titular de aqui abajo y el "sin escalon no se
+    #     vende" de arriba. El primero encierra el accidente del
+    #     12/09 -el mismo dato llamado `in_lineup` y
+    #     `is_starter`-, que no tiene nada que ver con el cariño.
 
     if (
         int(jugador.get("position") or 0) == GOALKEEPER_POSITION

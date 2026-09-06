@@ -82,7 +82,26 @@ TESTS = [
     "src.analysis.test_acquisition_wiring_v1",
     "src.analysis.test_bid_visibility_v1",
     "src.analysis.test_dashboard_truth_v1",
-    "src.analysis.test_intocables_v1",
+    # LOS INTOCABLES, DEROGADOS (dueño, 21/09/2026)
+    #
+    #     Aqui corria `src.analysis.test_intocables_v1`, que
+    #     vigilaba la lista de jugadores que Pepe no podia vender
+    #     -de Clave para arriba- ordenada por el dueño el 18/08.
+    #     Protegia a cinco de catorce: Yamal, Exposito,
+    #     Olasagasti, Djene y el portero titular.
+    #
+    #     El dueño la retira el 21/09/2026. Se quita de aqui a
+    #     proposito y no se silencia: la lista ya no existe, asi
+    #     que su guardia tampoco tiene que existir.
+    #
+    #     Lo que la sustituye NO es otra lista, es una cuenta:
+    #     `test_calidad_y_porteria_v1`, que exige que lo que entra
+    #     CABE EN EL ONCE antes de soltar a un grande, y que
+    #     ademas conserva las cuatro comprobaciones de aquella
+    #     guardia que nunca fueron una lista -el accidente del
+    #     12/09 con `in_lineup`/`is_starter`, el portero titular,
+    #     el "sin escalon no se vende" y que los vetados se vean-.
+    "src.analysis.test_calidad_y_porteria_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
     "src.analysis.test_ciclo_una_sola_vez_v1",
