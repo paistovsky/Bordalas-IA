@@ -1019,8 +1019,11 @@ def estimate_season_points(
     "coverage", "source"}`. Sin ella el numero es el de siempre,
     pero se marca que se esta valorando a ciegas.
 
-    `raw_points` conserva el numero sin escalar, porque explicar
-    la decision requiere poder decir "97 puntos, pero suplente".
+    `last_season_points` conserva el numero sin escalar, porque
+    explicar la decision requiere poder decir "97 puntos, pero
+    suplente". Son puntos de la temporada ANTERIOR: el alias
+    viejo `raw_points` sigue publicandose y sigue mintiendo por
+    el nombre, asi que se cita el bueno.
     """
 
     fuerza = None
@@ -1079,6 +1082,21 @@ def estimate_season_points(
 
         return {
             "points": int(round(puntos_brutos * factor)),
+
+            # UN NOMBRE QUE NO MIENTA (22/09/2026)
+            #
+            #     Se llamaba solo `raw_points`, y eso PARECE los
+            #     puntos de esta temporada. Son los de la
+            #     ANTERIOR, sin escalar.
+            #
+            #     El 20/09 lo divid por las jornadas jugadas para
+            #     estimar puntos por jornada y salio que Pedri
+            #     hacia 70 por jornada. Lo cace por absurdo; otro
+            #     no lo cazaria.
+            #
+            #     `raw_points` se conserva como alias mientras
+            #     queden lectores, pero el nombre bueno es este.
+            "last_season_points": int(puntos_brutos),
             "raw_points": int(puntos_brutos),
             "source": source,
             "confidence": round(confidence, 4),
@@ -1114,6 +1132,7 @@ def estimate_season_points(
     if tarifa <= 0 or precio <= 0:
         return {
             "points": 0,
+            "last_season_points": 0,
             "raw_points": 0,
             "source": "DESCONOCIDO",
             "confidence": 0.0,

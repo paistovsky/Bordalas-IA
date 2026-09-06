@@ -56,15 +56,70 @@ TOP_PUNTOS = 3
 
 # EL "CLARAMENTE" DE "CLARAMENTE POSITIVO" (regla 18)
 #
-#     Con tres jornadas de muestra, un neto de +0,1 puntos por
-#     jornada es ruido. Se pide medio punto por jornada, que en
-#     35 jornadas son 17,5 puntos: del orden de la distancia que
-#     separa del lider.
+# ============================================================
+# YA NO ES UN DECRETO: TIENE NUMERO (22/09/2026)
+# ============================================================
 #
-#     No es un umbral de mercado -no mueve ningun liston ni
-#     ningun tope-: es cuanto tiene que ganar una venta para que
+#     Nacio como medio punto por jornada porque "en 35 jornadas
+#     son 17,5, del orden de la distancia al lider". Eso es una
+#     analogia, no una medicion, y el encargo pidio darle un
+#     numero de verdad.
+#
+#     LO QUE SE MIDIO. En un cambio de este tipo, lo que SALE
+#     esta medido -sus puntos por partido de esta temporada- y lo
+#     que ENTRA es una PROYECCION. Asi que el margen tiene que
+#     cubrir cuanto se equivoca una proyeccion.
+#
+#     Sobre 259 jugadores del catalogo con al menos dos partidos
+#     jugados, comparando la proyeccion -puntos de la temporada
+#     anterior entre 38- con lo que de verdad estan haciendo:
+#
+#         error (real - proyeccion) en puntos por partido
+#             p10      -1,33
+#             p25      -0,42      <-- de aqui sale el margen
+#             mediana  +0,71
+#             p75      +1,95
+#             desviacion tipica 2,27
+#
+#     Una cuarta parte de las veces la proyeccion se pasa de
+#     largo en 0,42 puntos por partido o mas. Un neto por debajo
+#     de eso puede ser enteramente error de proyeccion: no es una
+#     mejora, es ruido con signo.
+#
+#     Se deja en 0,50 -el p25 redondeado hacia arriba, con un
+#     colchon de 0,08- en vez de bajarlo a 0,42: el numero que
+#     habia resulta estar bien puesto, y moverlo para ganar dos
+#     centesimas seria fingir precision.
+#
+#     Y UN AVISO SOBRE LA PROYECCION MISMA. Ese "puntos de la
+#     temporada anterior entre 38" da por hecho que todos
+#     jugaron las 38, asi que INFRAVALORA a quien se perdio
+#     partidos: la media real supera a la proyectada en +1,01.
+#     Eso hace la prueba mas conservadora -entra menos de lo que
+#     entraria- y por eso no se corrige a ciegas: corregirlo sin
+#     saber los partidos jugados del año pasado seria cambiar un
+#     sesgo conocido por uno desconocido.
+#
+#     No es un umbral de mercado: no mueve ningun liston ni
+#     ningun tope. Es cuanto tiene que ganar una venta para que
 #     merezca la pena deshacer un activo grande.
 MARGEN_NETO = 0.5
+
+
+# De donde sale el 0,50, para que viaje con el numero.
+MARGEN_ORIGEN = {
+    "measured_on": "2026-09-22",
+    "sample": 259,
+    "metric": (
+        "p25 del error (real - proyeccion) en puntos por partido"
+    ),
+    "p25_error": -0.42,
+    "note": (
+        "Una cuarta parte de las proyecciones se pasa de largo en "
+        "0,42 puntos por partido o mas. Por debajo de eso, un "
+        "neto positivo puede ser solo error de proyeccion."
+    ),
+}
 
 
 def safe_int(value, default: int = 0) -> int:
