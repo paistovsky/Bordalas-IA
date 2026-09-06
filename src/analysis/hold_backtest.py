@@ -72,12 +72,28 @@ STORE = Path("data") / "autopilot" / "price_history.json"
 # Los tramos que pide el encargo, mas el de los que caen, que
 # hace falta para la cola de ventas y que esconderlo seria
 # enseñar solo la mitad buena.
+# EL TRAMO DE ARRIBA, PARTIDO (16/09/2026)
+#
+#     Estaba abierto por arriba y eso aplastaba la informacion:
+#     dentro de "> 1 %" convivian un jugador que sube el 1,01 %
+#     diario y uno que sube el 4,85 %, y se les asignaba el mismo
+#     rendimiento.
+#
+#     Se vio en el resultado del 15/09: Gorosabel (4,849 %/dia) y
+#     Roro Riquelme (1,666 %/dia) aterrizaban los dos exactamente
+#     en 1,80 %. Tres veces la tasa, el mismo valor.
+#
+#     La celda buena tenia 142 operaciones, asi que hay de donde
+#     partir. Lo que no llegue a 30 sale marcado como
+#     insuficiente, igual que el resto.
 RATE_BUCKETS = (
     ("CAE", None, 0.0),
     ("0-0,25 %", 0.0, 0.0025),
     ("0,25-0,5 %", 0.0025, 0.005),
     ("0,5-1 %", 0.005, 0.01),
-    ("> 1 %", 0.01, None),
+    ("1-2 %", 0.01, 0.02),
+    ("2-4 %", 0.02, 0.04),
+    ("> 4 %", 0.04, None),
 )
 
 STREAK_BUCKETS = (
@@ -629,4 +645,94 @@ def rate_bucket_of(rate_percent_per_day) -> str | None:
         return _rate_bucket(float(rate_percent_per_day) / 100.0)
 
     except (TypeError, ValueError):
+        return None
+
+
+# ============================================================
+# CUANTO HISTORICO HAY, DE VERDAD (16/09/2026)
+# ============================================================
+#
+#     Nadie sabia cuantos dias de historico tenia produccion.
+#     Toda la discusion de las ultimas tres noches -"el almacen
+#     son seis dias"- salio de mirar una copia local caducada.
+#
+#     Esto se publica en el dashboard para que la pregunta no
+#     haya que volver a hacerla nunca.
+
+
+def store_depth(path: Path | None = None) -> dict:
+    """
+    Dias de historico y fecha del registro mas antiguo.
+
+    Se lee del almacen de verdad, no de una suposicion.
+    """
+
+    try:
+        almacen = _load(path)
+
+        marcas = [
+            t
+            for ficha in (almacen.get("players") or {}).values()
+            if isinstance(ficha, dict)
+            for t in (ficha.get("t") or [])
+        ]
+
+        if not marcas:
+            return {
+                "available": False,
+                "days": 0,
+                "oldest": None,
+                "newest": None,
+                "players": 0,
+                "reason": (
+                    "No hay almacen de precios, o esta vacio."
+                ),
+            }
+
+        desde = datetime.fromtimestamp(min(marcas))
+        hasta = datetime.fromtimestamp(max(marcas))
+
+        dias = len(
+            {
+                datetime.fromtimestamp(t).date()
+                for t in marcas
+            }
+        )
+
+        # Con cuantos dias se puede medir cada horizonte: una
+        # racha de `n` dias mas un horizonte de `m` necesitan
+        # `n + m + 1` dias de serie.
+        medibles = [m for m in HORIZONS if m + 2 <= dias]
+
+        return {
+            "available": True,
+            "days": dias,
+            "span_days": (hasta.date() - desde.date()).days + 1,
+            "oldest": desde.date().isoformat(),
+            "newest": hasta.date().isoformat(),
+            "players": len(almacen.get("players") or {}),
+            "points": len(marcas),
+            "retention_days": _retention(),
+            "measurable_horizons": medibles,
+            "reason": None,
+        }
+
+    except Exception as error:                       # noqa: BLE001
+        return {
+            "available": False,
+            "days": 0,
+            "oldest": None,
+            "reason": f"{type(error).__name__}: {error}",
+        }
+
+
+def _retention() -> int | None:
+    try:
+        from src.analysis.price_history_store import (
+            MAX_HISTORY_DAYS,
+        )
+
+        return MAX_HISTORY_DAYS
+
+    except Exception:                               # noqa: BLE001
         return None

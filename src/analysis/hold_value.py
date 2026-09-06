@@ -234,6 +234,34 @@ def hold_value(
             margin=MARGIN,
         )
 
+        # LAS DOS CIFRAS, UNA AL LADO DE LA OTRA (16/09/2026)
+        #
+        #     La alternativa que se propuso el 16/09 es esta misma
+        #     formula SIN el recorte: mantener la tasa propia del
+        #     jugador y castigar la racha larga solo por donde
+        #     esta medido el castigo, la continuacion.
+        #
+        #     Se midio cual de las dos sostiene el dato, dentro de
+        #     la muestra, comparando racha 1 con racha 2:
+        #
+        #         continuacion   92,0 % -> 94,1 %   SUBE
+        #         tasa siguiente  1,36 % ->  1,19 % (tramo 1-2 %)
+        #                         2,56 % ->  2,28 % (tramo 2-4 %)
+        #
+        #     La continuacion no baja entre racha 1 y 2: sube. Lo
+        #     que baja es la TASA. Asi que la caida no la explica
+        #     la continuacion, y por la regla del propio encargo
+        #     se queda el recorte, que es el conservador.
+        #
+        #     Pero la otra cifra se publica igual, para poder
+        #     mirarlas juntas cuando haya mas historico.
+        sin_recortar = value_with_confidence_on_gain(
+            precio,
+            ganancia_sin_recortar,
+            confianza,
+            margin=MARGIN,
+        )
+
         if maximo <= precio:
             return _sin_valor(
                 "SIN_MARGEN",
@@ -264,6 +292,10 @@ def hold_value(
             "calibrated_streak_max": recorte["max_streak"],
             "trend_days": safe_int(trend_days),
             "gain_before_clamp": ganancia_sin_recortar,
+
+            # La alternativa de la continuacion: la misma formula
+            # sin el recorte. Observador: no decide.
+            "value_unclamped": sin_recortar,
             "clamped": bool(
                 recorte["applies"]
                 and ganancia < ganancia_sin_recortar

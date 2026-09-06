@@ -178,6 +178,12 @@ def test_tener_paga_en_el_tramo_de_arriba() -> None:
 
         Si esto deja de ser cierto, la via TENER se apaga: no
         estaria apoyada por nada.
+
+    EL TRAMO SE PARTIO EL 16/09
+
+        Antes era "> 1 %" abierto por arriba, y ahi dentro
+        convivian un jugador al 1,01 %/dia y otro al 4,85 %. Este
+        test miraba esa celda; ahora mira las tres.
     """
 
     resultado = _resultado()
@@ -185,22 +191,58 @@ def test_tener_paga_en_el_tramo_de_arriba() -> None:
     if resultado is None:
         return
 
-    celda = resultado["cells"]["> 1 %|1 dia|3"]
+    celda = resultado["cells"]["2-4 %|1 dia|3"]
 
     if not celda.get("enough"):
         return
 
     assert celda["median"] > 0.03, (
-        f"comprar a mas del 1 %/dia y vender a tres dias rinde "
-        f"{celda['median'] * 100:.2f} % de mediana: por debajo "
-        f"del 3 % que exige la casa, asi que la via TENER no "
-        f"esta respaldada"
+        f"comprar entre el 2 y el 4 %/dia y vender a tres dias "
+        f"rinde {celda['median'] * 100:.2f} % de mediana: por "
+        f"debajo del 3 % que exige la casa, asi que la via TENER "
+        f"no esta respaldada"
     )
 
     assert celda["loss_rate"] < 0.20, (
         f"{celda['loss_rate'] * 100:.0f} % de operaciones en "
         f"perdida en el tramo bueno"
     )
+
+
+def test_a_mas_tasa_mas_rendimiento() -> None:
+    """
+    LO QUE DESTAPO PARTIR EL TRAMO
+
+        Con el tramo abierto por arriba, Gorosabel (4,849 %/dia) y
+        Roro Riquelme (1,666 %/dia) aterrizaban los dos en el
+        mismo 1,80 %. Tres veces la tasa, el mismo valor.
+
+        Partido, la escalera se ve: +3,22 % / +5,61 % / +18,37 %.
+        Si algun dia deja de ser monotona, el corte de los tramos
+        esta mal puesto.
+    """
+
+    resultado = _resultado()
+
+    if resultado is None:
+        return
+
+    medianas = []
+
+    for tramo in ("1-2 %", "2-4 %", "> 4 %"):
+
+        celda = resultado["cells"][f"{tramo}|1 dia|3"]
+
+        if not celda.get("enough"):
+            return
+
+        medianas.append((tramo, celda["median"]))
+
+    for (tramo_a, a), (tramo_b, b) in zip(medianas, medianas[1:]):
+        assert b > a, (
+            f"{tramo_b} rinde {b * 100:.2f} % y {tramo_a} rinde "
+            f"{a * 100:.2f} %: mas tasa deberia rendir mas"
+        )
 
 
 def test_quien_cae_vuelve_a_caer() -> None:
@@ -269,6 +311,7 @@ TESTS = [
     test_la_racha_cuenta_dias_del_mismo_signo,
     test_una_serie_de_un_solo_dia_no_produce_operaciones,
     test_tener_paga_en_el_tramo_de_arriba,
+    test_a_mas_tasa_mas_rendimiento,
     test_quien_cae_vuelve_a_caer,
     test_el_horizonte_elegido_es_el_que_maximiza_la_mediana,
     test_el_retrotest_no_lanza_sin_almacen,

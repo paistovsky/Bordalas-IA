@@ -111,6 +111,12 @@ CADENAS = [
         "PressPanel",
         ["BrainPage.jsx"],
     ),
+    (
+        "arbiter",
+        "arbiter",
+        "ArbiterPanel",
+        ["BrainPage.jsx"],
+    ),
 ]
 
 
@@ -897,6 +903,38 @@ def test_el_rango_de_validez_se_ve_en_pantalla() -> None:
     )
 
 
+def test_el_arbitro_enseña_los_dias_y_las_ventas() -> None:
+    """
+    Sin los dias, un -0,13 % parece un veredicto sobre la tesis
+    cuando tres de las siete compras son de hace cinco horas. Y
+    mirando solo las compras, Pollo parece un acumulador cuando
+    vendio 21,26 M el mismo dia.
+    """
+
+    panel = _lee(DASHBOARD / "components" / "ArbiterPanel.jsx")
+
+    assert "c.days" in panel, (
+        "el marcador no enseña cuantos dias han pasado"
+    )
+    assert "m.sold_total" in panel, (
+        "solo se ven las compras: media foto"
+    )
+    assert "rule_backtest" in panel, (
+        "no se ve la prueba de nuestra propia regla"
+    )
+    assert "rejections" in panel, (
+        "no se ve el libro de rechazos"
+    )
+    assert "history" in panel and "measurable_horizons" in panel, (
+        "no se ven los dias de historico ni que horizontes "
+        "permiten"
+    )
+    assert "coherencia interna" in panel, (
+        "no se avisa de que la regla se calibro sobre esos mismos "
+        "datos"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -927,6 +965,7 @@ TESTS = [
     test_el_desvio_de_puja_se_ve_con_su_precio,
     test_las_cuatro_vias_se_ven_una_al_lado_de_otra,
     test_el_rango_de_validez_se_ve_en_pantalla,
+    test_el_arbitro_enseña_los_dias_y_las_ventas,
     test_el_ritmo_neto_de_la_plantilla_se_ve,
     test_ningun_panel_nuevo_decide_nada,
 ]

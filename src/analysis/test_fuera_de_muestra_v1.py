@@ -95,7 +95,10 @@ def test_la_racha_maxima_medida_a_tres_dias_es_dos() -> None:
         f"{calibrado['max_streak']} dias con una ventana de seis"
     )
 
-    tramo = calibrado["by_rate_bucket"].get("> 1 %")
+    # El tramo de arriba se partio el 16/09 en 1-2 %, 2-4 % y
+    # > 4 %. Se mira el primero, que es donde caen Roro (1,666) y
+    # Amatucci (1,098).
+    tramo = calibrado["by_rate_bucket"].get("1-2 %")
 
     assert tramo and tramo.get("calibrated")
     assert tramo["max_streak"] == 2, (

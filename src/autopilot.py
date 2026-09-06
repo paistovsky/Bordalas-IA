@@ -3440,6 +3440,54 @@ def confirm_negotiation_transitions(
 
 
 
+def sync_rejections_book(
+    snapshot: dict,
+    result: dict | None = None,
+) -> dict:
+    """
+    El libro de rechazos: lo que nos juzga a nosotros.
+
+    La casa puntua a las fuentes con Brier desde el 06/09 y nunca
+    se habia aplicado esa vara a sus propias decisiones. Cada
+    objetivo rechazado se apunta con su motivo y su precio, y se
+    cierra tres dias despues con el precio de entonces.
+
+    Empieza vacio a proposito: hasta que venza el primero no dice
+    nada, y decir que no dice nada es parte de decirlo.
+
+    FASE OBSERVADOR. Blindado: un fallo del libro jamas puede
+    detener un ciclo.
+    """
+
+    try:
+        from src.analysis.rejection_ledger import sync_rejections
+
+        objetivos = (
+            ((result or {}).get("state") or {})
+            .get("acquisition", {})
+            .get("targets")
+        )
+
+        precios = {
+            str(player_id): (ficha or {}).get("price")
+            for player_id, ficha in (
+                (snapshot.get("catalog") or {})
+                .get("data", {})
+                .get("players")
+                or {}
+            ).items()
+            if isinstance(ficha, dict)
+        }
+
+        return sync_rejections(objetivos, precios)
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "reason": f"{type(error).__name__}: {error}",
+        }
+
+
 def sync_press(
     snapshot: dict,
 ) -> dict:
@@ -4059,6 +4107,10 @@ def run_cycle(
     # LA PRENSA (05/09/2026). Dos veces al dia, por TTL.
     prensa = sync_press(snapshot)
 
+    # EL LIBRO DE RECHAZOS (16/09/2026). Lo que nos juzga
+    # a nosotros, con la misma vara que a las fuentes.
+    rechazos = sync_rejections_book(snapshot, result)
+
     if ojeador.get("players"):
         print()
         print(
@@ -4091,6 +4143,12 @@ def run_cycle(
 
     elif prensa.get("error"):
         print(f"Prensa: no disponible ({prensa['error']}).")
+
+    if rechazos.get("recorded"):
+        print(
+            f"Rechazos: {rechazos['recorded']} apuntados, "
+            f"{rechazos.get('closed', 0)} cerrados."
+        )
 
     # El libro de pujas se cierra aqui, en la misma fase que el de
     # fuentes: post-ejecucion, leyendo el tablon ya persistido en vez

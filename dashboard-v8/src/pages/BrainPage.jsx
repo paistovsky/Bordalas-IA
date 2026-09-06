@@ -1,5 +1,6 @@
 import ScoutPanel from "../components/ScoutPanel";
 import PressPanel from "../components/PressPanel";
+import ArbiterPanel from "../components/ArbiterPanel";
 import StrategyPanel from "../components/StrategyPanel";
 import SolvencyPlansPanel from "../components/SolvencyPlansPanel";
 import SolvencyClockPanel from "../components/SolvencyClockPanel";
@@ -336,6 +337,12 @@ export default function BrainPage({ data }) {
             Va primero porque es la unica fuente que no copia el
             precio de Biwenger: lo de abajo es la misma medida
             repetida tres veces. */}
+        {/* EL ARBITRO (16/09/2026)
+            Va lo primero de ESTRATEGIA porque es la pregunta de
+            la que cuelgan las demas: ¿tenia razon el modelo al
+            no comprar? */}
+        <ArbiterPanel data={data} />
+
         <PressPanel data={data} />
 
         <ScoutPanel data={data} />

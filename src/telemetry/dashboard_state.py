@@ -3279,6 +3279,56 @@ def build_dashboard_state() -> dict:
             "unmatched": [],
         }
 
+    # EL ARBITRO (16/09/2026)
+    #
+    #     ¿Quien tenia razon? Cuatro noches concluyendo que no hay
+    #     que comprar nada mientras Pollo compraba siete
+    #     jugadores. Esto lo cuenta con numeros: lo que pago, lo
+    #     que vale hoy, y cuantos dias han pasado.
+    #
+    #     Y el libro de rechazos, que es lo que nos juzga a
+    #     nosotros: cada objetivo que Pepe rechazo contra lo que
+    #     ha hecho su precio desde entonces.
+    #
+    #     Observador puro: ningun motor lee este bloque.
+    try:
+        from src.analysis.hold_backtest import store_depth
+        from src.analysis.rejection_ledger import (
+            rule_backtest,
+            summary as rejection_summary,
+        )
+        from src.analysis.rival_scoreboard import build_scoreboard
+
+        arbitro = build_scoreboard(
+            {
+                "meta": {
+                    "generated_at": datetime.now().isoformat()
+                },
+                "rival_squads": rival_squads,
+                "league_center": league_center,
+                "race": race,
+            }
+        )
+
+        arbitro["rejections"] = rejection_summary()
+        arbitro["rule_backtest"] = rule_backtest()
+
+        # Y la linea que faltaba: cuantos dias de historico hay de
+        # verdad. Toda la discusion de "el almacen son seis dias"
+        # salio de mirar una copia local caducada.
+        arbitro["history"] = store_depth()
+
+    except Exception as error:                      # noqa: BLE001
+        arbitro = {
+            "available": False,
+            "observer_only": True,
+            "managers": {},
+            "reason": (
+                f"No se pudo montar el arbitro: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     # LA CONCENTRACION DE LA PLANTILLA (10/09/2026)
     #
     # Cuanto pesa el jugador mas caro y cuantos hay del mismo
@@ -3641,6 +3691,10 @@ def build_dashboard_state() -> dict:
         # A quien le toca salir cuando haga falta caja, en orden y
         # con el motivo. Observador puro: no vende nada.
         "sale_order": sale_order,
+
+        # Quien tenia razon: el marcador de los rivales, el libro
+        # de rechazos y los dias de historico que hay de verdad.
+        "arbiter": arbitro,
 
         # Cuanto queda para el plazo de solvencia -T-6h del primer
         # partido-, si la deuda llega tapada y con que venta.

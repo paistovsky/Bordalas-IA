@@ -162,6 +162,16 @@ export function normalizeStatus(raw = {}) {
       blocked: []
     },
 
+    // EL ARBITRO (16/09/2026)
+    //
+    // Quien tenia razon: el marcador de los rivales, el libro de
+    // nuestros rechazos y los dias de historico que hay de verdad.
+    arbiter: raw.arbiter || {
+      available: false,
+      managers: {},
+      history: {}
+    },
+
     // EL RELOJ DE LA SOLVENCIA (12/09/2026)
     //
     // Cuanto queda para el plazo -T-6h del primer partido-, si
