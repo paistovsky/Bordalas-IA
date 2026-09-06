@@ -678,12 +678,27 @@ def store_depth(path: Path | None = None) -> dict:
         ]
 
         if not marcas:
+            # LA FORMA NO CAMBIA CON EL CONTENIDO (17/09/2026)
+            #
+            #     Sin almacen faltaban `retention_days`,
+            #     `measurable_horizons`, `span_days` y `points`.
+            #     Quien los daba por seguros -la guardia del
+            #     arbitro- se caia en un checkout limpio: verde en
+            #     el disco del dueño, rojo en Actions.
+            #
+            #     "Ausencia de dato != dato" vale para el VALOR,
+            #     no para la clave: los campos siguen ahi, vacios
+            #     y con el motivo escrito.
             return {
                 "available": False,
                 "days": 0,
+                "span_days": 0,
                 "oldest": None,
                 "newest": None,
                 "players": 0,
+                "points": 0,
+                "retention_days": _retention(),
+                "measurable_horizons": [],
                 "reason": (
                     "No hay almacen de precios, o esta vacio."
                 ),

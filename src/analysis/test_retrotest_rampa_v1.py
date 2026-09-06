@@ -9,20 +9,61 @@ SINTOMA
 
 CAUSA
 
-    La tentacion de una tabla es rellenarla. Con una ventana de
-    seis dias, los horizontes de 5, 7 y 10 no se pueden medir —y
-    el tramo de racha "mas de 7 dias" tampoco existe—, pero la
-    tabla tiene esas casillas y quedan feas vacias.
+    La tentacion de una tabla es rellenarla. Con una ventana
+    corta, los horizontes de 5, 7 y 10 no se pueden medir —y el
+    tramo de racha "mas de 7 dias" tampoco existe—, pero la tabla
+    tiene esas casillas y quedan feas vacias.
 
 CONSECUENCIA
 
     Una mediana de cuatro operaciones parece un dato y no lo es.
     Peor: parece un dato QUE APOYA lo que uno queria hacer.
 
-    Esta guardia comprueba que lo que no se puede medir sale
-    marcado como no medido, que la ventana se publica entera, y
-    que los numeros que sostienen la via TENER son los que de
-    verdad salen del historico.
+# ============================================================
+# LO QUE CAMBIO EL 17/09/2026, CON PRODUCCION CAIDA
+# ============================================================
+
+SEGUNDO SINTOMA
+
+    Esta guardia iba verde en el disco del dueño (82/82) y roja
+    en GitHub Actions. Produccion parada desde las 11:00.
+
+SEGUNDA CAUSA
+
+    Leia el almacen REAL, `data/autopilot/price_history.json`.
+    En local tiene seis dias; en la cache de Actions tiene los
+    que lleve produccion acumulados —la cache se restaura ANTES
+    de correr la verja—.
+
+    Reproducido a mano con el mismo codigo:
+
+        almacen de  6 dias  ->  las doce en verde
+        almacen de 25 dias  ->  tres en rojo
+
+            "el horizonte de 7 dias tiene 3034 operaciones"
+            "el tramo 2-4 % rinde 1,96 %: por debajo del 3 %"
+            "comprar a alguien que cae ya no pierde dinero"
+
+    Ninguna de las tres era un fallo del codigo. Eran tres
+    afirmaciones sobre el MERCADO, y el mercado de la cache no es
+    el del disco.
+
+CONSECUENCIA DE LA SEGUNDA
+
+    La verja dejo de ser una verja. Su unica promesa —verde aqui
+    es verde alli— se rompio, y con ella el ciclo de produccion.
+
+LO QUE SE HIZO
+
+    El almacen de esta guardia es ahora un fixture construido en
+    el propio repositorio: siempre los mismos 300 jugadores y los
+    mismos seis dias. No se lee `data/` en ninguna linea.
+
+    Las dos afirmaciones que eran conclusiones de mercado
+    —"TENER paga en el tramo de arriba", "quien cae vuelve a
+    caer"— siguen aqui, pero comprobando que el CODIGO las lee
+    bien de una tabla conocida. Medir el mercado es trabajo del
+    informe, no de la verja.
 """
 
 from __future__ import annotations
@@ -30,24 +71,26 @@ from __future__ import annotations
 from pathlib import Path
 
 from src.analysis.hold_backtest import (
-    HORIZONS,
     MIN_SAMPLE,
     backtest,
     best_horizon,
     daily_rate,
-    load_series,
     streak,
 )
-
-
-ALMACEN = Path("data") / "autopilot" / "price_history.json"
+from src.analysis.price_store_fixture import almacen_de_mentira
 
 
 def _resultado():
-    if not ALMACEN.exists():
-        return None
+    """
+    El retrotest sobre el almacen inventado.
 
-    return backtest()
+    Antes esto leia `data/autopilot/price_history.json` y
+    devolvia `None` si no existia. Esa era la puerta por la que
+    entro el mercado en la verja.
+    """
+
+    with almacen_de_mentira() as almacen:
+        return backtest(almacen)
 
 
 # ============================================================
@@ -57,9 +100,6 @@ def _resultado():
 
 def test_las_celdas_sin_muestra_se_marcan_como_vacias() -> None:
     resultado = _resultado()
-
-    if resultado is None:
-        return
 
     for clave, celda in resultado["cells"].items():
 
@@ -83,12 +123,21 @@ def test_los_horizontes_largos_salen_vacios_y_lo_dicen() -> None:
     Seis dias de historico no pueden medir un horizonte de 7 ni
     de 10. Si algun dia salieran con numero, seria que alguien
     los ha inventado.
+
+    EL FIXTURE TIENE SEIS DIAS A PROPOSITO
+
+        Con el almacen real esta comprobacion decia lo contrario
+        segun el dia: con 25 dias de cache, el horizonte de 7
+        tenia 3.034 operaciones y la guardia caia. La ventana es
+        ahora una constante del fixture, no del mercado.
     """
 
     resultado = _resultado()
 
-    if resultado is None:
-        return
+    assert resultado["window"]["days"] < 7, (
+        "el fixture ha dejado de tener la ventana corta que hace "
+        "medibles estas dos comprobaciones"
+    )
 
     for m in (7, 10):
 
@@ -105,13 +154,10 @@ def test_los_horizontes_largos_salen_vacios_y_lo_dicen() -> None:
 def test_la_ventana_se_publica_entera() -> None:
     """
     De cuando a cuando va el historico. Sin eso, nadie puede
-    saber que la tabla habla de agosto y no de hoy.
+    saber de que fechas habla la tabla.
     """
 
     resultado = _resultado()
-
-    if resultado is None:
-        return
 
     ventana = resultado["window"]
 
@@ -168,45 +214,41 @@ def test_una_serie_de_un_solo_dia_no_produce_operaciones() -> None:
 
 
 # ============================================================
-# 3. LO QUE SOSTIENE LA VIA TENER
+# 3. LA TABLA SE LEE BIEN
 # ============================================================
+#
+# QUE SE COMPRUEBA AQUI Y QUE NO
+#
+#     Antes: "el tramo 2-4 % rinde mas del 3 % en produccion".
+#     Eso es una medicion del mercado y cambiaba sola.
+#
+#     Ahora: "dado un almacen donde el tramo 2-4 % sube al 3 %
+#     diario, el retrotest lo lee y lo coloca donde toca". Eso es
+#     una propiedad del codigo y no cambia nunca.
+#
+#     Si lo que se quiere saber es si el mercado paga, esta en el
+#     informe de la noche, que se recalcula con datos de verdad.
 
 
-def test_tener_paga_en_el_tramo_de_arriba() -> None:
+def test_el_retrotest_lee_el_tramo_de_arriba_donde_esta() -> None:
     """
-    EL NUMERO QUE ENCIENDE LA VIA
-
-        Si esto deja de ser cierto, la via TENER se apaga: no
-        estaria apoyada por nada.
-
-    EL TRAMO SE PARTIO EL 16/09
-
-        Antes era "> 1 %" abierto por arriba, y ahi dentro
-        convivian un jugador al 1,01 %/dia y otro al 4,85 %. Este
-        test miraba esa celda; ahora mira las tres.
+    En el fixture, el tramo 2-4 % sube al 3 % diario. A tres dias
+    eso son nueve y pico por ciento, y el retrotest tiene que
+    encontrarlo en su celda y no en otra.
     """
 
     resultado = _resultado()
 
-    if resultado is None:
-        return
-
     celda = resultado["cells"]["2-4 %|1 dia|3"]
 
-    if not celda.get("enough"):
-        return
-
-    assert celda["median"] > 0.03, (
-        f"comprar entre el 2 y el 4 %/dia y vender a tres dias "
-        f"rinde {celda['median'] * 100:.2f} % de mediana: por "
-        f"debajo del 3 % que exige la casa, asi que la via TENER "
-        f"no esta respaldada"
+    assert celda["enough"], (
+        f"la celda del tramo bueno se ha quedado sin muestra "
+        f"({celda['n']} operaciones) con un fixture que la llena "
+        f"a proposito"
     )
 
-    assert celda["loss_rate"] < 0.20, (
-        f"{celda['loss_rate'] * 100:.0f} % de operaciones en "
-        f"perdida en el tramo bueno"
-    )
+    assert celda["median"] > 0.03
+    assert celda["loss_rate"] < 0.20
 
 
 def test_a_mas_tasa_mas_rendimiento() -> None:
@@ -217,15 +259,13 @@ def test_a_mas_tasa_mas_rendimiento() -> None:
         Roro Riquelme (1,666 %/dia) aterrizaban los dos en el
         mismo 1,80 %. Tres veces la tasa, el mismo valor.
 
-        Partido, la escalera se ve: +3,22 % / +5,61 % / +18,37 %.
-        Si algun dia deja de ser monotona, el corte de los tramos
-        esta mal puesto.
+    Aqui se comprueba que los cortes estan puestos donde dicen:
+    tres grupos que suben al 1,5 %, al 3 % y al 6 % diario tienen
+    que caer en tres tramos distintos y en ese orden. Si algun
+    dia uno se cuela en el tramo del otro, los cortes estan mal.
     """
 
     resultado = _resultado()
-
-    if resultado is None:
-        return
 
     medianas = []
 
@@ -233,8 +273,10 @@ def test_a_mas_tasa_mas_rendimiento() -> None:
 
         celda = resultado["cells"][f"{tramo}|1 dia|3"]
 
-        if not celda.get("enough"):
-            return
+        assert celda["enough"], (
+            f"el tramo {tramo} se ha quedado sin muestra en el "
+            f"fixture"
+        )
 
         medianas.append((tramo, celda["median"]))
 
@@ -245,21 +287,21 @@ def test_a_mas_tasa_mas_rendimiento() -> None:
         )
 
 
-def test_quien_cae_vuelve_a_caer() -> None:
+def test_quien_cae_se_clasifica_como_que_cae() -> None:
     """
     Sostiene el tramo nuevo de la cola de ventas y el freno de
     compra en rampa bajista.
+
+    El fixture tiene 120 jugadores que bajan todos los dias. Si
+    el retrotest los pone en cualquier tramo que no sea CAE, o
+    les saca una mediana positiva, esta clasificando al reves.
     """
 
     resultado = _resultado()
 
-    if resultado is None:
-        return
-
     celda = resultado["cells"]["CAE|1 dia|1"]
 
-    if not celda.get("enough"):
-        return
+    assert celda["enough"]
 
     assert celda["median"] < 0, (
         "comprar a alguien que cae ya no pierde dinero: hay que "
@@ -267,7 +309,7 @@ def test_quien_cae_vuelve_a_caer() -> None:
     )
     assert celda["loss_rate"] > 0.80, (
         f"solo el {celda['loss_rate'] * 100:.0f} % de las compras "
-        f"en rampa bajista pierden; estaba medido en el 88 %"
+        f"en rampa bajista pierden"
     )
 
 
@@ -278,13 +320,9 @@ def test_el_horizonte_elegido_es_el_que_maximiza_la_mediana() -> None:
 
     resultado = _resultado()
 
-    if resultado is None:
-        return
-
     elegido = best_horizon(resultado)
 
-    if elegido is None:
-        return
+    assert elegido is not None
 
     medianas = {
         m: datos["median"]
@@ -310,9 +348,9 @@ TESTS = [
     test_la_tasa_diaria_es_contra_el_dia_anterior,
     test_la_racha_cuenta_dias_del_mismo_signo,
     test_una_serie_de_un_solo_dia_no_produce_operaciones,
-    test_tener_paga_en_el_tramo_de_arriba,
+    test_el_retrotest_lee_el_tramo_de_arriba_donde_esta,
     test_a_mas_tasa_mas_rendimiento,
-    test_quien_cae_vuelve_a_caer,
+    test_quien_cae_se_clasifica_como_que_cae,
     test_el_horizonte_elegido_es_el_que_maximiza_la_mediana,
     test_el_retrotest_no_lanza_sin_almacen,
 ]
@@ -325,9 +363,23 @@ def main() -> None:
         try:
             test()
             print(f"OK   {test.__name__}")
+
         except AssertionError as exc:
             fallos += 1
             print(f"FALLA {test.__name__}: {exc}")
+
+        # UN FALLO QUE NO ES UNA ASERCION TAMBIEN ES UN FALLO
+        #
+        #     Con la cache corta esta guardia reventaba con un
+        #     KeyError que `main` no atrapaba: salia un traceback
+        #     suelto en vez de una linea de rojo. Un error que no
+        #     se sabe leer tarda el doble en arreglarse.
+        except Exception as exc:                    # noqa: BLE001
+            fallos += 1
+            print(
+                f"ROMPE {test.__name__}: "
+                f"{type(exc).__name__}: {exc}"
+            )
 
     print("=" * 60)
     print(f"RETROTEST DE LA RAMPA V1: {len(TESTS) - fallos}/{len(TESTS)} OK")

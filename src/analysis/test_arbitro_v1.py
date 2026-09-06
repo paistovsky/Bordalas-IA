@@ -41,6 +41,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from src.analysis.hold_backtest import store_depth
+from src.analysis.price_store_fixture import almacen_de_mentira
 from src.analysis.rejection_ledger import (
     HORIZON_DAYS,
     MIN_SAMPLE,
@@ -438,9 +439,51 @@ def test_los_dias_de_historico_se_publican() -> None:
     Toda la discusion de "el almacen son seis dias" salio de
     mirar una copia local caducada. Que la pregunta no haya que
     volver a hacerla.
+
+    SOBRE EL FIXTURE (17/09/2026)
+
+        Esto llamaba a `store_depth()` a secas, que lee el
+        almacen real. En un checkout limpio -lo que tiene Actions
+        cuando la cache no acierta- el objeto venia sin
+        `retention_days` y la guardia se caia.
+
+        Eran dos fallos en uno: la guardia leia estado, y
+        `store_depth` cambiaba de FORMA segun hubiera almacen o
+        no. Lo segundo se arreglo en el modulo; lo primero, aqui.
     """
 
-    profundidad = store_depth()
+    with almacen_de_mentira() as almacen:
+
+        profundidad = store_depth(almacen)
+
+        for clave in (
+            "days",
+            "oldest",
+            "newest",
+            "retention_days",
+            "measurable_horizons",
+        ):
+            assert clave in profundidad, f"falta `{clave}`"
+
+        assert profundidad["available"]
+        assert profundidad["days"] >= 1
+        assert profundidad["oldest"]
+        assert profundidad["retention_days"] == 60
+
+
+def test_la_profundidad_tiene_la_misma_forma_sin_almacen() -> None:
+    """
+    LO QUE PARTIO LA VERJA
+
+        Sin almacen faltaban claves, y quien las daba por seguras
+        se caia. La ausencia de dato se dice con el valor vacio y
+        el motivo escrito, nunca quitando el campo.
+    """
+
+    vacio = store_depth(Path("no") / "existe.json")
+
+    assert vacio["available"] is False
+    assert vacio["reason"]
 
     for clave in (
         "days",
@@ -449,12 +492,12 @@ def test_los_dias_de_historico_se_publican() -> None:
         "retention_days",
         "measurable_horizons",
     ):
-        assert clave in profundidad, f"falta `{clave}`"
+        assert clave in vacio, (
+            f"sin almacen falta `{clave}`: la forma del objeto "
+            f"cambia con el contenido"
+        )
 
-    if profundidad["available"]:
-        assert profundidad["days"] >= 1
-        assert profundidad["oldest"]
-        assert profundidad["retention_days"] == 60
+    assert vacio["measurable_horizons"] == []
 
 
 def test_los_horizontes_medibles_salen_de_los_dias() -> None:
@@ -463,16 +506,19 @@ def test_los_horizontes_medibles_salen_de_los_dias() -> None:
     seis dias de historico.
     """
 
-    profundidad = store_depth()
+    with almacen_de_mentira() as almacen:
 
-    if not profundidad["available"]:
-        return
+        profundidad = store_depth(almacen)
 
-    for m in profundidad["measurable_horizons"]:
-        assert m + 2 <= profundidad["days"], (
-            f"dice poder medir un horizonte de {m} dias con "
-            f"{profundidad['days']} dias de historico"
+        assert profundidad["measurable_horizons"], (
+            "el fixture no produce ningun horizonte medible"
         )
+
+        for m in profundidad["measurable_horizons"]:
+            assert m + 2 <= profundidad["days"], (
+                f"dice poder medir un horizonte de {m} dias con "
+                f"{profundidad['days']} dias de historico"
+            )
 
 
 # ============================================================
@@ -532,6 +578,7 @@ TESTS = [
     test_la_regla_discrimina_de_verdad,
     test_los_dos_grupos_publican_su_muestra,
     test_los_dias_de_historico_se_publican,
+    test_la_profundidad_tiene_la_misma_forma_sin_almacen,
     test_los_horizontes_medibles_salen_de_los_dias,
     test_el_arbitro_no_decide_nada,
     test_el_bloque_entero_no_lanza,
