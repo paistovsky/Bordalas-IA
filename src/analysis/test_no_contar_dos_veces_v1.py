@@ -55,6 +55,36 @@ FUENTE = Path("src/analysis/hold_value.py")
 
 
 # Amatucci, con los numeros de la foto de produccion del 06/09.
+# UNA CALIBRACION FIJA PARA LAS TRES DE ABAJO (17/09/2026)
+#
+#     Estas tres comprueban la FORMULA -que la ganancia es solo
+#     la rampa, que la confianza descuenta la ganancia y no el
+#     capital, que una racha larga no vale mas que una corta-.
+#
+#     Llamaban a `hold_value` sin calibracion, asi que leian el
+#     almacen real por debajo. El dia que llego el interruptor de
+#     la via, el tramo de Amatucci se apago y las tres se cayeron
+#     sin haber cambiado nada de lo que vigilan.
+#
+#     Es el mismo fallo que tiro produccion esta mañana, un piso
+#     mas abajo. Con la calibracion puesta a mano, la formula se
+#     mide sola.
+RESPALDADA = {
+    "available": True,
+    "max_streak": 2,
+    "by_rate_bucket": {
+        "1-2 %": {
+            "calibrated": True,
+            "band": "1 dia",
+            "max_streak": 2,
+            "median": 0.045,
+            "loss_rate": 0.07,
+            "n": 68,
+        },
+    },
+}
+
+
 PRECIO = 3_670_000
 TASA = 1.098
 RACHA = 19
@@ -130,6 +160,7 @@ def test_la_ganancia_es_solo_la_rampa() -> None:
         rate_percent_per_day=TASA,
         trend_days=RACHA,
         sources=3,
+        calibration_override=RESPALDADA,
     )
 
     assert salida["raw_gain"] <= rampa, (
@@ -149,6 +180,20 @@ def test_la_ganancia_es_solo_la_rampa() -> None:
         rate_percent_per_day=2.0,
         trend_days=1,
         sources=3,
+        calibration_override={
+            "available": True,
+            "max_streak": 2,
+            "by_rate_bucket": {
+                "2-4 %": {
+                    "calibrated": True,
+                    "band": "1 dia",
+                    "max_streak": 2,
+                    "median": 0.093,
+                    "loss_rate": 0.03,
+                    "n": 60,
+                },
+            },
+        },
     )
 
     assert dentro["clamped"] is False
@@ -210,6 +255,7 @@ def test_la_confianza_descuenta_la_ganancia_no_el_capital() -> None:
         rate_percent_per_day=TASA,
         trend_days=RACHA,
         sources=3,
+        calibration_override=RESPALDADA,
     )
 
     assert salida["value"] > PRECIO, (
@@ -238,8 +284,14 @@ def test_una_racha_larga_vale_menos_que_una_corta() -> None:
     numeros.
     """
 
-    corta = hold_value(PRECIO, TASA, trend_days=2, sources=3)
-    larga = hold_value(PRECIO, TASA, trend_days=19, sources=3)
+    corta = hold_value(
+        PRECIO, TASA, trend_days=2, sources=3,
+        calibration_override=RESPALDADA,
+    )
+    larga = hold_value(
+        PRECIO, TASA, trend_days=19, sources=3,
+        calibration_override=RESPALDADA,
+    )
 
     assert corta["value"] > larga["value"], (
         f"una racha de 2 dias vale {corta['value']:,} y una de 19 "

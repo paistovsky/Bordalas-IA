@@ -1,5 +1,6 @@
 import PitchXI from "../components/PitchXI";
 import RacePanel from "../components/RacePanel";
+import ElOncePanel from "../components/ElOncePanel";
 import TimelinePanel from "../components/TimelinePanel";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
 import { formatMoney } from "../lib/utils";
@@ -106,6 +107,19 @@ export default function HomePage({ data }) {
           )}
         </section>
       )}
+
+      {/* EL ONCE, ANTES QUE LA CARRERA (17/09/2026)
+
+          "Sube el marcador de puntos dejados en el banquillo a
+          donde se vea sin buscarlo. Si esa cifra crece, es la
+          alarma mas importante del tablero."
+
+          Va justo encima de LA CARRERA a proposito: la brecha de
+          plantilla que se lee ahi abajo es la cifra sobre la que
+          se monto una estrategia equivocada durante cuatro
+          noches. Primero lo que gana puntos, y despues el
+          termometro. */}
+      <ElOncePanel data={data} />
 
       {/* LA CARRERA, ABAJO (05/09/2026, tarde)
           El dueño: "que lo baje abajo, que esta descuadrado".

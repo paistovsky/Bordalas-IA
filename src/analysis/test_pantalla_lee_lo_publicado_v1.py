@@ -70,6 +70,18 @@ CADENAS = [
         ["HomePage.jsx"],
     ),
     (
+        "once",
+        "once",
+        "ElOncePanel",
+        ["HomePage.jsx"],
+    ),
+    (
+        "hold_route",
+        "holdRoute",
+        "ViaTenerPanel",
+        ["MarketPage.jsx"],
+    ),
+    (
         "season_horizon",
         "seasonHorizon",
         "SeasonHorizonPanel",

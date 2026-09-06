@@ -3329,6 +3329,112 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # ============================================================
+    # ¿SIGUE RESPALDADA LA VIA TENER? (17/09/2026)
+    # ============================================================
+    #
+    #     Las dos aserciones de mercado que se quitaron de la
+    #     verja no se pierden: se mudan aqui, donde tienen
+    #     consecuencias de verdad.
+    #
+    #     En la verja se comprobaban una vez, contra el almacen
+    #     de quien lanzara CI, y ponian el despliegue en rojo
+    #     cuando el mercado cambiaba. Aqui se comprueban en cada
+    #     ciclo, contra el almacen de produccion, y lo que hacen
+    #     es apagar la via que se ha quedado sin respaldo.
+    try:
+        from src.analysis.hold_switch import route_state
+        from src.analysis.hold_value import (
+            DEFAULT_HORIZON_DAYS,
+            calibration_for,
+        )
+
+        via_tener = route_state(
+            calibration_for(DEFAULT_HORIZON_DAYS),
+            horizon_days=DEFAULT_HORIZON_DAYS,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        via_tener = {
+            "available": False,
+            "on": None,
+            "buckets": [],
+            "reason": (
+                f"No se pudo leer el estado de la via TENER: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # ============================================================
+    # EL ONCE: LOS PUNTOS QUE SE QUEDARON SENTADOS (17/09/2026)
+    # ============================================================
+    #
+    # POR QUE ESTE BLOQUE EXISTE
+    #
+    #     El arbitro tumbo la tesis de cuatro noches: el valor de
+    #     plantilla no explica los puntos en esta liga. Lo que
+    #     gana son los puntos, y los puntos los marcan once
+    #     jugadores.
+    #
+    #     Y la distancia es 13 puntos en 35 jornadas: 0,371 por
+    #     jornada. Si el once esta dejando mas que eso sentado,
+    #     la liga esta en el banquillo y no en el mercado.
+    #
+    # OBSERVADOR PURO
+    #
+    #     Ni el banquillo, ni el sesgo por posicion, ni la
+    #     comparacion con Mex tocan un umbral. Miden y publican.
+    marcador_estado = build_marcador()
+
+    try:
+        from src.analysis.banquillo import puntos_en_el_banquillo
+        from src.analysis.rival_once import comparar_con
+        from src.analysis.sesgo_posicion import sesgo_por_posicion
+
+        entorno_once = {
+            "rival_squads": rival_squads,
+            "league_center": league_center,
+            "rival_intelligence": rival_intelligence,
+            "race": race,
+        }
+
+        once_bloque = {
+            "available": True,
+            "observer_only": True,
+
+            # BLOQUE 1: los puntos sentados.
+            "bench": puntos_en_el_banquillo(
+                marcador_estado,
+                race,
+            ),
+
+            # BLOQUE 2: ¿la vara mide igual en las cuatro
+            # posiciones? Se mide y se propone; no se aplica.
+            "position_bias": sesgo_por_posicion(entorno_once),
+
+            # BLOQUE 3: el equipo comparable, que no era Pollo.
+            "rival": comparar_con(entorno_once, "Mex"),
+
+            # BLOQUE 4: que la pantalla deje de contar la pelicula
+            # vieja. La brecha se recalcula sola y ya dice 18,3 M;
+            # lo que faltaba era la advertencia AL LADO, para que
+            # nadie vuelva a montar una estrategia encima de una
+            # correlacion que no llega a su valor critico.
+            "value_warning": (arbitro or {}).get(
+                "value_versus_points"
+            ) or {"available": False},
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        once_bloque = {
+            "available": False,
+            "observer_only": True,
+            "reason": (
+                f"No se pudo montar el once: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     # LA CONCENTRACION DE LA PLANTILLA (10/09/2026)
     #
     # Cuanto pesa el jugador mas caro y cuantos hay del mismo
@@ -3730,7 +3836,16 @@ def build_dashboard_state() -> dict:
         # publica aunque este vacio: la pantalla tiene que poder
         # decir "todavia no hay jornadas cerradas" en vez de
         # desaparecer y dejar al dueño sin saber si mide o no.
-        "marcador": build_marcador(),
+        "marcador": marcador_estado,
+
+        # El once: los puntos sentados, el sesgo por posicion y
+        # el equipo que habia que mirar. No decide nada.
+        "once": once_bloque,
+
+        # La via TENER y el tramo que la sostiene. Esta SI
+        # decide: si el tramo de un jugador esta medido y rinde
+        # por debajo del liston, `hold_value` no le da valor.
+        "hold_route": via_tener,
 
         # Lo que Pepe hizo al pujar, no solo lo que pensaba pujar.
         "bid_outcomes": bid_outcome_summary(),

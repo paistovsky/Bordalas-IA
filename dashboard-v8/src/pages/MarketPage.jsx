@@ -1,4 +1,5 @@
 import RosterExpansionPanel from "../components/RosterExpansionPanel";
+import ViaTenerPanel from "../components/ViaTenerPanel";
 import SeasonHorizonPanel from "../components/SeasonHorizonPanel";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 
@@ -1209,6 +1210,16 @@ export default function MarketPage({ data }) {
         />
         <ListingsPanel listings={data.listings} />
       </div>
+
+      {/* EL INTERRUPTOR DE LA VÍA TENER (17/09/2026)
+
+          Encima del tablero de fichajes, porque decide si una de
+          las cuatro vías tiene algo debajo. Era una aserción que
+          vivía en la verja y no podía estar allí: medir el
+          mercado en CI ponía el despliegue en rojo cuando
+          cambiaba el mercado, no cuando cambiaba el código.
+          Tiró producción el 17/09. */}
+      <ViaTenerPanel data={data} />
 
       <TargetsPanel
         acquisition={data.acquisition}

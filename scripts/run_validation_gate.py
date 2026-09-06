@@ -139,6 +139,8 @@ TESTS = [
     "src.analysis.test_tope_deducido_v1",
     "src.analysis.test_arbitro_v1",
     "src.analysis.test_verja_determinista_v1",
+    "src.analysis.test_once_v1",
+    "src.analysis.test_interruptor_tener_v1",
 ]
 
 

@@ -183,6 +183,33 @@ def hold_value(
                 ),
             )
 
+        # ================================================
+        # EL TRAMO QUE LA SOSTIENE, COMPROBADO EN VIVO
+        # ================================================
+        #
+        #     El 17/09 se quitaron de la verja dos aserciones de
+        #     mercado -"el tramo 2-4 % rinde mas del 3 %"- porque
+        #     alli no pintaban nada: la verja compara codigo, no
+        #     mide el mercado del dia.
+        #
+        #     Pero la pregunta importa. Asi que se comprueba
+        #     AQUI, en cada ciclo y con el almacen de produccion:
+        #     si el tramo de este jugador esta medido y rinde por
+        #     debajo del liston de la via, no hay con que
+        #     sostener la compra y la via se apaga para el.
+        #
+        #     Un tramo SIN muestra no apaga nada: ausencia de
+        #     dato no es dato. Sale como "sin muestra" en el
+        #     tablero, que es otra cosa.
+        respaldo = _respaldo_del_tramo(
+            tasa,
+            horizon_days,
+            calibration_override=calibration_override,
+        )
+
+        if respaldo.get("backed") is False:
+            return _sin_valor("SIN_RESPALDO", respaldo["reason"])
+
         confianza, base = streak_confidence(
             trend_days=trend_days,
             sources=sources,
@@ -325,6 +352,26 @@ def hold_value(
 
 
 def _sin_valor(decision: str, motivo: str) -> dict:
+    """
+    Sin valor, pero con la MISMA FORMA (17/09/2026).
+
+    EL FALLO QUE ESTO ARREGLA
+
+        Al llegar el interruptor de la via, `hold_value` empezo a
+        devolver SIN_RESPALDO por este camino, y una guardia que
+        leia `salida["raw_gain"]` se cayo con un KeyError en vez
+        de dar un rojo legible.
+
+        Es el mismo defecto que `store_depth` esta misma mañana:
+        la forma del objeto cambiaba con el contenido. Quien
+        consume esto no puede tener que adivinar que claves le
+        van a llegar hoy.
+
+        "Ausencia de dato != dato" vale para el VALOR, no para la
+        clave: los campos siguen ahi, en cero, y el motivo
+        escrito.
+    """
+
     return {
         "route": ROUTE,
         "intent": INTENT,
@@ -332,6 +379,17 @@ def _sin_valor(decision: str, motivo: str) -> dict:
         "decision": decision,
         "reason": motivo,
         "horizon_days": DEFAULT_HORIZON_DAYS,
+
+        "raw_gain": 0,
+        "gain_before_clamp": 0,
+        "value_unclamped": 0,
+        "clamped": False,
+        "in_sample": None,
+        "calibrated_streak_max": None,
+        "trend_days": None,
+        "confidence": None,
+        "confidence_basis": None,
+        "sample_note": None,
     }
 
 
@@ -380,6 +438,33 @@ def calibration_for(horizon_days: int = DEFAULT_HORIZON_DAYS) -> dict:
 
 def reset_calibration_cache() -> None:
     _CALIBRACION.clear()
+
+
+def _respaldo_del_tramo(
+    tasa: float,
+    horizon_days: int,
+    calibration_override: dict | None = None,
+) -> dict:
+    """
+    ¿Sigue rindiendo el tramo de este jugador lo que la via exige?
+
+    Nunca lanza: si no se puede comprobar, no se apaga nada.
+    """
+
+    try:
+        from src.analysis.hold_backtest import rate_bucket_of
+        from src.analysis.hold_switch import bucket_backing
+
+        calibrado = (
+            calibration_override
+            if calibration_override is not None
+            else calibration_for(horizon_days)
+        )
+
+        return bucket_backing(calibrado, rate_bucket_of(tasa))
+
+    except Exception:                                # noqa: BLE001
+        return {"backed": None}
 
 
 def _recorte_por_muestra(

@@ -162,6 +162,28 @@ export function normalizeStatus(raw = {}) {
       blocked: []
     },
 
+    // ¿SIGUE RESPALDADA LA VIA TENER? (17/09/2026)
+    //
+    // El tramo que la sostiene, comprobado en cada ciclo contra
+    // el almacen de produccion. Si deja de rendir el liston, la
+    // via se apaga sola y aqui se ve por que.
+    holdRoute: raw.hold_route || { available: false, on: null, buckets: [] },
+
+    // EL ONCE (17/09/2026)
+    //
+    // Los puntos que se quedaron sentados, si la vara con la que
+    // se ordena el once mide igual en las cuatro posiciones, y en
+    // que se diferencia nuestro equipo del de Mex -que va segundo
+    // con nuestras mismas catorce fichas-.
+    //
+    // FASE OBSERVADOR: ningun motor lo lee.
+    once: raw.once || {
+      available: false,
+      bench: { available: false, jornadas: [] },
+      position_bias: { available: false, rows: [] },
+      rival: { available: false }
+    },
+
     // EL ARBITRO (16/09/2026)
     //
     // Quien tenia razon: el marcador de los rivales, el libro de

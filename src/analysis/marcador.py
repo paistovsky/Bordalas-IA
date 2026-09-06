@@ -514,6 +514,122 @@ def _puntos_de_la_jornada(
     return puntos
 
 
+def _puntos_de_la_clasificacion(
+    actual: dict,
+    previa: dict | None,
+) -> dict | None:
+    """Lo que Biwenger pago EN ESA JORNADA a cada manager.
+
+    EL FALLO QUE ESTO ARREGLA (17/09/2026)
+
+        La clasificacion de Biwenger es ACUMULADA. `points` no
+        son los puntos de la jornada: son los de la temporada
+        hasta ahi.
+
+        El cuadre comparaba `puntos_once` -una cifra de UNA
+        jornada- contra ese acumulado. En la jornada 1 coincide,
+        porque no hay nada antes, y por eso el fallo sobrevivio
+        un mes. De la 2 en adelante es imposible que cuadre:
+        estaba comparando 17 contra 60.
+
+        Consecuencia: cinco jornadas cerradas, CERO fiables, y
+        el proyecto llevaba un mes sin nota del once por un
+        error de aritmetica, no por un fallo del motor.
+
+        Lo mismo pasaba con la diferencia contra la liga: salia
+        +13,5 tres jornadas seguidas porque era la brecha de
+        TEMPORADA repetida, no la de la jornada.
+
+    Se mide igual que los jugadores: por diferencia de totales.
+    Sin observacion previa no se inventa, se devuelve None.
+    """
+
+    def totales(foto: dict | None) -> dict:
+        return {
+            safe_int(f.get("user_id")): safe_int(f.get("points"))
+            for f in ((foto or {}).get("clasificacion") or [])
+            if isinstance(f, dict) and safe_int(f.get("user_id"))
+        }
+
+    ahora = totales(actual)
+
+    if not ahora:
+        return None
+
+    if previa is None:
+
+        if safe_int(actual.get("round_id")) == PRIMERA_JORNADA:
+            # No hay nada antes: el acumulado ES la jornada.
+            return dict(ahora)
+
+        return None
+
+    antes = totales(previa)
+
+    return {
+        user_id: puntos - antes.get(user_id, 0)
+        for user_id, puntos in ahora.items()
+        if user_id in antes
+    }
+
+
+def _reconstruccion_completa(actual: dict) -> tuple[bool, str | None]:
+    """¿Estan en la plantilla los once que alineamos?
+
+    EL SEGUNDO FALLO (17/09/2026)
+
+        `totales` solo tiene a los jugadores que estaban en la
+        plantilla EN EL MOMENTO DE MIRAR. Un jugador que alineo
+        el sabado y se vendio el lunes ya no esta, asi que
+        aporta cero a la reconstruccion del once.
+
+        En las jornadas 1 y 2 pasaba con cuatro y con tres de
+        los once. El once salia a 13 y a 17 puntos cuando
+        Biwenger pago 29 y 31, y la pantalla publicaba "61,9 %
+        del optimo" como si fuera una nota del motor.
+
+        No era el motor: era que faltaba media alineacion.
+
+    Esto NO se puede arreglar hacia atras -los puntos de un
+    jugador vendido no vuelven-, pero si se puede DECIR, para
+    que un numero cojo no se lea como una nota.
+    """
+
+    en_plantilla = {
+        str(safe_int(j.get("id")))
+        for j in (actual.get("plantilla") or [])
+    }
+
+    alineados = [
+        str(safe_int(p))
+        for p in ((actual.get("mi_once") or {}).get("players") or [])
+    ]
+
+    if not alineados:
+        return False, (
+            "No se anoto que once jugo esa jornada."
+        )
+
+    faltan = [p for p in alineados if p not in en_plantilla]
+
+    if not faltan:
+        return True, None
+
+    nombres = actual.get("nombres") or {}
+
+    quienes = ", ".join(
+        str(nombres.get(p) or f"#{p}")
+        for p in faltan
+    )
+
+    return False, (
+        f"{len(faltan)} de los {len(alineados)} que alinearon ya "
+        f"no estaban en la plantilla al mirar ({quienes}): sus "
+        f"puntos de esa jornada no se pueden recuperar, asi que "
+        f"el once reconstruido sale corto."
+    )
+
+
 def marcador() -> dict:
     """Lee el ledger y contesta las tres preguntas."""
 
@@ -534,7 +650,9 @@ def marcador() -> dict:
         # media. Solo se miden las que ya tienen sucesora.
         cerrada = indice < len(jornadas) - 1
 
-        puntos = _puntos_de_la_jornada(actual, previa)
+        anterior = previa
+
+        puntos = _puntos_de_la_jornada(actual, anterior)
         previa = actual
 
         if not cerrada or puntos is None:
@@ -573,22 +691,25 @@ def marcador() -> dict:
             formacion_usada=once.get("formation"),
         )
 
-        clasificacion = actual.get("clasificacion") or []
         mi_user_id = safe_int(actual.get("mi_user_id"))
 
-        mios = next(
-            (
-                safe_int(f.get("points"))
-                for f in clasificacion
-                if safe_int(f.get("user_id")) == mi_user_id
-            ),
-            None,
+        # POR DIFERENCIA, COMO LOS JUGADORES (17/09/2026)
+        #
+        #     `points` de la clasificacion es el acumulado de la
+        #     temporada. Compararlo con el once de UNA jornada
+        #     es comparar 60 con 17.
+        oficiales = _puntos_de_la_clasificacion(actual, anterior)
+
+        mios = (
+            oficiales.get(mi_user_id)
+            if oficiales is not None
+            else None
         )
 
         rivales = [
-            safe_int(f.get("points"))
-            for f in clasificacion
-            if safe_int(f.get("user_id")) != mi_user_id
+            puntos
+            for user_id, puntos in (oficiales or {}).items()
+            if user_id != mi_user_id
         ]
 
         media_rivales = (
@@ -603,9 +724,18 @@ def marcador() -> dict:
             else None
         )
 
+        completa, motivo_incompleta = _reconstruccion_completa(actual)
+
         filas.append({
             "round_id": safe_int(actual.get("round_id")),
             "medible": True,
+
+            # UN NUMERO COJO NO ES UNA NOTA (17/09/2026)
+            #
+            #     Si faltaba media alineacion, "61,9 % del
+            #     optimo" no mide el motor: mide el agujero.
+            "reconstruccion_completa": completa,
+            "motivo_incompleta": motivo_incompleta,
 
             "formacion": once.get("formation"),
             "puntos_once": puntos_alineados,
@@ -628,9 +758,40 @@ def marcador() -> dict:
             ),
 
             "puntos_biwenger": mios,
+            "puntos_biwenger_acumulado": next(
+                (
+                    safe_int(f.get("points"))
+                    for f in (actual.get("clasificacion") or [])
+                    if safe_int(f.get("user_id")) == mi_user_id
+                ),
+                None,
+            ),
             "cuadra": (
                 mios is not None
                 and mios == puntos_alineados
+            ),
+
+            # CUANTO FALTA PARA CUADRAR (17/09/2026)
+            #
+            #     "No cuadra" a secas no distingue entre una
+            #     reconstruccion que se queda a 3 puntos de 73 y
+            #     otra que se queda a 16 de 29. La primera es
+            #     util con una nota al pie; la segunda no vale.
+            #
+            #     El cuadre sigue siendo exacto y la media sigue
+            #     siendo estricta: esto solo lo hace legible.
+            "descuadre": (
+                mios - puntos_alineados
+                if mios is not None
+                else None
+            ),
+            "descuadre_percent": (
+                round(
+                    abs(mios - puntos_alineados) / mios * 100,
+                    1,
+                )
+                if mios
+                else None
             ),
 
             "media_rivales": media_rivales,
@@ -678,7 +839,12 @@ def marcador() -> dict:
     # La diferencia contra la liga SI se conserva: sale de los
     # puntos oficiales, que son un hecho, y no depende de que
     # nuestra reconstruccion sea buena.
-    fiables = [f for f in medibles if f.get("cuadra")]
+    fiables = [
+        f
+        for f in medibles
+        if f.get("cuadra")
+        and f.get("reconstruccion_completa")
+    ]
 
     resumen = {
         "jornadas_observadas": len(jornadas),
