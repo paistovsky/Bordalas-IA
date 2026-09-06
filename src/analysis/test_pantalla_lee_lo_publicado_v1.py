@@ -877,6 +877,26 @@ def test_el_ritmo_neto_de_la_plantilla_se_ve() -> None:
     )
 
 
+def test_el_rango_de_validez_se_ve_en_pantalla() -> None:
+    """
+    "calibrado sobre rachas de 1 a 2 dias; este lleva 50". Si no
+    se ve, un valor fuera de muestra se lee igual que uno medido.
+    """
+
+    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+
+    assert "in_sample" in mercado, (
+        "la pantalla no distingue lo medido de lo extrapolado"
+    )
+    assert "FUERA DE MUESTRA" in mercado
+    assert "calibrated_streak_max" in mercado, (
+        "no se dice hasta que racha llega la calibracion"
+    )
+    assert "sample_note" in mercado, (
+        "el motivo del recorte no llega a la pantalla"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -906,6 +926,7 @@ TESTS = [
     test_la_prensa_enseña_la_cita_y_separa_dato_de_deduccion,
     test_el_desvio_de_puja_se_ve_con_su_precio,
     test_las_cuatro_vias_se_ven_una_al_lado_de_otra,
+    test_el_rango_de_validez_se_ve_en_pantalla,
     test_el_ritmo_neto_de_la_plantilla_se_ve,
     test_ningun_panel_nuevo_decide_nada,
 ]

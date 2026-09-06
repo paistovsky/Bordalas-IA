@@ -109,7 +109,21 @@ def test_la_via_tener_no_importa_la_prima_de_reventa() -> None:
 def test_la_ganancia_es_solo_la_rampa() -> None:
     """
     Precio x tasa diaria x horizonte. Ni un euro mas.
+
+    NI UN EURO MAS, PERO SI MENOS (15/09/2026)
+
+        Este test decia `==` y se puso rojo al llegar el recorte
+        por muestra: Amatucci pasaba de 120.889 de rampa bruta a
+        113.326 recortados.
+
+        Lo lei antes de tocarlo. Lo que vigila es que no se SUME
+        nada de otra via —la prima de reventa—, y un recorte que
+        RESTA no rompe eso. Asi que la comprobacion pasa a ser la
+        que de verdad importa: nunca por encima de la rampa, e
+        igual a la rampa cuando no hay recorte.
     """
+
+    rampa = int(PRECIO * (TASA / 100.0) * DEFAULT_HORIZON_DAYS)
 
     salida = hold_value(
         PRECIO,
@@ -118,11 +132,28 @@ def test_la_ganancia_es_solo_la_rampa() -> None:
         sources=3,
     )
 
-    esperada = int(PRECIO * (TASA / 100.0) * DEFAULT_HORIZON_DAYS)
-
-    assert salida["raw_gain"] == esperada, (
+    assert salida["raw_gain"] <= rampa, (
         f"la ganancia bruta son {salida['raw_gain']:,} y la rampa "
-        f"sola son {esperada:,}: hay algo mas sumado"
+        f"sola son {rampa:,}: hay algo mas sumado"
+    )
+
+    assert salida["gain_before_clamp"] == rampa, (
+        f"la rampa antes de recortar son "
+        f"{salida['gain_before_clamp']:,} y deberian ser "
+        f"{rampa:,}"
+    )
+
+    # Y dentro de muestra, sin recorte, tiene que ser exacta.
+    dentro = hold_value(
+        1_000_000,
+        rate_percent_per_day=2.0,
+        trend_days=1,
+        sources=3,
+    )
+
+    assert dentro["clamped"] is False
+    assert dentro["raw_gain"] == int(
+        1_000_000 * 0.02 * DEFAULT_HORIZON_DAYS
     )
 
 

@@ -342,7 +342,7 @@ def _stats(retornos: list) -> dict:
             min(int(q * (n - 1)), n - 1)
         ]
 
-    perdidas = sum(1 for r in retornos if r < 0)
+    perdedoras = [r for r in retornos if r < 0]
 
     return {
         "n": n,
@@ -351,7 +351,23 @@ def _stats(retornos: list) -> dict:
         "p25": percentil(0.25),
         "p75": percentil(0.75),
         "mean": statistics.fmean(ordenados),
-        "loss_rate": perdidas / n,
+        "loss_rate": len(perdedoras) / n,
+
+        # CUANTO SE PIERDE CUANDO SE PIERDE (15/09/2026)
+        #
+        #     La tabla del 14/09 daba el PORCENTAJE de
+        #     operaciones en perdida y no cuanto se perdia. En la
+        #     celda buena falla el 5 % de las veces, y con eso
+        #     solo no se puede dimensionar ningun tope: un tope
+        #     es exactamente la respuesta a "¿cuanto puedo perder
+        #     de una vez?".
+        "p5": percentil(0.05),
+        "worst": ordenados[0],
+        "loss_mean": (
+            statistics.fmean(perdedoras) if perdedoras else None
+        ),
+        "loss_worst": min(perdedoras) if perdedoras else None,
+
         "reason": None,
     }
 
@@ -487,3 +503,130 @@ def best_horizon(resultado: dict):
         return None
 
     return max(candidatos, key=lambda par: par[1])[0]
+
+
+# ============================================================
+# HASTA DONDE LLEGA LA MUESTRA (15/09/2026)
+# ============================================================
+#
+#     EL AGUJERO QUE DESTAPO LA PROPIA TABLA
+#
+#         El 14/09 la via TENER se encendio apoyada en una celda
+#         medida con racha de UN dia. Y despues se aplico a Roro
+#         Riquelme (50 dias de racha), Amatucci (19) y Pedri (8).
+#
+#         Ninguna de esas rachas existe en el retrotest. Con seis
+#         dias de ventana, una racha de `n` dias consume `n` dias
+#         por delante y deja `5 - n` por detras, asi que AL
+#         HORIZONTE DE TRES DIAS la racha maxima medible es DOS.
+#
+#         No es un detalle de precision: la direccion esta medida
+#         y va en contra. Con tasa > 1 %/dia y m=3, racha de 1 dia
+#         rinde +4,47 % y racha de 2 rinde +3,09 %. Baja.
+#
+#         Extrapolar a 50 dias desde una curva que llega a 2, en
+#         la direccion en que el rendimiento cae, es exactamente
+#         el error que este proyecto lleva un mes aprendiendo a no
+#         cometer.
+
+
+def calibration(resultado: dict | None, horizon: int) -> dict:
+    """
+    Hasta que racha esta calibrado cada tramo de tasa, a este
+    horizonte, y que rindio la racha mas larga que SI se midio.
+
+    Ese rendimiento es el techo honesto para cualquier racha por
+    encima: no sabemos que hace una de 50 dias, y lo mas largo
+    que hemos visto rendia eso.
+    """
+
+    vacio = {
+        "available": False,
+        "horizon": horizon,
+        "max_streak": None,
+        "by_rate_bucket": {},
+        "reason": "El retrotest no pudo correr.",
+    }
+
+    if not (resultado or {}).get("available"):
+        return vacio
+
+    celdas = resultado.get("cells") or {}
+
+    # El orden de las bandas de racha, de mas corta a mas larga.
+    orden = [b[0] for b in STREAK_BUCKETS]
+
+    # Y hasta que dia llega cada banda, para poder decirlo en
+    # numeros y no en etiquetas.
+    tope_de_banda = {
+        nombre: (maximo if maximo is not None else minimo)
+        for nombre, minimo, maximo in STREAK_BUCKETS
+    }
+
+    por_tramo = {}
+    maximo_global = 0
+
+    for tramo in [b[0] for b in RATE_BUCKETS]:
+
+        ultima = None
+
+        for banda in orden:
+
+            celda = celdas.get(f"{tramo}|{banda}|{horizon}")
+
+            if celda and celda.get("enough"):
+                ultima = (banda, celda)
+
+        if ultima is None:
+            por_tramo[tramo] = {
+                "calibrated": False,
+                "max_streak": None,
+                "reason": (
+                    f"Sin ninguna banda de racha con muestra "
+                    f"suficiente a {horizon} dias."
+                ),
+            }
+            continue
+
+        banda, celda = ultima
+
+        # La racha real que se llego a observar dentro de esa
+        # banda, no el techo nominal de la banda.
+        observada = min(
+            tope_de_banda[banda],
+            (resultado.get("days") or 1) - 1 - horizon,
+        )
+
+        observada = max(observada, 1)
+
+        maximo_global = max(maximo_global, observada)
+
+        por_tramo[tramo] = {
+            "calibrated": True,
+            "band": banda,
+            "max_streak": observada,
+            "median": celda["median"],
+            "loss_rate": celda["loss_rate"],
+            "n": celda["n"],
+        }
+
+    return {
+        "available": True,
+        "horizon": horizon,
+        "max_streak": maximo_global or None,
+        "by_rate_bucket": por_tramo,
+        "window": resultado.get("window"),
+        "reason": None,
+    }
+
+
+def rate_bucket_of(rate_percent_per_day) -> str | None:
+    """
+    En que tramo de tasa cae un ritmo diario dado en PORCENTAJE.
+    """
+
+    try:
+        return _rate_bucket(float(rate_percent_per_day) / 100.0)
+
+    except (TypeError, ValueError):
+        return None

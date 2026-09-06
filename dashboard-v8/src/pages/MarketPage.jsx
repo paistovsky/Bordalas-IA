@@ -511,7 +511,11 @@ function Tener({ hold, precio }) {
   const rinde = precio ? (margen / Number(precio)) * 100 : null;
 
   return (
-    <span title={`${hold.reason}  —  ${hold.confidence_basis || ""}`}>
+    <span
+      title={`${hold.reason}  —  ${hold.sample_note || ""}  —  ${
+        hold.confidence_basis || ""
+      }`}
+    >
       <b>{formatMoney(hold.value)}</b>
       <div style={{ fontSize: 9 }} className={margen > 0 ? "up" : "down"}>
         +{formatMoney(margen)}
@@ -523,6 +527,18 @@ function Tener({ hold, precio }) {
         {String(hold.rate_percent_per_day).replace(".", ",")} %/día ·{" "}
         {hold.horizon_days} d
       </div>
+
+      {/* EL RANGO DE VALIDEZ (15/09/2026)
+          "calibrado sobre rachas de 1 a 2 días; éste lleva 50".
+          Que se vea que estamos fuera de la muestra: al horizonte
+          de tres días la racha máxima medida es DOS, y el mercado
+          está lleno de rachas de 19 y de 50. */}
+      {hold.in_sample === false && (
+        <div className="pill warn" style={{ fontSize: 8, marginTop: 2 }}>
+          FUERA DE MUESTRA · racha {hold.trend_days} d, calibrado
+          hasta {hold.calibrated_streak_max}
+        </div>
+      )}
     </span>
   );
 }

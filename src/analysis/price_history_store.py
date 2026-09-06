@@ -59,10 +59,30 @@ STORE_FILE = (
 # Cuanta historia se conserva.
 #
 # La curva de primas necesita el precio del dia en que se hizo
-# cada puja, y las pujas que se observan tienen semanas. Con 45
-# dias se cubre lo que el tablon devuelve sin que el fichero se
-# desmande.
-MAX_HISTORY_DAYS = 45
+# cada puja, y las pujas que se observan tienen semanas.
+#
+# DE 45 A 60 (15/09/2026)
+#
+#     El retrotest de la rampa se quedo en seis dias y con eso no
+#     se pueden medir ni horizontes de una semana ni rachas
+#     largas: al horizonte de tres dias la racha maxima medible
+#     es DOS, y el mercado esta lleno de rachas de 19 y 50.
+#
+#     Se midio lo que cuesta guardar mas: el fichero pesa 22,3
+#     bytes por punto, un punto por jugador y dia, 573 jugadores.
+#
+#         45 dias   0,55 MB
+#         60 dias   0,74 MB
+#
+#     Menos que dos snapshots. Es la mejora mas barata del mes.
+#
+#     OJO: la retencion NO era la causa de los seis dias. Estaba
+#     en 45 desde antes. Lo que hay de seis dias es la COPIA
+#     LOCAL, que dejo de escribirse el 17/08. En produccion el
+#     almacen vive en la cache de GitHub Actions, y el sintoma de
+#     que ahi tampoco llega es que el modelo de primas descarta
+#     72 pujas "sin precio de aquel momento".
+MAX_HISTORY_DAYS = 60
 
 SECONDS_PER_DAY = 24 * 60 * 60
 

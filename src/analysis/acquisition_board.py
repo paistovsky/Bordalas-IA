@@ -36,6 +36,8 @@ from src.analysis.deployment import (
 
 from src.analysis.bid_jitter import apply_bid_jitter
 
+from src.analysis.hold_budget import hold_cap, hold_pocket
+
 from src.analysis.acquisition_budget import (
     budget_for_intent,
 )
@@ -341,6 +343,24 @@ def build_acquisition_board(
 
         except Exception:                           # noqa: BLE001
             jornada_para_el_desvio = None
+
+        # EL SALDO Y EL PATRIMONIO, PARA EL TOPE DE LA VIA TENER
+        #
+        #     Las dos condiciones del tope deducido: que la peor
+        #     perdida medida la aguante la caja, y que la posicion
+        #     no pase del 10 % del patrimonio.
+        saldo_actual = safe_int(
+            (
+                ((snapshot or {}).get("market") or {}).get("status")
+                or {}
+            ).get("balance")
+        )
+
+        valor_de_la_plantilla = sum(
+            safe_int(j.get("price"))
+            for j in ((snapshot or {}).get("my_team") or [])
+            if isinstance(j, dict)
+        )
 
         filas = []
 
@@ -653,6 +673,53 @@ def build_acquisition_board(
                     speculation_budget=available_budget,
                     acquisition_budget=acquisition_budget,
                 )
+
+                # EL BOLSILLO DE LA VIA TENER (15/09/2026)
+                #
+                #     Lo decide el efecto sobre el balance, no el
+                #     nombre de la via: una compra que ocupa una
+                #     ficha vacia no da nada a cambio -convierte
+                #     caja en activo- y eso es un fichaje a
+                #     efectos contables, aunque la tesis sea la
+                #     rampa.
+                #
+                #     El valor y el liston siguen siendo los de
+                #     TENER: la regla del 13/09 se respeta.
+                #
+                #     Y el tope NO es el del bolsillo grande: es
+                #     el deducido, que arranca exactamente donde
+                #     esta hoy el limite por operacion. El primer
+                #     dia no se afloja nada.
+                despliegue_fila = valoracion.get("deployment") or {}
+
+                if (
+                    DEPLOYMENT_ENABLED
+                    and despliegue_fila.get("route") == "HOLD"
+                ):
+
+                    bolsillo = hold_pocket(
+                        despliegue_fila.get("free_roster_slots")
+                    )
+
+                    if bolsillo["pocket"] == "FICHAR" and (
+                        acquisition_budget is not None
+                    ):
+                        presupuesto = safe_int(acquisition_budget)
+
+                    tope_tener = hold_cap(
+                        balance=saldo_actual,
+                        squad_value=valor_de_la_plantilla,
+                    )
+
+                    if tope_tener.get("cap") is not None:
+                        presupuesto = (
+                            min(presupuesto, tope_tener["cap"])
+                            if presupuesto is not None
+                            else tope_tener["cap"]
+                        )
+
+                    fila["hold_pocket"] = bolsillo
+                    fila["hold_cap"] = tope_tener
 
                 # EL TOPE DE CONCENTRACION
                 #

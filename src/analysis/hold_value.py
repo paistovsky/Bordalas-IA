@@ -124,6 +124,7 @@ def hold_value(
     trend_days=None,
     sources=None,
     horizon_days: int = DEFAULT_HORIZON_DAYS,
+    calibration_override: dict | None = None,
 ) -> dict:
     """
     Lo que vale TENER a este jugador `horizon_days` dias.
@@ -193,6 +194,39 @@ def hold_value(
         #     docstring del modulo y `test_no_contar_dos_veces_v1`.
         ganancia = int(precio * diaria * horizon_days)
 
+        # ================================================
+        # NO SE VALORA POR ENCIMA DE LO MEDIDO (15/09/2026)
+        # ================================================
+        #
+        #     Al horizonte de tres dias la racha maxima que el
+        #     retrotest llego a medir es DOS. Roro Riquelme lleva
+        #     50, Amatucci 19 y Pedri 8: los tres estan fuera de
+        #     muestra.
+        #
+        #     Y la direccion esta medida y va en contra: con tasa
+        #     > 1 %/dia, racha de 1 dia rinde +4,47 % y racha de 2
+        #     rinde +3,09 %.
+        #
+        #     Asi que la ganancia se RECORTA al rendimiento de la
+        #     racha mas larga que si se midio en su mismo tramo de
+        #     tasa. No se apaga la via —`streak_confidence` si
+        #     tiene una banda de "3 dias o mas" medida sobre 351
+        #     casos el 07/09, asi que ciegos no estamos— pero no
+        #     se le deja valer mas de lo que valio lo mas parecido
+        #     que hemos visto.
+        recorte = _recorte_por_muestra(
+            precio,
+            tasa,
+            trend_days,
+            horizon_days,
+            calibration_override=calibration_override,
+        )
+
+        ganancia_sin_recortar = ganancia
+
+        if recorte["applies"] and recorte["max_gain"] < ganancia:
+            ganancia = recorte["max_gain"]
+
         maximo = value_with_confidence_on_gain(
             precio,
             ganancia,
@@ -220,6 +254,21 @@ def hold_value(
             "raw_gain": ganancia,
             "confidence": confianza,
             "confidence_basis": base,
+
+            # EL RANGO DE VALIDEZ, AL LADO DEL NUMERO
+            #
+            #     "calibrado sobre rachas de 1 a 2 dias; este
+            #      lleva 50". Que se vea que estamos fuera de la
+            #      muestra, en el objeto y en pantalla.
+            "in_sample": not recorte["applies"],
+            "calibrated_streak_max": recorte["max_streak"],
+            "trend_days": safe_int(trend_days),
+            "gain_before_clamp": ganancia_sin_recortar,
+            "clamped": bool(
+                recorte["applies"]
+                and ganancia < ganancia_sin_recortar
+            ),
+            "sample_note": recorte["note"],
 
             "decision": "HOLD",
             # El separador de miles se formatea APARTE. Hacerlo
@@ -252,3 +301,142 @@ def _sin_valor(decision: str, motivo: str) -> dict:
         "reason": motivo,
         "horizon_days": DEFAULT_HORIZON_DAYS,
     }
+
+
+# ============================================================
+# EL RECORTE POR MUESTRA
+# ============================================================
+#
+#     El retrotest se calcula UNA vez y se guarda: recorrer
+#     5.577 operaciones por cada jugador del tablero seria
+#     absurdo. Si algun dia el almacen crece, basta con vaciar
+#     esta cache.
+
+_CALIBRACION = {}
+
+
+def calibration_for(horizon_days: int = DEFAULT_HORIZON_DAYS) -> dict:
+    """
+    Hasta que racha esta calibrada cada banda de tasa, y que
+    rindio la mas larga que si se midio.
+    """
+
+    if horizon_days not in _CALIBRACION:
+
+        try:
+            from src.analysis.hold_backtest import (
+                backtest,
+                calibration,
+            )
+
+            _CALIBRACION[horizon_days] = calibration(
+                backtest(),
+                horizon_days,
+            )
+
+        except Exception as error:                  # noqa: BLE001
+            _CALIBRACION[horizon_days] = {
+                "available": False,
+                "horizon": horizon_days,
+                "max_streak": None,
+                "by_rate_bucket": {},
+                "reason": f"{type(error).__name__}: {error}",
+            }
+
+    return _CALIBRACION[horizon_days]
+
+
+def reset_calibration_cache() -> None:
+    _CALIBRACION.clear()
+
+
+def _recorte_por_muestra(
+    precio: int,
+    tasa: float,
+    trend_days,
+    horizon_days: int,
+    calibration_override: dict | None = None,
+) -> dict:
+    """
+    ¿Esta este jugador fuera del rango medido? Y si lo esta,
+    ¿cuanto es lo maximo que se le puede reconocer de ganancia?
+
+    Nunca lanza: sin retrotest no se recorta nada y se dice.
+    """
+
+    sin_recorte = {
+        "applies": False,
+        "max_gain": None,
+        "max_streak": None,
+        "note": None,
+    }
+
+    try:
+        calibrado = (
+            calibration_override
+            if calibration_override is not None
+            else calibration_for(horizon_days)
+        )
+
+        if not calibrado.get("available"):
+            return {
+                **sin_recorte,
+                "note": (
+                    "Sin retrotest con el que comparar: no se "
+                    "recorta nada."
+                ),
+            }
+
+        from src.analysis.hold_backtest import rate_bucket_of
+
+        tramo = rate_bucket_of(tasa)
+
+        datos = (calibrado.get("by_rate_bucket") or {}).get(tramo)
+
+        if not datos or not datos.get("calibrated"):
+            return {
+                **sin_recorte,
+                "note": (
+                    f"El tramo de tasa «{tramo}» no tiene ninguna "
+                    f"banda de racha con muestra suficiente a "
+                    f"{horizon_days} dias."
+                ),
+            }
+
+        maxima = safe_int(datos.get("max_streak"))
+        racha = abs(safe_int(trend_days))
+
+        if racha <= maxima:
+            return {
+                "applies": False,
+                "max_gain": None,
+                "max_streak": maxima,
+                "note": (
+                    f"Racha de {racha} dia(s), dentro del rango "
+                    f"medido (1 a {maxima} a {horizon_days} dias)."
+                ),
+            }
+
+        # FUERA DE MUESTRA. El techo es lo que rindio la racha
+        # mas larga que si se midio en su mismo tramo de tasa.
+        techo = int(precio * float(datos["median"]))
+
+        return {
+            "applies": True,
+            "max_gain": max(techo, 0),
+            "max_streak": maxima,
+            "note": (
+                f"FUERA DE MUESTRA: calibrado sobre rachas de 1 a "
+                f"{maxima} dias a {horizon_days} dias vista, y "
+                f"este lleva {racha}. La ganancia se recorta a lo "
+                f"que rindio la racha mas larga medida en su tramo "
+                f"({datos['median'] * 100:+.2f} % sobre "
+                f"{datos['n']} operaciones)."
+            ),
+        }
+
+    except Exception as error:                       # noqa: BLE001
+        return {
+            **sin_recorte,
+            "note": f"{type(error).__name__}: {error}",
+        }
