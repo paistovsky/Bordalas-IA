@@ -960,6 +960,21 @@ def calculate_solvency_priority(
     ]
 
 
+# LAS FASES EN LAS QUE EL RELOJ YA APRIETA
+#
+#     Son las mismas que usa `calculate_solvency_priority` para
+#     escalar. Fuera de ellas -o sea, en NORMAL- estar en rojo es
+#     legal y esta escrito asi desde siempre: "en NORMAL estar en
+#     negativo es legal: debemos vigilar y generar liquidez, pero
+#     no tiene por que bloquear Franchise/mercado".
+FASES_CON_PRISA = frozenset({
+    "HARD_SAFETY",
+    "FINALIZATION",
+    "HIGH_ATTENTION",
+    "PREPARATION",
+})
+
+
 def calculate_accept_expiry_priority(
     balance: int,
     phase: str,
@@ -968,15 +983,35 @@ def calculate_accept_expiry_priority(
     Una oferta cuya perdida rompe SOLVENCY_GUARANTEE es una accion de
     solvencia, no una simple decision comercial.
 
-    Cuando el saldo es negativo debe ganar a cualquier cambio del XI,
-    reroll o mantenimiento. La ventana urgente ya esta limitada por el
-    motor Accept-Before-Expiry a las seis horas anteriores al deadline
-    efectivo, por lo que esta prioridad no provoca ventas prematuras.
+    POR EL RELOJ, NO POR EL SIGNO (24/09/2026)
+
+        Esto escalaba a EMERGENCY_SOLVENCY + 10 -1110- en cuanto
+        el saldo era negativo, en CUALQUIER fase salvo el cierre.
+        Y el propio docstring daba por hecho lo contrario: "la
+        ventana urgente ya esta limitada a las seis horas
+        anteriores al deadline".
+
+        Con una accion por vuelta, un martes en rojo -que la
+        doctrina permite expresamente: "se puede ir en rojo de
+        lunes a jueves"- el ciclo se dedicaba a la solvencia y no
+        volvia a mirar el mercado.
+
+        El numero NO se ha movido: EMERGENCY_SOLVENCY sigue
+        valiendo 1100. Lo que cambia es CUANDO se dispara: cuando
+        el reloj aprieta, que es lo que el docstring ya decia.
+
+        En NORMAL sigue devolviendo ACCEPT_EXPIRY_URGENT (680),
+        que sigue ganando a comprar (400): aceptar una buena
+        oferta antes de que caduque sigue siendo prioritario. Lo
+        que ya no hace es aplastarlo todo un martes.
+
+    EL VIERNES NO CAMBIA NADA. A T-6 h la fase es HIGH_ATTENTION o
+    mas apretada, y ahi la escalada es la de siempre.
     """
     if phase in LOCK_PHASES:
         return 0
 
-    if balance < 0:
+    if balance < 0 and phase in FASES_CON_PRISA:
         return PRIORITY["EMERGENCY_SOLVENCY"] + 10
 
     return PRIORITY["ACCEPT_EXPIRY_URGENT"]

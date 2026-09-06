@@ -1151,6 +1151,23 @@ def value_candidate(
                     f"{como_reventa.get('decision', '?')}"
                 )
 
+            # LA VIA QUE FALTABA EN EL MOTIVO (24/09/2026)
+            #
+            #     El texto del rechazo narraba once, especulacion
+            #     y reventa, y NO TENER — que es justo la via que
+            #     sostiene la rueda.
+            #
+            #     Se calcula, compite y viaja en `as_hold`, pero
+            #     desde fuera era imposible saber que dijo. Con la
+            #     regla 17 -cada decision cita su regla-, un
+            #     rechazo que no cuenta la via que decide es un
+            #     rechazo que miente por omision.
+            if como_tener:
+                motivos.append(
+                    f"como tenerlo mientras sube, "
+                    f"{como_tener.get('decision', '?')}"
+                )
+
             return _sin_valor(
                 "SIN_VALOR",
                 (

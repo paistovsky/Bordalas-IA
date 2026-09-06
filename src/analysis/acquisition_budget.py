@@ -150,6 +150,27 @@ def calculate_acquisition_budget(
             "maximum_bid": maximum_bid,
             "balance": balance,
             "safe_debt_headroom": headroom,
+
+            # LOS TRES CAMPOS QUE ABREN LA PUERTA DE LA DEUDA
+            # (24/09/2026)
+            #
+            #     Que Pepe pueda comprar en rojo un martes depende
+            #     enteramente de estos tres, y NINGUNO se publicaba
+            #     en ningun sitio. Al mirar por que el permiso de
+            #     endeudarse llevaba semanas sin usarse, no habia
+            #     forma de saber cual de los tres estaba cerrado.
+            #
+            #     Es la misma familia que todo lo de esta semana:
+            #     el dato existia y no se veia.
+            "solvency_guaranteed": bool(
+                guarantee.get("guaranteed", False)
+            ),
+            "debt_window_open": bool(
+                safe_debt.get("debt_window_open", False)
+            ),
+            "temporary_debt_allowed": bool(
+                temporary_debt.get("allowed", False)
+            ),
             "purpose": "XI_UPGRADE",
         }
 
