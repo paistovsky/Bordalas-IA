@@ -274,6 +274,9 @@ def build_valuation_context(
             "name": jugador.get("name"),
             "price": safe_int(jugador.get("price")),
             "points": puntos["points"],
+            "last_season_points": puntos.get(
+                "last_season_points"
+            ),
             "raw_points": puntos.get("raw_points"),
             "points_source": puntos["source"],
             "starter": titularidad,

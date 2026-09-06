@@ -87,16 +87,23 @@ CONCEPTOS = {
     # --- Deuda declarada: viajan con dos nombres y todavia no
     # --- han costado nada. Se escriben para que no se olviden.
     "puntos_temporada_anterior": {
-        "canonical": "points_last_season",
-        "aliases": ("pointsLastSeason", "raw_points"),
-        "incident": None,
-        "what": (
-            "Tres nombres para lo mismo. `raw_points` ademas "
-            "PARECE puntos de esta temporada y no lo es: el "
-            "20/09 lo divid por las jornadas jugadas y salio que "
-            "Pedri hacia 70 puntos por jornada."
+        "canonical": "last_season_points",
+        "aliases": (
+            "points_last_season",
+            "pointsLastSeason",
+            "raw_points",
         ),
-        "unified": False,
+        "incident": "20/09/2026",
+        "what": (
+            "Cuatro nombres para lo mismo, y uno de ellos mentia: "
+            "`raw_points` PARECE puntos de esta temporada y son "
+            "de la anterior. El 20/09 se dividio por las jornadas "
+            "jugadas para estimar puntos por jornada y salio que "
+            "Pedri hacia 70 por jornada. Se cazo por absurdo. "
+            "Renombrado a `last_season_points` el 22/09; el alias "
+            "viejo se conserva mientras queden lectores."
+        ),
+        "unified": True,
     },
     "subida_de_precio": {
         "canonical": "price_increment",

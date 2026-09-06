@@ -1,6 +1,6 @@
 # LA DOCTRINA DE PEPE
 
-**Versión 1.4 — 2026-09-22**
+**Versión 1.5 — 2026-09-22**
 
 Cómo juega Pepe. Cada regla dice de dónde sale y en qué estado está.
 
@@ -8,6 +8,9 @@ Cuatro fuentes, y ninguna manda sobre las otras:
 
 - **VÍDEO** — "Trucos TIPS para ganar en Biwenger 2026/27", MANYOTUBEPIC, 6:00.
   Ocho trucos, transcripción leída entera.
+- **VÍDEO-2** — "5 consejos para ganar tu liga Fantasy Biwenger 25/26", La Media
+  Inglesa, 12:22. Transcripción leída entera. **Es de la Premier, no de LaLiga**:
+  los nombres no valen, la mecánica del dinero es la misma.
 - **CONSEJO** — los básicos de Biwenger que da cualquier jugador experimentado.
 - **POLLO** — lo que hace el líder de la liga, medido en su tablón.
 - **MEDIDO** — lo que hemos comprobado nosotros con datos de esta liga.
@@ -42,6 +45,12 @@ presupuesto.
 
 Y no solo penaltis: **los que tiran las faltas**, tanto por el gol directo como
 porque remate otro y cuente la asistencia.
+
+**Y VÍDEO-2 añade el matiz que lo hace rentable:** el valor no está en el crack
+que además tira penaltis, está en **el barato que los tira**. *"A Salah o Palmer
+no los vas a fichar solo por los penaltis, pero Kluivert metió seis de penalti la
+temporada pasada, tres en un partido, y es mucho más barato."* Igual con córners
+y faltas: un jugador que juega mal pero saca todo **se hincha a asistencias**.
 
 **Estado: apagado.** El módulo existe con sus bonos escritos (8,0 lanzador, 3,0
 segundo) y cuelga de una API de pago rota. En el `status.json` de hoy **no hay ni
@@ -140,9 +149,31 @@ Un titular de un recién ascendido a 600.000 € subiendo 70.000 al día es un
 que sube más del 1 % diario con racha corta y venderlo a tres días:
 **+4,47 % de mediana, falla el 5 %** (n=142).
 
-**Estado: construido y casi nunca dispara.** El tope por operación y el listón
-del 3 % dejan fuera casi todo. Hay que ver dónde muere el embudo antes de tocar
-nada.
+**VÍDEO-2 lo pone en el centro, y añade la frase que nos señala:**
+
+> *"Todos los días dos minutitos fichando a todos los jugadores que se estén
+> revalorizando. Da igual que te caigan mal, da igual que sean de tu equipo
+> rival, **da igual que ni siquiera vayan a jugar**. (…) Puedes estar en −15,
+> −20 toda la semana, pero **los viernes vendes para volver a positivo y poder
+> puntuar**."*
+
+**Estado: construido y casi nunca dispara.** Y el embudo del 20/09 dice dónde
+muere: **12 de 20 por `NO_MEJORA_EL_ONCE`**, cero por el tope. Si un jugador
+descartado para el once **no se está evaluando después por la vía de comerciar**,
+entonces el filtro del once está matando operaciones de cartera — que es
+exactamente lo que el vídeo dice que no hay que hacer. **Por comprobar, y es la
+sospecha más cara que hay abierta.**
+
+### 9-bis. Volumen, no solo margen
+
+**VÍDEO-2 + POLLO.** Pollo hizo **52 pujas**; Mex, 3; Pepe, 1. El vídeo describe
+una estrategia de **muchas operaciones con margen fino**; la nuestra exige un 3 %
+por operación y hace casi ninguna.
+
+Nuestro propio retrotest tiene el dato para decidirlo: el tramo `1-2 %/día` rinde
++1,80 % y está apagado por no llegar al 3 %. Con volumen, muchos +1,80 %
+componen. **Sin medir: hay que comparar cartera de muchas operaciones finas
+contra pocas gruesas, con nuestro capital.** No se afloja el 3 % por consejo.
 
 ### 10. Mirar a los baratos y leer las noticias de cesiones
 
@@ -286,7 +317,24 @@ suelos de posición, reloj de solvencia y disponibilidad (regla 20).
 **CONSEJO + orden del dueño.** *"Con estar en positivo 6 horas antes del inicio
 de jornada es suficiente."*
 
-**Estado: hecho.** Reloj de solvencia y cola de ventas.
+**VÍDEO-2 lo confirma palabra por palabra:** en negativo toda la semana, en verde
+el viernes. La máquina está bien.
+
+**Estado: hecha, y sin usar nunca.** El reloj funciona, pero Pepe está
+`SIN_DEUDA` con saldo positivo y **jamás se ha puesto en rojo**. Tiene permiso
+para endeudarse y no lo usa, porque no hay nada que pase sus filtros de compra.
+El permiso no sirve de nada si el embudo no deja pasar a nadie: esto se arregla
+en la regla 9, no aquí.
+
+### 16-bis. Al lesionado se le vende rápido
+
+**VÍDEO-2 (consejo 3 y 4).** *"Cada jornada que lo tengas, estás perdiendo
+dinero."* Y no casarse: si empieza mal, se vende **aunque sea tu favorito**,
+que siempre se puede recomprar.
+
+**Estado: a medias.** La indisponibilidad veta comprar y alinear (regla 20), y la
+cola de ventas tiene tramos por "no juega" y "cae y no juega" — pero **lesionarse
+no es un tramo propio**, y es el momento en que más rápido hay que salir.
 
 ### 17. Cada decisión cita su regla
 
@@ -324,14 +372,16 @@ ninguno por encima de los demás.
 | 6 | Calidad medida | medida 19,1→23,5, **sin encender** |
 | 7 | Calidad sobre seguridad | a medias |
 | 8 | Recién ascendidos | **marcador puesto** 20/09 |
-| 9 | Comprar lo que sube | construido, no dispara |
+| 9 | Comprar lo que sube | construido, **no dispara** |
+| 9-bis | Volumen, no solo margen | **sin medir** |
 | 10 | Los baratos y las noticias de cesión | **a medias** |
 | 11 | No pagar de más | hecho |
 | 12 | Ver las pujas | **imposible**, cerrado 21/09 |
 | 13 | No comprar lo que cae | hecho |
 | 14 | Rotar, no acumular | **no hecho** |
 | 15 | Recoger beneficio en los grandes | resuelto: Yamal se queda |
-| 16 | Positivo a T−6 h | hecho |
+| 16 | Positivo a T−6 h | hecho, **nunca usado** |
+| 16-bis | Al lesionado, fuera rápido | a medias |
 | 17 | Cada decisión cita su regla | **hecho** 20/09 — 38 de 45 |
 | 18 | Ningún umbral sin número | práctica establecida |
 | 19 | Las ofertas que entran | **sin doctrina** |

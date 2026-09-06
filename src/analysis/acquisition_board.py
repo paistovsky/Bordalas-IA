@@ -559,6 +559,14 @@ def build_acquisition_board(
                 "expected_points": (
                     (valoracion.get("points") or {}).get("points")
                 ),
+                # Puntos de la temporada ANTERIOR. El alias
+                # `raw_points` se conserva y sigue mintiendo por
+                # el nombre: usar el de abajo.
+                "last_season_points": (
+                    (valoracion.get("points") or {}).get(
+                        "last_season_points"
+                    )
+                ),
                 "raw_points": (
                     (valoracion.get("points") or {}).get(
                         "raw_points"
