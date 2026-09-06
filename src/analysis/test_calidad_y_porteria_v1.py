@@ -273,29 +273,67 @@ def test_la_mejora_se_mide_sin_circularidad() -> None:
     )
 
 
-def test_la_calidad_medida_no_esta_encendida() -> None:
+def test_la_etiqueta_sobrevive_al_encendido() -> None:
     """
-    "Si no mejora, no la enciendas."
+    ESTA PRUEBA CAMBIO DE SIGNO EL 22/09/2026
 
-    Mejora 4,4 puntos, que es poco y con tres jornadas. Esta
-    noche se mide y se publica; encenderla es otra decision.
+        Se llamaba `test_la_calidad_medida_no_esta_encendida` y
+        exigia que el motor NO la usara: el 21/09 estaba medida
+        pero sin encender, y encenderla era otra decision.
+
+        El dueño la enciende el 22/09 con la medicion delante
+        -19,1 % a 23,5 %, sin circularidad-. Asi que la prueba se
+        actualiza a proposito, y no se silencia.
+
+    Lo que sigue siendo cierto, y es lo que ahora vigila: **la
+    etiqueta no se tira, se degrada a suplente**. Donde no hay
+    partidos jugados manda la jerarquia, exactamente como antes.
+    Si eso se perdiera, un recien llegado valdria cero y el motor
+    no lo alinearia nunca.
     """
 
-    salida = comparar_varas(
-        [_ficha(points=i, jugados=3, pasada=40) for i in range(30)],
-        3,
+    from src.analysis.calidad_medida import calidad_para_la_vara
+    from src.analysis.lineup_engine import weekly_expected_value
+
+    sin_partidos = {
+        "played_home": 0,
+        "played_away": 0,
+        "points": 0,
+        "hierarchy_value": 50,
+    }
+
+    assert calidad_para_la_vara(sin_partidos) is None, (
+        "sin partidos jugados se esta inventando una calidad "
+        "medida en vez de caer en la etiqueta"
     )
 
-    assert salida["applied"] is False
-
-    motor = Path(
-        "src/analysis/lineup_engine.py"
-    ).read_text(encoding="utf-8")
-
-    assert "calidad_medida" not in motor, (
-        "el motor de alineacion ha empezado a usar la calidad "
-        "medida: eso es encenderla, y hoy no se enciende"
+    # Y la vara sin calidad es EXACTAMENTE la de siempre.
+    assert weekly_expected_value(50, 80.0, quality=None) == (
+        weekly_expected_value(50, 80.0)
     )
+
+    # El interruptor devuelve la escalera entera.
+    import os
+
+    from src.analysis.calidad_medida import DISABLE_ENV
+
+    antes = os.environ.get(DISABLE_ENV)
+
+    try:
+        os.environ[DISABLE_ENV] = "1"
+
+        assert calidad_para_la_vara({
+            "played_home": 3,
+            "played_away": 0,
+            "points": 18,
+            "hierarchy_value": 50,
+        }) is None
+
+    finally:
+        if antes is None:
+            os.environ.pop(DISABLE_ENV, None)
+        else:
+            os.environ[DISABLE_ENV] = antes
 
 
 # ============================================================
@@ -736,7 +774,7 @@ TESTS = [
     test_sin_partidos_manda_la_etiqueta_y_se_dice_cual,
     test_sin_partidos_y_sin_escalon_no_se_inventa_nada,
     test_la_mejora_se_mide_sin_circularidad,
-    test_la_calidad_medida_no_esta_encendida,
+    test_la_etiqueta_sobrevive_al_encendido,
     test_un_solo_portero_es_prioridad_primera,
     test_con_dos_porteros_deja_de_ser_urgente,
     test_un_tercer_portero_se_dice_que_lo_es,

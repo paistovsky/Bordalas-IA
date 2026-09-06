@@ -61,7 +61,44 @@ Y SI NO MEJORA, NO SE ENCIENDE
 
 from __future__ import annotations
 
+import os
 import statistics
+
+
+# ============================================================
+# ENCENDIDA EL 22/09/2026
+# ============================================================
+#
+#     19,1 % -> 23,5 % de varianza explicada, medido sin
+#     circularidad. Modesto, pero la direccion es la que
+#     cualquiera esperaria -los puntos que un jugador ha hecho
+#     predicen mejor que una etiqueta- y la temporada corre.
+#
+#     Se apaga con una linea y vuelve la escalera de siempre:
+#
+#         BORDALAS_CALIDAD_ETIQUETA=1
+DISABLE_ENV = "BORDALAS_CALIDAD_ETIQUETA"
+
+
+# Para el contrafactual del marcador, sin tocar el entorno.
+_FORZAR_ETIQUETA = False
+
+
+# LA REFERENCIA QUE LLEVA PUNTOS A LA ESCALA DE LA VARA
+#
+#     La escalera de la etiqueta va de 0,25 a 1,00. La calidad
+#     medida va en puntos por partido, de 0 a 13. Mezclarlas sin
+#     traducir reventaria la ordenacion.
+#
+#     La referencia es el p95 de los 419 jugadores con calidad
+#     medida: 6,0 puntos por partido. Con eso, el 95 % del
+#     catalogo cae por debajo de 1,00, que es donde vivia la
+#     escalera.
+#
+#     NO se recorta arriba a proposito: un jugador que puntua el
+#     doble que un p95 es el doble de bueno, y la escalera vieja
+#     no podia decirlo porque su techo era Dios.
+REFERENCIA_PUNTOS_PARTIDO = 6.0
 
 
 # Partidos de esta temporada a los que las dos mitades pesan
@@ -100,12 +137,91 @@ def safe_float(value, default=None):
         return default
 
 
+def calidad_activa() -> bool:
+    """¿Manda la calidad medida, o la etiqueta de siempre?"""
+
+    if _FORZAR_ETIQUETA:
+        return False
+
+    valor = str(os.environ.get(DISABLE_ENV, "")).strip().lower()
+
+    return valor not in ("1", "true", "si", "yes", "on")
+
+
+class vara_de_etiqueta:
+    """
+    La escalera de siempre, dentro de este bloque y solo dentro.
+
+    Para calcular "que once habria elegido la vara anterior" sin
+    tocar el entorno del proceso ni el once de verdad.
+    """
+
+    def __enter__(self):
+        global _FORZAR_ETIQUETA
+        self._antes = _FORZAR_ETIQUETA
+        _FORZAR_ETIQUETA = True
+        return self
+
+    def __exit__(self, *_):
+        global _FORZAR_ETIQUETA
+        _FORZAR_ETIQUETA = self._antes
+        return False
+
+
+def calidad_para_la_vara(ficha: dict) -> float | None:
+    """
+    La calidad de este jugador en la escala de la vara.
+
+    `None` significa "no hay medicion": quien llame usa la
+    etiqueta. Nunca lanza.
+    """
+
+    try:
+        if not calidad_activa():
+            return None
+
+        medida = calidad(ficha)
+
+        if (
+            not medida["available"]
+            or medida["source"] != "MEDIDA"
+            or medida["points_per_match"] is None
+        ):
+            return None
+
+        return (
+            medida["points_per_match"]
+            / REFERENCIA_PUNTOS_PARTIDO
+        )
+
+    except Exception:                                # noqa: BLE001
+        return None
+
+
 def partidos_jugados(ficha: dict) -> int:
-    """Partidos, no jornadas. Es el denominador correcto."""
+    """
+    Partidos, no jornadas. Es el denominador correcto.
+
+    UN CONCEPTO, DOS NOMBRES (22/09/2026)
+
+        Biwenger lo llama `playedHome`/`playedAway`; la plantilla
+        publicada, `played_home`/`played_away`. Se entienden los
+        dos, igual que `in_lineup` e `is_starter`, y por el mismo
+        motivo: el que lee no tiene por que saber de donde viene
+        la ficha.
+    """
 
     return (
-        safe_int(ficha.get("playedHome"))
-        + safe_int(ficha.get("playedAway"))
+        safe_int(
+            ficha.get("playedHome")
+            if ficha.get("playedHome") is not None
+            else ficha.get("played_home")
+        )
+        + safe_int(
+            ficha.get("playedAway")
+            if ficha.get("playedAway") is not None
+            else ficha.get("played_away")
+        )
     )
 
 
@@ -144,7 +260,11 @@ def calidad(ficha: dict, hierarchy_value=None) -> dict:
         partidos = partidos_jugados(ficha)
         salida["matches"] = partidos
 
-        pasada = safe_int(ficha.get("pointsLastSeason"))
+        pasada = safe_int(
+            ficha.get("pointsLastSeason")
+            if ficha.get("pointsLastSeason") is not None
+            else ficha.get("points_last_season")
+        )
 
         por_partido_pasada = (
             pasada / PARTIDOS_TEMPORADA if pasada else None

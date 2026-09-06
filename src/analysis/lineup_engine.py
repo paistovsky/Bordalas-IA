@@ -654,6 +654,7 @@ def weekly_expected_value(
     hierarchy_value: int | None,
     starter_probability: float | None,
     position: int | None = None,
+    quality: float | None = None,
 ) -> float:
     """
     Lo que espero de este jugador ESTA jornada.
@@ -707,7 +708,26 @@ def weekly_expected_value(
         (1.0 - titular) * desde_el_banquillo
     )
 
-    vara = participacion * HIERARCHY_MATCH_QUALITY[escalon]
+    # LA CALIDAD, MEDIDA EN VEZ DE ETIQUETADA (22/09/2026)
+    #
+    #     `HIERARCHY_MATCH_QUALITY` es una escalera decretada a
+    #     partir de una etiqueta: ni un punto real entraba en la
+    #     vara. Con puntos por partido jugado, la varianza
+    #     explicada pasa de 19,1 % a 23,5 % -medido sin
+    #     circularidad-.
+    #
+    #     Sin `quality` la vara es EXACTAMENTE la de siempre, que
+    #     es lo que necesitan los sitios donde solo se publica el
+    #     numero. Y donde no hay partidos jugados, `quality` viene
+    #     a None y manda la etiqueta: degradada a suplente, no
+    #     tirada.
+    calidad_escalon = (
+        quality
+        if quality is not None
+        else HIERARCHY_MATCH_QUALITY[escalon]
+    )
+
+    vara = participacion * calidad_escalon
 
     if position is None:
         return vara
@@ -956,10 +976,21 @@ def prepare_players(
                 #     pasando sin posicion, para que la medicion
                 #     del sesgo siga midiendo la vara cruda y no
                 #     su propia correccion.
+                from src.analysis.calidad_medida import (
+                    calidad_para_la_vara,
+                )
+
                 expected_value = weekly_expected_value(
                     jerarquia.get("value"),
                     starter_probability,
                     position=player.get("position"),
+
+                    # Puntos por partido jugado. None donde no
+                    # hay medicion: entonces manda la etiqueta.
+                    quality=calidad_para_la_vara({
+                        **player,
+                        "hierarchy_value": jerarquia.get("value"),
+                    }),
                 )
 
                 final_score = (

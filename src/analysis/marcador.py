@@ -446,6 +446,34 @@ def anotar_once_alternativo(
             "vara": once.get("vara", "plana"),
         }
 
+        # TRES ONCES, PARA PODER SEPARAR LOS DOS CAMBIOS
+        # (22/09/2026)
+        #
+        #     El 18/09 se encendieron los factores de posicion y
+        #     el 22/09 la calidad medida. Con dos onces se sabria
+        #     si el conjunto suma; con tres se sabe cual de los
+        #     dos lo hace:
+        #
+        #         factores = FACTORES - BASE
+        #         calidad  = ACTUAL   - FACTORES
+        otros = once.get("por_vara") or {}
+
+        if otros:
+            jornada["onces_por_vara"] = {
+                nombre: {
+                    "formation": (datos or {}).get("formation"),
+                    "players": [
+                        safe_int(
+                            j.get("id")
+                            if isinstance(j, dict)
+                            else j
+                        )
+                        for j in ((datos or {}).get("players") or [])
+                    ],
+                }
+                for nombre, datos in otros.items()
+            }
+
         guardar_ledger(ledger)
 
         return {
@@ -876,6 +904,18 @@ def marcador() -> dict:
             #     Alineamos / habria alineado la vara vieja /
             #     mejor posible. Sin los tres no se puede saber
             #     si los factores por posicion suman o restan.
+            # Los tres onces, cada uno con sus puntos, para que
+            # el efecto de los factores y el de la calidad se
+            # puedan separar en vez de ir mezclados.
+            "puntos_por_vara": {
+                nombre: _puntos_del_once(
+                    puntos, (datos or {}).get("players")
+                )
+                for nombre, datos in (
+                    actual.get("onces_por_vara") or {}
+                ).items()
+            },
+
             "puntos_vara_vieja": _puntos_del_once(
                 puntos,
                 (actual.get("once_alternativo") or {}).get(

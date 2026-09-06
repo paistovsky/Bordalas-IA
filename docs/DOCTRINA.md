@@ -1,6 +1,6 @@
 # LA DOCTRINA DE PEPE
 
-**Versión 1.3 — 2026-09-21**
+**Versión 1.4 — 2026-09-22**
 
 Cómo juega Pepe. Cada regla dice de dónde sale y en qué estado está.
 
@@ -57,7 +57,15 @@ managers. En una de siete hay porteros de sobra, así que la parte innegociable 
 **no quedarse nunca con uno solo**; los dos del mismo club es la versión buena
 cuando salga a cuenta, no la obligación.
 
-**Estado: ausente.** Tenemos un portero y ninguna regla que lo impida.
+**Hecho el 21/09.** Regla con guardia: si solo hay un portero, fichar el segundo
+es PRIORIDAD PRIMERA, por encima de cualquier operación de cartera. Hoy solo cabe
+Letacek (150.000 €), tercer portero: **cubre no salir con diez, no cubre hacer
+una buena jornada**, y el módulo lo dice él solo.
+
+**Y el accidente que destapó:** la regla del portero miraba `in_lineup` mientras
+el dashboard llama a ese mismo dato `is_starter`. Dituro, único portero y
+titular, **no salía protegido**. Un dato con dos nombres. Es la cuarta vez que
+esta familia de fallo aparece.
 
 ### 4. Más delanteros, menos defensas
 
@@ -85,8 +93,14 @@ y al mediapunta. El vídeo confirma que hay que separarlos.
 **MEDIDO.** Hoy la calidad sale de una etiqueta de FutbolFantasy convertida en
 escalera. No entra ni un punto real. La vara explica el **20 %** de la varianza.
 
-**Estado: pendiente.** Es la regla más importante sin hacer, y es la que hace
-posibles la 5 y la 8.
+**Medido el 21/09: 19,1 % → 23,5 %.** Puntos por partido jugado, temporada pasada
+y ésta pesadas por muestra. Cuatro puntos de mejora, no cuarenta: la primera
+cifra que salió, 61,9 %, era **circular** —usaba los puntos de esta temporada
+para predecir los puntos de esta temporada— y se descartó. Hay guardia para que
+no vuelva a colarse.
+
+**Estado: construida, medida y sin encender.** Con tres jornadas de muestra es un
+cambio mayor que cualquier umbral.
 
 ### 7. Calidad por encima de seguridad de jugar
 
@@ -170,9 +184,15 @@ real— pero los ajustes de la liga traen `marketShowBids = true`. **Ya está
 encendido y es gratis.** Lo que falla es que pedimos las ventas a un sitio que no
 devuelve las pujas.
 
-**Estado: la información existe y no la estamos leyendo.** Si la llamada correcta
-devuelve pujas, `rival_bid_model` entero —48 pujas calibradas, curva de primas,
-probabilidad de que nos superen— **sobra**: se pasa de estimar a saber.
+**Ejecutado el 21/09: no se pueden leer, y el vídeo se equivoca para esta liga.**
+El ajuste está en `true`, pero el endpoint de mercado devuelve 63 ventas **sin un
+solo campo de puja** —ni en las 43 de rivales—, y la ruta por jugador responde
+`400 Invalid method`: no existe. Lo único visible son las ofertas que nos hacen a
+nosotros, que ya teníamos.
+
+**Estado: cerrado en negativo.** `rival_bid_model` **se queda** —hay que seguir
+estimando— y el desvío aleatorio de puja también, porque el rival sigue siendo
+invisible. Un "no se puede" comprobado vale más que un "quizá" abierto.
 
 ### 13. No comprar lo que cae, y soltar lo propio que cae
 
@@ -298,16 +318,16 @@ ninguno por encima de los demás.
 |---|---|---|
 | 1 | El once es lo único que marca | entendido |
 | 2 | Balón parado | **apagado** |
-| 3 | La portería nunca a uno | **ausente** |
+| 3 | La portería nunca a uno | **hecho** 21/09 |
 | 4 | Más delanteros, menos defensas | **hecho** 18/09 |
 | 5 | Centrocampistas con gol | **no hecho** |
-| 6 | Calidad medida | **pendiente** |
+| 6 | Calidad medida | medida 19,1→23,5, **sin encender** |
 | 7 | Calidad sobre seguridad | a medias |
 | 8 | Recién ascendidos | **marcador puesto** 20/09 |
 | 9 | Comprar lo que sube | construido, no dispara |
 | 10 | Los baratos y las noticias de cesión | **a medias** |
 | 11 | No pagar de más | hecho |
-| 12 | Ver las pujas | **gratis y sin leer** |
+| 12 | Ver las pujas | **imposible**, cerrado 21/09 |
 | 13 | No comprar lo que cae | hecho |
 | 14 | Rotar, no acumular | **no hecho** |
 | 15 | Recoger beneficio en los grandes | resuelto: Yamal se queda |

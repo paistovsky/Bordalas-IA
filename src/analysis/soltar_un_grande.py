@@ -172,6 +172,86 @@ def es_grande(jugador: dict, roster: list, matchdays: int) -> dict:
         return salida
 
 
+def mejor_cesta(
+    jugador: dict,
+    roster: list,
+    candidatos: list,
+    matchdays: int,
+    disponible: int,
+    maximo: int = 5,
+) -> list:
+    """
+    La cesta que MAS neto da, no una cualquiera.
+
+    POR QUE ESTO IMPORTA (22/09/2026)
+
+        Con la oferta viva de 21.099.500 EUR por Yamal, el neto
+        salia -6,26 con cinco fichas y -0,97 con dos. El mismo
+        veredicto, tres numeros distintos: depende de que cesta
+        se elija, y elegir una mala es hacerle trampas a la
+        opcion de vender.
+
+        Asi que se busca la MEJOR. Si ni siquiera la mejor pasa
+        el margen, el "no se vende" es solido; y si la mejor
+        pasara, habria que mirarlo de verdad.
+
+    Nunca lanza: si algo falla devuelve la cesta vacia, y con
+    cesta vacia no se vende nadie.
+    """
+
+    try:
+        import itertools
+
+        posibles = [
+            c
+            for c in (candidatos or [])
+            if isinstance(c, dict)
+            and safe_int(c.get("price")) > 0
+        ]
+
+        # Con veinte candidatos y cestas de hasta cinco esto son
+        # unas 21.000 combinaciones: instantaneo. Si el mercado
+        # creciera, se recorta por precio antes de combinar.
+        posibles = sorted(
+            posibles,
+            key=lambda c: -safe_float(
+                c.get("projected_per_matchday")
+            ),
+        )[:20]
+
+        mejor = []
+        mejor_neto = None
+
+        for cuantos in range(1, maximo + 1):
+
+            for combo in itertools.combinations(posibles, cuantos):
+
+                coste = sum(
+                    safe_int(c.get("price")) for c in combo
+                )
+
+                if coste > disponible:
+                    continue
+
+                salida = evaluar_venta(
+                    jugador, roster, list(combo), matchdays
+                )
+
+                neto = salida.get("net_points_per_matchday")
+
+                if neto is None:
+                    continue
+
+                if mejor_neto is None or neto > mejor_neto:
+                    mejor_neto = neto
+                    mejor = list(combo)
+
+        return mejor
+
+    except Exception:                                # noqa: BLE001
+        return []
+
+
 def evaluar_venta(
     jugador: dict | None,
     roster: list | None,

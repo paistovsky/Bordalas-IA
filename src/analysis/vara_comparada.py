@@ -78,27 +78,65 @@ def safe_float(value, default=None):
         return default
 
 
-def _vara(jugador: dict, con_factores: bool) -> float:
-    """La vara del motor, con o sin el factor de posicion."""
+# LAS TRES VARAS, PARA PODER SEPARAR LOS EFECTOS (22/09/2026)
+#
+#     El 18/09 se encendieron los factores de posicion. El 22/09,
+#     la calidad medida. Son dos cambios encima del otro sin
+#     saber como fue el primero.
+#
+#     Con solo dos onces -"el de antes" y "el de ahora"- el
+#     marcador diria si el conjunto suma, pero no cual de los dos
+#     cambios lo hace. Con tres, si:
+#
+#         factores = FACTORES - BASE
+#         calidad  = ACTUAL   - FACTORES
+#
+#     Por eso se anotan las tres cada jornada.
+VARAS = {
+    # La del 17/09: etiqueta, sin factores.
+    "base": (False, False),
 
+    # La del 18/09: etiqueta + factores de posicion.
+    "factores": (True, False),
+
+    # La de hoy: factores + calidad medida.
+    "actual": (True, True),
+}
+
+
+def _vara(jugador: dict, vara: str = "actual") -> float:
+    """La vara del motor, en la version que se le pida."""
+
+    from src.analysis.calidad_medida import (
+        calidad_para_la_vara,
+        vara_de_etiqueta,
+    )
     from src.analysis.lineup_engine import weekly_expected_value
 
-    if not con_factores:
-        return weekly_expected_value(
-            jugador.get("hierarchy_value"),
-            safe_float(jugador.get("starter_probability")),
-        )
+    factores, calidad = VARAS.get(vara, VARAS["actual"])
+
+    if calidad:
+        nota = calidad_para_la_vara(jugador)
+    else:
+        # Con la etiqueta forzada, `calidad_para_la_vara` devuelve
+        # None y manda la escalera de siempre.
+        with vara_de_etiqueta():
+            nota = calidad_para_la_vara(jugador)
 
     return weekly_expected_value(
         jugador.get("hierarchy_value"),
         safe_float(jugador.get("starter_probability")),
-        position=safe_int(jugador.get("position")),
+        position=(
+            safe_int(jugador.get("position")) if factores else None
+        ),
+        quality=nota,
     )
 
 
 def elegir_once(
     plantilla: list,
     con_factores: bool = True,
+    vara: str | None = None,
 ) -> dict:
     """
     El mejor once legal de esta plantilla con esta vara.
@@ -109,10 +147,15 @@ def elegir_once(
     try:
         from src.analysis.position_factor import vara_plana
 
+        # `vara` manda si viene; si no, el booleano de siempre.
+        cual = vara or ("actual" if con_factores else "base")
+
+        factores, _ = VARAS.get(cual, VARAS["actual"])
+
         contexto = (
-            vara_plana()
-            if not con_factores
-            else _nada()
+            _nada()
+            if factores
+            else vara_plana()
         )
 
         with contexto:
@@ -135,7 +178,7 @@ def elegir_once(
                         jugador.get("starter_probability")
                     ),
                     "points": safe_int(jugador.get("points")),
-                    "score": _vara(jugador, con_factores),
+                    "score": _vara(jugador, cual),
                 })
 
         por_posicion = {p: [] for p in POSICIONES}
@@ -188,7 +231,8 @@ def elegir_once(
                 "score": None,
                 "players": [],
                 "by_position": {},
-                "with_factors": con_factores,
+                "with_factors": factores,
+                "vara": cual,
                 "reason": (
                     "Ninguna formacion legal cabe en esta "
                     "plantilla."
@@ -213,7 +257,8 @@ def elegir_once(
                 key=lambda j: (j["position"], -j["score"]),
             ),
             "by_position": reparto,
-            "with_factors": con_factores,
+            "with_factors": factores,
+            "vara": cual,
             "reason": None,
         }
 
@@ -224,7 +269,8 @@ def elegir_once(
             "score": None,
             "players": [],
             "by_position": {},
-            "with_factors": con_factores,
+            "with_factors": None,
+            "vara": vara or "actual",
             "reason": (
                 f"No se pudo elegir el once: "
                 f"{type(error).__name__}: {error}"

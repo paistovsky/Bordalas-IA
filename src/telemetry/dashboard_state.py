@@ -1807,6 +1807,26 @@ def compact_roster(
                     player.get("priceIncrement")
                 ),
                 "points": safe_int(player.get("points")),
+
+                # PARTIDOS JUGADOS, QUE ES EL DENOMINADOR BUENO
+                # (22/09/2026)
+                #
+                #     La calidad medida son puntos por PARTIDO
+                #     jugado, no por jornada. El motor los tenia
+                #     -vienen en `my_team`- y la plantilla
+                #     publicada no, asi que quien leia el tablero
+                #     no podia recalcular la misma vara que el
+                #     motor y le salia otro once.
+                #
+                #     Es la misma familia de fallo que `in_lineup`
+                #     contra `is_starter`: el mismo concepto
+                #     viajando entero por un lado y cojo por otro.
+                "played_home": safe_int(player.get("playedHome")),
+                "played_away": safe_int(player.get("playedAway")),
+                "points_last_season": safe_int(
+                    player.get("pointsLastSeason")
+                ),
+
                 "status": player.get("status"),
                 "number": safe_int(player.get("number")),
                 "is_starter": player_id in starter_ids,
@@ -3417,10 +3437,16 @@ def build_dashboard_state() -> dict:
                 jornada_en_curso,
             )
 
-            alternativo = elegir_once(
-                (roster or {}).get("players") or [],
-                con_factores=False,
-            )
+            from src.analysis.vara_comparada import VARAS
+
+            fichas = (roster or {}).get("players") or []
+
+            por_vara = {
+                nombre: elegir_once(fichas, vara=nombre)
+                for nombre in VARAS
+            }
+
+            alternativo = por_vara["base"]
 
             if alternativo.get("available"):
                 anotar_once_alternativo(
@@ -3428,7 +3454,18 @@ def build_dashboard_state() -> dict:
                     {
                         "formation": alternativo["formation"],
                         "players": alternativo["players"],
-                        "vara": "plana",
+                        "vara": "base",
+
+                        # Los tres, para separar el efecto de los
+                        # factores del de la calidad.
+                        "por_vara": {
+                            nombre: {
+                                "formation": o.get("formation"),
+                                "players": o.get("players"),
+                            }
+                            for nombre, o in por_vara.items()
+                            if o.get("available")
+                        },
                     },
                 )
 
