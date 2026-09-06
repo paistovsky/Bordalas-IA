@@ -143,6 +143,7 @@ TESTS = [
     "src.analysis.test_interruptor_tener_v1",
     "src.analysis.test_vara_v1",
     "src.analysis.test_forma_estable_v1",
+    "src.analysis.test_doctrina_v1",
 ]
 
 

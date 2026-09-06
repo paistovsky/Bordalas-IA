@@ -88,6 +88,12 @@ CADENAS = [
         ["SquadPage.jsx"],
     ),
     (
+        "doctrina",
+        "doctrina",
+        "DoctrinaPanel",
+        ["BrainPage.jsx"],
+    ),
+    (
         "season_horizon",
         "seasonHorizon",
         "SeasonHorizonPanel",

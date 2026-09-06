@@ -3383,6 +3383,96 @@ def build_dashboard_state() -> dict:
     #     fallar: en silencio y con la clave puesta.
 
     # ============================================================
+    # LA DOCTRINA (20/09/2026)
+    # ============================================================
+    #
+    #     El dueño junto los consejos basicos de Biwenger, un
+    #     video de trucos y la forma medida de jugar de Pollo, y
+    #     dijo: "eso es lo que quiero que haga Pepe".
+    #
+    #     Dieciocho reglas en `docs/DOCTRINA.md`. Aqui se publica:
+    #
+    #       - que decisiones citan una regla y CUALES NO CITAN
+    #         NINGUNA, que es lo que de verdad interesa;
+    #       - que clubes acaban de ascender, deducidos del
+    #         catalogo, y si de verdad suben mas;
+    #       - donde muere cada objetivo del escaparate;
+    #       - y el activo que pesa demasiado, en dos columnas.
+    #
+    #     Observador puro: no mueve un tope ni un liston.
+    try:
+        from src.analysis.activo_grande import evaluar as activo_grande
+        from src.analysis.ascendidos import (
+            detectar as detectar_ascendidos,
+            en_el_mercado as ascendidos_en_mercado,
+        )
+        from src.analysis.doctrina import auditar as auditar_doctrina
+        from src.analysis.embudo import embudo as construir_embudo
+
+        catalogo_crudo = snapshot.get("catalog") or {}
+
+        ascendidos = detectar_ascendidos(catalogo_crudo)
+
+        equipo_de_jugador = {
+            str(j.get("id")): str(j.get("teamID"))
+            for j in (
+                (catalogo_crudo.get("data") or {}).get("players")
+                or {}
+            ).values()
+            if isinstance(j, dict)
+        }
+
+        doctrina = {
+            "available": True,
+            "observer_only": True,
+
+            # Regla 17.
+            "citations": auditar_doctrina(
+                {
+                    "acquisition": acquisition,
+                    "season_horizon": season_horizon,
+                    "decision": state.get("decision") or {},
+                }
+            ),
+
+            # Regla 8.
+            "promoted": ascendidos,
+            "promoted_on_sale": ascendidos_en_mercado(
+                (acquisition or {}).get("targets"),
+                equipo_de_jugador,
+                ascendidos.get("team_ids"),
+            ),
+
+            # Regla 9: por que casi nunca dispara.
+            "funnel": construir_embudo(acquisition),
+
+            # Regla 15.
+            "big_asset": activo_grande(
+                (roster or {}).get("players") or [],
+                (acquisition or {}).get("targets") or [],
+                safe_int((race or {}).get("matchdays_played")),
+                cash=safe_int(
+                    (exposure or {}).get("cash_budget")
+                ),
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        doctrina = {
+            "available": False,
+            "observer_only": True,
+            "citations": {"available": False},
+            "promoted": {"available": False},
+            "promoted_on_sale": {"available": False},
+            "funnel": {"available": False},
+            "big_asset": {"available": False},
+            "reason": (
+                f"No se pudo montar la doctrina: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # ============================================================
     # LA VARA CON FACTORES POR POSICION (18/09/2026)
     # ============================================================
     #
@@ -3931,6 +4021,11 @@ def build_dashboard_state() -> dict:
         # El once: los puntos sentados, el sesgo por posicion y
         # el equipo que habia que mirar. No decide nada.
         "once": once_bloque,
+
+        # La doctrina: que decisiones citan regla, cuales no,
+        # los recien ascendidos, el embudo del mercado y el
+        # activo que pesa demasiado. No decide nada.
+        "doctrina": doctrina,
 
         # La vara del once: los factores por posicion, su
         # muestra, el once que sale con ellos y el que salia sin

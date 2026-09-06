@@ -162,6 +162,18 @@ export function normalizeStatus(raw = {}) {
       blocked: []
     },
 
+    // LA DOCTRINA (20/09/2026)
+    //
+    // Las dieciocho reglas de docs/DOCTRINA.md aplicadas a lo que
+    // Pepe decide: que decisiones citan una y CUALES NO CITAN
+    // NINGUNA, los recien ascendidos, el embudo del mercado y el
+    // activo que pesa demasiado.
+    doctrina: raw.doctrina || {
+      available: false,
+      citations: { available: false },
+      funnel: { available: false }
+    },
+
     // LA VARA DEL ONCE (18/09/2026)
     //
     // Los factores por posicion, de cuantas fichas sale cada uno,

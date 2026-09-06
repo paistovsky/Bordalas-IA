@@ -1,4 +1,5 @@
 import ScoutPanel from "../components/ScoutPanel";
+import DoctrinaPanel from "../components/DoctrinaPanel";
 import PressPanel from "../components/PressPanel";
 import ArbiterPanel from "../components/ArbiterPanel";
 import StrategyPanel from "../components/StrategyPanel";
@@ -341,6 +342,12 @@ export default function BrainPage({ data }) {
             Va lo primero de ESTRATEGIA porque es la pregunta de
             la que cuelgan las demas: ¿tenia razon el modelo al
             no comprar? */}
+        {/* LA DOCTRINA, LA PRIMERA (20/09/2026)
+            Dieciocho reglas y, sobre todo, la lista de decisiones
+            que Pepe toma sin citar ninguna: esas son las que nadie
+            ha escrito nunca. */}
+        <DoctrinaPanel data={data} />
+
         <ArbiterPanel data={data} />
 
         <PressPanel data={data} />
