@@ -5,6 +5,47 @@ import requests
 from dotenv import load_dotenv
 
 
+# ============================================================
+# UN SOLO CLIENTE POR VUELTA
+# ============================================================
+#
+#     Cada colector construía el suyo y hacía su propio login.
+#     Dos colectores = dos `POST /auth/login` y dos
+#     `GET /account` por vuelta, para la misma sesión.
+#
+#     Un proceso es exactamente un ciclo -el workflow arranca
+#     uno por vuelta-, así que cachear el cliente aquí no cruza
+#     ciclos: cuando el proceso muere, la sesión muere con él.
+_CLIENTE_DEL_CICLO: dict = {}
+
+
+def cliente_del_ciclo() -> "BiwengerClient":
+    """
+    El cliente de esta vuelta, con sesión ya iniciada.
+
+    Nunca devuelve uno a medio autenticar: si el login falla, la
+    excepción sube y no se cachea nada, para que el siguiente
+    que llame lo vuelva a intentar en vez de heredar un cliente
+    roto.
+    """
+
+    if "value" not in _CLIENTE_DEL_CICLO:
+
+        nuevo = BiwengerClient()
+        nuevo.login()
+        nuevo.select_league()
+
+        _CLIENTE_DEL_CICLO["value"] = nuevo
+
+    return _CLIENTE_DEL_CICLO["value"]
+
+
+def reset_cliente_del_ciclo() -> None:
+    """Para las pruebas y para quien ejecute varios ciclos."""
+
+    _CLIENTE_DEL_CICLO.clear()
+
+
 class BiwengerClient:
     """Cliente básico para interactuar con la API de Biwenger."""
 
@@ -25,6 +66,12 @@ class BiwengerClient:
         self.token: str | None = None
         self.league_id: int | None = None
         self.user_id: int | None = None
+
+        # La liga elegida, guardada. Sin esto, quien comparte el
+        # cliente tendria que volver a pedir `/account` solo
+        # para tenerla — que es justo la peticion que se acaba de
+        # quitar.
+        self.league: dict[str, Any] | None = None
 
         self.session = requests.Session()
 
@@ -120,6 +167,7 @@ class BiwengerClient:
 
         league = leagues[0]
 
+        self.league = league
         self.league_id = league["id"]
         self.user_id = league["user"]["id"]
 
@@ -186,11 +234,27 @@ class BiwengerClient:
     # MI EQUIPO
     # --------------------------------------------------
 
-    def get_my_team(self) -> list[dict[str, Any]]:
-        """Obtiene información completa de nuestros jugadores."""
+    def get_my_team(
+        self,
+        catalog: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        """
+        Obtiene información completa de nuestros jugadores.
+
+        EL CATÁLOGO SE PUEDE PASAR (07/09/2026)
+
+            Quien ya lo tenga que lo pase: son 500 KB y una
+            petición. `collect_league_snapshot` lo pedía aquí
+            dentro y otra vez tres líneas después, con los
+            mismos parámetros, en la misma vuelta.
+
+            Sin argumento el comportamiento es el de siempre.
+        """
 
         player_ids = self.get_my_player_ids()
-        catalog = self.get_player_catalog()
+
+        if catalog is None:
+            catalog = self.get_player_catalog()
 
         team = []
 

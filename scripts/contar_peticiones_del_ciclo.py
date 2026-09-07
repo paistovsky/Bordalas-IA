@@ -36,6 +36,17 @@ import re
 MANAGERS = 7
 
 
+# Lo que costaba una vuelta antes del paso A (07/09/2026), para
+# poder enseñar el antes y el despues sin ir a buscarlo:
+#
+#     8 del snapshot -con el catalogo pedido dos veces-
+#   + 12 de la colecta del tablon
+#   + 12 de la MISMA colecta, otra vez
+#   ----
+#    32
+ANTES_DEL_PASO_A = 32
+
+
 class RespuestaFalsa:
 
     def __init__(self, cuerpo: dict):
@@ -116,8 +127,24 @@ def cuerpo_para(url: str) -> dict:
     if re.search(r"/user/\d+/finances", url):
         return {"status": 200, "data": {}}
 
-    if re.search(r"/user/\d+", url):
-        return {"status": 200, "data": {"id": 1, "players": []}}
+    perfil = re.search(r"/user/(\d+)", url)
+
+    if perfil:
+        # EL ID DE VERDAD, NO UNO FIJO (07/09/2026)
+        #
+        #     Con un `id: 1` para todos, los siete perfiles se
+        #     guardaban bajo la misma clave y la medicion de la
+        #     cache salia mal: decia que se refrescaban seis
+        #     cuando el codigo estaba haciendo lo correcto.
+        #
+        #     Un arnes que colapsa identidades mide otra cosa.
+        return {
+            "status": 200,
+            "data": {
+                "id": int(perfil.group(1)),
+                "players": [],
+            },
+        }
 
     if url.rstrip("/").endswith("/league"):
         return {
@@ -153,74 +180,159 @@ class SesionFalsa:
     delete = _responder
 
 
-def main() -> None:
+class _entorno_de_mentira:
+    """
+    Todo lo que hace falta para ejecutar los colectores en seco.
 
-    # Credenciales de mentira: el cliente las exige en el
-    # constructor y aqui no se usa ninguna.
-    os.environ.setdefault("BIWENGER_USERNAME", "no-se-usa")
-    os.environ.setdefault("BIWENGER_PASSWORD", "no-se-usa")
+    Sustituye la sesion por una falsa y manda TODA la escritura
+    a un directorio temporal.
 
-    import requests
+    LO SEGUNDO NO ES UN DETALLE (07/09/2026)
 
-    from src.biwenger import peticiones
+        Los colectores no solo piden: escriben. La primera
+        version de esta sonda dejo en el estado un snapshot con
+        tres jugadores de mentira, y
+        `test_futbolfantasy_source_v12` -que coge el mas
+        reciente- se puso rojo con un cero, en otro fichero y
+        sin relacion aparente.
 
-    # LA SUSTITUCION, ANTES DE CONSTRUIR NADA
-    #
-    #     El cliente envuelve `self.session` en su constructor,
-    #     asi que si se sustituye `requests.Session` antes, lo
-    #     que se envuelve -y se cuenta- es la de mentira.
-    original = requests.Session
-    requests.Session = SesionFalsa
+        Vive aqui, y no dentro de `main`, para que la guardia
+        pueda usar exactamente el mismo montaje: si la sonda y
+        la guardia midieran con arneses distintos, el numero de
+        una no probaria nada sobre el otro.
+    """
 
-    # Y LA OTRA SUSTITUCION, QUE ME COSTO LA VERJA (07/09/2026)
-    #
-    #     Los colectores no solo piden: ESCRIBEN. Al ejecutarlos
-    #     aqui dejaron en `data/` un snapshot con tres jugadores
-    #     de mentira, y `test_futbolfantasy_source_v12` -que coge
-    #     el snapshot mas reciente- se puso rojo con un `0`.
-    #
-    #     Una sonda que deja estado detras es peor que una que
-    #     lo lee: lo lee el siguiente que pase. Asi que los
-    #     directorios de salida se mandan a un temporal que se
-    #     borra al terminar, y `data/` no se toca.
-    import tempfile
+    def __init__(self):
+        self.requests = None
+        self.session_original = None
+        self.temporal = None
+        self.salidas = None
 
-    from pathlib import Path
+    def __enter__(self):
 
-    from src.collectors import (
-        board_history_collector as tablon_mod,
-    )
-    from src.collectors import league_collector as liga_mod
+        import tempfile
 
-    temporal = tempfile.TemporaryDirectory(
-        prefix="bordalas_recuento_"
-    )
+        from pathlib import Path
 
-    fuera = Path(temporal.name)
+        os.environ.setdefault("BIWENGER_USERNAME", "no-se-usa")
+        os.environ.setdefault("BIWENGER_PASSWORD", "no-se-usa")
 
-    (fuera / "rival_intelligence").mkdir(
-        parents=True, exist_ok=True
-    )
+        import requests
 
-    salidas_originales = (
-        liga_mod.DATA_DIR,
-        tablon_mod.DATA_DIR,
-        tablon_mod.BOARD_FILE,
-        tablon_mod.BOARD_RAW_FILE,
-    )
+        from src.biwenger import client as cliente_mod
+        from src.biwenger import peticiones
+        from src.collectors import (
+            board_history_collector as tablon_mod,
+        )
+        from src.collectors import league_collector as liga_mod
 
-    liga_mod.DATA_DIR = fuera
-    tablon_mod.DATA_DIR = fuera / "rival_intelligence"
-    tablon_mod.BOARD_FILE = (
-        tablon_mod.DATA_DIR / "board_events.json"
-    )
-    tablon_mod.BOARD_RAW_FILE = (
-        tablon_mod.DATA_DIR / "board_latest_raw.json"
-    )
+        self.requests = requests
+        self.session_original = requests.Session
+        requests.Session = SesionFalsa
 
-    try:
+        self.temporal = tempfile.TemporaryDirectory(
+            prefix="bordalas_recuento_"
+        )
+
+        fuera = Path(self.temporal.name)
+
+        (fuera / "rival_intelligence").mkdir(
+            parents=True, exist_ok=True
+        )
+
+        from src.biwenger import cache_del_reset as cache_mod
+
+        self.cache_mod = cache_mod
+
+        self.salidas = (
+            liga_mod,
+            tablon_mod,
+            liga_mod.DATA_DIR,
+            tablon_mod.DATA_DIR,
+            tablon_mod.BOARD_FILE,
+            tablon_mod.BOARD_RAW_FILE,
+            tablon_mod.PROFILES_FILE,
+            cache_mod.FICHERO,
+        )
+
+        liga_mod.DATA_DIR = fuera
+        tablon_mod.DATA_DIR = fuera / "rival_intelligence"
+        tablon_mod.BOARD_FILE = (
+            tablon_mod.DATA_DIR / "board_events.json"
+        )
+        tablon_mod.BOARD_RAW_FILE = (
+            tablon_mod.DATA_DIR / "board_latest_raw.json"
+        )
+
+        # La cache entre resets y los perfiles guardados: si no
+        # se desvian, la sonda leeria -y escribiria- la cache de
+        # produccion, y el numero saldria distinto segun la hora
+        # a la que se ejecute.
+        tablon_mod.PROFILES_FILE = (
+            tablon_mod.DATA_DIR / "profiles_cache.json"
+        )
+        cache_mod.FICHERO = fuera / "cache_biwenger.json"
+
+        # El cliente compartido es de una vuelta. Sin reiniciar,
+        # la segunda medicion heredaria el login de la primera y
+        # saldrian dos peticiones de menos.
+        cliente_mod.reset_cliente_del_ciclo()
+
         peticiones.reiniciar()
 
+        self.peticiones = peticiones
+
+        return self
+
+    def __exit__(self, *_):
+
+        from src.biwenger import client as cliente_mod
+
+        self.requests.Session = self.session_original
+
+        (
+            liga_mod,
+            tablon_mod,
+            liga_dir,
+            tablon_dir,
+            board_file,
+            board_raw,
+            profiles_file,
+            cache_file,
+        ) = self.salidas
+
+        liga_mod.DATA_DIR = liga_dir
+        tablon_mod.DATA_DIR = tablon_dir
+        tablon_mod.BOARD_FILE = board_file
+        tablon_mod.BOARD_RAW_FILE = board_raw
+        tablon_mod.PROFILES_FILE = profiles_file
+        self.cache_mod.FICHERO = cache_file
+
+        cliente_mod.reset_cliente_del_ciclo()
+
+        self.temporal.cleanup()
+
+        return False
+
+
+def medir_un_ciclo(vueltas: int = 1) -> dict:
+    """
+    Las peticiones de una vuelta, ejecutando los colectores.
+
+    `vueltas` corre varias seguidas sobre la MISMA cache y
+    devuelve lo que costo la ULTIMA. Con 1 se mide la primera
+    del dia -cache vacia-; con 2 o mas, el estado de crucero,
+    que es lo que se paga 47 de cada 48 veces.
+
+    `{snapshot, board, total, by_endpoint, vueltas}`. Forma
+    fija.
+
+    Ni una llamada a la red, ni un byte escrito en el estado.
+    """
+
+    with _entorno_de_mentira() as entorno:
+
+        from src.biwenger import client as cliente_mod
         from src.collectors.board_history_collector import (
             collect_board_history,
         )
@@ -228,246 +340,188 @@ def main() -> None:
             collect_league_snapshot,
         )
 
-        print("Ejecutando collect_league_snapshot()...")
+        contador = entorno.peticiones.CONTADOR
 
-        antes = peticiones.CONTADOR.total()
+        snapshot = 0
+        tablon = 0
 
-        try:
-            collect_league_snapshot()
+        for vuelta in range(max(1, int(vueltas))):
 
-        except Exception as error:                  # noqa: BLE001
-            print(f"  (paro en: {type(error).__name__}: {error})")
+            # Cada vuelta es un proceso nuevo en produccion: el
+            # cliente compartido no cruza ciclos.
+            cliente_mod.reset_cliente_del_ciclo()
 
-        snapshot = peticiones.CONTADOR.total() - antes
+            entorno.peticiones.reiniciar()
 
-        print(f"  -> {snapshot} peticiones")
+            contador = entorno.peticiones.CONTADOR
 
-        print()
-        print("Ejecutando collect_board_history()...")
+            antes = contador.total()
 
-        antes = peticiones.CONTADOR.total()
+            try:
+                collect_league_snapshot()
 
-        try:
-            collect_board_history()
+            except Exception:                       # noqa: BLE001
+                pass
 
-        except Exception as error:                  # noqa: BLE001
-            print(f"  (paro en: {type(error).__name__}: {error})")
+            snapshot = contador.total() - antes
 
-        tablon = peticiones.CONTADOR.total() - antes
+            antes = contador.total()
 
-        print(f"  -> {tablon} peticiones")
+            try:
+                collect_board_history()
 
-    finally:
-        requests.Session = original
+            except Exception:                       # noqa: BLE001
+                pass
 
-        (
-            liga_mod.DATA_DIR,
-            tablon_mod.DATA_DIR,
-            tablon_mod.BOARD_FILE,
-            tablon_mod.BOARD_RAW_FILE,
-        ) = salidas_originales
+            tablon = contador.total() - antes
 
-        temporal.cleanup()
+        resumen = entorno.peticiones.resumen()
 
-    cuenta = peticiones.resumen()
+    return {
+        "snapshot": snapshot,
+        "board": tablon,
+        "total": snapshot + tablon,
+        "by_endpoint": resumen.get("by_endpoint") or {},
+        "vueltas": max(1, int(vueltas)),
+    }
+
+
+def main() -> None:
+
+    print("Midiendo la PRIMERA vuelta tras el reset...")
+
+    primera = medir_un_ciclo(vueltas=1)
+
+    print(
+        f"  snapshot {primera['snapshot']} + tablon "
+        f"{primera['board']} = {primera['total']}"
+    )
+
+    print()
+    print("Midiendo una vuelta DE CRUCERO (cache llena)...")
+
+    crucero = medir_un_ciclo(vueltas=2)
+
+    print(
+        f"  snapshot {crucero['snapshot']} + tablon "
+        f"{crucero['board']} = {crucero['total']}"
+    )
 
     print()
     print("=" * 70)
-    print("UN CICLO COMPLETO")
+    print("POR ENDPOINT")
     print("=" * 70)
     print()
-    print(f"  refresh_snapshot            {snapshot:>4}")
-    print(f"  colecta del tablon          {tablon:>4}")
-    print(
-        f"  colecta del tablon (2a vez) {tablon:>4}"
-        f"   <-- duplicada, ver el informe"
-    )
-    print("  " + "-" * 34)
-    print(f"  TOTAL POR CICLO             {snapshot + 2 * tablon:>4}")
-    print()
-    print(
-        f"  Con cron cada 30 min (48 vueltas/dia): "
-        f"{48 * (snapshot + 2 * tablon):,}".replace(",", ".")
-        + " al dia"
+    print(f"  {'ENDPOINT':<38}{'1a':>5}{'CRUCERO':>9}")
+    print("  " + "-" * 52)
+
+    endpoints = sorted(
+        set(primera["by_endpoint"]) | set(crucero["by_endpoint"])
     )
 
-    print()
-    print("POR ENDPOINT (una sola colecta de cada)")
-    print("-" * 70)
-
-    for endpoint, cuantas in cuenta["by_endpoint"].items():
-        marca = "   <-- repetida" if cuantas > 1 else ""
-        print(f"  {cuantas:>3}  {endpoint}{marca}")
-
-    print()
-    print(
-        f"  repetidas en esta pasada: {cuenta['repeated']} de "
-        f"{cuenta['total']} ({cuenta['repeated_percent']} %)"
-    )
+    for endpoint in endpoints:
+        print(
+            f"  {endpoint:<38}"
+            f"{primera['by_endpoint'].get(endpoint, 0):>5}"
+            f"{crucero['by_endpoint'].get(endpoint, 0):>9}"
+        )
 
     print()
     print("  Ni una llamada ha salido a la red.")
 
-    proyeccion(snapshot, tablon)
+    proyeccion(primera["total"], crucero["total"])
 
 
 # ============================================================
 # EL NUMERO QUE DECIDE
 # ============================================================
 #
-#     "Cuantas quedarian" no puede ser una frase: tiene que ser
-#     una resta que se pueda repetir. Cada paso lleva lo que
-#     ahorra y de donde sale ese ahorro.
+#     Ya no es una proyeccion: los pasos A y B estan puestos, y
+#     esto MIDE lo que cuesta cada clase de vuelta.
 
 
-# Vueltas al dia con el cron de siempre: "7,37 * * * *".
-VUELTAS_HOY = 48
-
-
-# Vueltas con el cron propuesto. Ver el informe para la linea.
-VUELTAS_PROPUESTAS = 24
+# Vueltas al dia con el cron de siempre, "7,37 * * * *". No se
+# ha tocado: el paso C -bajarlo a 24- se descarto porque ahorra
+# 168 peticiones y cuesta la mitad de la capacidad de reaccion.
+VUELTAS_AL_DIA = 48
 
 
 # Cuantos de los 7 managers cambian de plantilla en un dia.
 #
-# MEDIDO, no supuesto (07/09/2026): sobre los 30 movimientos del
-# tablon de la liga -del 04/09 al 07/09- se movieron 4, 5, 2 y 1
-# managers cada dia. Media 3.
+# MEDIDO (07/09/2026): sobre los 30 movimientos del tablon del
+# 04 al 07 de septiembre se movieron 4, 5, 2 y 1 managers cada
+# dia. Media 3.
 #
-# Importa porque la plantilla de un rival SOLO cambia cuando
-# ficha o vende, y eso lo dice el tablon, que cuesta UNA
-# peticion. Hoy se piden los 7 perfiles 48 veces al dia por si
-# acaso.
+# Cada uno cuesta UNA peticion extra el ciclo en que se entera.
 MANAGERS_QUE_SE_MUEVEN_AL_DIA = 3
 
 
-# Lo que solo cambia en el reset de las 07:00, o menos.
-# `catalogo` son los precios; `league` la lista de managers;
-# `rounds` la jornada.
-CACHEABLES_AL_DIA = {
-    "GET /competitions/la-liga/data": 1,
-    "GET /league": 1,
-    "GET /rounds/league": 1,
-}
-
-
-def proyeccion(snapshot: int, tablon: int) -> None:
+def proyeccion(primera: int, crucero: int) -> None:
     """
-    De lo medido a lo propuesto, paso a paso.
+    El antes y el despues, medidos.
 
-    Nunca lanza: si algo no cuadra lo dice y sigue.
+    `primera` es la primera vuelta tras el reset -paga el
+    catalogo, la jornada, la lista de managers y los siete
+    perfiles-. `crucero` es cada una de las otras 47.
+
+    Nunca lanza.
     """
 
     try:
-        ahora_ciclo = snapshot + 2 * tablon
+        al_dia = (
+            primera
+            + crucero * (VUELTAS_AL_DIA - 1)
+            + MANAGERS_QUE_SE_MUEVEN_AL_DIA
+        )
+
+        antes_al_dia = ANTES_DEL_PASO_A * VUELTAS_AL_DIA
 
         print()
         print("=" * 70)
         print("EL NUMERO QUE DECIDE")
         print("=" * 70)
-
-        # ---------------------------------------------------
-        # PASO A: quitar lo que se pide dos veces
-        # ---------------------------------------------------
-        #
-        #     Sin cachear nada y sin perder un solo dato: la
-        #     segunda colecta del tablon, el catalogo duplicado
-        #     dentro del snapshot, y compartir el cliente entre
-        #     los dos colectores en vez de hacer dos logins.
-        paso_a = ahora_ciclo - tablon - 1 - 2
-
-        # ---------------------------------------------------
-        # PASO B: cachear lo que solo cambia en el reset
-        # ---------------------------------------------------
-        #
-        #     Lo que queda por ciclo despues de sacar los
-        #     cacheables y los perfiles de rivales.
-        cacheables_por_ciclo = len(CACHEABLES_AL_DIA)
-
-        perfiles_por_ciclo = 7
-
-        paso_b_ciclo = (
-            paso_a - cacheables_por_ciclo - perfiles_por_ciclo
+        print()
+        print(
+            f"  {'':<26}{'x CICLO':>9}{'VUELTAS':>9}"
+            f"{'AL DIA':>9}"
         )
-
-        extras_al_dia = (
-            sum(CACHEABLES_AL_DIA.values())
-            + MANAGERS_QUE_SE_MUEVEN_AL_DIA
+        print("  " + "-" * 55)
+        print(
+            f"  {'ANTES (06/09)':<26}"
+            f"{ANTES_DEL_PASO_A:>9}{VUELTAS_AL_DIA:>9}"
+            f"{antes_al_dia:>9}"
         )
-
-        filas = [
-            (
-                "AHORA (medido)",
-                ahora_ciclo,
-                VUELTAS_HOY,
-                0,
-                "el ciclo tal cual esta hoy",
-            ),
-            (
-                "A. sin duplicados",
-                paso_a,
-                VUELTAS_HOY,
-                0,
-                "misma informacion, menos llamadas",
-            ),
-            (
-                "B. + cache al reset",
-                paso_b_ciclo,
-                VUELTAS_HOY,
-                extras_al_dia,
-                "lo que solo cambia a las 07:00",
-            ),
-            (
-                "C. + cron de 24",
-                paso_b_ciclo,
-                VUELTAS_PROPUESTAS,
-                extras_al_dia,
-                "vueltas donde pasan cosas",
-            ),
-        ]
+        print(
+            f"  {'AHORA, primera del dia':<26}"
+            f"{primera:>9}{1:>9}{primera:>9}"
+        )
+        print(
+            f"  {'AHORA, las otras 47':<26}"
+            f"{crucero:>9}{VUELTAS_AL_DIA - 1:>9}"
+            f"{crucero * (VUELTAS_AL_DIA - 1):>9}"
+        )
+        print(
+            f"  {'+ los que se mueven':<26}"
+            f"{1:>9}{MANAGERS_QUE_SE_MUEVEN_AL_DIA:>9}"
+            f"{MANAGERS_QUE_SE_MUEVEN_AL_DIA:>9}"
+        )
+        print("  " + "-" * 55)
+        print(f"  {'TOTAL AL DIA':<26}{'':>9}{'':>9}{al_dia:>9}")
 
         print()
         print(
-            f"  {'PASO':<22}{'x CICLO':>9}{'VUELTAS':>9}"
-            f"{'+DIA':>7}{'AL DIA':>9}   {'AHORRO':>8}"
+            f"  DE {antes_al_dia} A {al_dia} PETICIONES AL DIA "
+            f"({100 * (antes_al_dia - al_dia) / antes_al_dia:.0f} % menos), "
+            f"con el MISMO cron."
         )
-        print("  " + "-" * 68)
-
-        base = None
-
-        for nombre, ciclo, vueltas, extra, nota in filas:
-
-            al_dia = ciclo * vueltas + extra
-
-            if base is None:
-                base = al_dia
-                ahorro = ""
-
-            else:
-                ahorro = f"{100 * (base - al_dia) / base:5.1f} %"
-
-            print(
-                f"  {nombre:<22}{ciclo:>9}{vueltas:>9}"
-                f"{extra:>7}{al_dia:>9}   {ahorro:>8}"
-            )
-
-        final = paso_b_ciclo * VUELTAS_PROPUESTAS + extras_al_dia
 
         print()
         print(
-            f"  DE {base} A {final} PETICIONES AL DIA "
-            f"({100 * (base - final) / base:.0f} % menos)."
+            f"  El paso C -bajar a 24 vueltas- ahorraria "
+            f"{crucero * 24} mas y costaria la mitad de la "
+            f"capacidad"
         )
-        print()
-        print(
-            "  El paso A es el que mas pesa y el unico que no "
-            "cambia nada de lo que Pepe ve."
-        )
-        print(
-            f"  El cron es el que menos: {VUELTAS_PROPUESTAS} "
-            f"vueltas de {ahora_ciclo} peticiones seguirian "
-            f"siendo {VUELTAS_PROPUESTAS * ahora_ciclo} al dia."
-        )
+        print("  de reaccion. Descartado por el dueño.")
 
     except Exception as error:                      # noqa: BLE001
         print(f"  No se pudo proyectar: {error}")

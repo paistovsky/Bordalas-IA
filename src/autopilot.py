@@ -808,6 +808,17 @@ def load_rival_intelligence(
         inteligencia["available"] = True
         inteligencia["current_user_id"] = current_user_id
 
+        # EL TABLON, GUARDADO CON EL RETRATO (07/09/2026)
+        #
+        #     Colectarlo cuesta 12 peticiones -login, cuenta, el
+        #     tablon, la lista de managers, SIETE perfiles y las
+        #     finanzas- y hasta hoy se hacia dos veces por
+        #     vuelta: 24 de las 32 peticiones del ciclo.
+        #
+        #     Se guarda aqui para que quien lo necesite lo
+        #     recoja en vez de volver a pedirlo.
+        _RIVAL_INTELLIGENCE_CACHE["board"] = board
+
     except Exception as error:
         inteligencia = {
             **vacio,
@@ -819,6 +830,40 @@ def load_rival_intelligence(
     _RIVAL_INTELLIGENCE_CACHE["value"] = inteligencia
 
     return inteligencia
+
+
+def board_del_ciclo(snapshot: dict) -> dict:
+    """
+    El tablon de esta vuelta, colectado UNA sola vez.
+
+    EL DUPLICADO QUE COSTABA 12 PETICIONES (07/09/2026)
+
+        `build_competitive_observer` llamaba a
+        `collect_board_history()` a pelo -nuevo login, nueva
+        lista de managers, los siete perfiles otra vez- y VEINTE
+        LINEAS MAS ABAJO tenia escrito este comentario:
+
+            "Ya se construyo antes de decidir. Volver a pedir el
+             tablon seria una segunda llamada de red por el
+             mismo dato."
+
+        Alguien arreglo la segunda llamada poniendo cache a
+        `load_rival_intelligence` y dejo la primera. El
+        comentario documentaba una intencion que el codigo no
+        cumplia.
+
+        24 de las 32 peticiones por vuelta eran esto. Con la
+        cuenta hecha: 576 peticiones al dia por un dato que ya
+        estaba en memoria.
+
+    Nunca lanza. Sin tablon devuelve un diccionario vacio, que
+    es lo que ya hacia el camino de error.
+    """
+
+    if "board" not in _RIVAL_INTELLIGENCE_CACHE:
+        load_rival_intelligence(snapshot)
+
+    return _RIVAL_INTELLIGENCE_CACHE.get("board") or {}
 
 
 def reset_rival_intelligence_cache() -> None:
@@ -1028,9 +1073,12 @@ def build_competitive_observer(
 
     try:
 
-        board = (
-            collect_board_history()
-        )
+        # EL MISMO TABLON DE ANTES, NO UNO NUEVO (07/09/2026)
+        #
+        #     Aqui habia un `collect_board_history()` pelado. Ver
+        #     `board_del_ciclo` para la historia entera: son 12
+        #     peticiones por vuelta y 576 al dia.
+        board = board_del_ciclo(snapshot)
 
         market_status = (
             snapshot.get(

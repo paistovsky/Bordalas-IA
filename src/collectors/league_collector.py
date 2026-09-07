@@ -2,7 +2,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from src.biwenger.client import BiwengerClient
+from src.biwenger import cache_del_reset as cache
+from src.biwenger.client import cliente_del_ciclo
 
 
 DATA_DIR = Path("data")
@@ -10,20 +11,34 @@ DATA_DIR.mkdir(exist_ok=True)
 
 
 def collect_league_snapshot() -> None:
-    client = BiwengerClient()
 
-    print("Iniciando sesión...")
-    client.login()
+    # EL CLIENTE DE LA VUELTA, NO UNO NUEVO (07/09/2026)
+    #
+    #     Cada colector hacía su propio login: dos
+    #     `POST /auth/login` y dos `GET /account` por vuelta para
+    #     la misma sesión. Ahora se comparte, y el que llega
+    #     primero paga la autenticación.
+    client = cliente_del_ciclo()
 
-    print("Seleccionando liga...")
-    league = client.select_league()
+    league = client.league
 
+    # LA JORNADA: CAMBIA UNA VEZ POR SEMANA (07/09/2026)
     print("Obteniendo información de la jornada...")
-    rounds = client.session.get(
-        f"{client.BASE_URL}/rounds/league"
-    )
-    rounds.raise_for_status()
-    rounds_data = rounds.json()
+
+    guardada = cache.leer("jornada")
+
+    if guardada["fresco"]:
+        rounds_data = guardada["valor"]
+        print("  (de la cache: no cambia entre resets)")
+
+    else:
+        rounds = client.session.get(
+            f"{client.BASE_URL}/rounds/league"
+        )
+        rounds.raise_for_status()
+        rounds_data = rounds.json()
+
+        cache.escribir("jornada", rounds_data)
 
     # ==================================================
     # LA ALINEACION DE VERDAD (22/08/2026)
@@ -67,19 +82,39 @@ def collect_league_snapshot() -> None:
     print("Obteniendo mercado...")
     market = client.get_market()
 
-    print("Obteniendo plantilla...")
-    team = client.get_my_team()
-
+    # EL CATÁLOGO, UNA VEZ (07/09/2026)
+    #
+    #     Estaba pedido DOS veces en esta misma función: una
+    #     dentro de `get_my_team()` y otra aquí abajo, con los
+    #     mismos parámetros y a segundos de distancia. Son 500 KB
+    #     y una petición de las 32 de la vuelta.
+    #
+    #     Ahora se pide primero y se le pasa a la plantilla.
     print("Obteniendo catálogo de jugadores...")
-    catalog_response = client.session.get(
-        f"{client.BASE_URL}/competitions/la-liga/data",
-        params={
-            "lang": "es",
-            "score": 5,
-        },
+
+    guardado = cache.leer("catalogo")
+
+    if guardado["fresco"]:
+        catalog = guardado["valor"]
+        print("  (de la cache: los precios cambian en el reset)")
+
+    else:
+        catalog_response = client.session.get(
+            f"{client.BASE_URL}/competitions/la-liga/data",
+            params={
+                "lang": "es",
+                "score": 5,
+            },
+        )
+        catalog_response.raise_for_status()
+        catalog = catalog_response.json()
+
+        cache.escribir("catalogo", catalog)
+
+    print("Obteniendo plantilla...")
+    team = client.get_my_team(
+        catalog=catalog["data"]["players"]
     )
-    catalog_response.raise_for_status()
-    catalog = catalog_response.json()
 
     snapshot = {
         "timestamp": datetime.now().isoformat(),

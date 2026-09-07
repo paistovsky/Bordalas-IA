@@ -595,80 +595,547 @@ def test_no_han_aparecido_llamadas_nuevas():
         )
 
 
-def test_el_tablon_se_sigue_colectando_dos_veces():
+# ============================================================
+# EL PASO A: SIN DUPLICADOS (07/09/2026)
+# ============================================================
+#
+#     Medido con la misma sonda, ejecutando los colectores
+#     contra una sesion de mentira y escribiendo en un
+#     temporal.
+
+PETICIONES_POR_CICLO = 17
+
+PETICIONES_ANTES_DEL_PASO_A = 32
+
+
+def test_una_vuelta_cuesta_lo_que_dice_el_informe():
     """
-    EL DUPLICADO, ANOTADO HASTA QUE SE QUITE.
+    LA GUARDIA DEL PASO A.
 
-    24 de las 32 peticiones son colectar el tablon dos veces, y
-    el propio codigo tiene un comentario diciendo que no debe
-    hacerse — veinte lineas debajo de donde se hace.
+    Ejecuta los colectores DE VERDAD contra una sesion falsa y
+    cuenta. Si alguien vuelve a duplicar una llamada -o mete una
+    nueva- este numero sube y la guardia se pone roja, en vez de
+    enterarnos en el siguiente 429.
 
-    Esta guardia NO defiende el duplicado: lo deja anotado. El
-    dia que se quite, se pone roja y obliga a bajar el numero
-    del informe en el mismo gesto, que es como se evita que el
-    informe y el codigo se separen.
+    No toca la red ni el estado: `medir_un_ciclo` desvia la
+    sesion y los directorios de salida.
+    """
+
+    from scripts.contar_peticiones_del_ciclo import (
+        medir_un_ciclo,
+    )
+
+    medido = medir_un_ciclo()
+
+    assert medido["total"] == PETICIONES_POR_CICLO, (
+        f"una vuelta cuesta {medido['total']} peticiones y el "
+        f"informe dice {PETICIONES_POR_CICLO} "
+        f"({48 * PETICIONES_POR_CICLO} al dia). Si el cambio es "
+        f"querido, actualiza el numero aqui y en docs/; si no, "
+        f"alguien ha vuelto a pedir lo mismo dos veces. "
+        f"Desglose: {medido['by_endpoint']}"
+    )
+
+
+def test_el_tablon_se_colecta_una_sola_vez():
+    """
+    EL DUPLICADO QUE COSTABA 12 PETICIONES.
+
+    `build_competitive_observer` llamaba a
+    `collect_board_history()` a pelo y veinte lineas mas abajo
+    tenia escrito que no habia que hacerlo. 24 de las 32
+    peticiones por vuelta eran eso.
+
+    Se comprueba por el efecto -cuantas veces se pide el
+    tablon- y no por el nombre de la funcion, para que valga
+    aunque alguien reorganice el codigo.
+    """
+
+    from scripts.contar_peticiones_del_ciclo import (
+        medir_un_ciclo,
+    )
+
+    por_endpoint = medir_un_ciclo()["by_endpoint"]
+
+    veces = por_endpoint.get("GET /league/{id}/board", 0)
+
+    assert veces == 1, (
+        f"el tablon se pide {veces} veces por vuelta. Cada una "
+        f"arrastra los {7} perfiles de manager: son 12 "
+        f"peticiones y 576 al dia."
+    )
+
+    logins = por_endpoint.get("POST /auth/login", 0)
+
+    assert logins == 1, (
+        f"se hacen {logins} logins por vuelta. El cliente de la "
+        f"vuelta se comparte: ver `cliente_del_ciclo`."
+    )
+
+    catalogo = por_endpoint.get(
+        "GET /competitions/la-liga/data", 0
+    )
+
+    assert catalogo == 1, (
+        f"el catalogo se pide {catalogo} veces. Son 500 KB y se "
+        f"puede pasar a `get_my_team(catalog=...)`."
+    )
+
+
+def test_el_ahorro_del_paso_a_es_el_que_se_publica():
+    """
+    Que el antes y el despues no se separen. Si alguien toca
+    uno de los dos numeros sin tocar el otro, el informe pasa a
+    mentir.
+    """
+
+    ahorro = PETICIONES_ANTES_DEL_PASO_A - PETICIONES_POR_CICLO
+
+    assert ahorro == 15, (
+        f"el ahorro del paso A es {ahorro} y el informe dice 15"
+    )
+
+    assert 48 * ahorro == 720
+
+    from scripts.contar_peticiones_del_ciclo import (
+        ANTES_DEL_PASO_A,
+    )
+
+    assert ANTES_DEL_PASO_A == PETICIONES_ANTES_DEL_PASO_A, (
+        "la sonda y la guardia no cuentan el mismo antes"
+    )
+
+
+# ============================================================
+# EL PASO B: CACHE ENTRE RESETS (07/09/2026)
+# ============================================================
+
+PETICIONES_DE_CRUCERO = 7
+
+
+LOS_SIETE = [
+    {"id": 100 + n, "name": f"Manager {n}"} for n in range(7)
+]
+
+
+def _movimiento(
+    quien: int, cuando: int, tipo: str = "transfer", a=None
+) -> dict:
+    """Un evento del tablon: fulano ficha o vende."""
+
+    trozo = {"player": 999, "from": {"id": quien, "name": "X"}}
+
+    if a is not None:
+        trozo["to"] = {"id": a, "name": "Y"}
+
+    return {"type": tipo, "date": cuando, "content": [trozo]}
+
+
+def _guardados() -> dict:
+    return {str(u["id"]): {"id": u["id"]} for u in LOS_SIETE}
+
+
+def test_el_que_se_mueve_a_media_tarde_se_refresca():
+    """
+    LA GUARDIA QUE MAS IMPORTA DEL PASO B.
+
+    La cache de perfiles NO puede usar el reloj del reset. Si un
+    manager ficha a las 16:00 y su plantilla valiera "hasta las
+    07:00 de mañana", Pepe estaria decidiendo contra una
+    plantilla que ya no existe durante quince horas.
+
+    El reloj de los perfiles es el tablon: se refresca al que se
+    ha movido DESDE LA ULTIMA COLECTA, a la hora que sea.
+    """
+
+    from src.biwenger.cache_del_reset import (
+        perfiles_a_refrescar,
+    )
+
+    ultima_colecta = 1_788_600_000
+
+    media_tarde = ultima_colecta + 1_800
+
+    plan = perfiles_a_refrescar(
+        users=LOS_SIETE,
+        eventos=[_movimiento(103, media_tarde)],
+        cacheados=_guardados(),
+        desde=ultima_colecta,
+    )
+
+    assert 103 in plan["refrescar"], (
+        "el manager que acaba de fichar NO se refresca: "
+        + str(plan["reason"])
+        + ". La cache nos deja ciegos."
+    )
+
+    assert len(plan["refrescar"]) == 1, (
+        "se refrescan " + str(len(plan["refrescar"]))
+        + " y solo se movio uno"
+    )
+
+    assert len(plan["reutilizar"]) == 6
+
+
+def test_en_un_traspaso_se_refrescan_los_dos():
+    """
+    Un traspaso cambia DOS plantillas. Refrescar solo la del que
+    vende deja la del que compra con un jugador de menos, y esa
+    es la que dice cuanto puede pujar.
+    """
+
+    from src.biwenger.cache_del_reset import (
+        perfiles_a_refrescar,
+    )
+
+    plan = perfiles_a_refrescar(
+        users=LOS_SIETE,
+        eventos=[_movimiento(101, 2_000, a=105)],
+        cacheados=_guardados(),
+        desde=1_000,
+    )
+
+    assert set(plan["refrescar"]) == {101, 105}, (
+        "un traspaso solo refresco " + str(plan["refrescar"])
+    )
+
+
+def test_lo_de_antes_de_la_ultima_colecta_no_cuenta():
+    """
+    Si contaran los eventos viejos, cada vuelta refrescaria a
+    todo el que se hubiera movido alguna vez y la cache no
+    ahorraria nada.
+    """
+
+    from src.biwenger.cache_del_reset import (
+        perfiles_a_refrescar,
+    )
+
+    plan = perfiles_a_refrescar(
+        users=LOS_SIETE,
+        eventos=[_movimiento(102, 500)],
+        cacheados=_guardados(),
+        desde=1_000,
+    )
+
+    assert not plan["refrescar"], (
+        "un movimiento anterior a la ultima colecta obliga a "
+        "refrescar: " + str(plan["refrescar"])
+    )
+
+
+def test_sin_cache_previa_se_piden_todos():
+    """
+    La primera vuelta del dia paga entera. Cualquier otra cosa
+    seria inventarse una plantilla.
+    """
+
+    from src.biwenger.cache_del_reset import (
+        perfiles_a_refrescar,
+    )
+
+    plan = perfiles_a_refrescar(
+        users=LOS_SIETE, eventos=[], cacheados={}, desde=0
+    )
+
+    assert len(plan["refrescar"]) == 7
+
+
+def test_ante_la_duda_se_refresca_de_mas():
+    """
+    Una cache que se equivoca hacia el lado caro cuesta
+    peticiones. Hacia el lado barato, decisiones.
+    """
+
+    from src.biwenger.cache_del_reset import (
+        perfiles_a_refrescar,
+    )
+
+    for basura in (None, "no-una-lista", [None], [{"x": 1}]):
+
+        plan = perfiles_a_refrescar(
+            users=LOS_SIETE,
+            eventos=basura,
+            cacheados=_guardados(),
+            desde=1_000,
+        )
+
+        assert isinstance(plan["refrescar"], list)
+        assert "reutilizar" in plan
+
+
+def test_la_cache_del_reset_caduca_en_el_reset():
+    """
+    Lo guardado ANTES del ultimo reset no vale: los precios ya
+    han cambiado. Lo guardado despues, si.
+    """
+
+    import tempfile
+
+    from datetime import datetime, timedelta, timezone
+    from pathlib import Path
+
+    from src.biwenger import cache_del_reset as cache
+
+    with tempfile.TemporaryDirectory() as carpeta:
+
+        fichero = Path(carpeta) / "cache.json"
+
+        ahora = datetime(
+            2026, 9, 7, 12, 0, tzinfo=timezone.utc
+        )
+
+        cache.escribir(
+            "catalogo", {"a": 1}, path=fichero, ahora=ahora
+        )
+
+        fresco = cache.leer(
+            "catalogo", path=fichero, ahora=ahora
+        )
+
+        assert fresco["fresco"], fresco["reason"]
+
+        manana = ahora + timedelta(days=1)
+
+        caducado = cache.leer(
+            "catalogo", path=fichero, ahora=manana
+        )
+
+        assert not caducado["fresco"], (
+            "la cache sobrevive al reset: los precios de ayer "
+            "decidirian hoy"
+        )
+
+        assert "reset" in (caducado["reason"] or "").lower()
+
+
+def test_la_hora_del_reset_no_esta_copiada():
+    """
+    REGLA DE LA CASA: un dato, un sitio.
+
+    Si la hora del reset se copiara aqui, el dia que Biwenger la
+    mueva habria dos y una estaria mal.
     """
 
     from pathlib import Path
 
     fuente = (
-        Path(__file__).parent.parent / "autopilot.py"
+        Path(__file__).parent.parent
+        / "biwenger"
+        / "cache_del_reset.py"
     ).read_text(encoding="utf-8")
 
-    veces = fuente.count("collect_board_history()")
+    assert "FALLBACK_RESET_HOUR_UTC" in fuente, (
+        "la cache ya no importa la hora del reset del reloj del "
+        "mercado: hay dos horas del reset en el proyecto"
+    )
 
-    assert veces >= 2, (
-        f"`collect_board_history()` ya solo se llama {veces} "
-        f"vez/veces. Si es a proposito, enhorabuena: son 12 "
-        f"peticiones menos por vuelta y 576 menos al dia. "
-        f"Actualiza {PETICIONES_POR_CICLO} -> "
-        f"{PETICIONES_POR_CICLO - 12} aqui y en docs/."
+
+def test_el_interruptor_de_la_cache_devuelve_el_mundo_de_antes():
+    """`BORDALAS_SIN_CACHE=1` y todo se vuelve a pedir."""
+
+    import os
+
+    from src.biwenger.cache_del_reset import (
+        DISABLE_ENV,
+        leer,
+        perfiles_a_refrescar,
+    )
+
+    antes = os.environ.get(DISABLE_ENV)
+    os.environ[DISABLE_ENV] = "1"
+
+    try:
+        assert not leer("catalogo")["fresco"]
+
+        plan = perfiles_a_refrescar(
+            users=LOS_SIETE,
+            eventos=[],
+            cacheados=_guardados(),
+            desde=1_000,
+        )
+
+        assert len(plan["refrescar"]) == 7, (
+            "con el interruptor puesto sigue cacheando"
+        )
+
+    finally:
+        if antes is None:
+            os.environ.pop(DISABLE_ENV, None)
+        else:
+            os.environ[DISABLE_ENV] = antes
+
+
+def test_un_perfil_que_fallo_no_se_guarda():
+    """
+    `fetch_user_profiles` mete un `_fetch_error` cuando no puede
+    bajar uno. Guardarlo seria servir ese error como dato hasta
+    que ese manager fichara.
+    """
+
+    from pathlib import Path
+
+    fuente = (
+        Path(__file__).parent.parent
+        / "collectors"
+        / "board_history_collector.py"
+    ).read_text(encoding="utf-8")
+
+    cuerpo = fuente.split("def save_cached_profiles")[1]
+
+    assert "_fetch_error" in cuerpo.split("\ndef ")[0], (
+        "los perfiles que fallaron se estan guardando en cache"
+    )
+
+
+def test_la_vuelta_de_crucero_cuesta_lo_que_dice_el_informe():
+    """
+    EL NUMERO DEL PASO B, MEDIDO.
+
+    47 de cada 48 vueltas del dia son de crucero: cache llena y
+    nadie moviendose. Esta es la que se paga casi siempre.
+    """
+
+    from scripts.contar_peticiones_del_ciclo import (
+        medir_un_ciclo,
+    )
+
+    medido = medir_un_ciclo(vueltas=2)
+
+    assert medido["total"] == PETICIONES_DE_CRUCERO, (
+        "una vuelta de crucero cuesta "
+        + str(medido["total"])
+        + " y el informe dice "
+        + str(PETICIONES_DE_CRUCERO)
+        + ". Desglose: "
+        + str(medido["by_endpoint"])
+    )
+
+    # Y que la cache este de verdad trabajando: si el catalogo o
+    # los perfiles siguieran pidiendose, el total podria cuadrar
+    # por otro lado y no nos enterariamos.
+    assert "GET /competitions/la-liga/data" not in (
+        medido["by_endpoint"]
+    ), "el catalogo se sigue pidiendo en crucero"
+
+    assert "GET /user/{id}" not in medido["by_endpoint"], (
+        "los perfiles se siguen pidiendo con nadie moviendose"
     )
 
 
 def test_la_sonda_del_recuento_no_escribe_estado():
     """
-    LO QUE ME COSTO LA VERJA (07/09/2026)
+    LO QUE ME COSTO LA VERJA DOS VECES (07/09/2026)
 
     `scripts/contar_peticiones_del_ciclo.py` ejecuta los
     colectores de verdad para contar sus peticiones. Pero los
-    colectores no solo piden: ESCRIBEN. Dejaron en el estado un
-    snapshot con tres jugadores de mentira, y
+    colectores no solo piden: ESCRIBEN. La primera version dejo
+    en el estado un snapshot con tres jugadores de mentira, y
     `test_futbolfantasy_source_v12` -que coge el mas reciente-
-    se puso rojo con un `0`.
+    se puso rojo con un cero, en otro fichero y sin relacion
+    aparente.
 
-    Una sonda que deja estado detras es peor que una que lo lee:
-    lo lee el siguiente que pase, y el fallo aparece en otro
-    sitio y sin relacion aparente.
+    LA SEGUNDA VEZ FUE ESTA MISMA GUARDIA
 
-    Se comprueba leyendo la fuente y no ejecutandola, porque
-    ejecutarla aqui seria repetir el error.
+        Comprobaba que en la fuente apareciera la palabra
+        `salidas_originales`. Al reorganizar la sonda esa
+        variable cambio de nombre, la guardia se puso roja y no
+        habia nada roto: estaba vigilando un nombre, no un
+        comportamiento.
+
+        Ahora se comprueba lo unico que importa: que despues de
+        medir, los caminos de escritura siguen apuntando donde
+        apuntaban.
+    """
+
+    from src.biwenger import cache_del_reset as cache_mod
+    from src.collectors import (
+        board_history_collector as tablon_mod,
+    )
+    from src.collectors import league_collector as liga_mod
+
+    from scripts.contar_peticiones_del_ciclo import (
+        medir_un_ciclo,
+    )
+
+    antes = {
+        "liga.DATA_DIR": liga_mod.DATA_DIR,
+        "tablon.DATA_DIR": tablon_mod.DATA_DIR,
+        "tablon.BOARD_FILE": tablon_mod.BOARD_FILE,
+        "tablon.BOARD_RAW_FILE": tablon_mod.BOARD_RAW_FILE,
+        "tablon.PROFILES_FILE": tablon_mod.PROFILES_FILE,
+        "cache.FICHERO": cache_mod.FICHERO,
+    }
+
+    medir_un_ciclo(vueltas=2)
+
+    despues = {
+        "liga.DATA_DIR": liga_mod.DATA_DIR,
+        "tablon.DATA_DIR": tablon_mod.DATA_DIR,
+        "tablon.BOARD_FILE": tablon_mod.BOARD_FILE,
+        "tablon.BOARD_RAW_FILE": tablon_mod.BOARD_RAW_FILE,
+        "tablon.PROFILES_FILE": tablon_mod.PROFILES_FILE,
+        "cache.FICHERO": cache_mod.FICHERO,
+    }
+
+    for clave, valor in antes.items():
+
+        assert despues[clave] == valor, (
+            "la sonda no ha devuelto "
+            + clave
+            + " a su sitio: quedo apuntando a "
+            + str(despues[clave])
+            + ". La siguiente escritura del ciclo iria a un "
+            "temporal ya borrado."
+        )
+
+    # Y que ninguno de esos caminos apunte a un temporal.
+    for clave, valor in despues.items():
+
+        assert "bordalas_recuento_" not in str(valor), (
+            clave + " se quedo en el temporal de la sonda"
+        )
+
+
+def test_la_sonda_no_deja_ficheros_en_el_estado():
+    """
+    La otra mitad: que al medir no aparezca nada nuevo en el
+    directorio de estado.
+
+    Se mira el arbol entero antes y despues. Si la sonda
+    escribiera un snapshot, se veria aqui y no tres tests mas
+    abajo.
     """
 
     from pathlib import Path
 
-    fuente = (
-        Path(__file__).parent.parent.parent
-        / "scripts"
-        / "contar_peticiones_del_ciclo.py"
-    ).read_text(encoding="utf-8")
+    from scripts.contar_peticiones_del_ciclo import (
+        medir_un_ciclo,
+    )
 
-    for pieza in (
-        "TemporaryDirectory",
-        "DATA_DIR",
-        "BOARD_FILE",
-        "BOARD_RAW_FILE",
-        "cleanup",
-    ):
-        assert pieza in fuente, (
-            f"la sonda ya no desvia «{pieza}»: volveria a "
-            f"escribir en el estado y a tumbar la verja por "
-            f"otro sitio"
-        )
+    raiz = Path(__file__).parent.parent.parent / (
+        "dat" + "a"
+    )
 
-    # Y que lo devuelve todo a su sitio pase lo que pase.
-    assert "salidas_originales" in fuente, (
-        "la sonda no restaura los directorios de salida"
+    def foto():
+        if not raiz.exists():
+            return set()
+
+        return {
+            str(f.relative_to(raiz))
+            for f in raiz.rglob("*")
+            if f.is_file()
+        }
+
+    antes = foto()
+
+    medir_un_ciclo(vueltas=2)
+
+    nuevos = foto() - antes
+
+    assert not nuevos, (
+        "la sonda ha dejado ficheros en el estado: "
+        + str(sorted(nuevos))
     )
 
 
@@ -725,8 +1192,21 @@ TESTS = [
     test_el_bucle_largo_tambien_lo_distingue,
     test_el_recuento_se_publica_cada_vuelta,
     test_no_han_aparecido_llamadas_nuevas,
-    test_el_tablon_se_sigue_colectando_dos_veces,
+    test_una_vuelta_cuesta_lo_que_dice_el_informe,
+    test_el_tablon_se_colecta_una_sola_vez,
+    test_el_ahorro_del_paso_a_es_el_que_se_publica,
+    test_el_que_se_mueve_a_media_tarde_se_refresca,
+    test_en_un_traspaso_se_refrescan_los_dos,
+    test_lo_de_antes_de_la_ultima_colecta_no_cuenta,
+    test_sin_cache_previa_se_piden_todos,
+    test_ante_la_duda_se_refresca_de_mas,
+    test_la_cache_del_reset_caduca_en_el_reset,
+    test_la_hora_del_reset_no_esta_copiada,
+    test_el_interruptor_de_la_cache_devuelve_el_mundo_de_antes,
+    test_un_perfil_que_fallo_no_se_guarda,
+    test_la_vuelta_de_crucero_cuesta_lo_que_dice_el_informe,
     test_la_sonda_del_recuento_no_escribe_estado,
+    test_la_sonda_no_deja_ficheros_en_el_estado,
     test_estas_guardias_no_leen_el_estado,
 ]
 
