@@ -3,6 +3,10 @@
 Rama `peticiones/bajar-el-ritmo`, desde `main` (`a5972c7`).
 **95 de 95 en verde.** Ni una llamada a Biwenger. Sin push.
 
+*Segunda pasada (07/09): añadido el punto 3 —el número que decide— con la cuenta
+hecha por el script, la frecuencia real de movimiento de los rivales medida sobre
+el tablón, y dos guardias para que el recuento no envejezca en silencio.*
+
 ---
 
 # ANTES DE NADA: EL 429 ES CASI SEGURO MÍO
@@ -103,21 +107,23 @@ veces.
 |---|---|---:|---:|
 | `/competitions/la-liga/data` | **precios, una vez al día en el reset** | 96/día | **1-2/día** |
 | `/league` (lista de managers) | casi nunca | 96/día | **1/día** |
-| `/user/{id}` (plantillas rivales) | **solo cuando alguien ficha** | 672/día | **~20/día** |
-| `/user/{id}/finances` | con cada movimiento | 96/día | ~24/día |
+| `/user/{id}` (plantillas rivales) | **solo cuando alguien ficha** | 672/día | **3/día** (medido) |
+| `/user/{id}/finances` | es la nuestra: con cada movimiento | 96/día | 48/día |
 | `/market` | continuamente | 48/día | 48/día |
 | `/league/{id}/board` | continuamente | 96/día | 48/día |
 
 **La clave son los perfiles: 672 peticiones al día, el 44 % del total.** Y la
 plantilla de un rival **solo cambia cuando ficha o vende — y eso lo dice el
-tablón**, que cuesta UNA petición. Así que:
+tablón**, que cuesta UNA petición. Cuántos se mueven de verdad está medido en el
+punto 3: **3 de 7 al día**. Así que:
 
 > Se pide el tablón. Si desde la última vez no hay movimiento de un manager, su
 > perfil no se vuelve a pedir. Se refresca solo el de quien se haya movido.
 
 Eso no pierde nada: es leer el índice antes de abrir el libro.
 
-**Con caché: ~8 peticiones por vuelta. 1.536 → ~384 al día.**
+**Con caché: 7 peticiones por vuelta más 6 al día. 1.536 → 342 al día.** La cuenta
+completa está en el punto 3.
 
 ## c) El cron
 
@@ -150,8 +156,8 @@ Eso no pierde nada: es leer el índice antes de abrir el libro.
 
 2. **El cron actual no es el problema, y bajarlo tampoco es la solución.**
    48 vueltas × 32 = 1.536. 24 × 32 = 768: sigue siendo mucho. **Lo que baja el
-   consumo de verdad es (a) y (b), no el cron.** Con las 8 peticiones de la caché,
-   incluso 48 vueltas serían 384 al día. Si tengo que elegir una sola cosa, elijo
+   consumo de verdad es (a) y (b), no el cron.** Con las 7 peticiones de la caché,
+   incluso 48 vueltas serían 342 al día. Si tengo que elegir una sola cosa, elijo
    quitar la colecta duplicada, no recortar vueltas.
 
 3. **Menos vueltas cuesta reacción.** Una oferta de un rival caduca, y con una
@@ -165,7 +171,7 @@ Eso no pierde nada: es leer el índice antes de abrir el libro.
 
 - **Vuelta barata** (1 petición: `/market`): ¿hay ofertas nuevas? ¿ha cambiado
   algo? Si no, se acabó la vuelta.
-- **Vuelta completa** (las 8): solo tras el reset, cuando el tablón se ha movido,
+- **Vuelta completa** (las 7): solo tras el reset, cuando el tablón se ha movido,
   o cerca del cierre de jornada.
 
 Con eso el cron puede seguir siendo denso —que es bueno para reaccionar— y el
@@ -174,7 +180,92 @@ dos hechos y medidos.**
 
 ---
 
-# 3. EL 429, ARREGLADO
+# 3. EL NÚMERO QUE DECIDE: de 1.536 a 174 al día
+
+**Lo calcula el script, no yo.** `scripts/contar_peticiones_del_ciclo.py` mide la
+línea de partida ejecutando los colectores de verdad y luego aplica los pasos:
+
+```
+  PASO                    x CICLO  VUELTAS   +DIA   AL DIA     AHORRO
+  --------------------------------------------------------------------
+  AHORA (medido)               32       48      0     1536
+  A. sin duplicados            17       48      0      816     46,9 %
+  B. + cache al reset           7       48      6      342     77,7 %
+  C. + cron de 24               7       24      6      174     88,7 %
+
+  DE 1536 A 174 PETICIONES AL DIA (89 % menos).
+```
+
+**El paso A solo, sin cachear ni tocar el cron, ya quita casi la mitad — y no
+cambia ni un dato de los que Pepe ve.**
+
+## De dónde sale cada paso
+
+**A — quitar lo que se pide dos veces (−15/ciclo).** La segunda colecta del tablón
+(−12), el catálogo duplicado dentro del snapshot (−1) y compartir el cliente entre
+los dos colectores en vez de hacer dos logins (−2).
+
+**B — cachear lo que solo cambia en el reset (−10/ciclo, +6/día).** Quedan fuera
+del ciclo el catálogo, la lista de managers y la jornada (3 peticiones al día en
+total), y los 7 perfiles de rivales pasan a pedirse **solo cuando el tablón dice
+que ese manager se ha movido**.
+
+**Ese último número está medido, no supuesto.** Sobre los 30 movimientos del
+tablón, del 04/09 al 07/09:
+
+| Día | Managers que se movieron |
+|---|---|
+| 04/09 | 4 de 7 |
+| 05/09 | 5 de 7 |
+| 06/09 | 2 de 7 |
+| 07/09 | 1 de 7 |
+| **Media** | **3 de 7** |
+
+**336 peticiones de perfiles al día pasan a ser 3.** Es leer el índice antes de
+abrir el libro: el tablón cuesta una petición y dice quién se ha movido.
+
+**C — el cron (−50 %).** Y es deliberadamente el último de la lista, porque es el
+que menos pesa: **24 vueltas de 32 peticiones seguirían siendo 768 al día.**
+
+---
+
+# UN FALLO MÍO EN ESTA MISMA PASADA, Y LO QUE ENSEÑA
+
+**La verja salió ROJA la primera vez que la corrí esta noche**, y en un sitio que
+no tenía nada que ver: `test_futbolfantasy_source_v12`, con un `AssertionError: 0`.
+
+La causa: `scripts/contar_peticiones_del_ciclo.py` ejecuta los colectores **de
+verdad** para contarlos. Y los colectores no solo piden — **escriben**. Dejaron en
+`data/` un snapshot con tres jugadores de mentira, y ese test coge *el snapshot más
+reciente*. Se encontró un mercado de tres jugadores donde esperaba quinientos.
+
+**Lo peor no es el fallo, es la forma:** el rojo apareció en otro fichero, en otro
+tema, sin relación aparente con lo que yo estaba tocando. Alguien que lo mirara
+mañana perdería una hora.
+
+Y es que **yo mismo había escrito el aviso** unas horas antes, en el comentario de
+la guardia que decide contar los sitios de llamada con `ast` en vez de ejecutar los
+colectores:
+
+> *"Ejecutar los colectores aquí no vale: `collect_board_history` escribe en el
+> estado, y una guardia que escribe estado es peor que una que lo lee."*
+
+Lo apliqué a la guardia y no a la sonda.
+
+**Arreglado:** la sonda desvía `DATA_DIR`, `BOARD_FILE` y `BOARD_RAW_FILE` a un
+directorio temporal que se borra al terminar, y los restaura pase lo que pase.
+Verificado comparando el árbol de `data/` antes y después: **intacto**. Hay guardia
+—`test_la_sonda_del_recuento_no_escribe_estado`— y comprueba la fuente, no la
+ejecuta, porque ejecutarla sería repetir el error.
+
+*(De rebote sobreescribió `data/rival_intelligence/board_latest_raw.json` con una
+lista vacía: es el crudo de la última lectura y se regenera en el primer ciclo real.
+`board_events.json` no se perdió — el colector fusiona, y sus 221 entradas siguen
+ahí.)*
+
+---
+
+# 3 bis. EL 429, ARREGLADO
 
 Esto sí lo he implementado, porque es lo que impide reactivar el workflow con
 seguridad.
@@ -289,9 +380,9 @@ al menos el punto (a).
 
 **La frase para mañana:** el ciclo hace **32 peticiones por vuelta y 1.536 al día**,
 y **24 de esas 32 son colectar el tablón dos veces** — con un comentario en el
-propio código diciendo que no se debe hacer. Quitar el duplicado y el catálogo
-repetido baja a **17 sin perder un dato**; cachear lo que solo cambia en el reset
-de las 07:00 baja a **~8**. El cron es lo de menos: 24 vueltas de 32 peticiones
-siguen siendo 768. Y el 429 ya no tumba nada — reintenta, y si no cede se retira
-en verde, **en el `main` que ejecuta el workflow, que no era el que yo estaba
-arreglando**.
+propio código, veinte líneas debajo, diciendo que no se debe hacer. **De 1.536 se
+puede bajar a 174, un 89 % menos**, y casi la mitad de eso se consigue solo
+quitando duplicados, sin cachear nada y sin que Pepe deje de ver un solo dato. El
+cron es lo de menos: 24 vueltas de 32 peticiones seguirían siendo 768. Y el 429 ya
+no tumba nada — reintenta, y si no cede se retira en verde, **en el `main` que
+ejecuta el workflow, que no era el que yo estaba arreglando**.

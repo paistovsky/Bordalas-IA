@@ -488,6 +488,190 @@ def test_el_recuento_se_publica_cada_vuelta():
         )
 
 
+# ============================================================
+# EL CONSUMO NO PUEDE CRECER EN SILENCIO
+# ============================================================
+#
+#     Los sitios desde los que se llama a Biwenger en el camino
+#     de un ciclo. Si aparece uno nuevo, el recuento del informe
+#     -32 por vuelta, 1.536 al dia- deja de ser cierto y hay que
+#     rehacerlo A PROPOSITO, no enterarse en el siguiente 429.
+#
+#     Se cuentan LEYENDO EL CODIGO, con `ast`. Ejecutar los
+#     colectores aqui no vale: `collect_board_history` escribe
+#     en el estado, y una guardia que escribe estado es peor que
+#     una que lo lee.
+SITIOS_DE_LLAMADA = {
+    # login, account, my_player_ids, catalog, market
+    "biwenger/client.py": 5,
+
+    # rounds, user(lineup), catalog
+    "collectors/league_collector.py": 3,
+
+    # board, league_users, user_profile, own_finances
+    "collectors/board_history_collector.py": 4,
+}
+
+
+# Lo que cuesta una vuelta, medido con
+# `scripts/contar_peticiones_del_ciclo.py` el 27/09/2026.
+PETICIONES_POR_CICLO = 32
+
+
+def test_no_han_aparecido_llamadas_nuevas():
+    """
+    LA GUARDIA QUE VIGILA EL NUMERO.
+
+    Un consumo que solo se conoce por un informe caduca el dia
+    que alguien mete una llamada. Esto lo cuenta desde el codigo
+    y se pone rojo cuando cambia.
+
+    Si sale roja y el cambio es querido: actualiza el numero
+    aqui Y el informe. Eso es justo lo que se pretende — que
+    cueste un gesto deliberado.
+    """
+
+    import ast
+
+    from pathlib import Path
+
+    raiz = Path(__file__).parent.parent
+
+    for relativo, esperados in SITIOS_DE_LLAMADA.items():
+
+        fichero = raiz / relativo
+
+        if not fichero.exists():
+            raise AssertionError(
+                f"{relativo} ha desaparecido: el recuento del "
+                f"informe ya no describe el ciclo"
+            )
+
+        arbol = ast.parse(
+            fichero.read_text(encoding="utf-8")
+        )
+
+        sitios = 0
+
+        for nodo in ast.walk(arbol):
+
+            if not isinstance(nodo, ast.Call):
+                continue
+
+            funcion = nodo.func
+
+            if not isinstance(funcion, ast.Attribute):
+                continue
+
+            if funcion.attr not in {
+                "get",
+                "post",
+                "put",
+                "delete",
+            }:
+                continue
+
+            # `algo.session.get(...)`: el que cuelga de `session`
+            # es una llamada a la API. `dict.get` no.
+            padre = funcion.value
+
+            if (
+                isinstance(padre, ast.Attribute)
+                and padre.attr == "session"
+            ) or (
+                isinstance(padre, ast.Name)
+                and padre.id == "session"
+            ):
+                sitios += 1
+
+        assert sitios == esperados, (
+            f"{relativo} tiene {sitios} llamadas a Biwenger y el "
+            f"informe cuenta {esperados}. El consumo del ciclo "
+            f"({PETICIONES_POR_CICLO} por vuelta, "
+            f"{48 * PETICIONES_POR_CICLO} al dia) ha dejado de "
+            f"ser cierto: rehazlo con "
+            f"scripts/contar_peticiones_del_ciclo.py y actualiza "
+            f"el numero aqui y en docs/."
+        )
+
+
+def test_el_tablon_se_sigue_colectando_dos_veces():
+    """
+    EL DUPLICADO, ANOTADO HASTA QUE SE QUITE.
+
+    24 de las 32 peticiones son colectar el tablon dos veces, y
+    el propio codigo tiene un comentario diciendo que no debe
+    hacerse — veinte lineas debajo de donde se hace.
+
+    Esta guardia NO defiende el duplicado: lo deja anotado. El
+    dia que se quite, se pone roja y obliga a bajar el numero
+    del informe en el mismo gesto, que es como se evita que el
+    informe y el codigo se separen.
+    """
+
+    from pathlib import Path
+
+    fuente = (
+        Path(__file__).parent.parent / "autopilot.py"
+    ).read_text(encoding="utf-8")
+
+    veces = fuente.count("collect_board_history()")
+
+    assert veces >= 2, (
+        f"`collect_board_history()` ya solo se llama {veces} "
+        f"vez/veces. Si es a proposito, enhorabuena: son 12 "
+        f"peticiones menos por vuelta y 576 menos al dia. "
+        f"Actualiza {PETICIONES_POR_CICLO} -> "
+        f"{PETICIONES_POR_CICLO - 12} aqui y en docs/."
+    )
+
+
+def test_la_sonda_del_recuento_no_escribe_estado():
+    """
+    LO QUE ME COSTO LA VERJA (07/09/2026)
+
+    `scripts/contar_peticiones_del_ciclo.py` ejecuta los
+    colectores de verdad para contar sus peticiones. Pero los
+    colectores no solo piden: ESCRIBEN. Dejaron en el estado un
+    snapshot con tres jugadores de mentira, y
+    `test_futbolfantasy_source_v12` -que coge el mas reciente-
+    se puso rojo con un `0`.
+
+    Una sonda que deja estado detras es peor que una que lo lee:
+    lo lee el siguiente que pase, y el fallo aparece en otro
+    sitio y sin relacion aparente.
+
+    Se comprueba leyendo la fuente y no ejecutandola, porque
+    ejecutarla aqui seria repetir el error.
+    """
+
+    from pathlib import Path
+
+    fuente = (
+        Path(__file__).parent.parent.parent
+        / "scripts"
+        / "contar_peticiones_del_ciclo.py"
+    ).read_text(encoding="utf-8")
+
+    for pieza in (
+        "TemporaryDirectory",
+        "DATA_DIR",
+        "BOARD_FILE",
+        "BOARD_RAW_FILE",
+        "cleanup",
+    ):
+        assert pieza in fuente, (
+            f"la sonda ya no desvia «{pieza}»: volveria a "
+            f"escribir en el estado y a tumbar la verja por "
+            f"otro sitio"
+        )
+
+    # Y que lo devuelve todo a su sitio pase lo que pase.
+    assert "salidas_originales" in fuente, (
+        "la sonda no restaura los directorios de salida"
+    )
+
+
 def test_estas_guardias_no_leen_el_estado():
     """
     LA REGLA DEL 18/09. Todo sale de sesiones inventadas aqui
@@ -540,6 +724,9 @@ TESTS = [
     test_el_punto_de_entrada_de_verdad_lo_aguanta,
     test_el_bucle_largo_tambien_lo_distingue,
     test_el_recuento_se_publica_cada_vuelta,
+    test_no_han_aparecido_llamadas_nuevas,
+    test_el_tablon_se_sigue_colectando_dos_veces,
+    test_la_sonda_del_recuento_no_escribe_estado,
     test_estas_guardias_no_leen_el_estado,
 ]
 
