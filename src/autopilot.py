@@ -37,6 +37,11 @@ from src.analysis.speculation_engine import (
     build_speculation_board,
 )
 
+from src.biwenger.peticiones import (
+    LimiteDePeticiones,
+    resumen as resumen_de_peticiones,
+)
+
 from src.analysis.action_failure_backoff import (
     candidate_target_id,
     load_backoff_state,
@@ -803,6 +808,17 @@ def load_rival_intelligence(
         inteligencia["available"] = True
         inteligencia["current_user_id"] = current_user_id
 
+        # EL TABLON, GUARDADO CON EL RETRATO (07/09/2026)
+        #
+        #     Colectarlo cuesta 12 peticiones -login, cuenta, el
+        #     tablon, la lista de managers, SIETE perfiles y las
+        #     finanzas- y hasta hoy se hacia dos veces por
+        #     vuelta: 24 de las 32 peticiones del ciclo.
+        #
+        #     Se guarda aqui para que quien lo necesite lo
+        #     recoja en vez de volver a pedirlo.
+        _RIVAL_INTELLIGENCE_CACHE["board"] = board
+
     except Exception as error:
         inteligencia = {
             **vacio,
@@ -814,6 +830,40 @@ def load_rival_intelligence(
     _RIVAL_INTELLIGENCE_CACHE["value"] = inteligencia
 
     return inteligencia
+
+
+def board_del_ciclo(snapshot: dict) -> dict:
+    """
+    El tablon de esta vuelta, colectado UNA sola vez.
+
+    EL DUPLICADO QUE COSTABA 12 PETICIONES (07/09/2026)
+
+        `build_competitive_observer` llamaba a
+        `collect_board_history()` a pelo -nuevo login, nueva
+        lista de managers, los siete perfiles otra vez- y VEINTE
+        LINEAS MAS ABAJO tenia escrito este comentario:
+
+            "Ya se construyo antes de decidir. Volver a pedir el
+             tablon seria una segunda llamada de red por el
+             mismo dato."
+
+        Alguien arreglo la segunda llamada poniendo cache a
+        `load_rival_intelligence` y dejo la primera. El
+        comentario documentaba una intencion que el codigo no
+        cumplia.
+
+        24 de las 32 peticiones por vuelta eran esto. Con la
+        cuenta hecha: 576 peticiones al dia por un dato que ya
+        estaba en memoria.
+
+    Nunca lanza. Sin tablon devuelve un diccionario vacio, que
+    es lo que ya hacia el camino de error.
+    """
+
+    if "board" not in _RIVAL_INTELLIGENCE_CACHE:
+        load_rival_intelligence(snapshot)
+
+    return _RIVAL_INTELLIGENCE_CACHE.get("board") or {}
 
 
 def reset_rival_intelligence_cache() -> None:
@@ -1023,9 +1073,12 @@ def build_competitive_observer(
 
     try:
 
-        board = (
-            collect_board_history()
-        )
+        # EL MISMO TABLON DE ANTES, NO UNO NUEVO (07/09/2026)
+        #
+        #     Aqui habia un `collect_board_history()` pelado. Ver
+        #     `board_del_ciclo` para la historia entera: son 12
+        #     peticiones por vuelta y 576 al dia.
+        board = board_del_ciclo(snapshot)
 
         market_status = (
             snapshot.get(
@@ -4385,6 +4438,59 @@ def run_cycle(
 # ============================================================
 
 
+def _publicar_peticiones() -> None:
+    """
+    Cuantas peticiones ha gastado este ciclo, y cuantas sobraban.
+
+    POR QUE SE IMPRIME SIEMPRE (27/09/2026)
+
+        El consumo de Biwenger solo se conocia sumando llamadas
+        a mano leyendo el codigo. Un gasto que nadie mide es un
+        gasto que crece: el dia que alguien añada una llamada
+        dentro de un bucle, no se entera nadie hasta el
+        siguiente 429.
+
+        `repetidas` es el numero que importa: peticiones a un
+        endpoint al que YA se habia ido en este mismo ciclo. Es
+        ahorro disponible sin perder un solo dato.
+
+    Nunca lanza: si el contador falla, el ciclo sigue.
+    """
+
+    try:
+        cuenta = resumen_de_peticiones()
+
+        if not cuenta.get("available"):
+            return
+
+        print()
+        print(
+            f"Peticiones a Biwenger en este ciclo: "
+            f"{cuenta['total']} "
+            f"({cuenta['unique_endpoints']} endpoints "
+            f"distintos, {cuenta['repeated']} repetidas = "
+            f"{cuenta['repeated_percent']} %)"
+        )
+
+        if cuenta["rate_limited"]:
+            print(
+                f"  Limitadas por Biwenger: "
+                f"{cuenta['rate_limited']} "
+                f"({cuenta['waited_seconds']} s esperando)"
+            )
+
+        for endpoint, cuantas in list(
+            cuenta["by_endpoint"].items()
+        )[:12]:
+
+            marca = "  <-- repetida" if cuantas > 1 else ""
+
+            print(f"    {cuantas:>3}  {endpoint}{marca}")
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+
 def main() -> None:
 
     parser = (
@@ -4548,6 +4654,8 @@ def main() -> None:
                     args.competitive_live,
             )
 
+            _publicar_peticiones()
+
         except KeyboardInterrupt:
 
             print()
@@ -4556,6 +4664,47 @@ def main() -> None:
             )
 
             break
+
+        except LimiteDePeticiones as limite:
+
+            # UN 429 NO ES UN FALLO NUESTRO (27/09/2026)
+            #
+            #     Biwenger limito la cuenta entera y el ciclo se
+            #     cayo con "ERROR EN CICLO". Eso es mentira en
+            #     los dos sentidos: no hay nada roto, y tratarlo
+            #     como error ensucia el diagnostico y confunde a
+            #     quien lo lea.
+            #
+            #     La sesion ya ha reintentado con espera
+            #     creciente antes de llegar aqui. Si aun asi no
+            #     cede, lo unico correcto es retirarse sin tocar
+            #     nada y volver en la siguiente vuelta.
+            print()
+            print(
+                "="
+                * 100
+            )
+
+            print(
+                "LIMITE DE PETICIONES DE BIWENGER"
+            )
+
+            print(
+                f"{limite}"
+            )
+
+            print(
+                "El ciclo se retira limpiamente. NO es un fallo: "
+                "no se ha tocado nada y se vuelve en la siguiente "
+                "vuelta."
+            )
+
+            print(
+                "="
+                * 100
+            )
+
+            _publicar_peticiones()
 
         except Exception as error:
 

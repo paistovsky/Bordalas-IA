@@ -4,7 +4,13 @@ import json
 from datetime import date, datetime, time, timezone
 from pathlib import Path
 
-from src.autopilot import refresh_snapshot, run_cycle
+from src.autopilot import (
+    _publicar_peticiones,
+    refresh_snapshot,
+    run_cycle,
+)
+
+from src.biwenger.peticiones import LimiteDePeticiones
 from src.analysis.controlled_speculation_live import (
     build_controlled_run,
     print_result as print_controlled_buy,
@@ -414,9 +420,58 @@ def run_full_autonomous_cycle() -> dict:
     return payload
 
 
-def main() -> None:
-    run_full_autonomous_cycle()
+def main() -> int:
+    """
+    El ciclo, con una sola salida especial: el limite de
+    peticiones.
+
+    EL INCIDENTE DEL 27/09/2026
+
+        Biwenger empezo a devolver 429 a la cuenta entera y este
+        `main` no tenia NINGUN try: la excepcion salia del
+        proceso, el paso de Actions se ponia rojo y el workflow
+        hubo que desactivarlo a mano.
+
+        Un 429 no es un fallo nuestro. Es el servidor diciendo
+        "ahora no". La sesion ya reintenta con espera creciente
+        antes de llegar aqui; si aun asi no cede, lo unico
+        correcto es retirarse sin tocar nada y volver en la
+        siguiente vuelta.
+
+    LO QUE NO CAMBIA
+
+        Cualquier OTRA excepcion sigue subiendo igual que
+        siempre y sigue poniendo el paso en rojo. Aqui solo se
+        aparta el caso que no es un error.
+    """
+
+    try:
+        run_full_autonomous_cycle()
+
+    except LimiteDePeticiones as limite:
+
+        print()
+        print("=" * 100)
+        print("LIMITE DE PETICIONES DE BIWENGER")
+        print(f"{limite}")
+        print(
+            "El ciclo se retira limpiamente. NO es un fallo: no "
+            "se ha tocado nada y se vuelve en la siguiente "
+            "vuelta."
+        )
+        print("=" * 100)
+
+        _publicar_peticiones()
+
+        # Cero a proposito: el paso de Actions no debe ponerse
+        # rojo por esto, o el dueño acaba desactivando el
+        # workflow como el 27/09.
+        return 0
+
+    _publicar_peticiones()
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

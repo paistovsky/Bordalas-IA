@@ -5,7 +5,11 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from src.biwenger.client import BiwengerClient
+from src.biwenger import cache_del_reset as cache
+from src.biwenger.client import (
+    BiwengerClient,
+    cliente_del_ciclo,
+)
 
 
 DATA_DIR = Path("data") / "rival_intelligence"
@@ -313,6 +317,73 @@ def normalize_board_event(
     }
 
 
+# Donde se guardan los perfiles entre vueltas, con la marca de
+# cuando se colectaron: ese instante es el corte para saber
+# quien se ha movido DESDE ENTONCES.
+PROFILES_FILE = DATA_DIR / "profiles_cache.json"
+
+
+def load_cached_profiles() -> dict:
+    """
+    `{collected_at, profiles}`. Forma fija, nunca lanza.
+
+    Sin fichero devuelve `collected_at: 0`, que hace que
+    `perfiles_a_refrescar` los pida todos — el comportamiento de
+    antes.
+    """
+
+    vacio = {"collected_at": 0, "profiles": {}}
+
+    try:
+        datos = json.loads(
+            PROFILES_FILE.read_text(encoding="utf-8")
+        )
+
+        return {
+            "collected_at": int(
+                datos.get("collected_at") or 0
+            ),
+            "profiles": datos.get("profiles") or {},
+        }
+
+    except Exception:                               # noqa: BLE001
+        return vacio
+
+
+def save_cached_profiles(profiles: list | None) -> None:
+    """Guarda los perfiles con la marca de ahora. Nunca lanza."""
+
+    try:
+        PROFILES_FILE.parent.mkdir(
+            parents=True, exist_ok=True
+        )
+
+        PROFILES_FILE.write_text(
+            json.dumps(
+                {
+                    "collected_at": int(
+                        datetime.now().timestamp()
+                    ),
+                    "profiles": {
+                        str(perfil.get("id")): perfil
+                        for perfil in (profiles or [])
+                        if isinstance(perfil, dict)
+                        and perfil.get("id")
+
+                        # Un perfil que fallo al bajarse no se
+                        # guarda: mañana volveria a servirse ese
+                        # error como si fuera un dato.
+                        and not perfil.get("_fetch_error")
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+
 def load_persisted_events() -> list[dict]:
 
     if not BOARD_FILE.exists():
@@ -436,12 +507,13 @@ def collect_board_history(
 
     if client is None:
 
-        client = (
-            BiwengerClient()
-        )
-
-        client.login()
-        client.select_league()
+        # EL CLIENTE DE LA VUELTA (07/09/2026)
+        #
+        #     Antes se construia uno nuevo con su propio login.
+        #     Ahora se comparte con el resto del ciclo: un
+        #     `POST /auth/login` y un `GET /account` por vuelta,
+        #     no tres de cada.
+        client = cliente_del_ciclo()
 
     elif client.league_id is None:
 
@@ -521,18 +593,61 @@ def collect_board_history(
             raw_events,
     )
 
-    users = (
-        fetch_league_users(
-            client
-        )
+    # LA LISTA DE MANAGERS: NO CAMBIA EN MESES (07/09/2026)
+    guardada = cache.leer("managers")
+
+    if guardada["fresco"]:
+        users = guardada["valor"]
+
+    else:
+        users = fetch_league_users(client)
+        cache.escribir("managers", users)
+
+    # ==========================================================
+    # LOS PERFILES: SOLO LOS QUE SE HAN MOVIDO
+    # ==========================================================
+    #
+    #     Eran 7 peticiones por vuelta, 336 al dia, y una
+    #     plantilla rival SOLO cambia cuando ese manager ficha o
+    #     vende. Medido sobre el tablon del 04 al 07/09: se
+    #     mueven 4, 5, 2 y 1 al dia. Media 3 de 7.
+    #
+    #     Asi que 333 de esas 336 preguntaban por algo que no
+    #     habia cambiado.
+    #
+    #     El aviso lo da el tablon, que ya esta pedido y cuesta
+    #     UNA peticion: `merged` son los eventos. Se lee el
+    #     indice antes de abrir el libro.
+    #
+    #     Ojo con el reloj: aqui NO vale el del reset. Un manager
+    #     que ficha a las 16:00 tiene que refrescarse a las
+    #     16:30, no al dia siguiente. Por eso el corte es la
+    #     ultima colecta y no las 07:00.
+    perfiles_guardados = load_cached_profiles()
+
+    plan = cache.perfiles_a_refrescar(
+        users=users,
+        eventos=merged,
+        cacheados=perfiles_guardados.get("profiles"),
+        desde=perfiles_guardados.get("collected_at") or 0,
     )
 
-    profiles = (
-        fetch_user_profiles(
-            client,
-            users,
-        )
+    print(f"  Perfiles: {plan['reason']}")
+
+    profiles = fetch_user_profiles(
+        client,
+        [
+            user
+            for user in users
+            if int(user.get("id") or 0) in set(
+                plan["refrescar"]
+            )
+        ],
     )
+
+    profiles.extend(plan["reutilizar"].values())
+
+    save_cached_profiles(profiles)
 
     finances = (
         fetch_own_finances(
