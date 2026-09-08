@@ -6,7 +6,7 @@ on:
   schedule:
     # Ciclo autonomo principal: dos ejecuciones por hora.
     # El cron-job externo puede permanecer desactivado.
-    - cron: "7,37 * * * *"
+    - cron: "7 * * * *"
 
 permissions:
   contents: read
