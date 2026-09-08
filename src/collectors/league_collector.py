@@ -92,13 +92,23 @@ def collect_league_snapshot() -> None:
     #     Ahora se pide primero y se le pasa a la plantilla.
     print("Obteniendo catálogo de jugadores...")
 
-    guardado = cache.leer("catalogo")
+    # La fase se mira UNA vez y se pasa: si cada `leer` la
+    # dedujera por su cuenta, dos llamadas de la misma vuelta
+    # podrian caer a distinto lado del cierre.
+    fase = cache.fase_del_calendario()
+
+    guardado = cache.leer("catalogo", fase=fase)
 
     if guardado["fresco"]:
         catalog = guardado["valor"]
         print("  (de la cache: los precios cambian en el reset)")
 
     else:
+        # Por que se pide: o no habia cache, o estamos en una
+        # fase en la que el estado del jugador no puede ser de
+        # esta mañana. Lo dice `guardado["reason"]`.
+        print(f"  ({guardado['reason']})")
+
         catalog_response = client.session.get(
             f"{client.BASE_URL}/competitions/la-liga/data",
             params={
@@ -109,7 +119,16 @@ def collect_league_snapshot() -> None:
         catalog_response.raise_for_status()
         catalog = catalog_response.json()
 
-        cache.escribir("catalogo", catalog)
+        # EL DIA DE LA JORNADA NO SE GUARDA (08/09/2026)
+        #
+        #     Si se guardara, la vuelta siguiente lo daria por
+        #     bueno... salvo que la fase lo vuelva a rechazar.
+        #     Funcionaria, pero dejaria en disco un catalogo con
+        #     el estado de hace una hora esperando a que la fase
+        #     cambie. Mejor no escribirlo: lo que no esta no
+        #     puede servirse por error.
+        if fase not in cache.FASES_SIN_CACHE:
+            cache.escribir("catalogo", catalog)
 
     print("Obteniendo plantilla...")
     team = client.get_my_team(

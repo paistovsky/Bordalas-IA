@@ -348,6 +348,41 @@ Un límite que nadie ha medido es una opinión disfrazada. Ya pasó con el list�
 del 3 % —que resultó bien puesto— y con el tope por operación —que resultó ser un
 porcentaje de un porcentaje.
 
+### 23. Ninguna guardia lee estado externo
+
+**Ni el disco, ni la red, ni el reloj. Si una guardia necesita una hora o un
+fichero, se los pasan.**
+
+Antes la regla era «ninguna guardia lee `data/`», y se quedaba corta por un lado
+que no habíamos visto: **el reloj también es estado externo**, y es el peor,
+porque cambia solo.
+
+**EL INCIDENTE (08/09/2026).** `test_ojeador_prensa_v1` se puso rojo un martes a
+las 17:00. Nadie había tocado nada. Su feed de mentira llevaba `pubDate` fijo del
+05/09 y llamaba a `build_press_report` **sin pasarle `now`**, así que la hora la
+leía producción. Con `MAX_ITEM_AGE_HOURS = 72`, el fixture cumplió tres días y
+cuatro pruebas cayeron a la vez.
+
+**Por qué es el peor tipo de rojo:** no falla cuando alguien rompe algo, falla un
+día cualquiera. Y quien lo mire buscará el fallo en su propio cambio, que es
+justo donde no está.
+
+**Y hay algo peor que el rojo.** Al repasarlo apareció una segunda prueba, en el
+mismo fichero, que tampoco pasaba la hora: `test_un_nombre_de_dos_fichas_no_se_adivina`
+afirmaba que el código **no elige** entre dos jugadores del mismo nombre. Desde el
+08/09 a las 17:00 eso se cumplía porque el titular se descartaba **por viejo** —
+`too_old: 1`— y la lista salía vacía sin que nadie comprobara nada. **Un verde que
+dejó de probar.** Ésas no las cuenta nadie hasta que fallan de verdad.
+
+**El pecado suele ser de omisión, no de comisión.** Ninguna de las dos llamaba al
+reloj: se limitaban a no pasar la hora a una función que la aceptaba. Por eso el
+barrido busca *llamadas que aceptan la hora y no la reciben*, y no
+`datetime.now()`. El primer escáner que escribí buscaba lo segundo y dio LIMPIA a
+la única guardia que sabemos que explotó.
+
+**Cómo se comprueba:** `python -m scripts.guardias_que_leen_el_mundo`. Y lo que
+decide de verdad no es el escáner, es adelantar el reloj y ver qué se cae sola.
+
 ---
 
 ## Descartado
@@ -388,8 +423,9 @@ ninguno por encima de los demás.
 | 20 | Lo no disponible no se toca | hecho, sin escribir |
 | 21 | Ningún bolsillo se vacía de golpe | hecho, sin escribir |
 | 22 | Los intocables | **derogada** 21/09 |
+| 23 | Ninguna guardia lee estado externo | **hecha** 08/09 — barrido de las 96 |
 
-**Diez hechas. Doce por hacer.**
+**Once hechas. Doce por hacer.**
 
 ### El embudo, medido el 20/09
 

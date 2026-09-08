@@ -202,6 +202,27 @@ def test_un_nombre_de_dos_fichas_no_se_adivina() -> None:
     informe = press.build_press_report(
         catalogo,
         xml_by_feed={"MARCA": _feed(("Moussa Diarra es baja", ""))},
+
+        # SIN ESTO LA PRUEBA PASABA POR EL MOTIVO EQUIVOCADO
+        # (08/09/2026)
+        #
+        #     El arreglo de ayer solo cubrio `_informe`. Aqui la
+        #     llamada seguia sin hora, asi que desde el 08/09 a
+        #     las 17:00 el titular se descartaba por viejo
+        #     -`too_old: 1`- y `players` salia vacio SIN QUE
+        #     NADIE COMPROBARA NADA.
+        #
+        #     Es peor que un rojo: un verde que dejo de probar.
+        #     Con la hora puesta, `too_old` es 0 y el vacio
+        #     significa lo que tiene que significar: que el
+        #     codigo se niega a elegir entre dos fichas del
+        #     mismo nombre.
+        now=_recien_publicado(),
+    )
+
+    assert informe.get("too_old") == 0, (
+        "el titular se ha descartado por viejo: esta prueba "
+        "estaria pasando sin comprobar nada"
     )
 
     assert not (informe.get("players") or {}), (
@@ -493,6 +514,12 @@ def test_nunca_lanza_con_basura() -> None:
         informe = press.build_press_report(
             catalogo,
             xml_by_feed={"MARCA": "esto no es un xml"},
+
+            # El xml es basura y no hay items que caducar, asi
+            # que aqui la hora daba igual. Se pasa igual: la
+            # regla es que ninguna guardia lee el reloj, no que
+            # lo lea cuando no importa.
+            now=_recien_publicado(),
         )
         assert isinstance(informe, dict)
         assert "available" in informe

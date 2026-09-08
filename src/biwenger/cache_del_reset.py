@@ -88,6 +88,158 @@ CACHEABLES = {
 }
 
 
+# ============================================================
+# EL CATALOGO NO SE CACHEA EL DIA DE LA JORNADA (08/09/2026)
+# ============================================================
+#
+#     LA PEGA QUE QUEDO ESCRITA AL MONTAR ESTO
+#
+#         El catalogo trae el PRECIO -que solo cambia en el
+#         reset- y tambien el ESTADO: lesionado, dudoso,
+#         sancionado. Lo segundo cambia a media tarde.
+#
+#         Un martes da igual: no se alinea a nadie. El dia de la
+#         jornada no: alinear a un lesionado cuesta puntos, y
+#         esta liga se decide por cuatro decimas por jornada.
+#
+#     LA REGLA, Y POR QUE ESTAS FASES
+#
+#         Se pide fresco mientras la alineacion TODAVIA SE PUEDE
+#         ESCRIBIR y el cierre esta cerca:
+#
+#             HIGH_ATTENTION   T-12 h
+#             FINALIZATION     T-2 h
+#             HARD_SAFETY      pasado T-90 min
+#
+#         Y con el calendario roto, tambien: no saber en que
+#         fase estamos tiene que costar peticiones, no puntos.
+#
+#     LO QUE SI SE CACHEA, Y POR QUE
+#
+#         NORMAL y PREPARATION: quedan mas de 12 h y la
+#         alineacion se escribe despues, ya en fresco.
+#
+#         ROUND_LOCKED y ROUND_TRANSITION_LOCK: la jornada esta
+#         en marcha y el once ya no se puede tocar. Un estado
+#         viejo no puede estropear una alineacion que esta
+#         cerrada.
+#
+#     EL COSTE, MEDIDO
+#
+#         Fresco solo en esas tres fases son ~12 h por jornada.
+#         Con el cron de 48 vueltas eso son unas 24 peticiones
+#         mas por jornada; nunca cachear costaria 47 AL DIA.
+#
+#         Si algun dia parece poco margen, meter PREPARATION en
+#         el conjunto sube a ~48 h por jornada. Es una linea, y
+#         el numero esta en el informe.
+FASES_SIN_CACHE = frozenset({
+    "HIGH_ATTENTION",
+    "FINALIZATION",
+    "HARD_SAFETY",
+
+    # No saber falla del lado caro.
+    "CALENDAR_UNKNOWN",
+    "SEASON_COMPLETE_OR_UNKNOWN",
+})
+
+
+# Lo unico que depende de la fase. El resto -jornada, lista de
+# managers- no lleva estado de jugador y se cachea siempre.
+SENSIBLE_A_LA_FASE = "catalogo"
+
+
+def fase_del_calendario(ahora=None) -> str:
+    """
+    En que fase temporal estamos, sin salir a la calle.
+
+    Se lee del calendario dinamico, que ya vive en disco y lo
+    usa el ciclo entero. `force=False`: si la copia esta fresca
+    no se pide nada, y si no lo esta se habria refrescado igual
+    unas lineas mas adelante.
+
+    Nunca lanza. Si no se puede saber, devuelve
+    `CALENDAR_UNKNOWN` — que esta en `FASES_SIN_CACHE`, o sea
+    que no saber sale por el lado seguro.
+    """
+
+    try:
+        from src.analysis.matchday_calendar_engine import (
+            refresh_dynamic_calendar,
+        )
+
+        dinamico = refresh_dynamic_calendar(
+            force=False, now=ahora
+        )
+
+        return str(
+            (dinamico or {}).get("phase")
+            or "CALENDAR_UNKNOWN"
+        )
+
+    except Exception:                               # noqa: BLE001
+        return "CALENDAR_UNKNOWN"
+
+
+def se_cachea_en_esta_fase(
+    clave: str,
+    fase: str | None = None,
+) -> dict:
+    """
+    `{cachea, fase, reason}`. Forma fija, nunca lanza.
+
+    `fase` se puede pasar -las guardias lo hacen- o se deduce.
+    Ninguna funcion de aqui lee el reloj por su cuenta si le
+    dan la hora.
+    """
+
+    try:
+        if clave != SENSIBLE_A_LA_FASE:
+            return {
+                "cachea": True,
+                "fase": fase,
+                "reason": (
+                    f"«{clave}» no lleva estado de jugador: la "
+                    f"fase no le afecta."
+                ),
+            }
+
+        if fase is None:
+            fase = fase_del_calendario()
+
+        if fase in FASES_SIN_CACHE:
+            return {
+                "cachea": False,
+                "fase": fase,
+                "reason": (
+                    f"Fase «{fase}»: la alineacion aun se puede "
+                    f"escribir y el cierre esta cerca. El "
+                    f"catalogo se pide fresco para no alinear a "
+                    f"un lesionado."
+                ),
+            }
+
+        return {
+            "cachea": True,
+            "fase": fase,
+            "reason": (
+                f"Fase «{fase}»: queda margen antes del cierre, "
+                f"el catalogo de este reset vale."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        # Ante la duda, fresco.
+        return {
+            "cachea": False,
+            "fase": fase,
+            "reason": (
+                f"No se pudo mirar la fase "
+                f"({type(error).__name__}): se pide fresco."
+            ),
+        }
+
+
 def _sin_cache() -> bool:
     return str(
         os.environ.get(DISABLE_ENV, "")
@@ -161,6 +313,7 @@ def leer(
     clave: str,
     path: Path | None = None,
     ahora: datetime | None = None,
+    fase: str | None = None,
 ) -> dict:
     """
     `{fresco, valor, guardado_en, reason}`.
@@ -192,6 +345,15 @@ def leer(
                     f"«{clave}» no esta en CACHEABLES: se pide."
                 ),
             }
+
+        # LA FASE MANDA SOBRE EL RESET (08/09/2026)
+        #
+        #     El catalogo se cachea desde el reset, salvo el dia
+        #     de la jornada. Ver `FASES_SIN_CACHE`.
+        por_la_fase = se_cachea_en_esta_fase(clave, fase)
+
+        if not por_la_fase["cachea"]:
+            return {**vacio, "reason": por_la_fase["reason"]}
 
         entrada = (_cargar(path) or {}).get(clave) or {}
 

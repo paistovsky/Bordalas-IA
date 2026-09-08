@@ -1023,6 +1023,185 @@ def test_la_vuelta_de_crucero_cuesta_lo_que_dice_el_informe():
     )
 
 
+# ============================================================
+# EL CATALOGO, FRESCO EL DIA DE LA JORNADA (08/09/2026)
+# ============================================================
+
+
+def test_un_martes_cualquiera_el_catalogo_va_de_la_cache():
+    """
+    LA MITAD BARATA.
+
+    En NORMAL quedan mas de 48 h para el cierre: nadie va a
+    alinear con este catalogo, y pedirlo son 500 KB y una
+    peticion por vuelta que no compra nada.
+    """
+
+    from scripts.contar_peticiones_del_ciclo import (
+        medir_un_ciclo,
+    )
+
+    medido = medir_un_ciclo(vueltas=2, fase="NORMAL")
+
+    assert "GET /competitions/la-liga/data" not in (
+        medido["by_endpoint"]
+    ), (
+        "un martes se sigue pidiendo el catalogo: son 47 "
+        "peticiones al dia que no deciden nada"
+    )
+
+    assert medido["total"] == 7, (
+        "una vuelta de martes cuesta "
+        + str(medido["total"])
+        + " y deberian ser 7"
+    )
+
+
+def test_el_dia_de_la_jornada_el_catalogo_va_fresco():
+    """
+    LA MITAD QUE VALE PUNTOS.
+
+    El catalogo lleva el ESTADO del jugador -lesionado, dudoso,
+    sancionado- y eso cambia a media tarde. Con la alineacion
+    todavia por escribir y el cierre a menos de 12 h, servir el
+    estado de esta mañana puede meter a un lesionado en el once.
+
+    Esta liga se decide por cuatro decimas por jornada.
+    """
+
+    from scripts.contar_peticiones_del_ciclo import (
+        medir_un_ciclo,
+    )
+
+    for fase in (
+        "HIGH_ATTENTION",
+        "FINALIZATION",
+        "HARD_SAFETY",
+    ):
+
+        medido = medir_un_ciclo(vueltas=2, fase=fase)
+
+        assert (
+            medido["by_endpoint"].get(
+                "GET /competitions/la-liga/data"
+            )
+            == 1
+        ), (
+            "en fase "
+            + fase
+            + " el catalogo sale de la cache: se puede alinear "
+            "a un lesionado con el estado de esta mañana"
+        )
+
+
+def test_no_saber_la_fase_cuesta_peticiones_y_no_puntos():
+    """
+    Con el calendario roto no se sabe si es martes o viernes.
+    Fallar del lado barato costaria puntos; del caro, una
+    peticion.
+    """
+
+    from src.biwenger.cache_del_reset import (
+        FASES_SIN_CACHE,
+        se_cachea_en_esta_fase,
+    )
+
+    for fase in (
+        "CALENDAR_UNKNOWN",
+        "SEASON_COMPLETE_OR_UNKNOWN",
+    ):
+        assert fase in FASES_SIN_CACHE
+
+        assert not se_cachea_en_esta_fase("catalogo", fase)[
+            "cachea"
+        ]
+
+    # Y si la funcion revienta por dentro, tambien fresco.
+    for basura in (None, 12345, object()):
+
+        veredicto = se_cachea_en_esta_fase("catalogo", basura)
+
+        assert isinstance(veredicto, dict)
+        assert "cachea" in veredicto
+
+
+def test_el_dia_de_la_jornada_no_se_guarda_en_disco():
+    """
+    Un catalogo pedido en fase caliente no se escribe en la
+    cache. Si se escribiera, quedaria en disco esperando a que
+    la fase cambie para servirse — con el estado de hace una
+    hora.
+
+    Lo que no esta no se puede servir por error.
+    """
+
+    from pathlib import Path
+
+    fuente = (
+        Path(__file__).parent.parent
+        / "collectors"
+        / "league_collector.py"
+    ).read_text(encoding="utf-8")
+
+    assert "if fase not in cache.FASES_SIN_CACHE:" in fuente, (
+        "el catalogo de una fase caliente se esta guardando en "
+        "la cache"
+    )
+
+
+def test_solo_el_catalogo_depende_de_la_fase():
+    """
+    La jornada y la lista de managers no llevan estado de
+    jugador. Meterlas en la regla de la fase seria pagar
+    peticiones sin comprar nada.
+    """
+
+    from src.biwenger.cache_del_reset import (
+        CACHEABLES,
+        SENSIBLE_A_LA_FASE,
+        se_cachea_en_esta_fase,
+    )
+
+    assert SENSIBLE_A_LA_FASE == "catalogo"
+
+    for clave in CACHEABLES:
+
+        if clave == SENSIBLE_A_LA_FASE:
+            continue
+
+        assert se_cachea_en_esta_fase(clave, "HARD_SAFETY")[
+            "cachea"
+        ], (
+            "«" + clave + "» deja de cachearse el dia de la "
+            "jornada y no lleva estado de jugador"
+        )
+
+
+def test_la_fase_se_mira_una_vez_por_vuelta():
+    """
+    Si cada `leer` dedujera la fase por su cuenta, dos llamadas
+    de la misma vuelta podrian caer a distinto lado del cierre y
+    media vuelta iria fresca y media cacheada.
+    """
+
+    from pathlib import Path
+
+    fuente = (
+        Path(__file__).parent.parent
+        / "collectors"
+        / "league_collector.py"
+    ).read_text(encoding="utf-8")
+
+    assert fuente.count("fase_del_calendario()") == 1, (
+        "la fase se deduce mas de una vez en el mismo colector"
+    )
+
+    assert 'cache.leer("catalogo", fase=fase)' in fuente, (
+        "el catalogo ya no recibe la fase: la deduciria por su "
+        "cuenta"
+    )
+
+
 def test_la_sonda_del_recuento_no_escribe_estado():
     """
     LO QUE ME COSTO LA VERJA DOS VECES (07/09/2026)
@@ -1205,6 +1384,12 @@ TESTS = [
     test_el_interruptor_de_la_cache_devuelve_el_mundo_de_antes,
     test_un_perfil_que_fallo_no_se_guarda,
     test_la_vuelta_de_crucero_cuesta_lo_que_dice_el_informe,
+    test_un_martes_cualquiera_el_catalogo_va_de_la_cache,
+    test_el_dia_de_la_jornada_el_catalogo_va_fresco,
+    test_no_saber_la_fase_cuesta_peticiones_y_no_puntos,
+    test_el_dia_de_la_jornada_no_se_guarda_en_disco,
+    test_solo_el_catalogo_depende_de_la_fase,
+    test_la_fase_se_mira_una_vez_por_vuelta,
     test_la_sonda_del_recuento_no_escribe_estado,
     test_la_sonda_no_deja_ficheros_en_el_estado,
     test_estas_guardias_no_leen_el_estado,

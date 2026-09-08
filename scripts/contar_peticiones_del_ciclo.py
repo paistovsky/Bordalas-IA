@@ -315,7 +315,48 @@ class _entorno_de_mentira:
         return False
 
 
-def medir_un_ciclo(vueltas: int = 1) -> dict:
+class _en_fase:
+    """
+    Fija la fase temporal sin tocar el reloj ni el calendario.
+
+    La fase decide si el catalogo se cachea. Para medir las dos
+    situaciones -martes cualquiera y dia de jornada- hay que
+    poder ponerla, no esperar al viernes.
+    """
+
+    def __init__(self, fase: str | None):
+        self.fase = fase
+        self.original = None
+
+    def __enter__(self):
+
+        if self.fase is None:
+            return self
+
+        from src.biwenger import cache_del_reset as cache_mod
+
+        self.original = cache_mod.fase_del_calendario
+        cache_mod.fase_del_calendario = lambda *a, **k: self.fase
+
+        return self
+
+    def __exit__(self, *_):
+
+        if self.original is not None:
+
+            from src.biwenger import (
+                cache_del_reset as cache_mod,
+            )
+
+            cache_mod.fase_del_calendario = self.original
+
+        return False
+
+
+def medir_un_ciclo(
+    vueltas: int = 1,
+    fase: str | None = None,
+) -> dict:
     """
     Las peticiones de una vuelta, ejecutando los colectores.
 
@@ -330,7 +371,7 @@ def medir_un_ciclo(vueltas: int = 1) -> dict:
     Ni una llamada a la red, ni un byte escrito en el estado.
     """
 
-    with _entorno_de_mentira() as entorno:
+    with _entorno_de_mentira() as entorno, _en_fase(fase):
 
         from src.biwenger import client as cliente_mod
         from src.collectors.board_history_collector import (
@@ -383,6 +424,7 @@ def medir_un_ciclo(vueltas: int = 1) -> dict:
         "total": snapshot + tablon,
         "by_endpoint": resumen.get("by_endpoint") or {},
         "vueltas": max(1, int(vueltas)),
+        "fase": fase,
     }
 
 
@@ -398,9 +440,9 @@ def main() -> None:
     )
 
     print()
-    print("Midiendo una vuelta DE CRUCERO (cache llena)...")
+    print("Midiendo una vuelta DE CRUCERO (martes, cache llena)...")
 
-    crucero = medir_un_ciclo(vueltas=2)
+    crucero = medir_un_ciclo(vueltas=2, fase="NORMAL")
 
     print(
         f"  snapshot {crucero['snapshot']} + tablon "
@@ -408,15 +450,32 @@ def main() -> None:
     )
 
     print()
+    print("Midiendo una vuelta EL DIA DE LA JORNADA...")
+
+    jornada = medir_un_ciclo(
+        vueltas=2, fase="HIGH_ATTENTION"
+    )
+
+    print(
+        f"  snapshot {jornada['snapshot']} + tablon "
+        f"{jornada['board']} = {jornada['total']}"
+    )
+
+    print()
     print("=" * 70)
     print("POR ENDPOINT")
     print("=" * 70)
     print()
-    print(f"  {'ENDPOINT':<38}{'1a':>5}{'CRUCERO':>9}")
-    print("  " + "-" * 52)
+    print(
+        f"  {'ENDPOINT':<38}{'1a':>5}{'CRUCERO':>9}"
+        f"{'JORNADA':>9}"
+    )
+    print("  " + "-" * 61)
 
     endpoints = sorted(
-        set(primera["by_endpoint"]) | set(crucero["by_endpoint"])
+        set(primera["by_endpoint"])
+        | set(crucero["by_endpoint"])
+        | set(jornada["by_endpoint"])
     )
 
     for endpoint in endpoints:
@@ -424,12 +483,15 @@ def main() -> None:
             f"  {endpoint:<38}"
             f"{primera['by_endpoint'].get(endpoint, 0):>5}"
             f"{crucero['by_endpoint'].get(endpoint, 0):>9}"
+            f"{jornada['by_endpoint'].get(endpoint, 0):>9}"
         )
 
     print()
     print("  Ni una llamada ha salido a la red.")
 
-    proyeccion(primera["total"], crucero["total"])
+    proyeccion(
+        primera["total"], crucero["total"], jornada["total"]
+    )
 
 
 # ============================================================
@@ -456,7 +518,16 @@ VUELTAS_AL_DIA = 48
 MANAGERS_QUE_SE_MUEVEN_AL_DIA = 3
 
 
-def proyeccion(primera: int, crucero: int) -> None:
+# Horas por jornada en que el catalogo se pide fresco:
+# HIGH_ATTENTION (T-12 h) hasta el cierre. Sale de los listones
+# de `matchday_calendar_engine.classify_phase`, no de una
+# suposicion.
+HORAS_FRESCAS_POR_JORNADA = 12
+
+
+def proyeccion(
+    primera: int, crucero: int, jornada: int | None = None
+) -> None:
     """
     El antes y el despues, medidos.
 
@@ -514,6 +585,31 @@ def proyeccion(primera: int, crucero: int) -> None:
             f"({100 * (antes_al_dia - al_dia) / antes_al_dia:.0f} % menos), "
             f"con el MISMO cron."
         )
+
+        if jornada is not None and jornada != crucero:
+
+            vueltas_frescas = int(
+                HORAS_FRESCAS_POR_JORNADA
+                * VUELTAS_AL_DIA
+                / 24
+            )
+
+            extra = (jornada - crucero) * vueltas_frescas
+
+            print()
+            print(
+                f"  EL DIA DE LA JORNADA el catalogo va fresco: "
+                f"{jornada} por vuelta en vez de {crucero}."
+            )
+            print(
+                f"  Son {HORAS_FRESCAS_POR_JORNADA} h por "
+                f"jornada = {vueltas_frescas} vueltas = "
+                f"+{extra} peticiones POR JORNADA."
+            )
+            print(
+                f"  No cachearlo nunca costaria "
+                f"{VUELTAS_AL_DIA} al dia."
+            )
 
         print()
         print(
