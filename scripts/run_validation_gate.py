@@ -107,6 +107,7 @@ TESTS = [
     "src.analysis.test_rueda_v1",
     "src.analysis.test_que_gire_v1",
     "src.analysis.test_calibracion_larga_v1",
+    "src.analysis.test_mercado_rivales_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
     "src.analysis.test_ciclo_una_sola_vez_v1",
