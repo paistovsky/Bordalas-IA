@@ -4160,6 +4160,44 @@ def run_cycle(
     # LA PRENSA (05/09/2026). Dos veces al dia, por TTL.
     prensa = sync_press(snapshot)
 
+    # EL ARCHIVO DEL DIA (09/09/2026)
+    #
+    #     Al intentar cruzar las 156 subastas del tablon con las
+    #     recomendaciones de las webs no se pudo: el libro del
+    #     ojeador guardaba OCHO predicciones, todas del mismo
+    #     dia. Se sobrescribia cada vuelta.
+    #
+    #     Cada dia sin archivar es un dia que no se podra
+    #     analizar nunca. Un precio se recupera de Biwenger meses
+    #     despues; un titular, no.
+    #
+    #     No cuesta una sola peticion: copia lo que las dos
+    #     lineas de arriba acaban de dejar en disco. Va DESPUES
+    #     de ellas a proposito, y blindado: perder un dia de
+    #     archivo es malo, tumbar el ciclo es peor.
+    try:
+        from src.intelligence.archivo_diario import (
+            archivar,
+            podar,
+        )
+
+        archivo = archivar()
+
+        if archivo.get("written"):
+            print()
+            print(f"Archivo: {archivo['reason']}")
+
+        podar()
+
+    except Exception as error:                      # noqa: BLE001
+        archivo = {
+            "available": False,
+            "reason": (
+                f"No se pudo archivar: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     # EL LIBRO DE RECHAZOS (16/09/2026). Lo que nos juzga
     # a nosotros, con la misma vara que a las fuentes.
     rechazos = sync_rejections_book(snapshot, result)

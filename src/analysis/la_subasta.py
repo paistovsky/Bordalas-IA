@@ -636,13 +636,224 @@ def comparar_los_dos_modos(
         }
 
 
-def _por_euro(candidato: dict) -> float:
+# ============================================================
+# LA PELEA, COMO COSTE (09/09/2026)
+# ============================================================
+#
+#     LO QUE SE MIDIO SOBRE LAS 156 SUBASTAS DEL TABLON
+#
+#     Que porcentaje acabo DISPUTADO -con al menos un rival-,
+#     cruzando precio y subida del dia anterior:
+#
+#                        CAE O PLANO    SUBE >= 1 %
+#         barato < 1,5 M     54 %           83 %
+#         medio 1,5-3 M      39 %           64 %
+#         caro >= 3 M        22 %           67 %
+#
+#     Subir cuesta unos 30 puntos de pelea. Ser caro ahorra
+#     otros 30. Y las dos cosas actuan en todos los niveles de
+#     la otra.
+#
+#     LA IRONIA QUE LO EXPLICA
+#
+#         La señal que nos hace fijarnos en alguien —que esta
+#         subiendo— es la misma que hace que se fijen los demas.
+#         No competimos por casualidad: competimos porque
+#         miramos donde mira todo el mundo.
+#
+#     POR QUE ESTO ES UN COSTE Y NO UN DETALLE
+#
+#         Gastar una ficha en alguien que se perdera el 83 % de
+#         las veces es tirar capacidad. Y la capacidad es lo
+#         escaso: hoy hay siete fichas libres.
+#
+#         Pujando bajo -al +0,25 %- se gana practicamente lo que
+#         nadie disputa y poco mas: sobre las 115 subastas con
+#         precio, ese importe se llevo 34, y sin rival habia 67
+#         de 156. Asi que:
+#
+#             P(llevarselo) ~= 1 - P(disputada)
+#
+#         Es una aproximacion, y se dice: quien puja bajo puede
+#         ganar alguna disputada por suerte, y perder alguna
+#         tranquila si aparece alguien nuevo.
+#
+#     MUESTRA
+#
+#         Las celdas van con su `n`. La de "caro y subiendo"
+#         tiene 6 casos y no manda nada: se publica y se marca.
+CORTES_DE_PRECIO = (1_500_000, 3_000_000)
+
+SUBIDA_QUE_LLAMA_LA_ATENCION = 1.0
+
+
+# `(precio_bajo, precio_alto, sube, probabilidad, n)`.
+# `precio_alto` None es "sin techo"; `sube` es si venia subiendo
+# por encima de `SUBIDA_QUE_LLAMA_LA_ATENCION`.
+PELEA_MEDIDA = (
+    (None, 1_500_000, False, 0.54, 24),
+    (None, 1_500_000, True, 0.83, 12),
+    (1_500_000, 3_000_000, False, 0.39, 18),
+    (1_500_000, 3_000_000, True, 0.64, 11),
+    (3_000_000, None, False, 0.22, 32),
+    (3_000_000, None, True, 0.67, 6),
+)
+
+
+# Por debajo de esto la celda se publica pero se marca: un 67 %
+# de seis casos no es un 67 %.
+MUESTRA_QUE_MANDA = 10
+
+
+def probabilidad_de_pelea(
+    precio,
+    subida_percent=None,
+) -> dict:
+    """
+    Que probabilidad hay de que este jugador salga disputado.
+
+    `{probabilidad, celda, n, fiable, reason}`. Forma fija,
+    nunca lanza.
+
+    Sin subida conocida se usa la fila de "cae o plano", que es
+    la conservadora: supone menos pelea, asi que si nos
+    equivocamos sera contando de menos el coste — y eso se ve en
+    el libro de aciertos, no en una sorpresa.
+    """
+
+    vacio = {
+        "probabilidad": None,
+        "celda": None,
+        "n": 0,
+        "fiable": False,
+        "reason": None,
+    }
+
+    try:
+        valor = safe_int(precio)
+
+        if valor <= 0:
+            return {
+                **vacio,
+                "reason": (
+                    "Sin precio no se puede decir si atraera "
+                    "pelea."
+                ),
+            }
+
+        sube = (
+            safe_float(subida_percent, 0.0)
+            >= SUBIDA_QUE_LLAMA_LA_ATENCION
+            if subida_percent is not None
+            else False
+        )
+
+        for bajo, alto, subiendo, probabilidad, n in (
+            PELEA_MEDIDA
+        ):
+
+            if subiendo != sube:
+                continue
+
+            if bajo is not None and valor < bajo:
+                continue
+
+            if alto is not None and valor >= alto:
+                continue
+
+            tramo = (
+                f"< {_euros(alto)}"
+                if bajo is None
+                else f">= {_euros(bajo)}"
+                if alto is None
+                else f"{_euros(bajo)} a {_euros(alto)}"
+            )
+
+            return {
+                "probabilidad": probabilidad,
+                "celda": (
+                    f"{tramo}, "
+                    f"{'subiendo' if sube else 'cae o plano'}"
+                ),
+                "n": n,
+                "fiable": n >= MUESTRA_QUE_MANDA,
+                "reason": (
+                    f"{100 * probabilidad:.0f} % de subastas "
+                    f"disputadas en «{tramo}, "
+                    f"{'subiendo' if sube else 'cae o plano'}» "
+                    f"sobre {n} casos"
+                    + (
+                        ""
+                        if n >= MUESTRA_QUE_MANDA
+                        else " (muestra corta: se publica, no "
+                        "manda)"
+                    )
+                ),
+            }
+
+        return {
+            **vacio,
+            "reason": (
+                f"{_euros(valor)} no cae en ninguna celda "
+                f"medida."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"No se pudo estimar la pelea: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+def probabilidad_de_llevarselo(
+    precio,
+    subida_percent=None,
+) -> dict:
+    """
+    `1 - P(disputada)`, con la aproximacion escrita arriba.
+
+    Sin celda medida devuelve `None`, no un 1: dar por hecho que
+    se gana lo que no se ha medido es exactamente como se
+    inventa una ventaja.
+    """
+
+    pelea = probabilidad_de_pelea(precio, subida_percent)
+
+    if pelea["probabilidad"] is None:
+        return {**pelea, "probabilidad": None}
+
+    return {
+        **pelea,
+        "probabilidad": round(1 - pelea["probabilidad"], 4),
+        "reason": (
+            f"Se lo llevaria el "
+            f"{100 * (1 - pelea['probabilidad']):.0f} % de las "
+            f"veces: " + str(pelea["reason"])
+        ),
+    }
+
+
+def _por_euro(
+    candidato: dict, contar_la_pelea: bool = False
+) -> float:
     """
     Ganancia esperada por euro comprometido.
 
     Es lo que ordena la cesta: con dinero limitado, lo que
     importa no es cual gana mas, sino cual gana mas POR EURO
     inmovilizado.
+
+    Con `contar_la_pelea`, se multiplica por la probabilidad de
+    llevarselo: una ficha gastada en alguien que se pierde el
+    83 % de las veces es capacidad tirada.
+
+    Sin probabilidad medida NO se penaliza: se ordena como
+    antes. Castigar lo que no se ha medido es inventarse un
+    coste.
     """
 
     puja = safe_int(candidato.get("bid"))
@@ -650,7 +861,16 @@ def _por_euro(candidato: dict) -> float:
     if puja <= 0:
         return -1.0
 
-    return safe_float(candidato.get("expected_value")) / puja
+    ganancia = safe_float(candidato.get("expected_value"))
+
+    if contar_la_pelea:
+
+        odds = candidato.get("win_odds")
+
+        if odds is not None:
+            ganancia *= safe_float(odds, 1.0)
+
+    return ganancia / puja
 
 
 def elegir_la_cesta(
@@ -659,6 +879,11 @@ def elegir_la_cesta(
     fichas_libres,
     caja_libre=None,
     max_por_club: int | None = None,
+
+    # LA PELEA COMO COSTE. Apagado a proposito: esto se publica
+    # y se mira, no se enciende. Con `True` el orden pasa a ser
+    # `ganancia x P(llevarselo)` en vez de solo ganancia.
+    contar_la_pelea: bool = False,
 ) -> dict:
     """
     El conjunto por el que se pujaria en esta ventana.
@@ -742,6 +967,21 @@ def elegir_la_cesta(
         #     nunca y volvia a ganar el mas caro. Dos
         #     rendimientos que se distinguen en la millonesima
         #     son el mismo rendimiento.
+        # Cada candidato lleva su probabilidad de llevarselo,
+        # se use para ordenar o no: publicarla siempre es lo que
+        # permite comparar los dos ordenes sin recalcular nada.
+        for candidato in utiles:
+
+            suya = probabilidad_de_llevarselo(
+                candidato.get("market_price"),
+                candidato.get("rate_percent_per_day"),
+            )
+
+            candidato["win_odds"] = suya["probabilidad"]
+            candidato["win_odds_cell"] = suya["celda"]
+            candidato["win_odds_n"] = suya["n"]
+            candidato["win_odds_reason"] = suya["reason"]
+
         utiles.sort(
             key=lambda c: (
                 # A la diezmilesima: el truncado a enteros de
@@ -751,7 +991,7 @@ def elegir_la_cesta(
                 # desempate no entraba. Dos rendimientos que se
                 # distinguen en la centesima de punto son el
                 # mismo rendimiento.
-                -round(_por_euro(c), 4),
+                -round(_por_euro(c, contar_la_pelea), 4),
                 safe_int(c.get("bid")),
             )
         )

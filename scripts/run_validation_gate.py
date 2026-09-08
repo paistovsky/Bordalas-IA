@@ -111,6 +111,7 @@ TESTS = [
     "src.analysis.test_peticiones_v1",
     "src.analysis.test_la_subasta_v1",
     "src.analysis.test_prima_de_puja_v1",
+    "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
     "src.analysis.test_ciclo_una_sola_vez_v1",
