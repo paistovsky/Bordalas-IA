@@ -49,12 +49,55 @@ MODULO = Path("src/intelligence/scout/press.py")
 # ============================================================
 
 
+# LA FECHA DEL FEED, Y DESDE CUANDO SE MIRA (08/09/2026)
+#
+#     EL FALLO
+#
+#         Los titulares de mentira llevaban `pubDate` fijo -el
+#         05/09 a las 17:00- y `_informe` no pasaba `now`, asi
+#         que `press.build_press_report` usaba la hora REAL.
+#
+#         `press.MAX_ITEM_AGE_HOURS` son 72. El 08/09 a las
+#         17:00 el fixture cumplio tres dias, todos los items
+#         empezaron a descartarse por viejos y cuatro pruebas se
+#         pusieron rojas de golpe. Sin que nadie tocara nada.
+#
+#     POR QUE IMPORTA MAS DE LO QUE PARECE
+#
+#         Una prueba que depende del reloj de pared no falla
+#         cuando alguien rompe algo: falla un martes por la
+#         tarde. Y quien la mire va a buscar el fallo en su
+#         propio cambio, que es justo donde no esta.
+#
+#     EL ARREGLO
+#
+#         El feed y el instante desde el que se lee viven
+#         juntos, aqui. Tres horas despues de publicarse, dentro
+#         de la ventana y para siempre.
+#
+#         Quien quiera probar el filtro de antiguedad pasa su
+#         propio `ahora` — como hace
+#         `test_una_noticia_de_hace_cuatro_dias_no_entra`.
+PUBLICADO_EL = "Sat, 05 Sep 2026 17:00:00 +0200"
+
+
+def _recien_publicado():
+    """El instante en que estos titulares son noticia fresca."""
+
+    from datetime import datetime, timedelta, timezone
+
+    # `PUBLICADO_EL` en UTC: 05/09 15:00.
+    return datetime(
+        2026, 9, 5, 15, 0, tzinfo=timezone.utc
+    ) + timedelta(hours=3)
+
+
 def _feed(*titulares) -> str:
     items = "".join(
         f"<item><title><![CDATA[{t}]]></title>"
         f"<description><![CDATA[{d}]]></description>"
         f"<link>https://ejemplo/{i}</link>"
-        f"<pubDate>Sat, 05 Sep 2026 17:00:00 +0200</pubDate>"
+        f"<pubDate>{PUBLICADO_EL}</pubDate>"
         f"</item>"
         for i, (t, d) in enumerate(titulares)
     )
@@ -97,7 +140,10 @@ def _informe(titulares, feed="MARCA", ahora=None):
     return press.build_press_report(
         CATALOGO,
         xml_by_feed={feed: _feed(*titulares)},
-        now=ahora,
+
+        # Sin esto se usaba la hora real y el fixture caducaba a
+        # los tres dias. Ver `PUBLICADO_EL`.
+        now=ahora or _recien_publicado(),
     )
 
 
