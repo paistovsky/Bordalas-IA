@@ -60,6 +60,8 @@ from src.analysis.intelligent_bid_engine import (
 )
 
 from src.analysis.rival_bid_model import (
+    PRIMA_DE_EQUILIBRIO,
+    PRIMA_MAXIMA_DE_PUJA,
     build_bid_model,
     optimal_bid,
 )
@@ -908,6 +910,45 @@ def build_acquisition_board(
                     intent=valoracion.get("intent"),
                 )
 
+                # LO QUE SE OFRECIA ANTES, AL LADO (11/09/2026)
+                #
+                #     `optimal_bid` ya no puede pasar del
+                #     +0,25 % sobre el precio -ver
+                #     `PRIMA_MAXIMA_DE_PUJA` y la curva de las
+                #     115 subastas-.
+                #
+                #     Se recalcula SIN el tope para poder enseñar
+                #     los dos numeros. No cuesta red: es
+                #     aritmetica sobre datos que ya estan en
+                #     memoria.
+                #
+                #     Sin esto, bajar el precio de la puja seria
+                #     un cambio invisible: la pantalla enseñaria
+                #     una cifra menor y nadie sabria de cuanto
+                #     fue el recorte.
+                sin_tope = optimal_bid(
+                    price=safe_int(ficha.get("price")),
+                    value=valoracion["value"],
+                    model=modelo,
+                    available_budget=presupuesto,
+                    intent=valoracion.get("intent"),
+                    prima_maxima=None,
+                )
+
+                fila["bid_sin_tope"] = safe_int(
+                    sin_tope.get("bid")
+                )
+
+                fila["ahorro_del_tope"] = max(
+                    0,
+                    safe_int(sin_tope.get("bid"))
+                    - safe_int(plan.get("bid")),
+                )
+
+                fila["prima_maxima_percent"] = round(
+                    100 * PRIMA_MAXIMA_DE_PUJA, 3
+                )
+
                 # Que techo se le aplico y de que bolsillo sale.
                 # Sin esto, un SUPERA_PRESUPUESTO vuelve a ser un
                 # numero que nadie sabe de donde sale.
@@ -1180,6 +1221,35 @@ def build_acquisition_board(
             "biddable": sum(
                 1 for f in filas if f["decision"] == "BID"
             ),
+
+            # LO QUE AHORRA EL TOPE DE LA PRIMA (11/09/2026)
+            #
+            #     Sumado sobre todo el escaparate, no fila a
+            #     fila: un recorte de mil euros por jugador no
+            #     dice nada; el acumulado si.
+            #
+            #     `bids_capped` son cuantas pujas ha recortado
+            #     de verdad. Si sale cero, el tope no esta
+            #     mordiendo — que hoy es lo que pasa, porque la
+            #     curva de primas esta plana y `optimal_bid` ya
+            #     ofrecia el precio y un euro.
+            "bid_cap": {
+                "premium_percent": round(
+                    100 * PRIMA_MAXIMA_DE_PUJA, 3
+                ),
+                "break_even_percent": round(
+                    100 * PRIMA_DE_EQUILIBRIO, 3
+                ),
+                "bids_capped": sum(
+                    1
+                    for f in filas
+                    if safe_int(f.get("ahorro_del_tope")) > 0
+                ),
+                "saved_total": sum(
+                    safe_int(f.get("ahorro_del_tope"))
+                    for f in filas
+                ),
+            },
 
             # EL ESCAPARATE, CON SUS DOS MITADES (24/09/2026)
             #

@@ -628,10 +628,99 @@ def win_probability(
 # ============================================================
 
 
+# ============================================================
+# LO QUE SE OFRECE COMO MUCHO (11/09/2026)
+# ============================================================
+#
+#     LA CURVA, SOBRE 115 SUBASTAS DEL TABLON
+#
+#     Para cada importe: cuantas se habrian ganado, cuanta prima
+#     se habria pagado y el resultado neto, contando que perder
+#     no cuesta nada -el balance no se mueve, solo baja
+#     `maximumBid` hasta el reset-.
+#
+#         OFRECE     GANA           NETO
+#         +0,00 %      30      2.376.870
+#         +0,25 %      34      2.654.961   <-- MAXIMO
+#         +0,50 %      35      2.325.829
+#         +1,00 %      35      1.431.245
+#         +1,50 %      40        572.873
+#         +2,00 %      46       -430.126
+#         +3,00 %      54     -2.940.054
+#         +5,00 %      61     -8.717.501
+#         +8,00 %      71    -18.540.551
+#
+#     Pepe pujaba con una prima MEDIANA del 8,51 %. Ahi se
+#     pierden 18,5 millones sobre esas mismas 115 subastas.
+#
+#     Subir del 0,25 % al 8 % compra 37 jugadores mas y cuesta 21
+#     millones: cada uno de esos 37 sale por mucho mas de lo que
+#     vale.
+#
+#     Y CUADRA POR UN CAMINO INDEPENDIENTE
+#
+#         El punto de equilibrio de la curva cae entre el 1,5 % y
+#         el 2 %. La prima que el Computer paga al RECOMPRAR es
+#         del +1,8 %, medida por produccion sobre 107 ventas.
+#
+#         Son dos mediciones distintas -una del tablon, otra del
+#         libro de ventas- que se encuentran en el mismo numero.
+#         Por encima de esa prima la operacion nace en perdidas
+#         antes de que el jugador se mueva.
+#
+#     EL SESGO VA A FAVOR
+#
+#         Las subastas del tablon son las que ALGUIEN gano. Los
+#         jugadores por los que nadie pujo no dejan rastro, y esos
+#         son justo los que `precio + 1` se lleva. La curva
+#         subestima lo que gana pujar bajo.
+PRIMA_MAXIMA_DE_PUJA = 0.0025
+
+
+# La prima que paga el Computer al recomprar, medida por
+# produccion sobre 107 ventas. Es el punto de equilibrio: pujar
+# por encima de esto es comprar con perdida garantizada.
+#
+# No decide nada por si sola. Existe para que la guardia pueda
+# comprobar que `PRIMA_MAXIMA_DE_PUJA` sigue por debajo.
+PRIMA_DE_EQUILIBRIO = 0.018
+
+
+def tope_por_la_prima(
+    price: int,
+    prima=PRIMA_MAXIMA_DE_PUJA,
+) -> int:
+    """
+    El importe mas alto que se puede ofrecer por este precio.
+
+    `+1` porque para ganar hay que SUPERAR la mejor puja, no
+    igualarla.
+    """
+
+    precio = safe_int(price)
+
+    if precio <= 0:
+        return 0
+
+    if prima is None:
+        return 0
+
+    try:
+        return int(precio * (1 + float(prima))) + 1
+
+    except (TypeError, ValueError):
+        return 0
+
+
 def candidate_bids(
     price: int,
     ceiling: int,
     model: dict,
+
+    # `None` quita el tope y devuelve el comportamiento de antes
+    # del 11/09. Lo usa el tablero para poder enseñar lo que se
+    # habria ofrecido ANTES, al lado de lo de ahora.
+    prima_maxima=PRIMA_MAXIMA_DE_PUJA,
 ) -> list:
     """
     Importes que merece la pena evaluar.
@@ -639,10 +728,27 @@ def candidate_bids(
     No hace falta probar euro a euro: solo los que cambian la
     probabilidad, que son los que quedan justo por encima de cada
     escenario de puja rival.
+
+    Y ninguno por encima de `PRIMA_MAXIMA_DE_PUJA`: ver la curva
+    en la cabecera de esa constante.
     """
 
     precio = safe_int(price)
     techo = safe_int(ceiling)
+
+    # EL TOPE DE LA PRIMA, ANTES QUE NADA
+    #
+    #     Se aplica sobre el techo para que `optimal_bid` siga
+    #     eligiendo entre los importes que quedan, sin cambiar su
+    #     forma de decidir. Lo que cambia es hasta donde puede
+    #     llegar.
+    #
+    #     Nunca por debajo de `precio + 1`: si no, no se podria
+    #     pujar por nadie.
+    por_la_prima = tope_por_la_prima(precio, prima_maxima)
+
+    if por_la_prima > 0:
+        techo = max(precio + 1, min(techo, por_la_prima))
 
     curva = (model.get("premium") or {}).get(
         "curve", list(DEFAULT_PREMIUM_CURVE)
@@ -668,6 +774,11 @@ def optimal_bid(
     model: dict,
     available_budget: int | None = None,
     intent: str | None = None,
+
+    # `None` quita el tope de la prima y devuelve el
+    # comportamiento de antes del 11/09. Lo usa el tablero para
+    # enseñar, al lado, lo que se habria ofrecido antes.
+    prima_maxima=PRIMA_MAXIMA_DE_PUJA,
 ) -> dict:
     """
     El importe que maximiza el valor esperado.
@@ -726,7 +837,44 @@ def optimal_bid(
 
         opciones = []
 
-        for importe in candidate_bids(precio, techo, model):
+        # EL TOPE ES DE LA ESPECULACION, NO DE TODO (11/09/2026)
+        #
+        #     LA TENSION QUE ME ENSEÑO UNA GUARDIA ROJA
+        #
+        #         Al topar `optimal_bid` entero se puso roja
+        #         `test_con_rivales_activos_se_sube_hasta_donde_compensa`,
+        #         que dice que con seis rivales activos pujar el
+        #         minimo es tirar la operacion.
+        #
+        #         Y tiene razon EN SU MUNDO: si solo se puede
+        #         tirar una vez, subir la oferta es correcto.
+        #
+        #     LA CURVA MIDE OTRA COSA
+        #
+        #         Las 115 subastas son del mercado diario del
+        #         Computer, donde hay veinte jugadores cada
+        #         mañana y perder no cuesta nada. Ahi pujar alto
+        #         pierde 18,5 millones.
+        #
+        #         Comprar al jugador que hace falta para el once
+        #         no es eso: es un disparo, y el margen se paga
+        #         en puntos, no en reventa.
+        #
+        #     Asi que el tope se aplica a la ESPECULACION. Con
+        #     otra intencion -o sin declararla- el
+        #     comportamiento es el de siempre, que es lo que
+        #     pedia el encargo del 10/09: "no borres
+        #     `optimal_bid`, sigue siendo el calculo correcto
+        #     cuando de verdad solo se puede tirar una vez".
+        tope_aplicable = (
+            prima_maxima
+            if str(intent or "").upper() == SPECULATION_INTENT
+            else None
+        )
+
+        for importe in candidate_bids(
+            precio, techo, model, prima_maxima=tope_aplicable
+        ):
 
             p = win_probability(importe, precio, model, rivales)
 
