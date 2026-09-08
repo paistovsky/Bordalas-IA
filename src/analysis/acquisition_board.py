@@ -946,6 +946,17 @@ def build_acquisition_board(
                         ceiling=presupuesto,
                         player_id=safe_int(ficha.get("id")),
                         matchday=jornada_para_el_desvio,
+
+                        # EL SEGURO SE PAGA CON LA GANANCIA
+                        # (10/09/2026)
+                        #
+                        #     Sin esto el tope del desvio era el
+                        #     0,5 % del PRECIO, que en los
+                        #     jugadores que busca la subasta es
+                        #     el 52 % de lo que suben en un dia.
+                        expected_gain=plan.get(
+                            "expected_value"
+                        ),
                     )
 
                     fila["bid"] = safe_int(desvio["bid"])

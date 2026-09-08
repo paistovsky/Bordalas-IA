@@ -502,10 +502,69 @@ def main() -> None:
 #     esto MIDE lo que cuesta cada clase de vuelta.
 
 
-# Vueltas al dia con el cron de siempre, "7,37 * * * *". No se
-# ha tocado: el paso C -bajarlo a 24- se descarto porque ahorra
-# 168 peticiones y cuesta la mitad de la capacidad de reaccion.
-VUELTAS_AL_DIA = 48
+def vueltas_al_dia() -> int:
+    """
+    Cuantas veces al dia corre el ciclo, LEIDO DEL WORKFLOW.
+
+    Estaba escrito a mano -48- y el dueño lo bajo a una por hora
+    el 08/09 tras el bloqueo. El numero del informe se quedo
+    viejo sin que nadie se enterara: es la misma familia que
+    todo lo demas.
+
+    Solo lee. El workflow no se toca.
+
+    Nunca lanza: si no se puede leer, devuelve el valor de
+    siempre y lo dice quien llame.
+    """
+
+    try:
+        import re
+
+        from pathlib import Path
+
+        fichero = (
+            Path(__file__).parent.parent
+            / ".github"
+            / "workflows"
+            / "bordalas-live.yml"
+        )
+
+        texto = fichero.read_text(encoding="utf-8")
+
+        total = 0
+
+        for linea in re.findall(
+            r'-\s*cron:\s*"([^"]+)"', texto
+        ):
+
+            campos = linea.split()
+
+            if len(campos) < 5:
+                continue
+
+            minutos, horas = campos[0], campos[1]
+
+            def _cuantos(campo: str, tope: int) -> int:
+                if campo == "*":
+                    return tope
+                cuenta = 0
+                for trozo in campo.split(","):
+                    if "-" in trozo:
+                        a, b = trozo.split("-")[:2]
+                        cuenta += int(b) - int(a) + 1
+                    else:
+                        cuenta += 1
+                return cuenta
+
+            total += _cuantos(minutos, 60) * _cuantos(horas, 24)
+
+        return total or 48
+
+    except Exception:                               # noqa: BLE001
+        return 48
+
+
+VUELTAS_AL_DIA = vueltas_al_dia()
 
 
 # Cuantos de los 7 managers cambian de plantilla en un dia.
@@ -612,12 +671,18 @@ def proyeccion(
             )
 
         print()
+        print()
         print(
-            f"  El paso C -bajar a 24 vueltas- ahorraria "
-            f"{crucero * 24} mas y costaria la mitad de la "
-            f"capacidad"
+            f"  El cron actual son {VUELTAS_AL_DIA} vueltas al "
+            f"dia, leidas del propio workflow."
         )
-        print("  de reaccion. Descartado por el dueño.")
+        print(
+            "  El cron de la subasta (10/09) tiene el MISMO "
+            "numero de vueltas:"
+        )
+        print(
+            "  lo que cambia es donde caen, no cuantas son."
+        )
 
     except Exception as error:                      # noqa: BLE001
         print(f"  No se pudo proyectar: {error}")
