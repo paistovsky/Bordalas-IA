@@ -131,9 +131,62 @@ def safe_int(value, default: int = 0) -> int:
         return default
 
 
-def jitter_ceiling(price) -> int:
+# ============================================================
+# EL SEGURO SE PAGA CON LA GANANCIA, NO CON EL PRECIO
+# ============================================================
+#
+#     LO QUE ESTABA MAL (10/09/2026)
+#
+#         `JITTER_PERCENT` es el 0,5 % DEL PRECIO. En un jugador
+#         de 4 M eso son 20.000, que es lo que ese jugador sube
+#         en un dia entero.
+#
+#         Medido sobre las 16 compras del tablon que se llevaron
+#         sin competencia Y venian subiendo:
+#
+#             el desvio es el 52 % (mediana) de lo que el
+#             jugador sube EN UN DIA, y en el peor caso el 127 %
+#
+#             sobre el horizonte de tres dias de la casa,
+#             el 17 % de la ganancia entera
+#
+#         El seguro se comia una quinta parte del negocio. Y en
+#         la estrategia de llevarse varios baratos que suben
+#         20.000, la diferencia entre ganar y perder.
+#
+#     EL NUMERO NUEVO, Y POR QUE ESE
+#
+#         El tope pasa a ser una fraccion de la GANANCIA
+#         ESPERADA. Con el 10 %:
+#
+#             desvio mediano  9.000  (antes 18.775)
+#             cuesta          10 % de la ganancia (antes 17 %)
+#             rango           1.550 a 36.000
+#
+#         No baja mas por el otro lado del encargo: si el desvio
+#         se queda en nada, volvemos a ser predecibles. Biwenger
+#         mueve los precios en escalones de 10.000, y 9.000 es
+#         casi uno entero: quien quiera asegurarse de superarnos
+#         tiene que subir un escalon completo, no unos euros.
+#
+#         Por debajo del 5 % el desvio mediano cae a 4.500 —medio
+#         escalon— y superarnos empieza a salir barato. Ese es el
+#         suelo, y por eso el numero es 10 y no 5.
+#
+#     LO QUE NO CAMBIA
+#
+#         Sin ganancia esperada, el tope es el de siempre. Y el
+#         del precio sigue actuando como limite absoluto: la
+#         ganancia solo puede APRETARLO, nunca aflojarlo.
+JITTER_DE_LA_GANANCIA = 0.10
+
+
+def jitter_ceiling(price, expected_gain=None) -> int:
     """
-    El tope del desvio para este precio: `J`.
+    El tope del desvio: `J`.
+
+    Con `expected_gain` se aprieta a una fraccion de la
+    ganancia. Sin ella, el comportamiento es el de siempre.
     """
 
     precio = safe_int(price)
@@ -141,9 +194,23 @@ def jitter_ceiling(price) -> int:
     if precio <= 0:
         return MIN_JITTER
 
-    return max(
+    por_el_precio = max(
         MIN_JITTER,
         min(MAX_JITTER, int(precio * JITTER_PERCENT)),
+    )
+
+    ganancia = safe_int(expected_gain)
+
+    if ganancia <= 0:
+        return por_el_precio
+
+    por_la_ganancia = int(ganancia * JITTER_DE_LA_GANANCIA)
+
+    # El del precio manda como techo absoluto: la ganancia solo
+    # puede apretar. Y el suelo nunca baja de `MIN_JITTER`, o el
+    # desvio dejaria de existir en las operaciones pequeñas.
+    return max(
+        MIN_JITTER, min(por_el_precio, por_la_ganancia)
     )
 
 
@@ -172,14 +239,20 @@ def bid_jitter(
     price,
     matchday=None,
     fecha=None,
+    expected_gain=None,
 ) -> int:
     """
     El desvio, en euros. Un entero en `[0, J]`.
 
     Mismo jugador, mismo dia, misma jornada -> mismo numero.
+
+    Y misma GANANCIA: si cambia lo que se espera ganar, cambia
+    el tope y por tanto el desvio. Es correcto —el seguro se
+    dimensiona con lo asegurado— pero conviene saberlo: el
+    numero no depende solo del jugador.
     """
 
-    tope = jitter_ceiling(price)
+    tope = jitter_ceiling(price, expected_gain)
 
     return _seed(player_id, fecha, matchday) % (tope + 1)
 
@@ -231,6 +304,11 @@ def apply_bid_jitter(
     matchday=None,
     fecha=None,
     single_operation_limit=None,
+
+    # Lo que se espera ganar con la operacion. Con esto el tope
+    # del desvio deja de ser un porcentaje del precio y pasa a
+    # ser una fraccion de la ganancia. Ver `jitter_ceiling`.
+    expected_gain=None,
 ) -> dict:
     """
     El importe final, con su desvio y lo que costo.
@@ -281,6 +359,7 @@ def apply_bid_jitter(
             precio,
             matchday=matchday,
             fecha=fecha,
+            expected_gain=expected_gain,
         )
 
         final = min(limpio + desvio, techo)
@@ -304,7 +383,22 @@ def apply_bid_jitter(
             "bid": int(final),
             "clean_bid": int(limpio),
             "jitter": int(final - limpio),
-            "jitter_ceiling": jitter_ceiling(precio),
+            "jitter_ceiling": jitter_ceiling(
+                precio, expected_gain
+            ),
+
+            # Lo que costo el seguro medido contra lo que
+            # aseguraba, que es la unica forma de saber si es
+            # caro. Antes solo se publicaba en euros.
+            "jitter_percent_of_gain": (
+                round(
+                    100 * int(final - limpio)
+                    / safe_int(expected_gain),
+                    2,
+                )
+                if safe_int(expected_gain) > 0
+                else None
+            ),
             "applied": bool(final != limpio),
             "salt_from_env": bool(
                 os.environ.get(SALT_ENV, "").strip()
