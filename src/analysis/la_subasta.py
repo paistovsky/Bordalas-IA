@@ -263,6 +263,379 @@ def tope_de_la_ventana(
         }
 
 
+# ============================================================
+# LA CURVA DE LA PRIMA (11/09/2026)
+# ============================================================
+#
+#     LA PREGUNTA
+#
+#         Si pujas `precio + 1` ganas solo lo que nadie mira. Si
+#         pujas `precio x 1,03` ganas alguno disputado pero pagas
+#         la prima en TODOS, incluidos los que habrias ganado por
+#         un euro.
+#
+#         Con las 156 subastas del tablon -que traen la puja
+#         ganadora- se puede contestar de verdad: para cada
+#         importe, cuantas habrias ganado y cuanto habrias pagado.
+#
+#     POR QUE PERDER NO CUESTA
+#
+#         Medido el 16/08: al pujar, el balance NO se mueve;
+#         baja `maximumBid` hasta el reset. Una puja perdida no
+#         cuesta un euro, solo capacidad durante unas horas.
+#
+#         Por eso la cuenta neta solo suma las ganadas.
+#
+#     LA CUENTA DE CADA OPERACION
+#
+#         Se compra a `precio x (1 + m)` y el Computer recompra a
+#         `precio x (1 + prima_de_reventa)`. El resultado, antes
+#         de que el jugador se mueva, es:
+#
+#             precio x (prima_de_reventa - m)
+#
+#         Con la prima de reventa medida por produccion sobre 107
+#         ventas -+1,8 %-, cualquier `m` por encima de eso entra
+#         en perdidas el mismo dia de la compra. La subida del
+#         jugador es la propina, no el negocio.
+IMPORTES_A_PROBAR = (
+    0.0,
+    0.0025,
+    0.005,
+    0.01,
+    0.015,
+    0.02,
+    0.03,
+    0.05,
+    0.08,
+)
+
+
+def curva_de_la_prima(
+    subastas: list | None,
+    prima_de_reventa: float,
+    importes=IMPORTES_A_PROBAR,
+) -> dict:
+    """
+    Para cada importe, cuantas se ganan y cuanto se paga.
+
+    Cada subasta necesita `precio` -el de mercado de ese dia- y
+    `pagado` -la puja ganadora-. Se gana si nuestra puja SUPERA
+    a la ganadora.
+
+    Forma fija. Nunca lanza.
+    """
+
+    vacio = {
+        "available": False,
+        "filas": [],
+        "mejor": None,
+        "subastas": 0,
+        "resale_premium": prima_de_reventa,
+        "reason": None,
+    }
+
+    try:
+        utiles = [
+            s
+            for s in (subastas or [])
+            if isinstance(s, dict)
+            and safe_int(s.get("precio")) > 0
+            and safe_int(s.get("pagado")) > 0
+        ]
+
+        if not utiles:
+            return {
+                **vacio,
+                "reason": (
+                    "Ninguna subasta con precio y puja ganadora."
+                ),
+            }
+
+        reventa = safe_float(prima_de_reventa)
+
+        filas = []
+
+        for m in importes:
+
+            ganadas = 0
+            prima_pagada = 0
+            neto = 0
+
+            for subasta in utiles:
+
+                precio = safe_int(subasta.get("precio"))
+
+                # `+1` porque para ganar hay que SUPERAR, no
+                # igualar.
+                nuestra = int(precio * (1 + m)) + 1
+
+                if nuestra <= safe_int(subasta.get("pagado")):
+                    continue
+
+                ganadas += 1
+
+                prima_pagada += nuestra - precio
+
+                neto += int(
+                    precio * (1 + reventa)
+                ) - nuestra
+
+            filas.append({
+                "importe_percent": round(100 * m, 3),
+                "ganadas": ganadas,
+                "de": len(utiles),
+                "ganadas_percent": round(
+                    100 * ganadas / len(utiles), 1
+                ),
+                "prima_pagada": prima_pagada,
+                "neto": neto,
+                "neto_por_ganada": (
+                    int(neto / ganadas) if ganadas else 0
+                ),
+            })
+
+        mejor = max(filas, key=lambda f: f["neto"])
+
+        return {
+            "available": True,
+            "filas": filas,
+            "mejor": mejor,
+            "subastas": len(utiles),
+            "resale_premium": reventa,
+            "reason": (
+                f"Sobre {len(utiles)} subastas, el importe que "
+                f"mas gana es precio + "
+                f"{mejor['importe_percent']:.2f} %: se llevaria "
+                f"{mejor['ganadas']} ({mejor['ganadas_percent']} "
+                f"%) con un neto de {_euros(mejor['neto'])} EUR."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"No se pudo trazar la curva: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+# ============================================================
+# LOS DOS MODOS (11/09/2026)
+# ============================================================
+#
+#     `optimal_bid` busca el importe que maximiza
+#     `P(ganar) x (valor - puja)`. Para subir `P(ganar)` sube la
+#     oferta, y eso es CORRECTO cuando solo se puede tirar una
+#     vez: una operacion grande, o el jugador concreto que hace
+#     falta para el once.
+#
+#     Pero en la subasta del reset:
+#
+#         perder no cuesta nada -el balance no se mueve, solo
+#         baja `maximumBid` hasta el reset-;
+#         hay veinte jugadores cada mañana, no uno;
+#         y el 43 % no tiene ningun rival.
+#
+#     Con tiros gratis y muchos candidatos, lo que hay que
+#     maximizar es la SUMA de las ganancias de la ventana, no la
+#     de una puja. Y eso se hace pujando bajo por muchos: te
+#     llevas los que nadie queria y pierdes gratis los
+#     disputados.
+#
+#     `optimal_bid` NO se toca. Lo que cambia es que se elige
+#     entre dos modos, y cada puja publica cual la decidio.
+MODO_UN_DISPARO = "UN_DISPARO"
+
+MODO_CARTERA = "CARTERA"
+
+
+# El importe de la puja baja, en tanto por uno sobre el precio.
+#
+# MEDIDO, NO ELEGIDO (11/09/2026)
+#
+#     Sobre las 115 subastas del tablon con precio de
+#     referencia, probando cada importe posible y contando que
+#     perder no cuesta:
+#
+#         +0,00 %   gana 30   neto  2.376.870
+#         +0,25 %   gana 34   neto  2.654.961   <- maximo
+#         +0,50 %   gana 35   neto  2.325.829
+#         +1,00 %   gana 35   neto  1.431.245
+#         +2,00 %   gana 46   neto   -430.126
+#         +8,00 %   gana 71   neto -18.540.551
+#
+#     Subir del 0,25 % al 8 % compra 37 jugadores mas y cuesta
+#     21 millones: cada uno de esos 37 sale por mas de lo que
+#     vale.
+#
+#     El punto de equilibrio esta en la prima que paga el
+#     Computer al recomprar -+1,8 % medido sobre 107 ventas-, que
+#     es exactamente lo que dice la teoria.
+IMPORTE_DE_CARTERA = 0.0025
+
+
+def puja_de_cartera(precio, importe=IMPORTE_DE_CARTERA) -> int:
+    """
+    Lo que se ofrece en modo cartera: el precio y un pelo.
+
+    `+1` porque para ganar hay que SUPERAR la mejor puja, no
+    igualarla.
+    """
+
+    valor = safe_int(precio)
+
+    if valor <= 0:
+        return 0
+
+    return int(valor * (1 + safe_float(importe))) + 1
+
+
+def candidatos_en_modo_cartera(
+    candidatos: list | None,
+    prima_de_reventa: float,
+    importe=IMPORTE_DE_CARTERA,
+) -> list:
+    """
+    Los mismos candidatos, con la puja baja y su ganancia.
+
+    LA GANANCIA, SIN ADIVINAR NADA
+
+        Se compra a `precio x (1 + importe)` y el Computer
+        recompra a `precio x (1 + prima_de_reventa)`. La
+        diferencia es lo que se gana ANTES de que el jugador se
+        mueva. La subida es la propina, no el negocio.
+
+    Nunca lanza. Los que no dan ganancia positiva salen con
+    `expected_value` 0 y `elegir_la_cesta` los aparta.
+    """
+
+    salida = []
+
+    try:
+        reventa = safe_float(prima_de_reventa)
+
+        for candidato in (candidatos or []):
+
+            if not isinstance(candidato, dict):
+                continue
+
+            precio = safe_int(candidato.get("market_price"))
+
+            if precio <= 0:
+                continue
+
+            puja = puja_de_cartera(precio, importe)
+
+            ganancia = int(precio * (1 + reventa)) - puja
+
+            salida.append({
+                **candidato,
+                "bid": puja,
+                "expected_value": max(0, ganancia),
+                "modo": MODO_CARTERA,
+                "bid_reason": (
+                    f"Modo cartera: se ofrece el precio "
+                    f"+{100 * safe_float(importe):.2f} % "
+                    f"({_euros(puja)} EUR sobre "
+                    f"{_euros(precio)}). El Computer recompra a "
+                    f"+{100 * reventa:.1f} %, asi que la "
+                    f"operacion nace con "
+                    f"{_euros(ganancia)} EUR de margen. Perder "
+                    f"no cuesta nada: solo capacidad hasta el "
+                    f"reset."
+                ),
+            })
+
+        return salida
+
+    except Exception:                               # noqa: BLE001
+        return salida
+
+
+def comparar_los_dos_modos(
+    candidatos: list | None,
+    prima_de_reventa: float,
+    presupuesto,
+    fichas_libres,
+    caja_libre=None,
+    max_por_club: int | None = None,
+    importe=IMPORTE_DE_CARTERA,
+) -> dict:
+    """
+    Lo que ofrece hoy contra lo que ofreceria en modo cartera.
+
+    Los candidatos entran con la puja que YA trae cada uno -la de
+    `optimal_bid`- y se comparan con la misma lista pujada bajo.
+
+    Forma fija. Nunca lanza. No ejecuta nada.
+    """
+
+    vacio = {
+        "available": False,
+        "observer_only": True,
+        "enabled": False,
+        "un_disparo": None,
+        "cartera": None,
+        "resale_premium": prima_de_reventa,
+        "importe_de_cartera": importe,
+        "reason": None,
+    }
+
+    try:
+        marcados = [
+            {**c, "modo": MODO_UN_DISPARO}
+            for c in (candidatos or [])
+            if isinstance(c, dict)
+        ]
+
+        hoy = elegir_la_cesta(
+            marcados,
+            presupuesto=presupuesto,
+            fichas_libres=fichas_libres,
+            caja_libre=caja_libre,
+            max_por_club=max_por_club,
+        )
+
+        cartera = elegir_la_cesta(
+            candidatos_en_modo_cartera(
+                candidatos, prima_de_reventa, importe
+            ),
+            presupuesto=presupuesto,
+            fichas_libres=fichas_libres,
+            caja_libre=caja_libre,
+            max_por_club=max_por_club,
+        )
+
+        return {
+            "available": True,
+            "observer_only": True,
+            "enabled": False,
+            "un_disparo": hoy,
+            "cartera": cartera,
+            "resale_premium": prima_de_reventa,
+            "importe_de_cartera": importe,
+            "reason": (
+                f"Hoy: {len(hoy.get('elegidos') or [])} puja(s) "
+                f"por {_euros(hoy.get('comprometido'))} EUR. "
+                f"Modo cartera: "
+                f"{len(cartera.get('elegidos') or [])} puja(s) "
+                f"por {_euros(cartera.get('comprometido'))} EUR."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"No se pudieron comparar los modos: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def _por_euro(candidato: dict) -> float:
     """
     Ganancia esperada por euro comprometido.
@@ -349,7 +722,39 @@ def elegir_la_cesta(
             and safe_float(c.get("expected_value")) > 0
         ]
 
-        utiles.sort(key=_por_euro, reverse=True)
+        # EL DESEMPATE IMPORTA, Y LO APRENDI AQUI (11/09/2026)
+        #
+        #     En modo cartera todos los candidatos rinden LO
+        #     MISMO por euro -la prima de reventa menos lo que se
+        #     ofrece-, asi que ordenar solo por eso no discrimina
+        #     nada: el primer intento se llevo al mas caro, gasto
+        #     el presupuesto entero en UNA puja y dejo 17 fuera.
+        #
+        #     Eso es justo lo contrario de "pujar bajo por
+        #     muchos".
+        #
+        #     Con el mismo rendimiento por euro, gana el que
+        #     consume menos capacidad: caben mas, y cada uno es
+        #     una opcion gratis sobre la subida del jugador.
+        #     Y el rendimiento se REDONDEA antes de comparar:
+        #     sin eso empataban en el 1,5461 % pero diferian en
+        #     el decimal quince, asi que el desempate no entraba
+        #     nunca y volvia a ganar el mas caro. Dos
+        #     rendimientos que se distinguen en la millonesima
+        #     son el mismo rendimiento.
+        utiles.sort(
+            key=lambda c: (
+                # A la diezmilesima: el truncado a enteros de
+                # la ganancia hace que un jugador de 300.000 y
+                # otro de 700.000 rindan 1,5458 % y 1,5460 %.
+                # Con seis decimales seguian sin empatar y el
+                # desempate no entraba. Dos rendimientos que se
+                # distinguen en la centesima de punto son el
+                # mismo rendimiento.
+                -round(_por_euro(c), 4),
+                safe_int(c.get("bid")),
+            )
+        )
 
         elegidos = []
         descartados = []
@@ -584,6 +989,10 @@ def para_la_pantalla(
                     "yield_per_euro": c.get("yield_per_euro"),
 
                     # Por que ese importe y no otro.
+                    # REGLA 17: cada decision cita su regla.
+                    # Aqui, cual de los dos modos la eligio.
+                    "modo": c.get("modo"),
+
                     "why": c.get("bid_reason")
                     or c.get("reason"),
                 }

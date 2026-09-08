@@ -55,10 +55,17 @@ from src.analysis.bid_jitter import (
 
 from src.analysis.la_subasta import (
     CAIDA_QUE_HAY_QUE_AGUANTAR,
+    IMPORTE_DE_CARTERA,
+    MODO_CARTERA,
+    MODO_UN_DISPARO,
     VENTANA_MINUTOS,
+    candidatos_en_modo_cartera,
+    comparar_los_dos_modos,
+    curva_de_la_prima,
     elegir_la_cesta,
     para_la_pantalla,
     peor_caso,
+    puja_de_cartera,
     tope_de_la_ventana,
     ventana_abierta,
 )
@@ -640,6 +647,299 @@ def test_la_ventana_aguanta_un_cron_que_llega_tarde():
     )
 
 
+# ============================================================
+# LA CURVA DE LA PRIMA (11/09/2026)
+# ============================================================
+#
+# Tres subastas de mentira: una que nadie disputo, una que se
+# fue por poco y otra por mucho.
+
+SUBASTAS = [
+    {"precio": 1_000_000, "pagado": 1_000_001},
+    {"precio": 1_000_000, "pagado": 1_010_000},
+    {"precio": 1_000_000, "pagado": 1_100_000},
+]
+
+
+def test_la_curva_cuenta_las_que_se_ganan():
+    """
+    Se gana si nuestra puja SUPERA a la ganadora. Con
+    `precio + 1` solo cae la que nadie disputo.
+    """
+
+    curva = curva_de_la_prima(
+        SUBASTAS, prima_de_reventa=0.018,
+        importes=(0.0, 0.02, 0.15),
+    )
+
+    assert curva["available"], curva["reason"]
+
+    por_importe = {
+        f["importe_percent"]: f for f in curva["filas"]
+    }
+
+    # Para ganar hay que SUPERAR: con `precio + 1` no se bate a
+    # quien pago `precio + 1`. Ni una de las tres.
+    assert por_importe[0.0]["ganadas"] == 0, (
+        "pujando el precio pelado se lleva algo que no deberia"
+    )
+
+    # Al +2 % caen las dos que se fueron por poco.
+    assert por_importe[2.0]["ganadas"] == 2
+
+    # Al +15 %, las tres. Y ahi es donde se paga la prima.
+    assert por_importe[15.0]["ganadas"] == 3
+
+
+def test_la_curva_cobra_la_prima_en_TODAS_las_ganadas():
+    """
+    LA TRAMPA QUE MIDE LA CURVA.
+
+    Subir el importe gana alguna disputada, pero se paga la
+    prima tambien en las que se habrian ganado por un euro.
+    """
+
+    curva = curva_de_la_prima(
+        SUBASTAS, prima_de_reventa=0.018,
+        importes=(0.0, 0.15),
+    )
+
+    filas = {f["importe_percent"]: f for f in curva["filas"]}
+
+    assert filas[15.0]["prima_pagada"] > 400_000, (
+        "la prima del 15 % sobre tres jugadores de un millon "
+        "tiene que doler y sale "
+        + str(filas[15.0]["prima_pagada"])
+    )
+
+    assert filas[15.0]["neto"] < filas[0.0]["neto"], (
+        "ganar mas jugadores pagando de mas sale mejor, y no "
+        "puede ser"
+    )
+
+
+def test_el_punto_de_equilibrio_es_la_prima_de_reventa():
+    """
+    Se compra a `precio x (1 + m)` y el Computer recompra a
+    `precio x (1 + reventa)`. Por encima de `reventa` la
+    operacion nace en perdidas, antes de que el jugador se
+    mueva.
+    """
+
+    reventa = 0.018
+
+    curva = curva_de_la_prima(
+        [{"precio": 1_000_000, "pagado": 1}] * 5,
+        prima_de_reventa=reventa,
+        importes=(0.01, 0.018, 0.03),
+    )
+
+    filas = {f["importe_percent"]: f for f in curva["filas"]}
+
+    assert filas[1.0]["neto"] > 0, (
+        "comprando por debajo de la prima de reventa se pierde"
+    )
+
+    assert filas[3.0]["neto"] < 0, (
+        "comprando por encima de la prima de reventa se gana, y "
+        "no puede ser"
+    )
+
+
+def test_la_curva_no_lanza_ni_con_basura():
+    """Nunca lanza. Forma fija."""
+
+    for datos in (None, [], "no", [None], [{"precio": 0}]):
+
+        curva = curva_de_la_prima(datos, 0.018)
+
+        assert isinstance(curva, dict)
+        assert "filas" in curva
+        assert "mejor" in curva
+
+
+# ============================================================
+# LOS DOS MODOS
+# ============================================================
+
+
+def test_en_modo_cartera_se_ofrece_el_precio_y_un_pelo():
+    """
+    `puja_de_cartera` ofrece el precio mas el importe medido, y
+    +1 porque para ganar hay que SUPERAR, no igualar.
+    """
+
+    assert puja_de_cartera(1_000_000, 0.0025) == 1_002_501
+
+    assert puja_de_cartera(0) == 0
+
+    assert IMPORTE_DE_CARTERA == 0.0025
+
+
+def test_la_ganancia_de_cartera_no_adivina_la_subida():
+    """
+    La cuenta es `recompra - puja`, sin suponer que el jugador
+    suba. La subida es la propina, no el negocio.
+    """
+
+    [candidato] = candidatos_en_modo_cartera(
+        [{"id": 1, "name": "X", "market_price": 1_000_000}],
+        prima_de_reventa=0.018,
+    )
+
+    # 1.018.000 de recompra menos 1.002.501 de puja.
+    assert candidato["expected_value"] == 15_499, (
+        candidato["expected_value"]
+    )
+
+    assert candidato["modo"] == MODO_CARTERA
+
+
+def test_con_el_mismo_rendimiento_gana_el_mas_barato():
+    """
+    EL FALLO QUE ME COMI EL PRIMER INTENTO (11/09/2026)
+
+    En modo cartera todos rinden LO MISMO por euro, asi que
+    ordenar solo por eso no discrimina: la primera version se
+    llevo al mas caro, gasto el presupuesto entero en UNA puja y
+    dejo 17 candidatos fuera. Lo contrario de "pujar bajo por
+    muchos".
+
+    Y el redondeo tampoco es un detalle: empataban en el
+    1,5461 % pero diferian en el decimal quince, asi que el
+    desempate no llegaba a entrar.
+    """
+
+    candidatos = candidatos_en_modo_cartera(
+        [
+            {"id": 1, "name": "Caro", "market_price": 2_000_000},
+            {"id": 2, "name": "Medio", "market_price": 700_000},
+            {"id": 3, "name": "Barato", "market_price": 300_000},
+        ],
+        prima_de_reventa=0.018,
+    )
+
+    cesta = elegir_la_cesta(
+        candidatos,
+        presupuesto=1_100_000,
+        fichas_libres=5,
+        caja_libre=5_000_000,
+    )
+
+    nombres = [c["name"] for c in cesta["elegidos"]]
+
+    assert nombres == ["Barato", "Medio"], (
+        f"con el mismo rendimiento por euro se eligio {nombres}: "
+        f"deberia entrar primero el que menos capacidad consume"
+    )
+
+
+def test_los_dos_modos_se_publican_juntos():
+    """
+    El encargo pide verlos al lado: lo que ofrece hoy y lo que
+    ofreceria en modo cartera.
+    """
+
+    candidatos = [
+        {
+            "id": 1,
+            "name": "Uno",
+            "market_price": 500_000,
+            "bid": 540_000,
+            "expected_value": 9_000,
+            "team_id": 1,
+        }
+    ]
+
+    dos = comparar_los_dos_modos(
+        candidatos,
+        prima_de_reventa=0.018,
+        presupuesto=5_000_000,
+        fichas_libres=5,
+        caja_libre=5_000_000,
+    )
+
+    assert dos["available"], dos["reason"]
+
+    assert dos["un_disparo"]["elegidos"]
+    assert dos["cartera"]["elegidos"]
+
+    caro = dos["un_disparo"]["elegidos"][0]["bid"]
+    barato = dos["cartera"]["elegidos"][0]["bid"]
+
+    assert barato < caro, (
+        f"el modo cartera ofrece {barato} y el de un disparo "
+        f"{caro}: el de cartera tiene que ser mas bajo"
+    )
+
+
+def test_cada_puja_dice_que_modo_la_decidio():
+    """
+    REGLA 17: cada decision cita su regla. Aqui, cual de los dos
+    modos eligio el importe.
+    """
+
+    dos = comparar_los_dos_modos(
+        [
+            {
+                "id": 1,
+                "name": "Uno",
+                "market_price": 500_000,
+                "bid": 540_000,
+                "expected_value": 9_000,
+            }
+        ],
+        prima_de_reventa=0.018,
+        presupuesto=5_000_000,
+        fichas_libres=5,
+        caja_libre=5_000_000,
+    )
+
+    pantalla_hoy = para_la_pantalla(
+        dos["un_disparo"], ventana_abierta(300)
+    )
+
+    pantalla_cartera = para_la_pantalla(
+        dos["cartera"], ventana_abierta(300)
+    )
+
+    assert (
+        pantalla_hoy["bids"][0]["modo"] == MODO_UN_DISPARO
+    )
+
+    assert (
+        pantalla_cartera["bids"][0]["modo"] == MODO_CARTERA
+    )
+
+    assert pantalla_cartera["bids"][0]["why"], (
+        "la puja de cartera no explica por que ese importe"
+    )
+
+
+def test_comparar_los_modos_no_ejecuta_nada():
+    """FASE OBSERVADOR."""
+
+    dos = comparar_los_dos_modos(
+        [], 0.018, 1_000, 1, caja_libre=1
+    )
+
+    assert dos["enabled"] is False
+    assert dos["observer_only"] is True
+
+
+def test_comparar_los_modos_nunca_lanza():
+
+    for datos in (None, "no", [None], [{"market_price": "x"}]):
+
+        dos = comparar_los_dos_modos(
+            datos, 0.018, 1_000, 1, caja_libre=1
+        )
+
+        assert isinstance(dos, dict)
+        assert "un_disparo" in dos
+        assert "cartera" in dos
+
+
 def test_estas_guardias_no_leen_el_estado():
     """
     REGLA 23. Ni disco, ni red, ni reloj.
@@ -696,6 +996,17 @@ TESTS = [
     test_la_forma_no_cambia_con_los_datos,
     test_nada_de_esto_lanza,
     test_la_ventana_aguanta_un_cron_que_llega_tarde,
+    test_la_curva_cuenta_las_que_se_ganan,
+    test_la_curva_cobra_la_prima_en_TODAS_las_ganadas,
+    test_el_punto_de_equilibrio_es_la_prima_de_reventa,
+    test_la_curva_no_lanza_ni_con_basura,
+    test_en_modo_cartera_se_ofrece_el_precio_y_un_pelo,
+    test_la_ganancia_de_cartera_no_adivina_la_subida,
+    test_con_el_mismo_rendimiento_gana_el_mas_barato,
+    test_los_dos_modos_se_publican_juntos,
+    test_cada_puja_dice_que_modo_la_decidio,
+    test_comparar_los_modos_no_ejecuta_nada,
+    test_comparar_los_modos_nunca_lanza,
     test_estas_guardias_no_leen_el_estado,
 ]
 

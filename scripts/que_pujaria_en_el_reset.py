@@ -31,6 +31,8 @@ import json
 from pathlib import Path
 
 from src.analysis.la_subasta import (
+    IMPORTE_DE_CARTERA,
+    comparar_los_dos_modos,
     elegir_la_cesta,
     para_la_pantalla,
     peor_caso,
@@ -139,24 +141,49 @@ def main() -> None:
     #
     #     Solo los que el tablero da por pujables. Una fila que
     #     no es BID no es un candidato: es un deseo.
-    candidatos = [
-        {
+    def _fila(f, ):
+        return {
             "id": f.get("id"),
             "name": f.get("name"),
             "market_price": f.get("market_price"),
             "bid": f.get("bid"),
             "expected_value": f.get("expected_value"),
             "team_id": f.get("team_id"),
+            "decision": f.get("decision"),
             "bid_reason": (f.get("bid_reasons") or [None])[0],
         }
+
+    # MODO UN DISPARO: solo los que el tablero da por pujables.
+    # Una fila que no es BID no es un candidato: es un deseo.
+    candidatos = [
+        _fila(f) for f in filas if f.get("decision") == "BID"
+    ]
+
+    # MODO CARTERA: entran todos los que se pueden comprar de
+    # verdad. Pujar bajo por muchos solo tiene sentido si «los
+    # muchos» existen, y lo que veta a un jugador para una puja
+    # cara -que no compense al +8 %- deja de vetarlo al +0,25 %.
+    #
+    # Lo que NO entra: lo indisponible. Un lesionado no mejora
+    # por pujar barato.
+    VETADOS = {"NO_DISPONIBLE"}
+
+    para_cartera = [
+        _fila(f)
         for f in filas
-        if f.get("decision") == "BID"
+        if f.get("decision") not in VETADOS
+        and (f.get("market_price") or 0) > 0
     ]
 
     print()
     print(
         f"  Candidatos con decision PUJAR: {len(candidatos)} "
         f"de {len(filas)}"
+    )
+    print(
+        f"  Candidatos para el modo cartera: "
+        f"{len(para_cartera)} de {len(filas)} "
+        f"(fuera los indisponibles)"
     )
 
     cesta = elegir_la_cesta(
@@ -216,6 +243,77 @@ def main() -> None:
         print("-" * 74)
         print()
         print(f"  {peor_caso(cesta, plantilla)['reason']}")
+
+    # ==========================================================
+    # LOS DOS MODOS, UNO AL LADO DEL OTRO
+    # ==========================================================
+
+    reventa = (
+        (
+            (tablero.get("computer_premium") or {}).get(
+                "median_percent"
+            )
+            or 0
+        )
+        / 100.0
+    )
+
+    dos = comparar_los_dos_modos(
+        para_cartera,
+        prima_de_reventa=reventa,
+        presupuesto=presupuesto,
+        fichas_libres=huecos,
+        caja_libre=caja,
+        max_por_club=MAX_POR_CLUB,
+    )
+
+    print()
+    print("=" * 74)
+    print("LOS DOS MODOS, UNO AL LADO DEL OTRO")
+    print("=" * 74)
+    print()
+    print(
+        f"  El Computer recompra a +{100 * reventa:.1f} %. "
+        f"El modo cartera ofrece precio "
+        f"+{100 * IMPORTE_DE_CARTERA:.2f} %."
+    )
+
+    for etiqueta, clave in (
+        ("HOY (un disparo)", "un_disparo"),
+        ("MODO CARTERA", "cartera"),
+    ):
+
+        cesta_modo = dos.get(clave) or {}
+
+        elegidos = cesta_modo.get("elegidos") or []
+
+        print()
+        print(f"  {etiqueta}")
+        print("  " + "-" * 70)
+        print(f"    {cesta_modo.get('reason')}")
+
+        if not elegidos:
+            continue
+
+        print()
+        print(
+            f"    {'JUGADOR':<20}{'PRECIO':>12}{'PUJA':>12}"
+            f"{'GANA':>11}{'POR EURO':>10}"
+        )
+
+        for c in elegidos:
+            print(
+                f"    {str(c.get('name'))[:20]:<20}"
+                f"{euros(c.get('market_price')):>12}"
+                f"{euros(c.get('bid')):>12}"
+                f"{euros(c.get('expected_value')):>11}"
+                f"{c.get('yield_per_euro'):>9} %"
+            )
+
+        peor = peor_caso(cesta_modo, plantilla)
+
+        print()
+        print(f"    Peor caso: {peor.get('reason')}")
 
     print()
     print(
