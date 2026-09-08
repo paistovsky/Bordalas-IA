@@ -776,7 +776,25 @@ def build_press_report(
             "players_with_signal": len(con_señal),
             "players_mentioned": len(por_jugador),
 
-            "unmatched": sin_emparejar[:60],
+            # EL CRUDO SE GUARDA ENTERO (09/09/2026)
+            #
+            #     Estaba cortado en 60 con `unmatched_total: 95`:
+            #     35 titulares se tiraban cada dia.
+            #
+            #     Y eran los peores de perder. Un titular sin
+            #     emparejar es uno en el que no se reconocio
+            #     ningun nombre — que es exactamente donde se
+            #     esconde "el Malaga busca a fulano" cuando el
+            #     emparejador falla.
+            #
+            #     Ahora que el archivo diario guarda este informe
+            #     tal cual, cortar aqui es perder para siempre lo
+            #     que mañana permitiria reclasificar hacia atras
+            #     con clases nuevas.
+            #
+            #     La pantalla ya recorta por su cuenta a 12, asi
+            #     que esto no le añade ni una linea.
+            "unmatched": sin_emparejar,
             "unmatched_total": len(sin_emparejar),
 
             # Que se pinte solo, para que nadie lo lea como un
