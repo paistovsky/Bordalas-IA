@@ -7,6 +7,7 @@ import {
   Gauge,
   ClipboardList
 } from "lucide-react";
+import { cadenciaEnPalabras } from "../lib/relojes";
 
 const ITEMS = [
   ["home", "INICIO", Home],
@@ -49,7 +50,7 @@ export default function Sidebar({ page, setPage, data }) {
 
       <div className="sidebar-foot">
         <b><span className="dot-ok">●</span> AUTOPILOT LIVE</b>
-        {cycle.version || "V10"} · ciclo {data?.meta?.cycle_minutes || 30} min
+        {cycle.version || "V10"} · ciclo {cadenciaEnPalabras()}
         <br />
         última escritura:{" "}
         {last.label ? String(last.label).toLowerCase() : "ninguna"}

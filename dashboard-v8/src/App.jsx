@@ -11,10 +11,13 @@ import AuditPage from "./pages/AuditPage";
 import { fetchStatus, normalizeStatus } from "./lib/status";
 import { ago, minutesOld } from "./lib/utils";
 import {
+  avisoDelCambioDeHora,
+  cadenciaEnPalabras,
+  cadenciaMinutos,
+  madridNaiveAUTC,
   minutosDeLaFoto,
   mmss,
-  proximoCiclo,
-  madridNaiveAUTC
+  proximoCiclo
 } from "./lib/relojes";
 
 const TITLES = {
@@ -94,7 +97,19 @@ export default function App() {
   };
 
   const edad = minutesOld(data.meta.generated_at);
-  const cicloMin = Number(data.meta.cycle_minutes || 30);
+  // LA CADENCIA SALE DEL MISMO SITIO QUE LA CUENTA ATRAS.
+  //
+  // Aqui ponia `data.meta.cycle_minutes || 30`, escrito a mano
+  // en Python. Cuando el cron paso a ser HORARIO, la cuenta
+  // atras -que lee el cron de verdad- siguio bien y este texto
+  // se quedo diciendo "cada 30". Un dato, dos nombres.
+  const cicloMin = cadenciaMinutos(ahora);
+
+  const cadencia = cadenciaEnPalabras(ahora);
+
+  // El 25/10/2026 sobra la hora de menos que llevan los crones
+  // externos. No se recuerda: se detecta.
+  const cambioDeHora = avisoDelCambioDeHora(ahora);
 
 
   const minutosFoto = minutosDeLaFoto(data.meta.generated_at);
@@ -107,7 +122,8 @@ export default function App() {
   // Un ciclo y medio sin regenerar ya no es "hace un rato": es
   // una foto vieja y hay que decirlo antes de que alguien tome
   // una decision con ella.
-  const rancio = edad != null && edad > cicloMin * 1.5;
+  const rancio =
+    edad != null && cicloMin != null && edad > cicloMin * 1.5;
 
   return (
     <>
@@ -152,9 +168,36 @@ export default function App() {
 
         {rancio && !error && (
           <div className="alert warn">
-            Estos datos son de hace {Math.round(edad)} minutos y el ciclo corre
-            cada {cicloMin}. Entre ciclo y ciclo lo que ves es una foto: puede
+            Estos datos son de hace {Math.round(edad)} minutos y el ciclo corre{" "}
+            {cadencia}. Entre ciclo y ciclo lo que ves es una foto: puede
             haber pujas o movimientos que aún no aparecen aquí.
+          </div>
+        )}
+
+        {/* EL CAMBIO DE HORA ROMPE LOS CRONES EXTERNOS
+            cron-job.org aplica CET aunque le pongas
+            "Europe/Madrid", asi que los disparos llevan una hora
+            de menos escrita a mano. Cuando Madrid sale del
+            horario de verano esa compensacion sobra y la ventana
+            del reset se abriria con el mercado sin resetear.
+
+            No se recuerda: se le pregunta a la base de zonas si
+            Madrid sigue en verano. Mientras lo este, esto no
+            aparece. */}
+        {cambioDeHora && (
+          <div className="alert crit">
+            <b>LOS CRONES EXTERNOS SE HAN ADELANTADO UNA HORA.</b>{" "}
+            {cambioDeHora.texto}
+            <div style={{ marginTop: 4 }}>
+              {cambioDeHora.cambiar.map((d) => (
+                <div key={d.cron}>
+                  <code>{d.cron}</code> → <code>{d.nuevo}</code>{" "}
+                  <span className="dim">
+                    ({d.madrid} · {d.que})
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

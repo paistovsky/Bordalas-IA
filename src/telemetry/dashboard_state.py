@@ -62,13 +62,32 @@ FULL_AUTONOMOUS_STATUS = (
 )
 
 
+# LA CADENCIA SALE DEL CRON, NO DE LA MEMORIA (10/09/2026)
+#
+#     El cron interno de `bordalas-live.yml` es la AUTORIDAD:
+#
+#         7 0-2,7-23 * * *
+#
+#     o sea, una vez a la hora. Aqui ponia 30 escrito a mano,
+#     de cuando el cron corria cada media hora, y al cambiarlo
+#     nadie toco esto: el aviso amarillo decia "cada 30", el
+#     lateral "ciclo 30 min" y `STALE_CYCLE_SECONDS` marcaba
+#     rancio un ciclo perfectamente normal a la hora de vida.
+#
+#     `test_la_cadencia_sale_del_cron` compara este numero con
+#     el cron del workflow y con `relojes.js`, para que los tres
+#     no puedan volver a discrepar.
+CRON_INTERNO = "7 0-2,7-23 * * *"
+
+CADENCIA_MINUTOS = 60
+
+
 # A partir de cuando "este ciclo" deja de ser este ciclo.
 #
-# Un ciclo son 30 minutos. Dos ciclos de margen absorben un
-# retraso normal -un refresco lento, una cola de GitHub-; a
-# partir de ahi lo que se esta enseñando es historia y hay que
-# decirlo.
-STALE_CYCLE_SECONDS = 2 * 30 * 60
+# Dos ciclos de margen absorben un retraso normal -un refresco
+# lento, una cola de GitHub-; a partir de ahi lo que se esta
+# enseñando es historia y hay que decirlo.
+STALE_CYCLE_SECONDS = 2 * CADENCIA_MINUTOS * 60
 
 
 def _edad_en_segundos(marca) -> int | None:
@@ -1691,7 +1710,7 @@ def build_execution_telemetry(
         cycle.get("timestamp")
     )
 
-    # Un ciclo son 30 minutos. Con mas de dos ciclos de retraso
+    # Con mas de dos ciclos de retraso
     # esto ya no es "este ciclo", es historia.
     cycle["stale"] = bool(
         cycle["age_seconds"] is not None
@@ -4523,7 +4542,7 @@ def build_dashboard_state() -> dict:
             "league_id": board.get("league_id"),
             "current_user_id": board.get("current_user_id"),
             "mode": "LIVE",
-            "cycle_minutes": 30,
+            "cycle_minutes": CADENCIA_MINUTOS,
         },
         "summary": {
             "balance": safe_int(state.get("balance")),

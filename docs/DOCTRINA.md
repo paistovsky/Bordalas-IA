@@ -811,6 +811,32 @@ plausible y equivocada, y sobrevive a todas las pruebas que no midan el desfase.
 - Un nombre de variable **no** documenta una zona. `ahora_madrid` es una promesa,
   no una garantía.
 
+**El caso que la motivó, y que sigue vivo:** `cron-job.org` aplica **CET siempre**,
+aunque le pongas `Europe/Madrid`. No sigue el horario de verano. Así que los tres
+disparos externos llevan **una hora de menos escrita a mano** para que ocurran a la
+hora real que queremos:
+
+```
+escrito  45,50 3 * * *   ->  dispara 04:45 y 04:50 reales   (ventana del reset)
+escrito  15 6 * * *      ->  dispara 07:15 reales           (tras el reset)
+```
+
+**El 25 de octubre de 2026** Madrid vuelve a CET, esa compensación sobra, y los
+disparos se adelantarían una hora: la ventana se abriría **con el mercado sin
+resetear**.
+
+Eso no se recuerda, **se detecta**: `avisoDelCambioDeHora()` le pregunta a la base
+de zonas si Madrid sigue en verano y, cuando deje de estarlo, saca en rojo los
+crones exactos que hay que poner. La compensación vive escrita junto a la
+definición de los relojes, no en un comentario suelto.
+
+**Y el que se cazó escribiendo esto:** `desfaseMadrid` tenía un `return 120` de
+reserva para cuando `Intl` fallase, *«que es lo que rige diez meses al año»*. Por
+eso mismo estaba mal — acierta diez meses y falla justo los dos en que el desfase
+importa, sin decir nada. Es la 35 y la [36](#36-un-valor-por-defecto-no-puede-absorber-el-caso-más-importante)
+a la vez: un desfase a mano, y un defecto benigno tapando un «no se sabe». Ahora
+devuelve `null` y quien llama dice que no lo sabe.
+
 Esto es la [regla 33](#33-un-dato-un-nombre--van-siete) —*un dato, un nombre*—
 aplicada al tiempo: **un instante con dos lecturas posibles ya son dos datos.**
 
