@@ -456,7 +456,7 @@ def test_el_embudo_no_toca_ningun_tope() -> None:
 
     for prohibido in (
         "MAX_SINGLE",
-        "MIN_SPECULATION_YIELD",
+        "RENDIMIENTO_MINIMO_DEL_CAPITAL",
         "budget =",
     ):
         assert prohibido not in fuente, (

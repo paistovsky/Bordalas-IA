@@ -88,15 +88,15 @@ def test_el_liston_no_se_copia_se_importa() -> None:
     uno. Este tiene que ser EL MISMO objeto que el de la puja.
     """
 
-    from src.analysis.rival_bid_model import MIN_SPECULATION_YIELD
+    from src.analysis.rival_bid_model import RENDIMIENTO_MINIMO_DEL_CAPITAL
 
-    assert MIN_TENER_YIELD == MIN_SPECULATION_YIELD == 0.03
+    assert MIN_TENER_YIELD == RENDIMIENTO_MINIMO_DEL_CAPITAL == 0.03
 
     fuente = Path(
         "src/analysis/hold_switch.py"
     ).read_text(encoding="utf-8")
 
-    assert "MIN_SPECULATION_YIELD" in fuente, (
+    assert "RENDIMIENTO_MINIMO_DEL_CAPITAL" in fuente, (
         "el liston se ha copiado en vez de importarse"
     )
 

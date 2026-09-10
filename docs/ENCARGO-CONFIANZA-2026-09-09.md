@@ -81,7 +81,7 @@ con su guardia.
 
 - Umbrales, presupuestos, topes de operación, guardarraíles de posición
   y solvencia.
-- `MIN_SPECULATION_YIELD` y `MIN_SPECULATION_EXPECTED_VALUE`: siguen
+- `RENDIMIENTO_MINIMO_DEL_CAPITAL` y `MIN_SPECULATION_EXPECTED_VALUE`: siguen
   fuera de la mesa. Hubo un intento el 03/09, revertido en `9bf60c4`.
 - La vía del Computer **no se frena por falta de racha**. Anoche saltó
   `test_reventa_al_computer_v1` por eso y tenía razón: esa vía no apuesta

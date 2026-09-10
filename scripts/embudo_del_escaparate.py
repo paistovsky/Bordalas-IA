@@ -60,7 +60,7 @@ import json
 from pathlib import Path
 
 from src.analysis.rival_bid_model import (
-    MIN_SPECULATION_YIELD,
+    RENDIMIENTO_MINIMO_DEL_CAPITAL,
     optimal_bid,
 )
 
@@ -261,7 +261,7 @@ def main() -> None:
             f"{euros(fila.get('market_price')):>12}"
             f"{euros(fila.get('our_value')):>12}"
             f"{(f'{margen:+.2f} %' if margen is not None else '—'):>9}"
-            f"{100 * MIN_SPECULATION_YIELD:>7.0f} %  "
+            f"{100 * RENDIMIENTO_MINIMO_DEL_CAPITAL:>7.0f} %  "
             f"{libre.get('decision')}"
         )
 

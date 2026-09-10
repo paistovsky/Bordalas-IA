@@ -435,10 +435,10 @@ def test_la_via_del_computer_viva_sigue_sin_confianza() -> None:
 def test_no_se_ha_bajado_ningun_umbral() -> None:
     from src.analysis.rival_bid_model import (
         MIN_SPECULATION_EXPECTED_VALUE,
-        MIN_SPECULATION_YIELD,
+        RENDIMIENTO_MINIMO_DEL_CAPITAL,
     )
 
-    assert MIN_SPECULATION_YIELD == 0.03
+    assert RENDIMIENTO_MINIMO_DEL_CAPITAL == 0.03
     assert MIN_SPECULATION_EXPECTED_VALUE == 25_000
 
 

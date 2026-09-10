@@ -558,7 +558,7 @@ def test_no_se_ha_subido_ningun_tope() -> None:
 
     from src.analysis.rival_bid_model import (
         MIN_SPECULATION_EXPECTED_VALUE,
-        MIN_SPECULATION_YIELD,
+        RENDIMIENTO_MINIMO_DEL_CAPITAL,
     )
     from src.analysis.speculation_engine import (
         MAX_DEBT_SPECULATION_PERCENT,
@@ -566,7 +566,7 @@ def test_no_se_ha_subido_ningun_tope() -> None:
         MAX_SPECULATION_BUDGET_PERCENT,
     )
 
-    assert MIN_SPECULATION_YIELD == 0.03
+    assert RENDIMIENTO_MINIMO_DEL_CAPITAL == 0.03
     assert MIN_SPECULATION_EXPECTED_VALUE == 25_000
     assert MAX_SPECULATION_BUDGET_PERCENT == 0.15
     assert MAX_SINGLE_SPECULATION_PERCENT == 0.40

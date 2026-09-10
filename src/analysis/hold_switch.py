@@ -40,7 +40,7 @@ QUE APAGA Y QUE NO
 
 EL LISTON ES EL MISMO, Y SE IMPORTA
 
-    `MIN_SPECULATION_YIELD`, el 3 % de siempre. Importado y no
+    `RENDIMIENTO_MINIMO_DEL_CAPITAL`, el 3 % de siempre. Importado y no
     copiado, porque la regla del 13/09 dice que el bolsillo, el
     liston y el valor salen todos de la misma via. Dos treses en
     dos ficheros se separan el dia que alguien mueve uno.
@@ -48,11 +48,11 @@ EL LISTON ES EL MISMO, Y SE IMPORTA
 
 from __future__ import annotations
 
-from src.analysis.rival_bid_model import MIN_SPECULATION_YIELD
+from src.analysis.rival_bid_model import RENDIMIENTO_MINIMO_DEL_CAPITAL
 
 
 # El liston de la via, sin copiarlo.
-MIN_TENER_YIELD = MIN_SPECULATION_YIELD
+MIN_TENER_YIELD = RENDIMIENTO_MINIMO_DEL_CAPITAL
 
 
 # EL TECHO DE PERDIDAS, QUE VENIA DE LA VERJA
@@ -135,7 +135,8 @@ def bucket_backing(
         Y ese tramo es donde cabe el 100 % del capital: 1,24 M al
         mes contra los 310.000 del tramo de arriba.
 
-        El liston del 3 % NO se ha movido. Lo que cambia es
+        El liston del 3 % -RENDIMIENTO SOBRE EL CAPITAL, no un
+        ritmo diario- NO se ha movido. Lo que cambia es
         contra que numero se compara.
 
     Sin `streak` se comporta como siempre, para no cambiar a

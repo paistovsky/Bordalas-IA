@@ -82,7 +82,7 @@ La divergencia no sirve para entrar. Sirve para **no** entrar.
 
 ## LO QUE NO SE TOCA
 
-**No bajes `MIN_SPECULATION_YIELD` ni `MIN_SPECULATION_EXPECTED_VALUE`.**
+**No bajes `RENDIMIENTO_MINIMO_DEL_CAPITAL` ni `MIN_SPECULATION_EXPECTED_VALUE`.**
 Bloqueaban todo porque la entrada era una constante del 0,22 %. Con el
 ritmo real, un jugador que subió un 17 % pasa el 3 % de sobra. El umbral
 no estaba mal: medía un número inventado. **Arregla la entrada y mira

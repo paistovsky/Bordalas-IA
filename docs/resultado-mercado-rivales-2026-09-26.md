@@ -51,7 +51,7 @@ sentido: el Computer saca lo que sobra; un mánager pone en venta lo que le
 estorba de su plantilla, que ya es plantilla de primera división.
 
 **Solo uno de los 27 cabe en el tope de especular** (Tete Morente, 680.000). Y
-**solo uno pasa el 3 % diario** (Ejuke, +4,45 % con racha de 3). **No son el
+**solo uno pasa el 3 % diario** *(CORRECCIÓN 10/09/2026: aquel «3 % diario» mezclaba dos cosas. El listón de la casa es `RENDIMIENTO_MINIMO_DEL_CAPITAL`, rendimiento sobre el capital de la operación, no un ritmo por día. El ritmo diario lo mira `market_rate_gate`, que solo exige que no sea negativo.)* (Ejuke, +4,45 % con racha de 3). **No son el
 mismo.** La intersección es cero, y por eso el cero.
 
 ## Lo que eso significa para el plan

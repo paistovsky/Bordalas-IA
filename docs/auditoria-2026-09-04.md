@@ -112,7 +112,7 @@ jornada** — justo cuando el mercado del Computer se resetea a las 07:00.
 MAX_SPECULATION_BUDGET_PERCENT = 0.15   aparca el 85 % de la caja (2,97 M)
 MAX_DEBT_SPECULATION_PERCENT   = 0.60   aparca el 40 % del margen seguro
 MAX_SINGLE_SPECULATION_PERCENT = 0.40
-MIN_SPECULATION_YIELD          = 0.03   contra un mercado que rinde 0,22 %
+RENDIMIENTO_MINIMO_DEL_CAPITAL          = 0.03   contra un mercado que rinde 0,22 %
 MIN_SPECULATION_EXPECTED_VALUE = 25.000 inalcanzable con el tope por operación
 ```
 

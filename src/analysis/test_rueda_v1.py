@@ -365,7 +365,7 @@ def test_no_mueve_ningun_liston() -> None:
     ).read_text(encoding="utf-8")
 
     for prohibido in (
-        "MIN_SPECULATION_YIELD",
+        "RENDIMIENTO_MINIMO_DEL_CAPITAL",
         "MAX_SINGLE",
         "MIN_TENER_YIELD",
     ):

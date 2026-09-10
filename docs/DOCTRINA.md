@@ -657,6 +657,81 @@ jornada.
 
 ---
 
+---
+
+### 32. El negocio de esta liga es la subasta, no el calendario
+
+**Medido el 10/09/2026 sobre los 36 viajes cerrados de Pollo17 (+5.700.524).**
+
+Su viaje mediano rinde **+3,86 % en 5 días**. De dónde sale, en tres partes que
+suman:
+
+```
+(a) lo que gana al COMPRAR      +0,15 %   compra POR DEBAJO del precio
+(b) prima del Computer al vender +2,49 %
+(a) + (b)                        +2,64 %   <- el 68 % de su ganancia
+(c) lo que sube mientras lo tiene +1,23 %  en 5 días = +0,25 %/día
+```
+
+**(c) es la deriva del mercado, no una rampa.** Su negocio es el spread entre la
+subasta y la recompra del Computer.
+
+**Y la hipótesis del calendario queda refutada:** 24 de sus 36 viajes **no
+atraviesan ninguna jornada**, y esos rinden **+1,29 %/día** contra +0,87 %/día de
+los 12 que sí. Aguantar la jornada da más beneficio absoluto porque dura cinco
+veces más, no porque rente mejor.
+
+### Dónde está su ventaja, y es una sola cosa
+
+**No paga de más en la subasta.** Lo que paga cada uno por encima del precio de
+mercado:
+
+```
+Pollo17      -0,15 %      <- compra al precio, o por debajo
+Prinzipote   +0,20 %
+DiosMande    +2,27 %
+Luismi_Haz   +2,31 %
+Manzagool    +7,95 %
+Mex         +11,81 %
+NOSOTROS    +29,23 %      <- n=1, nuestra única compra medida
+```
+
+**Y no es que venda mejor:** su prima de venta (+2,49 %) es la **peor** de los
+cinco que venden. Gana porque no regala el margen al comprar.
+
+Eso valida la curva de la prima del 11/09 —pujar a `precio + 0,25 %`— que nos
+pone justo en su zona. Y explica el 86 % de su dinero que nuestro filtro
+rechazaba: no buscábamos rampas donde no las hay, buscábamos rampas en lugar de
+buscar el spread.
+
+---
+
+### 33. Un dato, un nombre — van siete
+
+**`RENDIMIENTO_MINIMO_DEL_CAPITAL`**, antes `MIN_SPECULATION_YIELD`.
+
+*(Corregido el 10/09/2026.)*
+
+Llevábamos semanas llamándolo **«el listón del 3 % diario»**. No lo es y nunca lo
+fue:
+
+```
+rendimiento = expected_value / bid
+```
+
+Es lo que rinde **la operación sobre el capital que inmoviliza**, no lo que sube
+el jugador en un día. Un viaje de cinco días que rinde un 3 % pasa el listón; uno
+que sube un 3 % diario durante cinco días rinde un 16 % y pasa de sobra. **No son
+la misma cosa ni se parecen.**
+
+**El nombre malo tuvo consecuencia:** se comparó contra ritmos diarios de rivales
+para decidir si nuestro filtro era duro, y esa comparación no significaba nada.
+
+El **ritmo diario**, que es otra cosa, vive en `market_rate_gate` y **no tiene
+listón**: solo exige que no sea negativo.
+
+---
+
 ## Descartado
 
 **Entrenadores** (truco nº 4 del vídeo). **Esta liga no los usa.** Decisión del
@@ -704,6 +779,8 @@ ninguno por encima de los demás.
 | 29 | Las reglas del juego, cerradas | **nueva** 10/09 |
 | 30 | Los puntos son el motor económico, no la rueda | **medida** 10/09 — x8,4 |
 | 31 | Quedar de los últimos en la jornada paga | **medida** 10/09 |
+| 32 | El negocio es la subasta, no el calendario | **medida** 10/09 |
+| 33 | Un dato, un nombre — el 3 % no es diario | **corregida** 10/09 |
 
 **Once hechas. Doce por hacer. Cuatro nuevas el 10/09.**
 

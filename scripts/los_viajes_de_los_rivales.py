@@ -24,7 +24,7 @@ NUESTRO FILTRO NO ES UN NUMERO, SON DOS PUERTAS
            El ojeador existe desde el 08/09/2026. Antes de esa
            fecha NO HAY ritmo observado de nadie.
 
-    2. EL RENDIMIENTO (`MIN_SPECULATION_YIELD = 0.03`)
+    2. EL RENDIMIENTO (`RENDIMIENTO_MINIMO_DEL_CAPITAL = 0.03`)
 
            expected_value / bid >= 3 %. Ojo: es rendimiento
            SOBRE EL CAPITAL de la operacion, no un ritmo diario.
@@ -490,6 +490,251 @@ def informe(nombre: str, uid: int, detalle: bool = True) -> None:
     )
 
 
+def precios_por_dia() -> dict:
+    """El precio de mercado de cada jugador, por dia con foto."""
+
+    tabla = {}
+
+    for ruta in sorted(
+        glob.glob(str(RAIZ / "data" / "snapshot_*.json"))
+    ):
+
+        dia_foto = Path(ruta).name.split("snapshot_")[1][:8]
+
+        try:
+            s = json.loads(Path(ruta).read_text(encoding="utf-8"))
+        except Exception:                           # noqa: BLE001
+            continue
+
+        jugadores = (
+            ((s.get("catalog") or {}).get("data") or {}).get(
+                "players"
+            )
+            or {}
+        )
+
+        filas = (
+            jugadores.values()
+            if isinstance(jugadores, dict)
+            else jugadores
+        )
+
+        tabla[dia_foto] = {
+            j["id"]: int(j.get("price") or 0)
+            for j in filas
+            if isinstance(j, dict) and j.get("id")
+        }
+
+    return tabla
+
+
+def descomposicion() -> None:
+    """
+    De donde sale la ganancia, en tres partes que suman.
+
+        (a) lo que gana al COMPRAR   precio pagado contra mercado
+        (b) la prima del Computer al VENDER
+        (c) lo que subio mientras lo tuvo
+
+    Las tres se miden sobre las operaciones que caen en un dia
+    con foto, que es donde se sabe el precio de mercado.
+    """
+
+    import statistics
+
+    from scripts.las_mecanicas_del_juego import operaciones
+
+    print()
+    print("=" * 78)
+    print("DE DONDE SALE LA GANANCIA")
+    print("=" * 78)
+
+    board = json.loads(
+        (
+            RAIZ
+            / "data"
+            / "rival_intelligence"
+            / "board_events.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    precios = precios_por_dia()
+
+    def dia_clave(epoch):
+        return datetime.fromtimestamp(epoch, MADRID).strftime(
+            "%Y%m%d"
+        )
+
+    compra_por, venta_por = {}, {}
+
+    for op in operaciones(board, ("market", "transfer")):
+
+        precio = precios.get(dia_clave(op["date"]), {}).get(
+            op["player"]
+        )
+
+        if not precio or not op["amount"]:
+            continue
+
+        prima = (op["amount"] - precio) / precio * 100
+
+        if op["type"] == "market" and op["comprador"]:
+            compra_por.setdefault(op["comprador"], []).append(prima)
+
+        elif op["type"] == "transfer" and op["vendedor"]:
+            venta_por.setdefault(op["vendedor"], []).append(prima)
+
+    nombres = {
+        POLLO: "Pollo17",
+        MANZAGOOL: "Manzagool",
+        NOSOTROS: "NOSOTROS",
+        14156489: "Luismi_Haz",
+        14151726: "DiosMande",
+        14154203: "Prinzipote",
+        14178736: "Mex",
+    }
+
+    print()
+    print("  (a) LO QUE PAGA DE MAS EN LA SUBASTA")
+    print("      (negativo = compra POR DEBAJO del precio)")
+    print()
+    print(f"      {'manager':<14}{'n':>4}{'mediana':>10}")
+
+    for uid, xs in sorted(
+        compra_por.items(), key=lambda kv: statistics.median(kv[1])
+    ):
+        print(
+            f"      {nombres.get(uid, uid):<14}{len(xs):>4}"
+            f"{statistics.median(xs):>+9.2f} %"
+        )
+
+    print()
+    print("  (b) LO QUE LE PAGA EL COMPUTER AL VENDER")
+    print()
+    print(f"      {'manager':<14}{'n':>4}{'mediana':>10}")
+
+    for uid, xs in sorted(
+        venta_por.items(),
+        key=lambda kv: -statistics.median(kv[1]),
+    ):
+        print(
+            f"      {nombres.get(uid, uid):<14}{len(xs):>4}"
+            f"{statistics.median(xs):>+9.2f} %"
+        )
+
+    # --- la cuenta del viaje mediano de Pollo ---
+    a = statistics.median(compra_por.get(POLLO) or [0])
+    b = statistics.median(venta_por.get(POLLO) or [0])
+
+    trips = viajes_de(POLLO)
+
+    rendimiento = (
+        statistics.median([t["rendimiento"] for t in trips]) * 100
+    )
+
+    dias_medianos = statistics.median([t["dias"] for t in trips])
+
+    print()
+    print("  LA CUENTA DEL VIAJE MEDIANO DE POLLO:")
+    print()
+    print(f"      (a) compra                    {-a:+7.2f} %")
+    print(f"      (b) prima del Computer        {b:+7.2f} %")
+    print(f"      (a) + (b)                     {b - a:+7.2f} %")
+    print(f"      su viaje mediano rinde        {rendimiento:+7.2f} %")
+    print(
+        f"      (c) el resto, en {dias_medianos:.0f} dias      "
+        f"{rendimiento - (b - a):+7.2f} %"
+        f"   = {(rendimiento - (b - a)) / dias_medianos:+.2f} %/dia"
+    )
+    print()
+    print(
+        f"      (a)+(b) son el "
+        f"{100 * (b - a) / rendimiento:.0f} % de su ganancia."
+    )
+
+
+def calendario() -> None:
+    """
+    ¿Compra ANTES de que el jugador juegue y aguanta la jornada?
+    """
+
+    print()
+    print("=" * 78)
+    print("LA HIPOTESIS DEL CALENDARIO")
+    print("=" * 78)
+
+    import statistics
+
+    board = json.loads(
+        (
+            RAIZ
+            / "data"
+            / "rival_intelligence"
+            / "board_events.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    ini = {
+        ((e.get("content") or {}).get("round") or {}).get("id"): e["date"]
+        for e in board
+        if e.get("type") == "roundStarted"
+    }
+
+    fin = {
+        ((e.get("content") or {}).get("round") or {}).get("id"): e["date"]
+        for e in board
+        if e.get("type") == "roundFinished"
+    }
+
+    jornadas = [
+        (ini[r], fin[r]) for r in ini if r in fin
+    ]
+
+    print(f"  Jornadas completas en el tablon: {len(jornadas)}")
+
+    for nombre, uid in (
+        ("Pollo17", POLLO),
+        ("Manzagool", MANZAGOOL),
+    ):
+
+        trips = viajes_de(uid)
+
+        con = [
+            t
+            for t in trips
+            if any(
+                t["compra"] <= a and b <= t["venta"]
+                for a, b in jornadas
+            )
+        ]
+
+        sin = [t for t in trips if t not in con]
+
+        print()
+        print(f"  {nombre}:")
+
+        for etiqueta, grupo in (
+            ("ATRAVIESAN una jornada", con),
+            ("NO atraviesan ninguna ", sin),
+        ):
+
+            if not grupo:
+                continue
+
+            rend = statistics.median(
+                [t["rendimiento"] for t in grupo]
+            ) * 100
+
+            dias = statistics.median([t["dias"] for t in grupo])
+
+            print(
+                f"     {etiqueta}  {len(grupo):>3} viajes  "
+                f"{euros(sum(t['beneficio'] for t in grupo)):>12}  "
+                f"mediana {rend:+.1f} % en {dias:.0f} dias "
+                f"({rend / dias:+.2f} %/dia)"
+            )
+
+
 def main() -> None:
 
     print()
@@ -499,6 +744,10 @@ def main() -> None:
     informe("Pollo17", POLLO)
 
     informe("Manzagool", MANZAGOOL)
+
+    descomposicion()
+
+    calendario()
 
     print()
 

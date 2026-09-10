@@ -52,7 +52,7 @@ de la segunda:
 1. **La compuerta de ritmo.** Sin **ritmo observado por el ojeador**, la vía ni
    se abre (`SIN_RITMO_OBSERVADO`). Con ritmo negativo tampoco
    (`PRECIO_CAYENDO`).
-2. **El rendimiento**, `MIN_SPECULATION_YIELD = 0.03`. Y ojo: es **rendimiento
+2. **El rendimiento**, `RENDIMIENTO_MINIMO_DEL_CAPITAL = 0.03`. Y ojo: es **rendimiento
    sobre el capital**, no un ritmo diario. Lo hemos llamado «el 3 % diario» y no
    lo es.
 
@@ -151,3 +151,98 @@ un peaje sin dar nada a cambio.
   dependen de cómo estaba nuestra plantilla ese día, y solo hay fotos de esa
   semana. Fuera de ahí sale «no reconstruible» en vez de un número inventado.
 - **Ninguna escritura. No he hecho push.**
+
+---
+---
+
+# AMPLIACIÓN (10/09/2026) — de dónde sale la ganancia
+
+## La descomposición, en tres partes que suman
+
+El viaje mediano de Pollo rinde **+3,86 % en 5 días**:
+
+```
+(a) lo que gana al COMPRAR        +0,15 %    compra POR DEBAJO del precio
+(b) prima del Computer al vender  +2,49 %
+(a) + (b)                         +2,64 %    <- el 68 % de su ganancia
+(c) lo que sube mientras lo tiene +1,23 %    en 5 días = +0,25 %/día
+```
+
+**(c) es pequeño y es la deriva del mercado**, no una rampa: +0,25 %/día es
+exactamente la mediana del mercado entero.
+
+**Te habías equivocado en la hipótesis, y lo dice el propio dato:** manda (a)+(b).
+Su negocio **es la subasta**, no el calendario.
+
+## La hipótesis del calendario, refutada
+
+```
+Pollo17
+   ATRAVIESAN una jornada   12 viajes  +3.396.893  +8,7 % en 10 días (+0,87 %/día)
+   NO atraviesan ninguna    24 viajes  +2.303.631  +3,2 % en  2 días (+1,29 %/día)
+```
+
+**Dos tercios de sus viajes no ven jugar al jugador**, y rinden **mejor por día**
+que los que sí. Aguantar la jornada da más beneficio absoluto solo porque dura
+cinco veces más.
+
+Manzagool, para contraste: pierde en los dos grupos (−0,53 %/día con jornada,
+−2,05 %/día sin ella). El calendario no le salva ni le hunde.
+
+## Dónde está su ventaja: no paga de más
+
+Lo que paga cada manager **por encima del precio de mercado** al ganar una
+subasta:
+
+```
+Pollo17      -0,15 %   n=8    <- compra al precio, o por debajo
+Prinzipote   +0,20 %   n=1
+DiosMande    +2,27 %   n=4
+Luismi_Haz   +2,31 %   n=12
+Manzagool    +7,95 %   n=1
+Mex         +11,81 %   n=2
+NOSOTROS    +29,23 %   n=1
+```
+
+**Y no es que venda mejor.** Su prima de venta, +2,49 %, es la **peor** de los
+cinco que venden (la mediana de la liga es +2,91 %; nosotros sacamos +3,91 %).
+
+**Gana porque no regala el margen al comprar.** Eso es todo.
+
+### Lo que eso significa para nosotros
+
+Nuestra única compra en subasta medida pagó **+29,23 %** sobre el precio. Con la
+prima de venta en +2,5 %, esa operación nacía perdiendo un 27 %.
+
+**La curva de la prima del 11/09 ya arregló esto** —pujar a `precio + 0,25 %`—
+y esta medición dice que nos coloca **exactamente en la zona de Pollo**. No hay
+nada que cambiar ahí: hay que dejarla funcionar.
+
+Y explica el 86 % de su dinero que nuestro filtro rechazaba: **no es que
+buscáramos rampas donde no las hay. Es que buscábamos rampas en lugar de buscar
+el spread.**
+
+## El arreglo del nombre
+
+`MIN_SPECULATION_YIELD` → **`RENDIMIENTO_MINIMO_DEL_CAPITAL`**, en 23 ficheros.
+
+Es `expected_value / bid`: lo que rinde la operación sobre el capital que
+inmoviliza. **No es un ritmo diario y nunca lo fue.** Un viaje de cinco días al
+3 % pasa el listón; uno que sube un 3 % diario cinco días rinde un 16 %.
+
+**El nombre malo tuvo consecuencia:** se comparó contra ritmos diarios de rivales
+para juzgar si nuestro filtro era duro, y esa comparación no significaba nada.
+
+Barrido de «3 % diario» hecho **con cuidado**: donde se refería al listón, se
+corrige; donde de verdad habla de un ritmo por día —`price_store_fixture`,
+`test_retrotest_rampa`, el +2,33 %/día de `acquisition_valuation`— **no se ha
+tocado**, porque ahí sí es diario. Al informe del 26/09 se le añadió una nota de
+corrección en vez de reescribir lo que dijimos entonces.
+
+## Lo que sigue sin poder medirse
+
+La descomposición usa las operaciones que caen en un día con foto: **n=8 compras
+y n=15 ventas de Pollo**. Es suficiente para ver la diferencia de 30 puntos entre
+su prima de compra y la nuestra, y no lo es para afinar decimales.
+
+**No he tocado la compuerta de ritmo**, como pediste.

@@ -327,7 +327,7 @@ haberla mirado sería el mismo error que valorarla sin mirarla, del otro
 lado.
 
 **El listón se importa, no se copia.** `MIN_TENER_YIELD` es
-`MIN_SPECULATION_YIELD`, el 3 % de siempre — la regla del 13/09: el
+`RENDIMIENTO_MINIMO_DEL_CAPITAL`, el 3 % de siempre — la regla del 13/09: el
 bolsillo, el listón y el valor salen todos de la misma vía. Dos treses en
 dos ficheros se separan el día que alguien mueve uno, y hay una guardia que
 lo impide.

@@ -197,7 +197,30 @@ MIN_WIN_PROBABILITY = 0.15
 # Solo se aplican a la ESPECULACION. Una mejora del once se paga
 # en puntos, no en euros de reventa, y exigirle rendimiento de
 # caja seria medirla con la regla equivocada.
-MIN_SPECULATION_YIELD = 0.03
+#
+# EL NOMBRE, ARREGLADO EL 10/09/2026
+#
+#     Se llamaba `MIN_SPECULATION_YIELD` y llevabamos semanas
+#     hablando de el como "el liston del 3 % DIARIO". No lo es y
+#     nunca lo fue:
+#
+#         rendimiento = expected_value / bid
+#
+#     Es lo que rinde LA OPERACION sobre el capital que
+#     inmoviliza, no lo que sube el jugador en un dia. Un viaje
+#     de cinco dias que rinde un 3 % pasa este liston; uno que
+#     sube un 3 % diario durante cinco dias rinde un 16 % y pasa
+#     de sobra. No son la misma cosa ni se parecen.
+#
+#     El nombre malo tuvo consecuencia: se comparo contra ritmos
+#     diarios de rivales para decidir si nuestro filtro era duro,
+#     y esa comparacion no significaba nada.
+#
+#     Un dato, un nombre. Van siete.
+#
+# EL RITMO DIARIO, QUE ES OTRA COSA, vive en `market_rate_gate`
+# y no tiene liston: solo exige que NO sea negativo.
+RENDIMIENTO_MINIMO_DEL_CAPITAL = 0.03
 
 MIN_SPECULATION_EXPECTED_VALUE = 25_000
 
@@ -927,7 +950,7 @@ def optimal_bid(
                 / max(mejor["bid"], 1)
             )
 
-            if rendimiento < MIN_SPECULATION_YIELD:
+            if rendimiento < RENDIMIENTO_MINIMO_DEL_CAPITAL:
                 return _no_bid(
                     "RENDIMIENTO_INSUFICIENTE",
                     (
@@ -936,7 +959,7 @@ def optimal_bid(
                         f"({mejor['expected_value']:,} EUR sobre "
                         f"{mejor['bid']:,} inmovilizados) y se "
                         f"exige al menos un "
-                        f"{MIN_SPECULATION_YIELD * 100:.0f} %. "
+                        f"{RENDIMIENTO_MINIMO_DEL_CAPITAL * 100:.0f} %. "
                         f"Por debajo de eso la subida estimada "
                         f"esta dentro del ruido del precio y el "
                         f"dinero rinde mas en otra operacion."

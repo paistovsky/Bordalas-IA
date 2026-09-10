@@ -159,9 +159,9 @@ def test_el_liston_del_tres_por_ciento_no_se_ha_movido() -> None:
 
     assert MIN_TENER_YIELD == 0.03
 
-    from src.analysis.rival_bid_model import MIN_SPECULATION_YIELD
+    from src.analysis.rival_bid_model import RENDIMIENTO_MINIMO_DEL_CAPITAL
 
-    assert MIN_TENER_YIELD == MIN_SPECULATION_YIELD
+    assert MIN_TENER_YIELD == RENDIMIENTO_MINIMO_DEL_CAPITAL
 
 
 def test_una_banda_sin_muestra_cae_al_bloque() -> None:
@@ -424,10 +424,10 @@ def test_el_rechazo_nombra_las_cuatro_vias() -> None:
 def test_ningun_umbral_se_ha_movido() -> None:
     from src.analysis.hold_switch import MAX_TENER_LOSS_RATE
     from src.analysis.rival_bid_model import (
-        MIN_SPECULATION_YIELD,
+        RENDIMIENTO_MINIMO_DEL_CAPITAL,
     )
 
-    assert MIN_SPECULATION_YIELD == 0.03
+    assert RENDIMIENTO_MINIMO_DEL_CAPITAL == 0.03
     assert MAX_TENER_LOSS_RATE == 0.20
     assert PRIORITY["EMERGENCY_SOLVENCY"] == 1100
 

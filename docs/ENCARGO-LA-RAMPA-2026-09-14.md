@@ -123,7 +123,7 @@ con estas condiciones:
 
 ## BLOQUE 3 — El listón del 3 %, con número en vez de decreto
 
-`MIN_SPECULATION_YIELD = 0.03` y `MIN_SPECULATION_EXPECTED_VALUE = 25.000` son
+`RENDIMIENTO_MINIMO_DEL_CAPITAL = 0.03` y `MIN_SPECULATION_EXPECTED_VALUE = 25.000` son
 cifras puestas a mano para evitar operaciones ruidosas. Puede que estuvieran
 bien y puede que sean lo que nos tiene con 5,35 M parados.
 

@@ -330,7 +330,7 @@ umbrales      MAX_SPECULATION_BUDGET_PERCENT   sin tocar
               MAX_SINGLE_SPECULATION_PERCENT   sin tocar
               MAX_DEBT_SPECULATION_PERCENT     sin tocar
               MAX_SAFE_DEBT                    sin tocar
-              MIN_SPECULATION_YIELD            sin tocar
+              RENDIMIENTO_MINIMO_DEL_CAPITAL            sin tocar
               MIN_SPECULATION_EXPECTED_VALUE   sin tocar
               deuda                            sin tocar
 ```

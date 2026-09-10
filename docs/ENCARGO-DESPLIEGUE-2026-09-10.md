@@ -38,7 +38,7 @@ hablará de límites — con el dueño delante.
 
 Concretamente, siguen intocables: `MAX_SPECULATION_BUDGET_PERCENT`,
 `MAX_SINGLE_SPECULATION_PERCENT`, `MAX_DEBT_SPECULATION_PERCENT`,
-`MAX_SAFE_DEBT`, `MIN_SPECULATION_YIELD`,
+`MAX_SAFE_DEBT`, `RENDIMIENTO_MINIMO_DEL_CAPITAL`,
 `MIN_SPECULATION_EXPECTED_VALUE`.
 
 **Y no se toca la deuda.** Luismi va tercero con 10 M en rojo; ésa es

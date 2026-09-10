@@ -233,7 +233,7 @@ decisiones    ninguna cambia. La vía viva de tendencia sigue con la
               1,0 por defecto y devuelve los mismos 1.671.780 de la
               foto del 04/09.
 
-umbrales      MIN_SPECULATION_YIELD = 0,03           sin tocar
+umbrales      RENDIMIENTO_MINIMO_DEL_CAPITAL = 0,03           sin tocar
               MIN_SPECULATION_EXPECTED_VALUE = 25000 sin tocar
 ```
 

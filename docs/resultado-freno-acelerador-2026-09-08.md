@@ -245,7 +245,7 @@ puerta        70/70 en verde  (68 al empezar, 2 guardias nuevas)
 commits       4
 frontend      npm run build OK · NO desplegado · dist/ intacto
 
-umbrales      MIN_SPECULATION_YIELD = 0,03          sin tocar
+umbrales      RENDIMIENTO_MINIMO_DEL_CAPITAL = 0,03          sin tocar
               MIN_SPECULATION_EXPECTED_VALUE = 25000 sin tocar
               presupuestos, topes y guardarrailes    sin tocar
 

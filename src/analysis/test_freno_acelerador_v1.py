@@ -420,10 +420,10 @@ def test_no_se_ha_bajado_ningun_umbral() -> None:
 
     from src.analysis.rival_bid_model import (
         MIN_SPECULATION_EXPECTED_VALUE,
-        MIN_SPECULATION_YIELD,
+        RENDIMIENTO_MINIMO_DEL_CAPITAL,
     )
 
-    assert MIN_SPECULATION_YIELD == 0.03
+    assert RENDIMIENTO_MINIMO_DEL_CAPITAL == 0.03
     assert MIN_SPECULATION_EXPECTED_VALUE == 25_000
 
 
@@ -475,7 +475,7 @@ def test_la_compuerta_solo_sabe_decir_que_no() -> None:
         if isinstance(objetivo, ast.Name)
     }
 
-    for prohibido in ("MIN_SPECULATION_YIELD", "MAX_SINGLE", "BUDGET"):
+    for prohibido in ("RENDIMIENTO_MINIMO_DEL_CAPITAL", "MAX_SINGLE", "BUDGET"):
         assert not any(prohibido in n for n in nombres), (
             f"la compuerta define `{prohibido}`, que no es suyo"
         )

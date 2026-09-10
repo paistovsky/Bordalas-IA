@@ -28,7 +28,7 @@ from src.analysis.rival_bid_model import (
     DEFAULT_PREMIUM_CURVE,
     MIN_PREMIUM_SAMPLES,
     MIN_SPECULATION_EXPECTED_VALUE,
-    MIN_SPECULATION_YIELD,
+    RENDIMIENTO_MINIMO_DEL_CAPITAL,
     MIN_WIN_PROBABILITY,
     build_bid_model,
     calibrate_premium_curve,
@@ -921,7 +921,7 @@ def test_una_especulacion_que_si_rinde_pasa() -> None:
 
     rendimiento = plan["expected_value"] / plan["bid"]
 
-    assert rendimiento >= MIN_SPECULATION_YIELD
+    assert rendimiento >= RENDIMIENTO_MINIMO_DEL_CAPITAL
 
     print(
         f"  OK  una especulacion al "
@@ -964,7 +964,7 @@ def test_el_motivo_explica_el_rechazo_con_numeros() -> None:
 
     assert "%" in motivo, motivo
     assert str(MIN_SPECULATION_EXPECTED_VALUE)[:2] in motivo \
-        or f"{MIN_SPECULATION_YIELD * 100:.0f} %" in motivo, motivo
+        or f"{RENDIMIENTO_MINIMO_DEL_CAPITAL * 100:.0f} %" in motivo, motivo
 
     print("  OK  el rechazo viene con las cifras")
 

@@ -107,7 +107,7 @@ El estado se publica con **la banda y la racha con la que se ha juzgado**, para
 que ningún tramo encendido sea un número sin procedencia.
 
 **El 3 % no se ha tocado**, y hay guardia de que sigue atado a
-`MIN_SPECULATION_YIELD`. **Sin racha, el comportamiento es el de siempre.**
+`RENDIMIENTO_MINIMO_DEL_CAPITAL`. **Sin racha, el comportamiento es el de siempre.**
 
 **Y no cambia ninguna decisión hoy:** Roro rinde 2,55 % y Amatucci 2,35 % — los
 dos por debajo del listón. Gorosabel llega a 5,14 % y sigue `NO_DISPONIBLE` por
