@@ -401,22 +401,178 @@ def test_las_dos_cuentas_atras_corren_en_el_navegador() -> None:
     ciclo no llega, tiene que DECIRLO en vez de quedarse en cero
     fingiendo normalidad: un ciclo que no entra es justo lo que
     hay que ver.
+
+    Viven en dos sitios desde el 10/09: el ciclo en la pastilla
+    de la cabecera, el reset en la tira.
+    """
+
+    tira = _lee(DASHBOARD / "components" / "KpiStrip.jsx")
+
+    assert "setInterval" in tira and "segundosAlReset" in tira, (
+        "el reset no corre en la tira"
+    )
+
+    cabecera = _lee(DASHBOARD / "App.jsx")
+
+    assert "setInterval" in cabecera, (
+        "la pastilla no tiene reloj: la cuenta atras del ciclo "
+        "se queda congelada en la hora de la foto"
+    )
+
+    assert "proximoCiclo" in cabecera, (
+        "la pastilla no calcula el proximo ciclo"
+    )
+
+    assert "lateMinutes" in cabecera, (
+        "el ciclo que no llega no se canta"
+    )
+
+
+def test_la_tira_no_duplica_la_pastilla() -> None:
+    """
+    "FOTO" repetia la pastilla verde de la cabecera, y ademas
+    pintaba "hace 7.0107 min": `minutesOld` devuelve fraccion y
+    se imprimia cruda.
+
+    La tira queda en SEIS, y ni uno mas: es el sitio donde antes
+    se colaba todo.
     """
 
     fuente = _lee(DASHBOARD / "components" / "KpiStrip.jsx")
 
-    assert "setInterval" in fuente, (
-        "la tira no tiene reloj propio: las cuentas atras estan "
-        "congeladas en la hora de la foto"
+    assert 'label="Foto"' not in fuente, (
+        "el cuadro FOTO ha vuelto a la tira"
     )
 
-    assert (
-        "proximoCiclo" in fuente
-        and "segundosAlReset" in fuente
-    ), "falta una de las dos cuentas atras"
+    assert 'label="Próximo ciclo"' not in fuente, (
+        "el cuadro PROXIMO CICLO ha vuelto a la tira"
+    )
 
-    assert "lateMinutes" in fuente, (
-        "el ciclo que no llega no se canta"
+    cuantos = fuente.count("label=")
+
+    assert cuantos == 6, (
+        f"la tira tiene {cuantos} cuadros y son seis: Jornada, "
+        f"Deuda maxima, Reset, Cierre, XI, Pujas puestas"
+    )
+
+
+def test_la_edad_de_la_foto_va_en_minutos_enteros() -> None:
+    """
+    "hace 7.0107 min", con siete decimales, porque `minutesOld`
+    devuelve fraccion. Y ademas leia la marca como hora local,
+    que solo acierta si quien mira esta en Madrid (doctrina 35).
+    """
+
+    from src.analysis import __name__ as _  # noqa: F401
+
+    relojes = _lee(DASHBOARD / "lib" / "relojes.js")
+
+    assert "minutosDeLaFoto" in relojes, (
+        "no hay una edad de la foto en minutos enteros"
+    )
+
+    assert "Math.floor" in relojes.split("minutosDeLaFoto")[1], (
+        "la edad de la foto sigue devolviendo decimales"
+    )
+
+    cabecera = _lee(DASHBOARD / "App.jsx")
+
+    assert "minutosDeLaFoto" in cabecera, (
+        "la pastilla sigue pintando minutos con decimales"
+    )
+
+    assert "mmss" in cabecera, (
+        "la cuenta atras de la pastilla no va en MM:SS"
+    )
+
+
+def test_cada_suplente_trae_la_fila_entera() -> None:
+    """
+    Un motivo suelto no basta. El dueno tiene que poder juzgar el
+    cambio sin abrir nada mas, y para eso la fila necesita: quien
+    es, de que equipo, su tit. %, por que esta fuera, A QUIEN
+    tendria que quitarle el puesto -con nombre- y cuanto cambia
+    el once.
+
+    Sin el rival concreto, "puntua menos" no dice menos QUE
+    QUIEN, y no se puede decidir nada.
+    """
+
+    xi = [
+        {
+            "id": 2,
+            "name": "Jonny Castro",
+            "position": 2,
+            "lineup_position": 2,
+            "lineup_score": 250369.0,
+            "weekly_expected_value": 0.25,
+            "team_id": 91,
+            "jp_confidence": 96.0,
+            "points": 4,
+        }
+    ]
+
+    fila = banquillo_con_motivo(
+        xi
+        + [
+            {
+                "id": 3,
+                "name": "Kiko Femenía",
+                "position": 2,
+                "lineup_eligible": True,
+                "automatic_lineup": True,
+                "lineup_score": 250100.0,
+                "weekly_expected_value": 0.20,
+                "team_id": 44,
+                "jp_confidence": 31.0,
+            }
+        ],
+        xi,
+    )[0]
+
+    for campo in (
+        "name",
+        "position",
+        "team_id",
+        "reason_text",
+        "compared_to",
+        "weekly_value_delta",
+    ):
+        assert fila.get(campo) is not None, (
+            f"la fila del suplente no trae `{campo}`"
+        )
+
+    # Su probabilidad, por la misma cadena que las tarjetas del
+    # once: `starter_probability ?? jp_confidence`.
+    assert (
+        fila.get("starter_probability") is not None
+        or fila.get("jp_confidence") is not None
+    ), "no se puede pintar el tit. % del suplente"
+
+    # Y la del rival, que sin ella el cambio no se puede juzgar.
+    assert fila["compared_to_probability"] == 96.0, fila
+
+    assert fila["compared_to_team_id"] == 91, fila
+
+
+def test_sin_dato_de_titularidad_no_se_pinta_un_cero() -> None:
+    """
+    Pintar "tit. 0 %" cuando la fuente externa falla hace creer
+    que el jugador no juega, que es lo contrario de "no se sabe".
+    Es la misma regla que ya rige en las tarjetas del once.
+    """
+
+    fuente = _lee(
+        DASHBOARD / "components" / "PosiblesCambiosPanel.jsx"
+    )
+
+    assert "sin dato" in fuente, (
+        "el panel no distingue 'no se sabe' de un 0 %"
+    )
+
+    assert "jp_confidence" in fuente, (
+        "el panel no usa la misma cadena de titularidad que el "
+        "once: dos numeros distintos para el mismo jugador"
     )
 
 
@@ -452,6 +608,10 @@ TESTS = [
     test_la_amenaza_mas_alta_sale_en_rojo,
     test_las_dos_cuentas_atras_corren_en_el_navegador,
     test_la_deuda_maxima_ensena_su_desglose,
+    test_la_tira_no_duplica_la_pastilla,
+    test_la_edad_de_la_foto_va_en_minutos_enteros,
+    test_cada_suplente_trae_la_fila_entera,
+    test_sin_dato_de_titularidad_no_se_pinta_un_cero,
 ]
 
 

@@ -1,15 +1,25 @@
 import { useEffect, useState } from "react";
-import { formatMoney, minutesOld } from "../lib/utils";
+import { formatMoney } from "../lib/utils";
 import {
   cuenta,
-  madridNaiveAUTC,
-  proximoCiclo,
+  minutosDeLaFoto,
   segundosAlReset
 } from "../lib/relojes";
 
 /* LA TIRA DE ESTADO (10/09/2026)
  *
- * Ocho cosas, y dos de ellas corriendo en vivo.
+ * Seis cosas, y una corriendo en vivo.
+ *
+ * LO QUE SE FUE ARRIBA
+ *
+ *   "Foto" y "Proximo ciclo" estaban aqui y ahora van en la
+ *   pastilla verde de la cabecera, juntas:
+ *
+ *       foto de hace 6 min · proximo ciclo en 25:31
+ *
+ *   "Foto" duplicaba esa pastilla, y ademas pintaba
+ *   "hace 7.0107 min": `minutesOld` devuelve fraccion y aqui
+ *   se imprimia cruda.
  *
  * "DEUDA MÁXIMA" SUSTITUYE A "PUEDE GASTAR"
  *
@@ -116,17 +126,13 @@ export default function KpiStrip({ data }) {
   // ------------------------------------------------------
   // LOS DOS RELOJES
   // ------------------------------------------------------
-  // `generated_at` viene en hora de Madrid SIN zona. Se le pone
-  // la que le corresponde antes de comparar con nada: es el
-  // mismo error que nos costó la ventana del reset.
-  const ciclo = proximoCiclo(
-    ahora,
-    madridNaiveAUTC(meta.generated_at)
-  );
-
   const alReset = segundosAlReset(ahora);
 
-  const edad = minutesOld(meta.generated_at);
+  // La edad de la foto, con su zona puesta (doctrina 35).
+  // `minutesOld` la leia como hora LOCAL, asi que el cierre
+  // de jornada se descontaba mal para quien no estuviera en
+  // Madrid — dos horas de menos, sin avisar.
+  const edad = minutosDeLaFoto(meta.generated_at);
 
   // El cierre de la jornada venía calculado en la foto; se le
   // descuenta lo que ha pasado desde entonces para que no se
@@ -147,34 +153,6 @@ export default function KpiStrip({ data }) {
         label="Jornada"
         value={summary.target_matchday ?? "—"}
         sub={summary.phase || ""}
-      />
-
-      <Kpi
-        label="Foto"
-        value={edad != null ? `hace ${edad} min` : "—"}
-        sub={String(meta.generated_at || "").slice(11, 16)}
-        tone={edad != null && edad > 90 ? "bad" : ""}
-      />
-
-      {/* PRÓXIMO CICLO — EN VIVO, y si no llegó lo canta. */}
-      <Kpi
-        label={ciclo.lateMinutes ? "Ciclo NO llegado" : "Próximo ciclo"}
-        value={
-          ciclo.lateMinutes
-            ? `hace ${cuenta(ciclo.lateMinutes * 60)}`
-            : cuenta(ciclo.seconds)
-        }
-        sub={
-          ciclo.lateMinutes
-            ? "debería haber entrado ya"
-            : ciclo.next
-            ? ciclo.next.toLocaleTimeString("es-ES", {
-                hour: "2-digit",
-                minute: "2-digit"
-              })
-            : "sin cron conocido"
-        }
-        tone={ciclo.lateMinutes ? "bad" : ""}
       />
 
       {/* DEUDA MÁXIMA: lo que se puede comprometer, ya neto.

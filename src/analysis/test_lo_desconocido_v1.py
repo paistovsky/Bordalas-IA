@@ -40,6 +40,34 @@ RAIZ = Path(__file__).parents[2]
 DASHBOARD = RAIZ / "dashboard-v8" / "src"
 
 
+def _sin_comentarios(fuente: str) -> str:
+    """
+    El codigo, sin las notas que cuentan el incidente.
+
+    Dos guardias han tropezado ya con lo mismo: el fallo esta
+    contado por escrito -"aqui ponia `state or ABIERTO`",
+    "`minutesOld` la leia como hora LOCAL"- y la guardia leia esa
+    nota como si fuera codigo vivo.
+
+    Una guardia que obligue a borrar la explicacion del fallo
+    para pasar es una guardia que hace dano: la proxima persona
+    se encuentra el arreglo sin el motivo.
+    """
+
+    limpio = []
+
+    for linea in fuente.splitlines():
+
+        desnuda = linea.lstrip()
+
+        if desnuda.startswith(("#", "//", "*", "/*")):
+            continue
+
+        limpio.append(linea.split("//")[0])
+
+    return chr(10).join(limpio)
+
+
 def _lee(ruta: Path) -> str:
     if not ruta.exists():
         raise AssertionError(f"no existe {ruta}")
@@ -291,10 +319,24 @@ def test_la_foto_se_normaliza_antes_de_compararla() -> None:
     dicho "el ciclo llego" cuando no ha llegado.
     """
 
-    fuente = _lee(DASHBOARD / "components" / "KpiStrip.jsx")
+    # La comparacion contra el cron vive en la cabecera desde el
+    # 10/09; la tira sigue usando la foto para el cierre de
+    # jornada. Las DOS cruzan un limite, asi que las dos tienen
+    # que normalizar.
+    cabecera = _lee(DASHBOARD / "App.jsx")
 
-    assert "madridNaiveAUTC" in fuente, (
-        "la tira compara la foto con el cron sin ponerle zona"
+    assert "madridNaiveAUTC" in cabecera, (
+        "la pastilla compara la foto con el cron sin ponerle zona"
+    )
+
+    tira = _sin_comentarios(
+        _lee(DASHBOARD / "components" / "KpiStrip.jsx")
+    )
+
+    assert "minutesOld" not in tira, (
+        "la tira lee la foto como hora local: para quien no este "
+        "en Madrid, el cierre de jornada sale con dos horas de "
+        "menos y sin avisar"
     )
 
     relojes = _lee(DASHBOARD / "lib" / "relojes.js")

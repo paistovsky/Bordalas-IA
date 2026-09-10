@@ -661,3 +661,19 @@ td.rival{color:#93c5fd;font-weight:600}
     grid-template-columns: 1fr;
   }
 }
+
+/* POSIBLES CAMBIOS (10/09/2026)
+   Una fila por suplente, y la fila contesta entera. En pantalla
+   estrecha la tabla scrollea SOLA, dentro de su caja: la pagina
+   nunca se va de lado. */
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll-x>.tbl{min-width:640px}
+
+.who{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.who .sub{font-size:11px}
+.crest{width:16px;height:16px;object-fit:contain;flex:none}
+
+/* El que YA mejoraria el once. Un tinte, no un relleno: tiene
+   que verse de un vistazo sin tapar el texto de la fila. */
+.row-ok>td{background:rgba(34,197,94,.07)}
+.row-ok>td:first-child{box-shadow:inset 3px 0 0 var(--ok)}

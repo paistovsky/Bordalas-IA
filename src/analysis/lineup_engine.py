@@ -1731,6 +1731,27 @@ def banquillo_con_motivo(
                 "position": posicion,
                 "price": player.get("price"),
                 "points": player.get("points"),
+
+                # SU EQUIPO. La probabilidad de ser titular es
+                # en SU club, no en el nuestro, y sin saber cual
+                # es el numero no significa nada.
+                "team_id": player.get("team_id"),
+                "team_name": player.get("team_name"),
+
+                # LA MISMA CADENA QUE LAS TARJETAS DEL ONCE.
+                #
+                # `starter_probability ?? jp_confidence`, y sin
+                # dato NO es cero: pintar "tit. 0 %" hace creer
+                # que no juega, que es lo contrario de "no se
+                # sabe". Por eso viajan los dos campos y decide
+                # la pantalla, igual que en `PitchXI`.
+                "jp_confidence": player.get("jp_confidence"),
+                "starter_consensus": player.get(
+                    "starter_consensus"
+                ),
+                "starter_source_coverage": player.get(
+                    "starter_source_coverage"
+                ),
                 "reason": motivo,
                 "reason_text": frase,
                 "lineup_score": player.get("lineup_score"),
@@ -1745,6 +1766,22 @@ def banquillo_con_motivo(
                 ),
                 "compared_to_id": (
                     safe_player_id(rival) if rival else None
+                ),
+                "compared_to_team_id": (
+                    rival.get("team_id") if rival else None
+                ),
+                "compared_to_probability": (
+                    (
+                        rival.get("starter_probability")
+                        if rival.get("starter_probability")
+                        is not None
+                        else rival.get("jp_confidence")
+                    )
+                    if rival
+                    else None
+                ),
+                "compared_to_points": (
+                    rival.get("points") if rival else None
                 ),
                 "lineup_score_delta": _resta("lineup_score"),
                 "weekly_value_delta": _resta(

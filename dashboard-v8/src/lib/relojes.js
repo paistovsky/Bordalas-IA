@@ -247,3 +247,45 @@ export function madridNaiveAUTC(texto) {
     return null;
   }
 }
+
+/**
+ * "25:31" · "1:04:09" · "—". Sin decimales, nunca.
+ *
+ * `cuenta()` redondea a minutos por encima de la hora, que para
+ * una cuenta atras de cabecera se queda corto: "25m" no dice si
+ * quedan veinticinco minutos o veintiseis. Aqui van los segundos
+ * siempre.
+ */
+export function mmss(segundos) {
+  if (segundos == null || Number.isNaN(segundos)) return "—";
+
+  const s = Math.max(0, Math.round(segundos));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const seg = s % 60;
+
+  const dos = (n) => String(n).padStart(2, "0");
+
+  return h > 0
+    ? `${h}:${dos(m)}:${dos(seg)}`
+    : `${m}:${dos(seg)}`;
+}
+
+/**
+ * Minutos ENTEROS desde una marca de Madrid sin zona.
+ *
+ * `minutesOld` devuelve fraccion -de ahi el "hace 7.0107 min"
+ * que salia en la tira- y ademas lee la marca como hora local,
+ * que solo acierta si quien mira esta en Madrid. Doctrina 35.
+ */
+export function minutosDeLaFoto(texto) {
+  const iso = madridNaiveAUTC(texto);
+
+  if (!iso) return null;
+
+  const delta = (Date.now() - new Date(iso).getTime()) / 60000;
+
+  return Number.isFinite(delta)
+    ? Math.max(0, Math.floor(delta))
+    : null;
+}

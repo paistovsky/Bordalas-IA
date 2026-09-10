@@ -10,6 +10,12 @@ import MarcadorPage from "./pages/MarcadorPage";
 import AuditPage from "./pages/AuditPage";
 import { fetchStatus, normalizeStatus } from "./lib/status";
 import { ago, minutesOld } from "./lib/utils";
+import {
+  minutosDeLaFoto,
+  mmss,
+  proximoCiclo,
+  madridNaiveAUTC
+} from "./lib/relojes";
 
 const TITLES = {
   home: "INICIO",
@@ -71,6 +77,26 @@ export default function App() {
   const edad = minutesOld(data.meta.generated_at);
   const cicloMin = Number(data.meta.cycle_minutes || 30);
 
+  // LA PASTILLA LLEVA LAS DOS COSAS, Y CORREN (10/09/2026)
+  //
+  // Estaban duplicadas en la tira: "FOTO" repetia esto mismo y
+  // ademas en fracciones -"hace 7.0107 min"- porque `minutesOld`
+  // devuelve decimales. Aqui van juntas, la edad en minutos
+  // ENTEROS y la cuenta atras en MM:SS.
+  const [ahora, setAhora] = useState(() => new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setAhora(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const minutosFoto = minutosDeLaFoto(data.meta.generated_at);
+
+  const ciclo = proximoCiclo(
+    ahora,
+    madridNaiveAUTC(data.meta.generated_at)
+  );
+
   // Un ciclo y medio sin regenerar ya no es "hace un rato": es
   // una foto vieja y hay que decirlo antes de que alguien tome
   // una decision con ella.
@@ -86,8 +112,28 @@ export default function App() {
           <span className="tag">
             JORNADA {data.summary.target_matchday ?? "—"}
           </span>
-          <span className={rancio ? "freshness stale" : "freshness"}>
-            ● foto de {ago(data.meta.generated_at)}
+          <span
+            className={
+              ciclo.lateMinutes
+                ? "freshness stale"
+                : rancio
+                ? "freshness stale"
+                : "freshness"
+            }
+          >
+            ● foto de{" "}
+            {minutosFoto != null
+              ? `hace ${minutosFoto} min`
+              : ago(data.meta.generated_at)}
+            {" · "}
+            {/* Y SI EL CICLO NO LLEGA, LO DICE. Quedarse en cero
+                fingiendo normalidad es lo que tapo dos semanas
+                de ventana perdida. */}
+            {ciclo.lateMinutes
+              ? `debería haber entrado hace ${mmss(
+                  ciclo.lateMinutes * 60
+                )}`
+              : `próximo ciclo en ${mmss(ciclo.seconds)}`}
           </span>
         </div>
 
