@@ -114,6 +114,10 @@ TESTS = [
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
+
+    # El dia que Pepe empezo a escribir: renovar en la ventana,
+    # la zona de silencio y que renovar no pueda vender.
+    "src.analysis.test_renovar_en_la_ventana_v1",
     "src.analysis.test_ciclo_una_sola_vez_v1",
     "src.analysis.test_escrituras_con_cuerpo_v1",
     "src.analysis.test_cambiar_titular_v1",

@@ -385,6 +385,74 @@ decide de verdad no es el escáner, es adelantar el reloj y ver qué se cae sola
 
 ---
 
+### 24. La línea la pone el minuto en que arranca la jornada
+
+**Si estás en negativo en el minuto en que empieza la jornada, no puntúas. El
+T−6 h es salvaguarda nuestra, no norma de Biwenger.**
+
+*(Origen: DUEÑO, 10/09/2026.)*
+
+Las dos cifras se publican **por separado** y no se mezclan nunca: una es la
+regla del juego y la otra es nuestra prudencia. Confundirlas tiene los dos
+errores posibles dentro — vender con seis horas de margen creyendo que es
+obligatorio, y llegar al minuto cero creyendo que aún quedaban seis.
+
+---
+
+### 25. Una oferta viva es una opción gratis
+
+**Tenerla no obliga a nada. Solo ejercerla cuesta.**
+
+*(Origen: DUEÑO, 10/09/2026.)*
+
+Es el espejo exacto de lo que ya sabíamos de las pujas: perder no cuesta nada.
+Por eso el libro de ofertas vivas se cuida como se cuida una cartera de
+opciones, y por eso matar una oferta sin necesidad es tirar dinero que no se ve.
+
+**Medido el 10/09:** un listado vive **48,0 h exactas** (47 de 47
+observaciones), las ofertas del Computer caducan a las **07:00** (57 de 65) y la
+tanda nueva nace entre las **07:03 y las 07:09** (las 54 entrantes, siete días
+seguidos).
+
+---
+
+### 26. Renovar mata la oferta viva, así que se renueva tarde
+
+**En la ventana del reset, y solo lo que no llega vivo a la ventana siguiente.**
+
+*(Origen: DUEÑO, 10/09/2026, afinada con la medición del mismo día.)*
+
+El dueño lo enunció como «renovar a diario». Midiendo sale al revés: renovar por
+la mañana lo que caduca pasado mañana **tira un día de liquidez a la basura**,
+porque la oferta que matas tenía 24 h por delante.
+
+Y renovar a las 06:52 es **gratis**: la oferta que matas iba a morir a las 07:00
+de todas formas, y un listado creado a las 06:42 —dieciocho minutos antes del
+reset— recibió su oferta a las 07:04 del mismo día. La ventana hace doble turno:
+**colocar pujas y renovar lo que se muere.**
+
+**Lo que la medición añadió al encargo:** un listado que caduca *entre* dos
+ventanas no lo salva ninguna de las dos. El 10/09 eso pasaba con **siete de los
+ocho** listados. No se decide solo: se publica en `renovacion.at_risk` y lo mira
+el dueño, porque renovarlos fuera de la ventana costaría matar ofertas con 21 h
+de vida — que es justo la caja con la que se tapa la deuda contingente.
+
+---
+
+### 27. La liquidez no se busca cuando hace falta: se mantiene todos los días
+
+**Con el libro de ofertas renovado, la deuda de lunes a jueves deja de ser un
+riesgo.**
+
+*(Origen: DUEÑO, 10/09/2026.)*
+
+Es lo que convierte la regla 16 de una alarma en una rutina. Buscar liquidez el
+día que hace falta significa venderle a quien te la pida al precio que te
+ofrezca. Mantenerla significa llegar a ese día con las opciones ya compradas —y
+gratis.
+
+---
+
 ## Descartado
 
 **Entrenadores** (truco nº 4 del vídeo). **Esta liga no los usa.** Decisión del
@@ -424,8 +492,12 @@ ninguno por encima de los demás.
 | 21 | Ningún bolsillo se vacía de golpe | hecho, sin escribir |
 | 22 | Los intocables | **derogada** 21/09 |
 | 23 | Ninguna guardia lee estado externo | **hecha** 08/09 — barrido de las 96 |
+| 24 | La línea es el minuto de la jornada | **nueva** 10/09 |
+| 25 | Una oferta viva es una opción gratis | **nueva** 10/09 |
+| 26 | Renovar mata la oferta: se renueva tarde | **nueva** 10/09 — codificada, sin disparar |
+| 27 | La liquidez se mantiene, no se busca | **nueva** 10/09 |
 
-**Once hechas. Doce por hacer.**
+**Once hechas. Doce por hacer. Cuatro nuevas el 10/09.**
 
 ### El embudo, medido el 20/09
 

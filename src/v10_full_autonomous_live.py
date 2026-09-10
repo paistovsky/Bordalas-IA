@@ -238,6 +238,129 @@ def _verify_v10_write(action: str) -> dict:
     }
 
 
+# EL INTERRUPTOR DEL PRIMER DISPARO
+#
+#     Mientras esto sea False, la renovacion se calcula, se
+#     imprime y NO escribe nada contra Biwenger.
+RENOVACION_EN_VIVO = False
+
+
+def _renovar_en_la_ventana(cycle: dict | None) -> dict:
+    """
+    Renovar los listados que no llegan vivos a la proxima
+    ventana.
+
+    QUE ES RENOVAR: volver a listar al mismo precio. Biwenger
+    mata la oferta viva y publica una nueva en el reset -entre
+    las 07:03 y las 07:09, medido sobre siete dias-.
+
+    NO VENDE. El camino esta aislado en `renovar_executor`, que
+    solo sabe llamar a `list_player_for_sale`, y hay guardia.
+
+    Nunca lanza: una renovacion que revienta no puede tumbar el
+    ciclo.
+    """
+
+    vacio = {
+        "available": False,
+        "execute": False,
+        "renewals": [],
+        "sent": [],
+        "reason": None,
+    }
+
+    try:
+        import os
+
+        from datetime import datetime, timezone
+
+        from src.analysis.renovar_ofertas import (
+            filas_desde_lo_publicado,
+            que_renovar,
+        )
+        from src.analysis.zona_de_silencio import permite_escribir
+        from src.actions.renovar_executor import renovar
+        from src.telemetry.dashboard_state import (
+            compact_listings,
+        )
+
+        estado = (
+            (cycle or {}).get("result") or {}
+        ).get("state") or {}
+
+        # LA ZONA DE SILENCIO, PRIMERO.
+        #
+        #     Entre las 05:00 y las 07:00 de Madrid no se
+        #     escribe, salvo que la vuelta la haya disparado
+        #     alguien a proposito. La hora se calcula en Madrid
+        #     con su horario de verano, no en UTC.
+        silencio = permite_escribir(
+            datetime.now(timezone.utc),
+            os.environ.get("GITHUB_EVENT_NAME"),
+        )
+
+        filas = filas_desde_lo_publicado(
+            compact_listings(estado),
+            estado.get("offers"),
+            {"players": (cycle or {}).get("snapshot", {}).get("my_team")},
+        )
+
+        plan = que_renovar(
+            filas,
+            (estado.get("market_clock") or {}).get(
+                "seconds_to_reset"
+            ),
+            puede_escribir=bool(silencio.get("allowed")),
+        )
+
+        print()
+        print("=" * 100)
+        print("LA RENOVACION DE LA VENTANA")
+        print("=" * 100)
+        print(f"  {silencio.get('reason')}")
+        print(f"  {plan.get('reason')}")
+
+        for fila in (plan.get("renewals") or []):
+            print(
+                f"    RENUEVA {str(fila.get('name'))[:20]:<21}"
+                f"  caduca en "
+                f"{fila.get('listing_hours_to_expiry')} h"
+            )
+
+        for fila in (plan.get("at_risk") or []):
+            print(
+                f"    EN RIESGO {str(fila.get('name'))[:18]:<19}"
+                f"  {fila.get('reason')}"
+            )
+
+        if not plan.get("execute"):
+            return {**vacio, "available": True, **plan}
+
+        resultado = renovar(
+            plan["renewals"],
+            en_vivo=RENOVACION_EN_VIVO,
+        )
+
+        print(f"  {resultado.get('reason')}")
+
+        return {
+            **plan,
+            "available": True,
+            "sent": resultado.get("sent") or [],
+            "failed": resultado.get("failed") or [],
+            "live": RENOVACION_EN_VIVO,
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"La renovacion no pudo correr: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def run_full_autonomous_cycle() -> dict:
     print("\n" + "=" * 100)
     print("BORDALAS IA - V10.13.1 FULL AUTONOMOUS LIVE")
@@ -264,6 +387,25 @@ def run_full_autonomous_cycle() -> dict:
         "error": None,
     }
 
+    # ==========================================================
+    # 1-bis) LA RENOVACION DE LA VENTANA (10/09/2026)
+    # ==========================================================
+    #
+    #     Va ANTES de la puerta de "una escritura por ciclo",
+    #     porque renovar NO es comprar: no mueve dinero ni ocupa
+    #     fichas, y en la ventana hay que renovar varios a la vez.
+    #
+    #     Y va DESPUES de cobrar, que es lo que hace `run_cycle`
+    #     mas arriba: cobrar una oferta y renovarla en la misma
+    #     vuelta es perder el dinero.
+    #
+    #     APAGADA A PROPOSITO. `en_vivo=False`: monta el plan, lo
+    #     imprime y NO escribe. El primer disparo real se mira
+    #     con el dueno delante. Se enciende cambiando
+    #     `RENOVACION_EN_VIVO` a True, y nada mas.
+    renovacion = _renovar_en_la_ventana(cycle)
+
+    # ==========================================================
     # 2) If no prior write, allow BUY V10.
     if not write_used:
         buy = build_controlled_run(
