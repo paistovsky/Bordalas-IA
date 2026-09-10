@@ -56,6 +56,25 @@ export default function App() {
     };
   }, []);
 
+  // EL RELOJ DE LA PASTILLA, ARRIBA DEL TODO (10/09/2026)
+  //
+  // Estaba DEBAJO de los dos `return` de abajo, y eso tumbo la
+  // pagina entera: sin datos se ejecutaban cuatro hooks y con
+  // datos seis. React cuenta los hooks por orden y en el mismo
+  // numero cada vez -asi sabe cual es cual-, asi que al aparecer
+  // dos de la nada aborta el arbol completo. Pantalla en blanco,
+  // error #310.
+  //
+  // La regla no admite matices: los hooks van SIEMPRE arriba,
+  // antes de cualquier return y fuera de todo `if`. Lo
+  // condicional es lo que se PINTA, nunca el hook.
+  const [ahora, setAhora] = useState(() => new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setAhora(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
   if (error && !data) {
     return <div className="screen err">NO SE PUDO CARGAR BORDALÁS IA · {error}</div>;
   }
@@ -77,18 +96,6 @@ export default function App() {
   const edad = minutesOld(data.meta.generated_at);
   const cicloMin = Number(data.meta.cycle_minutes || 30);
 
-  // LA PASTILLA LLEVA LAS DOS COSAS, Y CORREN (10/09/2026)
-  //
-  // Estaban duplicadas en la tira: "FOTO" repetia esto mismo y
-  // ademas en fracciones -"hace 7.0107 min"- porque `minutesOld`
-  // devuelve decimales. Aqui van juntas, la edad en minutos
-  // ENTEROS y la cuenta atras en MM:SS.
-  const [ahora, setAhora] = useState(() => new Date());
-
-  useEffect(() => {
-    const t = setInterval(() => setAhora(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
 
   const minutosFoto = minutosDeLaFoto(data.meta.generated_at);
 
