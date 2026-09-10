@@ -82,6 +82,38 @@ export default function KpiStrip({ data }) {
   const credito = deudaMaxima + comprometido - saldo;
 
   // ------------------------------------------------------
+  // Y AHÍ ESTÁ EL PROBLEMA
+  // ------------------------------------------------------
+  //
+  // Cuadran SIEMPRE. Incluso si `maximumBid` viniera mal: el
+  // crédito absorbería el error entero y los cuatro números
+  // seguirían sumando tan tranquilos.
+  //
+  // Una pantalla que no puede estar equivocada tampoco puede
+  // avisar de que lo está.
+  //
+  // Por eso se contrasta contra la OTRA vía, la que no pasa por
+  // `maximumBid`:
+  //
+  //     línea de crédito = valor de plantilla × 0,25
+  //
+  // que está medida al euro en 12 de 12 estados. Si las dos no
+  // dan lo mismo, una de las dos miente y hay que verlo — no
+  // elegir en silencio cuál creer.
+  const medido = data.pujasDelDueno?.credito || {};
+
+  const creditoMedido = Number(medido.headroom || 0);
+
+  // Un euro de margen por el redondeo del 0,25 sobre la
+  // plantilla. Ni uno más: la medición fue exacta.
+  const descuadre =
+    medido.available && comprometido
+      ? Math.abs(credito - creditoMedido)
+      : 0;
+
+  const cuadra = descuadre <= 1;
+
+  // ------------------------------------------------------
   // LOS DOS RELOJES
   // ------------------------------------------------------
   // `generated_at` viene en hora de Madrid SIN zona. Se le pone
@@ -145,12 +177,18 @@ export default function KpiStrip({ data }) {
         tone={ciclo.lateMinutes ? "bad" : ""}
       />
 
-      {/* DEUDA MÁXIMA: lo que se puede comprometer, ya neto. */}
+      {/* DEUDA MÁXIMA: lo que se puede comprometer, ya neto.
+          Y en ROJO si las dos vías del crédito no coinciden. */}
       <Kpi
-        label="Deuda máxima"
+        label={cuadra ? "Deuda máxima" : "Deuda máxima NO CUADRA"}
         value={formatMoney(deudaMaxima)}
         sub={
-          comprometido
+          !cuadra
+            ? `crédito ${formatMoney(credito)} por resta, pero ` +
+              `${formatMoney(creditoMedido)} por plantilla ` +
+              `(${formatMoney(medido.roster_value)} × 0,25): ` +
+              `se llevan ${formatMoney(descuadre)}`
+            : comprometido
             ? `saldo ${formatMoney(saldo)} · comprometido ${formatMoney(
                 comprometido
               )} · crédito ${formatMoney(credito)}`
@@ -158,7 +196,7 @@ export default function KpiStrip({ data }) {
                 credito
               )} · sin pujas puestas`
         }
-        tone={comprometido ? "warn" : ""}
+        tone={!cuadra ? "bad" : comprometido ? "warn" : ""}
       />
 
       {/* RESET — EN VIVO. */}

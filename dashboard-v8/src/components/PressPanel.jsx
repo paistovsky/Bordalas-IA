@@ -1,4 +1,5 @@
 import { formatMoney } from "../lib/utils";
+import { tonoDe } from "../lib/tono";
 
 /**
  * LO QUE DICE LA PRENSA (05/09/2026)
@@ -100,8 +101,8 @@ export default function PressPanel({ data }) {
             {(press.items || []).map((item, i) => (
               <tr key={`${item.player_id}-${i}`}>
                 <td>
-                  <span className={TONO[item.kind] || "pill idle"}>
-                    {ETIQUETA[item.kind] || item.kind}
+                  <span className={tonoDe(TONO, item.kind).tono}>
+                    {tonoDe(ETIQUETA, item.kind).etiqueta}
                   </span>
                 </td>
                 <td>{item.player_name}</td>

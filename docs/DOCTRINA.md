@@ -778,6 +778,88 @@ comprueba que los seis que bajaron **llegaron** a Auditoría. La portada ya se
 llenó una vez, y se vuelve a llenar sola en cuanto nadie mira.
 
 
+---
+
+### 35. Una hora sin zona es un dato con dos nombres
+
+*(Cerrado por el dueño el 10/09/2026, después de tres fallos en un día.)*
+
+**Toda marca de tiempo que cruce un límite —fichero, red, pantalla— lleva su zona
+pegada, o se normaliza justo ahí.** No hay tercera opción, y «se sobreentiende
+que es de Madrid» no es llevarla pegada.
+
+`2026-09-10T09:04:33` es dos instantes distintos según quién lo lea, y los dos
+parecen correctos. Ese es el problema: **no falla ruidosamente**. Da una respuesta
+plausible y equivocada, y sobrevive a todas las pruebas que no midan el desfase.
+
+**Los tres del 10/09**, mismo error en tres capas:
+
+| dónde | qué pasó |
+|---|---|
+| **El cron externo** | se puso en hora de Madrid contra una ventana calculada en UTC. CET contra CEST: la ventana del reset no se abrió **en dos semanas** y nadie se enteró |
+| **El cálculo interno** | `VENTANA_MINUTOS` comparaba contra una hora de pared sin decir de dónde |
+| **`meta.generated_at`** | se publica en hora de Madrid **sin zona**. Leerlo como UTC lo adelanta dos horas: la cuenta atrás habría dicho «el ciclo llegó» cuando no ha llegado |
+
+**En la práctica:**
+
+- Al **escribir** un instante: ISO con offset, o `Z`. Nunca `datetime.now()` sin
+  `timezone`.
+- Al **leer** uno ajeno sin zona: se normaliza **en la primera línea que lo
+  toca**, no más abajo. `madridNaiveAUTC()` existe para eso.
+- La hora de una zona con horario de verano **se pide a la base de zonas**
+  (`Intl`, `zoneinfo`), no se codifica como `+2`. En marzo y octubre no es `+2`.
+- Un nombre de variable **no** documenta una zona. `ahora_madrid` es una promesa,
+  no una garantía.
+
+Esto es la [regla 33](#33-un-dato-un-nombre--van-siete) —*un dato, un nombre*—
+aplicada al tiempo: **un instante con dos lecturas posibles ya son dos datos.**
+
+---
+
+### 36. Un valor por defecto no puede absorber el caso más importante
+
+*(Cerrado por el dueño el 10/09/2026, después de que cayeran dos el mismo día.)*
+
+**Lo desconocido sale como desconocido. Nunca como el caso benigno.**
+
+Un `||` o un `or` que elige por defecto en una ruta que **decide** o que **pinta
+una alarma** convierte «no lo sé» en «no pasa nada». Y no deja rastro: no hay
+excepción, no hay registro, no hay nada que buscar después. El sistema informa de
+calma con la misma cara con la que informaría de calma verdadera.
+
+**Los dos del 10/09:**
+
+```js
+THREAT[intel.threat_level] || "pill idle"      // VERY_HIGH no estaba en la tabla
+```
+
+La amenaza **más alta** del tablero se pintaba en gris, exactamente igual que
+«ninguna». El caso que más urgía ver era el único invisible.
+
+```python
+state or ABIERTO      # una marca VIAJE en blanco daba permiso para vender
+```
+
+Un campo vacío se leía como «viaje abierto» y **autorizaba una venta**. Lo cazó
+una guardia propia, no una prueba.
+
+**La forma del fallo es siempre la misma:** el caso peligroso es el que *falta* de
+la tabla —el nuevo, el raro, el que nadie previó— y el defecto lo disfraza del
+caso más común, que casi siempre es el tranquilo.
+
+**En la práctica:**
+
+- Una tabla de severidad **tiene una entrada explícita para lo desconocido**, con
+  su propio tono, y **enseña el valor crudo** que no supo traducir. Si aparece un
+  `VERY_HIGH` nuevo mañana, que se vea que apareció.
+- Un permiso se concede con una **comparación exacta** (`== "ABIERTO"`), nunca con
+  la veracidad de un valor.
+- El defecto benigno se permite donde no decide ni alarma: una etiqueta de
+  posición que cae a `?` está diciendo la verdad.
+
+**Guardia:** `test_lo_desconocido_no_se_pinta_de_benigno`.
+
+
 ## Descartado
 
 **Entrenadores** (truco nº 4 del vídeo). **Esta liga no los usa.** Decisión del

@@ -1,4 +1,5 @@
 import { formatMoney } from "../lib/utils";
+import { tonoDe } from "../lib/tono";
 
 /**
  * EL RELOJ DE LA SOLVENCIA (12/09/2026)
@@ -67,8 +68,14 @@ export default function SolvencyClockPanel({ data }) {
             partido
           </div>
         </div>
-        <span className={`pill ${TONO[reloj.state] || "idle"}`}>
-          {reloj.state_label}
+        <span
+          className={
+            tonoDe(TONO, reloj.state).conocido
+              ? `pill ${TONO[reloj.state]}`
+              : tonoDe(TONO, reloj.state).tono
+          }
+        >
+          {reloj.state_label || tonoDe(TONO, reloj.state).etiqueta}
         </span>
       </div>
 

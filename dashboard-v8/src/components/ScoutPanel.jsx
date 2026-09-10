@@ -1,4 +1,5 @@
 import { formatMoney } from "../lib/utils";
+import { tonoDe } from "../lib/tono";
 
 /**
  * EL OJEADOR (06/09/2026)
@@ -37,7 +38,7 @@ const DIRECCION = {
 };
 
 function Direccion({ value, percent }) {
-  const [tono, flecha] = DIRECCION[value] || DIRECCION.FLAT;
+  const { tono, etiqueta: flecha } = tonoDe(DIRECCION, value);
 
   return (
     <span className={tono}>
@@ -222,8 +223,10 @@ export default function ScoutPanel({ data }) {
           </thead>
           <tbody>
             {(scout.highlights || []).map((fila) => {
-              const [tono, etiqueta] =
-                ACUERDO[fila.agreement] || ACUERDO.NONE;
+              const { tono, etiqueta } = tonoDe(
+                ACUERDO,
+                fila.agreement
+              );
 
               return (
                 <tr key={fila.player_id}>

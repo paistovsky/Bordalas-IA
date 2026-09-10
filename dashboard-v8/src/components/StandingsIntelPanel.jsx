@@ -1,4 +1,5 @@
 import { formatMoney } from "../lib/utils";
+import { tonoDe } from "../lib/tono";
 
 /**
  * Clasificacion con inteligencia del rival.
@@ -162,7 +163,11 @@ export default function StandingsIntelPanel({ data }) {
 
                 <td className="n">
                   {intel?.threat_level ? (
-                    <span className={THREAT[intel.threat_level] || "pill idle"}>
+                    <span
+                      className={
+                        tonoDe(THREAT, intel.threat_level).tono
+                      }
+                    >
                       {intel.threat_level}
                       {intel.threat_score != null
                         ? ` ${Math.round(Number(intel.threat_score))}`

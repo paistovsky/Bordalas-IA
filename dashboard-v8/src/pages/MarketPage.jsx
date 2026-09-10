@@ -2,6 +2,7 @@ import RosterExpansionPanel from "../components/RosterExpansionPanel";
 import ViaTenerPanel from "../components/ViaTenerPanel";
 import SeasonHorizonPanel from "../components/SeasonHorizonPanel";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
+import { tonoDe } from "../lib/tono";
 
 /* POR QUE UN "CLAVE" SALE SIN VALOR (21/08/2026)
  *
@@ -268,8 +269,10 @@ const DIVERGENCIA = {
 function Divergencia({ divergence }) {
   if (!divergence) return <span className="dim">—</span>;
 
-  const [tono, etiqueta] =
-    DIVERGENCIA[divergence.kind] || ["pill idle", divergence.kind];
+  const { tono, etiqueta } = tonoDe(
+    DIVERGENCIA,
+    divergence.kind
+  );
 
   const detalle = [
     divergence.note,
@@ -313,7 +316,7 @@ function AntesAhora({ gate, valor }) {
   const antes = Number(gate.value_before || 0);
   const ahora = Number(valor || 0);
 
-  const [tono, etiqueta] = COMPUERTA[gate.gate] || ["dim", gate.gate];
+  const { tono, etiqueta } = tonoDe(COMPUERTA, gate.gate);
 
   const detalle = [
     gate.gate_reason,
@@ -363,7 +366,7 @@ const VIA = {
 
 function Via({ nombre }) {
   if (!nombre) return <span className="dim">—</span>;
-  const [tono, etiqueta] = VIA[nombre] || ["dim", nombre];
+  const { tono, etiqueta } = tonoDe(VIA, nombre);
   return <span className={tono}>{etiqueta}</span>;
 }
 
@@ -882,7 +885,10 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
         </thead>
         <tbody>
           {(acquisition.targets || []).map((target) => {
-            const [tone, label] = DECISION[target.decision] || ["idle", target.decision];
+            const { tono: tone, etiqueta: label } = tonoDe(
+              DECISION,
+              target.decision
+            );
             const bids = target.decision === "BID";
             const viva = Number(target.live_bid || 0) > 0;
 

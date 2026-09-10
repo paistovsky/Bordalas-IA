@@ -126,6 +126,10 @@ DISABLE_ENV = "BORDALAS_SIN_MERCADO_RIVALES"
 MERCADO_DE_RIVAL = "MERCADO_DE_RIVAL"
 
 
+# Un estado que no llego. No es "ok" y no es una dolencia:
+# es la ausencia del dato, y se llama por su nombre.
+ESTADO_DESCONOCIDO = "desconocido"
+
 def _mercado_de_rivales_visible() -> bool:
     """
     Si los mercados de otros managers entran en la tabla.
@@ -527,7 +531,16 @@ def build_acquisition_board(
             if not ficha:
                 continue
 
-            estado = str(ficha.get("status") or "ok").lower()
+            # DOCTRINA 36: un estado que falta NO es "ok".
+            #
+            # Un jugador sin ficha de estado se colaba en el
+            # tablero como sano. Hoy no pasa -los 20 del tablero
+            # traen estado- pero el defecto estaba puesto para
+            # cuando dejara de pasar, y ese es justo el dia en
+            # que nadie estaria mirando.
+            estado = str(
+                ficha.get("status") or ESTADO_DESCONOCIDO
+            ).lower()
 
             valoracion = value_candidate(ficha, contexto)
 

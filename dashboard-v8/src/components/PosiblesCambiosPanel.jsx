@@ -1,4 +1,5 @@
 import { formatMoney } from "../lib/utils";
+import { tonoDe } from "../lib/tono";
 
 /* POSIBLES CAMBIOS (10/09/2026)
  *
@@ -116,7 +117,7 @@ export default function PosiblesCambiosPanel({ data }) {
               <td>{fila.name}</td>
 
               <td>
-                <span className={TONO[fila.reason] || "pill idle"}>
+                <span className={tonoDe(TONO, fila.reason).tono}>
                   {fila.reason_text}
                 </span>
               </td>

@@ -4086,6 +4086,34 @@ def build_dashboard_state() -> dict:
             capacidad_de_pujar,
         )
 
+        # LA VERDAD MEDIDA DE LA LINEA DE CREDITO
+        #
+        #     headroom = valor_plantilla x 0,25
+        #
+        # Medido al euro en 12 de 12 estados. NO depende de
+        # `maximumBid`, y ese es todo el punto: la tira calcula
+        # el credito restando -deuda maxima + comprometido -
+        # saldo-, asi que sus cuatro numeros cuadran SIEMPRE,
+        # incluso si `maximumBid` viniera mal.
+        #
+        # Una pantalla que no puede estar equivocada tampoco
+        # puede avisar de que lo esta. Por eso se publica aqui la
+        # otra via, la que no pasa por `maximumBid`: para poder
+        # contrastarlas y CANTARLO si no coinciden.
+        from src.analysis.linea_de_credito import (
+            LINEA_DE_CREDITO,
+            MEDIDA,
+            headroom_de,
+        )
+
+        pujas_del_dueno["credito"] = {
+            "available": bool(safe_int(valor_squad)),
+            "roster_value": safe_int(valor_squad),
+            "ratio": LINEA_DE_CREDITO,
+            "headroom": headroom_de(valor_squad),
+            "source": MEDIDA,
+        }
+
         pujas_del_dueno["capacity"] = capacidad_de_pujar(
             estado_mercado.get("maximumBid"),
             cash_budget=(exposure or {}).get("cash_budget"),

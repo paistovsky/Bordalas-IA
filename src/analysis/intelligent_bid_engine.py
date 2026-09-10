@@ -214,6 +214,10 @@ def build_market_bid_authority(
     }
 
 
+# Un estado que no llego. Ni "ok" ni una dolencia: la
+# ausencia del dato, con su nombre puesto.
+ESTADO_DESCONOCIDO = "desconocido"
+
 def _extract_user_from_sale(sale: dict) -> dict | None:
     """
     Biwenger puede cambiar la forma exacta del propietario.
@@ -722,14 +726,28 @@ def calculate_intelligent_bids(
             # tendencia. La recomendacion no trae todo eso.
             ficha = catalog_by_id.get(player_id) or {}
 
-            estado = str(ficha.get("status") or "ok").lower()
+            # DOCTRINA 36: lo desconocido no se puja como sano.
+            #
+            # Habia DOS defectos benignos encadenados aqui: una
+            # ficha sin estado se leia "ok", y ademas "unknown"
+            # estaba en la lista de los que si se pujan. Un
+            # jugador del que no sabemos si esta disponible se
+            # compraba igual que uno del que sabemos que si.
+            #
+            # Medido el 10/09: 0 de 20 fichas del tablero llegan
+            # sin estado, asi que esto no cambia ninguna puja de
+            # hoy. Cambia el dia que el catalogo venga cojo, que
+            # es exactamente cuando importa.
+            estado = str(
+                ficha.get("status") or ESTADO_DESCONOCIDO
+            ).lower()
 
             legacy_suggested_bid = suggested_bid
 
-            if estado not in {"ok", "unknown"}:
+            if estado != "ok":
 
-                # Lesionado, sancionado o descartado: no se ficha
-                # por barato que salga.
+                # Lesionado, sancionado, descartado — o sin dato:
+                # no se ficha por barato que salga.
                 suggested_bid = 0
                 action = "NO PUJAR"
 
