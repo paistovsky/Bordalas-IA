@@ -247,10 +247,32 @@ def reconstruir(
 
         ignoradas = []
 
-        # El tablon REPITE operaciones: el mismo movimiento llega
-        # en dos eventos con id distinto y la misma fecha. Sin
-        # esto se contaria dos veces.
+        # EL TABLON REPITE, Y EL ALMACEN ACUMULA (10/09/2026)
+        #
+        #     `stable_event_id` hashea el evento ENTERO, con su
+        #     `content`. Cuando Biwenger reemite el mismo hecho
+        #     con el payload cambiado -una puja mas en `bids`,
+        #     unos puntos corregidos tras un aplazamiento- el
+        #     hash cambia, el merge lo guarda como evento NUEVO y
+        #     el almacen se queda con los dos.
+        #
+        #     En local eran 241 eventos limpios. En produccion,
+        #     que lleva semanas acumulando, 468. Y la primera
+        #     version de esto deduplicaba las compras y las
+        #     ventas pero NO las jornadas: la J2 y la J3 se
+        #     pagaron dos veces y la caja salio 2.860.000 de mas.
+        #
+        #     Asi que se deduplica TODO lo que suma o resta, por
+        #     su identidad logica y no por el id del evento.
         vistos = set()
+
+        repetidos = 0
+
+        # Las jornadas, aparte: de cada `round.id` se queda la
+        # ultima version que llegue. Asi una correccion de puntos
+        # -que es a lo que se debe la reemision- sustituye a la
+        # anterior en vez de sumarse a ella.
+        jornadas = {}
 
         for evento in sorted(
             filas, key=lambda e: safe_int(e.get("date"))
@@ -284,6 +306,7 @@ def reconstruir(
                     )
 
                     if clave in vistos:
+                        repetidos += 1
                         continue
 
                     vistos.add(clave)
@@ -317,35 +340,14 @@ def reconstruir(
                             ignoradas.append(nombre)
                         continue
 
-                    # SIN ORDENAR, A PROPOSITO.
-                    #
-                    # El premio por puesto NO se deduce de la
-                    # posicion: se saca restando `bonus - puntos
-                    # x 30.000` a cada manager. En la J2 hay dos
-                    # empatados a 28 puntos con premios distintos
-                    # -250.000 y 500.000- y cualquier orden que
-                    # inventaramos aqui se los cambiaria.
-                    for fila in bloque.get("results") or []:
+                    # La ultima gana: los eventos vienen
+                    # ordenados por fecha, asi que una correccion
+                    # de puntos sustituye a la version anterior
+                    # en vez de sumarse a ella.
+                    if ronda["id"] in jornadas:
+                        repetidos += 1
 
-                        if not isinstance(fila, dict):
-                            continue
-
-                        quien = (fila.get("user") or {}).get("id")
-
-                        if not quien:
-                            continue
-
-                        pagado = safe_int(fila.get("bonus"))
-
-                        libro[quien]["matchday"] += pagado
-
-                        # El premio por puesto, aparte, para poder
-                        # auditarlo sin desmontar el libro.
-                        libro[quien]["matchday_premium"] += (
-                            pagado
-                            - safe_int(fila.get("points"))
-                            * EUROS_POR_PUNTO
-                        )
+                    jornadas[ronda["id"]] = bloque
 
             # --------------------------------------------
             # LA RACHA DIARIA
@@ -359,10 +361,54 @@ def reconstruir(
 
                     quien = (op.get("user") or {}).get("id")
 
-                    if quien:
-                        libro[quien]["streak"] += safe_int(
-                            op.get("amount")
-                        )
+                    if not quien:
+                        continue
+
+                    importe = safe_int(op.get("amount"))
+
+                    clave = (
+                        "bonus",
+                        safe_int(evento.get("date")),
+                        quien,
+                        importe,
+                        op.get("reason"),
+                    )
+
+                    if clave in vistos:
+                        repetidos += 1
+                        continue
+
+                    vistos.add(clave)
+
+                    libro[quien]["streak"] += importe
+
+        # AHORA SE PAGAN LAS JORNADAS, una sola vez cada una.
+        for bloque in jornadas.values():
+
+            for fila in bloque.get("results") or []:
+
+                if not isinstance(fila, dict):
+                    continue
+
+                quien = (fila.get("user") or {}).get("id")
+
+                if not quien:
+                    continue
+
+                pagado = safe_int(fila.get("bonus"))
+
+                libro[quien]["matchday"] += pagado
+
+                # El premio por puesto, aparte, para poder
+                # auditarlo sin desmontar el libro. No se deduce
+                # de la posicion: se resta, porque en la J2 hay
+                # dos empatados a 28 puntos con premios
+                # distintos.
+                libro[quien]["matchday_premium"] += (
+                    pagado
+                    - safe_int(fila.get("points"))
+                    * EUROS_POR_PUNTO
+                )
 
         # Los managers que no movieron nada tambien tienen caja.
         for quien in managers or []:
@@ -394,6 +440,21 @@ def reconstruir(
             "initial_balance": saldo_inicial,
             "managers": salida,
             "events_read": len(filas),
+
+            # CUANTAS REPETICIONES SE HAN DESCARTADO.
+            #
+            # No vale contar "eventos distintos" por su
+            # contenido: la reemision de Biwenger cambia el
+            # payload -mete una puja mas en `bids`- asi que dos
+            # copias del mismo hecho parecen distintas. Lo que se
+            # cuenta aqui es lo que la reconstruccion ha
+            # colapsado por identidad LOGICA, que es lo que
+            # delata un almacen acumulando.
+            "repeats_skipped": repetidos,
+
+            # Y las jornadas: cuantas llegaron y cuantas pagan.
+            "rounds_seen": len(jornadas) + len(ignoradas),
+            "rounds_paid": len(jornadas),
             "ignored_rounds": ignoradas,
             "reason": (
                 f"Caja de {len(salida)} managers reconstruida "

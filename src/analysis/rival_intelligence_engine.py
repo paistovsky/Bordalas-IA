@@ -2482,6 +2482,13 @@ def build_rival_intelligence(
             "available": caja.get("available"),
             "initial_balance": caja.get("initial_balance"),
             "events_read": caja.get("events_read"),
+
+            # Lo que hizo falta para diagnosticar el rojo del
+            # 10/09 en un minuto en vez de en una tarde: el
+            # ciclo veia 468 eventos donde en local habia 241.
+            "repeats_skipped": caja.get("repeats_skipped"),
+            "rounds_seen": caja.get("rounds_seen"),
+            "rounds_paid": caja.get("rounds_paid"),
             "ignored_rounds": caja.get("ignored_rounds"),
             "reason": caja.get("reason"),
         },

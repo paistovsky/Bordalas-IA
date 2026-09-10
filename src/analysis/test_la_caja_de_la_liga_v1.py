@@ -507,6 +507,159 @@ def test_la_tabla_de_clasificacion_no_ha_crecido() -> None:
         )
 
 
+# ============================================================
+# 5. EL TABLON LLEGA REPETIDO, Y LA CAJA NO SE INMUTA
+# ============================================================
+#
+# EL FALLO DEL 10/09, EN PRODUCCION.
+#
+#     La alarma salto en rojo: reconstruida 7.334.383 contra
+#     4.474.383 reales.
+#
+#     El ciclo vio 468 eventos donde en local habia 241.
+#     `stable_event_id` hashea el evento ENTERO, con su
+#     `content`: cuando Biwenger reemite el mismo hecho con el
+#     payload cambiado -una puja mas en `bids`, unos puntos
+#     corregidos tras un aplazamiento- el hash cambia, el merge
+#     lo guarda como evento NUEVO y el almacen acumula.
+#
+#     Y la primera version de `reconstruir` deduplicaba las
+#     compras y las ventas pero NO las jornadas. La J2 y la J3
+#     se pagaron dos veces: 1.030.000 + 1.830.000 = 2.860.000,
+#     los que faltaban clavados.
+#
+# POR QUE EL FIXTURE NO LO CAZO
+#
+#     Porque el fixture estaba limpio. Una guardia que solo
+#     prueba con datos ordenados no comprueba nada del mundo
+#     real. Estas dos ensucian el tablon a proposito.
+
+
+def _reemitido(eventos: list) -> list:
+    """
+    El mismo tablon, con cada hecho repetido y el payload
+    cambiado. Es lo que hace Biwenger de verdad: no manda copias
+    identicas, manda el hecho otra vez con mas informacion.
+    """
+
+    import copy
+
+    sucio = list(eventos)
+
+    for evento in eventos:
+
+        doble = copy.deepcopy(evento)
+
+        contenido = doble.get("content")
+
+        for op in (
+            contenido
+            if isinstance(contenido, list)
+            else [contenido]
+        ):
+            if isinstance(op, dict):
+                op.setdefault("bids", []).append(
+                    {"user": {"id": 99}, "amount": 1}
+                )
+
+        sucio.append(doble)
+
+    return sucio
+
+
+def test_un_tablon_repetido_no_cambia_la_caja() -> None:
+    """
+    La caja tiene que salir IGUAL con el tablon limpio y con el
+    tablon reemitido. Si no, el numero depende de cuantas
+    semanas lleve acumulando el almacen, que es justo lo que
+    tumbo produccion.
+    """
+
+    limpio = reconstruir(TABLON, [YO])
+
+    sucio = reconstruir(_reemitido(TABLON), [YO])
+
+    assert limpio["available"] and sucio["available"]
+
+    assert (
+        sucio["managers"][YO]["cash"]
+        == limpio["managers"][YO]["cash"]
+    ), (
+        f"con el tablon reemitido la caja sale "
+        f"{sucio['managers'][YO]['cash']} y limpia "
+        f"{limpio['managers'][YO]['cash']}"
+    )
+
+    # Y el ensuciado tiene que haber sido de verdad: si
+    # `_reemitido` dejara de repetir, esto pasaria en vacio.
+    assert sucio["events_read"] > limpio["events_read"], (
+        "el tablon sucio no trae mas eventos que el limpio: la "
+        "guardia no esta comprobando nada"
+    )
+
+
+def test_la_jornada_no_se_paga_dos_veces() -> None:
+    """
+    EL CASO EXACTO. La J2 repetida no puede pagar 2.060.000.
+
+    Se deduplica por `round.id` y gana la ULTIMA version, porque
+    la reemision se debe casi siempre a una correccion de puntos
+    tras un aplazamiento: la nueva sustituye, no se suma.
+    """
+
+    dos_veces = reconstruir([J2, J2, J2], [YO])
+
+    assert dos_veces["managers"][YO]["matchday"] == 1_030_000, (
+        f"la J2 se ha pagado "
+        f"{dos_veces['managers'][YO]['matchday']}"
+    )
+
+    # Y si la reemision trae los puntos CORREGIDOS, manda la
+    # ultima: no se suman las dos.
+    import copy
+
+    corregida = copy.deepcopy(J2)
+
+    for fila in corregida["content"]["results"]:
+        if fila["user"]["id"] == YO:
+            fila["points"] = 40
+            fila["bonus"] = 1_300_000
+
+    tras_correccion = reconstruir([J2, corregida], [YO])
+
+    assert (
+        tras_correccion["managers"][YO]["matchday"] == 1_300_000
+    ), tras_correccion["managers"][YO]
+
+
+def test_se_publica_cuantos_eventos_se_leyeron() -> None:
+    """
+    Lo que hacia falta para diagnosticar esto en un minuto en vez
+    de en una tarde: cuantos eventos vio el ciclo, y cuantos de
+    ellos eran hechos distintos.
+
+    En produccion eran 468 leidos; en local, 241. Ese numero solo
+    lo publicaba `events_read`, y hasta que no se miro no se supo
+    que los dos caminos veian tablones distintos.
+    """
+
+    salida = reconstruir(_reemitido(TABLON), [YO])
+
+    assert salida["events_read"] == 2 * len(TABLON), salida
+
+    assert salida["repeats_skipped"] > 0, (
+        "no se esta contando cuantas repeticiones se descartan: "
+        "sin eso, un almacen que acumula reemisiones no se ve"
+    )
+
+    assert salida["rounds_paid"] == 2, salida
+
+    # El limpio no puede parecer sucio.
+    limpio = reconstruir(TABLON, [YO])
+
+    assert limpio["repeats_skipped"] == 0, limpio
+
+
 TESTS = [
     test_la_caja_reconstruida_cuadra_con_la_real,
     test_la_comprobacion_no_pasa_con_las_manos_vacias,
@@ -517,6 +670,9 @@ TESTS = [
     test_el_motor_publica_el_cuadre_en_cada_vuelta,
     test_la_alarma_del_cuadre_solo_sale_si_esta_roja,
     test_la_tabla_de_clasificacion_no_ha_crecido,
+    test_un_tablon_repetido_no_cambia_la_caja,
+    test_la_jornada_no_se_paga_dos_veces,
+    test_se_publica_cuantos_eventos_se_leyeron,
 ]
 
 
