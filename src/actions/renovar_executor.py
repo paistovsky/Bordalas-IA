@@ -280,9 +280,41 @@ def renovar(
                 "live": bool(en_vivo),
                 "sent": bool(resultado.get("sent")),
                 "success": resultado.get("success"),
+
+                # LO QUE CONTESTO BIWENGER, ENTERO
+                #
+                #     El 10/09 Jonny volvio con `success: False`
+                #     y no habia forma de saber por que: el libro
+                #     guardaba el veredicto pero no el motivo.
+                "http_status": resultado.get("http_status"),
+                "response": resultado.get("response"),
+                "success_detail": resultado.get("success_detail"),
             }
 
             apuntar(anotacion, ruta_del_libro)
+
+            # UNA ESCRITURA ENVIADA NO ES UNA ESCRITURA HECHA
+            #
+            #     `sent` dice que salio; `success` dice que
+            #     entro. El 10/09 seis entraron y una no, y el
+            #     reintento del script no se entero porque solo
+            #     miraba las excepciones.
+            #
+            #     Si Biwenger dice que no, es un fallo.
+            if en_vivo and resultado.get("success") is False:
+
+                fallidas.append(
+                    {
+                        "name": fila.get("name"),
+                        "error": (
+                            f"Biwenger contesto "
+                            f"{resultado.get('http_status')}: "
+                            f"{resultado.get('success_detail') or resultado.get('response')}"
+                        ),
+                    }
+                )
+
+                continue
 
             enviadas.append(anotacion)
 
