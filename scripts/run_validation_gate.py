@@ -120,6 +120,11 @@ TESTS = [
     "src.analysis.test_suelo_de_titulares_v1",
     "src.analysis.test_marcador_v1",
     "src.analysis.test_plantillas_rivales_v1",
+
+    # El dia que una puja del dueno dejo a la liga entera en
+    # bancarrota: la linea de credito es un numero medido, no se
+    # deduce de un maximumBid contaminado.
+    "src.analysis.test_linea_de_credito_v1",
     "src.analysis.test_abono_jornada_v1",
     "src.analysis.test_mercado_completo_v1",
     "src.analysis.test_pujar_por_el_xi_v1",

@@ -731,15 +731,49 @@ def calibrate_debt_ratio(
     own_maximum_bid: int | None,
 ) -> dict:
     """
-    No hardcodeamos la regla de deuda de Biwenger.
+    El margen de deuda de Biwenger, que es un numero MEDIDO.
 
-    La calibramos con Pepe:
-        headroom = maximumBid oficial - saldo oficial
+    LO QUE HACIA ANTES, Y POR QUE ARRUINO A LA LIGA (10/09/2026)
 
-        ratio = headroom / valor actual plantilla Pepe
+        Deducia el ratio en caliente:
 
-    Como la regla es de liga, aplicamos el mismo ratio
-    a los rivales.
+            headroom = maximumBid oficial - saldo oficial
+            ratio    = headroom / valor de plantilla
+
+        Y `maximumBid` YA viene con las pujas vivas descontadas
+        -medido el 16/08-. Asi que en cuanto el dueno pujo
+        12.217.000 por Aubameyang, el margen se trago la puja:
+
+            07:52   ratio 0,250000   headroom 12.510.000
+            09:04   ratio 0,005855   headroom    293.000
+
+        Y como este ratio se aplicaba a los SIETE managers, la
+        capacidad estimada de toda la liga se hundio con el:
+        Pollo17 y Manzagool pasaron a cero, Luismi de 23,3 M a
+        2,9 M. Sin que ninguno hubiera hecho nada.
+
+        Lo grave no es la pantalla: es que toda la doctrina de no
+        pagar la prima se apoya en estimar bien la competencia.
+        Y Pepe se lo iba a hacer a si mismo en cuanto la cartera
+        pusiera cuatro pujas en la ventana del reset, justo
+        cuando decide cuanto ofrecer.
+
+    LO QUE HACE AHORA
+
+        El ratio no se deduce: se sabe. 0,25, medido sobre 12
+        estados distintos de 85 fotos, exacto al euro en los 12.
+
+            headroom     = valor_plantilla // 4
+            comprometido = saldo + headroom - maximumBid
+
+        El mismo algebra, despejado por el lado que no se
+        contamina.
+
+    SI ALGUN DIA EL RATIO REAL CAMBIA
+
+        Se detecta -`comprometido` saldria negativo, que es
+        imposible-, se publica como anomalia y se SIGUE con 0,25
+        hasta que se vuelva a medir. Nunca se adopta en caliente.
     """
 
     if (
@@ -793,49 +827,43 @@ def calibrate_debt_ratio(
                 ),
         }
 
-    headroom = (
-        int(
-            own_maximum_bid
-        )
-        -
-        int(
-            own_balance
-        )
+    from src.analysis.linea_de_credito import (
+        LINEA_DE_CREDITO,
+        comprometido_de,
     )
 
-    ratio = (
-        headroom
-        /
-        roster_value
+    # EL MARGEN SALE DE LA PLANTILLA, NO DE `maximumBid`.
+    cuenta = comprometido_de(
+        own_balance,
+        own_maximum_bid,
+        roster_value,
     )
-
-    # Protección contra respuestas anómalas.
-    if ratio < 0:
-
-        return {
-            "available":
-                False,
-
-            "ratio":
-                None,
-
-            "reason":
-                "Headroom negativo inesperado.",
-        }
 
     return {
         "available":
             True,
 
         "ratio":
-            float(
-                ratio
-            ),
+            LINEA_DE_CREDITO,
 
         "headroom":
-            int(
-                headroom
-            ),
+            cuenta["headroom"],
+
+        # LO QUE ANTES SE PERDIA POR EL CAMINO
+        #
+        #     El despeje viejo se comia justo esto. Ahora sale
+        #     publicado, que es lo que permite ver una puja del
+        #     dueno sin preguntarle.
+        "committed":
+            cuenta["committed"],
+
+        # Si el 0,25 dejara de cuadrar, aqui se veria. Y se
+        # seguiria usando 0,25.
+        "anomaly":
+            cuenta["anomaly"],
+
+        "source":
+            cuenta["source"],
 
         "own_roster_value":
             roster_value,
@@ -852,8 +880,15 @@ def calibrate_debt_ratio(
 
         "reason":
             (
-                "Ratio de deuda calibrado dinámicamente "
-                "con maximumBid oficial de Pepe."
+                cuenta["reason"]
+                if cuenta.get("anomaly")
+                else (
+                    f"Linea de credito MEDIDA: "
+                    f"{LINEA_DE_CREDITO:.2f} del valor de "
+                    f"plantilla. No se deduce de maximumBid, que "
+                    f"viene con las pujas vivas descontadas. "
+                    f"{cuenta['reason']}"
+                )
             ),
     }
 
@@ -861,22 +896,37 @@ def calibrate_debt_ratio(
 def apply_market_power(
     managers: dict[int, dict],
     calibration: dict,
+
+    # QUIENES SOMOS, Y CUANTO PODEMOS PUJAR DE VERDAD
+    #
+    #     Para todos los demas, la capacidad se ESTIMA con su
+    #     saldo y su plantilla. Para nosotros no hace falta
+    #     estimar nada: Biwenger publica nuestro `maximumBid`, y
+    #     ese SI tiene que llevar nuestras pujas descontadas,
+    #     porque es dinero que ya no podemos gastar.
+    #
+    #     Es la unica asimetria, y es a proposito: de los rivales
+    #     no sabemos si tienen pujas puestas; de nosotros, si.
+    current_user_id: int | None = None,
+    own_maximum_bid: int | None = None,
 ) -> None:
 
-    available = bool(
-        calibration.get(
-            "available",
-            False,
-        )
+    from src.analysis.linea_de_credito import (
+        LINEA_DE_CREDITO,
+        capacidad_de,
     )
 
-    ratio = (
-        calibration.get(
-            "ratio"
-        )
-        if available
-        else None
-    )
+    # LA CAPACIDAD DE UN RIVAL NO DEPENDE DE NUESTRAS PUJAS
+    #
+    #     Antes el ratio venia de `calibration`, que lo deducia
+    #     de nuestro `maximumBid`. El 10/09 el dueno pujo y
+    #     Pollo17 paso a "no puede pujar" sin haber hecho nada.
+    #
+    #     Ahora es la linea medida, que es de liga y no se mueve
+    #     porque nosotros pujemos. `calibration` se sigue
+    #     recibiendo -es quien publica la anomalia- pero ya no
+    #     manda sobre el ratio.
+    ratio = LINEA_DE_CREDITO
 
     for manager in managers.values():
 
@@ -900,62 +950,85 @@ def apply_market_power(
             roster_value
         )
 
-        if (
-            available
-            and
-            ratio is not None
-        ):
+        estimated_headroom = int(
+            max(0, roster_value) * ratio
+        )
 
-            estimated_headroom = round(
-                roster_value
-                *
-                float(
-                    ratio
+        manager[
+            "maximum_bid"
+        ] = (
+            capacidad_de(
+                balance,
+                roster_value,
+            )
+        )
+
+        manager[
+            "maximum_bid_headroom"
+        ] = (
+            estimated_headroom
+        )
+
+        manager[
+            "maximum_bid_source"
+        ] = (
+            "LINEA_MEDIDA"
+        )
+
+        # NOSOTROS, CON EL NUMERO OFICIAL
+        #
+        #     El estimado dice con cuanto PODRIAMOS pujar si no
+        #     tuvieramos nada puesto. El oficial dice con cuanto
+        #     podemos pujar AHORA. Para decidir, manda el
+        #     segundo.
+        es_nuestro = (
+            current_user_id is not None
+            and
+            safe_int(
+                manager.get(
+                    "user_id"
+                )
+                or
+                manager.get(
+                    "id"
                 )
             )
-
-            estimated_max_bid = max(
-                0,
-                balance
-                +
-                estimated_headroom,
+            ==
+            safe_int(
+                current_user_id
             )
+        )
 
-            manager[
-                "maximum_bid"
-            ] = (
-                estimated_max_bid
-            )
-
-            manager[
-                "maximum_bid_headroom"
-            ] = (
-                estimated_headroom
-            )
-
-            manager[
-                "maximum_bid_source"
-            ] = (
-                "CALIBRATED_FROM_PEPE"
-            )
-
-        else:
+        if (
+            es_nuestro
+            and
+            own_maximum_bid is not None
+        ):
 
             manager[
                 "maximum_bid"
             ] = max(
                 0,
-                balance,
+                safe_int(
+                    own_maximum_bid
+                ),
             )
-
-            manager[
-                "maximum_bid_headroom"
-            ] = 0
 
             manager[
                 "maximum_bid_source"
             ] = (
-                "CASH_ONLY_FALLBACK"
+                "OFICIAL_BIWENGER"
+            )
+
+            # Lo que podriamos pujar si no tuvieramos pujas
+            # puestas, al lado, para poder ver la diferencia.
+            manager[
+                "maximum_bid_gross"
+            ] = (
+                capacidad_de(
+                    balance,
+                    roster_value,
+                )
             )
 
 
@@ -2252,6 +2325,12 @@ def build_rival_intelligence(
 
         calibration=
             calibration,
+
+        current_user_id=
+            current_user_id,
+
+        own_maximum_bid=
+            own_maximum_bid,
     )
 
     build_points_rank(
