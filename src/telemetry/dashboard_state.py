@@ -3815,6 +3815,131 @@ def build_dashboard_state() -> dict:
     #
     # Observador: calcula y publica. Quien ejecuta es el camino de
     # siempre, ACCEPT_RECOVERY_OFFER.
+    # LAS PUJAS DEL DUENO, ANTES DEL RELOJ (10/09/2026)
+    #
+    #     El dueno puja a mano cuando le apetece. El 10/09 puso
+    #     11,8 M por Aubameyang y este reloj siguio diciendo
+    #     "Saldo positivo. El plazo no aprieta." durante horas,
+    #     porque leia `balance` y una puja viva no mueve el
+    #     balance: baja `maximumBid`.
+    #
+    #     Tres vias, y manda la mas conservadora. Va ANTES del
+    #     reloj porque el reloj necesita el numero.
+    try:
+        from src.analysis.pujas_del_dueno import (
+            pujas_comprometidas,
+            valor_de_plantilla,
+        )
+        from src.analysis.bid_exposure_engine import (
+            build_bid_exposure,
+        )
+        from src.intelligence.bitacora_del_saldo import (
+            apuntar_lectura,
+            ultima_lectura,
+        )
+
+        estado_mercado = (
+            (snapshot.get("market") or {}).get("status") or {}
+        )
+
+        valor_squad = valor_de_plantilla(snapshot.get("my_team"))
+
+        # La foto anterior, para la via de la diferencia. Se lee
+        # ANTES de apuntar la de ahora, o se restaria contra si
+        # misma y siempre daria cero.
+        anterior = ultima_lectura()
+
+        ahora_lectura = {
+            "balance": estado_mercado.get("balance"),
+            "maximum_bid": estado_mercado.get("maximumBid"),
+            "hours_to_reset": (market_clock or {}).get(
+                "hours_to_reset"
+            ),
+        }
+
+        pujas_del_dueno = pujas_comprometidas(
+            exposicion=build_bid_exposure(snapshot),
+            balance=estado_mercado.get("balance"),
+            maximum_bid=estado_mercado.get("maximumBid"),
+            valor_plantilla=valor_squad,
+            antes=anterior,
+            ahora=ahora_lectura,
+        )
+
+        # CON CUANTO SE PUEDE PUJAR DE VERDAD
+        #
+        #     Sobre maximumBid, que ya descuenta las pujas
+        #     vivas. Y la caja, con lo comprometido restado: el
+        #     saldo no sabe nada de pujas y quien reparta por
+        #     caja repartiria dinero ya gastado.
+        from src.analysis.pujas_del_dueno import (
+            capacidad_de_pujar,
+        )
+
+        pujas_del_dueno["capacity"] = capacidad_de_pujar(
+            estado_mercado.get("maximumBid"),
+            cash_budget=(exposure or {}).get("cash_budget"),
+            comprometido=pujas_del_dueno.get("committed"),
+        )
+
+        apuntar_lectura(
+            balance=estado_mercado.get("balance"),
+            maximum_bid=estado_mercado.get("maximumBid"),
+            roster_value=valor_squad,
+            hours_to_reset=ahora_lectura["hours_to_reset"],
+            committed=pujas_del_dueno.get("committed"),
+            source=pujas_del_dueno.get("source"),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        pujas_del_dueno = {
+            "available": False,
+            "committed": 0,
+            "source": None,
+            "sources": {},
+            "disagreement": 0,
+            "reason": (
+                f"No se pudieron contar las pujas del dueno: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # Los titulares, por nombre: con deuda contingente no se toca
+    # a ninguno, y para decirlo hay que saber quienes son.
+    titulares_ahora = [
+        j.get("name")
+        for j in (roster.get("players") or [])
+        if isinstance(j, dict) and j.get("is_starter")
+    ]
+
+    # EL CENSO DE LA TANDA NUEVA (una linea por reset)
+    #
+    #     "¿Hace falta vender a ciegas la noche antes de un
+    #      reset?" Si el Computer publica todas las mananas una
+    #     tanda que tapa el agujero con gente del banquillo, la
+    #     respuesta es que no hace falta nunca.
+    #
+    #     Con dos observaciones no se sabe. Se empieza a contar.
+    try:
+        from src.intelligence.bitacora_del_saldo import (
+            censar_el_reset,
+        )
+
+        censo = censar_el_reset(
+            offers_compactas,
+            (market_clock or {}).get("hours_to_reset"),
+            starters=titulares_ahora,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        censo = {
+            "available": False,
+            "reason": (
+                f"No se pudo censar el reset: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     try:
         from src.analysis.solvency_clock import build_solvency_clock
 
@@ -3824,6 +3949,8 @@ def build_dashboard_state() -> dict:
             offers=offers_compactas,
             market_clock=market_clock,
             sale_order=sale_order,
+            committed_bids=pujas_del_dueno.get("committed"),
+            starters=titulares_ahora,
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -4070,6 +4197,16 @@ def build_dashboard_state() -> dict:
         # Cuanto queda para el plazo de solvencia -T-6h del primer
         # partido-, si la deuda llega tapada y con que venta.
         "solvency_clock": solvency_clock,
+
+        # Cuanto dinero nuestro esta comprometido en pujas vivas,
+        # por las tres vias, aunque las haya puesto el dueno a
+        # mano y Biwenger no las publique en el tablon.
+        "pujas_del_dueno": pujas_del_dueno,
+
+        # Que trae la tanda nueva del Computer en cada reset.
+        # Observador puro: una linea al dia que dentro de un mes
+        # contesta si hace falta vender a ciegas o no.
+        "censo_del_reset": censo,
 
         # Que ficharia si pudiera llenar un hueco de plantilla.
         # Una lista al margen: no ficha nada.

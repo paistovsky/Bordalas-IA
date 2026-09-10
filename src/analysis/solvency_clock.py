@@ -100,6 +100,19 @@ OBSERVED_COMPUTER_SALES = 19
 # ============================================================
 
 SIN_DEUDA = "SIN_DEUDA"
+
+# DEUDA QUE TODAVIA NO EXISTE (10/09/2026)
+#
+#     No es lo mismo deber dinero que haberlo comprometido. Una
+#     puja viva es dinero que saldra SI se gana, y puede no
+#     ganarse.
+#
+#     Merece etiqueta propia porque se trata distinto: con deuda
+#     de verdad se vende lo que haga falta; con deuda contingente
+#     no se toca a ningun titular, porque una puja no ganada no
+#     justifica perder puntos.
+DEUDA_CONTINGENTE = "DEUDA_CONTINGENTE"
+
 CUBIERTO = "CUBIERTO"
 CUBIERTO_PERO_CADUCA = "CUBIERTO_PERO_CADUCA"
 PUBLICAR = "PUBLICAR"
@@ -108,6 +121,7 @@ EN_EL_PLAZO = "EN_EL_PLAZO"
 
 ESTADO_LABEL = {
     SIN_DEUDA: "Sin deuda",
+    DEUDA_CONTINGENTE: "Deuda contingente: se debera si se gana",
     CUBIERTO: "Cubierto por ofertas vivas",
     CUBIERTO_PERO_CADUCA: "Cubierto, pero la oferta caduca antes",
     PUBLICAR: "Hay que crear liquidez ya",
@@ -199,16 +213,51 @@ def build_solvency_clock(
     market_clock=None,
     sale_order=None,
     first_kickoff=None,
+
+    # LO QUE YA ESTA GASTADO AUNQUE EL SALDO NO LO DIGA
+    #
+    #     El 10/09 el dueno pujo 11,8 M a mano y este reloj
+    #     siguio publicando "Saldo positivo. El plazo no
+    #     aprieta.", porque leia `balance` y una puja viva no
+    #     mueve el balance: baja `maximumBid`.
+    #
+    #     Lo cuenta `pujas_del_dueno`, con tres vias y quedandose
+    #     con la mas conservadora. Aqui llega ya contado: este
+    #     modulo no lee el mundo.
+    committed_bids=0,
+
+    # Los titulares, por nombre. Con deuda contingente no se
+    # toca a ninguno, asi que hay que saber quienes son para
+    # poder decir si el agujero se tapa sin ellos.
+    starters=None,
 ) -> dict:
     """
     Cuanto queda para el plazo, y si la deuda llega tapada.
+
+    TRES NUMEROS, NO UNO REFUNDIDO
+
+        saldo               lo que hay en la cuenta
+        pujas comprometidas lo que saldra si se gana
+        saldo efectivo      el peor caso, que es sobre el que se
+                            calcula el deficit
 
     Nunca lanza.
     """
 
     try:
         saldo = safe_int(balance)
-        deficit = max(-saldo, 0)
+
+        comprometido = max(0, safe_int(committed_bids))
+
+        # EL PEOR CASO, QUE ES EL QUE HAY QUE PODER MIRAR
+        #
+        #     Si se ganan todas las pujas vivas. Es el unico
+        #     numero con el que la pregunta "¿llego en verde al
+        #     T-6h?" tiene una respuesta que no depende de la
+        #     suerte.
+        efectivo = saldo - comprometido
+
+        deficit = max(-efectivo, 0)
 
         horas_cierre = safe_float(hours_to_deadline)
 
@@ -313,10 +362,138 @@ def build_solvency_clock(
         )
 
         # ----------------------------------------------------
+        # EL PLAN DE LOS DOS MUNDOS
+        # ----------------------------------------------------
+        #
+        #     "Si gano, cubro con esto; si pierdo, no he perdido
+        #      nada."
+        #
+        #     Se publica ANTES del reset, que es cuando sirve de
+        #     algo. Y si NO existe un plan que cubra sin tocar
+        #     titulares, lo dice: es justo lo que el 10/09 no
+        #     dijo y por eso el dueno se entero por su cuenta.
+
+        titulares = {
+            str(n) for n in (starters or []) if n
+        }
+
+        del_banquillo = [
+            o for o in vendibles
+            if str(o.get("name")) not in titulares
+        ]
+
+        sin_titulares = sum(
+            o["amount"] for o in del_banquillo
+        )
+
+        # LO QUE ES GRATIS EN LOS DOS MUNDOS
+        #
+        #     Ofertas de gente que no juega, que caducan en el
+        #     mismo reset en el que se resuelve la puja. Cobrarlas
+        #     no cuesta ni un punto y no cobrarlas las pierde.
+        #     Eso es preparacion, no reaccion.
+        gratis_ahora = [
+            o for o in del_banquillo
+            if o["hours_to_expiry"] is not None
+            and horas_reset is not None
+            and o["hours_to_expiry"] <= horas_reset + 1.0
+        ]
+
+        plan = {
+            "available": comprometido > 0,
+            "committed": comprometido,
+
+            "if_won": {
+                "need": deficit,
+                "from_bench": sin_titulares,
+                "covered": bool(
+                    deficit <= 0 or sin_titulares >= deficit
+                ),
+                "players": [
+                    {
+                        "name": o["name"],
+                        "amount": o["amount"],
+                        "hours_to_expiry": o["hours_to_expiry"],
+                    }
+                    for o in sorted(
+                        del_banquillo,
+                        key=lambda x: -x["amount"],
+                    )
+                ],
+            },
+
+            "if_lost": {
+                "need": 0,
+                "reason": (
+                    "Si la puja se pierde no hay agujero: el "
+                    "saldo se queda como esta."
+                ),
+            },
+
+            "free_in_both_worlds": [
+                {
+                    "name": o["name"],
+                    "amount": o["amount"],
+                    "hours_to_expiry": o["hours_to_expiry"],
+                }
+                for o in gratis_ahora
+            ],
+
+            # LA REGLA, ESCRITA DONDE SE LEE EL PLAN
+            "never_sell_starters": True,
+        }
+
+        if comprometido <= 0:
+            plan["reason"] = (
+                "Sin pujas comprometidas no hay dos mundos que "
+                "planificar."
+            )
+
+        elif deficit <= 0:
+            plan["reason"] = (
+                f"Aunque se ganen las pujas ({euros(comprometido)} "
+                f"EUR), el saldo aguanta: quedaria en "
+                f"{euros(efectivo)} EUR."
+            )
+
+        elif sin_titulares >= deficit:
+            plan["reason"] = (
+                f"SI SE GANA: faltan {euros(deficit)} EUR y hay "
+                f"{euros(sin_titulares)} EUR en ofertas de gente "
+                f"que no juega. Se tapa sin tocar el once. SI SE "
+                f"PIERDE: no hay nada que hacer."
+            )
+
+        else:
+            plan["reason"] = (
+                f"SI SE GANA: faltan {euros(deficit)} EUR y las "
+                f"ofertas de los que no juegan solo dan "
+                f"{euros(sin_titulares)} EUR. NO HAY PLAN QUE "
+                f"CUBRA SIN TOCAR A UN TITULAR: lo decide el "
+                f"dueno, no la maquina. SI SE PIERDE: no hay "
+                f"nada que hacer."
+            )
+
+        # ----------------------------------------------------
         # EL ESTADO
         # ----------------------------------------------------
 
-        if deficit <= 0:
+        if deficit > 0 and saldo >= 0:
+            # DEUDA CONTINGENTE: el saldo esta en positivo y el
+            # agujero lo abre una puja que todavia puede
+            # perderse. No es deuda hasta el reset.
+            estado = DEUDA_CONTINGENTE
+
+            motivo = (
+                f"Saldo {euros(saldo)} EUR, pero hay "
+                f"{euros(comprometido)} EUR comprometidos en "
+                f"pujas vivas: si se ganan, el saldo queda en "
+                f"{euros(efectivo)} EUR. No es deuda todavia. NO "
+                f"se vende a ningun titular por una puja que "
+                f"puede no ganarse."
+            )
+
+        elif deficit <= 0:
             estado = SIN_DEUDA
 
             motivo = (
@@ -415,7 +592,13 @@ def build_solvency_clock(
             "available": True,
             "reason": None,
 
+            # LOS TRES NUMEROS, POR SEPARADO Y NO REFUNDIDOS
             "balance": saldo,
+            "committed_bids": comprometido,
+            "effective_balance": efectivo,
+
+            # El deficit se calcula sobre el EFECTIVO, que es el
+            # peor caso.
             "deficit": deficit,
 
             "hours_to_deadline": (
@@ -476,6 +659,10 @@ def build_solvency_clock(
             ),
 
             "recommended_sale": recomendada,
+
+            # "Si gano, cubro con esto; si pierdo, no he perdido
+            # nada." Publicado ANTES del reset.
+            "two_world_plan": plan,
 
             # Lo medido, para que el numero de arriba se pueda
             # discutir con datos y no de memoria.

@@ -163,6 +163,11 @@ TESTS = [
     "src.analysis.test_despliegue_v1",
     "src.analysis.test_orden_de_venta_v1",
     "src.analysis.test_reloj_solvencia_v1",
+
+    # El dia que el dueno pujo a mano y Pepe no se entero: las
+    # tres vias para ver una puja, la linea de credito medida y
+    # la deuda contingente.
+    "src.analysis.test_pujas_del_dueno_v1",
     "src.analysis.test_venta_ejecutable_v1",
     "src.analysis.test_ojeador_prensa_v1",
     "src.analysis.test_motivo_del_tablero_v1",
