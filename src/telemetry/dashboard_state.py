@@ -4322,6 +4322,83 @@ def build_dashboard_state() -> dict:
         }
 
     # ==========================================================
+    # EL LIBRO DE PRIMERA PUBLICACION (10/09/2026)
+    # ==========================================================
+    #
+    #     Renovar REESCRIBE la fecha del listado, asi que cada
+    #     renovacion destruye la evidencia de cuando se publico
+    #     un jugador por primera vez. Empieza hoy.
+    try:
+        from src.intelligence.libro_de_publicacion import (
+            apuntar_publicaciones,
+            resumen as resumen_publicacion,
+        )
+
+        nuestros = {
+            j.get("name"): j
+            for j in (roster.get("players") or [])
+            if isinstance(j, dict)
+        }
+
+        listados_hoy = [
+            {
+                "id": (nuestros.get(item.get("name")) or {}).get(
+                    "id"
+                ),
+                "name": item.get("name"),
+                "price": (
+                    nuestros.get(item.get("name")) or {}
+                ).get("price"),
+                "listed_price": item.get("listed_price"),
+            }
+            for item in (
+                (compact_listings(state) or {}).get(
+                    "renew_required"
+                )
+                or []
+            )
+        ]
+
+        apuntar_publicaciones(listados_hoy)
+
+        publicacion = resumen_publicacion()
+
+    except Exception as error:                      # noqa: BLE001
+        publicacion = {
+            "available": False,
+            "reason": (
+                f"No se pudo apuntar la publicacion: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # ==========================================================
+    # EL ORDEN DE PREFERENCIA AL COMPRAR (10/09/2026)
+    # ==========================================================
+    #
+    #     De la prima de recompra medida: un defensa se recompra
+    #     dos puntos mas caro que un delantero. NO quita a nadie.
+    try:
+        from src.analysis.salida_del_viaje import (
+            orden_de_preferencia,
+        )
+
+        preferencia = orden_de_preferencia(
+            [
+                dict(fila)
+                for fila in (
+                    (acquisition or {}).get("targets") or []
+                )
+                if isinstance(fila, dict)
+                and not fila.get("outside_computer_market")
+                and fila.get("decision") != "NO_DISPONIBLE"
+            ]
+        )[:12]
+
+    except Exception as error:                      # noqa: BLE001
+        preferencia = []
+
+    # ==========================================================
     # EL LIBRO EN LA SOMBRA (10/09/2026)
     # ==========================================================
     #
@@ -4521,6 +4598,16 @@ def build_dashboard_state() -> dict:
         # ninguna ruta lo lee, es un cuaderno para decidir
         # dentro de dos semanas si la compuerta se retira.
         "sombra": sombra,
+
+        # CUANDO SE PUBLICO CADA JUGADOR POR PRIMERA VEZ.
+        # Renovar reescribe la fecha del listado, asi que sin
+        # esto la evidencia se destruye en cada renovacion.
+        "publicacion": publicacion,
+
+        # EL ORDEN DE PREFERENCIA al comprar, que sale de la
+        # prima de recompra medida. NO es un filtro: no quita a
+        # nadie, los pone en orden.
+        "preferencia": preferencia,
 
         # Que ficharia si pudiera llenar un hueco de plantilla.
         # Una lista al margen: no ficha nada.

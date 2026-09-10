@@ -125,6 +125,11 @@ TESTS = [
     # la zona de silencio y que renovar no pueda vender.
     "src.analysis.test_renovar_en_la_ventana_v1",
 
+    # La primera ruta que VENDE sola: las cinco prohibiciones,
+    # cada una con su nombre, y la marca VIAJE como unico
+    # permiso.
+    "src.analysis.test_la_salida_del_viaje_v1",
+
     # El dia que se vio que la ventana no se habia abierto nunca
     # y que `FUERA_DE_VENTANA` no se distinguia de una noche
     # normal.
