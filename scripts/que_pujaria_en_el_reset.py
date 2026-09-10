@@ -128,11 +128,39 @@ def main() -> None:
         "deduce asi desde el 25/08)"
     )
 
-    caja = (bolsillos.get("cash_budget") or 0)
+    # LA CAJA, CON LO YA COMPROMETIDO FUERA (10/09/2026)
+    #
+    #     `cash_budget` sale del saldo, y el saldo no ve las
+    #     pujas: el 10/09 el dueno tenia 11,8 M comprometidos y
+    #     la caja seguia diciendo lo mismo que antes.
+    #
+    #     Repartir por caja seria repartir dinero ya gastado. Se
+    #     usa la caja efectiva, que es la misma menos lo
+    #     comprometido. Ningun umbral cambia: cambia la entrada,
+    #     que ya no miente.
+    pujas = estado.get("pujas_del_dueno") or {}
+
+    capacidad = pujas.get("capacity") or {}
+
+    caja_bruta = (bolsillos.get("cash_budget") or 0)
+
+    caja = (
+        capacidad.get("effective_cash")
+        if capacidad.get("available")
+        else caja_bruta
+    )
 
     presupuesto = bolsillos.get("available_budget") or 0
 
     print(f"  Caja libre: {euros(caja)} EUR")
+
+    if caja != caja_bruta:
+        print(
+            f"     (de {euros(caja_bruta)}, menos "
+            f"{euros(pujas.get('committed'))} ya comprometidos "
+            f"en pujas vivas)"
+        )
+
     print(f"  Bolsillo:   {euros(presupuesto)} EUR")
 
     # ==========================================================
