@@ -158,6 +158,27 @@ export default function App() {
           </div>
         )}
 
+        {/* LA CAJA DE LOS RIVALES NO CUADRA (10/09/2026)
+            De la caja cuelgan CAJA, PATRIMONIO, TOPE, PUJA,
+            MAX. VISTO y AMENAZA: media tabla de Clasificacion.
+
+            No podemos ver el saldo de nadie mas -la liga los
+            tiene ocultos- asi que la unica auditoria posible es
+            el NUESTRO: si el metodo falla con el que si podemos
+            comprobar, los otros seis tampoco valen.
+
+            SOLO SALE SI ESTA ROJA. Cuando cuadra no aparece
+            nada: una alarma que no salta no ocupa sitio. Por eso
+            se compara contra `false` y no contra un valor falsy:
+            un `null` es "no se ha podido comprobar", y eso no es
+            una alarma, es la columna diciendo SIN DATO. */}
+        {data.rivalIntel?.cash_check?.ok === false && (
+          <div className="alert crit">
+            <b>LA CAJA DE LOS RIVALES NO CUADRA.</b>{" "}
+            {data.rivalIntel.cash_check.reason}
+          </div>
+        )}
+
         {/* EL 11/11 EN VERDE MENTIA (20/08/2026)
             Un XI recomendado que no es el que hay puesto en
             Biwenger es el fallo mas caro posible: se juega la

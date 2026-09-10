@@ -40,12 +40,18 @@ ve**, mientras que acumulado se hereda.
 `bettingPool` queda fuera con motivo escrito: son quinielas `global: true` de todo
 Biwenger y el premio es en **créditos** de la app.
 
-## 3. La comprobación permanente
+## 3. La comprobación permanente — y sólo se ve si sale roja
 
-Cada ciclo publica `cash_check`: nuestra caja reconstruida contra el saldo real de
-la API. Hoy dice *«La caja reconstruida cuadra con el saldo real (4.474.383 EUR)»*.
-Si se separan un euro, salen las dos cifras, la diferencia y la frase que importa:
-**si el método falla con el nuestro, la caja de los seis rivales tampoco vale.**
+Corre en cada ciclo y publica `cash_check`. Hoy dice *«La caja reconstruida cuadra
+con el saldo real (4.474.383 EUR)»* — **y no aparece nada en pantalla**.
+
+Cuando falla, sale una línea roja de página, junto a las que ya existen (la foto
+rancia, el XI que no coincide con Biwenger). No es un panel ni una columna: es una
+alarma que no ocupa sitio mientras no salte.
+
+Se compara contra `false`, no contra un valor falsy, y eso importa: un `null` es
+«no se ha podido comprobar», y eso **no es una alarma** — es la columna diciendo
+SIN DATO.
 
 Es la única auditoría posible: la liga tiene `settings.balance = "hidden"`.
 
@@ -69,7 +75,22 @@ otra cosa (un score relativo de liga) y también toma `maximum_bid` como señal.
 
 ---
 
-## 6. El antes y el después
+## 6. El antes y el después — aquí, no en el dashboard
+
+**La pantalla se queda exactamente igual**: mismas diez columnas, mismo orden,
+mismo aspecto. Lo único que cambia son los números.
+
+Medido, no prometido: con la caja cuadrada, Inicio pinta **16.117 caracteres,
+exactamente los mismos que antes del cambio**. Y `StandingsIntelPanel.jsx` no se
+ha tocado — el commit de la caja no modificó ni un fichero de pantalla.
+
+Lo vigila `test_la_tabla_de_clasificacion_no_ha_crecido`, que comprueba las diez
+columnas por nombre y en orden, y que no se cuele en las filas ninguna etiqueta
+del tipo `SIN_DATO` o `RECONSTRUIDA`. Arreglar un número y aprovechar para
+«enseñar de dónde sale» es la forma más natural de llenar una tabla sin que nadie
+lo haya pedido.
+
+### Los siete, antes y después
 
 **CAJA** — se mueve para los siete:
 
@@ -127,7 +148,7 @@ que mido no lo confirma.
 
 ## 7. Guardias
 
-`src/analysis/test_la_caja_de_la_liga_v1.py` — **7/7**, con los eventos **reales**
+`src/analysis/test_la_caja_de_la_liga_v1.py` — **9/9**, con los eventos **reales**
 del tablón copiados como fixture:
 
 - `test_la_caja_reconstruida_cuadra_con_la_real`
@@ -137,8 +158,10 @@ del tablón copiados como fixture:
 - `test_la_jornada_partida_no_paga`
 - `test_la_jornada_ignorada_es_la_unica_sin_premio` — la confirmación cruzada
 - `test_sin_eventos_no_hay_caja_y_se_dice` — ninguna pasa en vacío
+- `test_la_alarma_del_cuadre_solo_sale_si_esta_roja`
+- `test_la_tabla_de_clasificacion_no_ha_crecido`
 - y dos más: el cuadre no aprueba con las manos vacías, y el motor publica el
-  cuadre.
+  cuadre en cada vuelta.
 
 **Un aviso de mi propio proceso:** escribiendo el fixture le puse a la jornada
 aplazada un `"short": "J1"` que el evento real **no tiene**, y la agrupación dejó

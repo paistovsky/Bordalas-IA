@@ -407,6 +407,106 @@ def test_el_motor_publica_el_cuadre_en_cada_vuelta() -> None:
     )
 
 
+def test_la_alarma_del_cuadre_solo_sale_si_esta_roja() -> None:
+    """
+    "Una alarma que no salta no ocupa sitio."
+
+    Cuando la caja cuadra NO aparece nada nuevo en pantalla. La
+    comprobacion corre igual en cada ciclo; lo que no hace es
+    pedir sitio para decir que todo va bien.
+
+    Y se compara contra `false` a proposito, no contra un valor
+    falsy: un `null` es "no se ha podido comprobar", y eso no es
+    una alarma -es la columna diciendo SIN DATO-.
+    """
+
+    from pathlib import Path
+
+    app = (
+        Path(__file__).parents[2]
+        / "dashboard-v8"
+        / "src"
+        / "App.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "cash_check?.ok === false" in app, (
+        "la alarma del cuadre no existe, o no se esconde cuando "
+        "la caja cuadra"
+    )
+
+    # Un `&&` sobre el objeto entero saldria SIEMPRE, porque un
+    # objeto es truthy. Es el fallo facil de escribir aqui.
+    assert "{data.rivalIntel?.cash_check && (" not in app, (
+        "la alarma saldria siempre: se esta comprobando el "
+        "objeto, no el resultado"
+    )
+
+
+def test_la_tabla_de_clasificacion_no_ha_crecido() -> None:
+    """
+    El dueno lo dijo con todas las letras: la pantalla se queda
+    EXACTAMENTE IGUAL. Mismas columnas, mismo orden, mismo
+    aspecto. Lo unico que cambia son los numeros.
+
+    Esta guardia existe porque arreglar un numero y aprovechar
+    para "ensenar de donde sale" es la forma mas natural de
+    llenar una tabla sin que nadie lo haya pedido.
+    """
+
+    from pathlib import Path
+
+    panel = (
+        Path(__file__).parents[2]
+        / "dashboard-v8"
+        / "src"
+        / "components"
+        / "StandingsIntelPanel.jsx"
+    ).read_text(encoding="utf-8")
+
+    columnas = [
+        linea.strip()
+        for linea in panel.splitlines()
+        # `<thead>` empieza igual y no es una columna.
+        if linea.strip().startswith(("<th>", "<th "))
+    ]
+
+    esperadas = [
+        "#",
+        "MÁNAGER",
+        "PTS",
+        "CAJA",
+        "PLANTILLA",
+        "PATRIMONIO",
+        "TOPE",
+        "PUJA",
+        "MÁX. VISTO",
+        "AMENAZA",
+    ]
+
+    assert len(columnas) == len(esperadas), (
+        f"la tabla tiene {len(columnas)} columnas y tenia "
+        f"{len(esperadas)}: {columnas}"
+    )
+
+    for titulo, linea in zip(esperadas, columnas):
+        assert titulo in linea, (
+            f"la columna `{titulo}` ha cambiado o se ha movido de "
+            f"sitio: {linea}"
+        )
+
+    # Y ni una etiqueta nueva colada en las filas.
+    for intruso in (
+        "cash_source",
+        "SIN_DATO",
+        "cash_check",
+        "RECONSTRUIDA",
+    ):
+        assert intruso not in panel, (
+            f"`{intruso}` se ha colado en la tabla de "
+            f"Clasificacion"
+        )
+
+
 TESTS = [
     test_la_caja_reconstruida_cuadra_con_la_real,
     test_la_comprobacion_no_pasa_con_las_manos_vacias,
@@ -415,6 +515,8 @@ TESTS = [
     test_la_jornada_ignorada_es_la_unica_sin_premio,
     test_sin_eventos_no_hay_caja_y_se_dice,
     test_el_motor_publica_el_cuadre_en_cada_vuelta,
+    test_la_alarma_del_cuadre_solo_sale_si_esta_roja,
+    test_la_tabla_de_clasificacion_no_ha_crecido,
 ]
 
 
