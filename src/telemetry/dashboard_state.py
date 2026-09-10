@@ -2950,14 +2950,6 @@ def compact_ledger_audit(audit: dict) -> dict:
         }
 
 
-    # El XI, calculado UNA vez: lo leen dos bloques -`lineup`
-    # y `posibles_cambios`- y tienen que contar lo mismo.
-    lineup_payload = compact_lineup(
-        state.get("lineup", {}) or {},
-        snapshot,
-        photo_lookup,
-    )
-
     return {
         "available": True,
         "status": audit.get("status"),
@@ -4514,6 +4506,14 @@ def build_dashboard_state() -> dict:
     rivales_compactos = compact_rivals(
         rival_intelligence,
         board.get("current_user_id"),
+    )
+
+    # El XI, calculado UNA vez: lo leen dos bloques -`lineup`
+    # y `posibles_cambios`- y tienen que contar lo mismo.
+    lineup_payload = compact_lineup(
+        state.get("lineup", {}) or {},
+        snapshot,
+        photo_lookup,
     )
 
     dashboard = {

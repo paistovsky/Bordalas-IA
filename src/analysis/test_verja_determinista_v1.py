@@ -112,6 +112,18 @@ DEL_REPOSITORIO = (
 #
 # Esta lista solo deberia encoger.
 DEUDA = {
+    "src.analysis.test_el_ciclo_publica_v1": (
+        "10/09/2026: nacio de la caida de produccion de esta "
+        "noche -NameError en `build_dashboard_state`, exit 1- y "
+        "existe justo para lo que la Regla 23 prohibe: MONTAR el "
+        "estado del dashboard con la foto real que hay en disco. "
+        "Un fixture no vale aqui; el agujero era precisamente que "
+        "107 guardias comprobaban la forma de las piezas y "
+        "ninguna que el montaje corriera de punta a punta. Si no "
+        "hay ninguna foto guardada informa 'sin muestra' y pasa, "
+        "y la mitad estatica -que caza el fallo exacto sin "
+        "ejecutar nada- sigue vigilando el fichero igual."
+    ),
     "src.analysis.test_futbolfantasy_source_v12": (
         "17/09/2026: contrasta el parser contra HTML real de "
         "ff_html y contra snapshots, ninguno de los dos en git. "

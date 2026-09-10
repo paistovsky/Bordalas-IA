@@ -174,6 +174,7 @@ TESTS = [
     "src.analysis.test_pantalla_lee_lo_publicado_v1",
     "src.analysis.test_posibles_cambios_v1",
     "src.analysis.test_lo_desconocido_v1",
+    "src.analysis.test_el_ciclo_publica_v1",
     "src.analysis.test_ojeador_fuentes_v1",
     "src.analysis.test_ojeador_emparejamiento_v1",
     "src.analysis.test_ojeador_informe_v1",
