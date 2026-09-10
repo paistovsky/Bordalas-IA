@@ -124,6 +124,11 @@ TESTS = [
     # El dia que Pepe empezo a escribir: renovar en la ventana,
     # la zona de silencio y que renovar no pueda vender.
     "src.analysis.test_renovar_en_la_ventana_v1",
+
+    # El dia que se vio que la ventana no se habia abierto nunca
+    # y que `FUERA_DE_VENTANA` no se distinguia de una noche
+    # normal.
+    "src.analysis.test_una_ventana_que_no_se_abre_v1",
     "src.analysis.test_ciclo_una_sola_vez_v1",
     "src.analysis.test_escrituras_con_cuerpo_v1",
     "src.analysis.test_cambiar_titular_v1",

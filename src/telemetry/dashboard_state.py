@@ -4236,6 +4236,21 @@ def build_dashboard_state() -> dict:
         # LA MEDICION QUE SALE GRATIS: de cada vuelta dentro de
         # la franja, si los precios YA habian cambiado. En una
         # semana hay hora exacta del reset sin gastar nada.
+        # CUANDO SE ENTRO POR ULTIMA VEZ EN LA VENTANA
+        #
+        #     Y en ROJO si hace mas de 24 h. La ventana no se
+        #     abrio nunca hasta hoy y `FUERA_DE_VENTANA` es
+        #     indistinguible de una noche normal: una capacidad
+        #     que no se dispara tiene que anunciar su ausencia.
+        from src.intelligence.libro_de_la_ventana import (
+            estado_de_la_ventana,
+            ultima_ventana,
+        )
+
+        plan_de_renovacion["ventana"] = estado_de_la_ventana(
+            ultima_ventana(), _ahora
+        )
+
         silencio_ahora["reset_observation"] = (
             observacion_del_reset(
                 silencio_ahora,

@@ -351,6 +351,70 @@ def summary(
     }
 
 
+def pujados_desde(
+    desde,
+    ledger: dict | None = None,
+    path: Path | None = None,
+) -> list:
+    """
+    Que jugadores tienen una puja NUESTRA apuntada desde ese
+    momento, todavia sin resolver.
+
+    POR QUE EXISTE (10/09/2026)
+
+        Con dos disparos externos a cinco minutos, los dos
+        dentro de la ventana, la segunda vuelta podria pujar
+        otra vez por el mismo jugador y comprometer capacidad
+        POR DUPLICADO.
+
+        El tablero trae `has_live_bid`, pero eso depende de que
+        la foto haya llegado fresca. El libro no: se escribe en
+        el mismo instante en que se puja.
+
+    Nunca lanza.
+    """
+
+    try:
+        libro = (
+            ledger if ledger is not None else load_ledger(path)
+        )
+
+        if isinstance(desde, str):
+            desde = datetime.fromisoformat(desde)
+
+        if desde.tzinfo is None:
+            desde = desde.replace(tzinfo=timezone.utc)
+
+        ids = []
+
+        for entrada in (libro.get("bids") or {}).values():
+
+            if not isinstance(entrada, dict):
+                continue
+
+            if entrada.get("outcome") not in (None, "PENDING"):
+                continue
+
+            try:
+                marca = datetime.fromisoformat(
+                    str(entrada.get("placed_at"))
+                )
+
+            except Exception:                       # noqa: BLE001
+                continue
+
+            if marca.tzinfo is None:
+                marca = marca.replace(tzinfo=timezone.utc)
+
+            if marca >= desde and entrada.get("player_id"):
+                ids.append(int(entrada["player_id"]))
+
+        return ids
+
+    except Exception:                               # noqa: BLE001
+        return []
+
+
 def sync_bid_outcomes(
     our_user_id: int | None,
     *,

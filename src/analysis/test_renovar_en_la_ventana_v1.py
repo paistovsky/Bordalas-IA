@@ -58,6 +58,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from src.actions.renovar_executor import renovar
+from src.analysis.la_subasta import (
+    VENTANA_MINUTOS,
+    ventana_abierta,
+)
 from src.analysis.renovar_ofertas import (
     HORAS_ENTRE_VENTANAS,
     TOPE_DE_RENOVACIONES,
@@ -356,7 +360,26 @@ def test_cada_renovacion_va_al_libro():
 
 def test_fuera_de_la_ventana_no_se_renueva():
 
-    for segundos in (3_600, 1_800, 901, None):
+    # LOS SEGUNDOS SALEN DE LA CONSTANTE, NO A MANO
+    #
+    #     Aqui decia `(3_600, 1_800, 901, None)`, y el 901 era
+    #     "un segundo fuera" cuando la ventana eran 15 minutos.
+    #     El 10/09 la ventana paso a 135 y estos numeros se
+    #     quedaron DENTRO: la guardia se puso roja sin que nada
+    #     estuviera roto.
+    #
+    #     Un dato, un nombre: el borde se deduce de
+    #     `VENTANA_MINUTOS`, asi que la proxima vez que se mueva
+    #     esto sigue midiendo el borde de verdad.
+    justo_fuera = VENTANA_MINUTOS * 60 + 1
+
+    # Y el borde EXACTO tiene que estar DENTRO. Sin esto, una
+    # ventana que no se abriera nunca pasaria esta guardia.
+    assert ventana_abierta(VENTANA_MINUTOS * 60)["abierta"], (
+        "el ultimo segundo de la ventana sale cerrado"
+    )
+
+    for segundos in (justo_fuera, justo_fuera * 2, 86_400, None):
 
         plan = que_renovar(
             _ocho(), segundos, puede_escribir=True
@@ -677,15 +700,21 @@ def test_fuera_de_la_franja_se_escribe_siempre():
 
         r = permite_escribir(_utc(9, 10, hora), "schedule")
 
-        madrid = (hora + 2) % 24
+        # EN MINUTOS, como las constantes.
+        #
+        #     Aqui se comparaba una HORA contra `SILENCIO_DESDE`.
+        #     El 10/09 esa constante paso a minutos -porque las
+        #     04:45 no son una hora redonda- y la cuenta se
+        #     quedo comparando 5 contra 285.
+        madrid = ((hora + 2) % 24) * 60
 
         esperado = not (
             SILENCIO_DESDE <= madrid < SILENCIO_HASTA
         )
 
         assert r["allowed"] is esperado, (
-            f"a las {madrid}:00 de Madrid dice "
-            f"allowed={r['allowed']}"
+            f"a las {madrid // 60}:{madrid % 60:02d} de Madrid "
+            f"dice allowed={r['allowed']}"
         )
 
 

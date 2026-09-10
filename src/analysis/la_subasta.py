@@ -62,7 +62,37 @@ from __future__ import annotations
 #     retrasa con frecuencia -a veces diez minutos-, y una
 #     ventana de cinco minutos se pierde entera con un retraso
 #     normal. Ver el informe.
-VENTANA_MINUTOS = 15
+#
+#     AMPLIADA A 135 EL 10/09/2026, Y POR QUE
+#
+#         Con quince minutos la ventana era 06:45-07:00 de
+#         Madrid, y el disparo externo NO ENTRABA:
+#
+#             cron a 04:45 Madrid  ->  135 min al reset
+#             cron a 04:50 Madrid  ->  130 min
+#             y si cron-job.org aplica CET -medido el 10/09-,
+#             dispara a 05:45 y 05:50: 75 y 70 min.
+#
+#         Las cuatro fuera. Manana no se habria pujado ni
+#         renovado, y el plan habria dicho FUERA_DE_VENTANA,
+#         que es lo mismo que dice el resto del dia:
+#         indistinguible de una noche normal.
+#
+#         135 minutos -04:45 a 07:00- cubren las dos lecturas
+#         del reloj con un solo numero. Deja de depender de
+#         acertar la zona horaria de un tercero.
+#
+#         Y NO CUESTA CASI NADA pujar antes: los precios no se
+#         mueven hasta el reset y las pujas de los rivales son
+#         invisibles. La asimetria manda: llegar tarde cuesta la
+#         ventana entera; llegar pronto, informacion, y poca.
+#
+#         VA ATADO a `zona_de_silencio.SILENCIO_DESDE`, que se
+#         movio a las 04:45 en el mismo cambio. Ampliar la
+#         ventana sin mover el silencio dejaria 04:45-05:00 sin
+#         vigilar, y ahi una vuelta `schedule` que llegue tarde
+#         escribiria de verdad. Medido antes de tocarlo.
+VENTANA_MINUTOS = 135
 
 
 # ============================================================
@@ -1251,6 +1281,19 @@ def plan_del_reset(
     solvency_clock: dict | None,
     plantilla: list | None = None,
     bloqueo_temporal: str | None = None,
+
+    # QUIEN YA TIENE PUJA NUESTRA EN ESTA VENTANA
+    #
+    #     Sale del LIBRO de pujas, no del tablero. Con dos
+    #     disparos externos a cinco minutos, los dos dentro de la
+    #     ventana, la segunda vuelta podria pujar otra vez por el
+    #     mismo jugador y comprometer capacidad por duplicado.
+    #
+    #     `has_live_bid` tambien lo evitaria, pero depende de que
+    #     la foto haya llegado fresca. El libro se escribe en el
+    #     mismo instante en que se puja.
+    ya_pujados: list | None = None,
+
     en_vivo: bool = False,
     max_por_club: int | None = None,
     max_pujas: int = MAX_PUJAS_PRIMER_DIA,
@@ -1358,9 +1401,20 @@ def plan_del_reset(
                 "reason": ventana["reason"],
             }
 
+        # LOS QUE YA TIENEN PUJA PUESTA EN ESTA VENTANA, FUERA.
+        puestos = {
+            safe_int(x) for x in (ya_pujados or []) if x
+        }
+
+        sin_repetir = [
+            c for c in (candidatos or [])
+            if isinstance(c, dict)
+            and safe_int(c.get("id")) not in puestos
+        ]
+
         cesta = elegir_la_cesta(
             candidatos_en_modo_cartera(
-                candidatos, prima_de_reventa
+                sin_repetir, prima_de_reventa
             ),
             presupuesto=presupuesto,
             fichas_libres=fichas_libres,
@@ -1690,6 +1744,7 @@ def plan_desde_el_estado(
     snapshot: dict | None = None,
     en_vivo: bool = False,
     max_pujas: int = MAX_PUJAS_PRIMER_DIA,
+    ya_pujados: list | None = None,
 ) -> dict:
     """
     El plan del reset a partir del estado del ciclo.
@@ -1700,6 +1755,7 @@ def plan_desde_el_estado(
 
     return plan_del_reset(
         **lectura_del_estado(state, snapshot),
+        ya_pujados=ya_pujados,
         en_vivo=en_vivo,
         max_pujas=max_pujas,
     )

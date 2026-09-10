@@ -411,11 +411,53 @@ def _pujar_en_el_reset(cycle: dict | None) -> dict:
 
         publicado = _estado_publicado(cycle)
 
+        # QUIEN YA TIENE PUJA NUESTRA EN ESTA VENTANA, DEL LIBRO
+        #
+        #     Hay DOS disparos externos a cinco minutos y los dos
+        #     caen dentro de la ventana. Sin esto, el segundo
+        #     volveria a pujar por los mismos y comprometeria
+        #     capacidad por duplicado.
+        #
+        #     Del libro y no del tablero: `has_live_bid` depende
+        #     de que la foto haya llegado fresca; el libro se
+        #     escribe en el mismo instante en que se puja.
+        from datetime import datetime, timedelta, timezone
+
+        from src.analysis.la_subasta import VENTANA_MINUTOS
+        from src.intelligence.bid_outcome_ledger import (
+            pujados_desde,
+        )
+
+        segundos = (
+            (publicado.get("market_clock") or {}).get(
+                "seconds_to_reset"
+            )
+        )
+
+        try:
+            abierta_hace = max(
+                0, VENTANA_MINUTOS * 60 - int(segundos or 0)
+            )
+        except (TypeError, ValueError):
+            abierta_hace = 0
+
+        ya_pujados = pujados_desde(
+            datetime.now(timezone.utc)
+            - timedelta(seconds=abierta_hace)
+        )
+
         plan = plan_desde_el_estado(
             publicado,
             (cycle or {}).get("snapshot"),
             en_vivo=True,
+            ya_pujados=ya_pujados,
         )
+
+        if ya_pujados:
+            print(
+                f"  Ya hay {len(ya_pujados)} puja(s) nuestras en "
+                f"esta ventana, del libro: no se repiten."
+            )
 
         print()
         print("=" * 100)
@@ -623,12 +665,22 @@ def _renovar_en_la_ventana(cycle: dict | None) -> dict:
             {"players": (cycle or {}).get("snapshot", {}).get("my_team")},
         )
 
+        segundos = (estado.get("market_clock") or {}).get(
+            "seconds_to_reset"
+        )
+
+        # DEL LIBRO, NO DE LA FOTO. Ver `renovados_en_esta_ventana`.
+        from src.actions.renovar_executor import (
+            renovados_en_esta_ventana,
+        )
+
+        ya_renovados = renovados_en_esta_ventana(segundos)
+
         plan = que_renovar(
             filas,
-            (estado.get("market_clock") or {}).get(
-                "seconds_to_reset"
-            ),
+            segundos,
             puede_escribir=bool(silencio.get("allowed")),
+            ya_renovados=ya_renovados,
         )
 
         print()
@@ -649,6 +701,31 @@ def _renovar_en_la_ventana(cycle: dict | None) -> dict:
             print(
                 f"    EN RIESGO {str(fila.get('name'))[:18]:<19}"
                 f"  {fila.get('reason')}"
+            )
+
+        # LA ENTRADA EN LA VENTANA, AL LIBRO
+        #
+        #     Se apunta aunque no haya trabajo: "entre y no habia
+        #     nada" es informacion, y muy distinta de "no entre".
+        #     Es lo que permite que la pantalla anuncie la
+        #     ausencia en vez de callarla.
+        if (plan.get("blocked_by") != "FUERA_DE_VENTANA"):
+
+            from src.intelligence.libro_de_la_ventana import (
+                apuntar_ventana,
+            )
+
+            apuntar_ventana(
+                seconds_to_reset=segundos,
+                bids=len(
+                    (globals().get("_ultima_subasta") or {}).get(
+                        "bids"
+                    )
+                    or []
+                ),
+                renewals=len(plan.get("renewals") or []),
+                trigger=os.environ.get("GITHUB_EVENT_NAME"),
+                executed=bool(plan.get("execute")),
             )
 
         if not plan.get("execute"):
@@ -720,6 +797,10 @@ def run_full_autonomous_cycle() -> dict:
     #     El balance no se mueve hasta el reset, asi que el resto
     #     del ciclo puede seguir haciendo su unica accion.
     subasta = _pujar_en_el_reset(cycle)
+
+    # La renovacion apunta la entrada en la ventana con lo que
+    # hicieron LAS DOS, asi que necesita ver esto.
+    globals()["_ultima_subasta"] = subasta
 
     # ==========================================================
     # 1-ter) LA RENOVACION DE LA VENTANA (10/09/2026)

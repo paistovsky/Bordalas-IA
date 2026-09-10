@@ -51,7 +51,7 @@ from __future__ import annotations
 
 import json
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -98,6 +98,87 @@ def apuntar(fila: dict, ruta: Path | None = None) -> bool:
 
     except Exception:                               # noqa: BLE001
         return False
+
+
+def renovados_en_esta_ventana(
+    seconds_to_reset,
+    ahora: datetime | None = None,
+    ruta: Path | None = None,
+) -> list:
+    """
+    A quien se ha renovado YA en la ventana que esta abierta.
+
+    POR QUE DEL LIBRO Y NO DE LA FOTO (10/09/2026)
+
+        La regla "nunca dos renovaciones del mismo en la misma
+        ventana" existia, pero `ya_renovados` no se alimentaba de
+        nada: solo protegia DE REBOTE, porque tras renovar la
+        oferta muere y la puerta de "sin oferta viva" lo saltaba.
+
+        Medido: con la foto SIN refrescar -la oferta todavia
+        viva en el snapshot- el segundo disparo renovaba otra
+        vez.
+
+        Y ahora hay DOS disparos externos a cinco minutos, los
+        dos dentro de la ventana. El libro es lo unico que no
+        depende de que la foto haya llegado fresca.
+
+    LA VENTANA, EN SEGUNDOS
+
+        Se abrio hace `VENTANA_MINUTOS * 60 - seconds_to_reset`
+        segundos. Todo lo apuntado despues de ese momento es de
+        esta ventana.
+
+    Nunca lanza: sin libro devuelve lista vacia, que es el
+    comportamiento de antes.
+    """
+
+    try:
+        from src.analysis.la_subasta import VENTANA_MINUTOS
+
+        momento = ahora or datetime.now(timezone.utc)
+
+        if momento.tzinfo is None:
+            momento = momento.replace(tzinfo=timezone.utc)
+
+        abierta_hace = max(
+            0,
+            VENTANA_MINUTOS * 60 - safe_int(seconds_to_reset),
+        )
+
+        desde = momento - timedelta(seconds=abierta_hace)
+
+        nombres = []
+
+        for linea in (
+            (ruta or LIBRO)
+            .read_text(encoding="utf-8")
+            .splitlines()
+        ):
+
+            linea = linea.strip()
+
+            if not linea:
+                continue
+
+            try:
+                fila = json.loads(linea)
+
+                marca = datetime.fromisoformat(str(fila["at"]))
+
+                if marca.tzinfo is None:
+                    marca = marca.replace(tzinfo=timezone.utc)
+
+                if marca >= desde and fila.get("player_name"):
+                    nombres.append(str(fila["player_name"]))
+
+            except Exception:                       # noqa: BLE001
+                continue
+
+        return nombres
+
+    except Exception:                               # noqa: BLE001
+        return []
 
 
 def renovar(

@@ -92,11 +92,29 @@ from datetime import datetime, timedelta, timezone
 # LA FRANJA
 # ============================================================
 #
-#     Es la de Biwenger, no una nuestra: "entre las 5:00 y las
-#     7:00 AM (hora local)". No es un umbral que se ajuste.
-SILENCIO_DESDE = 5
+#     La de Biwenger es "entre las 5:00 y las 7:00 AM (hora
+#     local)". La nuestra empieza QUINCE MINUTOS ANTES, a las
+#     04:45, y no es un capricho:
+#
+#         El 10/09/2026 se amplio la ventana de la subasta a 135
+#         minutos -04:45 a 07:00- para que el disparo externo
+#         entrara. Con el silencio empezando a las 05:00 quedaban
+#         quince minutos, 04:45-05:00, en los que la ventana
+#         estaba ABIERTA y el silencio todavia no vigilaba.
+#
+#         Medido antes de tocarlo: una vuelta `schedule` de
+#         GitHub que llegara tarde y cayera a las 04:47 salia
+#         "ventana ABIERTA" + "deja escribir", y habria pujado y
+#         renovado de verdad sin que nadie la hubiera puesto ahi.
+#
+#         Los dos numeros van atados. Si alguien vuelve a mover
+#         la ventana, esto se mueve con ella.
+#
+#     En minutos desde medianoche, porque 04:45 no es una hora
+#     redonda y comparar solo horas se comeria los 45 minutos.
+SILENCIO_DESDE = 4 * 60 + 45
 
-SILENCIO_HASTA = 7
+SILENCIO_HASTA = 7 * 60
 
 
 # Lo medido el 10/09/2026 sobre 7 dias seguidos.
@@ -157,9 +175,11 @@ def en_la_franja(momento_utc: datetime) -> bool:
     """
 
     try:
-        hora = _hora_de_madrid(momento_utc).hour
+        madrid = _hora_de_madrid(momento_utc)
 
-        return SILENCIO_DESDE <= hora < SILENCIO_HASTA
+        minutos = madrid.hour * 60 + madrid.minute
+
+        return SILENCIO_DESDE <= minutos < SILENCIO_HASTA
 
     except Exception:                               # noqa: BLE001
         # Sin poder calcular la hora, se calla: el error caro es
@@ -192,8 +212,10 @@ def permite_escribir(
     try:
         madrid = _hora_de_madrid(momento_utc)
 
+        minutos_de_madrid = madrid.hour * 60 + madrid.minute
+
         dentro = (
-            SILENCIO_DESDE <= madrid.hour < SILENCIO_HASTA
+            SILENCIO_DESDE <= minutos_de_madrid < SILENCIO_HASTA
         )
 
         deliberado = (
@@ -207,7 +229,12 @@ def permite_escribir(
             "madrid_time": madrid.strftime("%H:%M:%S"),
             "trigger": disparo,
             "deliberate": deliberado,
-            "window": f"{SILENCIO_DESDE:02d}:00-{SILENCIO_HASTA:02d}:00",
+            "window": (
+                f"{SILENCIO_DESDE // 60:02d}:"
+                f"{SILENCIO_DESDE % 60:02d}-"
+                f"{SILENCIO_HASTA // 60:02d}:"
+                f"{SILENCIO_HASTA % 60:02d}"
+            ),
         }
 
         if not dentro:

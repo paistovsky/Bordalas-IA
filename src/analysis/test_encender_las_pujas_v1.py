@@ -73,6 +73,8 @@ from pathlib import Path
 from src.analysis.la_subasta import (
     DISABLE_ENV,
     MAX_PUJAS_PRIMER_DIA,
+    VENTANA_MINUTOS,
+    ventana_abierta,
     lectura_del_estado,
     plan_del_reset,
     puja_de_cartera,
@@ -233,7 +235,26 @@ def test_con_deficit_no_se_puja_aunque_el_estado_sea_bueno():
 
 def test_fuera_de_la_ventana_no_se_puja():
 
-    for segundos in (3_600, 1_800, 901, None):
+    # LOS SEGUNDOS SALEN DE LA CONSTANTE, NO A MANO
+    #
+    #     Aqui decia `(3_600, 1_800, 901, None)`, y el 901 era
+    #     "un segundo fuera" cuando la ventana eran 15 minutos.
+    #     El 10/09 la ventana paso a 135 y estos numeros se
+    #     quedaron DENTRO: la guardia se puso roja sin que nada
+    #     estuviera roto.
+    #
+    #     Un dato, un nombre: el borde se deduce de
+    #     `VENTANA_MINUTOS`, asi que la proxima vez que se mueva
+    #     esto sigue midiendo el borde de verdad.
+    justo_fuera = VENTANA_MINUTOS * 60 + 1
+
+    # Y el borde EXACTO tiene que estar DENTRO. Sin esto, una
+    # ventana que no se abriera nunca pasaria esta guardia.
+    assert ventana_abierta(VENTANA_MINUTOS * 60)["abierta"], (
+        "el ultimo segundo de la ventana sale cerrado"
+    )
+
+    for segundos in (justo_fuera, justo_fuera * 2, 86_400, None):
         plan = _plan(seconds_to_reset=segundos)
 
         assert plan["execute"] is False, (
