@@ -84,17 +84,31 @@ from __future__ import annotations
 
 
 # ============================================================
-# LA LINEA DE CREDITO
+# LA LINEA DE CREDITO — UN DATO, UN NOMBRE
 # ============================================================
 #
-#     No es un umbral: es una medida. 12 estados distintos, 12
-#     aciertos al euro. Si algun dia Biwenger la cambia, esta
-#     constante se queda corta y las guardias se ponen rojas,
-#     que es exactamente lo que tiene que pasar.
-LINEA_DE_CREDITO = 0.25
+#     No es un umbral: es una medida. 12 estados distintos de 85
+#     fotos, 12 aciertos al euro.
+#
+#     Y vive en UN SOLO SITIO. Esta constante estuvo definida
+#     aqui y en `linea_de_credito.py` durante unas horas, porque
+#     las dos ramas se escribieron la misma noche sin verse. Dos
+#     copias del mismo numero son dos sitios donde equivocarse:
+#     el dia que Biwenger cambie el margen, una se actualizaria
+#     y la otra no, y nadie sabria cual manda.
+#
+#     Se importa. Si algun dia hay que tocarla, se toca alli y
+#     las guardias de las dos ramas se ponen rojas a la vez, que
+#     es exactamente lo que tiene que pasar.
+from src.analysis.linea_de_credito import (      # noqa: E402
+    ESTADOS_MEDIDOS,
+    LINEA_DE_CREDITO,
+)
 
-ESTADOS_MEDIDOS = 12
 
+# Cuando se midio CADA COSA. La linea, el 09/09 sobre las fotos
+# del 12-17/08. El par que enseno que una puja no mueve el
+# saldo, el 16/08.
 MEDIDO_EL = "16/08/2026 y 12-17/08/2026"
 
 
