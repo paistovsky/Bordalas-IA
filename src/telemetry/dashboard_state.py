@@ -4321,6 +4321,46 @@ def build_dashboard_state() -> dict:
             "reason": "No se pudo calcular la renovacion.",
         }
 
+    # ==========================================================
+    # EL LIBRO EN LA SOMBRA (10/09/2026)
+    # ==========================================================
+    #
+    #     La compuerta de ritmo cierra la via de especulacion en
+    #     la mitad del escaparate, y sobre los 36 viajes de
+    #     Pollo no discrimina: bloqueo las 6 con las que gano
+    #     1,78 M. Pero eso son 9 casos y con 9 no se retira un
+    #     filtro.
+    #
+    #     Se apunta lo que se compraria con la compuerta
+    #     apagada, TODOS LOS DIAS Y SIN DINERO. En dos semanas
+    #     hay ~280 casos y se decide con ellos.
+    try:
+        from src.intelligence.libro_en_la_sombra import (
+            apuntar_dia,
+            los_que_la_compuerta_rechaza,
+            resumen as resumen_sombra,
+        )
+
+        objetivos = (acquisition or {}).get("targets") or []
+
+        apuntar_dia(objetivos)
+
+        sombra = {
+            **resumen_sombra(),
+            "today": los_que_la_compuerta_rechaza(objetivos),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        sombra = {
+            "available": False,
+            "cases": 0,
+            "today": [],
+            "reason": (
+                f"No se pudo montar la sombra: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     # Los rivales compactados, UNA vez: los miran el payload y
     # el bloque de la subasta, y tienen que ser la misma lista.
     rivales_compactos = compact_rivals(
@@ -4475,6 +4515,12 @@ def build_dashboard_state() -> dict:
         # Observador puro: una linea al dia que dentro de un mes
         # contesta si hace falta vender a ciegas o no.
         "censo_del_reset": censo,
+
+        # EL LIBRO EN LA SOMBRA. Lo que se compraria con la
+        # compuerta de ritmo apagada del todo. SIN DINERO:
+        # ninguna ruta lo lee, es un cuaderno para decidir
+        # dentro de dos semanas si la compuerta se retira.
+        "sombra": sombra,
 
         # Que ficharia si pudiera llenar un hueco de plantilla.
         # Una lista al margen: no ficha nada.
