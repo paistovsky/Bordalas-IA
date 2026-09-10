@@ -4180,6 +4180,85 @@ def build_dashboard_state() -> dict:
             "detail": decision.get("reason") or "Sin urgencias críticas.",
         }
 
+    # ==========================================================
+    # LA ZONA DE SILENCIO Y LA RENOVACION (10/09/2026)
+    # ==========================================================
+    #
+    #     La telemetria NO escribe: calcula lo mismo que el ciclo
+    #     y lo ensena. Si esta pantalla dice "renovaria a estos
+    #     ocho", el ciclo renueva a esos ocho.
+    try:
+        from datetime import datetime as _dt, timezone as _tz
+        import os as _os
+
+        from src.analysis.renovar_ofertas import (
+            filas_desde_lo_publicado,
+            que_renovar,
+        )
+        from src.analysis.zona_de_silencio import (
+            lo_que_se_quedo_sin_hacer,
+            observacion_del_reset,
+            permite_escribir,
+        )
+
+        _ahora = _dt.now(_tz.utc)
+
+        silencio_ahora = permite_escribir(
+            _ahora,
+            _os.environ.get("GITHUB_EVENT_NAME"),
+        )
+
+        _filas = filas_desde_lo_publicado(
+            compact_listings(state),
+            offers_compactas,
+            roster,
+        )
+
+        plan_de_renovacion = que_renovar(
+            _filas,
+            (market_clock or {}).get("seconds_to_reset"),
+            puede_escribir=bool(silencio_ahora.get("allowed")),
+            deuda_contingente=0,
+        )
+
+        silencio_ahora["blocked"] = lo_que_se_quedo_sin_hacer(
+            silencio_ahora,
+            (
+                [
+                    f"renovar {plan_de_renovacion['count']} "
+                    f"listado(s)"
+                ]
+                if plan_de_renovacion.get("count")
+                else []
+            ),
+        )
+
+        # LA MEDICION QUE SALE GRATIS: de cada vuelta dentro de
+        # la franja, si los precios YA habian cambiado. En una
+        # semana hay hora exacta del reset sin gastar nada.
+        silencio_ahora["reset_observation"] = (
+            observacion_del_reset(
+                silencio_ahora,
+                precios_cambiados=None,
+                momento_utc=_ahora,
+            )
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        silencio_ahora = {
+            "available": False,
+            "allowed": False,
+            "reason": (
+                f"No se pudo calcular la zona de silencio: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+        plan_de_renovacion = {
+            "available": False,
+            "count": 0,
+            "reason": "No se pudo calcular la renovacion.",
+        }
+
     # Los rivales compactados, UNA vez: los miran el payload y
     # el bloque de la subasta, y tienen que ser la misma lista.
     rivales_compactos = compact_rivals(
@@ -4351,6 +4430,15 @@ def build_dashboard_state() -> dict:
         "offers": offers_compactas,
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
+
+        # LA ZONA DE SILENCIO y lo que se quedo sin hacer por
+        # ella. Una barandilla que frena en silencio es
+        # indistinguible de una averia.
+        "silencio": silencio_ahora,
+
+        # QUE SE RENOVARIA EN LA VENTANA, y que listados no
+        # llegan vivos a ella. Observador puro.
+        "renovacion": plan_de_renovacion,
         "market_clock": market_clock,
         "position_guardrail": compact_guardrail(liquidity),
         "exposure": exposure,
