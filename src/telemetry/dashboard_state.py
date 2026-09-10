@@ -2941,6 +2941,126 @@ def compact_ledger_audit(audit: dict) -> dict:
     }
 
 
+def bloque_de_la_subasta(
+    state: dict | None,
+    snapshot: dict | None,
+) -> dict:
+    """
+    Lo que el ciclo va a pujar en el reset, ANTES del reset.
+
+    POR QUE EN LA PANTALLA Y NO SOLO EN EL LOG
+
+        Una pieza que escribe en Biwenger sola, en una ventana de
+        15 minutos, a las siete menos cinco de la manana, no se
+        puede auditar leyendo un log despues. Aqui sale antes:
+        por quien puja, cuanto, cuanto compromete si se ganan
+        todas y cuanto falta para el cierre.
+
+    OBSERVADOR PURO
+
+        Llama al MISMO `plan_desde_el_estado` que el ciclo, y no
+        ejecuta nada. Si esta pantalla dice tres nombres, el
+        ciclo puja por esos tres.
+
+        `would_bid` es "el ciclo pujaria", no "se ha pujado". Lo
+        que ya se pujo esta en `outcomes`.
+
+    Nunca lanza: un termometro roto no puede tumbar la pantalla.
+    """
+
+    vacio = {
+        "available": False,
+        "would_bid": False,
+        "bids": [],
+        "committed": 0,
+        "expected": 0,
+        "all_won": 0,
+        "seconds_to_reset": None,
+        "kill_switch": "BORDALAS_SIN_SUBASTA=1",
+        "reason": None,
+    }
+
+    try:
+        from src.analysis.la_subasta import (
+            DISABLE_ENV,
+            MAX_PUJAS_PRIMER_DIA,
+            plan_desde_el_estado,
+        )
+
+        plan = plan_desde_el_estado(
+            state,
+            snapshot,
+
+            # En vivo A PROPOSITO: la pregunta que contesta esta
+            # pantalla es "¿que va a hacer el ciclo?", y el ciclo
+            # corre en vivo. Con `False` diria siempre "no puja
+            # porque no esta en vivo", que es verdad de esta
+            # llamada y mentira del ciclo.
+            en_vivo=True,
+        )
+
+        ventana = plan.get("window") or {}
+
+        return {
+            "available": bool(plan.get("available")),
+            "would_bid": bool(plan.get("execute")),
+            "bids": [
+                {
+                    "id": b.get("id"),
+                    "name": b.get("name"),
+                    "team_id": b.get("team_id"),
+                    "market_price": safe_int(b.get("market_price")),
+                    "bid": safe_int(b.get("bid")),
+                    "win_odds": b.get("win_odds"),
+                    "expected_value": safe_int(
+                        b.get("expected_value")
+                    ),
+                }
+                for b in (plan.get("bids") or [])
+            ],
+
+            # Lo que se compromete si se ganan TODAS: el peor
+            # caso de caja, que es el que hay que poder mirar.
+            "committed": safe_int(plan.get("committed")),
+            "expected": safe_int(plan.get("expected")),
+            "all_won": safe_int(plan.get("all_won")),
+
+            "slots_used": safe_int(plan.get("slots_used")),
+            "capped_at": plan.get("capped_at"),
+            "dropped_by_cap": safe_int(plan.get("dropped_by_cap")),
+            "dropped_by_club": safe_int(
+                plan.get("dropped_by_club")
+            ),
+            "first_day_cap": MAX_PUJAS_PRIMER_DIA,
+
+            # Cuanto falta para el cierre.
+            "seconds_to_reset": ventana.get("seconds_to_reset"),
+            "window_open": bool(ventana.get("abierta")),
+
+            "worst_case": plan.get("worst_case"),
+            "blocked_by": plan.get("blocked_by"),
+            "reason": plan.get("reason"),
+
+            # El interruptor, escrito donde se mira el resultado.
+            "kill_switch": f"{DISABLE_ENV}=1",
+
+            # Y DESPUES: que gano y que perdio de lo que pujo
+            # ESTE camino, no mezclado con el de siempre.
+            "outcomes": bid_outcome_summary(
+                target_source="SUBASTA_CARTERA"
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"La subasta no se pudo publicar: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -4060,6 +4180,13 @@ def build_dashboard_state() -> dict:
             "detail": decision.get("reason") or "Sin urgencias críticas.",
         }
 
+    # Los rivales compactados, UNA vez: los miran el payload y
+    # el bloque de la subasta, y tienen que ser la misma lista.
+    rivales_compactos = compact_rivals(
+        rival_intelligence,
+        board.get("current_user_id"),
+    )
+
     dashboard = {
         "meta": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -4216,10 +4343,7 @@ def build_dashboard_state() -> dict:
             "maximum_bid_calibration": rival_intelligence.get(
                 "maximum_bid_calibration"
             ),
-            "managers": compact_rivals(
-                rival_intelligence,
-                board.get("current_user_id"),
-            ),
+            "managers": rivales_compactos,
         },
         "league_center": league_center,
         "competition": competition,
@@ -4261,6 +4385,31 @@ def build_dashboard_state() -> dict:
 
         # Lo que Pepe hizo al pujar, no solo lo que pensaba pujar.
         "bid_outcomes": bid_outcome_summary(),
+
+        # LA SUBASTA DEL RESET, antes de que ocurra: por quien
+        # va a pujar el ciclo, cuanto compromete y cuanto falta
+        # para el cierre. Y debajo, lo que gano y perdio.
+        "subasta": bloque_de_la_subasta(
+            {
+                # LA MISMA FORMA QUE VE EL CICLO
+                #
+                #     El tablero, los bolsillos y el reloj no
+                #     estan en `state`: se montan aqui. Si se
+                #     le pasara `state` a secas, esta pantalla
+                #     diria "no hay candidatos" mientras el
+                #     ciclo puja por tres.
+                "acquisition": acquisition,
+                "exposure": exposure,
+                "market_clock": market_clock,
+                "rival_intelligence": {
+                    "managers": rivales_compactos
+                },
+                "solvency_clock": solvency_clock,
+                "operations_locked": state.get("operations_locked"),
+                "phase": state.get("phase"),
+            },
+            snapshot,
+        ),
 
         "priorities": candidates,
         "activity": activity,

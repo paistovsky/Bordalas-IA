@@ -291,7 +291,21 @@ def reconcile(
     return libro
 
 
-def summary(ledger: dict | None = None, path: Path | None = None) -> dict:
+def summary(
+    ledger: dict | None = None,
+    path: Path | None = None,
+
+    # DE DONDE SALIERON LAS PUJAS QUE SE CUENTAN (09/09/2026)
+    #
+    # Con el modo cartera encendido conviven dos caminos que
+    # pujan: el de siempre y la subasta del reset. Sumados, el
+    # dashboard diria un porcentaje de acierto que no es el de
+    # ninguno de los dos. Con este filtro se puede mirar cada uno
+    # por separado.
+    #
+    # None = todas, que es lo que hacia antes.
+    target_source: str | None = None,
+) -> dict:
     """
     El resumen que va al dashboard. Sin datos, dice que no los hay:
     nunca inventa un 0 % que parezca una medida.
@@ -299,6 +313,12 @@ def summary(ledger: dict | None = None, path: Path | None = None) -> dict:
 
     libro = ledger if ledger is not None else load_ledger(path)
     entradas = list(libro.get("bids", {}).values())
+
+    if target_source is not None:
+        entradas = [
+            e for e in entradas
+            if e.get("target_source") == target_source
+        ]
 
     ganadas = [e for e in entradas if e.get("outcome") == "WON"]
     perdidas = [e for e in entradas if e.get("outcome") == "LOST"]
@@ -313,6 +333,7 @@ def summary(ledger: dict | None = None, path: Path | None = None) -> dict:
 
     return {
         "available": bool(entradas),
+        "target_source": target_source,
         "placed": len(entradas),
         "won": len(ganadas),
         "lost": len(perdidas),

@@ -238,6 +238,324 @@ def _verify_v10_write(action: str) -> dict:
     }
 
 
+def _estado_publicado(cycle: dict | None) -> dict:
+    """
+    El tablero del reset, con la misma forma que el dashboard.
+
+    POR QUE HAY QUE ARMARLO Y NO BASTA CON `cycle`
+
+        `run_cycle` devuelve {snapshot, result, execution,
+        post_action}, y su `result["state"]` NO lleva ni el
+        tablero de adquisicion, ni los bolsillos compactados, ni
+        el reloj del mercado: eso lo monta la telemetria, que
+        corre DESPUES en otro proceso.
+
+        Leer `cycle["state"]` -o incluso `result["state"]`-
+        buscando `acquisition` devuelve vacio: cero candidatos,
+        cero pujas y ni un error en el log. Encendido y mudo,
+        que es la peor forma de estar apagado.
+
+    NO CUESTA NI UNA PETICION
+
+        El tablon y el retrato de la competencia se piden UNA
+        vez por vuelta y quedan cacheados desde el 07/09.
+        `load_rival_intelligence` y `board_del_ciclo` devuelven
+        lo ya pedido; aqui no se abre ninguna conexion nueva.
+
+    Nunca lanza. Devuelve la forma aunque falte todo.
+    """
+
+    publicado = {
+        "acquisition": {},
+        "exposure": {},
+        "market_clock": {},
+        "rival_intelligence": {},
+        "solvency_clock": None,
+        "operations_locked": False,
+        "phase": None,
+    }
+
+    try:
+        from src.autopilot import (
+            board_del_ciclo,
+            load_rival_intelligence,
+        )
+        from src.analysis.acquisition_board import (
+            build_acquisition_board,
+        )
+        from src.analysis.market_clock import build_market_clock
+        from src.analysis.solvency_clock import (
+            build_solvency_clock,
+        )
+
+        snapshot = (cycle or {}).get("snapshot") or {}
+
+        estado = (
+            (cycle or {}).get("result") or {}
+        ).get("state") or {}
+
+        especulacion = estado.get("speculation") or {}
+        bolsillo = especulacion.get("budget") or {}
+        fichajes = especulacion.get("acquisition_budget") or {}
+
+        publicado["operations_locked"] = bool(
+            estado.get("operations_locked")
+        )
+        publicado["phase"] = estado.get("phase")
+
+        publicado["exposure"] = {
+            "available_budget": bolsillo.get("available_budget"),
+            "cash_budget": bolsillo.get("cash_budget"),
+        }
+
+        publicado["market_clock"] = build_market_clock(snapshot)
+
+        # EL RELOJ DE SOLVENCIA, EN SU VERSION ESTRICTA
+        #
+        #     La telemetria se lo calcula contando la venta de
+        #     rescate que taparia la deuda. Aqui no hay orden de
+        #     ventas montada, asi que se calcula sin ella.
+        #
+        #     La diferencia siempre cae del lado de NO pujar: si
+        #     hay deuda y aqui no consta como tapada, no se puja.
+        #     Que un dia se deje de pujar por prudencia es
+        #     barato; lo caro es lo contrario.
+        publicado["solvency_clock"] = build_solvency_clock(
+            estado.get("balance"),
+            estado.get("hours_to_deadline"),
+            market_clock=publicado["market_clock"],
+        )
+
+        inteligencia = load_rival_intelligence(snapshot)
+        tablon = board_del_ciclo(snapshot)
+
+        # `is_us` NO viene en el retrato crudo: lo pone la
+        # telemetria al compactarlo. Sin el, "nuestra plantilla"
+        # sale 0, las fichas libres salen enormes y la
+        # barandilla de fichas deja de morder. Se marca aqui.
+        yo = tablon.get("current_user_id") or inteligencia.get(
+            "current_user_id"
+        )
+
+        publicado["rival_intelligence"] = {
+            "managers": [
+                {
+                    "user_id": m.get("user_id"),
+                    "roster_count": m.get("roster_count"),
+                    "is_us": (
+                        yo is not None
+                        and str(m.get("user_id")) == str(yo)
+                    ),
+                }
+                for m in (inteligencia.get("managers") or [])
+                if isinstance(m, dict)
+            ]
+        }
+
+        publicado["acquisition"] = build_acquisition_board(
+            snapshot=snapshot,
+            rival_intelligence=inteligencia,
+            current_user_id=tablon.get("current_user_id"),
+            available_budget=(
+                bolsillo.get("available_budget") or None
+            ),
+            acquisition_budget=(
+                (
+                    fichajes.get("available_budget")
+                    or fichajes.get("total_budget")
+                )
+                if fichajes.get("enabled")
+                else None
+            ),
+        )
+
+        return publicado
+
+    except Exception:                               # noqa: BLE001
+        return publicado
+
+
+def _pujar_en_el_reset(cycle: dict | None) -> dict:
+    """
+    Las pujas de la ventana del reset, ejecutadas de verdad.
+
+    LO QUE HACE Y LO QUE NO
+
+        Puja por hasta `MAX_PUJAS_PRIMER_DIA` en los ultimos
+        minutos antes del reset, y SOLO ahi. Cada puja al precio
+        topado por la curva.
+
+        No vende, no acepta ofertas y no toca el once.
+
+    LAS PUERTAS ESTAN EN `plan_del_reset`, NO AQUI
+
+        Esta funcion no decide: pregunta y ejecuta. Si algun dia
+        hay que endurecer una condicion, se endurece en un sitio
+        y esta no cambia.
+
+    Nunca lanza: una subasta que revienta no puede tumbar el
+    ciclo entero.
+    """
+
+    vacio = {
+        "available": False,
+        "execute": False,
+        "bids": [],
+        "sent": [],
+        "failed": [],
+        "reason": None,
+    }
+
+    try:
+        from src.analysis.la_subasta import plan_desde_el_estado
+
+        publicado = _estado_publicado(cycle)
+
+        plan = plan_desde_el_estado(
+            publicado,
+            (cycle or {}).get("snapshot"),
+            en_vivo=True,
+        )
+
+        print()
+        print("=" * 100)
+        print("LA SUBASTA DEL RESET")
+        print("=" * 100)
+        print(f"  {plan['reason']}")
+
+        # `_euros` y no `.replace(",", ".")` sobre la linea
+        # entera: eso se come las comas del nombre.
+        from src.analysis.la_subasta import _euros
+
+        for puja in plan["bids"]:
+            print(
+                f"    {str(puja.get('name'))[:22]:<22}"
+                f"{_euros(puja.get('bid')):>12}"
+                f"   se lo lleva "
+                f"{100 * (puja.get('win_odds') or 0):.0f} %"
+            )
+
+        if not plan.get("execute"):
+            return {**vacio, "available": True, **plan}
+
+        enviadas = []
+        fallidas = []
+
+        from src.biwenger.write_client import (
+            BiwengerWriteClient,
+        )
+
+        escritor = BiwengerWriteClient()
+
+        for puja in plan["bids"]:
+
+            try:
+                resultado = escritor.place_bid(
+                    player_id=int(puja["id"]),
+                    amount=int(puja["bid"]),
+                    seller_user_id=puja.get("seller_id"),
+                    execute=True,
+                )
+
+                enviadas.append(
+                    {
+                        "id": puja["id"],
+                        "name": puja.get("name"),
+                        "amount": puja["bid"],
+                        "market_price": puja.get("market_price"),
+                        "win_odds": puja.get("win_odds"),
+                        "seller_id": puja.get("seller_id"),
+                        "rate_percent_per_day": puja.get(
+                            "rate_percent_per_day"
+                        ),
+                        "sent": bool(resultado.get("sent")),
+                    }
+                )
+
+            except Exception as error:              # noqa: BLE001
+                fallidas.append(
+                    {
+                        "id": puja.get("id"),
+                        "name": puja.get("name"),
+                        "error": (
+                            f"{type(error).__name__}: {error}"
+                        ),
+                    }
+                )
+
+        print()
+        print(
+            f"  ENVIADAS {len(enviadas)}  ·  FALLIDAS "
+            f"{len(fallidas)}"
+        )
+
+        # AL LIBRO DE PUJAS, que hoy tiene UN registro. Sin esto
+        # no se podria medir nunca si esto funciona.
+        _anotar_en_el_libro(enviadas)
+
+        return {
+            **plan,
+            "available": True,
+            "sent": enviadas,
+            "failed": fallidas,
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"La subasta no pudo correr: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+def _anotar_en_el_libro(enviadas: list | None) -> None:
+    """
+    Cada puja enviada, al libro. Nunca lanza.
+
+    Es lo que permitira decir dentro de una semana si el modo
+    cartera gana dinero o no.
+    """
+
+    if not enviadas:
+        return
+
+    try:
+        from src.intelligence.bid_outcome_ledger import (
+            record_bid,
+        )
+
+        for puja in enviadas:
+            try:
+                record_bid(
+                    player_id=int(puja.get("id")),
+                    amount=int(puja.get("amount")),
+                    player_name=puja.get("name"),
+                    market_price=puja.get("market_price"),
+                    recommended_bid=puja.get("amount"),
+                    win_probability=puja.get("win_odds"),
+                    intent="SPECULATION",
+
+                    # De donde salio esta puja. Sin esto, dentro
+                    # de una semana no se podria separar lo que
+                    # gano el modo cartera de lo que gano el
+                    # camino de siempre.
+                    target_source="SUBASTA_CARTERA",
+
+                    seller_user_id=puja.get("seller_id"),
+                    market_rate_percent_per_day=puja.get(
+                        "rate_percent_per_day"
+                    ),
+                )
+
+            except Exception:                       # noqa: BLE001
+                continue
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+
 def run_full_autonomous_cycle() -> dict:
     print("\n" + "=" * 100)
     print("BORDALAS IA - V10.13.1 FULL AUTONOMOUS LIVE")
@@ -264,6 +582,23 @@ def run_full_autonomous_cycle() -> dict:
         "error": None,
     }
 
+    # ==========================================================
+    # 1-bis) LA SUBASTA DEL RESET (09/09/2026)
+    # ==========================================================
+    #
+    #     Va ANTES de la puerta de "una escritura por ciclo",
+    #     porque en la ventana del reset la regla es otra: se
+    #     puja por varios a la vez, que es todo el punto.
+    #
+    #     Fuera de la ventana ni se entera: `plan_del_reset`
+    #     devuelve `execute: False` y esto no toca nada.
+    #
+    #     Y no consume `write_used`: una puja no es una compra.
+    #     El balance no se mueve hasta el reset, asi que el resto
+    #     del ciclo puede seguir haciendo su unica accion.
+    subasta = _pujar_en_el_reset(cycle)
+
+    # ==========================================================
     # 2) If no prior write, allow BUY V10.
     if not write_used:
         buy = build_controlled_run(
