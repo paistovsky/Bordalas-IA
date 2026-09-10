@@ -23,10 +23,35 @@ LO QUE CUESTA: NADA
     Cero peticiones. Es la pieza mas barata del encargo y la mas
     valiosa.
 
-QUE SE GUARDA
+QUE SE GUARDA, Y CON QUE FECHA
 
-        archivo/2026-09-09/scout.json
-        archivo/2026-09-09/press.json
+        archivo/2026-09-05/scout.json
+        archivo/2026-09-05/press.json
+
+    LA CARPETA LLEVA LA FECHA DEL INFORME, NO LA DE HOY
+    (09/09/2026)
+
+        La primera version estampaba el dia en que se archivaba.
+        El 09/09 guardo bajo `2026-09-09` un informe cuyo
+        `generated_at` era del 05/09: cuatro dias de diferencia.
+
+        Eso envenena el libro de la prensa, que fecha los avisos
+        por la carpeta. Un titular de hace cinco dias guardado
+        como de hoy hace que el libro concluya que la noticia NO
+        movio el precio — cuando lo movio cuatro dias antes, y
+        el libro estaba mirando desde el dia equivocado.
+
+        Es la sexta vez de la familia "un dato que dice ser lo
+        que no es", y la primera que se caza antes de que nadie
+        decida con ella.
+
+    Y LO CADUCADO SE QUEDA FUERA
+
+        Si el informe tiene mas de `HORAS_QUE_VALE`, no se
+        archiva: se dice que la fuente esta parada y se deja
+        fuera. Guardarlo otra vez bajo su propia fecha no haria
+        daño —es idempotente— pero callarse que lleva cuatro
+        dias sin refrescarse si lo hace.
 
     Uno por dia y fuente. La primera vuelta del dia escribe; las
     23 siguientes ven que ya esta y no hacen nada.
@@ -68,6 +93,74 @@ FUENTES = {
 DISABLE_ENV = "BORDALAS_SIN_ARCHIVO"
 
 
+# Desde cuando un informe deja de poder representar "ahora".
+#
+# Veinticuatro horas, y sale de como corren las fuentes: el
+# ojeador se refresca cada seis horas y la prensa dos veces al
+# dia. Un informe de mas de un dia significa que su fuente esta
+# parada, no que el mercado no se haya movido.
+#
+# No es un umbral de decision: nada se compra ni se vende por
+# este numero. Solo decide si una copia entra en el archivo o se
+# marca como caducada.
+HORAS_QUE_VALE = 24
+
+
+def dia_del_informe(ruta) -> dict:
+    """
+    La fecha que el propio informe dice tener.
+
+    `{dia, generado, edad_horas, reason}`. Forma fija, nunca
+    lanza. Sin `generated_at` legible devuelve `dia: None`, y
+    quien llame decide — que aqui es no archivar.
+    """
+
+    vacio = {
+        "dia": None,
+        "generado": None,
+        "edad_horas": None,
+        "reason": None,
+    }
+
+    try:
+        from pathlib import Path as _Path
+
+        datos = json.loads(
+            _Path(ruta).read_text(encoding="utf-8")
+        )
+
+        marca = (datos or {}).get("generated_at")
+
+        if not marca:
+            return {
+                **vacio,
+                "reason": (
+                    "El informe no dice cuando se genero: no se "
+                    "puede fechar."
+                ),
+            }
+
+        cuando = datetime.fromisoformat(
+            str(marca).replace("Z", "+00:00")
+        )
+
+        return {
+            "dia": cuando.date(),
+            "generado": cuando,
+            "edad_horas": None,
+            "reason": None,
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"No se pudo leer la fecha: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 # Cuantos dias se conservan. Sesenta, como el almacen de precios:
 # el mismo horizonte para los dos, porque se van a cruzar.
 #
@@ -102,6 +195,8 @@ def archivar(
         "written": [],
         "already": [],
         "missing": [],
+        "stale": [],
+        "undated": [],
         "failed": [],
         "reason": None,
     }
@@ -115,29 +210,52 @@ def archivar(
                 ),
             }
 
-        cuando = dia or datetime.now().date()
+        # `dia` es AHORA, para medir si un informe esta
+        # caducado. No es la carpeta: la carpeta la dice cada
+        # informe.
+        ahora = dia or datetime.now().date()
 
-        raiz = (directorio or DIRECTORIO) / cuando.isoformat()
+        base = directorio or DIRECTORIO
 
         origenes = fuentes or FUENTES
 
         escritos = []
         ya_estaban = []
         sin_origen = []
+        caducados = []
+        sin_fecha = []
         fallidos = []
 
         for nombre, origen in origenes.items():
-
-            destino = raiz / f"{nombre}.json"
-
-            if destino.exists():
-                ya_estaban.append(nombre)
-                continue
 
             origen = Path(origen)
 
             if not origen.exists():
                 sin_origen.append(nombre)
+                continue
+
+            # LA FECHA LA DICE EL INFORME, NO EL RELOJ
+            fechado = dia_del_informe(origen)
+
+            if fechado["dia"] is None:
+                sin_fecha.append(nombre)
+                continue
+
+            edad = (ahora - fechado["dia"]).days
+
+            if edad * 24 > HORAS_QUE_VALE:
+                caducados.append(
+                    f"{nombre} ({fechado['dia'].isoformat()}, "
+                    f"{edad} dia(s))"
+                )
+                continue
+
+            raiz = base / fechado["dia"].isoformat()
+
+            destino = raiz / f"{nombre}.json"
+
+            if destino.exists():
+                ya_estaban.append(nombre)
                 continue
 
             try:
@@ -161,13 +279,21 @@ def archivar(
 
         return {
             "available": True,
-            "day": cuando.isoformat(),
+            "day": ahora.isoformat(),
             "written": escritos,
             "already": ya_estaban,
             "missing": sin_origen,
+            "stale": caducados,
+            "undated": sin_fecha,
             "failed": fallidos,
             "reason": _reason(
-                cuando, escritos, ya_estaban, sin_origen, fallidos
+                ahora,
+                escritos,
+                ya_estaban,
+                sin_origen,
+                caducados,
+                sin_fecha,
+                fallidos,
             ),
         }
 
@@ -181,27 +307,40 @@ def archivar(
         }
 
 
-def _reason(cuando, escritos, ya, sin_origen, fallidos) -> str:
+def _reason(
+    ahora, escritos, ya, sin_origen, caducados, sin_fecha,
+    fallidos,
+) -> str:
 
     if escritos:
-        texto = (
-            f"Archivado {cuando.isoformat()}: "
-            f"{', '.join(sorted(escritos))}."
-        )
+        texto = f"Archivado: {', '.join(sorted(escritos))}."
 
     elif ya:
         texto = (
-            f"{cuando.isoformat()} ya estaba archivado "
-            f"({', '.join(sorted(ya))})."
+            f"Ya estaba archivado: {', '.join(sorted(ya))}."
         )
 
     else:
-        texto = f"Nada que archivar el {cuando.isoformat()}."
+        texto = "Nada nuevo que archivar."
 
     if sin_origen:
         texto += (
             f" Sin fichero de origen: "
             f"{', '.join(sorted(sin_origen))}."
+        )
+
+    if caducados:
+        # Esto no es un detalle: significa que una fuente lleva
+        # dias sin refrescarse, y sin decirlo nadie se entera.
+        texto += (
+            f" CADUCADOS, fuera del archivo: "
+            f"{', '.join(sorted(caducados))}."
+        )
+
+    if sin_fecha:
+        texto += (
+            f" Sin fecha dentro: "
+            f"{', '.join(sorted(sin_fecha))}."
         )
 
     if fallidos:

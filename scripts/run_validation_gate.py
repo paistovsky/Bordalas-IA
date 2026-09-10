@@ -111,6 +111,12 @@ TESTS = [
     "src.analysis.test_peticiones_v1",
     "src.analysis.test_la_subasta_v1",
     "src.analysis.test_prima_de_puja_v1",
+
+    # Las puertas del dia que se encendieron las pujas: el
+    # interruptor, el reloj de solvencia por encima de todo, el
+    # tope de tres del primer dia, el peor caso contando la
+    # plantilla, y que la compra a rivales siga cerrada.
+    "src.analysis.test_encender_las_pujas_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",

@@ -880,10 +880,28 @@ def elegir_la_cesta(
     caja_libre=None,
     max_por_club: int | None = None,
 
-    # LA PELEA COMO COSTE. Apagado a proposito: esto se publica
-    # y se mira, no se enciende. Con `True` el orden pasa a ser
-    # `ganancia x P(llevarselo)` en vez de solo ganancia.
-    contar_la_pelea: bool = False,
+    # LA PELEA COMO COSTE. ENCENDIDO el 09/09/2026.
+    #
+    #     Se publico apagado un dia y se midio en euros sobre el
+    #     escaparate real. Gana en las dos dimensiones:
+    #
+    #                          SIN la pelea   CON la pelea
+    #         pujas                    7            4
+    #         compromete       1.964.907    2.375.929
+    #         si gana todas       30.373       36.731
+    #         ESPERADO            13.972       20.918
+    #         por ficha            1.996        5.230
+    #
+    #     Un 50 % mas de euros esperados usando TRES FICHAS
+    #     MENOS, y 2,6 veces mejor por ficha ocupada.
+    #
+    #     Lo unico que cuesta es comprometer 411.022 mas de
+    #     capacidad — que no es dinero gastado, porque perder no
+    #     cuesta nada, y se libera en el reset.
+    #
+    #     Y no mueve ningun umbral: es un ORDEN. Con `False`
+    #     vuelve el de antes.
+    contar_la_pelea: bool = True,
 ) -> dict:
     """
     El conjunto por el que se pujaria en esta ventana.
@@ -1172,6 +1190,519 @@ def peor_caso(cesta: dict | None, plantilla: list | None) -> dict:
                 f"{type(error).__name__}: {error}"
             ),
         }
+
+
+# ============================================================
+# ENCENDER LAS PUJAS (09/09/2026)
+# ============================================================
+#
+#     Dos semanas midiendo y Pepe no ha pujado ni una vez. La
+#     pieza estaba construida y apagada.
+#
+#     LOS LIMITES DEL PRIMER DIA, Y POR QUE EXISTEN
+#
+#         Tres pujas como mucho, aunque el reparto proponga
+#         mas. No es una medicion: es que el primer dia de algo
+#         que escribe en Biwenger se mira con pocas piezas en el
+#         tablero. Cuando haya una semana de resultados en el
+#         libro de pujas, este numero se decide con datos.
+#
+#         Hoy cuesta poco: el reparto propone cuatro y el cuarto
+#         añade 853 EUR de esperado sobre 310.776 mas
+#         comprometidos. Recortar a tres pierde el 5 % del
+#         esperado.
+#
+#     LO QUE MANDA POR ENCIMA DE TODO
+#
+#         El reloj de solvencia. Si hay deficit o el plazo
+#         aprieta, no se puja: el viernes hay que estar en
+#         positivo, y una puja ganada es dinero que sale.
+#
+#     EL INTERRUPTOR
+#
+#         `BORDALAS_SIN_SUBASTA=1` y no se puja nada, en
+#         cualquier fase y con cualquier cesta.
+MAX_PUJAS_PRIMER_DIA = 3
+
+
+DISABLE_ENV = "BORDALAS_SIN_SUBASTA"
+
+
+# Estados del reloj de solvencia en los que SI se puede pujar.
+# Cualquier otro -y cualquier deficit- cierra la ventana.
+SOLVENCIA_QUE_DEJA_PUJAR = frozenset({"SIN_DEUDA", "CUBIERTO"})
+
+
+def _sin_subasta() -> bool:
+    import os
+
+    return str(
+        os.environ.get(DISABLE_ENV, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
+
+
+def plan_del_reset(
+    candidatos: list | None,
+    prima_de_reventa: float,
+    presupuesto,
+    fichas_libres,
+    caja_libre,
+    seconds_to_reset,
+    solvency_clock: dict | None,
+    plantilla: list | None = None,
+    bloqueo_temporal: str | None = None,
+    en_vivo: bool = False,
+    max_por_club: int | None = None,
+    max_pujas: int = MAX_PUJAS_PRIMER_DIA,
+) -> dict:
+    """
+    Por quien se puja en esta ventana, o por que no se puja.
+
+    TODO SE PASA: los segundos al reset, el reloj de solvencia,
+    los bolsillos. Aqui no se lee ni disco, ni red, ni hora.
+
+    Las puertas, en orden, y cada una con su motivo publicado:
+
+        1. el interruptor
+        2. el reloj de solvencia manda
+        3. la ventana del reset
+        4. las fichas libres
+        5. el reparto -con la pelea contada- y sus barandillas
+        6. el tope del primer dia
+
+    Forma fija. Nunca lanza. `execute` sale False salvo que TODO
+    este en orden Y `en_vivo`.
+    """
+
+    vacio = {
+        "available": False,
+        "execute": False,
+        "bids": [],
+        "committed": 0,
+        "expected": 0,
+        "slots_used": 0,
+        "window": None,
+        "capped_at": max_pujas,
+        "dropped_by_cap": 0,
+        "dropped_by_club": 0,
+        "all_won": 0,
+        "worst_case": None,
+        "blocked_by": None,
+        "reason": None,
+    }
+
+    try:
+        if _sin_subasta():
+            return {
+                **vacio,
+                "available": True,
+                "blocked_by": "INTERRUPTOR",
+                "reason": (
+                    f"{DISABLE_ENV} puesto: no se puja nada."
+                ),
+            }
+
+        # EL RELOJ DE SOLVENCIA, ANTES QUE LA VENTANA
+        #
+        #     Va primero a proposito. Si el viernes no llegamos
+        #     en positivo, da igual lo buena que sea la cesta:
+        #     una puja ganada es dinero que sale.
+        reloj = solvency_clock or {}
+
+        estado = str(reloj.get("state") or "")
+
+        deficit = safe_int(reloj.get("deficit"))
+
+        if estado not in SOLVENCIA_QUE_DEJA_PUJAR or deficit > 0:
+            return {
+                **vacio,
+                "available": True,
+                "blocked_by": "SOLVENCIA",
+                "reason": (
+                    f"El reloj de solvencia dice «{estado or '?'}»"
+                    + (
+                        f" con {_euros(deficit)} EUR de deficit"
+                        if deficit > 0
+                        else ""
+                    )
+                    + ". No se puja: el viernes hay que estar en "
+                    "positivo."
+                ),
+            }
+
+        # EL BLOQUEO TEMPORAL DE LA CASA
+        #
+        #     Una puja es una escritura contra Biwenger. Si las
+        #     operaciones estan cerradas por la fase -jornada
+        #     bloqueada, transicion de ronda-, esta no es la
+        #     excepcion.
+        if bloqueo_temporal:
+            return {
+                **vacio,
+                "available": True,
+                "blocked_by": "BLOQUEO_TEMPORAL",
+                "reason": (
+                    f"Operaciones bloqueadas en fase "
+                    f"«{bloqueo_temporal}». No se puja."
+                ),
+            }
+
+        ventana = ventana_abierta(seconds_to_reset)
+
+        if not ventana["abierta"]:
+            return {
+                **vacio,
+                "available": True,
+                "window": ventana,
+                "blocked_by": "FUERA_DE_VENTANA",
+                "reason": ventana["reason"],
+            }
+
+        cesta = elegir_la_cesta(
+            candidatos_en_modo_cartera(
+                candidatos, prima_de_reventa
+            ),
+            presupuesto=presupuesto,
+            fichas_libres=fichas_libres,
+            caja_libre=caja_libre,
+            max_por_club=max_por_club,
+        )
+
+        elegidos = cesta.get("elegidos") or []
+
+        if not elegidos:
+            return {
+                **vacio,
+                "available": True,
+                "window": ventana,
+                "blocked_by": "SIN_CESTA",
+                "reason": cesta.get("reason"),
+            }
+
+        # EL TOPE DEL PRIMER DIA, AL FINAL
+        #
+        #     Despues del reparto y no antes: primero se elige
+        #     bien entre todos, y luego se recorta. Al reves se
+        #     estaria eligiendo entre tres al azar.
+        tope = max(0, safe_int(max_pujas))
+
+        recortados = max(0, len(elegidos) - tope)
+
+        elegidos = elegidos[:tope]
+
+        # LA BARANDILLA SOBRE EL PEOR CASO: QUE SE GANEN TODAS
+        #
+        #     `elegir_la_cesta` ya limita cuantos del mismo club
+        #     van EN LA CESTA. Lo que no puede saber es cuantos
+        #     de ese club hay YA en la plantilla.
+        #
+        #     Tres del Betis en el banquillo mas dos en la cesta
+        #     son cinco si entran las dos, y cinco del mismo club
+        #     es salirse de lo que hace el lider de la liga.
+        #
+        #     Se cuenta la suma, no cada puja por separado.
+        ocupacion: dict = {}
+
+        for jugador in (plantilla or []):
+
+            if not isinstance(jugador, dict):
+                continue
+
+            club = jugador.get("team_id") or jugador.get("teamID")
+
+            if club is not None:
+                ocupacion[club] = ocupacion.get(club, 0) + 1
+
+        tope_club = safe_int(max_por_club)
+
+        if tope_club > 0 and elegidos:
+
+            caben = []
+            fuera_por_club = 0
+
+            for candidato in elegidos:
+
+                club = candidato.get("team_id")
+
+                if (
+                    club is not None
+                    and ocupacion.get(club, 0) + 1 > tope_club
+                ):
+                    fuera_por_club += 1
+                    continue
+
+                if club is not None:
+                    ocupacion[club] = ocupacion.get(club, 0) + 1
+
+                caben.append(candidato)
+
+            elegidos = caben
+
+        else:
+            fuera_por_club = 0
+
+        if not elegidos:
+            return {
+                **vacio,
+                "available": True,
+                "window": ventana,
+                "dropped_by_cap": recortados,
+                "dropped_by_club": fuera_por_club,
+                "blocked_by": "PEOR_CASO",
+                "reason": (
+                    f"Las {fuera_por_club} puja(s) que quedaban "
+                    f"dejarian mas de {tope_club} jugadores del "
+                    f"mismo club si se ganaran. No se puja."
+                ),
+            }
+
+        comprometido = sum(
+            safe_int(c.get("bid")) for c in elegidos
+        )
+
+        esperado = int(
+            sum(
+                safe_float(c.get("expected_value"))
+                * safe_float(c.get("win_odds"), 0.0)
+                for c in elegidos
+            )
+        )
+
+        # Lo que se ganaria si entraran TODAS, que es el caso
+        # que hay que poder mirar antes de encender nada.
+        si_todas = int(
+            sum(
+                safe_float(c.get("expected_value"))
+                for c in elegidos
+            )
+        )
+
+        return {
+            "available": True,
+            "execute": bool(en_vivo and elegidos),
+            "bids": elegidos,
+            "committed": comprometido,
+            "expected": esperado,
+            "all_won": si_todas,
+            "worst_case": peor_caso(
+                {"elegidos": elegidos}, plantilla
+            ),
+            "slots_used": len(elegidos),
+            "window": ventana,
+            "capped_at": tope,
+            "dropped_by_cap": recortados,
+            "dropped_by_club": fuera_por_club,
+            "blocked_by": None if en_vivo else "SIN_LIVE",
+            "reason": (
+                f"{len(elegidos)} puja(s) por "
+                f"{_euros(comprometido)} EUR, esperado "
+                f"{_euros(esperado)} EUR. "
+                f"{ventana['reason']}"
+                + (
+                    f" El tope del primer dia dejo fuera "
+                    f"{recortados}."
+                    if recortados
+                    else ""
+                )
+                + (
+                    ""
+                    if en_vivo
+                    else " NO se ejecuta: falta el modo en vivo."
+                )
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "blocked_by": "ERROR",
+            "reason": (
+                f"No se pudo montar el plan del reset: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+def lectura_del_estado(
+    state: dict | None,
+    snapshot: dict | None = None,
+) -> dict:
+    """
+    Traduce el estado del ciclo a lo que pide `plan_del_reset`.
+
+    POR QUE EXISTE, Y POR QUE ES UNA SOLA
+
+        Esto lo necesitan DOS procesos: el ciclo, que puja, y la
+        telemetria, que ensena en la pantalla por quien va a
+        pujar. Si cada uno arma sus candidatos por su cuenta,
+        acaban ensenando cosas distintas del mismo mercado, y el
+        dueno mira una pantalla que no es lo que va a pasar.
+
+        Aqui se arma una vez. Las dos llaman a la misma.
+
+    NO LEE EL MUNDO: recibe el estado y el snapshot ya cargados.
+    Ni disco, ni red, ni reloj. Forma fija. Nunca lanza.
+    """
+
+    lectura = {
+        "candidatos": [],
+        "prima_de_reventa": 0.0,
+        "presupuesto": 0,
+        "fichas_libres": 0,
+        "caja_libre": 0,
+        "seconds_to_reset": None,
+        "solvency_clock": None,
+        "plantilla": [],
+        "bloqueo_temporal": None,
+        "max_por_club": None,
+    }
+
+    try:
+        estado = state or {}
+
+        tablero = estado.get("acquisition") or {}
+        bolsillos = estado.get("exposure") or {}
+        reloj = estado.get("market_clock") or {}
+
+        # LOS CANDIDATOS
+        #
+        #     Pujando al 0,25 % por encima del precio, lo que
+        #     vetaba a un jugador para una puja cara deja de
+        #     vetarlo: no se paga prima, asi que no hay prima
+        #     que justificar. Por eso entran los `SIN_VALOR`:
+        #     no valen lo que piden, pero el reset paga la
+        #     prima de reventa igual.
+        #
+        #     TRES PUERTAS QUE NO SE CRUZAN
+        #
+        #     1. LA COMPRA A RIVALES SIGUE CERRADA. De 49
+        #        objetivos del 09/09, VEINTINUEVE son de
+        #        mercado de rival. Pujar por uno es comprarle a
+        #        un rival, que es una puerta que el dueno tiene
+        #        cerrada. Se miran, no se pujan.
+        #
+        #     2. Ni un jugador con puja viva: dos pujas por el
+        #        mismo son dos compromisos por una ficha.
+        #
+        #     3. Ni los NO_DISPONIBLE, que no se pueden comprar.
+        lectura["candidatos"] = [
+            {
+                "id": fila.get("id"),
+                "name": fila.get("name"),
+                "market_price": fila.get("market_price"),
+                "team_id": fila.get("team_id"),
+                "seller_id": fila.get("seller_id"),
+                "rate_percent_per_day": (
+                    fila.get("market_gate") or {}
+                ).get("rate_percent_per_day"),
+            }
+            for fila in (tablero.get("targets") or [])
+            if isinstance(fila, dict)
+            and fila.get("decision") != "NO_DISPONIBLE"
+            and not fila.get("outside_computer_market")
+            and not fila.get("seller_id")
+            and not fila.get("has_live_bid")
+            and safe_int(fila.get("market_price")) > 0
+        ]
+
+        lectura["prima_de_reventa"] = (
+            safe_float(
+                (tablero.get("computer_premium") or {}).get(
+                    "median_percent"
+                )
+            )
+            / 100.0
+        )
+
+        lectura["presupuesto"] = bolsillos.get("available_budget")
+        lectura["caja_libre"] = bolsillos.get("cash_budget")
+        lectura["seconds_to_reset"] = reloj.get("seconds_to_reset")
+        lectura["solvency_clock"] = estado.get("solvency_clock")
+
+        # LAS FICHAS LIBRES, con la definicion de la casa: la
+        # plantilla mas grande de la liga menos la nuestra.
+        managers = (
+            (estado.get("rival_intelligence") or {}).get("managers")
+            or []
+        )
+
+        tamanos = [
+            safe_int(m.get("roster_count"))
+            for m in managers
+            if isinstance(m, dict)
+        ]
+
+        nuestra = next(
+            (
+                safe_int(m.get("roster_count"))
+                for m in managers
+                if isinstance(m, dict) and m.get("is_us")
+            ),
+            0,
+        )
+
+        lectura["fichas_libres"] = max(
+            0, (max(tamanos) if tamanos else nuestra) - nuestra
+        )
+
+        # LA PLANTILLA, para el peor caso. Del snapshot, que es
+        # donde vive; el estado no la lleva.
+        plantilla = (snapshot or {}).get("my_team")
+
+        if isinstance(plantilla, dict):
+            plantilla = (
+                plantilla.get("players")
+                or plantilla.get("data")
+                or []
+            )
+
+        lectura["plantilla"] = [
+            j for j in (plantilla or []) if isinstance(j, dict)
+        ]
+
+        # EL BLOQUEO TEMPORAL de la casa, el mismo que respetan
+        # las demas escrituras del ciclo.
+        if bool(estado.get("operations_locked")):
+            lectura["bloqueo_temporal"] = str(
+                estado.get("phase") or "UNKNOWN"
+            )
+
+        # EL TOPE POR CLUB no se inventa aqui: es el de la casa,
+        # el que lleva el lider de la liga.
+        try:
+            from src.analysis.concentration_guardrail import (
+                MAX_SAME_TEAM,
+            )
+
+            lectura["max_por_club"] = MAX_SAME_TEAM
+
+        except Exception:                           # noqa: BLE001
+            lectura["max_por_club"] = None
+
+        return lectura
+
+    except Exception:                               # noqa: BLE001
+        return lectura
+
+
+def plan_desde_el_estado(
+    state: dict | None,
+    snapshot: dict | None = None,
+    en_vivo: bool = False,
+    max_pujas: int = MAX_PUJAS_PRIMER_DIA,
+) -> dict:
+    """
+    El plan del reset a partir del estado del ciclo.
+
+    Una linea para el ciclo y otra para la pantalla, y las dos
+    pasando por el mismo sitio.
+    """
+
+    return plan_del_reset(
+        **lectura_del_estado(state, snapshot),
+        en_vivo=en_vivo,
+        max_pujas=max_pujas,
+    )
 
 
 def para_la_pantalla(
