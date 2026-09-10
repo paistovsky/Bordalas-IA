@@ -69,7 +69,22 @@ GUION = (
 MODULOS = RAIZ / "dashboard-v8" / "node_modules"
 
 
+MUESTRA = (
+    RAIZ / "dashboard-v8" / "tools" / "foto_de_muestra.json"
+)
+
+
 def _se_puede() -> tuple[bool, str]:
+    """
+    Si falta la herramienta -no el dato- esto no se puede correr.
+
+    OJO CON LA DIFERENCIA. Que falte `node` es que no hay con que
+    ejecutar; que faltara la FOTO era que no habia con que
+    pintar, y eso paso once horas en verde saltandose media
+    guardia. Lo segundo ya no puede pasar: la muestra esta
+    versionada y su ausencia es un fallo, no un salto.
+    """
+
     if shutil.which("node") is None:
         return False, "no hay `node` en el PATH"
 
@@ -124,11 +139,23 @@ def test_la_pantalla_se_monta_y_pinta() -> None:
 
     assert "hooks: ninguno condicional" in salida, salida
 
-    # Regla 24: la guardia no pasa con las manos vacias. Si
-    # `pintar` dijera "SIN MUESTRA" estariamos comprobando solo
-    # la mitad, y hay que verlo.
-    assert "pintar: tira" in salida, (
-        f"no se ha llegado a pintar ninguna pagina: {salida}"
+    # LA MUESTRA SE PINTA SIEMPRE, Y NO HAY VERDE SIN ELLA.
+    #
+    # Aqui ponia `"pintar: tira" in salida`, y el guion decia
+    # "SIN MUESTRA" y salia con codigo 0 cuando no encontraba la
+    # foto. En CI no la hay, asi que esta guardia paso el dia
+    # entero en verde habiendose saltado la mitad que pinta -y
+    # tumbo la verja la noche que importaba-.
+    #
+    # Ahora la foto de muestra esta VERSIONADA y se pinta
+    # siempre. Sin ella, el guion sale en rojo.
+    assert "pintar muestra: tira" in salida, (
+        f"no se ha pintado la foto de muestra: {salida}"
+    )
+
+    assert "SIN MUESTRA" not in salida, (
+        f"el guion ha vuelto a saltarse la mitad que pinta: "
+        f"{salida}"
     )
 
 
@@ -162,8 +189,55 @@ def test_el_detector_de_hooks_se_prueba_a_si_mismo() -> None:
     )
 
 
+def test_la_foto_de_muestra_esta_versionada() -> None:
+    """
+    EL VERDE VACUO DEL 10/09.
+
+    La mitad que pinta leia `dashboard/data/status.json`, que NO
+    esta en el repo. En CI no existe, el guion decia "SIN
+    MUESTRA" y pasaba en verde habiendose saltado la mitad. Y la
+    noche que la verja tenia que dejar pasar el ciclo, se puso
+    roja.
+
+    La muestra va en el repo. Y tiene que traer los bloques que
+    Inicio necesita, o pintaria una pagina vacia y estariamos
+    igual.
+    """
+
+    assert MUESTRA.exists(), (
+        f"falta {MUESTRA}: sin muestra versionada la guardia "
+        f"vuelve a depender de una foto que en CI no existe"
+    )
+
+    import json
+
+    foto = json.loads(MUESTRA.read_text(encoding="utf-8"))
+
+    for bloque in (
+        "meta",
+        "summary",
+        "lineup",
+        "competition",
+        "rival_intelligence",
+    ):
+        assert bloque in foto, (
+            f"la muestra no trae `{bloque}`: Inicio pintaria una "
+            f"pagina a medias y la guardia no comprobaria nada"
+        )
+
+    # Regla 24: una muestra vacia no comprueba nada.
+    assert (foto.get("lineup") or {}).get("players"), (
+        "la muestra no trae el XI"
+    )
+
+    assert MUESTRA.stat().st_size > 2000, (
+        "la muestra es demasiado pequena para pintar nada"
+    )
+
+
 TESTS = [
     test_el_detector_de_hooks_se_prueba_a_si_mismo,
+    test_la_foto_de_muestra_esta_versionada,
     test_la_pantalla_se_monta_y_pinta,
 ]
 

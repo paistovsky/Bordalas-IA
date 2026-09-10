@@ -325,20 +325,42 @@ console.log("hooks: ninguno condicional");
 // 2. Y LA PAGINA SE PINTA DE VERDAD
 // ============================================================
 
-const FOTO = join(REPO, "dashboard", "data", "status.json");
+/* LA MUESTRA ESTA VERSIONADA, Y ES LA QUE MANDA
+ *
+ * Antes esto leia la foto real de `dashboard/data/status.json`,
+ * que NO esta en el repo. En CI no existe, asi que la guardia
+ * decia "SIN MUESTRA" y pasaba en verde habiendose saltado la
+ * mitad que pinta. Verde vacuo: justo lo que llevamos todo el
+ * dia cazando.
+ *
+ * Ahora se pinta SIEMPRE contra `foto_de_muestra.json`, que va
+ * en el repo: la guardia deja de leer estado externo, es
+ * determinista y pinta de verdad en los dos sitios.
+ *
+ * La foto real, si esta, se pinta ADEMAS. Si no esta, no pasa
+ * nada. Lo que ya no puede pasar es que no se pinte ninguna.
+ */
 
-let crudo;
+const MUESTRA = join(AQUI, "foto_de_muestra.json");
+
+const FOTO_REAL = join(REPO, "dashboard", "data", "status.json");
+
+function leer(ruta) {
+  return JSON.parse(readFileSync(ruta, "utf8"));
+}
+
+let muestra;
 
 try {
-  crudo = JSON.parse(readFileSync(FOTO, "utf8"));
+  muestra = leer(MUESTRA);
 } catch (error) {
-  // Sin foto no se pinta, pero tampoco se calla: un salto
-  // silencioso aqui seria el mismo agujero con otra forma.
-  console.log(
-    `pintar: SIN MUESTRA (${error.code || error.message}). ` +
-      `La lectura de hooks sigue vigilando igual.`
+  console.error(
+    `FALTA LA MUESTRA VERSIONADA (${MUESTRA}): sin ella esta ` +
+      `comprobacion no pinta nada y no vale para nada.
+` +
+      String(error)
   );
-  process.exit(0);
+  process.exit(1);
 }
 
 // Rutas RELATIVAS: `resolveDir` es `dashboard-v8`, y esbuild no
@@ -388,21 +410,39 @@ await esbuild.build({
 
 const modulo = createRequire(import.meta.url)(salida);
 
-const tamanos = modulo.pinta(crudo);
+function pintaY(etiqueta, crudo) {
+  const tamanos = modulo.pinta(crudo);
 
-for (const [pagina, largo] of Object.entries(tamanos)) {
-  if (!largo || largo < 200) {
-    console.error(
-      `PANTALLA EN BLANCO: \`${pagina}\` ha pintado ${largo} ` +
-        `caracteres. Se monta, pero no sale nada.`
-    );
-    process.exit(1);
+  for (const [pagina, largo] of Object.entries(tamanos)) {
+    if (!largo || largo < 200) {
+      console.error(
+        `PANTALLA EN BLANCO (${etiqueta}): \`${pagina}\` ha ` +
+          `pintado ${largo} caracteres. Se monta, pero no sale ` +
+          `nada.`
+      );
+      process.exit(1);
+    }
   }
+
+  console.log(
+    `pintar ${etiqueta}: ` +
+      Object.entries(tamanos)
+        .map(([k, v]) => `${k} ${v}`)
+        .join(" · ")
+  );
 }
 
-console.log(
-  "pintar: " +
-    Object.entries(tamanos)
-      .map(([k, v]) => `${k} ${v}`)
-      .join(" · ")
-);
+// LA MUESTRA SIEMPRE. Si esto falla, falla la guardia.
+pintaY("muestra", muestra);
+
+// Y la real ADEMAS, cuando el dueno la tiene en su disco. Su
+// ausencia no es un fallo; su presencia es una comprobacion de
+// regalo contra datos de hoy.
+try {
+  pintaY("foto real", leer(FOTO_REAL));
+} catch (error) {
+  console.log(
+    `pintar foto real: no hay (${error.code || "ausente"}). ` +
+      `La muestra versionada ya se ha pintado.`
+  );
+}
