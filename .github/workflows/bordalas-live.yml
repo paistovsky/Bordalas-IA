@@ -7,7 +7,7 @@ on:
     # Ciclo autonomo: una vuelta por hora.
     # Reducido el 08/09/2026 tras el bloqueo por exceso de peticiones.
     # Volver a "7,37 * * * *" cuando lleve dos dias limpio.
-    - cron: "7 * * * *"
+     - cron: "7 0-2,7-23 * * *"
 
 permissions:
   contents: read
