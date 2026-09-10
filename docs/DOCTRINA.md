@@ -450,9 +450,28 @@ listado: cuelga del reset, y muere a las 07:00 haga lo que haga el listado.
 - **Y desaparece el problema de los listados que morían entre dos ventanas.** El
   10/09 eran siete de ocho.
 
-**RENOVAR ES TAMBIÉN RE-PRECIAR.** Pedir = valor de mercado × **1,15**,
-recalculado en cada renovación *(el multiplicador es del dueño, 10/09)*. No es
-cosmética: **es lo que rompió dos de las ocho renovaciones**.
+**RENOVAR ES TAMBIÉN RE-PRECIAR, PERO HACIA ARRIBA:**
+
+```
+pedir = max(precio_actual, valor de mercado × 1,15)
+```
+
+*(El multiplicador es del dueño, 10/09. El `max`, corrección del mismo día.)*
+
+**Sube cuando el mercado adelanta al listado; no baja nunca.** La primera versión
+recalculaba siempre, y eso convertía el arreglo en un destrozo:
+
+```
+Yamal      32.160.000  ->  24.748.000    -7,4 M
+Expósito    7.820.000  ->   6.014.500    -1,8 M
+```
+
+Pedir alto por alguien es **una decisión** —es el precio al que estamos
+dispuestos a soltarlo—, no un descuido que haya que corregir. El problema que se
+arreglaba era otro: **el rechazo por debajo de mercado**. Eso se arregla subiendo
+el suelo, no reescribiendo el techo. Guardia: `test_renovar_no_baja_el_precio`.
+
+No es cosmética: **es lo que rompió dos de las ocho renovaciones**.
 
 ```
 Jonny         pedía 2.350.000   valía 2.370.000   ->  HTTP 400
@@ -466,20 +485,37 @@ adelantó. Para situar el 1,15: las trece peticiones vivas ese día iban de 1,03
 1,50, con la mediana en 1,18; Cepeda estaba en 1,03 y era el siguiente en
 romperse.
 
-### EN LA APP NO ES ASÍ — y el dueño renueva a mano
+### LA APP SÍ MATA LAS OFERTAS. LA API NO. — medido
 
-**Ojo con esto, porque afecta a quien lo haga por la interfaz:** el dueño reporta
-que en la app **no hay botón de renovar** y hay que **quitar del mercado y volver
-a poner**, y que al hacerlo **la oferta anterior muere**.
+**No son dos formas de hacer lo mismo: hacen cosas distintas.**
 
-Lo medido arriba es de la **API**, que es por donde escribe Pepe. Ahí una sola
-llamada reemplaza el listado y la oferta sobrevive.
+**En la app**, el botón *Renovar* lo avisa con todas las letras:
 
-**Lo que no puedo afirmar** es que la app mate la oferta, porque la única
-renovación por app que he podido mirar —Mangala, re-listado a mano a las 09:04 del
-10/09— **también conservó su oferta**, del 09/09. O la app tampoco la mata, o
-Mangala no se renovó por ahí. Queda escrito como aviso, no como medición: **si
-renuevas a mano y ves morir la oferta, es la app, no la regla.**
+> *«Se rechazarán todas las ofertas recibidas por él»*
+
+*(Fuente: captura del propio botón, aportada por el dueño el 10/09/2026. Lo dice
+la app, no es una deducción nuestra.)*
+
+**Por API no pasa.** Trece renovaciones el 10/09 con el dueño delante, **trece
+ofertas vivas conservadas**. Y confirmado también **cambiando el precio**: Jonny
+y Pablo Durán fueron re-listados a 2.700.000 y 480.000 —precios distintos de los
+que tenían— y **conservaron su oferta**. Ni el re-listado ni el re-precio la
+tocan.
+
+**Lo que esto significa en la práctica:**
+
+- **Pepe renueva por API**: no pierde nada, y por eso renueva todos los días.
+- **Si renuevas tú a mano en la app, MATAS las ofertas vivas de ese jugador.**
+  Un día normal da igual —el Computer vuelve a ofertar en el reset—, pero con
+  deuda contingente esas ofertas son la caja con la que se tapa: matarlas la
+  víspera de la jornada es exactamente lo que no hay que hacer.
+- Si tienes que renovar a mano y hay ofertas que te importan, **díselo a Pepe y
+  que lo haga él**.
+
+*(Antes esto estaba escrito como aviso sin confirmar, porque Mangala —renovado a
+mano a las 09:04— conservó su oferta. Con la captura del botón queda cerrado: o
+Mangala no se renovó por la app, o no se llegó a confirmar el aviso.)*
+
 
 ### 27. La liquidez no se busca cuando hace falta: se mantiene todos los días
 
@@ -536,7 +572,7 @@ ninguno por encima de los demás.
 | 23 | Ninguna guardia lee estado externo | **hecha** 08/09 — barrido de las 96 |
 | 24 | La línea es el minuto de la jornada | **nueva** 10/09 |
 | 25 | Una oferta viva es una opción gratis | **nueva** 10/09 |
-| 26 | Se renueva todo, todos los días, re-preciando | **corregida** 10/09 — medida en vivo y ENCENDIDA |
+| 26 | Se renueva todo, todos los días, subiendo el precio | **corregida** 10/09 — medida en vivo y ENCENDIDA |
 | 27 | La liquidez se mantiene, no se busca | **nueva** 10/09 |
 
 **Once hechas. Doce por hacer. Cuatro nuevas el 10/09.**

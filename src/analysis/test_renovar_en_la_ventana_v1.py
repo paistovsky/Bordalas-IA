@@ -440,9 +440,22 @@ def test_no_se_lista_por_debajo_de_mercado():
             f"{valor}. Biwenger contesta 400."
         )
 
-        assert pedido == int(valor * PRIMA_DE_LA_PETICION), (
+        # LA REGLA ES UN SUELO, NO UN PRECIO.
+        #
+        #     Aqui decia `pedido == valor * PRIMA`, que era la
+        #     regla del "recalcular siempre". Esa version bajaba
+        #     los precios altos puestos a proposito -a Yamal le
+        #     habria quitado 7,4 M-, asi que paso a ser
+        #     `max(precio_actual, valor * prima)`.
+        #
+        #     La afirmacion no se debilita: se ata a la regla
+        #     buena. Lo que NUNCA puede pasar -pedir por debajo
+        #     de mercado- se sigue exigiendo arriba.
+        assert pedido == max(
+            viejo, int(valor * PRIMA_DE_LA_PETICION)
+        ), (
             f"{nombre}: se pide {pedido} y la regla dice "
-            f"{int(valor * PRIMA_DE_LA_PETICION)}"
+            f"{max(viejo, int(valor * PRIMA_DE_LA_PETICION))}"
         )
 
     # Y el caso que mas importa: el precio viejo NO se reutiliza.
@@ -461,9 +474,83 @@ def test_no_se_lista_por_debajo_de_mercado():
         puede_escribir=True,
     )
 
-    assert rancio["renewals"][0]["listed_price"] == int(
-        1_000_000 * PRIMA_DE_LA_PETICION
+    assert rancio["renewals"][0]["listed_price"] == max(
+        100, int(1_000_000 * PRIMA_DE_LA_PETICION)
     ), "se esta reutilizando el precio viejo"
+
+
+def test_renovar_no_baja_el_precio():
+    """
+    SUBE, NUNCA BAJA.
+
+    La primera version de la regla recalculaba SIEMPRE, y eso
+    habria desplomado los precios altos puestos a proposito en
+    la primera renovacion:
+
+        Yamal      32.160.000  ->  24.748.000    -7,4 M
+        Exposito    7.820.000  ->   6.014.500    -1,8 M
+
+    Pedir alto por alguien es una DECISION -es el precio al que
+    estamos dispuestos a soltarlo-, no un descuido.
+    """
+
+    caros = [
+        # (nombre, precio pedido hoy, valor de mercado)
+        ("Yamal", 32_160_000, 21_520_000),
+        ("Exposito", 7_820_000, 5_230_000),
+        ("Mangala", 3_330_000, 2_510_000),
+    ]
+
+    assert caros, "sin casos no se prueba nada"
+
+    for nombre, actual, valor in caros:
+
+        # Que el caso SEA de los que bajarian: si no, esta
+        # guardia pasaria sin mirar nada.
+        assert int(valor * PRIMA_DE_LA_PETICION) < actual, (
+            f"{nombre} no es un caso de bajada: el fixture no "
+            f"prueba lo que dice"
+        )
+
+        fila = {
+            "id": 1,
+            "name": nombre,
+            "listed_price": actual,
+            "market_price": valor,
+            "listing_hours_to_expiry": 4.0,
+            "offer_amount": 1,
+        }
+
+        plan = que_renovar([fila], 300, puede_escribir=True)
+
+        assert plan["count"] == 1, f"{nombre}: no se renueva"
+
+        pedido = plan["renewals"][0]["listed_price"]
+
+        assert pedido == actual, (
+            f"{nombre}: la renovacion le baja el precio de "
+            f"{actual} a {pedido}"
+        )
+
+        assert pedido >= int(valor * PRIMA_DE_LA_PETICION)
+
+    # Y la contraria, para que siga subiendo cuando toca: si
+    # solo se comprobara "no baja", dejar el precio quieto
+    # siempre tambien pasaria, y volveria el 400.
+    rancio = {
+        "id": 2,
+        "name": "Jonny",
+        "listed_price": 2_350_000,
+        "market_price": 2_370_000,
+        "listing_hours_to_expiry": 4.0,
+        "offer_amount": 1,
+    }
+
+    subido = que_renovar([rancio], 300, puede_escribir=True)
+
+    assert subido["renewals"][0]["listed_price"] == int(
+        2_370_000 * PRIMA_DE_LA_PETICION
+    ), "ya no sube cuando el mercado adelanta al listado"
 
 
 def test_sin_precio_de_mercado_no_se_inventa_uno():
@@ -919,6 +1006,7 @@ TESTS = [
     test_cada_renovacion_va_al_libro,
     test_la_ventana_ya_no_restringe_la_renovacion,
     test_no_se_lista_por_debajo_de_mercado,
+    test_renovar_no_baja_el_precio,
     test_sin_precio_de_mercado_no_se_inventa_uno,
     test_dentro_de_la_ventana_si_se_renueva,
     test_la_zona_de_silencio_para_la_renovacion,

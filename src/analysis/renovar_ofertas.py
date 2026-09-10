@@ -118,24 +118,48 @@ MARGEN_HORAS = 1.0
 #     el valor, con la mediana en 1,18. Cepeda estaba en 1,03 y
 #     habria sido el siguiente en romperse.
 #
-#     Se recalcula EN CADA RENOVACION, que es todo el punto.
+#     Se recalcula EN CADA RENOVACION, pero como SUELO, no
+#     como precio: `max(precio_actual, valor x 1,15)`. Sube
+#     cuando el mercado adelanta al listado; no baja nunca.
 PRIMA_DE_LA_PETICION = 1.15
 
 
 def precio_de_la_peticion(
     market_price,
+    precio_actual=None,
     prima: float = PRIMA_DE_LA_PETICION,
 ) -> int:
     """
     Lo que se pide por un jugador al renovar su listado.
 
-    Nunca por debajo del valor de mercado: eso lo rechaza
-    Biwenger con un 400.
+        pedir = max(precio_actual, valor de mercado x prima)
+
+    SUBE, NUNCA BAJA. Y ese `max` no es un detalle (10/09/2026)
+
+        La primera version recalculaba SIEMPRE, y eso convertia
+        el arreglo en un destrozo: los precios altos puestos a
+        proposito se habrian desplomado en la primera
+        renovacion.
+
+            Yamal      32.160.000  ->  24.748.000   -7,4 M
+            Exposito    7.820.000  ->   6.014.500   -1,8 M
+
+        Pedir alto por alguien es una decision -es el precio al
+        que estamos dispuestos a soltarlo-, no un descuido que
+        haya que corregir.
+
+        El problema que se arreglaba era OTRO: que Biwenger
+        rechaza con un 400 listar por debajo del valor de
+        mercado, y los listados viejos se quedan atras cuando el
+        mercado los adelanta. Eso se arregla subiendo el suelo,
+        no reescribiendo el techo.
     """
 
     valor = max(0, safe_int(market_price))
 
-    return int(valor * prima)
+    suelo = int(valor * prima)
+
+    return max(suelo, max(0, safe_int(precio_actual)))
 
 
 # EL TOPE POR CICLO
@@ -438,7 +462,10 @@ def que_renovar(
             valor_hoy = safe_int(fila.get("market_price"))
 
             pedido = (
-                precio_de_la_peticion(valor_hoy)
+                precio_de_la_peticion(
+                    valor_hoy,
+                    precio_actual=fila.get("listed_price"),
+                )
                 if valor_hoy > 0
                 else safe_int(fila.get("listed_price"))
             )
