@@ -409,6 +409,74 @@ def test_la_dedup_sale_del_libro_y_no_de_la_foto():
     )
 
 
+def test_no_se_apunta_una_entrada_si_la_ventana_no_se_abrio():
+    """
+    EL FALLO QUE SE COMETIO AL CONSTRUIR ESTO (10/09/2026)
+
+        La condicion para apuntar la entrada era
+        `blocked_by != "FUERA_DE_VENTANA"`. Cuando se quito la
+        puerta de la ventana de `que_renovar` -porque renovar
+        dejo de depender de ella- esa condicion se quedo sin
+        sentido: `blocked_by` ya no vale nunca FUERA_DE_VENTANA.
+
+        Resultado: se apuntaba una entrada EN CADA VUELTA. El
+        libro se lleno de entradas falsas y la alarma de "24 h
+        sin entrar" no habria saltado JAMAS.
+
+        Un verde falso en el panel que existe para cazar verdes
+        falsos.
+
+    NO TOCA LA RED NI `data/`: se cambian por delante las
+    funciones que tocarian Biwenger y se desvia el libro.
+    """
+
+    import src.autopilot as autopilot
+    import src.intelligence.libro_de_la_ventana as libro
+    import src.v10_full_autonomous_live as v10
+
+    retrato = autopilot.load_rival_intelligence
+    tablon = autopilot.board_del_ciclo
+    ruta_original = libro.FICHERO
+
+    with tempfile.TemporaryDirectory() as carpeta:
+
+        try:
+            autopilot.load_rival_intelligence = lambda s: {
+                "managers": [],
+                "current_user_id": 9,
+            }
+            autopilot.board_del_ciclo = lambda s: {
+                "current_user_id": 9
+            }
+
+            libro.FICHERO = Path(carpeta) / "ventana.jsonl"
+
+            # Una vuelta CUALQUIERA: doce horas para el reset.
+            v10._renovar_en_la_ventana(
+                {
+                    "snapshot": {"my_team": []},
+                    "result": {
+                        "state": {
+                            "market_clock": {
+                                "seconds_to_reset": 12 * 3600
+                            }
+                        }
+                    },
+                }
+            )
+
+            assert not libro.FICHERO.exists(), (
+                "ha apuntado una entrada en la ventana con la "
+                "ventana CERRADA: la alarma de las 24 h no "
+                "volveria a saltar"
+            )
+
+        finally:
+            autopilot.load_rival_intelligence = retrato
+            autopilot.board_del_ciclo = tablon
+            libro.FICHERO = ruta_original
+
+
 def test_nada_de_esto_lanza():
 
     for basura in (None, "no", {}, [], 0):
@@ -432,6 +500,7 @@ TESTS = [
     test_el_segundo_disparo_no_puja_dos_veces,
     test_el_segundo_disparo_no_renueva_dos_veces,
     test_la_dedup_sale_del_libro_y_no_de_la_foto,
+    test_no_se_apunta_una_entrada_si_la_ventana_no_se_abrio,
     test_nada_de_esto_lanza,
 ]
 

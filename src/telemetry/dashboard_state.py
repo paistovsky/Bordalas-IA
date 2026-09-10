@@ -2941,6 +2941,40 @@ def compact_ledger_audit(audit: dict) -> dict:
     }
 
 
+def _libro_de_pujas(limite: int = 8) -> list:
+    """
+    Las ultimas pujas con nombre, importe y como acabaron.
+
+    Observador puro: lee el libro ya escrito. Nunca lanza.
+    """
+
+    try:
+        from src.intelligence.bid_outcome_ledger import load_ledger
+
+        filas = [
+            {
+                "name": b.get("player_name"),
+                "amount": safe_int(b.get("amount")),
+                "outcome": b.get("outcome"),
+                "source": b.get("target_source"),
+                "margin": b.get("margin"),
+                "placed_at": b.get("placed_at"),
+            }
+            for b in (load_ledger().get("bids") or {}).values()
+            if isinstance(b, dict)
+        ]
+
+        filas.sort(
+            key=lambda f: str(f.get("placed_at") or ""),
+            reverse=True,
+        )
+
+        return filas[:limite]
+
+    except Exception:                               # noqa: BLE001
+        return []
+
+
 def bloque_de_la_subasta(
     state: dict | None,
     snapshot: dict | None,
@@ -3049,6 +3083,19 @@ def bloque_de_la_subasta(
             "outcomes": bid_outcome_summary(
                 target_source="SUBASTA_CARTERA"
             ),
+
+            # TODAS las pujas, vengan de donde vengan: el dueno
+            # tambien puja a mano y esas no son de la cartera.
+            "outcomes_all": bid_outcome_summary(),
+
+            # CON NOMBRE Y APELLIDOS.
+            #
+            #     Los contadores dicen "1 ganada"; no dicen A
+            #     QUIEN. Y la pregunta de las 07:15 es literal:
+            #     "¿gané a Aubameyang?". Sin el nombre hay que
+            #     ir a buscarlo a otra pagina, que es justo lo
+            #     que la portada tiene que evitar.
+            "bids_book": _libro_de_pujas(),
         }
 
     except Exception as error:                      # noqa: BLE001

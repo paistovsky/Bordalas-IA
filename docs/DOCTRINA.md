@@ -531,6 +531,50 @@ gratis.
 
 ---
 
+---
+
+### 28. Un panel nace en Auditoría; a la portada se sube
+
+**Cualquier panel que se pida para VERIFICAR algo nace en Auditoría. A la portada
+solo sube lo que el dueño necesita para DECIDIR.**
+
+*(Origen: DUEÑO, 10/09/2026.)*
+
+La portada se llenó sola, y no por descuido: cada panel se pidió por un buen
+motivo, casi siempre para comprobar que algo recién construido funcionaba. Una
+curva, una calibración, una sonda, un reparto. Y después se quedaba.
+
+**El criterio es la pregunta que contesta el panel:**
+
+- **QUÉ** — el saldo, el once, lo que se puede cobrar, lo que se pujó → portada.
+- **POR QUÉ** — la curva de la prima, la calibración del ratio, el embudo, el
+  histórico, la vara → **Auditoría**.
+
+**Nada se borra.** Lo que se quita de delante se mueve, y se dice a dónde. Lo que
+se pierde no se recupera; lo que se mueve, sí.
+
+**Las ocho preguntas de la portada** *(dueño, 10/09)*, que son también su índice:
+
+```
+1. ¿Algo en ROJO que exija que yo haga algo AHORA?
+2. ¿Vamos ganando?           puntos contra Pollo, y los del banquillo
+3. ¿Cuánto hay y cuánto debo DE VERDAD?   saldo · comprometido · efectivo
+4. ¿Qué hizo Pepe y qué hará?
+5. ¿Se abrió la ventana? ¿qué pujó y qué renovó?
+6. ¿Qué puedo cobrar ahora, y cuáles de esos son titulares?
+7. ¿Cómo está el once?
+8. ¿A por quién va Pepe?
+```
+
+Si un panel no contesta a una de esas ocho, no está en la portada.
+
+**Y la de arriba del todo dice algo aunque no pase nada.** Una tira que solo
+aparece cuando hay problemas es indistinguible de una tira rota: cuando no hay
+nada, pone *NADA QUE HACER AHORA*. Es la misma lección que la ventana que no se
+abría — **una ausencia tiene que anunciarse**.
+
+---
+
 ## Descartado
 
 **Entrenadores** (truco nº 4 del vídeo). **Esta liga no los usa.** Decisión del
@@ -574,6 +618,7 @@ ninguno por encima de los demás.
 | 25 | Una oferta viva es una opción gratis | **nueva** 10/09 |
 | 26 | Se renueva todo, todos los días, subiendo el precio | **corregida** 10/09 — medida en vivo y ENCENDIDA |
 | 27 | La liquidez se mantiene, no se busca | **nueva** 10/09 |
+| 28 | Un panel nace en Auditoría; a la portada se sube | **nueva** 10/09 |
 
 **Once hechas. Doce por hacer. Cuatro nuevas el 10/09.**
 

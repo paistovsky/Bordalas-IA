@@ -64,15 +64,53 @@ CADENAS = [
         [],
     ),
     (
+        # BAJADO A AUDITORIA el 10/09: es un termometro de
+        # temporada y no pide ninguna decision hoy.
         "race",
         "race",
         "RacePanel",
-        ["HomePage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
         "once",
         "once",
         "ElOncePanel",
+        ["HomePage.jsx"],
+    ),
+
+    # ========================================================
+    # LOS DEL 10/09, QUE NACIERON SIN PANTALLA
+    # ========================================================
+    #
+    #     Se publicaron cuatro bloques nuevos en `status.json`
+    #     -la subasta, las pujas del dueno, la renovacion y la
+    #     zona de silencio- y NINGUNO llegaba a la interfaz. Se
+    #     calculaban en cada vuelta y no los veia nadie.
+    #
+    #     Esta guardia no lo cazo porque no estaban en esta
+    #     tabla. Ahora si.
+    (
+        "subasta",
+        "subasta",
+        "VentanaPanel",
+        ["HomePage.jsx"],
+    ),
+    (
+        "renovacion",
+        "renovacion",
+        "VentanaPanel",
+        ["HomePage.jsx"],
+    ),
+    (
+        "pujas_del_dueno",
+        "pujasDelDueno",
+        "DineroPanel",
+        ["HomePage.jsx"],
+    ),
+    (
+        "silencio",
+        "silencio",
+        "AhoraPanel",
         ["HomePage.jsx"],
     ),
     (
@@ -109,13 +147,13 @@ CADENAS = [
         "scout",
         "scout",
         "ScoutPanel",
-        ["BrainPage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
         "concentration",
         "concentration",
         "ConcentrationPanel",
-        ["SquadPage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
         "sale_order",
@@ -133,7 +171,7 @@ CADENAS = [
         "press",
         "press",
         "PressPanel",
-        ["BrainPage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
         "arbiter",

@@ -717,7 +717,23 @@ def _renovar_en_la_ventana(cycle: dict | None) -> dict:
         #     nada" es informacion, y muy distinta de "no entre".
         #     Es lo que permite que la pantalla anuncie la
         #     ausencia en vez de callarla.
-        if (plan.get("blocked_by") != "FUERA_DE_VENTANA"):
+        # SOLO SI LA VENTANA ESTA ABIERTA DE VERDAD.
+        #
+        #     Aqui ponia `blocked_by != "FUERA_DE_VENTANA"`, y
+        #     esa condicion se quedo sin sentido en cuanto se
+        #     quito la puerta de la ventana de `que_renovar`:
+        #     `blocked_by` ya no vale nunca FUERA_DE_VENTANA, asi
+        #     que apuntaba una entrada EN CADA VUELTA.
+        #
+        #     Con el libro lleno de entradas falsas, la alarma de
+        #     "24 h sin entrar" no habria saltado jamas. Es
+        #     exactamente el fallo que ese panel existe para
+        #     evitar, cometido al construirlo.
+        #
+        #     Se pregunta a la ventana, que es quien lo sabe.
+        from src.analysis.la_subasta import ventana_abierta
+
+        if ventana_abierta(segundos).get("abierta"):
 
             from src.intelligence.libro_de_la_ventana import (
                 apuntar_ventana,

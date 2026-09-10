@@ -1,4 +1,3 @@
-import ConcentrationPanel from "../components/ConcentrationPanel";
 import VaraPanel from "../components/VaraPanel";
 import SaleOrderPanel from "../components/SaleOrderPanel";
 import { useState } from "react";
@@ -210,7 +209,6 @@ export default function SquadPage({ data }) {
           verdad desde esta noche. */}
       <VaraPanel data={data} />
 
-      <ConcentrationPanel data={data} />
 
       {/* A QUIEN LE TOCA SALIR (11/09/2026)
           Va aqui, debajo de la concentracion y encima del suelo

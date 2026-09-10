@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
 import BidOutcomesPanel from "../components/BidOutcomesPanel";
+import ConcentrationPanel from "../components/ConcentrationPanel";
+import PressPanel from "../components/PressPanel";
+import RacePanel from "../components/RacePanel";
+import ScoutPanel from "../components/ScoutPanel";
 import { ago } from "../lib/utils";
 
 const FILTERS = [
@@ -239,6 +243,71 @@ export default function AuditPage({ data }) {
           {!rows.length && <div className="empty">No hay registros para este filtro.</div>}
         </div>
       </section>
+
+      {/* ================================================
+          LO QUE BAJO DE LA PORTADA EL 10/09/2026
+
+          Nada se ha borrado. Todo esto contesta POR QUE en vez
+          de QUE, y ninguno pide una decision hoy:
+
+            LA CARRERA        como va la temporada. Termometro.
+            CONCENTRACION     como esta repartida la plantilla.
+            EL OJEADOR        lo que otras webs creen que vale
+                              un jugador: es una ENTRADA de la
+                              valoracion, no una decision. Si
+                              alguna vez contradice al precio,
+                              lo que hay que mirar es la
+                              valoracion, y esta aqui al lado.
+            LA PRENSA         partes medicos y convocatorias. Ya
+                              esta DENTRO de la probabilidad de
+                              ser titular que pinta el XI de la
+                              portada; aqui se ve el material en
+                              crudo del que sale. Cuando dice
+                              algo que cambia una decision, sube
+                              solo: al XI como "0 % sin motivo"
+                              y a la tira roja si tumba a un
+                              titular.
+          ================================================ */}
+
+      {/* PLANTILLA POR POSICION. Estaba en la portada y no
+          pedia ninguna decision: dice como esta repartida la
+          plantilla, no que hacer con ella. Se conserva entero. */}
+      {data.guardrail?.available && (
+        <section className="pan">
+          <h2>PLANTILLA POR POSICIÓN</h2>
+          <div className="sub">Tengo / suelo para alinear / vendibles</div>
+          <div className="poswrap">
+            {(data.guardrail.by_position || []).map((row) => (
+              <div
+                className={
+                  row.owned < row.floor
+                    ? "poscel crit"
+                    : row.below_desired
+                    ? "poscel warn"
+                    : "poscel"
+                }
+                key={row.position}
+              >
+                <b>{row.name.toUpperCase()}</b>
+                <span className="big">{row.owned}</span>
+                <small>
+                  suelo {row.floor} · vend. {row.disposable}
+                </small>
+              </div>
+            ))}
+          </div>
+          {data.guardrail.goalkeeper_warning && (
+            <div className="alert warn" style={{ marginTop: 9, marginBottom: 0 }}>
+              🧤 {data.guardrail.goalkeeper_warning}
+            </div>
+          )}
+        </section>
+      )}
+
+      <RacePanel data={data} />
+      <ConcentrationPanel data={data} />
+      <ScoutPanel data={data} />
+      <PressPanel data={data} />
     </>
   );
 }

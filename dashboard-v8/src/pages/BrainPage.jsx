@@ -1,6 +1,4 @@
-import ScoutPanel from "../components/ScoutPanel";
 import DoctrinaPanel from "../components/DoctrinaPanel";
-import PressPanel from "../components/PressPanel";
 import ArbiterPanel from "../components/ArbiterPanel";
 import StrategyPanel from "../components/StrategyPanel";
 import SolvencyPlansPanel from "../components/SolvencyPlansPanel";
@@ -350,9 +348,7 @@ export default function BrainPage({ data }) {
 
         <ArbiterPanel data={data} />
 
-        <PressPanel data={data} />
 
-        <ScoutPanel data={data} />
       </div>
     </>
   );

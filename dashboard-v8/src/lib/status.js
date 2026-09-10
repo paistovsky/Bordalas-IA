@@ -223,6 +223,37 @@ export function normalizeStatus(raw = {}) {
       recommended_sale: null
     },
 
+    // LO QUE SE CONSTRUYO EL 10/09 Y NO LLEGABA A NINGUNA
+    // PANTALLA. Se calculaba en cada vuelta y no se veia.
+
+    // Por quien va a pujar el ciclo en la ventana del reset, y
+    // que gano o perdio despues.
+    subasta: raw.subasta || { available: false, bids: [] },
+
+    // Cuanto dinero nuestro esta comprometido en pujas vivas,
+    // aunque las haya puesto el dueno a mano.
+    pujasDelDueno: raw.pujas_del_dueno || {
+      available: false,
+      committed: 0,
+      sources: {}
+    },
+
+    // Que se renovaria, que no llega vivo a la proxima ventana,
+    // y cuando se entro por ultima vez en la ventana.
+    renovacion: raw.renovacion || {
+      available: false,
+      renewals: [],
+      at_risk: [],
+      ventana: null
+    },
+
+    // Si Pepe esta en la franja en la que no escribe, y que se
+    // quedo sin hacer por ella.
+    silencio: raw.silencio || { available: false, allowed: true },
+
+    // Que trae la tanda nueva del Computer en cada reset.
+    censoDelReset: raw.censo_del_reset || { available: false },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] }

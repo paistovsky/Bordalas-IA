@@ -536,3 +536,115 @@ tr.live td{opacity:1}
    y un manager con nombre va marcado, porque pujarle a alguien
    no es lo mismo que pujar al mercado. */
 td.rival{color:#93c5fd;font-weight:600}
+
+/* ============================================================
+   LA LIMPIEZA DE LA PORTADA (10/09/2026)
+   ============================================================ */
+
+/* La tira de "¿algo AHORA?". Va arriba del todo y tiene que
+   distinguirse de un panel normal de un vistazo: si hay algo
+   rojo, el borde lo canta antes de leer nada. */
+.ahora {
+  padding: 10px 14px;
+  border-left: 4px solid var(--ok, #2e9e5b);
+}
+
+.ahora-bad {
+  border-left-color: var(--crit, #d9414a);
+}
+
+.ahora-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+  flex-wrap: wrap;
+}
+
+.ahora-why {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+/* Los tres números del dinero. Nunca refundidos en uno. */
+.dinero {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.dinero-cel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dinero-cel small {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.dinero-cel b {
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dinero-total {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.dinero-relojes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.dinero-relojes > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dinero-relojes small {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.dinero-relojes b {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Un titular en la lista de "qué puedo cobrar" no es liquidez
+   normal: cobrarlo cuesta puntos, y la fila lo dice. */
+.row-warn td {
+  background: rgba(230, 170, 40, 0.08);
+}
+
+.mini {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+  margin: 10px 0 4px;
+}
+
+.grid.g2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .grid.g2,
+  .dinero,
+  .dinero-relojes {
+    grid-template-columns: 1fr;
+  }
+}
