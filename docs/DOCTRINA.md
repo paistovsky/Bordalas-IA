@@ -416,28 +416,70 @@ seguidos).
 
 ---
 
-### 26. Renovar mata la oferta viva, así que se renueva tarde
+### 26. Se renueva todo, todos los días — CORREGIDA el 10/09
 
-**En la ventana del reset, y solo lo que no llega vivo a la ventana siguiente.**
+**Renovar NO mata la oferta viva. Se renueva todos los días, a cualquier hora, y
+cada renovación RE-PRECIA.**
 
-*(Origen: DUEÑO, 10/09/2026, afinada con la medición del mismo día.)*
+*(Origen: DUEÑO, 10/09/2026. Corregida el mismo día por medición en vivo.)*
 
-El dueño lo enunció como «renovar a diario». Midiendo sale al revés: renovar por
-la mañana lo que caduca pasado mañana **tira un día de liquidez a la basura**,
-porque la oferta que matas tenía 24 h por delante.
+**Lo que decía esta regla hasta hoy**, y era falso: «renovar mata la oferta viva,
+por eso se renueva tarde, en la ventana del reset». Toda la política de la
+ventana colgaba de esa frase.
 
-Y renovar a las 06:52 es **gratis**: la oferta que matas iba a morir a las 07:00
-de todas formas, y un listado creado a las 06:42 —dieciocho minutos antes del
-reset— recibió su oferta a las 07:04 del mismo día. La ventana hace doble turno:
-**colocar pujas y renovar lo que se muere.**
+**Lo que se midió, escribiendo de verdad contra Biwenger** (13 renovaciones, con
+el dueño delante):
 
-**Lo que la medición añadió al encargo:** un listado que caduca *entre* dos
-ventanas no lo salva ninguna de las dos. El 10/09 eso pasaba con **siete de los
-ocho** listados. No se decide solo: se publica en `renovacion.at_risk` y lo mira
-el dueño, porque renovarlos fuera de la ventana costaría matar ofertas con 21 h
-de vida — que es justo la caja con la que se tapa la deuda contingente.
+```
+Dituro   listado nuevo 10/09 12:25, 48 h por delante
+         oferta de 2.439.000 creada el 09/09 a las 07:08:  INTACTA
+```
 
----
+Trece renovaciones, **trece ofertas vivas conservadas**. La oferta no cuelga del
+listado: cuelga del reset, y muere a las 07:00 haga lo que haga el listado.
+
+**Consecuencias, y son grandes:**
+
+- **Renovar no cuesta nada.** No hay que esperar a la ventana para no perder
+  liquidez, porque no se pierde ninguna.
+- **La ventana deja de restringir la renovación.** Sigue mandando para pujar
+  —eso sí depende del reset— y sigue mandando la zona de silencio, que es sobre
+  no escribir mientras el mercado se rehace.
+- **Se renueva todo, todos los días.** Se autolimita: al renovar, el listado dura
+  48 h y no vuelve a pedir renovación hasta 23 h después.
+- **Y desaparece el problema de los listados que morían entre dos ventanas.** El
+  10/09 eran siete de ocho.
+
+**RENOVAR ES TAMBIÉN RE-PRECIAR.** Pedir = valor de mercado × **1,15**,
+recalculado en cada renovación *(el multiplicador es del dueño, 10/09)*. No es
+cosmética: **es lo que rompió dos de las ocho renovaciones**.
+
+```
+Jonny         pedía 2.350.000   valía 2.370.000   ->  HTTP 400
+Pablo Durán   pedía   400.000   valía   420.000   ->  HTTP 400
+los otros seis, entre +240.000 y +740.000         ->  OK
+```
+
+**Biwenger rechaza listar por debajo del precio de mercado.** Y le pasa a los
+listados viejos: se publicaron cuando el jugador valía menos y el mercado los
+adelantó. Para situar el 1,15: las trece peticiones vivas ese día iban de 1,03 a
+1,50, con la mediana en 1,18; Cepeda estaba en 1,03 y era el siguiente en
+romperse.
+
+### EN LA APP NO ES ASÍ — y el dueño renueva a mano
+
+**Ojo con esto, porque afecta a quien lo haga por la interfaz:** el dueño reporta
+que en la app **no hay botón de renovar** y hay que **quitar del mercado y volver
+a poner**, y que al hacerlo **la oferta anterior muere**.
+
+Lo medido arriba es de la **API**, que es por donde escribe Pepe. Ahí una sola
+llamada reemplaza el listado y la oferta sobrevive.
+
+**Lo que no puedo afirmar** es que la app mate la oferta, porque la única
+renovación por app que he podido mirar —Mangala, re-listado a mano a las 09:04 del
+10/09— **también conservó su oferta**, del 09/09. O la app tampoco la mata, o
+Mangala no se renovó por ahí. Queda escrito como aviso, no como medición: **si
+renuevas a mano y ves morir la oferta, es la app, no la regla.**
 
 ### 27. La liquidez no se busca cuando hace falta: se mantiene todos los días
 
@@ -494,7 +536,7 @@ ninguno por encima de los demás.
 | 23 | Ninguna guardia lee estado externo | **hecha** 08/09 — barrido de las 96 |
 | 24 | La línea es el minuto de la jornada | **nueva** 10/09 |
 | 25 | Una oferta viva es una opción gratis | **nueva** 10/09 |
-| 26 | Renovar mata la oferta: se renueva tarde | **nueva** 10/09 — codificada, sin disparar |
+| 26 | Se renueva todo, todos los días, re-preciando | **corregida** 10/09 — medida en vivo y ENCENDIDA |
 | 27 | La liquidez se mantiene, no se busca | **nueva** 10/09 |
 
 **Once hechas. Doce por hacer. Cuatro nuevas el 10/09.**

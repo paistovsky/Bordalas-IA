@@ -234,6 +234,17 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--precios",
+        default="",
+        help=(
+            "Precio explicito por jugador: "
+            "\"Jonny=2700000,Pablo Duran=480000\". "
+            "Re-preciar NO es renovar: lo decide una persona, "
+            "por eso hay que escribirlo a mano."
+        ),
+    )
+
+    parser.add_argument(
         "--confirmar",
         action="store_true",
         help="Sin esto NO se escribe nada.",
@@ -255,9 +266,33 @@ def main() -> None:
         estado.get("roster"),
     )
 
+    # LOS PRECIOS QUE MANDA LA PERSONA, si los hay.
+    puestos = {}
+
+    for trozo in args.precios.split(","):
+
+        if "=" not in trozo:
+            continue
+
+        nombre, valor = trozo.split("=", 1)
+
+        try:
+            puestos[_plano(nombre)] = int(valor.strip())
+
+        except (TypeError, ValueError):
+            continue
+
     buscados = {_plano(n) for n in pedidos}
 
     filas = [f for f in todas if _plano(f["name"]) in buscados]
+
+    for fila in filas:
+
+        nuevo_precio = puestos.get(_plano(fila["name"]))
+
+        if nuevo_precio:
+            fila["precio_anterior"] = fila["listed_price"]
+            fila["listed_price"] = nuevo_precio
 
     encontrados = {_plano(f["name"]) for f in filas}
 
@@ -326,6 +361,12 @@ def main() -> None:
             f"   conserva oferta de "
             f"{euros(fila['offer_amount']):>10}"
             + aviso
+            + (
+                f"   [re-preciado desde "
+                f"{euros(fila.get('precio_anterior'))}]"
+                if fila.get("precio_anterior")
+                else ""
+            )
         )
 
     if faltan:

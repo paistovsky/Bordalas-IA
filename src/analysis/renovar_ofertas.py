@@ -96,6 +96,48 @@ HORAS_ENTRE_VENTANAS = 24.0
 MARGEN_HORAS = 1.0
 
 
+# LO QUE SE PIDE AL RENOVAR (10/09/2026)
+#
+#     RENOVAR ES TAMBIEN RE-PRECIAR. Volver a listar al precio
+#     viejo deja la peticion rancia: el mercado sube y el listado
+#     se queda quieto.
+#
+#     Y eso NO es solo feo, ROMPE la renovacion. Medido en vivo
+#     el 10/09: de ocho renovaciones a mano, dos volvieron con
+#     HTTP 400 -Jonny y Pablo Duran-, y eran exactamente los dos
+#     que pedian POR DEBAJO de lo que valia el jugador:
+#
+#         Jonny         pedia 2.350.000   valia 2.370.000   400
+#         Pablo Duran   pedia   400.000   valia   420.000   400
+#         los otros seis pedian entre +240.000 y +740.000  OK
+#
+#     Biwenger rechaza listar por debajo del precio de mercado.
+#
+#     EL MULTIPLICADOR ES DEL DUENO (10/09). Para situarlo: las
+#     trece peticiones vivas ese dia iban de 1,03 a 1,50 veces
+#     el valor, con la mediana en 1,18. Cepeda estaba en 1,03 y
+#     habria sido el siguiente en romperse.
+#
+#     Se recalcula EN CADA RENOVACION, que es todo el punto.
+PRIMA_DE_LA_PETICION = 1.15
+
+
+def precio_de_la_peticion(
+    market_price,
+    prima: float = PRIMA_DE_LA_PETICION,
+) -> int:
+    """
+    Lo que se pide por un jugador al renovar su listado.
+
+    Nunca por debajo del valor de mercado: eso lo rechaza
+    Biwenger con un 400.
+    """
+
+    valor = max(0, safe_int(market_price))
+
+    return int(valor * prima)
+
+
 # EL TOPE POR CICLO
 #
 #     No es un numero a ojo: es el maximo de listados que hemos
@@ -259,19 +301,30 @@ def que_renovar(
                         }
                     )
 
-        if not ventana.get("abierta"):
-            return {
-                **vacio,
-                "available": True,
-                "at_risk": en_riesgo,
-                "blocked_by": "FUERA_DE_VENTANA",
-                "reason": (
-                    f"{ventana.get('reason')} Se renueva tarde, "
-                    f"no a diario: renovar por la manana lo que "
-                    f"caduca pasado manana tira un dia de "
-                    f"liquidez."
-                ),
-            }
+        # LA VENTANA YA NO RESTRINGE LA RENOVACION (10/09/2026)
+        #
+        #     Aqui habia una puerta: fuera de la ventana no se
+        #     renovaba. Se apoyaba en que renovar mata la oferta
+        #     viva, asi que habia que hacerlo cuando a esa oferta
+        #     le quedaran minutos.
+        #
+        #     ESA PREMISA ES FALSA POR API, y esta medido en vivo:
+        #     al renovar a Dituro su listado quedo nuevo -48 h- y
+        #     su oferta de 2.439.000, creada el 09/09 a las 07:08,
+        #     SIGUIO VIVA. Trece renovaciones ese dia, trece
+        #     ofertas intactas.
+        #
+        #     Renovar no cuesta nada, asi que no hay motivo para
+        #     esperar. Se renueva todo, todos los dias.
+        #
+        #     El limite diario no hace falta ponerlo: al renovar,
+        #     el listado dura 48 h y deja de cumplir la puerta de
+        #     "no llega a la proxima ventana" durante 23 h. Se
+        #     autolimita.
+        #
+        #     Lo que SI sigue mandando es la zona de silencio:
+        #     eso no es sobre la oferta, es sobre no escribir
+        #     mientras el mercado se rehace.
 
         if not puede_escribir:
             return {
@@ -381,13 +434,24 @@ def que_renovar(
                 )
                 continue
 
+            # SE RE-PRECIA AQUI, en cada renovacion.
+            valor_hoy = safe_int(fila.get("market_price"))
+
+            pedido = (
+                precio_de_la_peticion(valor_hoy)
+                if valor_hoy > 0
+                else safe_int(fila.get("listed_price"))
+            )
+
             elegidos.append(
                 {
                     "id": fila.get("id"),
                     "name": fila.get("name"),
-                    "listed_price": safe_int(
+                    "listed_price": pedido,
+                    "precio_anterior": safe_int(
                         fila.get("listed_price")
                     ),
+                    "market_price": valor_hoy,
                     "listing_hours_to_expiry": queda,
 
                     # LO QUE MUERE AL RENOVAR, apuntado antes de
@@ -451,6 +515,8 @@ def que_renovar(
                     else ""
                 )
                 + f". {ventana.get('reason')}"
+                + " (la ventana ya no restringe la renovacion:"
+                " renovar no mata la oferta viva)"
                 + (
                     f" El tope de {limite} dejo fuera "
                     f"{recortados}."
@@ -517,10 +583,15 @@ def filas_desde_lo_publicado(
 
         ids = {}
 
+        valores = {}
+
         for jugador in ((roster or {}).get("players") or []):
 
             if isinstance(jugador, dict) and jugador.get("name"):
                 ids[str(jugador["name"])] = jugador.get("id")
+                valores[str(jugador["name"])] = jugador.get(
+                    "price"
+                )
 
         filas = []
 
@@ -544,6 +615,12 @@ def filas_desde_lo_publicado(
                     ),
                     "listing_hours_to_expiry": safe_float(
                         item.get("hours_to_expiry")
+                    ),
+
+                    # Lo que vale HOY. Sin esto no se puede
+                    # re-preciar y la peticion se queda rancia.
+                    "market_price": safe_int(
+                        valores.get(nombre)
                     ),
                     "offer_amount": safe_int(
                         oferta.get("amount")

@@ -64,6 +64,7 @@ from src.analysis.la_subasta import (
 )
 from src.analysis.renovar_ofertas import (
     HORAS_ENTRE_VENTANAS,
+    PRIMA_DE_LA_PETICION,
     TOPE_DE_RENOVACIONES,
     VIDA_DE_UN_LISTADO_HORAS,
     filas_desde_lo_publicado,
@@ -96,6 +97,7 @@ def _listado(
         "id": identificador,
         "name": nombre,
         "listed_price": precio,
+        "market_price": int(precio / 1.2),
         "listing_hours_to_expiry": caduca_en,
         "offer_amount": oferta,
         "offer_hours_to_expiry": 0.2,
@@ -358,37 +360,127 @@ def test_cada_renovacion_va_al_libro():
 # 2, 3. LA VENTANA Y EL SILENCIO
 # ============================================================
 
-def test_fuera_de_la_ventana_no_se_renueva():
+def test_la_ventana_ya_no_restringe_la_renovacion():
+    """
+    DEROGADA la regla que probaba esto antes.
 
-    # LOS SEGUNDOS SALEN DE LA CONSTANTE, NO A MANO
-    #
-    #     Aqui decia `(3_600, 1_800, 901, None)`, y el 901 era
-    #     "un segundo fuera" cuando la ventana eran 15 minutos.
-    #     El 10/09 la ventana paso a 135 y estos numeros se
-    #     quedaron DENTRO: la guardia se puso roja sin que nada
-    #     estuviera roto.
-    #
-    #     Un dato, un nombre: el borde se deduce de
-    #     `VENTANA_MINUTOS`, asi que la proxima vez que se mueva
-    #     esto sigue midiendo el borde de verdad.
-    justo_fuera = VENTANA_MINUTOS * 60 + 1
+    Aqui se exigia que fuera de la ventana NO se renovara. Esa
+    regla se apoyaba en que renovar mata la oferta viva, y el
+    10/09 se midio en vivo que por API NO la mata: trece
+    renovaciones, trece ofertas intactas.
 
-    # Y el borde EXACTO tiene que estar DENTRO. Sin esto, una
-    # ventana que no se abriera nunca pasaria esta guardia.
-    assert ventana_abierta(VENTANA_MINUTOS * 60)["abierta"], (
-        "el ultimo segundo de la ventana sale cerrado"
-    )
+    Renovar no cuesta nada, asi que se renueva todo, todos los
+    dias. Lo que se protege ahora es lo contrario: que la
+    ventana ya no sea una excusa para no renovar.
+    """
 
-    for segundos in (justo_fuera, justo_fuera * 2, 86_400, None):
+    fila = _listado("X", 1, 4.0)
+
+    for segundos in (None, 300, 12 * 3600, 86_400):
 
         plan = que_renovar(
-            _ocho(), segundos, puede_escribir=True
+            [fila], segundos, puede_escribir=True
         )
 
-        assert plan["execute"] is False, (
-            f"a {segundos} s del reset ya esta renovando"
+        assert plan["count"] == 1, (
+            f"a {segundos} s del reset no renueva: la ventana "
+            f"sigue restringiendo"
         )
-        assert plan["blocked_by"] == "FUERA_DE_VENTANA"
+
+
+def test_no_se_lista_por_debajo_de_mercado():
+    """
+    LO QUE ROMPIO A JONNY Y A PABLO DURAN (10/09/2026)
+
+        De ocho renovaciones a mano, dos volvieron con HTTP 400.
+        Los dos unicos que pedian POR DEBAJO del valor:
+
+            Jonny         pedia 2.350.000   valia 2.370.000
+            Pablo Duran   pedia   400.000   valia   420.000
+
+        Los otros seis pedian entre 240.000 y 740.000 por
+        encima y entraron.
+
+    Renovar RE-PRECIA. Si no, la peticion se queda rancia: el
+    mercado sube y el listado se queda quieto hasta que Biwenger
+    lo rechaza.
+    """
+
+    casos = [
+        # (nombre, precio viejo listado, valor de mercado hoy)
+        ("Jonny", 2_350_000, 2_370_000),
+        ("Pablo Duran", 400_000, 420_000),
+        ("Cepeda", 553_575, 540_000),
+        ("Jutgla", 3_900_000, 3_160_000),
+    ]
+
+    assert casos, "sin casos no se prueba nada"
+
+    for nombre, viejo, valor in casos:
+
+        fila = {
+            "id": 1,
+            "name": nombre,
+            "listed_price": viejo,
+            "market_price": valor,
+            "listing_hours_to_expiry": 4.0,
+            "offer_amount": 500_000,
+        }
+
+        plan = que_renovar([fila], 300, puede_escribir=True)
+
+        assert plan["count"] == 1, (
+            f"{nombre}: no se renueva"
+        )
+
+        pedido = plan["renewals"][0]["listed_price"]
+
+        assert pedido > valor, (
+            f"{nombre}: se pediria {pedido} por un jugador de "
+            f"{valor}. Biwenger contesta 400."
+        )
+
+        assert pedido == int(valor * PRIMA_DE_LA_PETICION), (
+            f"{nombre}: se pide {pedido} y la regla dice "
+            f"{int(valor * PRIMA_DE_LA_PETICION)}"
+        )
+
+    # Y el caso que mas importa: el precio viejo NO se reutiliza.
+    rancio = que_renovar(
+        [
+            {
+                "id": 1,
+                "name": "Rancio",
+                "listed_price": 100,
+                "market_price": 1_000_000,
+                "listing_hours_to_expiry": 1.0,
+                "offer_amount": 1,
+            }
+        ],
+        300,
+        puede_escribir=True,
+    )
+
+    assert rancio["renewals"][0]["listed_price"] == int(
+        1_000_000 * PRIMA_DE_LA_PETICION
+    ), "se esta reutilizando el precio viejo"
+
+
+def test_sin_precio_de_mercado_no_se_inventa_uno():
+    """
+    Si no se sabe lo que vale, se re-lista al precio de antes.
+    Es lo que hacia hasta hoy: no es peor que antes.
+    """
+
+    fila = _listado("Sin valor", 1, 4.0)
+
+    fila.pop("market_price", None)
+
+    plan = que_renovar([fila], 300, puede_escribir=True)
+
+    assert plan["renewals"][0]["listed_price"] == fila[
+        "listed_price"
+    ]
 
 
 def test_dentro_de_la_ventana_si_se_renueva():
@@ -825,7 +917,9 @@ TESTS = [
     test_el_modulo_de_renovar_no_conoce_la_venta,
     test_en_seco_no_escribe_nada,
     test_cada_renovacion_va_al_libro,
-    test_fuera_de_la_ventana_no_se_renueva,
+    test_la_ventana_ya_no_restringe_la_renovacion,
+    test_no_se_lista_por_debajo_de_mercado,
+    test_sin_precio_de_mercado_no_se_inventa_uno,
     test_dentro_de_la_ventana_si_se_renueva,
     test_la_zona_de_silencio_para_la_renovacion,
     test_nunca_se_renueva_un_listado_sin_oferta_viva,

@@ -598,11 +598,19 @@ def _anotar_en_el_libro(enviadas: list | None) -> None:
         pass
 
 
-# EL INTERRUPTOR DEL PRIMER DISPARO
+# EL INTERRUPTOR DE LA RENOVACION
 #
-#     Mientras esto sea False, la renovacion se calcula, se
-#     imprime y NO escribe nada contra Biwenger.
-RENOVACION_EN_VIVO = False
+#     ENCENDIDO el 10/09/2026, despues de dispararla a mano con
+#     el dueno delante: trece listados renovados, trece ofertas
+#     intactas, y los dos unicos fallos -HTTP 400- explicados y
+#     arreglados (se pedia por debajo del precio de mercado).
+#
+#     Se apago un dia entero a proposito. Ya no hay razon:
+#     renovar no mueve dinero, no ocupa fichas, no mata la
+#     oferta viva y no puede vender -camino aparte y guardia-.
+#
+#     Con False vuelve a calcular y no escribir.
+RENOVACION_EN_VIVO = True
 
 
 def _renovar_en_la_ventana(cycle: dict | None) -> dict:
