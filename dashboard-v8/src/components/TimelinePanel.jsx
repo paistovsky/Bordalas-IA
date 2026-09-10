@@ -1,7 +1,7 @@
 import { formatMoney } from "../lib/utils";
 
 /**
- * LO QUE VA A HACER PEPE.
+ * CRONOLOGÍA DE BORDALÁS.
  *
  * En la maqueta original este panel llevaba texto escrito a
  * mano y eso confundio: parecia medido y no lo estaba. Aqui
@@ -88,7 +88,7 @@ export default function TimelinePanel({ data }) {
     <section className="pan">
       <div className="pan-head">
         <div>
-          <h2>LO QUE VA A HACER PEPE</h2>
+          <h2>CRONOLOGÍA DE BORDALÁS</h2>
           <div className="sub">Línea temporal · derivada de la telemetría</div>
         </div>
         {Number(backoff.blocked_count || 0) > 0 && (

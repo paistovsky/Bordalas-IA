@@ -1,33 +1,29 @@
-import AhoraPanel from "../components/AhoraPanel";
-import CobrarPanel from "../components/CobrarPanel";
-import DineroPanel from "../components/DineroPanel";
-import ElOncePanel from "../components/ElOncePanel";
 import PitchXI from "../components/PitchXI";
+import PosiblesCambiosPanel from "../components/PosiblesCambiosPanel";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
 import TimelinePanel from "../components/TimelinePanel";
-import VentanaPanel from "../components/VentanaPanel";
 import { formatMoney } from "../lib/utils";
 
-/* LA PORTADA CONTESTA OCHO PREGUNTAS (10/09/2026)
+/* INICIO: LA TIRA Y CUATRO PANELES (10/09/2026)
  *
- * Y solo ocho. El orden es el de urgencia, no el de cuanto
- * costo construir cada panel:
+ * Arriba, la tira de estado -que vive en `KpiStrip`- con las dos
+ * cuentas atras corriendo. Debajo, cuatro paneles y solo cuatro:
  *
- *   1. ¿Algo en ROJO que exija que yo haga algo AHORA?  AhoraPanel
- *   2. ¿Vamos ganando?                       Standings + El Once
- *   3. ¿Cuánto dinero hay y cuánto debo?             DineroPanel
- *   4. ¿Qué hizo y qué hará Pepe?                  TimelinePanel
- *   5. ¿Se abrió la ventana? ¿qué pujó y renovó?  VentanaPanel
- *   6. ¿Qué puedo cobrar y quién es titular?       CobrarPanel
- *   7. ¿Cómo está el once?                             PitchXI
- *   8. ¿A por quién va Pepe?                        (objetivos)
+ *   1. EL XI PARA LA JORNADA      quien juega
+ *   2. CLASIFICACION E INTELIGENCIA  como vamos y quien aprieta
+ *   3. CRONOLOGIA DE BORDALAS     que hizo y que hara
+ *   4. POSIBLES CAMBIOS           quien esta fuera, y por que
  *
  * LO QUE SE FUE, Y NO SE BORRO
  *
- *   LA CARRERA y PLANTILLA POR POSICION estaban aqui y ahora
- *   viven en Auditoria. Las dos contestan POR QUE -como va la
- *   temporada, como esta repartida la plantilla- y ninguna
- *   pide una decision hoy. Nada se ha perdido: se ha movido.
+ *   AhoraPanel, DineroPanel, VentanaPanel, CobrarPanel,
+ *   ElOncePanel y los objetivos estaban aqui y ahora viven en
+ *   Auditoria. Ni un panel se ha borrado: se han movido, y
+ *   siguen leyendo exactamente los mismos datos.
+ *
+ *   El dinero ya no necesita panel propio en la portada porque
+ *   la DEUDA MAXIMA subio a la tira, con su desglose debajo:
+ *   saldo, comprometido y credito.
  *
  * LA REGLA QUE EVITA QUE ESTO SE VUELVA A LLENAR
  *
@@ -43,69 +39,13 @@ function squadValue(players = []) {
   );
 }
 
-function Objetivos({ data }) {
-  const board = data.acquisition || {};
-
-  const filas = (board.targets || [])
-    .filter((t) => Number(t.bid || 0) > 0)
-    .slice(0, 5);
-
-  if (!filas.length) {
-    return (
-      <section className="pan">
-        <h2>A POR QUIÉN VA PEPE</h2>
-        <div className="sub">
-          Ningún objetivo con puja propuesta ahora mismo.
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="pan">
-      <div className="pan-head">
-        <div>
-          <h2>A POR QUIÉN VA PEPE</h2>
-          <div className="sub">
-            lo que pujaría, y por qué ese importe
-          </div>
-        </div>
-      </div>
-      <table className="tbl">
-        <tbody>
-          {filas.map((t) => (
-            <tr key={t.id}>
-              <td>{t.name}</td>
-              <td className="num">{formatMoney(t.bid)}</td>
-              <td className="num sub">
-                vale {formatMoney(t.market_price)}
-              </td>
-              <td className="sub">{t.decision}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  );
-}
-
 export default function HomePage({ data }) {
   const lineup = data.lineup || {};
   const mandatory = lineup.mandatory_hierarchy || {};
 
   return (
     <>
-      {/* 1. ¿HAY ALGO EN ROJO? Arriba del todo y sin scroll. */}
-      <AhoraPanel data={data} />
-
-      {/* 3. EL DINERO y 5. LA VENTANA, uno al lado del otro:
-             son las dos preguntas de las 07:15. */}
-      <div className="grid g2">
-        <DineroPanel data={data} />
-        <VentanaPanel data={data} />
-      </div>
-
-      {/* 7. EL ONCE, y 2. cómo vamos, a su lado. */}
+      {/* 1. EL XI, y 2. cómo vamos, a su lado. */}
       <div className="grid g23">
         <section className="pan pan-pitch">
           <div className="pan-head">
@@ -156,24 +96,16 @@ export default function HomePage({ data }) {
         </section>
 
         <div className="stack">
-          {/* 2. ¿VAMOS GANANDO? La clasificación primero. */}
+          {/* 2. ¿VAMOS GANANDO? */}
           <StandingsIntelPanel data={data} />
 
-          {/* 4. ¿QUÉ HIZO Y QUÉ HARÁ? */}
+          {/* 3. ¿QUÉ HIZO Y QUÉ HARÁ? */}
           <TimelinePanel data={data} />
         </div>
       </div>
 
-      {/* 6. QUÉ PUEDO COBRAR, con la columna de titular. */}
-      <CobrarPanel data={data} />
-
-      {/* 2-bis. LOS PUNTOS QUE DEJAMOS EN EL BANQUILLO.
-          "Si esa cifra crece, es la alarma más importante del
-          tablero." (dueño, 17/09) */}
-      <ElOncePanel data={data} />
-
-      {/* 8. A POR QUIÉN VA PEPE. */}
-      <Objetivos data={data} />
+      {/* 4. QUIÉN ESTÁ FUERA DEL XI, Y POR QUÉ. */}
+      <PosiblesCambiosPanel data={data} />
     </>
   );
 }

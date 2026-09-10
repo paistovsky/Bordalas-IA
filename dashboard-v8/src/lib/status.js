@@ -250,6 +250,10 @@ export function normalizeStatus(raw = {}) {
     // Si Pepe esta en la franja en la que no escribe, y que se
     // quedo sin hacer por ella.
     silencio: raw.silencio || { available: false, allowed: true },
+    posiblesCambios: raw.posibles_cambios || {
+      available: false,
+      bench: []
+    },
 
     // Que trae la tanda nueva del Computer en cada reset.
     censoDelReset: raw.censo_del_reset || { available: false },

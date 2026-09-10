@@ -172,6 +172,7 @@ TESTS = [
     "src.analysis.test_ampliar_plantilla_sombra_v1",
     "src.analysis.test_dashboard_orden_de_variables_v1",
     "src.analysis.test_pantalla_lee_lo_publicado_v1",
+    "src.analysis.test_posibles_cambios_v1",
     "src.analysis.test_ojeador_fuentes_v1",
     "src.analysis.test_ojeador_emparejamiento_v1",
     "src.analysis.test_ojeador_informe_v1",

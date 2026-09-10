@@ -901,8 +901,42 @@ def compact_lineup(
             "reason": f"No se pudo leer el XI real: {error}",
         }
 
+    # POSIBLES CAMBIOS (10/09/2026)
+    #
+    # El banquillo con el motivo que dio el motor al descartarlo.
+    # No se decide nada aqui: `banquillo_con_motivo` lee lo que
+    # `build_lineup` ya comparo. Solo se le pega la foto, para
+    # que el panel no tenga que buscarla.
+    banquillo = []
+
+    for fila in lineup.get("bench") or []:
+
+        if not isinstance(fila, dict):
+            continue
+
+        foto = photo_lookup.get(safe_int(fila.get("id"))) or {}
+
+        banquillo.append(
+            {
+                **fila,
+                "photo_url": (
+                    foto.get("photo_url")
+                    or (
+                        f"https://cdn.biwenger.com/cdn-cgi/image/"
+                        f"f=avif/i/p/{safe_int(fila.get('id'))}.png"
+                    )
+                ),
+            }
+        )
+
     return {
         "formation": lineup.get("formation_name"),
+        # Los suplentes, y POR QUE cada uno se queda fuera.
+        # Va tambien en su bloque propio -`posibles_cambios`-
+        # porque el panel que lo pinta es suyo y tiene que poder
+        # decir "no se sabe" sin arrastrar al XI.
+        "bench": banquillo,
+
 
         # Lo que hay puesto en Biwenger y en que se diferencia.
         "live": once_real,
@@ -2915,6 +2949,15 @@ def compact_ledger_audit(audit: dict) -> dict:
             "reason": (audit or {}).get("reason"),
         }
 
+
+    # El XI, calculado UNA vez: lo leen dos bloques -`lineup`
+    # y `posibles_cambios`- y tienen que contar lo mismo.
+    lineup_payload = compact_lineup(
+        state.get("lineup", {}) or {},
+        snapshot,
+        photo_lookup,
+    )
+
     return {
         "available": True,
         "status": audit.get("status"),
@@ -4535,11 +4578,7 @@ def build_dashboard_state() -> dict:
                 )
             ),
         },
-        "lineup": compact_lineup(
-            state.get("lineup", {}) or {},
-            snapshot,
-            photo_lookup,
-        ),
+        "lineup": lineup_payload,
         "roster": roster,
 
         # Las plantillas de los seis rivales, con la misma ficha.
@@ -4629,6 +4668,17 @@ def build_dashboard_state() -> dict:
         # LA ZONA DE SILENCIO y lo que se quedo sin hacer por
         # ella. Una barandilla que frena en silencio es
         # indistinguible de una averia.
+        # POSIBLES CAMBIOS: el banquillo con el motivo del motor.
+        # Bloque propio para que el panel pueda distinguir "no hay
+        # suplentes" de "no se sabe", que no es lo mismo.
+        "posibles_cambios": {
+            "available": bool(
+                (lineup_payload.get("bench") or [])
+                or lineup_payload.get("formation")
+            ),
+            "bench": lineup_payload.get("bench") or [],
+        },
+
         "silencio": silencio_ahora,
 
         # QUE SE RENOVARIA EN LA VENTANA, y que listados no

@@ -732,6 +732,52 @@ listón**: solo exige que no sea negativo.
 
 ---
 
+### 34. Inicio contesta, no informa
+
+*(Cerrado por el dueño el 10/09/2026.)*
+
+**Inicio es la tira de estado y cuatro paneles. Nada más.**
+
+| | |
+|---|---|
+| **XI para la jornada** | quién juega |
+| **Clasificación e inteligencia** | cómo vamos y quién aprieta |
+| **Cronología de Bordalás** | qué hizo y qué hará |
+| **Posibles cambios** | quién está fuera del XI, y por qué |
+
+La tira de arriba lleva ocho cosas: jornada · edad de la foto · **próximo ciclo
+(en vivo)** · **deuda máxima** · **reset (en vivo)** · cierre de la jornada · XI ·
+pujas puestas.
+
+**«Deuda máxima» sustituye a «Puede gastar»**, y no es un cambio de nombre:
+
+```
+deuda máxima = saldo + línea de crédito − pujas ya comprometidas
+```
+
+Ese número **ya descuenta las pujas vivas**. El 10/09 son **3.608.383** y no
+15.825.383, porque hay 12.217.000 puestos en Aubameyang. Por eso lleva el
+desglose debajo — *saldo · comprometido · crédito*: sin él se lee como «se me ha
+hundido el saldo» cuando lo que pasa es que hay una puja puesta.
+
+**Las dos cuentas atrás corren en el navegador**, no en la foto. Y **si un ciclo
+no llega, lo dicen**: pasan a «debería haber entrado hace X» en vez de quedarse
+en cero fingiendo normalidad. Un ciclo que no entra es exactamente lo que hay que
+ver — es lo que tapó dos semanas de ventana perdida.
+
+**Nada se borra: lo que sale de Inicio se mueve.** AhoraPanel, DineroPanel,
+VentanaPanel, CobrarPanel, ElOncePanel y los objetivos bajaron a Auditoría
+enteros, leyendo los mismos datos. Si se duda de dónde va algo, va a Auditoría.
+
+Con la [regla 28](#28-un-panel-nace-en-auditoría) — *un panel nace en Auditoría* —
+esto cierra el círculo: **a Inicio solo sube lo que hace falta para decidir, y
+solo baja a Auditoría lo que sirve para verificar.**
+
+**Guardia:** `test_inicio_tiene_los_cuatro_paneles_y_solo_esos`, que además
+comprueba que los seis que bajaron **llegaron** a Auditoría. La portada ya se
+llenó una vez, y se vuelve a llenar sola en cuanto nadie mira.
+
+
 ## Descartado
 
 **Entrenadores** (truco nº 4 del vídeo). **Esta liga no los usa.** Decisión del

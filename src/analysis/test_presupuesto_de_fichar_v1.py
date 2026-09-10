@@ -452,7 +452,6 @@ def test_la_pantalla_no_desmiente_al_bot():
     )
 
     for ruta in (
-        dashboard / "components" / "KpiStrip.jsx",
         dashboard / "pages" / "MarketPage.jsx",
         dashboard / "components" / "StrategyPanel.jsx",
         dashboard / "pages" / "BrainPage.jsx",
@@ -463,6 +462,39 @@ def test_la_pantalla_no_desmiente_al_bot():
         assert "exposure.acquisition" in fuente, (
             f"{ruta.name} ha vuelto a enseñar el presupuesto de "
             f"especular donde manda el de fichar"
+        )
+
+    # ------------------------------------------------------
+    # LA TIRA, DESDE EL 10/09/2026
+    # ------------------------------------------------------
+    #
+    # "Puede gastar" ya no existe: lo sustituye DEUDA MAXIMA, que
+    # no sale de ninguno de los dos bolsillos nuestros sino del
+    # `maximumBid` OFICIAL de Biwenger:
+    #
+    #     saldo + linea de credito - pujas ya comprometidas
+    #
+    # Eso cierra el incidente del 21/08 por arriba -ya no hay
+    # bolsillo que confundir- pero abre la puerta contraria: que
+    # alguien "arregle" la tira volviendo a colgarla de un
+    # presupuesto interno. Por eso la condicion se invierte aqui.
+    tira = (
+        dashboard / "components" / "KpiStrip.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "maximum_bid" in tira, (
+        "la tira ya no enseña el maximumBid oficial: si cuelga de "
+        "un presupuesto nuestro, vuelve el 21/08"
+    )
+
+    for bolsillo in (
+        "available_budget",
+        "total_budget",
+        "speculation",
+    ):
+        assert bolsillo not in tira, (
+            f"la tira ha vuelto a leer `{bolsillo}`, que es un "
+            f"presupuesto interno y no lo que se puede comprometer"
         )
 
 

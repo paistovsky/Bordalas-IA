@@ -20,7 +20,11 @@ import { formatMoney } from "../lib/utils";
  * competidores y la ruta de puja ajustada no se activaba nunca.
  */
 
+// VERY_HIGH faltaba y caia al gris del `||`: la amenaza mas
+// alta del tablero se pintaba igual que "ninguna". Va primero
+// para que se vea que existe.
 const THREAT = {
+  VERY_HIGH: "pill crit",
   HIGH: "pill crit",
   MEDIUM: "pill warn",
   LOW: "pill idle",

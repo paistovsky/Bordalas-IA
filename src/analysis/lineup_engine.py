@@ -1579,6 +1579,191 @@ def evaluate_formation(
 # ============================================================
 
 
+# ============================================================
+# EL BANQUILLO, CON EL MOTIVO DEL MOTOR
+# ============================================================
+
+
+def safe_player_id(player) -> int:
+    """El id de un jugador, o 0. Nunca lanza."""
+
+    try:
+        return int((player or {}).get("id") or 0)
+
+    except (TypeError, ValueError, AttributeError):
+        return 0
+
+
+def banquillo_con_motivo(
+    players: list[dict],
+    selected: list[dict],
+) -> list[dict]:
+    """
+    Por que cada suplente se queda fuera, dicho por el motor.
+
+    SINTOMA
+
+        El dashboard ensena once nombres y un banquillo mudo. El
+        dueno ve que Cepeda no juega y no sabe si es que esta
+        lesionado, si su posicion esta llena o si simplemente
+        puntua menos que el que esta.
+
+    CAUSA
+
+        `search_best_lineup_for_formation` ya compara a TODOS:
+        descarta por `lineup_eligible`, luego por
+        `automatic_lineup`, y de los que quedan ordena por
+        `lineup_score` y se queda con los mejores de cada
+        posicion. Pero de todo ese trabajo solo publicaba el
+        resultado -los once- y tiraba el porque.
+
+    CONSECUENCIA
+
+        Esta funcion NO calcula nada. Lee los tres valores que el
+        motor ya dejo puestos en cada jugador y dice en cual de
+        los tres cortes se quedo. El "cuanto costaria" es la
+        distancia contra el peor titular de su misma posicion,
+        que es exactamente la comparacion que hizo el motor para
+        preferir a uno sobre otro.
+
+        Si algun dia el motor cambia de criterio, esto cambia
+        solo: no hay una segunda opinion que mantener al dia.
+    """
+
+    elegidos = {
+        safe_player_id(player)
+        for player in (selected or [])
+    }
+
+    # El listón de cada posición: el PEOR titular que hay puesto
+    # ahí. Es contra quien tendría que ganar el suplente para
+    # entrar, y es el mismo que el motor comparó al ordenar.
+    peor_de_la_posicion: dict[int, dict] = {}
+
+    for titular in selected or []:
+
+        posicion = titular.get("lineup_position")
+
+        if posicion is None:
+            posicion = titular.get("position")
+
+        actual = peor_de_la_posicion.get(posicion)
+
+        if (
+            actual is None
+            or float(titular.get("lineup_score") or 0.0)
+            < float(actual.get("lineup_score") or 0.0)
+        ):
+            peor_de_la_posicion[posicion] = titular
+
+    banquillo = []
+
+    for player in players or []:
+
+        if safe_player_id(player) in elegidos:
+            continue
+
+        posicion = player.get("position")
+
+        rival = peor_de_la_posicion.get(posicion)
+
+        # ----------------------------------------------------
+        # EL MOTIVO: el primer corte que no pasó, en ese orden
+        # ----------------------------------------------------
+        if not player.get("lineup_eligible"):
+
+            if player.get("external_lineup_block"):
+                motivo = "NO_JUEGA_SU_EQUIPO"
+                frase = "su club no lo alinea esta jornada"
+
+            else:
+                motivo = "NO_DISPONIBLE"
+                frase = (
+                    str(
+                        player.get("availability_label")
+                        or "no está disponible"
+                    ).lower()
+                )
+
+        elif not player.get("automatic_lineup"):
+            motivo = "EN_DUDA"
+            frase = "hay dudas de que vaya a jugar"
+
+        elif rival is None:
+            motivo = "POSICION_CUBIERTA"
+            frase = "su posición ya está cubierta"
+
+        else:
+            motivo = "PUNTUA_MENOS"
+            frase = (
+                f"puntúa menos que {rival.get('name') or 'el que está'}"
+            )
+
+        # ----------------------------------------------------
+        # LO QUE COSTARÍA O GANARÍA EL ONCE
+        # ----------------------------------------------------
+        # La resta contra ese mismo peor titular. Positiva
+        # significa que el once ganaría con el dentro, y eso solo
+        # puede pasar cuando el motivo NO es puntuar menos: es
+        # decir, cuando lo que le falta es poder jugar.
+        def _resta(campo: str):
+
+            if rival is None:
+                return None
+
+            mio = player.get(campo)
+
+            suyo = rival.get(campo)
+
+            if mio is None or suyo is None:
+                return None
+
+            try:
+                return round(float(mio) - float(suyo), 4)
+
+            except (TypeError, ValueError):
+                return None
+
+        banquillo.append(
+            {
+                "id": safe_player_id(player),
+                "name": player.get("name"),
+                "position": posicion,
+                "price": player.get("price"),
+                "points": player.get("points"),
+                "reason": motivo,
+                "reason_text": frase,
+                "lineup_score": player.get("lineup_score"),
+                "weekly_expected_value": player.get(
+                    "weekly_expected_value"
+                ),
+                "starter_probability": player.get(
+                    "starter_probability"
+                ),
+                "compared_to": (
+                    rival.get("name") if rival else None
+                ),
+                "compared_to_id": (
+                    safe_player_id(rival) if rival else None
+                ),
+                "lineup_score_delta": _resta("lineup_score"),
+                "weekly_value_delta": _resta(
+                    "weekly_expected_value"
+                ),
+            }
+        )
+
+    # Primero los que más cerca están de entrar.
+    banquillo.sort(
+        key=lambda fila: (
+            fila["lineup_score_delta"] is None,
+            -(fila["lineup_score_delta"] or 0.0),
+        )
+    )
+
+    return banquillo
+
+
 def build_lineup(
     snapshot: dict,
     lineup_intelligence: dict | None = None,
@@ -1912,6 +2097,23 @@ def build_lineup(
 
         "unavailable_selected":
             unavailable_selected,
+
+        # EL BANQUILLO CON SU MOTIVO. Sale de los mismos
+
+        # `players` que el motor acaba de comparar: no se
+
+        # vuelve a puntuar a nadie.
+
+        "bench":
+
+            banquillo_con_motivo(
+
+                players,
+
+                best_lineup,
+
+            ),
+
 
         "blocked_players":
             blocked_players,

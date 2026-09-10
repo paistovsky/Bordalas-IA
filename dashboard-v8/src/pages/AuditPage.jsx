@@ -1,10 +1,33 @@
 import { useMemo, useState } from "react";
+import AhoraPanel from "../components/AhoraPanel";
 import BidOutcomesPanel from "../components/BidOutcomesPanel";
+import CobrarPanel from "../components/CobrarPanel";
 import ConcentrationPanel from "../components/ConcentrationPanel";
+import DineroPanel from "../components/DineroPanel";
+import ElOncePanel from "../components/ElOncePanel";
 import PressPanel from "../components/PressPanel";
 import RacePanel from "../components/RacePanel";
 import ScoutPanel from "../components/ScoutPanel";
-import { ago } from "../lib/utils";
+import VentanaPanel from "../components/VentanaPanel";
+import { ago, formatMoney } from "../lib/utils";
+
+/* LO QUE BAJO DE INICIO EL 10/09/2026
+ *
+ * Inicio se quedo en la tira de estado y cuatro paneles. Todo lo
+ * que estaba alli y no cabia en esos cuatro esta AQUI, entero y
+ * leyendo los mismos datos:
+ *
+ *   AhoraPanel     lo que esta en rojo ahora
+ *   DineroPanel    el dinero al detalle
+ *   VentanaPanel   la ventana del reset: que pujo y que renovo
+ *   CobrarPanel    las ofertas que se pueden cobrar
+ *   ElOncePanel    los puntos que se quedaron en el banquillo
+ *   Objetivos      a por quien va Bordalas
+ *
+ * Ni uno se ha borrado. La DEUDA MAXIMA, que era la unica
+ * pregunta del dinero que hay que contestar en diez segundos,
+ * subio a la tira con su desglose: saldo, comprometido, credito.
+ */
 
 const FILTERS = [
   ["all", "TODO"],
@@ -134,6 +157,55 @@ function CyclePanel({ cycle = {}, last = {}, competitive = {}, consistency = {} 
   );
 }
 
+/* A POR QUIEN VA BORDALAS. Venia de la portada el 10/09: dice
+   lo que pujaria y por que ese importe, que es material de
+   verificacion, no una decision que tomar hoy. */
+function Objetivos({ data }) {
+  const board = data.acquisition || {};
+
+  const filas = (board.targets || [])
+    .filter((t) => Number(t.bid || 0) > 0)
+    .slice(0, 5);
+
+  if (!filas.length) {
+    return (
+      <section className="pan">
+        <h2>A POR QUIÉN VA PEPE</h2>
+        <div className="sub">
+          Ningún objetivo con puja propuesta ahora mismo.
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="pan">
+      <div className="pan-head">
+        <div>
+          <h2>A POR QUIÉN VA PEPE</h2>
+          <div className="sub">
+            lo que pujaría, y por qué ese importe
+          </div>
+        </div>
+      </div>
+      <table className="tbl">
+        <tbody>
+          {filas.map((t) => (
+            <tr key={t.id}>
+              <td>{t.name}</td>
+              <td className="num">{formatMoney(t.bid)}</td>
+              <td className="num sub">
+                vale {formatMoney(t.market_price)}
+              </td>
+              <td className="sub">{t.decision}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
 export default function AuditPage({ data }) {
   const [filter, setFilter] = useState("all");
   const backoff = data.backoff || {};
@@ -145,6 +217,22 @@ export default function AuditPage({ data }) {
 
   return (
     <>
+      {/* LO QUE BAJO DE INICIO. Va primero porque `AhoraPanel`
+          sigue siendo lo que exige una decision hoy: solo que
+          Inicio ya no es su sitio. */}
+      <AhoraPanel data={data} />
+
+      <div className="grid g2">
+        <DineroPanel data={data} />
+        <VentanaPanel data={data} />
+      </div>
+
+      <CobrarPanel data={data} />
+
+      <ElOncePanel data={data} />
+
+      <Objetivos data={data} />
+
       <CyclePanel
         cycle={data.cycle || {}}
         last={data.lastExecution || {}}

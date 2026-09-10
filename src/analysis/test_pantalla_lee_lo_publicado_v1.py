@@ -52,6 +52,14 @@ NORMALIZADOR = DASHBOARD / "lib" / "status.js"
 #  paginas donde tiene que estar montado)
 CADENAS = [
     (
+        # POSIBLES CAMBIOS (10/09/2026). El banquillo con el
+        # motivo que dio el motor al descartarlo.
+        "posibles_cambios",
+        "posiblesCambios",
+        "PosiblesCambiosPanel",
+        ["HomePage.jsx"],
+    ),
+    (
         "bid_outcomes",
         "bidOutcomes",
         "BidOutcomesPanel",
@@ -72,10 +80,12 @@ CADENAS = [
         ["AuditPage.jsx"],
     ),
     (
+        # MUDADO A AUDITORIA el 10/09: Inicio se quedo en
+        # la tira y cuatro paneles. Nada se borro.
         "once",
         "once",
         "ElOncePanel",
-        ["HomePage.jsx"],
+        ["AuditPage.jsx"],
     ),
 
     # ========================================================
@@ -90,28 +100,36 @@ CADENAS = [
     #     Esta guardia no lo cazo porque no estaban en esta
     #     tabla. Ahora si.
     (
+        # MUDADO A AUDITORIA el 10/09: Inicio se quedo en
+        # la tira y cuatro paneles. Nada se borro.
         "subasta",
         "subasta",
         "VentanaPanel",
-        ["HomePage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
+        # MUDADO A AUDITORIA el 10/09: Inicio se quedo en
+        # la tira y cuatro paneles. Nada se borro.
         "renovacion",
         "renovacion",
         "VentanaPanel",
-        ["HomePage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
+        # MUDADO A AUDITORIA el 10/09: Inicio se quedo en
+        # la tira y cuatro paneles. Nada se borro.
         "pujas_del_dueno",
         "pujasDelDueno",
         "DineroPanel",
-        ["HomePage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
+        # MUDADO A AUDITORIA el 10/09: Inicio se quedo en
+        # la tira y cuatro paneles. Nada se borro.
         "silencio",
         "silencio",
         "AhoraPanel",
-        ["HomePage.jsx"],
+        ["AuditPage.jsx"],
     ),
     (
         "hold_route",
