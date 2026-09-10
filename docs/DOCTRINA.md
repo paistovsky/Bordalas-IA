@@ -575,6 +575,88 @@ abría — **una ausencia tiene que anunciarse**.
 
 ---
 
+---
+
+### 29. Las reglas del juego, cerradas — no se vuelven a discutir
+
+*(Origen: DUEÑO, 10/09/2026, confirmado contra el tablón donde se podía.)*
+
+- **No hay capitán ni multiplicador.** No es liga de pago. Confirmado por el
+  propio Biwenger: el evento `leagueSettings` del tablón trae
+  `lineupCaptain: false`.
+- **No hay cláusula de rescisión.** Solo subasta del Computer y ofertas entre
+  managers.
+- **Las ofertas por nuestros jugadores hay que ACEPTARLAS.** Nadie nos quita a
+  nadie pagando. Un precio alto no protege nada — y medido: de cuatro ofertas de
+  rivales, **dos llegaron por encima de lo que pedíamos**. El precio pedido no es
+  un techo, es una señal.
+- **El suplente NO puntúa para nosotros aunque el jugador puntúe.** Solo cuenta
+  el XI en el minuto en que arranca la jornada, y **no hay sustitución
+  automática**. Por eso los puntos del banquillo son una pérdida real y no una
+  curiosidad.
+
+---
+
+### 30. Los puntos son el motor económico, no la rueda
+
+**Un punto de jornada paga 30.000 EUR, y eso da ocho veces más que comprar y
+vender.**
+
+*(Medido el 10/09/2026 sobre las 5 jornadas cerradas del tablón.)*
+
+Biwenger lo publica él mismo: cada `roundFinished` trae `points` y `bonus` por
+manager. **23 de 35 filas cuadran a 30.000 exactos**; las 12 restantes son las
+que cobran el extra de la regla de abajo.
+
+**Y la comparación que importa**, contando solo jugadores comprados **y**
+vendidos —lo demás sigue en la plantilla y no es beneficio—:
+
+```
+                   POR PUNTOS   viajes    BENEFICIO   por viaje
+Pollo17             7.170.000       36    5.700.524     158.347
+Pepe Bordalás       6.550.000        6      781.654     130.275
+Luismi_Haz          6.520.000       24    4.512.794     188.033
+Manzagool           5.240.000       12   -2.879.680    -239.974
+Mex                 6.370.000        0            0           —
+```
+
+**Para nosotros los puntos dan 8,4 veces lo que la rueda.** Y ni siquiera el
+trader más activo de la liga —Pollo, con 36 viajes cerrados— saca de comerciar
+lo que saca de puntuar. Manzagool ha *perdido* 2,9 M comerciando.
+
+**Consecuencia pendiente de decidir:** si el once es el motor económico
+principal, dejar puntos en el banquillo no cuesta solo posición — cuesta dinero.
+
+---
+
+### 31. Quedar de los últimos en la jornada PAGA
+
+**Puesto 5 de la jornada: +100.000. Puesto 6: +250.000. Último: +500.000.**
+
+*(Medido el 10/09/2026. Encaja en 4 de las 5 jornadas; en la Jornada 1 no cobró
+extra nadie.)*
+
+Los cuatro primeros no cobran extra **nunca**. No es una racha, no son las
+operaciones y no es ganar: es un **pago de consolación**, y más grande cuanto
+peor lo hagas.
+
+```
+puesto 1-4:  0 x5 cada uno
+puesto 5:    100.000 x4      (y 0 x1, la Jornada 1)
+puesto 6:    250.000 x4
+puesto 7:    500.000 x4
+```
+
+Manzagool ha sido último en las cuatro: **+2.000.000 de consolación**, que es
+casi la mitad de lo que ha cobrado por puntos.
+
+**Y es otra cosa que el `dailyStreak`**, que el tablón publica en eventos
+`bonus` aparte: tres vistos, todos de 250.000 (Prinzipote 02/09, Pollo 02/09 y
+07/09). Ése sí parece una racha de conexión diaria, y no tiene que ver con la
+jornada.
+
+---
+
 ## Descartado
 
 **Entrenadores** (truco nº 4 del vídeo). **Esta liga no los usa.** Decisión del
@@ -619,6 +701,9 @@ ninguno por encima de los demás.
 | 26 | Se renueva todo, todos los días, subiendo el precio | **corregida** 10/09 — medida en vivo y ENCENDIDA |
 | 27 | La liquidez se mantiene, no se busca | **nueva** 10/09 |
 | 28 | Un panel nace en Auditoría; a la portada se sube | **nueva** 10/09 |
+| 29 | Las reglas del juego, cerradas | **nueva** 10/09 |
+| 30 | Los puntos son el motor económico, no la rueda | **medida** 10/09 — x8,4 |
+| 31 | Quedar de los últimos en la jornada paga | **medida** 10/09 |
 
 **Once hechas. Doce por hacer. Cuatro nuevas el 10/09.**
 
