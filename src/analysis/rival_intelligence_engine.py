@@ -930,6 +930,18 @@ def apply_market_power(
 
     for manager in managers.values():
 
+        # UN SIN DATO NO ES UN CERO (doctrina 36).
+        #
+        # `safe_int(None)` daba 0, y un manager sin caja
+        # reconstruida salia con PATRIMONIO = su plantilla entera
+        # y TOPE = un cuarto de ella, con la misma cara que un
+        # numero medido. Si no se sabe, se dice.
+        if manager.get("balance") is None:
+            manager["net_worth"] = None
+            manager["maximum_bid"] = None
+            manager["maximum_bid_source"] = "SIN_DATO"
+            continue
+
         balance = safe_int(
             manager.get(
                 "balance"
@@ -2125,7 +2137,76 @@ def build_rival_intelligence(
     # libro COMPLETO. Si el abono se quedase fuera, el cuadre
     # diria que fallamos por 870.000 EUR y no sabriamos de que.
 
-    abonos_aplicados = apply_matchday_bonus(managers)
+    # LA CAJA SE RECONSTRUYE, NO SE DERIVA (10/09/2026)
+    #
+    #     `apply_matchday_bonus` pagaba `puntos x 30.000` y eso
+    #     deja fuera el PREMIO POR PUESTO. La pantalla publicaba
+    #     4,37 M de caja nuestra contra 4.474.383 reales: cien
+    #     mil clavados, los del 5o puesto en la J2.
+    #
+    #     Ahora la caja entera sale de `caja_de_la_liga`, que LEE
+    #     lo que el tablon dice que se pago -premio incluido- y
+    #     descarta la jornada partida que la liga ignora.
+    #
+    #     Se replica desde el `leagueReset` en cada vuelta. Sin
+    #     acumulado: un libro que vive en la cache de CI puede
+    #     retroceder, y un saldo que retrocede en silencio es lo
+    #     peor que le puede pasar a esto.
+    from src.analysis.caja_de_la_liga import (
+        cuadra as _cuadra_la_caja,
+        reconstruir as _reconstruir_la_caja,
+    )
+
+    caja = _reconstruir_la_caja(events, list(managers))
+
+    abonos_aplicados = {}
+
+    for user_id, manager in managers.items():
+
+        if not isinstance(manager, dict):
+            continue
+
+        fila = (caja.get("managers") or {}).get(user_id)
+
+        if not caja.get("available") or fila is None:
+            # DOCTRINA 36: sin reconstruccion NO se vuelve al
+            # metodo viejo ni se pinta una estimacion con la
+            # misma cara que un numero medido. Se dice.
+            manager["balance"] = None
+            manager["cash_source"] = "SIN_DATO"
+            manager["cash_reason"] = caja.get("reason")
+            continue
+
+        manager["balance"] = fila["cash"]
+        manager["cash_source"] = "RECONSTRUIDA"
+        manager["cash_reason"] = caja.get("reason")
+        manager["initial_balance"] = fila["initial_balance"]
+        manager["matchday_bonus"] = fila["matchday"]
+        manager["matchday_bonus_premium"] = fila[
+            "matchday_premium"
+        ]
+        manager["matchday_bonus_rate"] = EUROS_POR_PUNTO
+        manager["sales_total"] = fila["sales"]
+        manager["purchases_total"] = fila["purchases"]
+        manager["streak_total"] = fila["streak"]
+
+        abonos_aplicados[user_id] = fila["matchday"]
+
+    # LA COMPROBACION PERMANENTE
+    #
+    #     Nuestra caja reconstruida contra el saldo real de la
+    #     API. Es la unica auditoria posible de un numero que no
+    #     podemos ver: la liga tiene los saldos ocultos, asi que
+    #     de los seis rivales no hay contra que contrastar.
+    #
+    #     Y ya demostro que funciona: fue esta comparacion la que
+    #     encontro el `splitRound`, con 870.000 clavados.
+    cuadre_de_la_caja = _cuadra_la_caja(
+        (caja.get("managers") or {})
+        .get(current_user_id, {})
+        .get("cash"),
+        own_balance,
+    )
 
     # --------------------------------------------------------
     # VALIDACION CONTABLE PEPE
@@ -2395,6 +2476,16 @@ def build_rival_intelligence(
 
         "ledger_status":
             ledger_status,
+
+        # DE DONDE SALE LA CAJA, Y SI CUADRA.
+        "cash_reconstruction": {
+            "available": caja.get("available"),
+            "initial_balance": caja.get("initial_balance"),
+            "events_read": caja.get("events_read"),
+            "ignored_rounds": caja.get("ignored_rounds"),
+            "reason": caja.get("reason"),
+        },
+        "cash_check": cuadre_de_la_caja,
 
         "event_type_counts":
             dict(

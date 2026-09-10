@@ -4681,6 +4681,18 @@ def build_dashboard_state() -> dict:
         "roster_expansion": roster_expansion,
         "rival_intelligence": {
             "ledger_status": rival_intelligence.get("ledger_status"),
+
+            # DE DONDE SALE LA CAJA Y SI CUADRA (10/09/2026).
+            #
+            # De la caja cuelgan CAJA, PATRIMONIO, TOPE, PUJA %,
+            # MAX. VISTO y AMENAZA. Si el metodo falla con el
+            # nuestro -el unico saldo que podemos ver- la caja de
+            # los seis rivales tampoco vale, y eso tiene que
+            # salir en ROJO en vez de quedarse en un log.
+            "cash_reconstruction": rival_intelligence.get(
+                "cash_reconstruction"
+            ),
+            "cash_check": rival_intelligence.get("cash_check"),
             "maximum_bid_calibration": rival_intelligence.get(
                 "maximum_bid_calibration"
             ),
