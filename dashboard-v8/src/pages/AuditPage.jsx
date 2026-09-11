@@ -7,6 +7,7 @@ import DineroPanel from "../components/DineroPanel";
 import ElOncePanel from "../components/ElOncePanel";
 import PressPanel from "../components/PressPanel";
 import RacePanel from "../components/RacePanel";
+import RendijaPanel from "../components/RendijaPanel";
 import ScoutPanel from "../components/ScoutPanel";
 import VentanaPanel from "../components/VentanaPanel";
 import { ago, formatMoney } from "../lib/utils";
@@ -391,6 +392,8 @@ export default function AuditPage({ data }) {
           )}
         </section>
       )}
+
+      <RendijaPanel data={data} />
 
       <RacePanel data={data} />
       <ConcentrationPanel data={data} />

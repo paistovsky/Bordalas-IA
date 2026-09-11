@@ -18,7 +18,7 @@ de la acción principal, con presupuesto propio.
 | **APAGADA** | la rendija se cerró sola |
 | **SILENCIO** | mientras el mercado se resuelve, nada |
 | **EMERGENCIA** | si la vuelta se fue en una `EMERGENCY_*`, `HARD_SAFETY` o `ROUND_LOCK`, el carril se calla |
-| **CUPO_DEL_RESET** | 4 operaciones de 07:00 a 07:00 |
+| **CUPO_DEL_RESET** | **2** de estreno, 4 cuando se cierre el primer viaje entero |
 | **CUPO_DE_LA_VUELTA** | 2 escrituras del carril por vuelta |
 
 **Sobre la zona de silencio:** pediste 05:00–07:00. La que ya existe va de **04:45**
@@ -26,20 +26,39 @@ a 07:00, así que cubre lo pedido con quince minutos de más. **No he movido nin
 umbral** — uso la que hay, y hay guardia que comprueba que sigue cubriendo tu
 intervalo.
 
+### El cupo: empieza en 2, sube solo
+
+Hasta que no se cierre **un viaje entero** —comprado, listado, oferta recibida y
+**cobrada por encima del suelo**— el cupo es **2**. Abrir con cuatro sería
+comprometer el doble sobre algo que no ha funcionado ni una vez.
+
+Un corte de pérdidas o un viaje caducado **no cuentan**: cerraron el viaje, pero la
+rueda no giró — se paró. Hay guardia para esos tres casos.
+
+**Un número, un sitio.** El cupo vive en `cupo_del_reset()` y en ningún otro lado.
+La portada no lo lleva escrito: lo pregunta, y pinta también el porqué:
+
+> *«Cupo de 2 por ciclo de reset: todavía no se ha cerrado ningún viaje entero
+> —comprado, listado, oferta recibida y cobrada por encima del suelo—. Sube a 4 en
+> cuanto pase una vez.»*
+
+Hay guardia (`test_la_pantalla_lee_el_cupo_no_lo_escribe`) que prohíbe que el panel
+lleve el número a mano: el día que suba a 4 cambia solo.
+
 ### El coste en peticiones
 
 ```
 hoy                       181 /día
 el límite que rompió     1536
 
-pujas                       4 /día   (cupo por reset)
-listar al ganar             4 /día   (peor caso: se ganan las 4)
-cobrar la oferta            4 /día   (peor caso: se cierran las 4)
-----------------------------------
-PEOR CASO                  12 /día
+con el cupo de estreno (2):
+  pujas                     2 /día
+  listar al ganar           2 /día
+  cobrar la oferta          2 /día
+  PEOR CASO                 6 /día   ->  total 187 (12,2 % del límite)
 
-total                     193 /día   (12,6 % del límite)
-margen                   1343
+cuando suba a 4:
+  PEOR CASO                12 /día   ->  total 193 (12,6 % del límite)
 ```
 
 **El tope por vuelta no es el que manda.** 2 × 23 vueltas daría 46; el que ata es
@@ -98,43 +117,52 @@ con marca, sin coste -> HOLD_TRIP    no se puede juzgar, no se vende
 ## EL ENSAYO EN SECO — datos de hoy, 11/09, en vivo
 
 ```
-EL CARRIL:  puede escribir · quedan 2 en la vuelta y 4 en el ciclo de reset
+EL CUPO:  2 (ESTRENO) — aún no se ha cerrado ningún viaje entero
 SALDO 4.474.383     TOPE DE PUJA 16.756.883
-
-Mercado del Computer:  20 jugadores
-  con estado "ok":     15      (los 5 restantes, descartados por estado)
-  de 1 M o más:        10      (los de menos no pagan la ficha)
 ```
 
-**Qué compraría ahora mismo, en orden de preferencia:**
+**Qué compraría ahora mismo:**
 
-| jugador | pos | precio | listaría a | suelo de cobro |
-|---|---|---|---|---|
-| Marcos Alonso | DEF | 3.590.000 | 4.128.500 | 3.625.900 |
-| Starfelt | DEF | 2.150.000 | 2.472.500 | 2.171.500 |
-| Cáceres | DEF | 1.540.000 | 1.771.000 | 1.555.400 |
-| Gulácsi | POR | 1.590.000 | 1.828.500 | 1.605.900 |
-| **compromete** | | **8.870.000** | | |
+| jugador | pos | precio | listaría a | suelo de cobro | viene |
+|---|---|---|---|---|---|
+| Marcos Alonso | DEF | 3.590.000 | 4.128.500 | 3.625.900 | sin dato |
+| Starfelt | DEF | 2.150.000 | 2.472.500 | 2.171.500 | **CAYENDO −2,01 %/día** |
+| **compromete** | | **5.740.000** | | | quedarían **11.016.883** |
 
-Sobre un tope de 16.756.883 quedarían **7.886.883** libres.
+Dos defensas, que es el orden medido (DEF +3,67 %). Los siguientes de la lista
+—Cáceres (DEF), Gulácsi (POR), Sotelo (MED), Nico Williams (DEL)— **no se
+descartan**: no caben en el cupo de estreno.
 
-**Los cuatro defensas y el portero primero, y no por casualidad:** es el orden
-medido (DEF +3,67 %, POR +3,26 %, MED +2,85 %, DEL +1,80 %). Los siguientes de la
-lista —Sotelo (MED), Nico Williams (DEL, 8 M), Robbie Ure, Berenguer— **no se
-descartan**, simplemente no caben en el cupo de 4. Es orden, no filtro.
+### El ritmo, que es lo que pediste ver
 
-**Qué ofertas espera y cuándo cobraría:** se publica en la misma vuelta a `×1,15`,
-la publicación vive 48 h, y las ofertas se resuelven en el **reset de las 07:00**.
-Así que la primera oportunidad de cobrar es el reset siguiente, y la última el
-segundo. Se cobra la oferta que supere el suelo de la columna de la derecha; por
-debajo, se espera. A los **4 resets** el viaje caduca y deja de serlo.
+De los 11 candidatos elegibles del carril (Computer, estado `ok`, ≥ 1 M):
 
-**El peor caso, para que lo veas antes de decidir:** si se ganan las cuatro y
-ninguna oferta llega al suelo, quedan 8,87 M inmovilizados en cuatro jugadores
-vendibles durante cuatro resets, con el saldo en 4,47 M y el tope bajando a ~7,9 M.
-Las barandillas de solvencia y deuda siguen puestas y ninguna se ha tocado.
+```
+3 subiendo · 3 cayendo · 0 planos · 5 sin dato
+```
 
----
+**No se confirma la sospecha del libro en la sombra.** Decía que lo rechazado era
+todo `PRECIO_CAYENDO`; lo que compraríamos **no** lo es —hay de todo, y Berenguer
+viene subiendo un +4,75 %/día—. Pero de los dos que entran hoy, **uno viene cayendo
+un −2 %/día y del otro no hay dato**, así que tampoco puedo decirte que el
+experimento no sea «comprar caídos y revender».
+
+Con 5 de 11 sin dato, esto es una **observación, no una medición** — y ya sabemos
+lo que cuesta confundirlas. Por eso queda publicado en cada ciclo: la columna
+`VIENE` del panel, con el porcentaje y los días de racha, y un aviso explícito si
+algún día **todos** los que traen dato vienen cayendo.
+
+**No decide nada**: nadie se cae de la lista por su ritmo. La compuerta se quitó a
+propósito porque el negocio es el spread, no la rampa.
+
+**Cuándo cobraría:** publicado en la misma vuelta a ×1,15; la publicación vive 48 h
+y las ofertas se resuelven en el reset de las 07:00. Primera oportunidad el reset
+siguiente, última el segundo; a los 4 resets el viaje caduca y deja de serlo.
+
+**El peor caso:** si se ganan las dos y ninguna oferta llega al suelo, quedan
+5,74 M inmovilizados en dos jugadores vendibles durante cuatro resets, con el saldo
+en 4,47 M y el tope bajando a ~11,0 M. Ninguna barandilla de solvencia o deuda se
+ha tocado.
 
 ## Lo que queda apagado
 
@@ -144,7 +172,7 @@ datos reales, no una operación enviada.
 
 ## Guardias
 
-`src/analysis/test_la_rendija_v1.py` — **14/14**. Las cinco puertas del carril, el
+`src/analysis/test_la_rendija_v1.py` — **18/18**. Las cinco puertas del carril, el
 apagado automático (y que una racha de nueve **no** apaga nada — ese error ya costó
 una ventana), el escaparate, la guardia clave del viaje sin listar, el caso exacto
 del `HOLD` y el orden de preferencia.
@@ -154,5 +182,5 @@ del `HOLD` y el orden de preferencia.
 ## Estado
 
 - Verja: **111/111**
-- Coste del carril: **12 peticiones/día en el peor caso**
+- Coste del carril: **6 peticiones/día** con el cupo de estreno (12 si sube a 4)
 - Rama `main`, **sin push** — el push lo das tú después de leer el ensayo

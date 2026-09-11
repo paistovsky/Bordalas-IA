@@ -198,6 +198,18 @@ export default function App() {
           </div>
         )}
 
+        {/* UN VIAJE COMPRADO Y FUERA DEL ESCAPARATE
+            Es el estado que no puede existir: se compro para
+            revender y no esta en venta. Cada vuelta asi es una
+            tanda de ofertas que no llega, y sin esto no lo
+            notaria nadie. Con nombre y hora. */}
+        {data.rendija?.sin_listar?.ok === false && (
+          <div className="alert crit">
+            <b>VIAJE COMPRADO Y SIN LISTAR.</b>{" "}
+            {data.rendija.sin_listar.reason}
+          </div>
+        )}
+
         {/* LA CAJA DE LOS RIVALES NO CUADRA (10/09/2026)
             De la caja cuelgan CAJA, PATRIMONIO, TOPE, PUJA,
             MAX. VISTO y AMENAZA: media tabla de Clasificacion.

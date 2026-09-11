@@ -52,6 +52,14 @@ NORMALIZADOR = DASHBOARD / "lib" / "status.js"
 #  paginas donde tiene que estar montado)
 CADENAS = [
     (
+        # LA RENDIJA (11/09/2026). En que cupo esta el
+        # carril y como vienen los candidatos.
+        "rendija",
+        "rendija",
+        "RendijaPanel",
+        ["AuditPage.jsx"],
+    ),
+    (
         # POSIBLES CAMBIOS (10/09/2026). El banquillo con el
         # motivo que dio el motor al descartarlo.
         "posibles_cambios",

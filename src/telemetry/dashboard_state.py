@@ -4535,6 +4535,106 @@ def build_dashboard_state() -> dict:
         photo_lookup,
     )
 
+    # ------------------------------------------------------
+    # LA RENDIJA
+    # ------------------------------------------------------
+    # Observador puro: lee el cupo vigente y mide el ritmo de
+    # los candidatos. No decide nada y no escribe nada.
+    try:
+        from src.analysis.la_rendija import (
+            cupo_del_reset,
+            ritmo_de_los_candidatos,
+            se_apaga_sola,
+        )
+
+        _cierres = []
+
+        try:
+            import json as _json
+
+            _libro = (
+                Path("data") / "trading" / "libro_de_salidas.jsonl"
+            )
+
+            if _libro.exists():
+                for _linea in _libro.read_text(
+                    encoding="utf-8"
+                ).splitlines():
+                    if _linea.strip():
+                        _cierres.append(
+                            _json.loads(_linea)
+                        )
+
+        except Exception:                           # noqa: BLE001
+            _cierres = []
+
+        _cupo = cupo_del_reset(_cierres)
+
+        from src.actions.escaparate_executor import (
+            viajes_sin_listar,
+        )
+
+        from src.analysis.libro_de_viajes import abiertos
+
+        _abiertos = abiertos(
+            plantilla=(roster or {}).get("players") or []
+        )
+
+        _sin_listar = viajes_sin_listar(
+            viajes=_abiertos.get("viajes") or [],
+            listados=(compact_listings(state) or {}).get("rows") or [],
+        )
+
+        # LOS CANDIDATOS DEL CARRIL, NO LOS DEL TABLERO.
+        #
+        # El tablero de fichajes mira a todo el mercado; el
+        # carril solo compra del Computer, con estado `ok` y de
+        # 1 M para arriba -por debajo, un +1,52 % sobre 150.000
+        # son 2.250 EUR y no pagan la ficha-. Pintar la lista del
+        # tablero diria el ritmo de jugadores que este carril no
+        # va a comprar.
+        _candidatos = [
+            {
+                "player_id": safe_int(t.get("id")),
+                "name": t.get("name"),
+                "position": safe_int(t.get("position")),
+                "market_price": safe_int(t.get("market_price")),
+            }
+            for t in ((acquisition or {}).get("targets") or [])
+            if safe_int(t.get("market_price")) >= 1_000_000
+            and str(t.get("status") or "").lower() == "ok"
+            # SOLO EL MERCADO DEL COMPUTER. La puerta del
+            # mercado de rivales sigue cerrada por regla del
+            # dueno, asi que pintar su ritmo seria enseñar
+            # jugadores que este carril no va a comprar.
+            and not t.get("outside_computer_market")
+        ]
+
+        rendija_ahora = {
+            "available": True,
+            "cupo": _cupo["cupo"],
+            "cupo_estado": _cupo["estado"],
+            "cupo_reason": _cupo["reason"],
+            "apagado": se_apaga_sola(_cierres),
+            "ritmo": ritmo_de_los_candidatos(_candidatos),
+            "en_vivo": False,
+
+            # LA GUARDIA CLAVE, como dato: un jugador marcado
+            # VIAJE que termina el ciclo SIN LISTAR. Comprado
+            # para revender y fuera del escaparate es una vuelta
+            # tirada, y sin esto no lo notaria nadie.
+            "sin_listar": _sin_listar,
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        rendija_ahora = {
+            "available": False,
+            "reason": (
+                f"No se pudo leer el estado de la rendija: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     dashboard = {
         "meta": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -4737,6 +4837,11 @@ def build_dashboard_state() -> dict:
             ),
             "bench": lineup_payload.get("bench") or [],
         },
+
+        # LA RENDIJA: en que cupo esta y por que, y el ritmo
+        # de lo que compraria. El cupo NO se escribe aqui: se
+        # pregunta a `cupo_del_reset()`, que es su unico sitio.
+        "rendija": rendija_ahora,
 
         "silencio": silencio_ahora,
 

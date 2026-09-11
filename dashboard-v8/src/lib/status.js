@@ -250,6 +250,7 @@ export function normalizeStatus(raw = {}) {
     // Si Pepe esta en la franja en la que no escribe, y que se
     // quedo sin hacer por ella.
     silencio: raw.silencio || { available: false, allowed: true },
+    rendija: raw.rendija || { available: false },
     posiblesCambios: raw.posibles_cambios || {
       available: false,
       bench: []

@@ -40,8 +40,11 @@ LO QUE SE QUEDA, SIN EXCEPCION
       de Madrid-, que cubre de sobra el 05:00-07:00 pedido. No
       se mueve ningun umbral.
 
-    · CUATRO OPERACIONES POR CICLO DE RESET, de 07:00 a 07:00.
-      Al no haber ventana, el cupo necesitaba una unidad: esa.
+    · EL CUPO POR CICLO DE RESET, de 07:00 a 07:00. Al no
+      haber ventana, el cupo necesitaba una unidad: esa.
+      Empieza en DOS y sube a cuatro solo cuando se cierre un
+      viaje entero. Vive en  y en ningun
+      otro sitio.
 
     · DOS ESCRITURAS DE ESTE CARRIL POR VUELTA.
 
@@ -76,8 +79,30 @@ from datetime import datetime, timezone
 # consumo: son 2 POST sobre una vuelta de 7 peticiones.
 ESCRITURAS_POR_VUELTA = 2
 
-# Por ciclo de reset, de 07:00 a 07:00. Es el cupo del dueno.
-OPERACIONES_POR_RESET = 4
+# ============================================================
+# EL CUPO, Y POR QUE HAY DOS
+# ============================================================
+#
+# Por ciclo de reset, de 07:00 a 07:00.
+#
+# SE EMPIEZA POR DOS, NO POR CUATRO
+#
+#     Hasta que no se cierre UN viaje entero -comprado, listado,
+#     oferta recibida y cobrada por encima del suelo- no sabemos
+#     si la rueda gira. Abrir con cuatro seria comprometer el
+#     doble sobre algo que no ha funcionado ni una vez.
+#
+#     En cuanto pase una vez, sube a cuatro solo.
+#
+# UN NUMERO EN UN SITIO
+#
+#     El cupo vigente no se escribe en ningun otro lado: se
+#     pregunta a `cupo_del_reset()`, que ademas dice en cual
+#     esta y por que, para que la portada lo pinte sin deducir
+#     nada.
+CUPO_DE_ESTRENO = 2
+
+CUPO_PLENO = 4
 
 # Cuantos viajes cerrados hacen falta antes de juzgar si esto
 # merece la pena. Menos que esto es una racha, no una medicion.
@@ -183,6 +208,234 @@ def se_apaga_sola(cierres: list | None) -> dict:
 
 
 # ============================================================
+# EL CUPO VIGENTE
+# ============================================================
+
+
+def un_viaje_cerrado_entero(cierres: list | None) -> dict:
+    """
+    ¿Ha dado alguno la vuelta completa? Forma fija.
+
+    "Entero" es: comprado, listado, oferta recibida y COBRADA
+    POR ENCIMA DEL SUELO. Un corte de perdidas o un viaje
+    caducado NO cuentan: la rueda no ha girado, solo se ha
+    parado.
+    """
+
+    try:
+        for cierre in cierres or []:
+
+            if not isinstance(cierre, dict):
+                continue
+
+            beneficio = cierre.get("profit")
+
+            if beneficio is None:
+                continue
+
+            if safe_int(beneficio) > 0 and not cierre.get(
+                "loss_cut"
+            ):
+                return {
+                    "available": True,
+                    "hay": True,
+                    "player_name": cierre.get("player_name"),
+                    "profit": safe_int(beneficio),
+                    "at": cierre.get("at"),
+                }
+
+        return {"available": True, "hay": False}
+
+    except Exception:                               # noqa: BLE001
+        # Sin saberlo, por el lado prudente: no hay.
+        return {"available": False, "hay": False}
+
+
+def cupo_del_reset(cierres: list | None = None) -> dict:
+    """
+    Cuantas operaciones caben en este ciclo de reset, y POR QUE.
+
+    ES EL UNICO SITIO DONDE VIVE ESE NUMERO. La portada lo pinta
+    de aqui: ni lo deduce ni lo lleva escrito.
+    """
+
+    primero = un_viaje_cerrado_entero(cierres)
+
+    if primero.get("hay"):
+        return {
+            "available": True,
+            "cupo": CUPO_PLENO,
+            "estado": "PLENO",
+            "reason": (
+                f"Cupo de {CUPO_PLENO} por ciclo de reset: ya se "
+                f"cerro un viaje entero"
+                + (
+                    f" ({primero.get('player_name')}, "
+                    f"+{_euros(primero.get('profit'))} EUR)"
+                    if primero.get("player_name")
+                    else ""
+                )
+                + "."
+            ),
+        }
+
+    return {
+        "available": True,
+        "cupo": CUPO_DE_ESTRENO,
+        "estado": "ESTRENO",
+        "reason": (
+            f"Cupo de {CUPO_DE_ESTRENO} por ciclo de reset: "
+            f"todavia no se ha cerrado ningun viaje entero "
+            f"-comprado, listado, oferta recibida y cobrada por "
+            f"encima del suelo-. Sube a {CUPO_PLENO} en cuanto "
+            f"pase una vez."
+        ),
+    }
+
+
+# ============================================================
+# EL RITMO DE LOS CANDIDATOS
+# ============================================================
+
+
+def ritmo_de_los_candidatos(
+    candidatos: list | None,
+    rates: dict | None = None,
+) -> dict:
+    """
+    De lo que el carril compraria: ¿viene SUBIENDO o CAYENDO, y a
+    que ritmo? Forma fija, nunca lanza.
+
+    LA COMPUERTA DE RITMO SE QUITO A PROPOSITO. El negocio es el
+    spread, no la rampa: se compra al precio del Computer y se
+    revende por encima, y para eso da igual hacia donde vaya el
+    precio.
+
+    Pero quitarla no es dejar de mirar. El libro en la sombra
+    decia que lo que se rechazaba era todo PRECIO_CAYENDO; si lo
+    que compramos tambien lo es, el experimento real es "comprar
+    caidos y revender", y eso hay que saberlo MIENTRAS PASA, no
+    despues.
+
+    ESTO NO DECIDE NADA. Solo cuenta lo que se esta comprando.
+    """
+
+    vacio = {
+        "available": False,
+        "filas": [],
+        "subiendo": 0,
+        "cayendo": 0,
+        "planos": 0,
+        "sin_dato": 0,
+        "todos_cayendo": False,
+        "reason": None,
+    }
+
+    try:
+        from src.analysis.market_rate_gate import (
+            FALLING,
+            build_market_rates,
+            evaluate,
+        )
+
+        ritmos = (
+            rates if rates is not None else build_market_rates()
+        )
+
+        filas = []
+
+        for candidato in candidatos or []:
+
+            if not isinstance(candidato, dict):
+                continue
+
+            pid = safe_int(candidato.get("player_id"))
+
+            visto = evaluate(pid, ritmos)
+
+            ritmo = safe_float(visto.get("rate_percent_per_day"))
+
+            if ritmo is None:
+                direccion = "SIN_DATO"
+
+            elif ritmo > 0:
+                direccion = "SUBIENDO"
+
+            elif ritmo < 0:
+                direccion = FALLING
+
+            else:
+                direccion = "PLANO"
+
+            filas.append(
+                {
+                    "player_id": pid,
+                    "name": candidato.get("name"),
+                    "position": safe_int(
+                        candidato.get("position")
+                    ),
+                    "market_price": safe_int(
+                        candidato.get("market_price")
+                    ),
+                    "direction": direccion,
+                    "rate_percent_per_day": ritmo,
+                    "trend_days": visto.get("trend_days"),
+                }
+            )
+
+        cuenta = {
+            "subiendo": sum(
+                1 for f in filas if f["direction"] == "SUBIENDO"
+            ),
+            "cayendo": sum(
+                1 for f in filas if f["direction"] == FALLING
+            ),
+            "planos": sum(
+                1 for f in filas if f["direction"] == "PLANO"
+            ),
+            "sin_dato": sum(
+                1 for f in filas if f["direction"] == "SIN_DATO"
+            ),
+        }
+
+        con_dato = len(filas) - cuenta["sin_dato"]
+
+        todos_cayendo = bool(
+            con_dato and cuenta["cayendo"] == con_dato
+        )
+
+        return {
+            "available": True,
+            "filas": filas,
+            **cuenta,
+            "todos_cayendo": todos_cayendo,
+            "reason": (
+                f"{len(filas)} candidato(s): "
+                f"{cuenta['subiendo']} subiendo, "
+                f"{cuenta['cayendo']} cayendo, "
+                f"{cuenta['planos']} planos, "
+                f"{cuenta['sin_dato']} sin dato."
+                + (
+                    " TODOS los que traen dato vienen CAYENDO: el "
+                    "experimento es «comprar caidos y revender»."
+                    if todos_cayendo
+                    else ""
+                )
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"No se pudo medir el ritmo de los candidatos: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+
+# ============================================================
 # EL PERMISO DEL CARRIL
 # ============================================================
 
@@ -217,9 +470,11 @@ def permiso(
 
         apagado = se_apaga_sola(cierres)
 
+        cupo = cupo_del_reset(cierres)
+
         quedan_reset = max(
             0,
-            OPERACIONES_POR_RESET
+            cupo["cupo"]
             - safe_int(operaciones_en_este_reset),
         )
 
@@ -235,7 +490,9 @@ def permiso(
             "quedan_en_la_vuelta": quedan_vuelta,
             "quedan_en_el_reset": quedan_reset,
             "cupo_por_vuelta": ESCRITURAS_POR_VUELTA,
-            "cupo_por_reset": OPERACIONES_POR_RESET,
+            "cupo_por_reset": cupo["cupo"],
+            "cupo_estado": cupo["estado"],
+            "cupo_reason": cupo["reason"],
             "apagado": apagado,
         }
 
@@ -289,7 +546,7 @@ def permiso(
                 "reason": (
                     f"Ya van {safe_int(operaciones_en_este_reset)} "
                     f"operaciones en este ciclo de reset y el "
-                    f"tope son {OPERACIONES_POR_RESET}."
+                    + cupo["reason"]
                 ),
             }
 
@@ -358,7 +615,7 @@ def a_quien_pujar(
         ordenados = orden_de_preferencia(candidatos)
 
         tope = (
-            OPERACIONES_POR_RESET
+            cupo_del_reset()["cupo"]
             if cuantos is None
             else max(0, safe_int(cuantos))
         )

@@ -19,7 +19,8 @@ LO QUE SE QUITA, Y POR QUE
 LO QUE NO SE QUITA, Y ESTAS GUARDIAS LO PRUEBAN
 
     · la zona de silencio
-    · cuatro operaciones por ciclo de reset
+    · el cupo por ciclo de reset: DOS de estreno, y cuatro
+      solo cuando se haya cerrado un viaje entero
     · dos escrituras del carril por vuelta
     · ni una si la vuelta se fue en una emergencia
     · las cinco prohibiciones de `que_cobrar`
@@ -45,12 +46,16 @@ from src.actions.escaparate_executor import (
     viajes_sin_listar,
 )
 from src.analysis.la_rendija import (
+    CUPO_DE_ESTRENO,
+    CUPO_PLENO,
     ESCRITURAS_POR_VUELTA,
-    OPERACIONES_POR_RESET,
     VIAJES_PARA_JUZGAR,
     a_quien_pujar,
+    cupo_del_reset,
     permiso,
+    ritmo_de_los_candidatos,
     se_apaga_sola,
+    un_viaje_cerrado_entero,
 )
 from src.analysis.offer_decision_engine import (
     decide_incoming_offer,
@@ -128,27 +133,167 @@ def test_con_una_emergencia_el_carril_se_calla() -> None:
     )["puede"] is True
 
 
-def test_el_cupo_es_por_ciclo_de_reset() -> None:
+def test_el_cupo_empieza_en_dos_y_sube_solo() -> None:
     """
-    Al no haber ventana, el cupo necesitaba una unidad. Es el
-    ciclo de reset: de 07:00 a 07:00, cuatro operaciones.
+    EL CUPO DE ESTRENO.
+
+    Hasta que no se cierre UN viaje entero -comprado, listado,
+    oferta recibida y cobrada por encima del suelo- no sabemos si
+    la rueda gira. Abrir con cuatro seria comprometer el doble
+    sobre algo que no ha funcionado ni una vez.
     """
 
-    assert OPERACIONES_POR_RESET == 4, OPERACIONES_POR_RESET
+    assert CUPO_DE_ESTRENO == 2, CUPO_DE_ESTRENO
+    assert CUPO_PLENO == 4, CUPO_PLENO
 
-    for ya in range(OPERACIONES_POR_RESET):
+    de_estreno = cupo_del_reset([])
+
+    assert de_estreno["cupo"] == CUPO_DE_ESTRENO, de_estreno
+    assert de_estreno["estado"] == "ESTRENO", de_estreno
+
+    # En cuanto se cierra uno entero, sube solo.
+    pleno = cupo_del_reset(
+        [{"profit": 120_000, "player_name": "Starfelt"}]
+    )
+
+    assert pleno["cupo"] == CUPO_PLENO, pleno
+    assert pleno["estado"] == "PLENO", pleno
+
+    # Y lo dice con el nombre, para que la portada lo pinte.
+    assert "Starfelt" in pleno["reason"], pleno
+
+
+def test_un_corte_de_perdidas_no_sube_el_cupo() -> None:
+    """
+    "Entero" es cobrado POR ENCIMA DEL SUELO. Un corte de
+    perdidas cerro el viaje pero la rueda no giro: se paro.
+    """
+
+    for falso in (
+        [{"profit": -5_000, "loss_cut": True}],
+        [{"profit": 0}],
+        [{"profit": None}],
+        [{}],
+    ):
+        assert un_viaje_cerrado_entero(falso)["hay"] is False, (
+            falso
+        )
+
+        assert cupo_del_reset(falso)["cupo"] == CUPO_DE_ESTRENO
+
+
+def test_el_cupo_manda_sobre_el_permiso() -> None:
+    """Un numero en un sitio: el permiso lo pregunta, no lo lleva."""
+
+    for ya in range(CUPO_DE_ESTRENO):
         assert permiso(
             ahora=DE_DIA, operaciones_en_este_reset=ya
         )["puede"] is True, ya
 
     agotado = permiso(
         ahora=DE_DIA,
-        operaciones_en_este_reset=OPERACIONES_POR_RESET,
+        operaciones_en_este_reset=CUPO_DE_ESTRENO,
     )
 
-    assert agotado["puede"] is False, agotado
-
     assert agotado["blocked_by"] == "CUPO_DEL_RESET", agotado
+
+    assert agotado["cupo_por_reset"] == CUPO_DE_ESTRENO, agotado
+
+    assert agotado["cupo_estado"] == "ESTRENO", agotado
+
+    # Con un viaje cerrado entero, esas mismas dos ya no agotan.
+    con_uno = permiso(
+        ahora=DE_DIA,
+        operaciones_en_este_reset=CUPO_DE_ESTRENO,
+        cierres=[{"profit": 120_000}],
+    )
+
+    assert con_uno["puede"] is True, con_uno
+
+
+def test_la_pantalla_lee_el_cupo_no_lo_escribe() -> None:
+    """
+    El cupo vive en UN sitio. Si la pantalla llevara el numero
+    escrito, el dia que suba a cuatro habria dos y uno estaria
+    mal.
+    """
+
+    from pathlib import Path
+
+    panel = (
+        Path(__file__).parents[2]
+        / "dashboard-v8"
+        / "src"
+        / "components"
+        / "RendijaPanel.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "rendija.cupo" in panel, (
+        "el panel no lee el cupo del estado publicado"
+    )
+
+    assert "cupo_reason" in panel, (
+        "el panel no pinta POR QUE esta en ese cupo"
+    )
+
+    # Y no lleva el numero escrito.
+    for suelto in ("cupo: 2", "cupo: 4", "= 2;", "= 4;"):
+        assert suelto not in panel, (
+            f"el panel lleva el cupo escrito a mano: `{suelto}`"
+        )
+
+
+def test_se_ve_si_los_candidatos_suben_o_caen() -> None:
+    """
+    La compuerta de ritmo se quito a proposito -el negocio es el
+    spread, no la rampa- pero eso no es dejar de mirar.
+
+    Si lo que compramos viniera todo cayendo, el experimento
+    real seria "comprar caidos y revender", y hay que saberlo
+    MIENTRAS PASA.
+    """
+
+    visto = ritmo_de_los_candidatos(
+        [
+            {"player_id": 1, "name": "Sube", "position": 2},
+            {"player_id": 2, "name": "Cae", "position": 2},
+            {"player_id": 3, "name": "Plano", "position": 2},
+            {"player_id": 4, "name": "Nadie", "position": 2},
+        ],
+        rates={
+            1: {"rate_percent_per_day": 1.2, "trend_days": 3},
+            2: {"rate_percent_per_day": -0.8, "trend_days": 5},
+            3: {"rate_percent_per_day": 0.0, "trend_days": 1},
+        },
+    )
+
+    assert visto["available"], visto
+
+    assert visto["subiendo"] == 1, visto
+    assert visto["cayendo"] == 1, visto
+    assert visto["planos"] == 1, visto
+    assert visto["sin_dato"] == 1, visto
+
+    assert visto["todos_cayendo"] is False, visto
+
+    # Y el caso que hay que cazar.
+    todos = ritmo_de_los_candidatos(
+        [
+            {"player_id": 1, "name": "A"},
+            {"player_id": 2, "name": "B"},
+        ],
+        rates={
+            1: {"rate_percent_per_day": -0.5},
+            2: {"rate_percent_per_day": -1.1},
+        },
+    )
+
+    assert todos["todos_cayendo"] is True, todos
+
+    assert "comprar caidos y revender" in todos["reason"], todos
+
+    # NO decide nada: nadie se cae de la lista por su ritmo.
+    assert len(todos["filas"]) == 2, todos
 
 
 def test_dos_escrituras_del_carril_por_vuelta() -> None:
@@ -448,7 +593,7 @@ def test_caben_los_que_diga_el_cupo() -> None:
     ]
 
     assert len(a_quien_pujar(candidatos)["elegidos"]) == (
-        OPERACIONES_POR_RESET
+        CUPO_DE_ESTRENO
     )
 
     assert a_quien_pujar(candidatos, cuantos=0)["elegidos"] == []
@@ -457,7 +602,11 @@ def test_caben_los_que_diga_el_cupo() -> None:
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
-    test_el_cupo_es_por_ciclo_de_reset,
+    test_el_cupo_empieza_en_dos_y_sube_solo,
+    test_un_corte_de_perdidas_no_sube_el_cupo,
+    test_el_cupo_manda_sobre_el_permiso,
+    test_la_pantalla_lee_el_cupo_no_lo_escribe,
+    test_se_ve_si_los_candidatos_suben_o_caen,
     test_dos_escrituras_del_carril_por_vuelta,
     test_si_no_se_sabe_si_puede_no_puede,
     test_la_rendija_se_apaga_sola_si_pierde_dinero,
