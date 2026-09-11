@@ -625,7 +625,7 @@ def test_una_vuelta_cuesta_lo_que_dice_el_informe():
         medir_un_ciclo,
     )
 
-    medido = medir_un_ciclo()
+    medido = medir_un_ciclo(fase="NORMAL")
 
     assert medido["total"] == PETICIONES_POR_CICLO, (
         f"una vuelta cuesta {medido['total']} peticiones y el "
@@ -655,7 +655,7 @@ def test_el_tablon_se_colecta_una_sola_vez():
         medir_un_ciclo,
     )
 
-    por_endpoint = medir_un_ciclo()["by_endpoint"]
+    por_endpoint = medir_un_ciclo(fase="NORMAL")["by_endpoint"]
 
     veces = por_endpoint.get("GET /league/{id}/board", 0)
 
@@ -889,8 +889,19 @@ def test_la_cache_del_reset_caduca_en_el_reset():
             "catalogo", {"a": 1}, path=fichero, ahora=ahora
         )
 
+        # LA FASE SE PINA (regla 23).
+        #
+        # Sin esto, `leer` la deduce del calendario dinamico que
+        # vive en disco, o sea del reloj: en NORMAL la cache
+        # sirve y en HIGH_ATTENTION no. Esta guardia paso en
+        # verde el 10/09 y se puso roja el 11 a las 17:34 sin
+        # que nadie la tocara, porque a esa hora la jornada
+        # estaba cerca.
+        #
+        # Lo que aqui se mide es la caducidad POR EL RESET. La
+        # fase es otra cosa y tiene su propia guardia.
         fresco = cache.leer(
-            "catalogo", path=fichero, ahora=ahora
+            "catalogo", path=fichero, ahora=ahora, fase="NORMAL"
         )
 
         assert fresco["fresco"], fresco["reason"]
@@ -898,7 +909,7 @@ def test_la_cache_del_reset_caduca_en_el_reset():
         manana = ahora + timedelta(days=1)
 
         caducado = cache.leer(
-            "catalogo", path=fichero, ahora=manana
+            "catalogo", path=fichero, ahora=manana, fase="NORMAL"
         )
 
         assert not caducado["fresco"], (
@@ -946,7 +957,11 @@ def test_el_interruptor_de_la_cache_devuelve_el_mundo_de_antes():
     os.environ[DISABLE_ENV] = "1"
 
     try:
-        assert not leer("catalogo")["fresco"]
+        # Con la fase puesta a una que SI cachearia, para que
+        # lo unico que apague la cache sea el interruptor. Sin
+        # `fase` esto podia pasar por el motivo equivocado -una
+        # fase sensible- y no comprobaria el interruptor.
+        assert not leer("catalogo", fase="NORMAL")["fresco"]
 
         plan = perfiles_a_refrescar(
             users=LOS_SIETE,
@@ -1000,7 +1015,14 @@ def test_la_vuelta_de_crucero_cuesta_lo_que_dice_el_informe():
         medir_un_ciclo,
     )
 
-    medido = medir_un_ciclo(vueltas=2)
+    # CRUCERO ES UNA FASE, y hay que decirla (regla 23).
+    #
+    # Sin `fase`, esto medía la vuelta de la hora a la que se
+    # ejecutara la verja. En HIGH_ATTENTION el catalogo se pide
+    # fresco a proposito -para no alinear a un lesionado- y la
+    # vuelta cuesta 8 en vez de 7: la guardia se ponia roja sin
+    # que nada estuviera mal.
+    medido = medir_un_ciclo(vueltas=2, fase="NORMAL")
 
     assert medido["total"] == PETICIONES_DE_CRUCERO, (
         "una vuelta de crucero cuesta "
@@ -1246,7 +1268,7 @@ def test_la_sonda_del_recuento_no_escribe_estado():
         "cache.FICHERO": cache_mod.FICHERO,
     }
 
-    medir_un_ciclo(vueltas=2)
+    medir_un_ciclo(vueltas=2, fase="NORMAL")
 
     despues = {
         "liga.DATA_DIR": liga_mod.DATA_DIR,
@@ -1308,13 +1330,95 @@ def test_la_sonda_no_deja_ficheros_en_el_estado():
 
     antes = foto()
 
-    medir_un_ciclo(vueltas=2)
+    medir_un_ciclo(vueltas=2, fase="NORMAL")
 
     nuevos = foto() - antes
 
     assert not nuevos, (
         "la sonda ha dejado ficheros en el estado: "
         + str(sorted(nuevos))
+    )
+
+
+def test_nadie_mide_sin_decir_en_que_fase():
+    """
+    EL ROJO DEL 11/09/2026, Y LA REGLA 23 OTRA VEZ.
+
+    `medir_un_ciclo` y `cache.leer` deducen la fase del
+    calendario dinamico -o sea, del RELOJ- si no se les dice
+    cual. Y la fase cambia lo que cuesta una vuelta: en
+    HIGH_ATTENTION el catalogo se pide fresco a proposito, para
+    no alinear a un lesionado, y la vuelta pasa de 7 peticiones
+    a 8.
+
+    Dos guardias de este fichero no la pasaban. Pasaron en verde
+    el 10/09 y se pusieron rojas el 11 a las 17:34 sin que nadie
+    las tocara, porque a esa hora la jornada estaba cerca. Y la
+    verja corre ANTES del ciclo, asi que pararon el bot.
+
+    Lo peor es que el mecanismo ya existia: el docstring de
+    `se_cachea_en_esta_fase` dice, con esas palabras, que la
+    fase "se puede pasar -las guardias lo hacen- o se deduce".
+    Cuatro la pasaban y dos no.
+
+    Asi que aqui no se comprueba un numero: se comprueba que
+    NADIE de este fichero mida sin decir en que fase.
+    """
+
+    import ast
+
+    from pathlib import Path
+
+    fuente = Path(__file__).read_text(encoding="utf-8")
+
+    arbol = ast.parse(fuente)
+
+    VIGILADAS = {"medir_un_ciclo", "leer"}
+
+    mudas = []
+
+    for nodo in ast.walk(arbol):
+
+        if not isinstance(nodo, ast.Call):
+            continue
+
+        nombre = (
+            nodo.func.attr
+            if isinstance(nodo.func, ast.Attribute)
+            else getattr(nodo.func, "id", None)
+        )
+
+        if nombre not in VIGILADAS:
+            continue
+
+        if not any(
+            kw.arg == "fase" for kw in nodo.keywords
+        ):
+            mudas.append(f"{nombre}() en la linea {nodo.lineno}")
+
+    assert not mudas, (
+        "estas llamadas deducen la fase del reloj, asi que su "
+        "resultado depende de la hora a la que corra la verja: "
+        + " · ".join(mudas)
+    )
+
+    # Regla 24: si el barrido dejara de encontrar llamadas, esto
+    # pasaria en vacio y no estaria comprobando nada.
+    total = sum(
+        1
+        for nodo in ast.walk(arbol)
+        if isinstance(nodo, ast.Call)
+        and (
+            nodo.func.attr
+            if isinstance(nodo.func, ast.Attribute)
+            else getattr(nodo.func, "id", None)
+        )
+        in VIGILADAS
+    )
+
+    assert total >= 6, (
+        f"solo se han encontrado {total} llamadas que vigilar: "
+        f"el barrido esta roto"
     )
 
 
@@ -1392,6 +1496,7 @@ TESTS = [
     test_la_fase_se_mira_una_vez_por_vuelta,
     test_la_sonda_del_recuento_no_escribe_estado,
     test_la_sonda_no_deja_ficheros_en_el_estado,
+    test_nadie_mide_sin_decir_en_que_fase,
     test_estas_guardias_no_leen_el_estado,
 ]
 
