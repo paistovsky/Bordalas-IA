@@ -11,7 +11,7 @@ import AuditPage from "./pages/AuditPage";
 import { fetchStatus, normalizeStatus } from "./lib/status";
 import { ago, minutesOld } from "./lib/utils";
 import {
-  avisoDelCambioDeHora,
+  avisoDeDisparoFueraDeHora,
   cadenciaEnPalabras,
   cadenciaMinutos,
   madridNaiveAUTC,
@@ -107,9 +107,12 @@ export default function App() {
 
   const cadencia = cadenciaEnPalabras(ahora);
 
-  // El 25/10/2026 sobra la hora de menos que llevan los crones
-  // externos. No se recuerda: se detecta.
-  const cambioDeHora = avisoDelCambioDeHora(ahora);
+  // Un ciclo que entra a una hora que no es ninguna de las
+  // configuradas. No dice de que es culpa: dice que no encaja.
+  const fueraDeHora = avisoDeDisparoFueraDeHora(
+    ahora,
+    madridNaiveAUTC(data.meta.generated_at)
+  );
 
 
   const minutosFoto = minutosDeLaFoto(data.meta.generated_at);
@@ -174,29 +177,23 @@ export default function App() {
           </div>
         )}
 
-        {/* EL CAMBIO DE HORA ROMPE LOS CRONES EXTERNOS
-            cron-job.org aplica CET aunque le pongas
-            "Europe/Madrid", asi que los disparos llevan una hora
-            de menos escrita a mano. Cuando Madrid sale del
-            horario de verano esa compensacion sobra y la ventana
-            del reset se abriria con el mercado sin resetear.
+        {/* UN DISPARO A UNA HORA QUE NO ES LA SUYA
+            Aqui habia un aviso del cambio de hora, para acordarse
+            de quitar en octubre una compensacion que los crones
+            externos NO necesitan: la teoria que la justificaba se
+            dedujo de un solo caso y era falsa.
 
-            No se recuerda: se le pregunta a la base de zonas si
-            Madrid sigue en verano. Mientras lo este, esto no
-            aparece. */}
-        {cambioDeHora && (
-          <div className="alert crit">
-            <b>LOS CRONES EXTERNOS SE HAN ADELANTADO UNA HORA.</b>{" "}
-            {cambioDeHora.texto}
-            <div style={{ marginTop: 4 }}>
-              {cambioDeHora.cambiar.map((d) => (
-                <div key={d.cron}>
-                  <code>{d.cron}</code> → <code>{d.nuevo}</code>{" "}
-                  <span className="dim">
-                    ({d.madrid} · {d.que})
-                  </span>
-                </div>
-              ))}
+            Esto vigila lo que si importa —que el ciclo entre
+            cuando toca— y no diagnostica la causa. */}
+        {fueraDeHora && (
+          <div className="alert warn">
+            <b>EL CICLO NO HA ENTRADO A SU HORA.</b>{" "}
+            {fueraDeHora.texto}
+            <div style={{ marginTop: 4 }} className="dim">
+              Configurados:{" "}
+              {fueraDeHora.configurados
+                .map((d) => `${d.madrid} (${d.que})`)
+                .join(" · ")}
             </div>
           </div>
         )}

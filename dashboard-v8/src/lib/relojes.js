@@ -51,46 +51,60 @@ const HORAS_INTERNAS = [
 const MINUTO_INTERNO = 7;
 
 /* ============================================================
- * LOS DISPAROS EXTERNOS Y SU COMPENSACION A MANO
+ * LOS DISPAROS EXTERNOS
  * ============================================================
  *
- * cron-job.org, con la zona puesta en "Europe/Madrid", aplica
- * CET SIEMPRE. No sigue el horario de verano. Asi que la hora
- * que escribes ahi ocurre UNA HORA MAS TARDE en Madrid real
- * mientras dure el verano.
+ * cron-job.org, con la zona puesta en "Europe/Madrid". Sin
+ * compensacion ninguna: la hora que se escribe es la hora de
+ * Madrid en que ocurre.
  *
- * Por eso estan puestos con una hora de menos:
+ *     45,50 4 * * *   ->   04:45 y 04:50   (ventana del reset)
+ *     15 7 * * *      ->   07:15           (tras el reset)
  *
- *     escrito  45,50 3 * * *  ->  dispara 04:45 y 04:50 reales
- *     escrito  15 6 * * *     ->  dispara 07:15 reales
+ * LA COMPENSACION QUE HUBO AQUI, Y POR QUE YA NO ESTA
  *
- * EL 25 DE OCTUBRE DE 2026, al acabar el horario de verano,
- * Madrid pasa a CET y el desfase DESAPARECE. Hay que devolverlos
- * a "45,50 4" y "15 7", o empezaran a dispararse una hora antes
- * de lo que queremos: las 03:45 en vez de las 04:45, con el
- * mercado aun sin resetear.
+ *   Del 10 al 11/09/2026 estos crones llevaron UNA HORA DE
+ *   MENOS escrita a mano. La teoria era que cron-job.org aplica
+ *   CET siempre y no sigue el horario de verano, asi que lo
+ *   escrito ocurria una hora mas tarde.
  *
- * No hace falta acordarse: `avisoDelCambioDeHora()` lo detecta
- * solo, porque le pregunta a la base de zonas si Madrid sigue en
- * verano. Doctrina 35: un desfase NUNCA se escribe como +1 o +2.
+ *   ERA FALSA. Se dedujo de UN solo caso -un job que disparo a
+ *   una hora que no cuadraba- y el historial del dia siguiente
+ *   la desmintio de forma directa:
+ *
+ *       10/09  job "45,52 6" Europe/Madrid  ->  ciclo 07:52
+ *       11/09  job "45,50 3" Europe/Madrid  ->  disparos 03:45
+ *                                               y 03:50
+ *
+ *   El segundo es la medicion buena: Madrid SI se honra, y la
+ *   compensacion adelantaba los disparos una hora. La ventana
+ *   del reset se abrio con el mercado sin resetear.
+ *
+ *   Lo del 10/09 probablemente era otra cosa -ese job venia de
+ *   antes y pudo tener otra zona configurada- pero no se puede
+ *   probar y da igual: la medicion directa manda.
+ *
+ *   NO SE VUELVA A DEDUCIR ESTO DE UN SOLO CASO. Si algun dia un
+ *   disparo llega a una hora rara, eso es UNA observacion, no
+ *   una regla. La regla se mide con historial.
+ *
+ * QUE SE VIGILA AHORA
+ *
+ *   No el cambio de hora -no hay nada que revertir en octubre-
+ *   sino lo que de verdad importa: que un ciclo entre a una hora
+ *   que NO es ninguna de las configuradas, sea cual sea el
+ *   motivo. Lo hace `avisoDeDisparoFueraDeHora()`.
  */
 
-// Lo que queremos que ocurra, en hora de Madrid real.
+// Lo que hay puesto, tal cual, para poder enseñarlo.
 export const EXTERNOS_ESCRITOS = [
-  { madrid: "04:45", cron: "45 3 * * *", que: "ventana del reset" },
-  { madrid: "04:50", cron: "50 3 * * *", que: "ventana del reset" },
-  { madrid: "07:15", cron: "15 6 * * *", que: "tras el reset" }
+  { madrid: "04:45", cron: "45 4 * * *", que: "ventana del reset" },
+  { madrid: "04:50", cron: "50 4 * * *", que: "ventana del reset" },
+  { madrid: "07:15", cron: "15 7 * * *", que: "tras el reset" }
 ];
 
 // Hora de Madrid, en minutos desde medianoche.
 const EXTERNOS_MADRID = [4 * 60 + 45, 4 * 60 + 50, 7 * 60 + 15];
-
-// CET, en minutos sobre UTC. NO es "el desfase de Madrid" -ese
-// se le pide siempre a la base de zonas- sino la zona FIJA que
-// cron-job.org aplica pase lo que pase. CET es +1 por
-// definicion y no cambia nunca; lo que cambia es Madrid, y por
-// eso Madrid se pregunta y esto se escribe.
-const CET_DE_CRON_JOB = 60;
 
 // El reset del mercado: 07:00 de Madrid, medido sobre siete días
 // seguidos (las ofertas caducan a las 07:00 y la tanda nueva
@@ -431,49 +445,84 @@ export function cadenciaEnPalabras(ahora = new Date()) {
 }
 
 /**
- * El aviso del cambio de hora, o null si no toca.
+ * Un ciclo que entro a una hora que no es ninguna de las
+ * configuradas. `null` si encaja, o si no se puede saber.
  *
- * SINTOMA QUE ESTO EVITA
+ * QUE SUSTITUYE, Y POR QUE
  *
- *   Los crones externos llevan una hora de menos escrita a mano
- *   para compensar que cron-job.org aplica CET aunque le pongas
- *   "Europe/Madrid". El 25 de octubre de 2026 Madrid pasa a CET
- *   y esa compensacion sobra: los disparos se adelantarian una
- *   hora y la ventana del reset se abriria con el mercado sin
- *   resetear.
+ *   Aqui habia un `avisoDelCambioDeHora()` que preguntaba a la
+ *   base de zonas si Madrid seguia en verano, para avisar de que
+ *   el 25 de octubre habia que quitar la compensacion de los
+ *   crones externos. Esa compensacion no existe: la teoria que
+ *   la justificaba era falsa y el historial la desmintio -esta
+ *   contado arriba-. Asi que no hay nada que revertir en
+ *   octubre y ese aviso no vigilaba nada.
  *
- * COMO SE DETECTA
+ *   Lo que si hace falta es esto: que si un disparo llega a una
+ *   hora que no es la suya, se vea. SEA CUAL SEA EL MOTIVO —una
+ *   zona mal puesta, un cron tocado, un job duplicado—. No se
+ *   diagnostica la causa: se enseña la hora a la que entro, la
+ *   hora a la que tenia que entrar y la diferencia, y que la
+ *   mire una persona.
  *
- *   No por fecha ni por un `+1` escrito: se le PREGUNTA a la
- *   base de zonas cuanto va Madrid sobre UTC en este instante.
- *   Si ya no esta en verano, la compensacion sobra y se dice,
- *   con los crones que hay que poner. Doctrina 35.
+ * POR QUE NO DICE DE QUE ES CULPA
+ *
+ *   Porque la ultima vez que se dedujo una causa de un solo caso
+ *   costo la primera ventana del reset. Una observacion no es
+ *   una medicion.
  */
-export function avisoDelCambioDeHora(ahora = new Date()) {
+export function avisoDeDisparoFueraDeHora(ahora, fotoISO) {
   try {
-    const desfase = desfaseMadrid(ahora);
+    if (!fotoISO) return null;
 
-    // Sin base de zonas no se avisa de nada: no se sabe.
-    if (desfase == null) return null;
+    const foto = new Date(fotoISO);
 
-    // Mientras Madrid vaya por delante de CET -o sea, en
-    // verano- los crones escritos con una hora menos aciertan.
-    if (desfase > CET_DE_CRON_JOB) return null;
+    if (Number.isNaN(foto.getTime())) return null;
+
+    // Todos los disparos que podrian explicar esta foto.
+    const desde = new Date(foto.getTime() - 3 * 3600_000);
+    const hasta = new Date(foto.getTime() + 3 * 3600_000);
+
+    const todos = disparos(desde, hasta);
+
+    if (!todos.length) return null;
+
+    let cerca = null;
+
+    for (const t of todos) {
+      const d = Math.abs(t - foto.getTime());
+      if (cerca === null || d < cerca.distancia) {
+        cerca = { cuando: t, distancia: d };
+      }
+    }
+
+    const minutos = Math.round(cerca.distancia / 60000);
+
+    // El ciclo tarda en correr y publicar, y un `schedule` de
+    // GitHub se retrasa: por debajo de la gracia no hay nada que
+    // mirar.
+    if (minutos <= GRACIA_MINUTOS) return null;
+
+    const hhmm = (fecha) =>
+      fecha.toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/Madrid"
+      });
 
     return {
-      motivo: "FIN_DEL_HORARIO_DE_VERANO",
-      desfaseMadrid: desfase,
+      motivo: "DISPARO_FUERA_DE_HORA",
+      entro: hhmm(foto),
+      esperado: hhmm(cerca.cuando),
+      minutos,
       texto:
-        "Madrid ya no está en horario de verano, así que la hora " +
-        "de menos que llevan los crones externos sobra: se están " +
-        "disparando una hora antes de lo que queremos.",
-      cambiar: EXTERNOS_ESCRITOS.map((d) => ({
-        ...d,
-        nuevo: d.cron.replace(
-          /^(\d+(?:,\d+)*) (\d+)/,
-          (_, min, hora) => `${min} ${Number(hora) + 1}`
-        )
-      }))
+        `El ciclo entró a las ${hhmm(foto)} y el disparo más ` +
+        `cercano que hay configurado es el de las ` +
+        `${hhmm(cerca.cuando)}: ${minutos} minutos de ` +
+        `diferencia. Puede ser un retraso, una zona mal puesta ` +
+        `o un job de más — esto no lo distingue, solo dice que ` +
+        `no encaja.`,
+      configurados: EXTERNOS_ESCRITOS
     };
   } catch {
     return null;

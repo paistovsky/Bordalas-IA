@@ -28,17 +28,24 @@ CONSECUENCIA
 
 EL OTRO RELOJ: LOS CRONES EXTERNOS
 
-    cron-job.org aplica CET aunque le pongas "Europe/Madrid", asi
-    que los disparos llevan escrita UNA HORA DE MENOS para que
-    ocurran a la hora real que queremos.
+    Del 10 al 11/09/2026 llevaron UNA HORA DE MENOS escrita a
+    mano, sobre la teoria de que cron-job.org aplica CET aunque
+    le pongas "Europe/Madrid".
 
-    El 25/10/2026, al acabar el horario de verano, esa
-    compensacion sobra y los disparos se adelantarian una hora:
-    la ventana del reset se abriria con el mercado sin resetear.
+    ERA FALSA. Se dedujo de UN solo caso y el historial del dia
+    siguiente la desmintio: con el job en "45,50 3" los disparos
+    salieron a las 03:45 y 03:50. Madrid SI se honra, la
+    compensacion los adelantaba una hora, y la primera ventana
+    del reset se abrio con el mercado sin resetear.
 
-    No se recuerda: se detecta. Se le pregunta a la base de zonas
-    si Madrid sigue en verano. Doctrina 35, y este es el caso que
-    la motivo.
+    Ya no hay compensacion. Lo que se vigila aqui no es el
+    cambio de hora -no hay nada que revertir en octubre- sino
+    que un ciclo entre a una hora que NO es ninguna de las
+    configuradas, sea cual sea el motivo.
+
+    UN SOLO CASO NO ES UNA MEDICION. Esa es la leccion, y esta
+    guardia existe para que no se vuelva a montar una regla
+    sobre n=1.
 """
 
 from __future__ import annotations
@@ -258,65 +265,82 @@ def test_el_ciclo_no_se_pone_rancio_antes_de_tiempo() -> None:
 # ============================================================
 
 
-def test_la_compensacion_de_cron_job_esta_escrita_donde_se_ve() -> None:
+def test_no_queda_compensacion_en_los_crones_externos() -> None:
     """
-    Una compensacion a mano que solo vive en la cabeza de alguien
-    es una bomba con fecha. Va junto a la definicion de los
-    relojes, con la fecha en que caduca.
+    LA TEORIA FALSA, Y SU RASTRO.
+
+    Los crones externos NO llevan compensacion: la hora escrita
+    es la hora de Madrid en que ocurren. Lo que si tiene que
+    quedar es la explicacion de por que hubo una y como se
+    desmintio, para que nadie la vuelva a deducir de un caso.
     """
 
     relojes = _lee(RELOJES)
 
-    assert "cron-job.org" in relojes, (
-        "la compensacion de los crones externos no esta escrita "
-        "donde vive la definicion de los relojes"
-    )
-
-    assert "25 DE OCTUBRE DE 2026" in relojes, (
-        "no se dice cuando caduca la compensacion"
-    )
-
-    for cron in ("45 3 * * *", "50 3 * * *", "15 6 * * *"):
+    # Los de verdad, sin compensar.
+    for cron in ("45 4 * * *", "50 4 * * *", "15 7 * * *"):
         assert cron in relojes, (
             f"falta el cron externo `{cron}` tal cual esta puesto"
         )
 
+    # Y los compensados NO pueden volver como configuracion.
+    codigo = _sin_comentarios(relojes)
 
-def test_el_bot_avisa_del_cambio_de_hora() -> None:
+    for viejo in ("45 3 * * *", "50 3 * * *", "15 6 * * *"):
+        assert viejo not in codigo, (
+            f"ha vuelto el cron compensado `{viejo}`: eso "
+            f"adelanta el disparo una hora y abre la ventana con "
+            f"el mercado sin resetear"
+        )
+
+    # El rastro, en cambio, tiene que estar.
+    assert "ERA FALSA" in relojes, (
+        "se ha borrado que la compensacion se probo y no valia: "
+        "dentro de tres meses alguien la deduce otra vez"
+    )
+
+    assert "03:45" in relojes and "07:52" in relojes, (
+        "falta la medicion que desmintio la teoria"
+    )
+
+
+def test_el_bot_avisa_si_el_ciclo_no_entra_a_su_hora() -> None:
     """
-    LO QUE EVITA TENER QUE ACORDARSE.
+    LO QUE SUSTITUYE AL AVISO DEL CAMBIO DE HORA.
 
-    Se ejecuta de verdad `avisoDelCambioDeHora` con dos fechas:
-    una de verano -no avisa- y una de invierno -avisa, y dice que
-    crones poner-.
+    Aquel vigilaba una compensacion que no existe. Este vigila lo
+    que si importa: que un ciclo entre a una hora que no es
+    ninguna de las configuradas.
 
-    Se le pregunta a la base de zonas. Ni una fecha codificada ni
-    un `+1` escrito: doctrina 35.
+    Se ejecuta de verdad, con dos fotos: una en hora -no avisa- y
+    una desplazada -avisa, y dice cuanto-.
+
+    Y NO diagnostica la causa. Esa es la mitad que importa: la
+    ultima vez que se dedujo una causa de un solo caso costo la
+    primera ventana del reset.
     """
 
     if shutil.which("node") is None:
         print("     AVISO: sin `node` no se puede ejecutar.")
         return
 
-    guion = (
-        'import { avisoDelCambioDeHora } from '
-        '"./src/lib/relojes.js";\n'
-        'const verano = avisoDelCambioDeHora('
-        'new Date("2026-09-10T12:00:00Z"));\n'
-        'const invierno = avisoDelCambioDeHora('
-        'new Date("2026-11-15T12:00:00Z"));\n'
-        'console.log(JSON.stringify({\n'
-        '  verano: verano === null,\n'
-        '  invierno: invierno && invierno.motivo,\n'
-        '  desfase: invierno && invierno.desfaseMadrid,\n'
-        '  crones: invierno && invierno.cambiar.map('
-        '(c) => c.nuevo)\n'
-        '}));\n'
-    )
+    guion = """
+import { avisoDeDisparoFueraDeHora } from "./src/lib/relojes.js";
+const ahora = new Date("2026-09-11T05:07:00Z");
+const enHora = avisoDeDisparoFueraDeHora(ahora, "2026-09-11T02:47:00Z");
+const fuera = avisoDeDisparoFueraDeHora(ahora, "2026-09-11T01:46:00Z");
+console.log(JSON.stringify({
+  enHora: enHora === null,
+  motivo: fuera && fuera.motivo,
+  minutos: fuera && fuera.minutos,
+  texto: fuera && fuera.texto,
+  configurados: fuera && fuera.configurados.map((c) => c.cron)
+}));
+"""
 
     carpeta = RAIZ / "dashboard-v8"
 
-    fichero = carpeta / "_aviso_cambio_hora.mjs"
+    fichero = carpeta / "_aviso_fuera_de_hora.mjs"
 
     try:
         fichero.write_text(guion, encoding="utf-8")
@@ -341,24 +365,28 @@ def test_el_bot_avisa_del_cambio_de_hora() -> None:
 
     visto = json.loads(salida.stdout.strip().splitlines()[-1])
 
-    assert visto["verano"] is True, (
-        "avisa en pleno verano, cuando la compensacion es "
-        "correcta: un aviso que salta siempre no se lee"
+    assert visto["enHora"] is True, (
+        "avisa con un ciclo que entro a su hora: una alarma que "
+        "salta siempre no se lee"
     )
 
-    assert visto["invierno"] == "FIN_DEL_HORARIO_DE_VERANO", visto
+    assert visto["motivo"] == "DISPARO_FUERA_DE_HORA", visto
 
-    assert visto["desfase"] == 60, (
-        f"Madrid en invierno son +60 y la base de zonas dice "
-        f"{visto['desfase']}"
-    )
+    assert visto["minutos"] > 12, visto
 
-    # Y dice EXACTAMENTE los crones que hay que poner.
-    assert visto["crones"] == [
+    # Los crones que enseña son los de verdad, sin compensar.
+    assert visto["configurados"] == [
         "45 4 * * *",
         "50 4 * * *",
         "15 7 * * *",
     ], visto
+
+    # Y no le echa la culpa a nadie.
+    for causa in ("CET", "horario de verano", "cron-job"):
+        assert causa not in visto["texto"], (
+            f"el aviso diagnostica una causa (`{causa}`) y no "
+            f"puede: con una observacion no se sabe"
+        )
 
 
 def test_ningun_desfase_horario_escrito_a_mano() -> None:
@@ -414,8 +442,8 @@ TESTS = [
     test_la_cadencia_sale_del_cron,
     test_ningun_texto_lleva_la_cadencia_escrita_a_mano,
     test_el_ciclo_no_se_pone_rancio_antes_de_tiempo,
-    test_la_compensacion_de_cron_job_esta_escrita_donde_se_ve,
-    test_el_bot_avisa_del_cambio_de_hora,
+    test_no_queda_compensacion_en_los_crones_externos,
+    test_el_bot_avisa_si_el_ciclo_no_entra_a_su_hora,
     test_ningun_desfase_horario_escrito_a_mano,
 ]
 

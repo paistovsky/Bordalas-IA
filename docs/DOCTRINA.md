@@ -782,7 +782,7 @@ llenó una vez, y se vuelve a llenar sola en cuanto nadie mira.
 
 ### 35. Una hora sin zona es un dato con dos nombres
 
-*(Cerrado por el dueño el 10/09/2026, después de tres fallos en un día.)*
+*(Cerrado por el dueño el 10/09/2026. Corregido el 11/09: eran **dos**, no tres.)*
 
 **Toda marca de tiempo que cruce un límite —fichero, red, pantalla— lleva su zona
 pegada, o se normaliza justo ahí.** No hay tercera opción, y «se sobreentiende
@@ -792,13 +792,18 @@ que es de Madrid» no es llevarla pegada.
 parecen correctos. Ese es el problema: **no falla ruidosamente**. Da una respuesta
 plausible y equivocada, y sobrevive a todas las pruebas que no midan el desfase.
 
-**Los tres del 10/09**, mismo error en tres capas:
+**Los dos del 10/09**, mismo error en dos capas:
 
 | dónde | qué pasó |
 |---|---|
-| **El cron externo** | se puso en hora de Madrid contra una ventana calculada en UTC. CET contra CEST: la ventana del reset no se abrió **en dos semanas** y nadie se enteró |
 | **El cálculo interno** | `VENTANA_MINUTOS` comparaba contra una hora de pared sin decir de dónde |
 | **`meta.generated_at`** | se publica en hora de Madrid **sin zona**. Leerlo como UTC lo adelanta dos horas: la cuenta atrás habría dicho «el ciclo llegó» cuando no ha llegado |
+
+> **Aquí había un tercero, y era falso.** Se dio por hecho que `cron-job.org`
+> aplicaba CET aunque le pusieras `Europe/Madrid`. **No es verdad**, y la
+> corrección está abajo. Se queda escrito porque una regla que se apoya en un
+> ejemplo inventado enseña mal, y porque el modo en que se coló importa más que
+> el error.
 
 **En la práctica:**
 
@@ -811,24 +816,46 @@ plausible y equivocada, y sobrevive a todas las pruebas que no midan el desfase.
 - Un nombre de variable **no** documenta una zona. `ahora_madrid` es una promesa,
   no una garantía.
 
-**El caso que la motivó, y que sigue vivo:** `cron-job.org` aplica **CET siempre**,
-aunque le pongas `Europe/Madrid`. No sigue el horario de verano. Así que los tres
-disparos externos llevan **una hora de menos escrita a mano** para que ocurran a la
-hora real que queremos:
+### La compensación que no hacía falta — y la lección, que es del dueño
+
+Del 10 al 11/09 los tres disparos externos llevaron **una hora de menos escrita a
+mano**, sobre esta teoría: *«cron-job.org aplica CET siempre, aunque le pongas
+Europe/Madrid»*.
+
+**Era falsa.** Se dedujo de **un solo caso** —un job que disparó a una hora que no
+cuadraba— y el historial del día siguiente la desmintió de forma directa:
 
 ```
-escrito  45,50 3 * * *   ->  dispara 04:45 y 04:50 reales   (ventana del reset)
-escrito  15 6 * * *      ->  dispara 07:15 reales           (tras el reset)
+10/09   job "45,52 6"  Europe/Madrid   ->  ciclo a las 07:52
+11/09   job "45,50 3"  Europe/Madrid   ->  disparos a las 03:45 y 03:50
 ```
 
-**El 25 de octubre de 2026** Madrid vuelve a CET, esa compensación sobra, y los
-disparos se adelantarían una hora: la ventana se abriría **con el mercado sin
-resetear**.
+El segundo es la medición buena: **Madrid sí se honra.** La compensación adelantaba
+los disparos una hora, y **la primera ventana del reset se abrió con el mercado sin
+resetear**. Lo del 10/09 probablemente era otra cosa —ese job venía de antes y pudo
+tener otra zona— pero no se puede probar y da igual: la medición directa manda.
 
-Eso no se recuerda, **se detecta**: `avisoDelCambioDeHora()` le pregunta a la base
-de zonas si Madrid sigue en verano y, cuando deje de estarlo, saca en rojo los
-crones exactos que hay que poner. La compensación vive escrita junto a la
-definición de los relojes, no en un comentario suelto.
+Los crones están ya sin compensación: `45,50 4` y `15 7`, `Europe/Madrid`.
+
+> ### Un solo caso no es una medición
+>
+> **Palabras del dueño, 11/09/2026:** *«Monté una compensación sobre n=1 y me costó
+> la primera ventana.»*
+>
+> Un caso aislado es una **observación**: dice que algo pasó, no por qué. Para
+> convertirlo en regla hace falta historial, y hasta entonces lo honesto es dejar
+> el sistema como está y seguir mirando.
+>
+> Esto vale para todo lo demás de este documento: cada número medido lleva su `n`
+> escrito al lado —12 de 12 estados, 4 jornadas × 7 managers, 85 fotos— y no es
+> adorno. Es la diferencia entre una regla y una corazonada con suerte.
+
+Lo que se vigila ahora no es el cambio de hora —no hay nada que revertir en
+octubre— sino lo que de verdad importa: **que un ciclo entre a una hora que no es
+ninguna de las configuradas**, sea cual sea el motivo.
+`avisoDeDisparoFueraDeHora()` enseña la hora a la que entró, la hora a la que
+tenía que entrar y la diferencia, **y no diagnostica la causa**. Precisamente
+porque la última vez que se dedujo una causa de un solo caso salió cara.
 
 **Y el que se cazó escribiendo esto:** `desfaseMadrid` tenía un `return 120` de
 reserva para cuando `Intl` fallase, *«que es lo que rige diez meses al año»*. Por
