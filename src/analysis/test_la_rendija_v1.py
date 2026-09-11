@@ -46,12 +46,16 @@ from src.actions.escaparate_executor import (
     viajes_sin_listar,
 )
 from src.analysis.la_rendija import (
+    APAGADO_ENV,
     CUPO_DE_ESTRENO,
     CUPO_PLENO,
     ESCRITURAS_POR_VUELTA,
     VIAJES_PARA_JUZGAR,
     a_quien_pujar,
+    con_margen,
     cupo_del_reset,
+    en_vivo,
+    margen_esperado,
     permiso,
     ritmo_de_los_candidatos,
     se_apaga_sola,
@@ -599,6 +603,220 @@ def test_caben_los_que_diga_el_cupo() -> None:
     assert a_quien_pujar(candidatos, cuantos=0)["elegidos"] == []
 
 
+# ============================================================
+# 6. EL MARGEN ESPERADO — EL NUMERO QUE DEFINE UN VIAJE
+# ============================================================
+
+
+STARFELT = {
+    "player_id": 1,
+    "name": "Starfelt",
+    "position": 2,          # defensa
+    "market_price": 2_150_000,
+}
+
+
+def test_el_caso_de_starfelt() -> None:
+    """
+    EL CASO QUE MOTIVA EL NUMERO.
+
+    Defensa, 2.150.000, CAYENDO un 2,01 %/dia. Con la prima
+    mediana de la liga la operacion no llega al suelo de venta;
+    con la prima de su posicion, si.
+
+    Y eso es exactamente lo que separa este filtro de la
+    compuerta de ritmo: aquella lo habria tirado por caer. Este
+    lo deja entrar porque, cayendo y todo, la operacion gana.
+    """
+
+    visto = margen_esperado(
+        STARFELT, prima_de_puja=0.28, ritmo_diario=-2.01
+    )
+
+    assert visto["available"], visto
+
+    # Con la prima de SU POSICION: pasa, y pasa el suelo.
+    assert 1.2 < visto["margen_percent"] < 1.4, visto
+
+    assert visto["llega_al_suelo"] is True, visto
+
+    # Con la mediana de la liga: positivo, pero NO llega al
+    # suelo de venta. Ese es el caso del dueno.
+    assert 0 < visto["margen_con_mediana_percent"] < 1.0, visto
+
+    # El estimador que aplica es el de su posicion, y se ve cual
+    # es: defensa.
+    assert visto["prima_de_reventa_percent"] == 3.67, visto
+
+
+def test_el_margen_no_es_la_compuerta_de_ritmo() -> None:
+    """
+    La compuerta exigia que el precio SUBIERA. Esto exige que la
+    OPERACION GANE. No es lo mismo, y hay casos que lo separan en
+    las dos direcciones.
+    """
+
+    # CAE y entra: la prima de su posicion compensa la caida.
+    cayendo = margen_esperado(
+        STARFELT, prima_de_puja=0.28, ritmo_diario=-2.01
+    )
+
+    assert cayendo["gana"] is True, cayendo
+
+    # SUBE y no entra: una prima de puja alta se come la subida.
+    subiendo = margen_esperado(
+        {**STARFELT, "position": 4},   # delantero, +1,80 %
+        prima_de_puja=8.0,
+        ritmo_diario=+1.0,
+    )
+
+    assert subiendo["gana"] is False, subiendo
+
+
+def test_un_margen_negativo_no_entra() -> None:
+    """El unico filtro que anade este carril."""
+
+    visto = con_margen(
+        [
+            {**STARFELT, "player_id": 1, "name": "Gana"},
+            {
+                "player_id": 2,
+                "name": "Pierde",
+                "position": 4,
+                "market_price": 2_000_000,
+            },
+        ],
+        prima_de_puja=8.0,
+        rates={
+            1: {"rate_percent_per_day": 10.0},
+            2: {"rate_percent_per_day": -5.0},
+        },
+    )
+
+    assert visto["available"], visto
+
+    nombres = [x["margen"]["name"] for x in visto["entran"]]
+
+    assert nombres == ["Gana"], visto
+
+    assert visto["fuera"], visto
+
+    # Regla 24: si nadie quedara fuera, esto no probaria el
+    # filtro.
+    assert visto["fuera"][0]["margen_percent"] < 0, visto
+
+
+def test_sin_ritmo_se_usa_el_supuesto_y_se_dice() -> None:
+    """
+    5 de 11 candidatos no traen ritmo. Se usa el mediano del
+    mercado, pero la fila queda MARCADA: un margen que descansa
+    en un supuesto no es lo mismo que uno medido, y hay que poder
+    juzgarlos aparte despues.
+    """
+
+    con_dato = margen_esperado(
+        STARFELT, prima_de_puja=0.28, ritmo_diario=-2.01
+    )
+
+    assert con_dato["supuesto"] is False, con_dato
+
+    sin_dato = margen_esperado(
+        STARFELT,
+        prima_de_puja=0.28,
+        ritmo_diario=None,
+        ritmo_supuesto=0.0,
+    )
+
+    assert sin_dato["supuesto"] is True, sin_dato
+
+    assert "SUPUESTO" in sin_dato["reason"], sin_dato
+
+    # Y sin ritmo NI supuesto no se inventa un margen.
+    a_ciegas = margen_esperado(
+        STARFELT, prima_de_puja=0.28, ritmo_diario=None
+    )
+
+    assert a_ciegas["available"] is False, a_ciegas
+
+    assert a_ciegas["margen_percent"] is None, a_ciegas
+
+
+def test_se_publica_si_llega_al_suelo_de_venta() -> None:
+    """
+    EL HUECO QUE SE VE AL MEDIRLO.
+
+    El suelo de venta es coste + 1 %, y el margen es
+    oferta/coste - 1. Asi que un margen POSITIVO pero por debajo
+    del 1 % es una operacion que espera una oferta que nosotros
+    mismos rechazariamos: el viaje entra y no puede cerrarse.
+
+    El filtro pedido es "negativo fuera", y no se cambia. Pero
+    esto se PUBLICA para que la diferencia se vea.
+    """
+
+    from src.analysis.salida_del_viaje import SUELO_DEL_VIAJE
+
+    justo = margen_esperado(
+        {**STARFELT, "position": 4},
+        prima_de_puja=1.0,
+        ritmo_diario=0.0,
+    )
+
+    assert justo["available"], justo
+
+    # +1,80 % de delantero contra +1 % de puja: ~+0,79 %.
+    assert 0 < justo["margen_percent"] < (
+        SUELO_DEL_VIAJE * 100
+    ), justo
+
+    assert justo["gana"] is True, justo
+
+    assert justo["llega_al_suelo"] is False, justo
+
+    assert "no llega al suelo" in justo["reason"], justo
+
+
+# ============================================================
+# 7. ARMADA, Y APAGABLE SIN DESPLEGAR
+# ============================================================
+
+
+def test_la_rendija_esta_armada() -> None:
+    """
+    Armada el 11/09/2026, con el dueno delante y despues de leer
+    el ensayo en seco.
+    """
+
+    import os
+
+    antes = os.environ.get(APAGADO_ENV)
+
+    try:
+        os.environ.pop(APAGADO_ENV, None)
+
+        assert en_vivo() is True, (
+            "la rendija ya no esta armada"
+        )
+
+        # Y se apaga SIN DESPLEGAR.
+        os.environ[APAGADO_ENV] = "1"
+
+        assert en_vivo() is False, (
+            f"`{APAGADO_ENV}=1` ya no apaga el carril: el dia que "
+            f"haya que pararla habria que esperar a un commit"
+        )
+
+        assert (
+            permiso(ahora=DE_DIA)["en_vivo"] is False
+        ), "el permiso no obedece al interruptor"
+
+    finally:
+        if antes is None:
+            os.environ.pop(APAGADO_ENV, None)
+        else:
+            os.environ[APAGADO_ENV] = antes
+
+
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
@@ -618,6 +836,12 @@ TESTS = [
     test_un_viaje_por_debajo_del_suelo_no_se_vende,
     test_se_prefieren_defensas_y_porteros,
     test_caben_los_que_diga_el_cupo,
+    test_el_caso_de_starfelt,
+    test_el_margen_no_es_la_compuerta_de_ritmo,
+    test_un_margen_negativo_no_entra,
+    test_sin_ritmo_se_usa_el_supuesto_y_se_dice,
+    test_se_publica_si_llega_al_suelo_de_venta,
+    test_la_rendija_esta_armada,
 ]
 
 

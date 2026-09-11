@@ -4542,7 +4542,9 @@ def build_dashboard_state() -> dict:
     # los candidatos. No decide nada y no escribe nada.
     try:
         from src.analysis.la_rendija import (
+            con_margen,
             cupo_del_reset,
+            en_vivo,
             ritmo_de_los_candidatos,
             se_apaga_sola,
         )
@@ -4569,6 +4571,12 @@ def build_dashboard_state() -> dict:
             _cierres = []
 
         _cupo = cupo_del_reset(_cierres)
+
+        from src.analysis.market_rate_gate import (
+            build_market_rates,
+        )
+
+        _rates = build_market_rates()
 
         from src.actions.escaparate_executor import (
             viajes_sin_listar,
@@ -4610,14 +4618,36 @@ def build_dashboard_state() -> dict:
             and not t.get("outside_computer_market")
         ]
 
+        # LA PRIMA DE PUJA, de la curva calibrada en vivo. No se
+        # escribe aqui: sale del modelo de puja de los rivales.
+        _prima = (
+            (
+                (acquisition or {}).get("premium_model") or {}
+            ).get("curve")
+            or [[1.0, 0]]
+        )[0][0]
+
+        _margen = con_margen(
+            _candidatos,
+            prima_de_puja=(float(_prima) - 1.0) * 100.0,
+            rates=_rates,
+        )
+
         rendija_ahora = {
             "available": True,
             "cupo": _cupo["cupo"],
             "cupo_estado": _cupo["estado"],
             "cupo_reason": _cupo["reason"],
             "apagado": se_apaga_sola(_cierres),
-            "ritmo": ritmo_de_los_candidatos(_candidatos),
-            "en_vivo": False,
+            "ritmo": ritmo_de_los_candidatos(
+                _candidatos, rates=_rates
+            ),
+
+            # EL MARGEN ESPERADO, que es el numero que define un
+            # viaje. Quien no gana dinero no entra en la lista.
+            "margen": _margen,
+
+            "en_vivo": en_vivo(),
 
             # LA GUARDIA CLAVE, como dato: un jugador marcado
             # VIAJE que termina el ciclo SIN LISTAR. Comprado

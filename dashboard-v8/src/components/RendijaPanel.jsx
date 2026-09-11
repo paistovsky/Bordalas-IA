@@ -54,6 +54,19 @@ export default function RendijaPanel({ data }) {
   const apagado = rendija.apagado || {};
   const filas = ritmo.filas || [];
 
+  // El margen esperado de cada fila, por id. Se publica aparte
+  // porque el filtro vive en Python y aqui solo se pinta.
+  const margen = rendija.margen || {};
+
+  const porId = new Map(
+    (margen.entran || []).map((x) => [
+      x.margen.player_id,
+      x.margen
+    ])
+  );
+
+  const margenDe = (fila) => porId.get(fila.player_id) || null;
+
   return (
     <section className="pan">
       <div className="pan-head">
@@ -136,7 +149,7 @@ export default function RendijaPanel({ data }) {
                 <th className="n">PRECIO</th>
                 <th>VIENE</th>
                 <th className="n">%/DÍA</th>
-                <th className="n">DÍAS</th>
+                <th className="n">MARGEN</th>
               </tr>
             </thead>
             <tbody>
@@ -167,8 +180,29 @@ export default function RendijaPanel({ data }) {
                             f.rate_percent_per_day
                           }`}
                     </td>
-                    <td className="n sub">
-                      {f.trend_days ?? "—"}
+                    {/* EL MARGEN ESPERADO, que es el número
+                        que decide si el viaje gana dinero. En
+                        rojo si no llega al suelo de venta: esa
+                        operación espera una oferta que nosotros
+                        mismos rechazaríamos. */}
+                    <td className="n">
+                      {margenDe(f) == null ? (
+                        <span className="sub">—</span>
+                      ) : (
+                        <b
+                          className={
+                            margenDe(f).llega_al_suelo
+                              ? "up"
+                              : "down"
+                          }
+                        >
+                          {margenDe(f).margen_percent > 0
+                            ? "+"
+                            : ""}
+                          {margenDe(f).margen_percent.toFixed(2)}%
+                          {margenDe(f).supuesto ? " *" : ""}
+                        </b>
+                      )}
                     </td>
                   </tr>
                 );
@@ -178,8 +212,28 @@ export default function RendijaPanel({ data }) {
         </div>
       )}
 
+      <div className="sub" style={{ marginTop: 6 }}>
+        {margen.reason}
+        {margen.ritmo_supuesto != null && (
+          <>
+            {" "}· <b>*</b> usa el ritmo supuesto (mediano del
+            mercado, {margen.ritmo_supuesto > 0 ? "+" : ""}
+            {margen.ritmo_supuesto} %/día), no medido.
+          </>
+        )}
+      </div>
+
       <p className="note" style={{ textAlign: "left" }}>
-        Esta columna <b>no decide nada</b>: la compuerta de ritmo
+        <b>MARGEN</b> = oferta esperada / coste − 1, con la prima
+        de reventa de <b>su posición</b> (defensa +3,67 · portero
+        +3,26 · medio +2,85 · delantero +1,80). En rojo si no
+        llega al suelo de venta: esa operación espera una oferta
+        que nosotros mismos rechazaríamos. Quien tiene margen
+        negativo <b>no entra en la lista</b>.
+      </p>
+
+      <p className="note" style={{ textAlign: "left" }}>
+        La columna <b>VIENE</b> no decide nada: la compuerta de ritmo
         se quitó a propósito porque el negocio es el spread, no la
         rampa. Está aquí para ver qué se está comprando de verdad
         mientras pasa — si todos vinieran cayendo, el experimento
