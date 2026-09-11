@@ -423,6 +423,7 @@ def decide_incoming_offer(
     recovery_selected_offer_ids: set[int],
     rival_intelligence: dict | None = None,
     competitive_context: dict | None = None,
+    viaje: dict | None = None,
 ) -> dict:
 
     offer_id = offer.get("offer_id")
@@ -441,6 +442,102 @@ def decide_incoming_offer(
         offer.get("market_value", 0)
         or 0
     )
+
+    # ========================================================
+    # UN VIAJE SALE DE ESTA COLA ANTES DE ENTRAR
+    # ========================================================
+    #
+    # LO QUE PASABA SI NO
+    #
+    #     Mas abajo hay esta regla, que para la plantilla esta
+    #     bien y no se toca:
+    #
+    #         speculation_score >= 62 and price_increment > 0
+    #             -> HOLD_OFFER
+    #
+    #     Para un VIAJE es la pregunta equivocada, y ademas la
+    #     peor posible: un jugador comprado para revender tiene,
+    #     por construccion, señal especulativa alta y precio
+    #     subiendo. La regla lo retiene JUSTO cuando el viaje
+    #     esta saliendo bien.
+    #
+    #     La compra la decide un motor que no vende, y la oferta
+    #     la juzgaba otro que no sabe que era un viaje. Por eso
+    #     las posiciones de revender se quedaban encalladas.
+    #
+    # LA UNICA PREGUNTA DE UN VIAJE
+    #
+    #         ¿la oferta supera coste x (1 + suelo)?
+    #
+    #     Nada mas. Ni la calidad de la prima, ni el score
+    #     estrategico, ni la señal especulativa.
+    #
+    #     Las cinco prohibiciones -no tocar a quien no lleva la
+    #     marca, no vender a un titular, no dejarnos con un solo
+    #     portero, no vender bajo coste, el cupo- viven en
+    #     `que_cobrar` y se aplican ANTES. Esto solo contesta el
+    #     precio.
+    if viaje:
+
+        from src.analysis.salida_del_viaje import (
+            SUELO_DEL_VIAJE,
+            precio_de_salida,
+        )
+
+        coste = int(viaje.get("cost") or 0)
+
+        suelo = precio_de_salida(coste, SUELO_DEL_VIAJE)
+
+        pasa = bool(coste > 0 and amount >= suelo)
+
+        def _euros_viaje(valor) -> str:
+            try:
+                return f"{int(valor):,}".replace(",", ".")
+            except (TypeError, ValueError):
+                return "?"
+
+        if pasa:
+            motivo = (
+                f"VIAJE: la oferta de {_euros_viaje(amount)} EUR "
+                f"supera el suelo de {_euros_viaje(suelo)} "
+                f"(coste {_euros_viaje(coste)} + "
+                f"{SUELO_DEL_VIAJE * 100:.0f} %). Se cobra."
+            )
+
+        elif coste > 0:
+            motivo = (
+                f"VIAJE: la oferta de {_euros_viaje(amount)} EUR "
+                f"no llega al suelo de {_euros_viaje(suelo)} "
+                f"(coste {_euros_viaje(coste)} + "
+                f"{SUELO_DEL_VIAJE * 100:.0f} %)."
+            )
+
+        else:
+            motivo = (
+                "VIAJE sin coste conocido: no se puede juzgar "
+                "contra el suelo, asi que no se vende."
+            )
+
+        return {
+            "offer_id": offer_id,
+            "player_id": player_id,
+            "player_name": offer.get("player_name"),
+            "amount": amount,
+            "market_value": market_value,
+            "decision": "ACCEPT_TRIP" if pasa else "HOLD_TRIP",
+            "confidence": 99,
+            "automatic": False,
+            "observer_only": OBSERVER_ONLY,
+            "decision_authority": "VIAJE",
+            "trip": {
+                "cost": coste,
+                "floor": suelo,
+                "profit": (amount - coste) if coste else None,
+            },
+            "reasons": [motivo],
+            "raw_offer": offer,
+        }
+
 
     # LA PRIMA VALIA CERO SIEMPRE (18/08/2026)
     #

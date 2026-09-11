@@ -219,6 +219,7 @@ TESTS = [
     #     apuntada en DEUDA para que no se quede aqui de adorno.
     # "src.analysis.test_la_pantalla_pinta_v1",
     "src.analysis.test_la_caja_de_la_liga_v1",
+    "src.analysis.test_la_rendija_v1",
     "src.analysis.test_los_relojes_v1",
     "src.analysis.test_ojeador_fuentes_v1",
     "src.analysis.test_ojeador_emparejamiento_v1",
