@@ -249,6 +249,15 @@ def build_bid_exposure(
                     "player_ids": pedidos,
                     "status": estado or "waiting",
                     "until": oferta.get("until"),
+
+                    # CUANDO SE PUSO (12/09/2026)
+                    #
+                    #     No viajaba, y es el `placed_at` de la
+                    #     puja. Sin el, el libro que recoge pujas
+                    #     vivas tendria que inventarse la hora — y
+                    #     de esa hora depende cual es el reset que
+                    #     la resuelve.
+                    "created": oferta.get("created"),
                     "counterparty_id": (
                         safe_int(destino_c.get("id")) or None
                     ),
@@ -286,6 +295,15 @@ def build_bid_exposure(
                     "player_ids": _requested_player_ids(oferta),
                     "status": estado or "waiting",
                     "until": oferta.get("until"),
+
+                    # CUANDO SE PUSO (12/09/2026)
+                    #
+                    #     Es el `placed_at` de la puja. Sin el, el
+                    #     libro que recoge pujas vivas del tablon
+                    #     tendria que inventarse la hora — y de
+                    #     esa hora depende cual es el reset que la
+                    #     resuelve.
+                    "created": oferta.get("created"),
 
                     "counterparty_id": (
                         safe_int(destino.get("id")) or None

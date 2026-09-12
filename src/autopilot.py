@@ -4264,6 +4264,14 @@ def run_cycle(
         #
         #     O la tienes o no la tienes.
         roster=snapshot.get("my_team"),
+
+        # LA FOTO, PARA RECOGER LO QUE EL LIBRO NO ANOTO.
+        #
+        #     Una puja viva que el tablon publica y el libro no
+        #     tiene se anota al VERLA, no al hacerla. Asi entran
+        #     las de una version anterior, las hechas a mano y
+        #     las que fallaron al apuntarse.
+        snapshot=snapshot,
     )
 
     if bid_outcomes.get("lost_with_margin"):

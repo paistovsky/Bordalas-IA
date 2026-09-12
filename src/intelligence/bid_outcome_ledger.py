@@ -90,6 +90,16 @@ def save_ledger(libro: dict, path: Path | None = None) -> bool:
         return False
 
 
+def safe_int(value, default: int = 0) -> int:
+    """Un entero o el defecto. Nunca lanza."""
+
+    try:
+        return int(value or 0)
+
+    except (TypeError, ValueError):
+        return default
+
+
 def _clave(player_id: int, puesta_en: str) -> str:
     return f"{int(player_id)}:{puesta_en}"
 
@@ -336,6 +346,323 @@ def _en_la_plantilla(roster) -> set:
     # tratarla como "no tiene a nadie" marcaria TODO como
     # perdido. Sin plantilla, no se sabe.
     return ids or None
+
+
+# ============================================================
+# EL LIBRO RECOGE LO QUE VE
+# ============================================================
+#
+# SINTOMA (12/09/2026, noche)
+#
+#     Una puja viva por Trent de 2.760.000, puesta a las 16:45
+#     con el codigo de antes de que el carril aprendiera a
+#     anotar. No estaba en ningun libro, y se resolvia a las
+#     07:00 del dia siguiente: el primer viaje del carril se
+#     habria cerrado sin quedar registrado.
+#
+#     Anotar AL PUJAR no la recoge. Ya se pujo.
+#
+# LA REGLA
+#
+#     Si el tablon publica una puja viva nuestra que no esta en
+#     el libro, EL LIBRO LA ANOTA. Con el importe del tablon, no
+#     con el que el codigo pujaria hoy.
+#
+#     Es mas honesto que anotar al pujar: el libro se llena de lo
+#     que OCURRIO, no de lo que el codigo creyo hacer. Una puja
+#     hecha a mano, una puesta por una version anterior o una que
+#     fallo al apuntarse entran igual.
+#
+# EL ORIGEN, SOLO SI SE PUEDE PROBAR
+#
+#     De una puja recogida del tablon no se sabe de que via
+#     salio. Se marca DESCONOCIDO salvo que haya prueba: el libro
+#     del carril, que se escribe en el mismo instante en que se
+#     puja. Inventar el origen es peor que no tenerlo — el dia
+#     que se comparen las dos vias, una marca inventada mueve el
+#     resultado y nadie lo sabra.
+ORIGEN_SIN_PROBAR = "DESCONOCIDO"
+
+LIBRO_DEL_CARRIL = (
+    Path("data") / "trading" / "libro_del_carril.jsonl"
+)
+
+
+def _origen_probado(player_id: int, amount: int, ruta=None):
+    """
+    De que via salio esta puja. Solo si se puede PROBAR.
+
+    El carril escribe su propio libro en el mismo instante en que
+    puja. Si ahi consta este jugador con este importe, el origen
+    esta probado. Si no, DESCONOCIDO.
+
+    Nunca lanza.
+    """
+
+    try:
+        destino = ruta or LIBRO_DEL_CARRIL
+
+        if not destino.exists():
+            return ORIGEN_SIN_PROBAR
+
+        for linea in destino.read_text(
+            encoding="utf-8"
+        ).splitlines():
+
+            if not linea.strip():
+                continue
+
+            fila = json.loads(linea)
+
+            if int(
+                fila.get("player_id") or 0
+            ) == int(player_id) and int(
+                fila.get("amount") or 0
+            ) == int(amount):
+                return str(
+                    fila.get("marca") or ORIGEN_SIN_PROBAR
+                )
+
+        return ORIGEN_SIN_PROBAR
+
+    except Exception:                               # noqa: BLE001
+        return ORIGEN_SIN_PROBAR
+
+
+def _cuando_se_puso(created):
+    """La fecha de la oferta del tablon, en ISO. None si no se sabe."""
+
+    try:
+        if created is None:
+            return None
+
+        return datetime.fromtimestamp(
+            int(created), timezone.utc
+        ).isoformat()
+
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def _nombre_en_la_foto(snapshot, player_id):
+    """El nombre del jugador, si la foto lo trae. None si no."""
+
+    try:
+        # OJO AL `if`: hay que exigir que HAYA nombre, no solo
+        # que el id case. Las ventas del mercado traen
+        # `{"id": 1602}` a secas, asi que un `return
+        # jugador.get("name")` sale con None y no llega nunca al
+        # catalogo, que es donde estan los nombres.
+        for venta in (
+            (snapshot.get("market") or {}).get("sales") or []
+        ):
+            jugador = venta.get("player")
+
+            if (
+                isinstance(jugador, dict)
+                and safe_int(jugador.get("id"))
+                == int(player_id)
+                and jugador.get("name")
+            ):
+                return jugador.get("name")
+
+        for jugador in (snapshot.get("my_team") or []):
+            if (
+                isinstance(jugador, dict)
+                and safe_int(jugador.get("id"))
+                == int(player_id)
+                and jugador.get("name")
+            ):
+                return jugador.get("name")
+
+        # EL CATALOGO, QUE ES DONDE ESTAN LOS NOMBRES.
+        #
+        #     Las ventas del mercado traen el jugador sin nombre
+        #     -`{"id": 1602, "name": null}`- asi que sin esto el
+        #     libro se llenaria de entradas llamadas `None` y
+        #     habria que cruzar ids a mano para leerlas.
+        catalogo = (
+            (snapshot.get("catalog") or {}).get("data") or {}
+        ).get("players") or {}
+
+        ficha = None
+
+        if isinstance(catalogo, dict):
+            ficha = catalogo.get(str(player_id)) or catalogo.get(
+                player_id
+            )
+
+        elif isinstance(catalogo, list):
+            for x in catalogo:
+                if isinstance(x, dict) and safe_int(
+                    x.get("id")
+                ) == int(player_id):
+                    ficha = x
+                    break
+
+        if isinstance(ficha, dict) and ficha.get("name"):
+            return ficha.get("name")
+
+        return None
+
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def recoger_pujas_vivas(
+    snapshot,
+    our_user_id,
+    *,
+    ledger: dict,
+    ruta_del_carril=None,
+) -> dict:
+    """
+    Anota en el libro las pujas vivas del tablon que no estan.
+
+    Forma fija. Nunca lanza. Devuelve las que ha recogido, para
+    que el ciclo pueda decirlo.
+
+    NO DUPLICA: se mira POR JUGADOR y no por clave, porque la
+    clave lleva la hora y la del tablon no tiene por que coincidir
+    al segundo con la que anoto el ejecutor. La misma foto dos
+    veces deja una sola entrada.
+    """
+
+    salida = {
+        "available": False,
+        "recogidas": [],
+        "reason": None,
+    }
+
+    try:
+        if not snapshot or our_user_id is None:
+            return {
+                **salida,
+                "reason": (
+                    "Sin foto o sin saber quienes somos no se "
+                    "recoge nada: marcar pujas ajenas como "
+                    "nuestras seria peor que no verlas."
+                ),
+            }
+
+        from src.analysis.bid_exposure_engine import (
+            build_bid_exposure,
+        )
+
+        exposicion = build_bid_exposure(
+            snapshot, own_user_id=our_user_id
+        )
+
+        ya_estan = {
+            int(e.get("player_id") or 0)
+            for e in (ledger.get("bids") or {}).values()
+            if isinstance(e, dict)
+            and e.get("outcome") == "PENDING"
+        }
+
+        recogidas = []
+
+        for operacion in (exposicion.get("operations") or []):
+
+            importe = safe_int(operacion.get("amount"))
+
+            if importe <= 0:
+                continue
+
+            for jugador in (operacion.get("player_ids") or []):
+
+                pid = safe_int(jugador)
+
+                if pid <= 0 or pid in ya_estan:
+                    continue
+
+                puesta = (
+                    _cuando_se_puso(operacion.get("created"))
+                    or _ahora()
+                )
+
+                record_bid(
+                    pid,
+                    importe,
+                    player_name=_nombre_en_la_foto(
+                        snapshot, pid
+                    ),
+                    market_price=_precio_en_la_foto(
+                        snapshot, pid
+                    ),
+                    target_source=_origen_probado(
+                        pid, importe, ruta_del_carril
+                    ),
+                    seller_user_id=operacion.get(
+                        "counterparty_id"
+                    ),
+                    placed_at=puesta,
+                    ledger=ledger,
+                    save=False,
+                )
+
+                # Queda dicho que NO la vimos pujar: se anoto al
+                # verla puesta.
+                ledger["bids"][_clave(pid, puesta)][
+                    "recorded_by"
+                ] = "TABLON"
+
+                ya_estan.add(pid)
+
+                recogidas.append(
+                    {
+                        "player_id": pid,
+                        "amount": importe,
+                        "placed_at": puesta,
+                    }
+                )
+
+        return {
+            "available": True,
+            "recogidas": recogidas,
+            "reason": (
+                f"{len(recogidas)} puja(s) viva(s) del tablon "
+                f"que no estaban en el libro."
+                if recogidas
+                else (
+                    "Ninguna puja viva del tablon falta en el "
+                    "libro."
+                )
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **salida,
+            "reason": (
+                f"No se pudieron recoger las pujas vivas: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+def _precio_en_la_foto(snapshot, player_id):
+    """El precio de mercado del jugador, si la foto lo trae."""
+
+    try:
+        for venta in (
+            (snapshot.get("market") or {}).get("sales") or []
+        ):
+            jugador = venta.get("player")
+
+            pid = (
+                jugador.get("id")
+                if isinstance(jugador, dict)
+                else jugador
+            )
+
+            if safe_int(pid) == int(player_id):
+                return safe_int(venta.get("price")) or None
+
+        return None
+
+    except Exception:                               # noqa: BLE001
+        return None
 
 
 def _quedo_sin_ella(entrada, en_plantilla, momento) -> bool:
@@ -624,6 +951,7 @@ def sync_bid_outcomes(
     board_path: Path | None = None,
     path: Path | None = None,
     roster=None,
+    snapshot=None,
 ) -> dict:
     """
     El enganche del ciclo: cierra pendientes y devuelve el resumen.
@@ -649,9 +977,30 @@ def sync_bid_outcomes(
         }
 
     try:
-        libro = reconcile(
-            eventos, our_user_id, path=path, roster=roster
+        libro = load_ledger(path)
+
+        # PRIMERO SE RECOGE, LUEGO SE CIERRA.
+        #
+        #     En este orden a proposito: una puja que el tablon
+        #     publica y el libro no tenia entra, y se resuelve en
+        #     ESTA MISMA vuelta si su reset ya paso. Al reves se
+        #     quedaria un ciclo entero sin cerrar.
+        recogidas = recoger_pujas_vivas(
+            snapshot, our_user_id, ledger=libro
         )
-        return summary(libro)
+
+        libro = reconcile(
+            eventos,
+            our_user_id,
+            ledger=libro,
+            path=path,
+            roster=roster,
+        )
+
+        resumen = summary(libro)
+
+        resumen["recogidas_del_tablon"] = recogidas
+
+        return resumen
     except Exception:
         return {"available": False, "error": "El libro de pujas no pudo cerrarse."}

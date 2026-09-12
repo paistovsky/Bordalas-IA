@@ -225,6 +225,7 @@ TESTS = [
     "src.analysis.test_la_puja_del_carril_v1",
     "src.analysis.test_los_dos_techos_v1",
     "src.analysis.test_el_libro_sabe_perder_v1",
+    "src.analysis.test_el_libro_recoge_v1",
     "src.analysis.test_el_reloj_de_48h_v1",
     "src.analysis.test_los_relojes_v1",
     "src.analysis.test_ojeador_fuentes_v1",
