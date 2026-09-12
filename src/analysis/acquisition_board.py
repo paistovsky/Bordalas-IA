@@ -35,6 +35,7 @@ from src.analysis.deployment import (
 )
 
 from src.analysis.bid_jitter import apply_bid_jitter
+from src.analysis.los_dos_techos import los_dos_techos
 
 from src.analysis.hold_budget import hold_cap, hold_pocket
 
@@ -170,6 +171,102 @@ def _se_paga_solo(cost_per_point) -> bool | None:
         return None
 
     return coste < EUROS_POR_PUNTO
+
+
+def _resumen_de_los_techos(filas) -> dict:
+    """
+    Cuantas pujas pasan del techo del comerciante, POR VIA.
+
+    Forma fija. Nunca lanza. No decide: cuenta.
+    """
+
+    salida = {
+        "available": False,
+        "revender": 0,
+        "quedarse": 0,
+        "sin_via": 0,
+        "con_tope_aplicado": 0,
+        "pasan_el_del_comerciante": [],
+        "reason": None,
+    }
+
+    try:
+        pasan = []
+
+        # REGLA 24: "ninguna pasa el techo" y "ninguna tiene tope
+        # aplicado" son dos cosas distintas, y la segunda no
+        # prueba nada. Se cuentan aparte.
+        con_tope = 0
+
+        por_via = {"REVENDER": 0, "QUEDARSE": 0, None: 0}
+
+        for fila in filas or []:
+
+            techos = (fila or {}).get("los_dos_techos") or {}
+
+            if not techos.get("available"):
+                continue
+
+            via = techos.get("via")
+
+            por_via[via if via in por_via else None] += 1
+
+            comerciante = (
+                techos.get("comerciante") or {}
+            ).get("techo")
+
+            aplicado = techos.get("aplicado")
+
+            if aplicado:
+                con_tope += 1
+
+            if (
+                comerciante
+                and aplicado
+                and aplicado > comerciante
+            ):
+                pasan.append(
+                    {
+                        "name": fila.get("name"),
+                        "via": via,
+                        "aplicado": aplicado,
+                        "techo_del_comerciante": comerciante,
+                        "de_mas": aplicado - comerciante,
+                    }
+                )
+
+        return {
+            "available": True,
+            "revender": por_via["REVENDER"],
+            "quedarse": por_via["QUEDARSE"],
+            "sin_via": por_via[None],
+            "con_tope_aplicado": con_tope,
+            "pasan_el_del_comerciante": pasan,
+            "reason": (
+                f"{por_via['QUEDARSE']} para quedarse y "
+                f"{por_via['REVENDER']} para revender. "
+                + (
+                    "Ninguna lleva tope aplicado en esta vuelta, "
+                    "asi que no se puede decir si alguna lo "
+                    "pasaria."
+                    if not con_tope
+                    else (
+                        f"De las {con_tope} con tope aplicado, "
+                        f"{len(pasan)} van por encima del techo "
+                        f"del comerciante."
+                    )
+                )
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **salida,
+            "reason": (
+                f"No se pudo resumir los techos: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
 
 
 def build_acquisition_board(
@@ -962,6 +1059,30 @@ def build_acquisition_board(
                     100 * PRIMA_MAXIMA_DE_PUJA, 3
                 )
 
+                # LOS DOS TECHOS, CADA UNO CON SU NOMBRE
+                # (12/09/2026)
+                #
+                #     Habia UN solo tope para todos, y su
+                #     `break_even_percent` -1,80 %- es donde deja
+                #     de ser negocio REVENDER al Computer. Se le
+                #     aplicaba igual al jugador que queremos
+                #     QUEDARNOS, que es otra moneda entera: los
+                #     puntos se pagan a 30.000 EUR.
+                #
+                #     ESTO NO MUEVE NADA. Publica los dos para
+                #     que se vea cual se esta aplicando.
+                fila["los_dos_techos"] = los_dos_techos(
+                    safe_int(ficha.get("price")),
+                    prima_computer_percent=(
+                        (
+                            contexto.get("computer_premium")
+                            or {}
+                        ).get("median_percent")
+                    ),
+                    intent=valoracion.get("intent"),
+                    tope_aplicado=safe_int(plan.get("bid")),
+                )
+
                 # Que techo se le aplico y de que bolsillo sale.
                 # Sin esto, un SUPERA_PRESUPUESTO vuelve a ser un
                 # numero que nadie sabe de donde sale.
@@ -1246,6 +1367,31 @@ def build_acquisition_board(
             #     mordiendo — que hoy es lo que pasa, porque la
             #     curva de primas esta plana y `optimal_bid` ya
             #     ofrecia el precio y un euro.
+            # LOS DOS TECHOS, CADA UNO CON SU NOMBRE
+            # (12/09/2026)
+            #
+            #     `bid_cap` de abajo es UN solo tope para todos, y
+            #     su `break_even_percent` es donde deja de ser
+            #     negocio REVENDERLO al Computer — un numero que
+            #     no tiene nada que ver con el jugador que
+            #     queremos QUEDARNOS, y que se le aplicaba igual.
+            #
+            #     Esto los calcula y dice cual se esta aplicando.
+            #     NO MUEVE NINGUNO: `bid_cap` sigue exactamente
+            #     como estaba y ninguna puja cambia de importe.
+            # EL NUMERO QUE CONTESTA LA PREGUNTA
+            # (12/09/2026)
+            #
+            #     Cuantas pujas llevan hoy un tope aplicado POR
+            #     ENCIMA del techo del comerciante. En una puja
+            #     de revender eso es pagar mas de lo que el viaje
+            #     puede recuperar; en una de fichar no significa
+            #     nada, porque ese techo no es el suyo.
+            #
+            #     Se publica separado por via, que es justo lo
+            #     que no se podia ver.
+            "techos": _resumen_de_los_techos(filas),
+
             "bid_cap": {
                 "premium_percent": round(
                     100 * PRIMA_MAXIMA_DE_PUJA, 3
