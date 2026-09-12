@@ -1,5 +1,36 @@
 ﻿name: Bordalas IA Live
 
+# EL SCHEDULE DE GITHUB SE RETIRO EL 12/09/2026
+#
+#   Y NO POR SIMPLIFICAR: SE SALTABA VUELTAS TODOS LOS DIAS.
+#
+#       llegaba 30-40 minutos tarde
+#       y perdia ciclos enteros
+#
+#   Los `schedule` de Actions no son una promesa: son una cola de
+#   baja prioridad. Con una vuelta por hora, 30-40 minutos tarde
+#   no es "un poco tarde" — es que la vuelta de esa hora se
+#   solapa con la siguiente o se pierde.
+#
+#   Si abres este fichero, ves que solo tiene `workflow_dispatch`
+#   y piensas "le falta el cron": esto es lo que te falta saber.
+#   Se probo, se midio y se quito. QUE NADIE LO VUELVA A PONER
+#   SIN SABER POR QUE SE QUITO.
+#
+#   El latido lo dispara ahora cron-job.org (hora de Madrid), que
+#   entra por `workflow_dispatch`:
+#
+#       :07 cada hora, horas 0-3 y 8-23   latido
+#       04:45 y 04:50                     ventana del reset
+#       07:15                             tras el reset
+#
+#   ESO NO SE CONFIGURA AQUI Y EL CODIGO NO PUEDE LEERLO. Lo que
+#   el proyecto declara esperar esta en `config/disparos.json`, y
+#   lo unico que compara esa declaracion contra la realidad es el
+#   aviso de DISPARO FUERA DE HORA de la pantalla. Ver
+#   `src/analysis/los_disparos.py`.
+#
+#   Guardia: `test_el_schedule_de_github_no_vuelve_sin_saber_por_que`.
 on:
  workflow_dispatch:
 

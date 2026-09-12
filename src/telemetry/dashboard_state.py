@@ -62,24 +62,41 @@ FULL_AUTONOMOUS_STATUS = (
 )
 
 
-# LA CADENCIA SALE DEL CRON, NO DE LA MEMORIA (10/09/2026)
+# LA CADENCIA SALE DE LA DECLARACION (12/09/2026)
 #
-#     El cron interno de `bordalas-live.yml` es la AUTORIDAD:
+#     Aqui ponia 30 escrito a mano, de cuando el cron corria
+#     cada media hora, y al cambiarlo nadie toco esto: el aviso
+#     amarillo decia "cada 30", el lateral "ciclo 30 min" y
+#     `STALE_CYCLE_SECONDS` marcaba rancio un ciclo
+#     perfectamente normal a la hora de vida.
 #
-#         7 0-2,7-23 * * *
+#     Se arreglo copiando aqui el cron del workflow. Y el 12/09
+#     ese cron desaparecio —el `schedule` de GitHub se retiro
+#     porque se saltaba vueltas todos los dias: llegaba 30-40
+#     minutos tarde y perdia ciclos enteros— asi que la copia se
+#     quedo apuntando a algo que ya no existe y la verja se puso
+#     roja.
 #
-#     o sea, una vez a la hora. Aqui ponia 30 escrito a mano,
-#     de cuando el cron corria cada media hora, y al cambiarlo
-#     nadie toco esto: el aviso amarillo decia "cada 30", el
-#     lateral "ciclo 30 min" y `STALE_CYCLE_SECONDS` marcaba
-#     rancio un ciclo perfectamente normal a la hora de vida.
+#     LA AUTORIDAD YA NO ESTA EN EL REPOSITORIO: el latido lo
+#     dispara cron-job.org, que el codigo no puede leer. Lo que
+#     hay es `config/disparos.json`, la declaracion de lo que se
+#     ESPERA, y esto la lee. Ver `src/analysis/los_disparos.py`.
 #
-#     `test_la_cadencia_sale_del_cron` compara este numero con
-#     el cron del workflow y con `relojes.js`, para que los tres
-#     no puedan volver a discrepar.
-CRON_INTERNO = "7 0-2,7-23 * * *"
+#     No se escribe ningun numero aqui. Si la declaracion no se
+#     pudiera leer, `None` — y los textos diran "a intervalos
+#     desconocidos" en vez de inventarse una cadencia
+#     (doctrina 36).
+def _cadencia_declarada():
+    try:
+        from src.analysis.los_disparos import declaracion
 
-CADENCIA_MINUTOS = 60
+        return declaracion().get("cadencia_minutos")
+
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+CADENCIA_MINUTOS = _cadencia_declarada()
 
 
 # A partir de cuando "este ciclo" deja de ser este ciclo.
@@ -87,7 +104,13 @@ CADENCIA_MINUTOS = 60
 # Dos ciclos de margen absorben un retraso normal -un refresco
 # lento, una cola de GitHub-; a partir de ahi lo que se esta
 # enseñando es historia y hay que decirlo.
-STALE_CYCLE_SECONDS = 2 * CADENCIA_MINUTOS * 60
+STALE_CYCLE_SECONDS = (
+    2 * CADENCIA_MINUTOS * 60
+    if CADENCIA_MINUTOS
+    # Sin cadencia conocida no se marca rancio a nadie: un umbral
+    # inventado aqui pinta de "historia" un ciclo normal.
+    else None
+)
 
 
 def _edad_en_segundos(marca) -> int | None:

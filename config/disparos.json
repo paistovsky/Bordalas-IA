@@ -1,0 +1,27 @@
+{
+  "_LEEME": "LA AUTORIDAD DEL RELOJ. Antes de tocar nada aqui, lee src/analysis/los_disparos.py: cuenta por que el schedule de GitHub se retiro el 12/09/2026 y por que este fichero existe.",
+  "_QUE_ES": "Los disparos que este proyecto ESPERA recibir. No es una configuracion: la configuracion vive en cron-job.org, fuera del repositorio y fuera del alcance del codigo. Esto es lo que decimos esperar, y es contra esto contra lo que se comprueba la realidad.",
+  "_DESDE": "2026-09-12",
+  "zona": "Europe/Madrid",
+  "donde_se_configura": "cron-job.org",
+  "como_entra": "workflow_dispatch",
+
+  "latido": {
+    "que": "latido",
+    "minuto": 7,
+    "horas": [0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+    "cron": "7 0-3,8-23 * * *",
+    "_POR_QUE_ESAS_HORAS": "Salta las 4, 5, 6 y 7 de Madrid: es la ventana del reset del mercado, y ahi mandan los disparos puntuales de abajo. Quedan 20 vueltas al dia.",
+    "cadencia_minutos": 60
+  },
+
+  "_SIN_COMPENSACION": "El campo `cron` es lo que hay escrito TAL CUAL en cron-job.org, en hora de Madrid y sin restarle nada. Del 10 al 11/09/2026 llevaron una hora de menos, sobre la teoria de que cron-job.org aplica CET siempre. ERA FALSA, deducida de n=1, y adelanto los disparos una hora: la ventana del reset se abrio con el mercado sin resetear. No se vuelva a compensar.",
+  "puntuales": [
+    { "madrid": "04:45", "cron": "45 4 * * *", "que": "ventana", "para": "pujar en la ventana del reset" },
+    { "madrid": "04:50", "cron": "50 4 * * *", "que": "ventana", "para": "renovar en la ventana del reset" },
+    { "madrid": "07:15", "cron": "15 7 * * *", "que": "tras_el_reset", "para": "leer el resultado del reset y cobrar" }
+  ],
+
+  "gracia_minutos": 12,
+  "_GRACIA": "Un ciclo tarda en arrancar, correr y publicar. Por debajo de esto no se llama tarde a nadie ni se da un disparo por fuera de hora."
+}

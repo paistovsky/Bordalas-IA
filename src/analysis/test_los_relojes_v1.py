@@ -23,8 +23,39 @@ CAUSA
 
 CONSECUENCIA
 
-    Ahora hay una autoridad -el cron de `bordalas-live.yml`- y
-    dos espejos que esta guardia obliga a coincidir con ella.
+    Hubo una autoridad -el cron de `bordalas-live.yml`- y dos
+    espejos que esta guardia obligaba a coincidir con ella.
+
+SEGUNDO SINTOMA (12/09/2026): LA AUTORIDAD SE FUE DE CASA
+
+    La verja en rojo y el ciclo parado, 5 de 6. Fallaba
+    `test_la_cadencia_sale_del_cron` porque leia un `schedule`
+    que ya no existe.
+
+    EL SCHEDULE DE GITHUB SE RETIRO EL 12/09/2026, y con un dato
+    detras: SE SALTABA VUELTAS TODOS LOS DIAS. Llegaba 30-40
+    minutos tarde y perdia ciclos enteros. Los `schedule` de
+    Actions son una cola de baja prioridad, no una promesa; con
+    una vuelta por hora, 30-40 minutos tarde es la vuelta
+    perdida. QUE NADIE LO VUELVA A PONER SIN SABER ESTO.
+
+    El latido pasa a cron-job.org. Y eso es un cambio de fondo,
+    no un parche: LA AUTORIDAD DEL RELOJ YA NO VIVE EN EL
+    REPOSITORIO. Esta en un servicio externo que el codigo no
+    puede leer.
+
+    Asi que la autoridad pasa a ser `config/disparos.json`: la
+    declaracion de los disparos que se ESPERAN. Y esta guardia
+    comprueba los espejos contra esa declaracion.
+
+    OJO A LO QUE NO PUEDE HACER ESTA GUARDIA
+
+        La declaracion no es la verdad: es lo que creemos haber
+        configurado. Ninguna guardia puede comprobar que
+        cron-job.org este vivo. Lo unico que mira la realidad es
+        el aviso de DISPARO FUERA DE HORA, y por eso
+        `test_el_bot_avisa_si_el_ciclo_no_entra_a_su_hora` pasa
+        a ser la guardia mas importante de este fichero.
 
 EL OTRO RELOJ: LOS CRONES EXTERNOS
 
@@ -60,6 +91,8 @@ from pathlib import Path
 RAIZ = Path(__file__).parents[2]
 
 WORKFLOW = RAIZ / ".github" / "workflows" / "bordalas-live.yml"
+
+DECLARACION = RAIZ / "config" / "disparos.json"
 
 RELOJES = RAIZ / "dashboard-v8" / "src" / "lib" / "relojes.js"
 
@@ -98,63 +131,16 @@ def _sin_comentarios(fuente: str) -> str:
     return chr(10).join(limpio)
 
 
-def cron_del_workflow() -> str:
-    """El cron que de verdad dispara. Es la autoridad."""
+def _declaracion() -> dict:
+    """La autoridad. Si no se puede leer, no hay reloj."""
 
-    fuente = _lee(WORKFLOW)
+    from src.analysis.los_disparos import declaracion
 
-    encontrados = re.findall(
-        r"-\s*cron:\s*[\"']([^\"']+)[\"']", fuente
-    )
+    decl = declaracion()
 
-    assert encontrados, (
-        "el workflow no declara ningun `cron`: si esto pasa, la "
-        "cadencia de la pantalla no la pina nadie"
-    )
+    assert decl["available"], decl["reason"]
 
-    return encontrados[0].strip()
-
-
-def cadencia_del_cron(expresion: str) -> int:
-    """
-    Cada cuantos minutos dispara un cron de cinco campos.
-
-    Solo se apoya en los dos primeros campos, que es lo que usa
-    esta casa. Si algun dia el cron se complica, esta guardia se
-    pone roja en vez de mentir.
-    """
-
-    partes = expresion.split()
-
-    assert len(partes) == 5, expresion
-
-    minutos, horas = partes[0], partes[1]
-
-    def _cuantos(campo: str, tope: int) -> int:
-        if campo == "*":
-            return tope
-
-        total = 0
-
-        for trozo in campo.split(","):
-            if trozo.startswith("*/"):
-                total += tope // int(trozo[2:])
-            elif "-" in trozo:
-                a, b = trozo.split("-")
-                total += int(b) - int(a) + 1
-            else:
-                total += 1
-
-        return total
-
-    disparos_al_dia = _cuantos(minutos, 60) * _cuantos(horas, 24)
-
-    assert disparos_al_dia > 0, expresion
-
-    # Los disparos NO estan repartidos por igual -el cron salta
-    # la madrugada- asi que esto es el hueco entre dos seguidos
-    # dentro de la franja activa, que es lo que vive el dueno.
-    return 60 // _cuantos(minutos, 60)
+    return decl
 
 
 # ============================================================
@@ -162,42 +148,111 @@ def cadencia_del_cron(expresion: str) -> int:
 # ============================================================
 
 
-def test_la_cadencia_sale_del_cron() -> None:
+def test_la_cadencia_sale_de_la_declaracion() -> None:
     """
-    El cron del workflow manda. Los dos espejos -`relojes.js` y
-    `dashboard_state.py`- tienen que decir lo mismo que el.
+    La declaracion manda, y los que la leen no la copian.
+
+    Antes esto comparaba tres numeros -el cron, `relojes.js` y
+    `dashboard_state.py`- y obligaba a que coincidieran. Hoy no
+    hay nada que comparar en `relojes.js`: IMPORTA el mismo
+    fichero. Eso es mejor que una guardia, porque no puede
+    desincronizarse.
+
+    Lo que si se comprueba es que sigan importandolo, y que
+    Python no se haya vuelto a escribir un numero a mano.
     """
 
-    cron = cron_del_workflow()
+    decl = _declaracion()
 
-    esperada = cadencia_del_cron(cron)
+    esperada = decl["cadencia_minutos"]
 
     # Regla 24: si el calculo diera algo absurdo, la guardia no
     # puede pasar tan contenta.
-    assert 1 <= esperada <= 24 * 60, (cron, esperada)
+    assert 1 <= esperada <= 24 * 60, decl
 
-    relojes = _lee(RELOJES)
+    # Un latido por hora y tres puntuales: 23 al dia.
+    assert len(decl["todos_los_minutos"]) == 23, decl
 
-    assert f'CRON_INTERNO = "{cron}"' in relojes, (
-        f"`relojes.js` no lleva el cron real ({cron}): la cuenta "
-        f"atras y el cron pueden discrepar"
+    relojes = _sin_comentarios(_lee(RELOJES))
+
+    assert "config/disparos.json" in relojes, (
+        "`relojes.js` no importa la declaracion: ha vuelto a "
+        "tener un espejo, y un espejo se desincroniza"
     )
 
-    telemetria = _lee(TELEMETRIA)
+    # Y no lleva ninguna hora escrita a mano.
+    for suelto in ("04:45", "04:50", "07:15", "0-2,7-23"):
+        assert suelto not in relojes, (
+            f"`relojes.js` lleva `{suelto}` escrito a mano en "
+            f"vez de leerlo de la declaracion"
+        )
 
-    assert f'CRON_INTERNO = "{cron}"' in telemetria, (
-        f"`dashboard_state.py` no lleva el cron real ({cron})"
+    telemetria = _sin_comentarios(_lee(TELEMETRIA))
+
+    assert "los_disparos" in telemetria, (
+        "`dashboard_state.py` no lee la declaracion"
     )
 
-    encontrada = re.search(
-        r"CADENCIA_MINUTOS\s*=\s*(\d+)", telemetria
+    assert not re.search(
+        r"CADENCIA_MINUTOS\s*=\s*\d+", telemetria
+    ), (
+        "`dashboard_state.py` ha vuelto a escribir la cadencia a "
+        "mano: es exactamente el fallo del 10/09"
     )
 
-    assert encontrada, "no hay `CADENCIA_MINUTOS`"
+    from src.telemetry.dashboard_state import CADENCIA_MINUTOS
 
-    assert int(encontrada.group(1)) == esperada, (
-        f"el cron dispara cada {esperada} min y "
-        f"`CADENCIA_MINUTOS` dice {encontrada.group(1)}"
+    assert CADENCIA_MINUTOS == esperada, (
+        CADENCIA_MINUTOS,
+        esperada,
+    )
+
+
+def test_el_schedule_de_github_no_vuelve_sin_saber_por_que() -> None:
+    """
+    SE RETIRO EL 12/09/2026 Y NO POR CAPRICHO.
+
+    Se saltaba vueltas todos los dias: llegaba 30-40 minutos
+    tarde y perdia ciclos enteros. Si alguien ve un workflow con
+    solo `workflow_dispatch` y piensa "le falta el cron", esto es
+    lo que le falta saber.
+
+    La guardia no prohibe volver a ponerlo —puede haber un motivo
+    algun dia— pero obliga a que el motivo de la retirada siga
+    escrito donde se lea.
+    """
+
+    from src.analysis.los_disparos import (
+        SCHEDULE_MOTIVO,
+        SCHEDULE_RETIRADO_EL,
+        SCHEDULE_RETRASO_MEDIDO,
+    )
+
+    assert SCHEDULE_RETIRADO_EL == "2026-09-12"
+
+    assert SCHEDULE_RETRASO_MEDIDO == "30-40 minutos"
+
+    assert "vueltas" in SCHEDULE_MOTIVO, SCHEDULE_MOTIVO
+
+    # El motivo, donde se va a leer: en el propio workflow.
+    workflow = _lee(WORKFLOW)
+
+    for dato in ("12/09/2026", "30-40", "cron-job.org"):
+        assert dato in workflow, (
+            f"el workflow no dice `{dato}`: quien lo abra vera "
+            f"un fichero sin cron y no sabra que se quito a "
+            f"proposito"
+        )
+
+    # Y si vuelve a haber un `schedule`, que sea deliberado: esta
+    # guardia se pone roja y hay que venir aqui a leer por que.
+    assert not re.search(
+        r"^\s*schedule:", _sin_comentarios(workflow), re.M
+    ), (
+        "ha vuelto el `schedule` de GitHub. Se retiro el "
+        "12/09/2026 porque llegaba 30-40 minutos tarde y perdia "
+        "ciclos enteros. Si vuelve a ponerse a proposito, "
+        "actualiza esta guardia y deja escrito por que."
     )
 
 
@@ -277,14 +332,19 @@ def test_no_queda_compensacion_en_los_crones_externos() -> None:
 
     relojes = _lee(RELOJES)
 
-    # Los de verdad, sin compensar.
+    declarado = DECLARACION.read_text(encoding="utf-8")
+
+    # Los de verdad, sin compensar, EN LA DECLARACION — que es
+    # donde viven desde el 12/09. Ya no estan en `relojes.js`.
     for cron in ("45 4 * * *", "50 4 * * *", "15 7 * * *"):
-        assert cron in relojes, (
+        assert cron in declarado, (
             f"falta el cron externo `{cron}` tal cual esta puesto"
         )
 
     # Y los compensados NO pueden volver como configuracion.
-    codigo = _sin_comentarios(relojes)
+    codigo = _sin_comentarios(relojes) + _sin_comentarios(
+        declarado
+    )
 
     for viejo in ("45 3 * * *", "50 3 * * *", "15 6 * * *"):
         assert viejo not in codigo, (
@@ -327,14 +387,22 @@ def test_el_bot_avisa_si_el_ciclo_no_entra_a_su_hora() -> None:
     guion = """
 import { avisoDeDisparoFueraDeHora } from "./src/lib/relojes.js";
 const ahora = new Date("2026-09-11T05:07:00Z");
+// 04:47 Madrid: dos minutos del disparo de la ventana. En hora.
 const enHora = avisoDeDisparoFueraDeHora(ahora, "2026-09-11T02:47:00Z");
+// 03:46 Madrid: 39 minutos del latido de las 03:07.
 const fuera = avisoDeDisparoFueraDeHora(ahora, "2026-09-11T01:46:00Z");
+// 05:30 Madrid: DENTRO de la ventana del reset, donde no hay
+// ningun disparo declarado. Es la forma que tendria un
+// cron-job.org mal configurado, y la unica alarma que lo veria.
+const enLaVentana = avisoDeDisparoFueraDeHora(ahora, "2026-09-11T03:30:00Z");
 console.log(JSON.stringify({
   enHora: enHora === null,
   motivo: fuera && fuera.motivo,
   minutos: fuera && fuera.minutos,
   texto: fuera && fuera.texto,
-  configurados: fuera && fuera.configurados.map((c) => c.cron)
+  configurados: fuera && fuera.configurados.map((c) => c.madrid),
+  ventanaAvisa: enLaVentana !== null,
+  ventanaMinutos: enLaVentana && enLaVentana.minutos
 }));
 """
 
@@ -374,12 +442,27 @@ console.log(JSON.stringify({
 
     assert visto["minutos"] > 12, visto
 
-    # Los crones que enseña son los de verdad, sin compensar.
+    # Las horas que enseña son las declaradas, sin compensar.
     assert visto["configurados"] == [
-        "45 4 * * *",
-        "50 4 * * *",
-        "15 7 * * *",
+        "04:45",
+        "04:50",
+        "07:15",
     ], visto
+
+    # Y CAZA UN DISPARO DENTRO DE LA VENTANA DEL RESET.
+    #
+    #     Es el caso que importa desde el 12/09: si cron-job.org
+    #     se descolocara, un ciclo entraria a una hora en la que
+    #     no hay ningun disparo declarado. Esta alarma es LA
+    #     UNICA que mira la realidad — ninguna guardia puede
+    #     comprobar que un servicio externo este vivo.
+    assert visto["ventanaAvisa"] is True, (
+        "un ciclo a las 05:30, dentro de la ventana del reset y "
+        "sin ningun disparo declarado cerca, NO dispara la "
+        "alarma: nos quedariamos sin saberlo"
+    )
+
+    assert visto["ventanaMinutos"] > 12, visto
 
     # Y no le echa la culpa a nadie.
     for causa in ("CET", "horario de verano", "cron-job"):
@@ -439,7 +522,8 @@ def test_ningun_desfase_horario_escrito_a_mano() -> None:
 
 
 TESTS = [
-    test_la_cadencia_sale_del_cron,
+    test_la_cadencia_sale_de_la_declaracion,
+    test_el_schedule_de_github_no_vuelve_sin_saber_por_que,
     test_ningun_texto_lleva_la_cadencia_escrita_a_mano,
     test_el_ciclo_no_se_pone_rancio_antes_de_tiempo,
     test_no_queda_compensacion_en_los_crones_externos,

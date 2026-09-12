@@ -4,13 +4,33 @@
  *
  * DE DÓNDE SALE EL PRÓXIMO CICLO
  *
- *   No de una estimación: del cron real que hay puesto.
+ *   De `config/disparos.json`, que es LA AUTORIDAD y el único
+ *   sitio donde vive. Este fichero lo importa: no lo copia. No
+ *   hay espejo que pueda desincronizarse porque no hay espejo.
  *
- *     interno (GitHub Actions, UTC)   "7 0-2,7-23 * * *"
- *     externo (cron-job.org, Madrid)  04:45 · 04:50 · 07:15
+ * EL SCHEDULE DE GITHUB SE RETIRÓ EL 12/09/2026
  *
- *   El interno salta UTC 03-06 a propósito, que es la ventana
- *   del reset en las dos estaciones.
+ *   Y no por simplificar: SE SALTABA VUELTAS TODOS LOS DÍAS.
+ *   Llegaba 30-40 minutos tarde y perdía ciclos enteros. Los
+ *   `schedule` de Actions son una cola de baja prioridad, no una
+ *   promesa. Con una vuelta por hora, 30-40 minutos tarde no es
+ *   "un poco tarde": es la vuelta perdida.
+ *
+ *   QUE NADIE LO VUELVA A PONER SIN SABER ESTO.
+ *
+ *   Todo el latido pasa a cron-job.org, en hora de Madrid, y
+ *   entra por `workflow_dispatch`.
+ *
+ * LO QUE ESTO SIGNIFICA, Y HAY QUE DECIRLO
+ *
+ *   LA AUTORIDAD DEL RELOJ YA NO VIVE EN EL REPOSITORIO. Está en
+ *   un servicio externo que el código no puede leer. La
+ *   declaración NO es la verdad: es lo que creemos haber
+ *   configurado. Si cron-job.org estuviera parado, seguiría
+ *   diciendo lo mismo tan tranquila.
+ *
+ *   Lo único que mira la realidad es
+ *   `avisoDeDisparoFueraDeHora()`, más abajo.
  *
  * Y SI NO LLEGA, SE DICE
  *
@@ -28,27 +48,34 @@
  */
 
 /* ============================================================
- * LOS DISPAROS, DEFINIDOS UNA VEZ
+ * LOS DISPAROS, DECLARADOS UNA VEZ Y EN UN SITIO
  * ============================================================
  *
  * De aqui sale TODO: la cuenta atras, la cadencia que se pinta
- * en el aviso amarillo y en el lateral, y el aviso del cambio de
- * hora. Antes la cadencia estaba escrita a mano en tres sitios
- * -"cada 30", "ciclo 30 min", `cycle_minutes: 30`- y cuando el
- * cron paso a ser HORARIO los tres se quedaron mintiendo
- * mientras la cuenta atras iba bien.
+ * en el aviso amarillo y en el lateral, y el aviso de disparo
+ * fuera de hora. Antes la cadencia estaba escrita a mano en tres
+ * sitios -"cada 30", "ciclo 30 min", `cycle_minutes: 30`- y
+ * cuando el cron cambio los tres se quedaron mintiendo mientras
+ * la cuenta atras iba bien.
+ *
+ * Y antes de hoy la autoridad era el `cron` del workflow. Ya no
+ * hay workflow que leer: lo que hay es esta declaracion, que
+ * Python y la pantalla importan del MISMO fichero.
  */
+// `with { type: "json" }` no es decoracion: Node ESM lo exige
+// desde la v22 y sin el las guardias que corren este fichero con
+// node revientan con ERR_IMPORT_ATTRIBUTE_MISSING. Vite lo
+// acepta igual.
+import DISPAROS from "../../../config/disparos.json" with { type: "json" };
 
-// El cron interno, tal cual esta en `bordalas-live.yml`. En UTC,
-// que es lo que usa GitHub Actions.
-export const CRON_INTERNO = "7 0-2,7-23 * * *";
+// TODO en hora de pared de Madrid. Ya no hay nada en UTC: el
+// unico que lo estaba era el cron de GitHub, y se retiro.
+const LATIDO_HORAS = DISPAROS.latido.horas;
 
-const HORAS_INTERNAS = [
-  0, 1, 2, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-  21, 22, 23
-];
+const LATIDO_MINUTO = DISPAROS.latido.minuto;
 
-const MINUTO_INTERNO = 7;
+// Lo que hay puesto, tal cual, para poder enseñarlo.
+export const DISPAROS_ESPERADOS = DISPAROS.puntuales;
 
 /* ============================================================
  * LOS DISPAROS EXTERNOS
@@ -96,15 +123,12 @@ const MINUTO_INTERNO = 7;
  *   motivo. Lo hace `avisoDeDisparoFueraDeHora()`.
  */
 
-// Lo que hay puesto, tal cual, para poder enseñarlo.
-export const EXTERNOS_ESCRITOS = [
-  { madrid: "04:45", cron: "45 4 * * *", que: "ventana del reset" },
-  { madrid: "04:50", cron: "50 4 * * *", que: "ventana del reset" },
-  { madrid: "07:15", cron: "15 7 * * *", que: "tras el reset" }
-];
-
-// Hora de Madrid, en minutos desde medianoche.
-const EXTERNOS_MADRID = [4 * 60 + 45, 4 * 60 + 50, 7 * 60 + 15];
+// Hora de Madrid, en minutos desde medianoche. De la
+// declaracion, no escritos aqui.
+const PUNTUALES_MADRID = DISPAROS.puntuales.map((p) => {
+  const [h, m] = p.madrid.split(":");
+  return Number(h) * 60 + Number(m);
+});
 
 // El reset del mercado: 07:00 de Madrid, medido sobre siete días
 // seguidos (las ofertas caducan a las 07:00 y la tanda nueva
@@ -112,8 +136,8 @@ const EXTERNOS_MADRID = [4 * 60 + 45, 4 * 60 + 50, 7 * 60 + 15];
 const RESET_MADRID = 7 * 60;
 
 // Margen para que un ciclo arranque, corra y publique. Por
-// debajo de esto no se llama tarde a nadie.
-const GRACIA_MINUTOS = 12;
+// debajo de esto no se llama tarde a nadie. De la declaracion.
+const GRACIA_MINUTOS = DISPAROS.gracia_minutos;
 
 /** Desfase de Madrid respecto a UTC, en minutos, para ese instante. */
 export function desfaseMadrid(fecha) {
@@ -202,21 +226,18 @@ function desdeMadrid(base, minutosDelDia, diasDespues = 0) {
 function disparos(desde, hasta) {
   const lista = [];
 
-  // Internos: UTC puro.
-  const cursor = new Date(desde.getTime());
-  cursor.setUTCMinutes(0, 0, 0);
-  cursor.setUTCHours(cursor.getUTCHours() - 1);
-
-  for (let i = 0; i < 72; i += 1) {
-    const h = new Date(cursor.getTime() + i * 3600_000);
-    if (!HORAS_INTERNAS.includes(h.getUTCHours())) continue;
-    const t = new Date(h.getTime() + MINUTO_INTERNO * 60000);
-    if (t >= desde && t <= hasta) lista.push(t);
-  }
-
-  // Externos: hora de pared de Madrid.
+  // TODO en hora de pared de Madrid. El unico que iba en UTC
+  // era el cron de GitHub, y se retiro el 12/09/2026 porque se
+  // saltaba vueltas todos los dias.
   for (let d = -1; d <= 2; d += 1) {
-    for (const m of EXTERNOS_MADRID) {
+    // El latido: una vuelta por hora, al minuto declarado.
+    for (const h of LATIDO_HORAS) {
+      const t = desdeMadrid(desde, h * 60 + LATIDO_MINUTO, d);
+      if (t >= desde && t <= hasta) lista.push(t);
+    }
+
+    // Y los puntuales: la ventana y el de despues del reset.
+    for (const m of PUNTUALES_MADRID) {
       const t = desdeMadrid(desde, m, d);
       if (t >= desde && t <= hasta) lista.push(t);
     }
@@ -394,8 +415,7 @@ export function minutosDeLaFoto(texto) {
  * media a un sitio que no describe ningun ciclo real.
  *
  * Cuando el cron corria cada media hora esto daba 30; con el
- * horario `7 0-2,7-23` da 60. Los textos que lo pintan
- * cambian solos.
+ * latido horario da 60. Los textos que lo pintan cambian solos.
  */
 export function cadenciaMinutos(ahora = new Date()) {
   try {
@@ -522,7 +542,7 @@ export function avisoDeDisparoFueraDeHora(ahora, fotoISO) {
         `diferencia. Puede ser un retraso, una zona mal puesta ` +
         `o un job de más — esto no lo distingue, solo dice que ` +
         `no encaja.`,
-      configurados: EXTERNOS_ESCRITOS
+      configurados: DISPAROS_ESPERADOS
     };
   } catch {
     return null;
