@@ -259,27 +259,44 @@ def test_el_silencio_cubre_la_ventana_entera():
         f"vigilar"
     )
 
-    # Y en la practica: el cron de GitHub que llega tarde calla
-    # en todo el rango; el disparo deliberado escribe.
-    for hora, minuto in ((4, 45), (4, 47), (5, 30), (6, 52)):
+    # Y EN LA PRACTICA. Ojo, que el eje cambio el 12/09/2026.
+    #
+    #     Aqui se comprobaba que un `schedule` callaba en todo el
+    #     rango y que un `workflow_dispatch` escribia. Eso dejo
+    #     de tener sentido el dia que se retiro el `schedule` de
+    #     GitHub: desde entonces TODAS las vueltas entran como
+    #     `workflow_dispatch`, el latido incluido, asi que por
+    #     ese criterio todas escribian.
+    #
+    #     Ahora el eje es LA HORA, contra `config/disparos.json`.
+    #     Lo que se comprueba es lo mismo que antes —que no queda
+    #     ni un minuto de ventana sin vigilar— pero por el lado
+    #     que de verdad la vigila.
+    for hora, minuto, escribe in (
+        (4, 45, True),      # disparo declarado de la ventana
+        (4, 47, True),      # dentro de su gracia
+        (5, 30, False),     # DESCOLOCADO
+        (6, 52, False),     # DESCOLOCADO
+    ):
 
         utc = datetime(
             2026, 9, 11, hora - 2, minuto, tzinfo=timezone.utc
         )
 
-        tarde = permite_escribir(utc, "schedule")
+        for quien in ("schedule", "workflow_dispatch", "manual"):
 
-        deliberado = permite_escribir(utc, "workflow_dispatch")
+            visto = permite_escribir(utc, quien)
 
-        assert tarde["allowed"] is False, (
-            f"a las {hora:02d}:{minuto:02d} un cron tarde "
-            f"escribiria"
-        )
+            assert visto["allowed"] is escribe, (
+                f"a las {hora:02d}:{minuto:02d} con «{quien}» "
+                f"dice allowed={visto['allowed']} y tenia que "
+                f"decir {escribe}: manda la hora, no quien llama"
+            )
 
-        assert deliberado["allowed"] is True, (
-            f"a las {hora:02d}:{minuto:02d} el disparo "
-            f"deliberado no puede trabajar"
-        )
+        # Y dentro de la franja SIEMPRE, para las cuatro.
+        assert permite_escribir(utc, "manual")["in_window"] is (
+            True
+        ), (hora, minuto)
 
 
 # ============================================================

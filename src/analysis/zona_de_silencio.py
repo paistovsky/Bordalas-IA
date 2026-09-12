@@ -127,11 +127,33 @@ TANDA_NUEVA_HASTA = "07:09"
 DIAS_MEDIDOS = 7
 
 
-# QUIEN DISPARA
+# QUIEN DISPARA — RETIRADO EL 12/09/2026 COMO CRITERIO
 #
-#     `schedule` es el cron de GitHub, que llega tarde cuando le
-#     apetece. Los demas son deliberados.
-DISPAROS_DELIBERADOS = frozenset(
+#     Esta lista decidia si una vuelta podia escribir dentro de
+#     la ventana del reset: `schedule` era el cron de GitHub, que
+#     llega tarde cuando le apetece, y los demas se daban por
+#     deliberados.
+#
+#     DEJO DE FUNCIONAR EL MISMO DIA QUE SE RETIRO EL SCHEDULE.
+#     Sin el, TODAS las vueltas entran como `workflow_dispatch`
+#     —el latido de cron-job.org incluido— asi que todas caian en
+#     esta lista y todas eran "deliberadas". El criterio no es
+#     que fuera mas permisivo: es que dejo de distinguir nada.
+#
+#     Comprobado ese dia:
+#
+#         05:30 Madrid, dentro de la ventana del reset
+#           schedule           escribe False
+#           workflow_dispatch  escribe True   <- ahora, todas
+#
+#     Un latido descolocado a las 05:30 habria escrito con el
+#     mercado sin resetear, que es exactamente lo que costo la
+#     primera ventana en septiembre.
+#
+#     LA LISTA SE QUEDA ESCRITA y ya no decide. El nombre del
+#     disparo se sigue publicando como `trigger`, porque para
+#     mirar un incidente vale; para decidir, no.
+DISPAROS_DELIBERADOS_RETIRADOS = frozenset(
     {
         "workflow_dispatch",
         "repository_dispatch",
@@ -141,6 +163,62 @@ DISPAROS_DELIBERADOS = frozenset(
 )
 
 DISPARO_DEL_CRON = "schedule"
+
+
+# LO QUE DECIDE AHORA: LA HORA, CONTRA LA DECLARACION
+#
+#     Un disparo cuenta como DELIBERADO solo si cae en una de las
+#     horas declaradas para la ventana —04:45, 04:50, 07:15—
+#     dentro del margen de gracia. Cualquier otro es un disparo
+#     DESCOLOCADO y no escribe aqui dentro, VENGA POR DONDE
+#     VENGA.
+#
+#     Eso se puede saber sin depender de quien llamo, que es
+#     justo lo que se perdio al quitar el `schedule`.
+#
+#     La declaracion vive en `config/disparos.json` y es la
+#     autoridad. Ver `src/analysis/los_disparos.py`.
+CLASES_DELIBERADAS = frozenset({"ventana", "tras_el_reset"})
+
+
+def _es_deliberado(minutos_de_madrid: int) -> dict:
+    """
+    ¿Tocaba un disparo de la ventana a esta hora? Forma fija.
+
+    SI NO SE SABE, NO ES DELIBERADO. Si la declaracion no se
+    pudiera leer, esto devuelve False y la vuelta no escribe
+    dentro de la ventana: el lado seguro de no saber la hora a la
+    que tocaba entrar es no tocar el mercado mientras se resetea.
+    """
+
+    try:
+        from src.analysis.los_disparos import que_disparo_toca
+
+        toca = que_disparo_toca(minutos_de_madrid)
+
+        if not toca.get("available"):
+            return {
+                "deliberado": False,
+                "que": None,
+                "reason": toca.get("reason"),
+            }
+
+        return {
+            "deliberado": bool(toca.get("hay"))
+            and toca.get("que") in CLASES_DELIBERADAS,
+            "que": toca.get("que") if toca.get("hay") else None,
+            "reason": toca.get("reason"),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "deliberado": False,
+            "que": None,
+            "reason": (
+                f"No se pudo mirar la declaracion de disparos: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
 
 
 def _hora_de_madrid(momento_utc: datetime) -> datetime:
@@ -218,17 +296,21 @@ def permite_escribir(
             SILENCIO_DESDE <= minutos_de_madrid < SILENCIO_HASTA
         )
 
-        deliberado = (
-            str(disparo or "").strip().lower()
-            in DISPAROS_DELIBERADOS
-        )
+        # LA HORA DECIDE, NO QUIEN LLAMO.
+        segun_la_hora = _es_deliberado(minutos_de_madrid)
+
+        deliberado = segun_la_hora["deliberado"]
 
         base = {
             "available": True,
             "in_window": dentro,
             "madrid_time": madrid.strftime("%H:%M:%S"),
+            # Se sigue publicando: para mirar un incidente vale.
+            # Para decidir, ya no.
             "trigger": disparo,
             "deliberate": deliberado,
+            "declared_shot": segun_la_hora["que"],
+            "declared_reason": segun_la_hora["reason"],
             "window": (
                 f"{SILENCIO_DESDE // 60:02d}:"
                 f"{SILENCIO_DESDE % 60:02d}-"
@@ -254,9 +336,10 @@ def permite_escribir(
                 "allowed": True,
                 "reason": (
                     f"Son las {base['madrid_time']} de Madrid, "
-                    f"dentro de la franja del reset, pero esta "
-                    f"vuelta la ha disparado «{disparo}» a "
-                    f"proposito: es el trabajo de la ventana."
+                    f"dentro de la franja del reset, y a esta "
+                    f"hora SI toca un disparo declarado "
+                    f"(«{segun_la_hora['que']}»): es el trabajo "
+                    f"de la ventana."
                 ),
             }
 
@@ -266,11 +349,13 @@ def permite_escribir(
             "reason": (
                 f"ZONA DE SILENCIO: son las "
                 f"{base['madrid_time']} de Madrid y el reset se "
-                f"ejecuta en esta franja ({base['window']}). "
-                f"Esta vuelta llega de "
-                f"«{disparo or 'origen desconocido'}», no de un "
-                f"disparo deliberado: se lee y se publica, no se "
-                f"escribe."
+                f"ejecuta en esta franja ({base['window']}). A "
+                f"esta hora NO toca ningun disparo declarado de "
+                f"la ventana, asi que esta vuelta esta "
+                f"DESCOLOCADA venga de donde venga —llega de "
+                f"«{disparo or 'origen desconocido'}»—: se lee y "
+                f"se publica, no se escribe. "
+                f"{segun_la_hora['reason'] or ''}".strip()
             ),
         }
 

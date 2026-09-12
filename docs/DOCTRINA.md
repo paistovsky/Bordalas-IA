@@ -957,6 +957,68 @@ Es la [regla 36](#36-un-valor-por-defecto-no-puede-absorber-el-caso-más-importa
 —*lo desconocido sale como desconocido*— aplicada a los indicadores: **«no ha
 corrido» no es «va bien»**.
 
+---
+
+### 38. Lo que decide no puede depender de quién pregunta
+
+*(Cerrado por el dueño el 12/09/2026.)*
+
+La zona de silencio decidía si una vuelta podía escribir durante el reset mirando
+**quién la había disparado**:
+
+```python
+DISPAROS_DELIBERADOS = {"workflow_dispatch", "repository_dispatch", "manual", "ventana"}
+DISPARO_DEL_CRON = "schedule"
+```
+
+Funcionó mientras hubo dos clases de llamante. El 12/09 se retiró el `schedule` de
+GitHub —se saltaba vueltas todos los días: llegaba 30-40 minutos tarde y perdía
+ciclos enteros— y **todas** las vueltas pasaron a entrar como `workflow_dispatch`,
+el latido incluido.
+
+El criterio no se volvió más permisivo. **Dejó de distinguir nada**, en silencio y
+sin ponerse rojo:
+
+```
+05:30 Madrid, dentro de la ventana del reset
+  schedule           escribe False      <- antes
+  workflow_dispatch  escribe True       <- ahora, TODAS
+```
+
+Un latido descolocado a las 05:30 habría escrito con el mercado a medio resetear,
+que es exactamente lo que costó la primera ventana en septiembre.
+
+**La regla:** una decisión se toma sobre una **propiedad del hecho**, no sobre la
+identidad de quien lo trae. Quién llama es un dato del entorno: cambia por motivos
+que no tienen nada que ver con la decisión, y cuando cambia no avisa.
+
+La propiedad aquí era **la hora**:
+
+> Un disparo cuenta como deliberado **sólo si cae en una de las horas declaradas**
+> —04:45, 04:50, 07:15— dentro de su margen de gracia. Cualquier otro está
+> **descolocado** y no escribe dentro de la zona de silencio, **venga por donde
+> venga**. Un humano incluido.
+
+Eso se puede saber sin preguntarle a nadie, porque la declaración está en
+`config/disparos.json` y es la autoridad.
+
+**Y su reverso, que es de dónde salió esto:** la autoridad del reloj **ya no vive en
+el repositorio**. Está en cron-job.org, que el código no puede leer. Cuando la
+autoridad se va de casa, lo único honesto es **declarar lo que se espera** y
+comparar la realidad contra esa declaración — sabiendo que la declaración *no es la
+verdad*, sino lo que creemos haber configurado.
+
+**Guardias:** `test_el_descolocado_no_escribe_venga_de_donde_venga` prueba 05:30 y
+06:40 contra cinco llamantes distintos —incluido `manual`—;
+`test_sin_declaracion_no_se_escribe_en_la_ventana` comprueba que si la declaración
+no se puede leer, **no** es deliberado (regla 36);
+`test_el_schedule_de_github_no_vuelve_sin_saber_por_que` se pone roja si alguien
+devuelve el cron sin leer por qué se quitó.
+
+Es la [regla 33](#33-un-dato-un-nombre) —*un dato, un nombre*— llevada a las
+decisiones: **un criterio, una propiedad**. Si el criterio necesita saber quién
+pregunta, es que aún no se ha encontrado la propiedad.
+
 
 ## Descartado
 
@@ -1007,6 +1069,7 @@ ninguno por encima de los demás.
 | 31 | Quedar de los últimos en la jornada paga | **medida** 10/09 |
 | 32 | El negocio es la subasta, no el calendario | **medida** 10/09 |
 | 33 | Un dato, un nombre — el 3 % no es diario | **corregida** 10/09 |
+| 38 | Lo que decide no puede depender de quién pregunta | **nueva** 12/09 |
 
 **Once hechas. Doce por hacer. Cuatro nuevas el 10/09.**
 

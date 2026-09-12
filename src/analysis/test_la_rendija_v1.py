@@ -901,40 +901,58 @@ def test_el_ciclo_llama_al_carril() -> None:
         )
 
 
-def test_el_disparo_deliberado_viaja_hasta_el_silencio() -> None:
+def test_la_hora_declarada_manda_en_el_silencio() -> None:
     """
     Los disparos de las 04:45 y 04:50 caen DENTRO de la zona de
-    silencio a proposito, y la zona los salva si se le dice que
-    son deliberados.
+    silencio a proposito, y la zona los deja pasar.
 
-    `permiso()` llamaba a `permite_escribir(momento)` sin el
-    disparo, asi que los bloqueaba igual que a los del cron —
-    justo en la ventana del reset, que es para lo que estan.
+    DOS ARREGLOS, Y EL SEGUNDO SE COMIO AL PRIMERO
+
+        11/09. `permiso()` llamaba a `permite_escribir(momento)`
+        SIN el disparo, asi que bloqueaba los de la ventana igual
+        que a los del cron. Se arreglo pasandole el disparo.
+
+        12/09. Se retiro el `schedule` de GitHub y ese arreglo
+        dejo de servir: desde entonces TODAS las vueltas entran
+        como `workflow_dispatch`, el latido incluido, asi que
+        todas eran "deliberadas" y la zona dejo de frenar nada.
+
+        Ahora decide LA HORA, contra `config/disparos.json`. El
+        disparo se sigue pasando y se sigue publicando —para
+        mirar un incidente vale— pero no decide.
     """
 
-    # 04:50 de Madrid.
+    # 04:50 de Madrid: hora declarada. Pasa venga de donde venga.
     en_la_ventana = datetime(
         2026, 9, 12, 2, 50, tzinfo=timezone.utc
     )
 
-    assert permiso(ahora=en_la_ventana)["blocked_by"] == (
-        "SILENCIO"
-    ), "sin decir el disparo tiene que seguir bloqueando"
+    for quien in (None, "schedule", "workflow_dispatch", "manual"):
+        visto = permiso(ahora=en_la_ventana, disparo=quien)
 
-    assert permiso(
-        ahora=en_la_ventana, disparo="schedule"
-    )["blocked_by"] == "SILENCIO", (
-        "el cron NO puede escribir en la zona de silencio"
-    )
+        assert visto["puede"] is True, (quien, visto)
 
-    for deliberado in ("ventana", "workflow_dispatch", "manual"):
-        visto = permiso(
-            ahora=en_la_ventana, disparo=deliberado
+    # 05:30 y 06:40 de Madrid: DESCOLOCADOS. No pasa ninguno.
+    for hora, minuto in ((3, 30), (4, 40)):
+
+        descolocado = datetime(
+            2026, 9, 12, hora, minuto, tzinfo=timezone.utc
         )
 
-        assert visto["puede"] is True, (deliberado, visto)
+        for quien in (
+            None,
+            "workflow_dispatch",
+            "manual",
+            "ventana",
+        ):
+            visto = permiso(ahora=descolocado, disparo=quien)
 
-    # Y el ciclo se lo pasa.
+            assert visto["blocked_by"] == "SILENCIO", (
+                quien,
+                visto,
+            )
+
+    # Y el ciclo se lo sigue pasando: se publica como `trigger`.
     from pathlib import Path
 
     ejecutor = (
@@ -1717,7 +1735,7 @@ TESTS = [
     test_se_publica_si_llega_al_suelo_de_venta,
     test_la_rendija_esta_armada,
     test_el_ciclo_llama_al_carril,
-    test_el_disparo_deliberado_viaja_hasta_el_silencio,
+    test_la_hora_declarada_manda_en_el_silencio,
     test_el_filtro_es_el_suelo_no_el_cero,
     test_la_prueba_de_humo_es_de_cupo_no_de_suelo,
     test_al_completar_un_viaje_vuelve_todo_a_su_sitio,

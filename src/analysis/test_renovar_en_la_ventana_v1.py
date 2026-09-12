@@ -803,6 +803,14 @@ def _utc(mes, dia, hora, minuto=0):
     return datetime(2026, mes, dia, hora, minuto, tzinfo=timezone.utc)
 
 
+def _mins(hhmm):
+    """"HH:MM" -> minutos desde medianoche."""
+
+    h, m = str(hhmm).split(":")
+
+    return int(h) * 60 + int(m)
+
+
 def test_la_hora_se_calcula_en_madrid_con_su_verano():
     """
     Ni en UTC ni con la hora del contenedor. Es el error que ya
@@ -848,32 +856,167 @@ def test_el_cron_que_llega_tarde_no_escribe():
     assert "SILENCIO" in tarde["reason"]
 
 
-def test_el_disparo_deliberado_si_escribe():
+def test_la_hora_declarada_escribe_venga_de_donde_venga():
     """
-    El trabajo de la ventana cae DENTRO de la franja a
-    proposito. Si el silencio lo tapara, no habria subasta
-    nunca.
+    EL TRABAJO DE LA VENTANA CAE DENTRO DE LA FRANJA A PROPOSITO.
+    Si el silencio lo tapara, no habria subasta nunca.
+
+    LO QUE CAMBIO EL 12/09/2026
+
+        Antes esto dependia de QUIEN llamaba: `workflow_dispatch`
+        era deliberado y `schedule` no. Ese criterio murio el dia
+        que se retiro el `schedule` de GitHub —desde entonces
+        TODAS las vueltas entran como `workflow_dispatch`, el
+        latido incluido, asi que la lista dejo de distinguir
+        nada—.
+
+        Ahora decide LA HORA, contra `config/disparos.json`: un
+        disparo es deliberado solo si cae en una de las horas
+        declaradas de la ventana. Eso se puede saber sin depender
+        de quien llamo, que es justo lo que se habia perdido.
     """
 
-    ventana = permite_escribir(
-        _utc(9, 10, 4, 52), "workflow_dispatch"
-    )
+    # 04:50 de Madrid: disparo declarado de la ventana.
+    for quien in (
+        "workflow_dispatch",
+        "manual",
+        "schedule",
+        None,
+    ):
+        ventana = permite_escribir(_utc(9, 10, 2, 50), quien)
 
-    assert ventana["allowed"] is True
-    assert ventana["in_window"] is True
-    assert ventana["deliberate"] is True
+        assert ventana["allowed"] is True, (quien, ventana)
+        assert ventana["in_window"] is True, (quien, ventana)
+        assert ventana["deliberate"] is True, (quien, ventana)
+        assert ventana["declared_shot"] == "ventana", ventana
 
 
-def test_sin_saber_quien_dispara_se_calla():
+def test_el_descolocado_no_escribe_venga_de_donde_venga():
+    """
+    LA OTRA MITAD, Y LA QUE IMPORTA.
 
+    Un disparo que no cae en ninguna hora declarada esta
+    DESCOLOCADO, y dentro de la franja del reset no escribe
+    aunque lo mande un humano. Es la forma que tendria un
+    cron-job.org mal configurado: antes lo frenaba el `schedule`
+    y al quitarlo se quedo sin nadie que lo frenara.
+
+    Un ciclo escribiendo con el mercado a medio resetear es
+    exactamente lo que costo la primera ventana en septiembre.
+    """
+
+    # 05:30 y 06:40 de Madrid: dentro de la franja, y a esas
+    # horas no toca ningun disparo declarado.
+    for hora, minuto in ((3, 30), (4, 40)):
+
+        for quien in (
+            "workflow_dispatch",
+            "repository_dispatch",
+            "manual",
+            "ventana",
+            None,
+        ):
+            visto = permite_escribir(
+                _utc(9, 10, hora, minuto), quien
+            )
+
+            assert visto["allowed"] is False, (
+                hora,
+                minuto,
+                quien,
+                visto,
+            )
+
+            assert visto["deliberate"] is False, visto
+
+            assert visto["declared_shot"] is None, visto
+
+            # Y lo dice sin echarle la culpa a quien llamo.
+            assert "DESCOLOCADA" in visto["reason"], visto
+
+
+def test_sin_declaracion_no_se_escribe_en_la_ventana():
+    """
+    Si la declaracion no se pudiera leer, NO es deliberado.
+
+    El lado seguro de no saber a que hora tocaba entrar es no
+    tocar el mercado mientras se resetea. Un valor por defecto
+    no puede absorber el caso mas importante (doctrina 36), y
+    aqui el caso mas importante es justamente "no se sabe".
+    """
+
+    from src.analysis.zona_de_silencio import _es_deliberado
+
+    import src.analysis.los_disparos as disparos
+
+    original = disparos.DECLARACION
+
+    try:
+        disparos.DECLARACION = (
+            original.parent / "no_existe_este_fichero.json"
+        )
+
+        visto = _es_deliberado(4 * 60 + 50)
+
+        assert visto["deliberado"] is False, visto
+        assert visto["que"] is None, visto
+        assert visto["reason"], "no dice por que no lo sabe"
+
+    finally:
+        disparos.DECLARACION = original
+
+    # Y con la declaracion de vuelta, vuelve a saberlo.
+    assert _es_deliberado(4 * 60 + 50)["deliberado"] is True
+
+
+def test_sin_saber_quien_dispara_manda_la_hora():
+    """
+    LA PREMISA DE ESTA GUARDIA CAMBIO EL 12/09/2026.
+
+    Se llamaba `test_sin_saber_quien_dispara_se_calla` y era
+    cierta mientras QUIEN llamaba decidia: sin disparo conocido,
+    no se escribia dentro de la franja.
+
+    Ya no decide quien llama, decide la hora. Asi que no saber
+    quien disparo no cambia nada: a las 06:52, que no es ninguna
+    hora declarada, se calla — y a las 04:50 escribe, porque a
+    esa hora toca el trabajo de la ventana.
+    """
+
+    # 06:52 de Madrid: dentro de la franja, sin disparo declarado.
     sin_saber = permite_escribir(_utc(9, 10, 4, 52), None)
 
-    assert sin_saber["allowed"] is False, (
-        "escribe sin saber quien ha disparado la vuelta"
-    )
+    assert sin_saber["allowed"] is False, sin_saber
+
+    # 04:50 de Madrid: hora declarada.
+    en_hora = permite_escribir(_utc(9, 10, 2, 50), None)
+
+    assert en_hora["allowed"] is True, en_hora
 
 
 def test_fuera_de_la_franja_se_escribe_siempre():
+    """
+    Fuera de la franja del reset se escribe siempre.
+
+    OJO A LAS 05:00, que es donde esta guardia se puso roja el
+    12/09: esta DENTRO de la franja, pero a diez minutos del
+    disparo declarado de las 04:50 — y la gracia declarada son
+    doce. Un ciclo disparado a las 04:50 tarda en arrancar,
+    correr y llegar a la escritura; si la gracia no contara aqui,
+    el trabajo de la ventana se bloquearia a si mismo.
+
+    La gracia sale de `config/disparos.json`, no de aqui.
+    """
+
+    from src.analysis.los_disparos import declaracion
+
+    decl = declaracion()
+
+    gracia = decl["gracia_minutos"]
+
+    declarados = [
+        _mins(p["madrid"]) for p in decl["puntuales"]
+    ]
 
     for hora in (0, 3, 7, 12, 20, 23):
 
@@ -887,8 +1030,13 @@ def test_fuera_de_la_franja_se_escribe_siempre():
         #     quedo comparando 5 contra 285.
         madrid = ((hora + 2) % 24) * 60
 
-        esperado = not (
-            SILENCIO_DESDE <= madrid < SILENCIO_HASTA
+        cerca_de_un_declarado = any(
+            abs(madrid - d) <= gracia for d in declarados
+        )
+
+        esperado = (
+            not (SILENCIO_DESDE <= madrid < SILENCIO_HASTA)
+            or cerca_de_un_declarado
         )
 
         assert r["allowed"] is esperado, (
@@ -1019,8 +1167,10 @@ TESTS = [
     test_el_tope_por_defecto_cabe_en_el_presupuesto,
     test_la_hora_se_calcula_en_madrid_con_su_verano,
     test_el_cron_que_llega_tarde_no_escribe,
-    test_el_disparo_deliberado_si_escribe,
-    test_sin_saber_quien_dispara_se_calla,
+    test_la_hora_declarada_escribe_venga_de_donde_venga,
+    test_el_descolocado_no_escribe_venga_de_donde_venga,
+    test_sin_declaracion_no_se_escribe_en_la_ventana,
+    test_sin_saber_quien_dispara_manda_la_hora,
     test_fuera_de_la_franja_se_escribe_siempre,
     test_si_no_se_puede_calcular_la_hora_se_calla,
     test_se_ve_lo_que_se_quedo_sin_hacer,
