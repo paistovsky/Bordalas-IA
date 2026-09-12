@@ -111,6 +111,8 @@ def correr(
     rates: dict | None,
     prima_de_puja: float,
     curva: float = 1.0,
+    caja=None,
+    comprometido=None,
     presupuesto=None,
     tope_por_operacion=None,
     escritor=None,
@@ -129,6 +131,7 @@ def correr(
         MARCA,
         suelo_de_precio,
         a_quien_pujar,
+        bolsillo_del_carril,
         con_margen,
         importe_de_la_puja,
         los_que_se_pueden_pagar,
@@ -217,13 +220,29 @@ def correr(
         #     por operacion de 843.612, y la puja se rechazaba
         #     sola. Siete veces el tope.
         #
-        #     El orden de preferencia va por prima de reventa, y
-        #     esa prefiere a los caros: sin esto el carril elige
-        #     sistematicamente al que menos puede pagar y gasta
-        #     el ciclo en un nombre imposible.
+        #     El orden de preferencia NO MIRA EL PRECIO: va por
+        #     prima de posicion, defensas primero. Asi que el
+        #     primero de la lista puede costar cualquier cosa, y
+        #     sin esto el ciclo se gasta en un nombre imposible.
         #
         #     Es el MISMO tope que ya habia, preguntado cuando
         #     todavia sirve de algo.
+        # EL BOLSILLO DEL CARRIL, QUE ES SUYO.
+        #
+        #     En euros, no un porcentaje del motor de especular.
+        #     Acotado por la caja: el carril no abre deuda para
+        #     especular, asi que no puede comprometer dinero que
+        #     no hay ni romper ninguna barandilla de solvencia.
+        bolsillo = bolsillo_del_carril(
+            caja, comprometido=comprometido
+        )
+
+        tope_por_operacion = (
+            bolsillo["tope"]
+            if tope_por_operacion is None
+            else tope_por_operacion
+        )
+
         pagables = los_que_se_pueden_pagar(
             margen.get("entran") or [],
             curva=curva,
@@ -253,6 +272,7 @@ def correr(
                 "permiso": puerta,
                 "margen": margen,
                 "pagables": pagables,
+                "bolsillo": bolsillo,
             }
 
         if escritor is None:
@@ -365,6 +385,7 @@ def correr(
             "permiso": puerta,
             "margen": margen,
             "pagables": pagables,
+            "bolsillo": bolsillo,
             "reason": (
                 f"{len(puestas)} puja(s) de la rendija"
                 + (

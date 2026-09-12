@@ -47,9 +47,10 @@ from src.actions.escaparate_executor import (
 )
 from src.analysis.la_rendija import (
     APAGADO_ENV,
+    CARRIL_TOPE_POR_OPERACION,
     CUPO_DE_LA_PRUEBA,
     PRIMA_DEL_TRAMO_BARATO,
-    SUELO_DE_LA_PRUEBA,
+    SUELO_RETIRADO_DE_LA_PRUEBA,
     CUPO_DE_ESTRENO,
     CUPO_PLENO,
     ESCRITURAS_POR_VUELTA,
@@ -61,6 +62,8 @@ from src.analysis.la_rendija import (
     margen_esperado,
     permiso,
     ritmo_de_los_candidatos,
+    bolsillo_del_carril,
+    importe_de_la_puja,
     los_que_se_pueden_pagar,
     se_apaga_sola,
     suelo_de_precio,
@@ -992,47 +995,61 @@ def test_el_filtro_es_el_suelo_no_el_cero() -> None:
 # ============================================================
 
 
-def test_la_prueba_de_humo_baja_el_suelo_y_el_cupo() -> None:
+def test_la_prueba_de_humo_es_de_cupo_no_de_suelo() -> None:
     """
-    El primer viaje NO tiene que ganar dinero: tiene que
-    COMPLETARSE. Con el tope por operacion de hoy (~740.000) y el
-    suelo normal de 1 M, las dos condiciones eran incompatibles y
-    el carril no podia comprar NUNCA.
+    LO QUE SE PROBO Y SE RETIRO EL MISMO DIA.
 
-    Un viaje, y se mira.
+    El 12/09 se bajo el suelo a 400.000 para que la prueba de
+    humo pudiera comprar algo. Medido con el mercado de ese dia,
+    no valia: por debajo del millon el Computer casi no ofrece
+    nada, y cuando ofrece la prima de reventa es la PEOR de las
+    cuatro bandas (+1,52 %). La prueba se habria hecho en el
+    unico tramo donde el negocio no existe.
+
+    El freno NUNCA fue el suelo. Era el TECHO: 843.612 EUR de
+    tope por operacion, que salia de un porcentaje del bolsillo
+    de OTRO motor y era menor que el propio suelo.
+
+    Asi que la prueba de humo se queda —UN viaje, de punta a
+    punta— y el suelo vuelve a su sitio.
     """
 
-    assert SUELO_DE_LA_PRUEBA == 400_000, SUELO_DE_LA_PRUEBA
     assert CUPO_DE_LA_PRUEBA == 1, CUPO_DE_LA_PRUEBA
+
+    assert cupo_del_reset([])["cupo"] == CUPO_DE_LA_PRUEBA
+
+    assert cupo_del_reset([])["estado"] == "PRUEBA_DE_HUMO"
+
+    # EL SUELO VOLVIO, y tiene un solo estado.
+    from src.analysis.salida_del_viaje import (
+        PRECIO_QUE_NO_PAGA_LA_FICHA,
+    )
 
     suelo = suelo_de_precio([])
 
-    assert suelo["suelo"] == SUELO_DE_LA_PRUEBA, suelo
-    assert suelo["estado"] == "PRUEBA_DE_HUMO", suelo
+    assert suelo["suelo"] == PRECIO_QUE_NO_PAGA_LA_FICHA, suelo
 
-    assert cupo_del_reset([])["cupo"] == CUPO_DE_LA_PRUEBA
+    assert suelo["estado"] == "NORMAL", suelo
+
+    # Y no lo mueve haber cerrado un viaje: ya no es un escalon.
+    assert suelo_de_precio(
+        [{"profit": 9_000, "player_name": "el primero"}]
+    )["suelo"] == PRECIO_QUE_NO_PAGA_LA_FICHA
+
+    # El 400.000 sigue escrito, pero SOLO como lo que se retiro.
+    assert SUELO_RETIRADO_DE_LA_PRUEBA == 400_000
 
 
 def test_al_completar_un_viaje_vuelve_todo_a_su_sitio() -> None:
     """
     La prueba termina sola. Un viaje completo —cobrado por encima
-    del suelo— y el suelo vuelve a 1.000.000 y el cupo a 2.
+    del suelo— y el cupo vuelve a 2.
 
     Y la condicion NO la cumple un corte de perdidas: eso cerro
     el viaje, no lo completo.
     """
 
-    from src.analysis.salida_del_viaje import (
-        PRECIO_QUE_NO_PAGA_LA_FICHA,
-    )
-
     completo = [{"profit": 9_000, "player_name": "el primero"}]
-
-    assert suelo_de_precio(completo)["suelo"] == (
-        PRECIO_QUE_NO_PAGA_LA_FICHA
-    )
-
-    assert suelo_de_precio(completo)["estado"] == "NORMAL"
 
     assert cupo_del_reset(completo)["cupo"] == CUPO_DE_ESTRENO
 
@@ -1045,7 +1062,7 @@ def test_al_completar_un_viaje_vuelve_todo_a_su_sitio() -> None:
         [{"profit": -5_000, "loss_cut": True}],
         [{"profit": 0}],
     ):
-        assert suelo_de_precio(falso)["estado"] == (
+        assert cupo_del_reset(falso)["estado"] == (
             "PRUEBA_DE_HUMO"
         ), falso
 
@@ -1435,6 +1452,245 @@ def test_la_pantalla_dice_el_suelo_y_los_viajes() -> None:
         )
 
 
+# ============================================================
+# 10. EL BOLSILLO PROPIO DEL CARRIL
+# ============================================================
+
+
+def test_el_carril_tiene_bolsillo_propio_en_euros() -> None:
+    """
+    EL FRENO DE VERDAD NO ERA EL SUELO, ERA EL TECHO.
+
+    Mientras el tope por operacion del carril salia de
+    `MAX_SINGLE_SPECULATION_PERCENT` sobre el bolsillo del motor
+    de especular, valia 843.612 EUR el 12/09: MENOS QUE EL SUELO
+    de 1.000.000. El carril no podia comprar nada, nunca, por
+    construccion —y bajar el suelo a 400.000 no lo arreglaba,
+    solo lo mandaba al tramo de peor prima de reventa.
+
+    Ahora el tope es suyo, en euros, y no depende de ningun
+    porcentaje de otro motor.
+    """
+
+    assert CARRIL_TOPE_POR_OPERACION == 3_000_000, (
+        CARRIL_TOPE_POR_OPERACION
+    )
+
+    # EL TOPE TIENE QUE SER MAYOR QUE EL SUELO, o estamos otra
+    # vez donde estabamos: un carril que no puede comprar nada.
+    assert CARRIL_TOPE_POR_OPERACION > (
+        suelo_de_precio([])["suelo"]
+    ), (
+        "el tope por operacion es menor que el suelo: el carril "
+        "no puede comprar nada, que es el fallo de origen"
+    )
+
+    # POR QUE 3 M Y NO 2 M: por el tramo de mejor prima medida
+    # sobre las 34 recompras —1-3 M, +3,46 %—. Con 2 M el carril
+    # solo alcanza la parte baja de ese tramo.
+    assert CARRIL_TOPE_POR_OPERACION >= 3_000_000, (
+        "por debajo de 3 M se pierde la parte alta del tramo "
+        "1-3 M, que es el de mejor prima de reventa medida"
+    )
+
+    # Y NO SALE DE NINGUN PORCENTAJE DEL MOTOR DE ESPECULAR.
+    from src.analysis.speculation_engine import (
+        MAX_SINGLE_SPECULATION_PERCENT,
+    )
+
+    assert MAX_SINGLE_SPECULATION_PERCENT == 0.40, (
+        "se ha movido un porcentaje del motor de especular, que "
+        "es exactamente lo que el bolsillo propio existe para no "
+        "tener que hacer"
+    )
+
+
+def test_el_bolsillo_no_puede_gastar_lo_que_no_hay() -> None:
+    """
+    Tener bolsillo propio NO es tener dinero propio.
+
+    El carril no abre deuda para especular: su tope es el menor
+    de los dos, su bolsillo y la caja LIBRE. Por eso no puede
+    romper ninguna barandilla de solvencia — nunca compromete
+    mas de lo que hay.
+    """
+
+    CAJA = 4_333_406                 # medida el 12/09
+
+    holgado = bolsillo_del_carril(CAJA)
+
+    assert holgado["tope"] == CARRIL_TOPE_POR_OPERACION, holgado
+
+    assert holgado["limitado_por"] == (
+        "CARRIL_TOPE_POR_OPERACION"
+    ), holgado
+
+    # Con la caja justa, manda la caja.
+    corto = bolsillo_del_carril(1_200_000)
+
+    assert corto["tope"] == 1_200_000, corto
+    assert corto["limitado_por"] == "CAJA", corto
+
+    # LO YA COMPROMETIDO NO ES CAJA.
+    #
+    #     El motor de especular ya descuenta de lo suyo lo que
+    #     aparta el carril. Este es el mismo descuento en el otro
+    #     sentido, que faltaba: las dos pujas se resuelven en el
+    #     MISMO reset.
+    con_pujas_vivas = bolsillo_del_carril(
+        CAJA, comprometido=2_000_000
+    )
+
+    assert con_pujas_vivas["tope"] == CAJA - 2_000_000, (
+        con_pujas_vivas
+    )
+
+    assert con_pujas_vivas["limitado_por"] == "CAJA"
+
+    # Regla 24: sin saber la caja NO SE PUJA. Un tope de 3 M a
+    # ciegas es justo lo que no puede pasar. Y dos casos
+    # distintos, dos nombres (regla 33).
+    for ciego, nombre in (
+        (bolsillo_del_carril(None), "CAJA_DESCONOCIDA"),
+        (bolsillo_del_carril(0), "CAJA_DESCONOCIDA"),
+        (
+            bolsillo_del_carril(CAJA, comprometido=CAJA),
+            "SIN_CAJA_LIBRE",
+        ),
+    ):
+        assert ciego["tope"] == 0, ciego
+        assert ciego["available"] is False, ciego
+        assert ciego["limitado_por"] == nombre, ciego
+
+
+def test_el_bolsillo_propio_manda_al_elegir() -> None:
+    """
+    EL HALLAZGO DEL 12/09, PROBADO CON EL TOPE NUEVO.
+
+    El tope se aplicaba AL PAGAR y no AL ELEGIR.
+
+    Y OJO AL PORQUE, que no es "prefiere a los caros": el orden
+    NO MIRA EL PRECIO. Va por prima de posicion —defensas
+    primero—, asi que el primero de la lista puede costar
+    cualquier cosa. El 12/09 el primero era Cancelo, defensa de
+    5.970.000, contra un tope de 843.612.
+
+    Con el tope nuevo de 3 M el caso es el mismo con otros
+    numeros: Cancelo sigue siendo el primero y sigue sin caber.
+    """
+
+    CAJA = 4_333_406
+
+    tope = bolsillo_del_carril(CAJA)["tope"]
+
+    assert tope == 3_000_000, tope
+
+    # Los tres son del mercado real del 12/09. Cancelo y Trent
+    # son defensas: el orden los pone por delante de un medio, y
+    # entre ellos no mira cual cuesta el doble.
+    mercado = [
+        {"player_id": 1, "name": "Cancelo", "position": 2,
+         "market_price": 5_970_000},
+        {"player_id": 2, "name": "Trent", "position": 2,
+         "market_price": 2_760_000},
+        {"player_id": 3, "name": "Ruben Garcia", "position": 3,
+         "market_price": 2_680_000},
+    ]
+
+    # SIN FILTRAR: el orden elige al que no se puede pagar.
+    assert a_quien_pujar(mercado, cuantos=1)["elegidos"][0][
+        "name"
+    ] == "Cancelo", (
+        "si esto cambia, el caso que motiva la guardia ya no es "
+        "el que era: revisala"
+    )
+
+    filtrado = los_que_se_pueden_pagar(
+        mercado, curva=1.0, tope_por_operacion=tope
+    )
+
+    assert filtrado["tope"] == 3_000_000, filtrado
+
+    assert [x["name"] for x in filtrado["caben"]] == [
+        "Trent",
+        "Ruben Garcia",
+    ], filtrado
+
+    assert [x["name"] for x in filtrado["no_caben"]] == [
+        "Cancelo"
+    ], filtrado
+
+    assert filtrado["no_caben"][0]["capped_by"] == (
+        "CARRIL_TOPE_POR_OPERACION"
+    ), filtrado
+
+    # CON FILTRO: elige a uno que SI se puede pagar.
+    elegido = a_quien_pujar(
+        filtrado["caben"], cuantos=1
+    )["elegidos"][0]
+
+    assert elegido["name"] == "Trent", elegido
+
+    assert importe_de_la_puja(
+        elegido["market_price"],
+        curva=1.0,
+        tope_por_operacion=tope,
+    )["amount"] > 0, "el elegido no se puede pagar"
+
+    # Y SIN CAJA no cabe nadie, aunque haya candidatos.
+    a_ciegas = los_que_se_pueden_pagar(
+        mercado,
+        curva=1.0,
+        tope_por_operacion=bolsillo_del_carril(None)["tope"],
+    )
+
+    assert a_ciegas["caben"] == [], a_ciegas
+
+
+def test_un_viaje_de_tres_millones_no_rompe_la_solvencia() -> None:
+    """
+    LA EXPOSICION MAXIMA, EN NUMEROS.
+
+    UN viaje —`CUPO_DE_LA_PRUEBA` = 1— de 3 M como mucho, con el
+    tope acotado por la caja libre. Lo que puede perderse de
+    verdad no son los 3 M: es la caida del precio mientras dure,
+    que medida esta en torno al 8 % en cuatro resets.
+
+    Esta guardia NO lee el mundo (regla 23): usa la caja medida
+    el 12/09 como numero fijo. Si algun dia la caja real fuera
+    otra, `bolsillo_del_carril` lo recorta solo — y eso es lo que
+    se comprueba abajo.
+    """
+
+    CAJA = 4_333_406                 # medida el 12/09
+    CAIDA_EN_CUATRO_RESETS = 0.08    # medida
+
+    tope = bolsillo_del_carril(CAJA)["tope"]
+
+    assert tope == 3_000_000
+
+    # Despues de pagarlo entero queda caja, y positiva.
+    queda = CAJA - tope
+
+    assert queda > 0, queda
+
+    # Y despues de la caida, tambien.
+    perdida = int(tope * CAIDA_EN_CUATRO_RESETS)
+
+    assert perdida == 240_000, perdida
+
+    assert queda - perdida > 0, (queda, perdida)
+
+    # NUNCA se puede comprometer mas de lo que hay: es la
+    # propiedad que hace innecesario mirar la deuda, porque el
+    # carril no la abre.
+    for caja in (0, 100_000, 999_999, 3_000_000, 9_000_000):
+        assert bolsillo_del_carril(caja)["tope"] <= caja, caja
+
+    # Y un solo viaje: el cupo no deja abrir dos.
+    assert CUPO_DE_LA_PRUEBA == 1
+
+
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
@@ -1463,7 +1719,7 @@ TESTS = [
     test_el_ciclo_llama_al_carril,
     test_el_disparo_deliberado_viaja_hasta_el_silencio,
     test_el_filtro_es_el_suelo_no_el_cero,
-    test_la_prueba_de_humo_baja_el_suelo_y_el_cupo,
+    test_la_prueba_de_humo_es_de_cupo_no_de_suelo,
     test_al_completar_un_viaje_vuelve_todo_a_su_sitio,
     test_los_baratos_usan_la_prima_de_su_tramo,
     test_la_via_vieja_esta_en_pausa,
@@ -1472,6 +1728,10 @@ TESTS = [
     test_el_carril_filtra_por_el_tope_antes_de_elegir,
     test_el_suelo_vive_en_un_sitio,
     test_la_pantalla_dice_el_suelo_y_los_viajes,
+    test_el_carril_tiene_bolsillo_propio_en_euros,
+    test_el_bolsillo_no_puede_gastar_lo_que_no_hay,
+    test_el_bolsillo_propio_manda_al_elegir,
+    test_un_viaje_de_tres_millones_no_rompe_la_solvencia,
 ]
 
 

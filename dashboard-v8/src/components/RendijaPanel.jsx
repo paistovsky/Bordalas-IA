@@ -61,6 +61,11 @@ export default function RendijaPanel({ data }) {
   // Quien de los que entran se puede pagar de verdad.
   const pagables = rendija.pagables || {};
 
+  // El bolsillo del carril: suyo, en euros, y acotado por
+  // la caja libre. No sale de ningun porcentaje del motor
+  // de especular.
+  const bolsillo = rendija.bolsillo || {};
+
   const porId = new Map(
     (margen.entran || []).map((x) => [
       x.margen.player_id,
@@ -189,6 +194,36 @@ export default function RendijaPanel({ data }) {
 
       <p className="note" style={{ textAlign: "left" }}>
         {rendija.suelo_reason}
+      </p>
+
+      {/* EL BOLSILLO, Y QUE LO LIMITA.
+
+          Mientras el tope salia de un porcentaje del motor de
+          especular valia 843.612 — menos que el suelo — y el
+          carril no podia comprar nada. Ahora es suyo, y aqui se
+          ve cual de los dos manda: su tope o la caja. */}
+      <div className="kv">
+        <span>Tope por operación</span>
+        <b className="mono">
+          {bolsillo.tope == null
+            ? "—"
+            : formatMoney(bolsillo.tope)}{" "}
+          <span
+            className={
+              bolsillo.available === false
+                ? "pill crit"
+                : bolsillo.limitado_por === "CAJA"
+                ? "pill warn"
+                : "pill ok"
+            }
+          >
+            {bolsillo.limitado_por || "—"}
+          </span>
+        </b>
+      </div>
+
+      <p className="note" style={{ textAlign: "left" }}>
+        {bolsillo.reason}
       </p>
 
       {/* EL CUPO, Y POR QUE ESE Y NO OTRO. */}
@@ -326,7 +361,7 @@ export default function RendijaPanel({ data }) {
             SE PUEDEN PAGAR
           </b>
           {pagables.tope != null && (
-            <> · tope por operación {formatMoney(pagables.tope)}</>
+            <> · tope {formatMoney(pagables.tope)}</>
           )}
           <div className="sub" style={{ marginTop: 4 }}>
             No caben:{" "}

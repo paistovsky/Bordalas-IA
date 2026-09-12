@@ -127,16 +127,71 @@ ESCRITURAS_POR_VUELTA = 2
 #     ficha. Lo que se acepta a sabiendas es que la operacion de
 #     la PRUEBA gane poco. Es el precio de saber si la cadena
 #     entera funciona.
-SUELO_DE_LA_PRUEBA = 400_000
+# RETIRADO EL 12/09/2026, EL MISMO DIA QUE SE PUSO.
+#
+#     Se bajo a 400.000 para que la prueba de humo pudiera
+#     comprar algo. Medido con el mercado de ese dia: no valia.
+#
+#     Por debajo del millon el Computer casi no ofrece nada, y
+#     cuando ofrece la prima de reventa es la PEOR de las cuatro
+#     bandas -+1,52 %, medido sobre las mismas 34 recompras-. La
+#     prueba se habria hecho en el unico tramo donde el negocio
+#     no existe: se habria medido la cadena con el peor material
+#     posible y un fracaso no habria dicho nada.
+#
+#     El freno nunca fue el suelo. Era el TECHO -el tope por
+#     operacion, 843.612 EUR, que salia de un porcentaje del
+#     bolsillo del motor de especular-. La solucion es darle al
+#     carril bolsillo propio, no bajarle el suelo.
+#
+#     Se deja escrito y NO se borra: el numero se probo, se midio
+#     y se retiro por una razon, y esa razon vale mas que el
+#     numero.
+SUELO_RETIRADO_DE_LA_PRUEBA = 400_000
 
-# El de siempre, al que se vuelve. No se toca: se importa.
+# El suelo de verdad. No se escribe aqui: se importa de donde se
+# midio.
 from src.analysis.salida_del_viaje import (                # noqa: E402
     PRECIO_QUE_NO_PAGA_LA_FICHA,
 )
 
-# Medida sobre las mismas 34 recompras, partidas por tramo de
-# precio en vez de por posicion. Es la que describe a un
-# jugador de menos de 1 M.
+# ============================================================
+# EL BOLSILLO DEL CARRIL — PROPIO, EN EUROS
+# ============================================================
+#
+# POR QUE EXISTE
+#
+#     Hasta hoy el tope por operacion del carril salia de
+#     `MAX_SINGLE_SPECULATION_PERCENT` sobre el bolsillo del
+#     motor de especular: 843.612 EUR el 12/09. Menor que el
+#     suelo de 1.000.000, o sea que EL CARRIL NO PODIA COMPRAR
+#     NADA, NUNCA, por construccion.
+#
+#     Y para arreglarlo habia dos caminos: tocar los porcentajes
+#     del motor de especular -que mueve tambien lo que hace la
+#     via vieja, y son numeros calibrados- o darle al carril su
+#     propio tope. El segundo no toca nada de lo otro.
+#
+# POR QUE 3.000.000 Y NO 2.000.000
+#
+#     Por el tramo de mejor prima de reventa, medido sobre las
+#     mismas 34 recompras:
+#
+#         <1 M    +1,52 %      3-6 M   +3,20 %
+#         1-3 M   +3,46 %  <-  6 M+    +3,83 %
+#
+#     Con tope de 2 M el carril solo alcanza la parte baja del
+#     tramo bueno. Con 3 M lo alcanza entero.
+#
+# LO QUE SE PUEDE PERDER
+#
+#     Un viaje -CUPO_DE_LA_PRUEBA = 1- de 3 M como mucho, que
+#     cierra en uno o dos dias, contra un techo de puja de
+#     16,72 M. Si sale mal, lo que se pierde no son los 3 M: es
+#     la caida del precio durante los resets que dure, que
+#     medida esta en torno al 8 % en cuatro. Unos 240.000.
+CARRIL_TOPE_POR_OPERACION = 3_000_000
+
 PRIMA_DEL_TRAMO_BARATO = 1.52
 
 # El cupo, por ciclo de reset. UNO mientras dure la prueba: un
@@ -339,37 +394,27 @@ def suelo_de_precio(cierres: list | None = None) -> dict:
     """
     Por debajo de que precio no mira el carril, y POR QUE.
 
-    Es el unico sitio donde vive ese numero, igual que el cupo.
-    Mientras dure la prueba de humo son 400.000; en cuanto se
-    complete un viaje vuelve a 1.000.000 solo.
+    Es el unico sitio donde vive ese numero. Hoy tiene un solo
+    estado: el 12/09 se bajo a 400.000 para la prueba de humo y
+    se devolvio el mismo dia, porque por debajo del millon el
+    Computer casi no ofrece nada y la prima de reventa es la peor
+    de las cuatro bandas. Ver `SUELO_RETIRADO_DE_LA_PRUEBA`.
+
+    `cierres` se sigue aceptando aunque hoy no cambie nada: la
+    firma la usan el ejecutor y la telemetria, y quitarla para
+    volver a ponerla es mas ruido que dejarla.
     """
-
-    primero = un_viaje_cerrado_entero(cierres)
-
-    if primero.get("hay"):
-        return {
-            "available": True,
-            "suelo": PRECIO_QUE_NO_PAGA_LA_FICHA,
-            "estado": "NORMAL",
-            "reason": (
-                f"Suelo de {_euros(PRECIO_QUE_NO_PAGA_LA_FICHA)} "
-                f"EUR: por debajo, la prima de reventa medida no "
-                f"paga la ficha. La prueba de humo termino."
-            ),
-        }
 
     return {
         "available": True,
-        "suelo": SUELO_DE_LA_PRUEBA,
-        "estado": "PRUEBA_DE_HUMO",
+        "suelo": PRECIO_QUE_NO_PAGA_LA_FICHA,
+        "estado": "NORMAL",
         "reason": (
-            f"PRUEBA DE HUMO: suelo bajado a "
-            f"{_euros(SUELO_DE_LA_PRUEBA)} EUR para que el "
-            f"carril tenga mercado con el tope por operacion de "
-            f"hoy. No busca ganar dinero: busca COMPLETAR un "
-            f"viaje de punta a punta. Vuelve a "
-            f"{_euros(PRECIO_QUE_NO_PAGA_LA_FICHA)} en cuanto "
-            f"pase una vez."
+            f"Suelo de {_euros(PRECIO_QUE_NO_PAGA_LA_FICHA)} "
+            f"EUR: por debajo, la prima de reventa medida es "
+            f"+{PRIMA_DEL_TRAMO_BARATO} % —la peor de las cuatro "
+            f"bandas— y sobre 150.000 son 2.250 EUR, que no "
+            f"pagan la ficha que ocupan."
         ),
     }
 
@@ -414,6 +459,113 @@ def cupo_del_reset(cierres: list | None = None) -> dict:
             f"cuanto pase una vez."
         ),
     }
+
+
+def bolsillo_del_carril(caja=None, comprometido=None) -> dict:
+    """
+    Cuanto puede comprometer el carril en UNA operacion, y POR
+    QUE ese numero.
+
+    ES SUYO, EN EUROS, Y NO SALE DE NINGUN PORCENTAJE DEL MOTOR
+    DE ESPECULAR. Ese fue el cambio del 12/09: mientras el tope
+    salia de un porcentaje del bolsillo ajeno, valia 843.612 EUR
+    —menos que el suelo— y el carril no podia comprar nada.
+
+    PERO EL DINERO TIENE QUE EXISTIR
+
+        Tener bolsillo propio no es tener dinero propio. Si la
+        caja no llega a 3.000.000, el tope es la caja: el carril
+        no abre deuda para especular, y por eso no puede romper
+        ninguna barandilla de solvencia — nunca compromete mas de
+        lo que hay.
+
+        Sin saber la caja NO SE PUJA. Pujar a ciegas con un tope
+        de 3 M es justo lo que esta funcion existe para impedir.
+
+    Y LO YA COMPROMETIDO NO ES CAJA
+
+        El motor de especular descuenta de SU presupuesto las
+        pujas vivas (`apply_exposure_to_budget`), asi que ve lo
+        que compromete el carril. Al reves no pasaba: el carril
+        tiene bolsillo propio y podria comprometer 3 M sobre una
+        caja de la que la ruta normal ya hubiera apartado otro
+        tanto, y las dos pujas se resuelven en el MISMO reset.
+
+        `comprometido` es ese dinero apartado. Se resta antes de
+        nada: tener bolsillo propio no es tener dinero propio.
+
+    Forma fija. Nunca lanza.
+    """
+
+    try:
+        disponible = safe_int(caja) - max(
+            0, safe_int(comprometido)
+        )
+
+        if disponible <= 0:
+            # DOS CASOS, DOS NOMBRES (regla 33). "No se sabe
+            # cuanto hay" y "se sabe, y esta todo apartado" se
+            # arreglan de formas distintas: el primero es una
+            # lectura rota, el segundo es el sistema funcionando.
+            return {
+                "available": False,
+                "tope": 0,
+                "limitado_por": (
+                    "CAJA_DESCONOCIDA"
+                    if safe_int(caja) <= 0
+                    else "SIN_CAJA_LIBRE"
+                ),
+                "reason": (
+                    f"Sin caja libre no se puja. Caja "
+                    f"{_euros(safe_int(caja))} EUR menos "
+                    f"{_euros(max(0, safe_int(comprometido)))} "
+                    f"EUR ya comprometidos en pujas vivas. El "
+                    f"tope del carril son "
+                    f"{_euros(CARRIL_TOPE_POR_OPERACION)} y "
+                    f"comprometerlos a ciegas es exactamente lo "
+                    f"que no puede pasar."
+                ),
+            }
+
+        if disponible < CARRIL_TOPE_POR_OPERACION:
+            return {
+                "available": True,
+                "tope": disponible,
+                "limitado_por": "CAJA",
+                "reason": (
+                    f"Tope de {_euros(disponible)} EUR: es la "
+                    f"caja LIBRE, que hoy no llega a los "
+                    f"{_euros(CARRIL_TOPE_POR_OPERACION)} del "
+                    f"carril. El carril no abre deuda para "
+                    f"especular."
+                ),
+            }
+
+        return {
+            "available": True,
+            "tope": CARRIL_TOPE_POR_OPERACION,
+            "limitado_por": "CARRIL_TOPE_POR_OPERACION",
+            "reason": (
+                f"Tope de "
+                f"{_euros(CARRIL_TOPE_POR_OPERACION)} EUR por "
+                f"operacion: es el bolsillo propio del carril, "
+                f"no un porcentaje del motor de especular. "
+                f"Alcanza el tramo de mejor prima de reventa "
+                f"medida, 1-3 M (+3,46 %). Caja disponible, "
+                f"{_euros(disponible)} EUR."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "tope": 0,
+            "limitado_por": "ERROR",
+            "reason": (
+                f"No se pudo calcular el bolsillo del carril: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
 
 
 # ============================================================
@@ -504,33 +656,50 @@ def importe_de_la_puja(
         bruto = int(round(precio * multiplicador))
 
         # LOS TOPES. Sin ellos NO se puja.
-        presupuesto = safe_int(presupuesto)
-
-        if presupuesto <= 0:
-            return {
-                **vacio,
-                "reason": (
-                    "Sin presupuesto de especulacion conocido no "
-                    "se puja."
-                ),
-            }
-
-        from src.analysis.speculation_engine import (
-            MAX_SINGLE_SPECULATION_PERCENT,
-        )
-
-        por_operacion = int(
-            presupuesto * MAX_SINGLE_SPECULATION_PERCENT
-        )
-
-        topes = {"MAX_SINGLE_SPECULATION_PERCENT": por_operacion}
-
+        #
+        # EL CARRIL TRAE EL SUYO, Y ENTONCES MANDA EL SUYO
+        #
+        #     Mientras el tope del carril salia de un porcentaje
+        #     del bolsillo del motor de especular valia 843.612
+        #     EUR: MENOS QUE EL SUELO de 1.000.000, o sea que el
+        #     carril no podia comprar nada por construccion.
+        #
+        #     Desde el 12/09 el carril tiene bolsillo propio en
+        #     euros (`CARRIL_TOPE_POR_OPERACION`), y cuando lo
+        #     pasa NO se consulta `MAX_SINGLE_SPECULATION_PERCENT`
+        #     — no es que se ignore un limite: es que ese limite
+        #     es de OTRO bolsillo y se estaba aplicando aqui por
+        #     no tener uno propio.
+        #
+        #     El bolsillo del carril ya viene acotado por la caja
+        #     (`bolsillo_del_carril`), asi que no puede
+        #     comprometer dinero que no hay.
         if tope_por_operacion is not None:
-            topes["TOPE_POR_OPERACION"] = safe_int(
-                tope_por_operacion
+            cual = "CARRIL_TOPE_POR_OPERACION"
+
+            tope = safe_int(tope_por_operacion)
+
+        else:
+            presupuesto = safe_int(presupuesto)
+
+            if presupuesto <= 0:
+                return {
+                    **vacio,
+                    "reason": (
+                        "Sin presupuesto de especulacion "
+                        "conocido no se puja."
+                    ),
+                }
+
+            from src.analysis.speculation_engine import (
+                MAX_SINGLE_SPECULATION_PERCENT,
             )
 
-        cual, tope = min(topes.items(), key=lambda x: x[1])
+            cual = "MAX_SINGLE_SPECULATION_PERCENT"
+
+            tope = int(
+                presupuesto * MAX_SINGLE_SPECULATION_PERCENT
+            )
 
         if tope <= 0:
             return {
@@ -602,9 +771,10 @@ def los_que_se_pueden_pagar(
         `importe_de_la_puja` lo miraba —y hacia bien en no
         recortar a la baja— pero para entonces el candidato ya
         estaba elegido y el cupo, gastado en un nombre imposible.
-        Y el orden de preferencia va por prima de reventa, que
-        prefiere a los caros: el carril elegia sistematicamente
-        al que menos podia pagar.
+        Y el orden de preferencia NO MIRA EL PRECIO: va por
+        prima de posicion —defensas primero—, asi que el
+        primero de la lista puede costar cualquier cosa. Ese
+        dia era Cancelo, defensa de 5.970.000.
 
     CONSECUENCIA
 

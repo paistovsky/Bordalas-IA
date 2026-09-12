@@ -648,6 +648,31 @@ def _correr_el_carril(cycle: dict, accion_principal):
             rates=build_market_rates(),
             prima_de_puja=(float(curva[0][0]) - 1.0) * 100.0,
             curva=float(curva[0][0]),
+            # EL CARRIL TIENE BOLSILLO PROPIO (12/09/2026).
+            #
+            #     Ya no sale de `budgets.speculation`: mientras
+            #     salia de ahi valia 843.612 EUR, menos que el
+            #     suelo de 1.000.000, y el carril no podia
+            #     comprar nada por construccion.
+            #
+            #     Lo que se le pasa ahora es LA CAJA, que es lo
+            #     que acota su tope propio de 3.000.000. El
+            #     presupuesto del motor de especular se sigue
+            #     pasando porque otras cuentas lo miran, pero ya
+            #     no decide el tope.
+            caja=(estado.get("balance")),
+            # Lo ya apartado en pujas vivas NO es caja. El motor
+            # de especular ya descuenta lo del carril de lo suyo;
+            # esto es el mismo descuento en el otro sentido, que
+            # faltaba.
+            comprometido=(
+                (
+                    (estado.get("speculation") or {}).get(
+                        "bid_exposure"
+                    )
+                    or {}
+                ).get("committed_total")
+            ),
             presupuesto=(
                 (tablero.get("budgets") or {}).get(
                     "speculation"

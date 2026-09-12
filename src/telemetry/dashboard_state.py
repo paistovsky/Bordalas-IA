@@ -4577,6 +4577,7 @@ def build_dashboard_state() -> dict:
     # los candidatos. No decide nada y no escribe nada.
     try:
         from src.analysis.la_rendija import (
+            bolsillo_del_carril,
             con_margen,
             cupo_del_reset,
             los_que_se_pueden_pagar,
@@ -4686,16 +4687,36 @@ def build_dashboard_state() -> dict:
         #     candidatos y ni uno comprable: el numero de la
         #     pantalla era cierto y la conclusion que sugeria,
         #     falsa.
+        # EL BOLSILLO DEL CARRIL, QUE ES SUYO Y EN EUROS.
+        #
+        #     Ya no sale de un porcentaje del motor de especular:
+        #     mientras salia de ahi valia 843.612 EUR, menos que
+        #     el suelo, y el carril no podia comprar nada.
+        #     Y la caja se pide FRESCA, no de la foto: con el
+        #     saldo caduco el tope saldria de un numero de hace
+        #     horas. Es la misma leccion del rojo falso del
+        #     cuadre. Si no se puede pedir, `None` — y entonces
+        #     el bolsillo vale 0 y no se puja, que es el lado
+        #     seguro.
+        _bolsillo = bolsillo_del_carril(
+            _saldo_fresco(market_status),
+            comprometido=(
+                (
+                    (state or {}).get("speculation") or {}
+                ).get("bid_exposure")
+                or {}
+            ).get("committed_total"),
+        )
+
         _pagables = los_que_se_pueden_pagar(
             _margen.get("entran") or [],
             curva=float(_prima),
-            presupuesto=(
-                (acquisition or {}).get("budgets") or {}
-            ).get("speculation"),
+            tope_por_operacion=_bolsillo["tope"],
         )
 
         rendija_ahora = {
             "available": True,
+            "bolsillo": _bolsillo,
             "pagables": _pagables,
             "cupo": _cupo["cupo"],
             "cupo_estado": _cupo["estado"],
