@@ -4682,7 +4682,20 @@ def build_dashboard_state() -> dict:
             # viaje. Quien no gana dinero no entra en la lista.
             "margen": _margen,
 
+            # EL INDICADOR LO ENCIENDE EL HECHO (doctrina 37).
+            #
+            #     `en_vivo` es la INTENCION -la bandera del
+            #     modulo- y por si sola mentia: el 12/09 el
+            #     panel decia EN VIVO sobre codigo que nadie
+            #     llamaba. Lo que enciende el indicador es
+            #     `ultima_vuelta`: cuando corrio de verdad.
             "en_vivo": en_vivo(),
+            "ultima_vuelta": (
+                (load_full_autonomous_status() or {}).get("carril") or {}
+            ).get("ran_at"),
+            "ultima_decision": (
+                (load_full_autonomous_status() or {}).get("carril") or {}
+            ).get("reason"),
 
             # LA GUARDIA CLAVE, como dato: un jugador marcado
             # VIAJE que termina el ciclo SIN LISTAR. Comprado

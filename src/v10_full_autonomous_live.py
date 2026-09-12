@@ -646,6 +646,12 @@ def _correr_el_carril(cycle: dict, accion_principal):
             objetivos=tablero.get("targets") or [],
             rates=build_market_rates(),
             prima_de_puja=(float(curva[0][0]) - 1.0) * 100.0,
+            curva=float(curva[0][0]),
+            presupuesto=(
+                (tablero.get("budgets") or {}).get(
+                    "speculation"
+                )
+            ),
             disparo=_disparo_de_este_ciclo(),
         )
 

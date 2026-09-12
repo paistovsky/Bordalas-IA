@@ -109,6 +109,9 @@ def correr(
     objetivos: list | None,
     rates: dict | None,
     prima_de_puja: float,
+    curva: float = 1.0,
+    presupuesto=None,
+    tope_por_operacion=None,
     escritor=None,
     disparo: str | None = None,
     ahora: datetime | None = None,
@@ -125,13 +128,23 @@ def correr(
         MARCA,
         a_quien_pujar,
         con_margen,
+        importe_de_la_puja,
         permiso,
     )
     from src.analysis.libro_de_viajes import (
         cuantos_en_este_reset,
     )
 
+    # EL HECHO, NO LA INTENCION.
+    #
+    #     `ran_at` va en TODAS las salidas, incluida la de
+    #     bloqueado y la de error. Es lo que le permite a la
+    #     pantalla distinguir "no ha corrido nunca" de
+    #     "corrio y no habia a quien pujar", que es
+    #     exactamente lo que hubo que descubrir a mano el
+    #     12/09.
     salida = {
+        "ran_at": _ahora(),
         "available": False,
         "executed": False,
         "bids": [],
@@ -158,6 +171,7 @@ def correr(
         if not puerta.get("puede"):
             return {
                 **salida,
+                "ran_at": _ahora(),
                 "available": True,
                 "blocked_by": puerta.get("blocked_by"),
                 "reason": puerta.get("reason"),
@@ -225,20 +239,31 @@ def correr(
 
             pid = safe_int(fila.get("player_id"))
 
-            # EL IMPORTE NO SE INVENTA AQUI. Sale del tablero,
-            # que ya aplico la curva, el tope por operacion y
-            # `MAX_SINGLE_SPECULATION_PERCENT`.
-            importe = safe_int(fila.get("bid"))
+            # EL IMPORTE SALE DE LA CURVA, NO DEL TABLERO.
+            #
+            #     El tablero lo daba a CERO -decision
+            #     RENDIMIENTO_INSUFICIENTE- porque decide con la
+            #     compuerta de rendimiento, que es justo la que
+            #     este carril no usa: el negocio de un viaje es
+            #     el spread, no el rendimiento.
+            #
+            #     Los topes siguen mandando, y si no se saben no
+            #     se puja.
+            cuanto = importe_de_la_puja(
+                fila.get("market_price"),
+                curva=curva,
+                presupuesto=presupuesto,
+                tope_por_operacion=tope_por_operacion,
+            )
+
+            importe = safe_int(cuanto.get("amount"))
 
             if pid <= 0 or importe <= 0:
                 fallidas.append(
                     {
                         "name": fila.get("name"),
-                        "error": (
-                            "Sin id o sin importe del tablero no "
-                            "se puja: el importe lo pone la "
-                            "curva, no este fichero."
-                        ),
+                        "error": cuanto.get("reason")
+                        or "Sin id no se puja.",
                     }
                 )
                 continue
@@ -301,6 +326,7 @@ def correr(
                 )
 
         return {
+            "ran_at": _ahora(),
             "available": True,
             "executed": bool(puestas),
             "bids": puestas,

@@ -303,6 +303,159 @@ def cupo_del_reset(cierres: list | None = None) -> dict:
 
 
 # ============================================================
+# EL IMPORTE DE LA PUJA
+# ============================================================
+#
+# POR QUE EL CARRIL NO SE LO PIDE AL TABLERO
+#
+#     12/09/2026. Con el carril ya enchufado, seguia sin pujar:
+#     el tablero daba importe CERO a los 59 objetivos.
+#
+#         decision: RENDIMIENTO_INSUFICIENTE
+#
+#     Esa es `RENDIMIENTO_MINIMO_DEL_CAPITAL`, la compuerta que
+#     exige que la operacion rinda un minimo sobre el capital que
+#     inmoviliza. Para la via de especular esta bien; para el
+#     carril es justo la que se quito, porque el negocio de un
+#     viaje no es el rendimiento sino el SPREAD.
+#
+#     O sea: el carril le pedia el importe a una pieza que
+#     decide con el criterio que el carril no usa. Tercer fallo
+#     de la misma familia que los dos de hoy — una pieza armada
+#     cuya entrada la corta algo de mas arriba.
+#
+# DE DONDE SALE ENTONCES
+#
+#         importe = precio de mercado x curva de puja
+#
+#     La curva calibrada en vivo sobre las pujas medidas de esta
+#     liga. Es "el importe que dice la curva", literalmente.
+#
+# Y LOS TOPES QUE SIGUEN MANDANDO
+#
+#     · el tope por operacion
+#     · MAX_SINGLE_SPECULATION_PERCENT del presupuesto
+#
+#     Ninguno se mueve: se aplican. Y si alguno no se sabe, NO
+#     se puja — un importe sin tope conocido es la puerta
+#     abierta mas cara que hay.
+
+
+def importe_de_la_puja(
+    precio_de_mercado,
+    curva: float,
+    presupuesto=None,
+    tope_por_operacion=None,
+) -> dict:
+    """
+    Lo que se puja por un candidato del carril. Forma fija.
+
+    `curva` es el multiplicador (1,0028 = +0,28 %), tal como lo
+    publica `premium_model`.
+    """
+
+    vacio = {
+        "available": False,
+        "amount": 0,
+        "capped_by": None,
+        "reason": None,
+    }
+
+    try:
+        precio = safe_int(precio_de_mercado)
+
+        if precio <= 0:
+            return {
+                **vacio,
+                "reason": "Sin precio de mercado no se puja.",
+            }
+
+        multiplicador = safe_float(curva)
+
+        if multiplicador is None or multiplicador < 1:
+            return {
+                **vacio,
+                "reason": (
+                    f"Curva de puja imposible ({curva}): no se "
+                    f"puja por debajo del precio."
+                ),
+            }
+
+        bruto = int(round(precio * multiplicador))
+
+        # LOS TOPES. Sin ellos NO se puja.
+        presupuesto = safe_int(presupuesto)
+
+        if presupuesto <= 0:
+            return {
+                **vacio,
+                "reason": (
+                    "Sin presupuesto de especulacion conocido no "
+                    "se puja."
+                ),
+            }
+
+        from src.analysis.speculation_engine import (
+            MAX_SINGLE_SPECULATION_PERCENT,
+        )
+
+        por_operacion = int(
+            presupuesto * MAX_SINGLE_SPECULATION_PERCENT
+        )
+
+        topes = {"MAX_SINGLE_SPECULATION_PERCENT": por_operacion}
+
+        if tope_por_operacion is not None:
+            topes["TOPE_POR_OPERACION"] = safe_int(
+                tope_por_operacion
+            )
+
+        cual, tope = min(topes.items(), key=lambda x: x[1])
+
+        if tope <= 0:
+            return {
+                **vacio,
+                "reason": (
+                    f"El tope `{cual}` sale {tope}: no se puja."
+                ),
+            }
+
+        if bruto > tope:
+            return {
+                "available": True,
+                "amount": 0,
+                "capped_by": cual,
+                "reason": (
+                    f"La puja de {_euros(bruto)} EUR pasa el tope "
+                    f"`{cual}` ({_euros(tope)} EUR). NO se recorta "
+                    f"a la baja: pujar por debajo de la curva es "
+                    f"pagar la ficha por perder la subasta."
+                ),
+            }
+
+        return {
+            "available": True,
+            "amount": bruto,
+            "capped_by": None,
+            "reason": (
+                f"{_euros(bruto)} EUR = {_euros(precio)} x "
+                f"{multiplicador:.4f} (la curva), dentro del tope "
+                f"`{cual}` de {_euros(tope)} EUR."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": (
+                f"No se pudo calcular el importe: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+
+# ============================================================
 # EL MARGEN ESPERADO
 # ============================================================
 #

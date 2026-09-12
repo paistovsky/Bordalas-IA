@@ -77,10 +77,21 @@ export default function RendijaPanel({ data }) {
             la acción de la vuelta
           </div>
         </div>
+        {/* EL INDICADOR LO ENCIENDE EL HECHO (doctrina 37).
+
+            Aqui ponia `rendija.en_vivo`, que es la BANDERA del
+            modulo. El 12/09 decia EN VIVO sobre codigo que no
+            llamaba nadie: la pantalla afirmaba que funcionaba
+            porque una constante decia True.
+
+            Ahora lo enciende `ultima_vuelta` — cuando corrio de
+            verdad — y si no ha corrido nunca, lo dice. */}
         <span
           className={
             apagado.apagada
               ? "pill crit"
+              : !rendija.ultima_vuelta
+              ? "pill warn"
               : rendija.en_vivo
               ? "pill ok"
               : "pill idle"
@@ -88,11 +99,48 @@ export default function RendijaPanel({ data }) {
         >
           {apagado.apagada
             ? "CERRADA"
+            : !rendija.ultima_vuelta
+            ? "NUNCA HA CORRIDO"
             : rendija.en_vivo
             ? "EN VIVO"
-            : "ARMADA Y APAGADA"}
+            : "APAGADA"}
         </span>
       </div>
+
+      {/* CUANDO CORRIO, Y QUE DECIDIO. Es lo que convierte
+          el indicador en un hecho comprobable. */}
+      <div className="kv">
+        <span>Última vuelta del carril</span>
+        <b className="mono">
+          {rendija.ultima_vuelta
+            ? new Date(rendija.ultima_vuelta).toLocaleString(
+                "es-ES",
+                {
+                  day: "2-digit",
+                  month: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                }
+              )
+            : "nunca"}
+        </b>
+      </div>
+
+      {rendija.ultima_decision && (
+        <p className="note" style={{ textAlign: "left" }}>
+          {rendija.ultima_decision}
+        </p>
+      )}
+
+      {!rendija.ultima_vuelta && (
+        <div className="alert warn" style={{ marginTop: 8 }}>
+          <b>EL CARRIL NO HA CORRIDO NUNCA.</b> Está armado y
+          publicado, pero ningún ciclo lo ha ejecutado todavía.
+          Un indicador que se enciende con la intención y no con
+          el hecho es exactamente lo que tapó esto durante un
+          día.
+        </div>
+      )}
 
       {/* EL CUPO, Y POR QUE ESE Y NO OTRO. */}
       <div className="kv">

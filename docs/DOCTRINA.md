@@ -913,6 +913,51 @@ caso más común, que casi siempre es el tranquilo.
 **Guardia:** `test_lo_desconocido_no_se_pinta_de_benigno`.
 
 
+---
+
+### 37. Un indicador de que algo funciona lo enciende el hecho, no la intención
+
+*(Cerrado por el dueño el 12/09/2026.)*
+
+La rendija se armó el 11. Al día siguiente no había comprado nada, **y el panel
+decía `EN VIVO`**.
+
+No falló ninguna de sus cinco puertas. Falló algo anterior: **nadie la llamaba**. El
+único sitio del proyecto que importaba `la_rendija` era la telemetría. Módulos
+escritos, 24 guardias en verde, estado publicado, pantalla afirmando que
+funcionaba — sobre código que no corría.
+
+La causa está en una línea:
+
+```jsx
+{rendija.en_vivo ? "EN VIVO" : "APAGADA"}
+```
+
+`en_vivo` es **la bandera del módulo**. Decía `True` porque una constante decía
+`True`, no porque nada hubiera pasado.
+
+**La regla:** un indicador de que algo funciona sólo puede encenderlo un **hecho
+observado**, con su hora:
+
+- `EN VIVO` significa *«corrió a las 04:50 y decidió esto»*, no *«la constante dice
+  que sí»*.
+- Si no ha corrido **nunca**, hay que decirlo con esas palabras. Un hueco en
+  blanco se lee como «va bien».
+- El hecho lo escribe quien lo ejecuta (`ran_at`), no quien lo configura.
+
+**Y su reverso: lo que se arma, se enchufa.** Armar algo y no conectarlo es **peor**
+que no armarlo, porque la pantalla dice que funciona y nadie va a mirar.
+
+**Guardias:** `test_el_carril_esta_enchufado` recorre el **árbol de importaciones**
+—no un `grep`, que diría que sí por un comentario— y exige un camino real desde el
+ciclo hasta cada pieza armada. `test_el_indicador_no_se_enciende_con_la_bandera`
+prohíbe que la pantalla vuelva a leer la intención.
+
+Es la [regla 36](#36-un-valor-por-defecto-no-puede-absorber-el-caso-más-importante)
+—*lo desconocido sale como desconocido*— aplicada a los indicadores: **«no ha
+corrido» no es «va bien»**.
+
+
 ## Descartado
 
 **Entrenadores** (truco nº 4 del vídeo). **Esta liga no los usa.** Decisión del

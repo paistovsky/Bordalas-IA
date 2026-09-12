@@ -220,6 +220,7 @@ TESTS = [
     # "src.analysis.test_la_pantalla_pinta_v1",
     "src.analysis.test_la_caja_de_la_liga_v1",
     "src.analysis.test_la_rendija_v1",
+    "src.analysis.test_esta_enchufado_v1",
     "src.analysis.test_los_relojes_v1",
     "src.analysis.test_ojeador_fuentes_v1",
     "src.analysis.test_ojeador_emparejamiento_v1",
