@@ -47,6 +47,9 @@ from src.actions.escaparate_executor import (
 )
 from src.analysis.la_rendija import (
     APAGADO_ENV,
+    CUPO_DE_LA_PRUEBA,
+    PRIMA_DEL_TRAMO_BARATO,
+    SUELO_DE_LA_PRUEBA,
     CUPO_DE_ESTRENO,
     CUPO_PLENO,
     ESCRITURAS_POR_VUELTA,
@@ -58,7 +61,9 @@ from src.analysis.la_rendija import (
     margen_esperado,
     permiso,
     ritmo_de_los_candidatos,
+    los_que_se_pueden_pagar,
     se_apaga_sola,
+    suelo_de_precio,
     un_viaje_cerrado_entero,
 )
 from src.analysis.offer_decision_engine import (
@@ -137,34 +142,41 @@ def test_con_una_emergencia_el_carril_se_calla() -> None:
     )["puede"] is True
 
 
-def test_el_cupo_empieza_en_dos_y_sube_solo() -> None:
+def test_el_cupo_empieza_en_uno_y_sube_solo() -> None:
     """
-    EL CUPO DE ESTRENO.
+    LA ESCALERA DEL CUPO.
 
-    Hasta que no se cierre UN viaje entero -comprado, listado,
-    oferta recibida y cobrada por encima del suelo- no sabemos si
-    la rueda gira. Abrir con cuatro seria comprometer el doble
-    sobre algo que no ha funcionado ni una vez.
+    Escrita el 11/09 como 2 -> 4 y corregida el 12/09 a
+    1 -> 2 -> 4, porque el 12 se supo que el carril no habia
+    podido comprar NUNCA: el tope por operacion (~740.000) era
+    menor que el suelo de 1 M.
+
+    El primer viaje no tiene que ganar dinero: tiene que
+    COMPLETARSE. Una vez, de punta a punta. Por eso se abre con
+    UNO y no con dos, y el escalon siguiente sigue siendo el que
+    era.
     """
 
+    assert CUPO_DE_LA_PRUEBA == 1, CUPO_DE_LA_PRUEBA
     assert CUPO_DE_ESTRENO == 2, CUPO_DE_ESTRENO
     assert CUPO_PLENO == 4, CUPO_PLENO
 
-    de_estreno = cupo_del_reset([])
+    de_prueba = cupo_del_reset([])
+
+    assert de_prueba["cupo"] == CUPO_DE_LA_PRUEBA, de_prueba
+    assert de_prueba["estado"] == "PRUEBA_DE_HUMO", de_prueba
+
+    # En cuanto se cierra uno entero, sube solo al escalon
+    # siguiente. NO al pleno: eso son dos viajes, no uno.
+    de_estreno = cupo_del_reset(
+        [{"profit": 120_000, "player_name": "Starfelt"}]
+    )
 
     assert de_estreno["cupo"] == CUPO_DE_ESTRENO, de_estreno
     assert de_estreno["estado"] == "ESTRENO", de_estreno
 
-    # En cuanto se cierra uno entero, sube solo.
-    pleno = cupo_del_reset(
-        [{"profit": 120_000, "player_name": "Starfelt"}]
-    )
-
-    assert pleno["cupo"] == CUPO_PLENO, pleno
-    assert pleno["estado"] == "PLENO", pleno
-
     # Y lo dice con el nombre, para que la portada lo pinte.
-    assert "Starfelt" in pleno["reason"], pleno
+    assert "Starfelt" in de_estreno["reason"], de_estreno
 
 
 def test_un_corte_de_perdidas_no_sube_el_cupo() -> None:
@@ -183,32 +195,38 @@ def test_un_corte_de_perdidas_no_sube_el_cupo() -> None:
             falso
         )
 
-        assert cupo_del_reset(falso)["cupo"] == CUPO_DE_ESTRENO
+        # Se queda en el escalon de abajo: la prueba de humo
+        # sigue pendiente.
+        assert cupo_del_reset(falso)["cupo"] == (
+            CUPO_DE_LA_PRUEBA
+        ), falso
 
 
 def test_el_cupo_manda_sobre_el_permiso() -> None:
     """Un numero en un sitio: el permiso lo pregunta, no lo lleva."""
 
-    for ya in range(CUPO_DE_ESTRENO):
+    for ya in range(CUPO_DE_LA_PRUEBA):
         assert permiso(
             ahora=DE_DIA, operaciones_en_este_reset=ya
         )["puede"] is True, ya
 
     agotado = permiso(
         ahora=DE_DIA,
-        operaciones_en_este_reset=CUPO_DE_ESTRENO,
+        operaciones_en_este_reset=CUPO_DE_LA_PRUEBA,
     )
 
     assert agotado["blocked_by"] == "CUPO_DEL_RESET", agotado
 
-    assert agotado["cupo_por_reset"] == CUPO_DE_ESTRENO, agotado
+    assert agotado["cupo_por_reset"] == CUPO_DE_LA_PRUEBA, (
+        agotado
+    )
 
-    assert agotado["cupo_estado"] == "ESTRENO", agotado
+    assert agotado["cupo_estado"] == "PRUEBA_DE_HUMO", agotado
 
-    # Con un viaje cerrado entero, esas mismas dos ya no agotan.
+    # Con un viaje cerrado entero, esa misma ya no agota.
     con_uno = permiso(
         ahora=DE_DIA,
-        operaciones_en_este_reset=CUPO_DE_ESTRENO,
+        operaciones_en_este_reset=CUPO_DE_LA_PRUEBA,
         cierres=[{"profit": 120_000}],
     )
 
@@ -596,9 +614,17 @@ def test_caben_los_que_diga_el_cupo() -> None:
         for i in range(1, 8)
     ]
 
+    # Sin decirle cuantos, le PREGUNTA al cupo. No lo lleva
+    # escrito: por eso bajar el cupo a 1 cambio esto solo.
     assert len(a_quien_pujar(candidatos)["elegidos"]) == (
-        CUPO_DE_ESTRENO
+        CUPO_DE_LA_PRUEBA
     )
+
+    assert len(
+        a_quien_pujar(candidatos, cuantos=CUPO_DE_ESTRENO)[
+            "elegidos"
+        ]
+    ) == CUPO_DE_ESTRENO
 
     assert a_quien_pujar(candidatos, cuantos=0)["elegidos"] == []
 
@@ -961,10 +987,458 @@ def test_el_filtro_es_el_suelo_no_el_cero() -> None:
     ), visto
 
 
+# ============================================================
+# 9. LA PRUEBA DE HUMO
+# ============================================================
+
+
+def test_la_prueba_de_humo_baja_el_suelo_y_el_cupo() -> None:
+    """
+    El primer viaje NO tiene que ganar dinero: tiene que
+    COMPLETARSE. Con el tope por operacion de hoy (~740.000) y el
+    suelo normal de 1 M, las dos condiciones eran incompatibles y
+    el carril no podia comprar NUNCA.
+
+    Un viaje, y se mira.
+    """
+
+    assert SUELO_DE_LA_PRUEBA == 400_000, SUELO_DE_LA_PRUEBA
+    assert CUPO_DE_LA_PRUEBA == 1, CUPO_DE_LA_PRUEBA
+
+    suelo = suelo_de_precio([])
+
+    assert suelo["suelo"] == SUELO_DE_LA_PRUEBA, suelo
+    assert suelo["estado"] == "PRUEBA_DE_HUMO", suelo
+
+    assert cupo_del_reset([])["cupo"] == CUPO_DE_LA_PRUEBA
+
+
+def test_al_completar_un_viaje_vuelve_todo_a_su_sitio() -> None:
+    """
+    La prueba termina sola. Un viaje completo —cobrado por encima
+    del suelo— y el suelo vuelve a 1.000.000 y el cupo a 2.
+
+    Y la condicion NO la cumple un corte de perdidas: eso cerro
+    el viaje, no lo completo.
+    """
+
+    from src.analysis.salida_del_viaje import (
+        PRECIO_QUE_NO_PAGA_LA_FICHA,
+    )
+
+    completo = [{"profit": 9_000, "player_name": "el primero"}]
+
+    assert suelo_de_precio(completo)["suelo"] == (
+        PRECIO_QUE_NO_PAGA_LA_FICHA
+    )
+
+    assert suelo_de_precio(completo)["estado"] == "NORMAL"
+
+    assert cupo_del_reset(completo)["cupo"] == CUPO_DE_ESTRENO
+
+    # Nueve mil euros bastan: lo que compran es saber que la
+    # cadena funciona.
+    assert completo[0]["profit"] < 10_000
+
+    # Un corte de perdidas NO termina la prueba.
+    for falso in (
+        [{"profit": -5_000, "loss_cut": True}],
+        [{"profit": 0}],
+    ):
+        assert suelo_de_precio(falso)["estado"] == (
+            "PRUEBA_DE_HUMO"
+        ), falso
+
+
+def test_los_baratos_usan_la_prima_de_su_tramo() -> None:
+    """
+    LO QUE HABRIA HECHO OPTIMISTA LA PRUEBA.
+
+    Las dos tablas salen de las MISMAS 34 recompras, partidas de
+    dos formas. Para un jugador de menos de 1 M la que describe
+    su caso es la del TRAMO (+1,52 %), no la de su posicion.
+
+    A un medio de 660.000 se le aplicaba +2,85 %: casi dos puntos
+    de margen inventados, justo en el rango donde va a jugarse la
+    prueba de humo.
+    """
+
+    assert PRIMA_DEL_TRAMO_BARATO == 1.52, PRIMA_DEL_TRAMO_BARATO
+
+    barato = margen_esperado(
+        {
+            "player_id": 1,
+            "name": "Víctor García",
+            "position": 3,          # medio, +2,85 %
+            "market_price": 660_000,
+        },
+        prima_de_puja=0.25,
+        ritmo_diario=-1.80,
+    )
+
+    assert barato["prima_de_reventa_percent"] == (
+        PRIMA_DEL_TRAMO_BARATO
+    ), barato
+
+    # Y con la prima buena NO llega al suelo: la prueba no puede
+    # entrar en un viaje que no se puede cerrar.
+    assert barato["llega_al_suelo"] is False, barato
+
+    # Por encima de 1 M sigue mandando la posicion.
+    caro = margen_esperado(
+        {
+            "player_id": 2,
+            "name": "Un medio caro",
+            "position": 3,
+            "market_price": 2_000_000,
+        },
+        prima_de_puja=0.25,
+        ritmo_diario=0.0,
+    )
+
+    assert caro["prima_de_reventa_percent"] == 2.85, caro
+
+
+def test_la_via_vieja_esta_en_pausa() -> None:
+    """
+    UNA TEORIA CADA VEZ.
+
+    La via vieja y el carril son dos teorias opuestas del mismo
+    negocio sobre el mismo mercado. Mientras las dos corran, cada
+    compra puede ser de cualquiera y no se puede juzgar ninguna.
+    """
+
+    import os
+
+    from src.analysis.speculation_engine import (
+        ESPECULACION_EN_PAUSA_ENV,
+        especulacion_vieja_en_pausa,
+    )
+
+    antes = os.environ.get(ESPECULACION_EN_PAUSA_ENV)
+
+    try:
+        # Sin decir nada, esta en pausa. Y si el entorno no se
+        # puede leer tambien: durante la prueba el lado seguro es
+        # que solo corra una teoria.
+        os.environ.pop(ESPECULACION_EN_PAUSA_ENV, None)
+
+        assert especulacion_vieja_en_pausa() is True, (
+            "la via vieja ya no esta en pausa"
+        )
+
+        # Y se reanuda sin desplegar.
+        os.environ[ESPECULACION_EN_PAUSA_ENV] = "0"
+
+        assert especulacion_vieja_en_pausa() is False
+
+    finally:
+        if antes is None:
+            os.environ.pop(ESPECULACION_EN_PAUSA_ENV, None)
+        else:
+            os.environ[ESPECULACION_EN_PAUSA_ENV] = antes
+
+
+def test_pausar_no_cambia_la_forma() -> None:
+    """
+    DOS VECES LO MISMO, Y LA SEGUNDA CASI TUMBA LA PRUEBA.
+
+    1. La primera version de la pausa devolvia un diccionario
+       corto y `portfolio_roi_engine` reviento con
+       KeyError: 'owned'.
+
+    2. Arreglada la forma, seguia devolviendo `budget: 0`. El
+       presupuesto NO es una opinion de la via vieja: es la caja
+       de la liga, y EL CARRIL LO LEE DE AHI. Con aquel cero, el
+       carril contestaba "Sin presupuesto de especulacion
+       conocido no se puja" — pausar la via vieja apagaba en
+       silencio justo lo que la pausa existia para poder medir.
+
+    Pausar una via para sus DECISIONES, nunca sus MEDICIONES.
+    """
+
+    import ast
+
+    from pathlib import Path
+
+    from src.analysis.speculation_engine import (
+        _tablero_en_pausa,
+    )
+
+    # LAS CLAVES DEL RETORNO DE VERDAD, del arbol y no de una
+    # lista escrita a mano: el dia que alguien anada una clave al
+    # tablero y se olvide de la pausa, esto se pone rojo.
+    fuente = (
+        Path(__file__).parents[1] / "analysis"
+        / "speculation_engine.py"
+    ).read_text(encoding="utf-8")
+
+    arbol = ast.parse(fuente)
+
+    completo = None
+
+    for nodo in ast.walk(arbol):
+
+        if (
+            isinstance(nodo, ast.FunctionDef)
+            and nodo.name == "build_speculation_board"
+        ):
+            for hijo in ast.walk(nodo):
+
+                if (
+                    isinstance(hijo, ast.Return)
+                    and isinstance(hijo.value, ast.Dict)
+                    and len(hijo.value.keys) > 10
+                ):
+                    completo = {
+                        k.value
+                        for k in hijo.value.keys
+                        if isinstance(k, ast.Constant)
+                    }
+
+    assert completo and len(completo) >= 13, completo
+
+    pausado = _tablero_en_pausa(budget=1_234_567)
+
+    faltan = completo - set(pausado)
+
+    assert not faltan, (
+        f"pausar se come estas claves, que otros leen: "
+        f"{sorted(faltan)}"
+    )
+
+    # LO QUE SE MIDE PASA ENTERO.
+    assert pausado["budget"] == 1_234_567, pausado
+
+    # LO QUE SE DECIDE VA VACIO.
+    for callado in (
+        "players",
+        "buy_candidates",
+        "executable_buys",
+        "owned",
+        "sell_candidates",
+        "hold_candidates",
+        "watchlist",
+    ):
+        assert pausado[callado] == [], (callado, pausado[callado])
+
+    assert pausado["paused"] is True
+
+
+def test_el_tope_se_pregunta_al_elegir_no_al_pagar() -> None:
+    """
+    EL FALLO DE CANCELO (12/09/2026).
+
+    Bajado el suelo a 400.000 para que el carril pudiera comprar
+    algo por fin, siguio sin comprar: elegia a CANCELO
+    -5.970.000- contra un tope por operacion de 843.612. Siete
+    veces el tope.
+
+    El tope existia y se aplicaba... AL PAGAR. Para entonces el
+    candidato ya estaba elegido y el ciclo, gastado. Y como el
+    orden de preferencia va por prima de reventa, que prefiere a
+    los caros, el carril elegia SIEMPRE al que menos podia pagar.
+
+    Un techo que solo se comprueba cuando ya no se puede hacer
+    nada no es un techo: es un parte de defuncion.
+    """
+
+    PRESUPUESTO = 2_109_030          # medido el 12/09
+    TOPE = 843_612                   # 40 % de ese presupuesto
+
+    mercado = [
+        {"player_id": 1, "name": "Cancelo", "position": 2,
+         "market_price": 5_970_000},
+        {"player_id": 2, "name": "Víctor García", "position": 3,
+         "market_price": 660_000},
+    ]
+
+    filtrado = los_que_se_pueden_pagar(
+        mercado, curva=1.0, presupuesto=PRESUPUESTO
+    )
+
+    assert filtrado["tope"] == TOPE, filtrado
+
+    assert [x["name"] for x in filtrado["caben"]] == (
+        ["Víctor García"]
+    ), filtrado
+
+    # Y el que no cabe sale CON SU NOMBRE y con el tope que le
+    # echa: la pantalla tiene que poder decir por que no se
+    # compro, en vez de callarse.
+    fuera = filtrado["no_caben"]
+
+    assert len(fuera) == 1, fuera
+    assert fuera[0]["name"] == "Cancelo", fuera
+    assert fuera[0]["capped_by"] == (
+        "MAX_SINGLE_SPECULATION_PERCENT"
+    ), fuera
+
+    # EL ORDEN PREFIERE AL CARO: por eso el filtro tiene que ir
+    # ANTES. Sin el, el elegido es el imposible.
+    sin_filtrar = a_quien_pujar(mercado, cuantos=1)["elegidos"]
+
+    assert sin_filtrar[0]["name"] == "Cancelo", (
+        "si esto cambia, el caso que motivo la guardia ya no es "
+        "el que era: revisala"
+    )
+
+    con_filtro = a_quien_pujar(
+        filtrado["caben"], cuantos=1
+    )["elegidos"]
+
+    assert con_filtro[0]["name"] == "Víctor García", con_filtro
+
+    # Regla 24: sin presupuesto no pasa nadie, y se dice.
+    a_ciegas = los_que_se_pueden_pagar(
+        mercado, curva=1.0, presupuesto=None
+    )
+
+    assert a_ciegas["caben"] == [], a_ciegas
+    assert len(a_ciegas["no_caben"]) == 2, a_ciegas
+
+    # Y con la lista vacia no pasa en vacio: lo dice.
+    assert "no habia nadie" in (
+        los_que_se_pueden_pagar(
+            [], curva=1.0, presupuesto=PRESUPUESTO
+        )["reason"]
+    )
+
+
+def test_el_carril_filtra_por_el_tope_antes_de_elegir() -> None:
+    """
+    Lo mismo, pero en el camino de verdad: que el ejecutor lo
+    llame, y que no puje por quien no puede pagar.
+    """
+
+    import ast
+    from pathlib import Path
+
+    fuente = (
+        Path(__file__).parents[1] / "actions"
+        / "carril_executor.py"
+    ).read_text(encoding="utf-8")
+
+    arbol = ast.parse(fuente)
+
+    llamadas = [
+        n.func.id
+        for n in ast.walk(arbol)
+        if isinstance(n, ast.Call)
+        and isinstance(n.func, ast.Name)
+    ]
+
+    assert "los_que_se_pueden_pagar" in llamadas, (
+        "el ejecutor no pregunta por el tope antes de elegir: "
+        "volveria a elegir a Cancelo"
+    )
+
+    # Y lo pregunta ANTES de elegir, no despues.
+    assert fuente.index("los_que_se_pueden_pagar(") < (
+        fuente.index("elegidos = a_quien_pujar(")
+    ), (
+        "el tope se pregunta DESPUES de elegir, que es "
+        "exactamente el fallo"
+    )
+
+
+def test_el_suelo_vive_en_un_sitio() -> None:
+    """
+    UN DATO, UN NOMBRE (regla 33).
+
+    La telemetria llevaba el suelo escrito a mano —
+    `>= 1_000_000` — al filtrar los candidatos que pinta. Al
+    bajarlo a 400.000 para la prueba de humo, la pantalla habria
+    seguido pintando la lista vieja: el carril mirando una cosa y
+    el panel otra, y ninguna de las dos avisando.
+    """
+
+    from pathlib import Path
+
+    raiz = Path(__file__).parents[2]
+
+    def _sin_comentarios(texto: str) -> str:
+        # Las lineas que EXPLICAN el incidente nombran el
+        # numero. Esta guardia se ha puesto roja sobre su propia
+        # documentacion mas de una vez.
+        return chr(10).join(
+            linea
+            for linea in texto.splitlines()
+            if not linea.strip().startswith("#")
+        )
+
+    for ruta in (
+        raiz / "src" / "telemetry" / "dashboard_state.py",
+        raiz / "src" / "actions" / "carril_executor.py",
+    ):
+        codigo = _sin_comentarios(
+            ruta.read_text(encoding="utf-8")
+        )
+
+        for escrito in ("1_000_000", "400_000"):
+            assert escrito not in codigo, (
+                f"{ruta.name} lleva el suelo escrito a mano "
+                f"(`{escrito}`) en vez de preguntarselo a "
+                f"`suelo_de_precio`"
+            )
+
+        assert "suelo_de_precio" in codigo or 'suelo["suelo"]' in (
+            codigo
+        ), f"{ruta.name} no le pregunta el suelo a su unico sitio"
+
+
+def test_la_pantalla_dice_el_suelo_y_los_viajes() -> None:
+    """
+    Lo que el dueno quiere ver cada dia: en que suelo esta, por
+    que, y cuantos viajes se han completado.
+    """
+
+    from pathlib import Path
+
+    import re
+
+    panel = (
+        Path(__file__).parents[2] / "dashboard-v8" / "src"
+        / "components" / "RendijaPanel.jsx"
+    ).read_text(encoding="utf-8")
+
+    # LOS COMENTARIOS QUE EXPLICAN EL INCIDENTE NOMBRAN EL
+    # NUMERO. Es la tercera vez que una guardia se pone roja
+    # sobre su propia documentacion: lo que no puede llevar el
+    # numero escrito es el CODIGO que se ejecuta.
+    codigo = re.sub(
+        r"\{/\*.*?\*/\}", "", panel, flags=re.S
+    )
+
+    codigo = re.sub(r"/\*.*?\*/", "", codigo, flags=re.S)
+
+    codigo = chr(10).join(
+        linea
+        for linea in codigo.splitlines()
+        if not linea.strip().startswith("//")
+    )
+
+    for dato in (
+        "rendija.suelo",
+        "suelo_reason",
+        "viajes_completados",
+        "VIAJES COMPLETADOS",
+    ):
+        assert dato in panel, (
+            f"el panel no pinta `{dato}`"
+        )
+
+    # Y no lleva ningun numero escrito a mano.
+    for suelto in ("400.000", "1.000.000", "400000", "1000000"):
+        assert suelto not in codigo, (
+            f"el panel lleva el suelo escrito a mano: `{suelto}`"
+        )
+
+
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
-    test_el_cupo_empieza_en_dos_y_sube_solo,
+    test_el_cupo_empieza_en_uno_y_sube_solo,
     test_un_corte_de_perdidas_no_sube_el_cupo,
     test_el_cupo_manda_sobre_el_permiso,
     test_la_pantalla_lee_el_cupo_no_lo_escribe,
@@ -989,6 +1463,15 @@ TESTS = [
     test_el_ciclo_llama_al_carril,
     test_el_disparo_deliberado_viaja_hasta_el_silencio,
     test_el_filtro_es_el_suelo_no_el_cero,
+    test_la_prueba_de_humo_baja_el_suelo_y_el_cupo,
+    test_al_completar_un_viaje_vuelve_todo_a_su_sitio,
+    test_los_baratos_usan_la_prima_de_su_tramo,
+    test_la_via_vieja_esta_en_pausa,
+    test_pausar_no_cambia_la_forma,
+    test_el_tope_se_pregunta_al_elegir_no_al_pagar,
+    test_el_carril_filtra_por_el_tope_antes_de_elegir,
+    test_el_suelo_vive_en_un_sitio,
+    test_la_pantalla_dice_el_suelo_y_los_viajes,
 ]
 
 

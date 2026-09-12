@@ -643,6 +643,7 @@ def _correr_el_carril(cycle: dict, accion_principal):
 
         return correr(
             accion_principal=accion_principal,
+            cierres=_cierres_de_viajes(),
             objetivos=tablero.get("targets") or [],
             rates=build_market_rates(),
             prima_de_puja=(float(curva[0][0]) - 1.0) * 100.0,
@@ -664,6 +665,32 @@ def _correr_el_carril(cycle: dict, accion_principal):
                 f"{type(error).__name__}: {error}"
             ),
         }
+
+
+def _cierres_de_viajes():
+    """Los viajes ya cerrados. Sin ellos no se sabe el cupo."""
+
+    try:
+        import json
+        from pathlib import Path
+
+        libro = (
+            Path("data") / "trading" / "libro_de_salidas.jsonl"
+        )
+
+        if not libro.exists():
+            return []
+
+        return [
+            json.loads(linea)
+            for linea in libro.read_text(
+                encoding="utf-8"
+            ).splitlines()
+            if linea.strip()
+        ]
+
+    except Exception:                               # noqa: BLE001
+        return []
 
 
 def _disparo_de_este_ciclo():

@@ -1661,6 +1661,100 @@ def calculate_speculation_budget(
 # ======================================================
 
 
+# ============================================================
+# LA VIA VIEJA, EN PAUSA (12/09/2026)
+# ============================================================
+#
+#     Esta via y el carril de la rendija son DOS TEORIAS
+#     OPUESTAS del mismo negocio, corriendo sobre el mismo
+#     mercado y sin saber la una de la otra:
+#
+#         esta via   mide RENDIMIENTO sobre el capital, no
+#                    tiene suelo de precio, y el 12/09 compro a
+#                    Fortuno por 150.376 y a Diego Conde por
+#                    240.601
+#
+#         el carril  mide el SPREAD, y tiene prohibido por
+#                    medicion comprar por debajo de 1 M
+#
+#     Mientras las dos corran no se puede juzgar ninguna: cada
+#     compra que aparezca puede ser de cualquiera de las dos, y
+#     las conclusiones se mezclan.
+#
+#     UNA TEORIA CADA VEZ. Esta se pausa mientras dure la prueba
+#     de humo del carril. Se reanuda quitando la variable, sin
+#     desplegar.
+#
+#     NO se ha borrado ni se le ha movido ningun umbral: sigue
+#     entera, y vuelve como estaba.
+ESPECULACION_EN_PAUSA_ENV = "ESPECULACION_VIEJA_EN_PAUSA"
+
+
+def especulacion_vieja_en_pausa() -> bool:
+    """¿Esta pausada la via vieja de especular? Nunca lanza."""
+
+    try:
+        import os
+
+        return str(
+            os.getenv(ESPECULACION_EN_PAUSA_ENV, "1")
+        ).strip().lower() in ("1", "true", "si", "yes")
+
+    except Exception:                               # noqa: BLE001
+        # Si no se sabe, se pausa: durante la prueba de humo el
+        # lado seguro es que solo corra una teoria.
+        return True
+
+
+def _tablero_en_pausa(
+    *,
+    solvency=None,
+    active_franchise_bid=None,
+    budget=None,
+    acquisition_budget=None,
+    bid_exposure=None,
+) -> dict:
+    """
+    El tablero de la via vieja cuando esta en pausa.
+
+    LO QUE SE MIDE SE SIGUE MIDIENDO; LO QUE SE DECIDE SE CALLA.
+
+    Esta separado en su propia funcion para que una guardia pueda
+    comprobar la FORMA sin necesitar un snapshot: es justo la
+    forma lo que se ha roto dos veces al pausar.
+    """
+
+    return {
+        "paused": True,
+        "reason": (
+            "VIA VIEJA EN PAUSA mientras dura la prueba de humo "
+            "del carril. Dos teorias opuestas sobre el mismo "
+            "mercado no se pueden juzgar a la vez. El "
+            "presupuesto y la solvencia SI se miden: el carril "
+            "los lee. Se reanuda quitando "
+            f"`{ESPECULACION_EN_PAUSA_ENV}`."
+        ),
+        # LO QUE SE MIDE.
+        "solvency": solvency if solvency is not None else {},
+        "active_franchise_bid": active_franchise_bid,
+        "budget": budget,
+        "acquisition_budget": acquisition_budget,
+        "bid_exposure": (
+            bid_exposure if bid_exposure is not None else {}
+        ),
+        # LO QUE SE DECIDE.
+        "players": [],
+        "buy_candidates": [],
+        "executable_buys": [],
+        "rejected_by_seller_floor": [],
+        "owned": [],
+        "sell_candidates": [],
+        "hold_candidates": [],
+        "watchlist": [],
+        "jp_market_intelligence": {},
+    }
+
+
 def build_speculation_board(
     snapshot: dict,
 ) -> dict:
@@ -1774,6 +1868,41 @@ def build_speculation_board(
         active_franchise_bid=active_franchise_bid,
         exposure=bid_exposure,
     )
+
+    # ==================================================
+    # LA VIA VIEJA, EN PAUSA
+    # ==================================================
+    #
+    #     UNA TEORIA CADA VEZ. Mientras dura la prueba de humo
+    #     del carril, la via vieja no decide nada: dos teorias
+    #     opuestas sobre el mismo mercado no se pueden juzgar a
+    #     la vez.
+    #
+    # PERO EL CORTE VA AQUI, Y NO ARRIBA, Y ESO ES EL PUNTO
+    #
+    #     La primera version cortaba en la primera linea y
+    #     devolvia `budget: 0`. Parecia inofensivo: si no compra,
+    #     para que quiere presupuesto.
+    #
+    #     El presupuesto NO es una opinion de esta via: es la
+    #     caja de la liga, y el CARRIL lo lee de aqui. Con aquel
+    #     corte, el carril se quedaba sin dinero conocido y
+    #     contestaba "Sin presupuesto de especulacion conocido no
+    #     se puja" — o sea que pausar la via vieja apagaba en
+    #     silencio justo lo que la pausa existia para poder
+    #     medir.
+    #
+    #     Es la segunda vez lo mismo: antes fue KeyError 'owned'.
+    #     PAUSAR UNA VIA PARA SUS DECISIONES, NUNCA SUS
+    #     MEDICIONES.
+    if especulacion_vieja_en_pausa():
+        return _tablero_en_pausa(
+            solvency=solvency,
+            active_franchise_bid=active_franchise_bid,
+            budget=budget,
+            acquisition_budget=acquisition_budget,
+            bid_exposure=bid_exposure,
+        )
 
     # ==================================================
     # PLAYERS

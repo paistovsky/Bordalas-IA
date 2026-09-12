@@ -58,6 +58,9 @@ export default function RendijaPanel({ data }) {
   // porque el filtro vive en Python y aqui solo se pinta.
   const margen = rendija.margen || {};
 
+  // Quien de los que entran se puede pagar de verdad.
+  const pagables = rendija.pagables || {};
+
   const porId = new Map(
     (margen.entran || []).map((x) => [
       x.margen.player_id,
@@ -141,6 +144,52 @@ export default function RendijaPanel({ data }) {
           día.
         </div>
       )}
+
+      {/* LA LINEA QUE SE MIRA CADA DIA.
+
+          Hasta que ponga 1, todo lo del carril es teoria sobre
+          codigo que no ha comprado nada. */}
+      <div className="kv">
+        <span>VIAJES COMPLETADOS</span>
+        <b className="mono">
+          <span
+            className={
+              rendija.viajes_completados > 0
+                ? "pill ok"
+                : "pill warn"
+            }
+          >
+            {rendija.viajes_completados ?? "—"}
+          </span>
+        </b>
+      </div>
+
+      {/* EL SUELO, Y POR QUE ESE Y NO OTRO.
+
+          Igual que el cupo: se pinta lo que dice
+          `suelo_de_precio()`, que es su unico sitio. El dia que
+          vuelva a 1.000.000 este panel cambia solo. */}
+      <div className="kv">
+        <span>Suelo de precio</span>
+        <b className="mono">
+          {rendija.suelo == null
+            ? "—"
+            : formatMoney(rendija.suelo)}{" "}
+          <span
+            className={
+              rendija.suelo_estado === "NORMAL"
+                ? "pill ok"
+                : "pill warn"
+            }
+          >
+            {rendija.suelo_estado || "—"}
+          </span>
+        </b>
+      </div>
+
+      <p className="note" style={{ textAlign: "left" }}>
+        {rendija.suelo_reason}
+      </p>
 
       {/* EL CUPO, Y POR QUE ESE Y NO OTRO. */}
       <div className="kv">
@@ -257,6 +306,37 @@ export default function RendijaPanel({ data }) {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* QUIEN NO SE PUEDE PAGAR, CON SU NOMBRE.
+
+          El 12/09 el panel decia «8 llegan al suelo, 0 fuera»
+          mientras el carril elegia a Cancelo —5.970.000— contra
+          un tope por operacion de 843.612. El numero era cierto
+          y la conclusion que sugeria, falsa: ni uno de los ocho
+          era comprable. Un panel que cuenta candidatos sin
+          contar el tope no informa, tranquiliza. */}
+      {pagables.no_caben && pagables.no_caben.length > 0 && (
+        <div className="alert warn" style={{ marginTop: 8 }}>
+          <b>
+            {pagables.caben ? pagables.caben.length : 0} de{" "}
+            {(pagables.caben ? pagables.caben.length : 0) +
+              pagables.no_caben.length}{" "}
+            SE PUEDEN PAGAR
+          </b>
+          {pagables.tope != null && (
+            <> · tope por operación {formatMoney(pagables.tope)}</>
+          )}
+          <div className="sub" style={{ marginTop: 4 }}>
+            No caben:{" "}
+            {pagables.no_caben
+              .map(
+                (x) =>
+                  `${x.name} (${formatMoney(x.market_price)})`
+              )
+              .join(" · ")}
+          </div>
         </div>
       )}
 

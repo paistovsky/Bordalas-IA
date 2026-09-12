@@ -106,6 +106,7 @@ def _epoch_del_ultimo_reset(ahora: datetime) -> int:
 def correr(
     *,
     accion_principal: str | None,
+    cierres: list | None = None,
     objetivos: list | None,
     rates: dict | None,
     prima_de_puja: float,
@@ -126,9 +127,11 @@ def correr(
 
     from src.analysis.la_rendija import (
         MARCA,
+        suelo_de_precio,
         a_quien_pujar,
         con_margen,
         importe_de_la_puja,
+        los_que_se_pueden_pagar,
         permiso,
     )
     from src.analysis.libro_de_viajes import (
@@ -162,6 +165,7 @@ def correr(
         )
 
         puerta = permiso(
+            cierres=cierres,
             ahora=momento,
             accion_principal=accion_principal,
             operaciones_en_este_reset=ya_van,
@@ -181,6 +185,8 @@ def correr(
         # ------------------------------------------------
         # A QUIEN PUJAR
         # ------------------------------------------------
+        suelo = suelo_de_precio(cierres)
+
         candidatos = [
             {
                 "player_id": safe_int(t.get("id")),
@@ -191,7 +197,9 @@ def correr(
             }
             for t in (objetivos or [])
             if isinstance(t, dict)
-            and safe_int(t.get("market_price")) >= 1_000_000
+            # EL SUELO VIVE EN UN SITIO. Durante la prueba de
+            # humo son 400.000; despues vuelve a 1.000.000.
+            and safe_int(t.get("market_price")) >= suelo["suelo"]
             and str(t.get("status") or "").lower() == "ok"
             and not t.get("outside_computer_market")
         ]
@@ -202,13 +210,34 @@ def correr(
             rates=rates,
         )
 
+        # EL TOPE, ANTES DE ELEGIR Y NO DESPUES DE ELEGIR.
+        #
+        #     El 12/09, con el suelo ya bajado a 400.000, el
+        #     carril elegia a Cancelo -5.970.000- contra un tope
+        #     por operacion de 843.612, y la puja se rechazaba
+        #     sola. Siete veces el tope.
+        #
+        #     El orden de preferencia va por prima de reventa, y
+        #     esa prefiere a los caros: sin esto el carril elige
+        #     sistematicamente al que menos puede pagar y gasta
+        #     el ciclo en un nombre imposible.
+        #
+        #     Es el MISMO tope que ya habia, preguntado cuando
+        #     todavia sirve de algo.
+        pagables = los_que_se_pueden_pagar(
+            margen.get("entran") or [],
+            curva=curva,
+            presupuesto=presupuesto,
+            tope_por_operacion=tope_por_operacion,
+        )
+
         caben = min(
             puerta["quedan_en_la_vuelta"],
             puerta["quedan_en_el_reset"],
         )
 
         elegidos = a_quien_pujar(
-            [x for x in margen.get("entran") or []],
+            pagables.get("caben") or [],
             cuantos=caben,
         )["elegidos"]
 
@@ -218,10 +247,12 @@ def correr(
                 "available": True,
                 "reason": (
                     f"El carril podia pujar y no hay a quien: "
-                    f"{margen.get('reason')}"
+                    f"{margen.get('reason')} "
+                    f"{pagables.get('reason') or ''}".strip()
                 ),
                 "permiso": puerta,
                 "margen": margen,
+                "pagables": pagables,
             }
 
         if escritor is None:
@@ -333,6 +364,7 @@ def correr(
             "failed": fallidas,
             "permiso": puerta,
             "margen": margen,
+            "pagables": pagables,
             "reason": (
                 f"{len(puestas)} puja(s) de la rendija"
                 + (

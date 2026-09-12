@@ -100,8 +100,55 @@ ESCRITURAS_POR_VUELTA = 2
 #     pregunta a `cupo_del_reset()`, que ademas dice en cual
 #     esta y por que, para que la portada lo pinte sin deducir
 #     nada.
+# ============================================================
+# LA PRUEBA DE HUMO (12/09/2026)
+# ============================================================
+#
+#     El primer viaje NO TIENE QUE GANAR DINERO: TIENE QUE
+#     COMPLETARSE. Una vez, de punta a punta —comprado, listado,
+#     oferta recibida, cobrada por encima del suelo—. Nueve mil
+#     euros valen; lo que compran es saber que la cadena
+#     funciona.
+#
+#     Con el bolsillo de hoy el tope por operacion son ~740.000,
+#     y con el suelo normal de 1 M el carril no tiene mercado:
+#     las dos condiciones eran incompatibles y no podia comprar
+#     nada NUNCA.
+#
+#     Asi que el suelo baja a 400.000 TEMPORALMENTE. En cuanto
+#     se complete un viaje, vuelve solo a 1.000.000 y el cupo
+#     pasa a 2.
+#
+# LO QUE ESTO NO ES
+#
+#     No es mover un umbral medido. `PRECIO_QUE_NO_PAGA_LA_FICHA`
+#     sigue siendo 1.000.000 y sigue siendo verdad: por debajo,
+#     un +1,52 % sobre 150.000 son 2.250 EUR que no pagan la
+#     ficha. Lo que se acepta a sabiendas es que la operacion de
+#     la PRUEBA gane poco. Es el precio de saber si la cadena
+#     entera funciona.
+SUELO_DE_LA_PRUEBA = 400_000
+
+# El de siempre, al que se vuelve. No se toca: se importa.
+from src.analysis.salida_del_viaje import (                # noqa: E402
+    PRECIO_QUE_NO_PAGA_LA_FICHA,
+)
+
+# Medida sobre las mismas 34 recompras, partidas por tramo de
+# precio en vez de por posicion. Es la que describe a un
+# jugador de menos de 1 M.
+PRIMA_DEL_TRAMO_BARATO = 1.52
+
+# El cupo, por ciclo de reset. UNO mientras dure la prueba: un
+# viaje, y se mira.
+CUPO_DE_LA_PRUEBA = 1
+
 CUPO_DE_ESTRENO = 2
 
+# El de cuatro sigue escrito y hoy NO SE ALCANZA por ningun
+# camino automatico: su condicion era la misma que la de subir a
+# dos, y no puede servir para las dos cosas. Cuando haga falta,
+# necesita condicion propia.
 CUPO_PLENO = 4
 
 # Cuantos viajes cerrados hacen falta antes de juzgar si esto
@@ -260,6 +307,73 @@ def un_viaje_cerrado_entero(cierres: list | None) -> dict:
         return {"available": False, "hay": False}
 
 
+def viajes_completados(cierres: list | None) -> int:
+    """
+    CUANTOS han dado la vuelta entera. La linea que el dueno
+    quiere ver cada dia hasta que ponga 1.
+
+    Usa EXACTAMENTE la misma definicion de "entero" que
+    `un_viaje_cerrado_entero` —cobrado por encima del suelo, sin
+    corte de perdidas—, porque si contara con otra regla habria
+    dos verdades sobre el mismo hecho y una estaria mal.
+
+    Devuelve un entero. Si no se sabe, 0: el lado prudente es no
+    dar por completado lo que no consta.
+    """
+
+    try:
+        return len(
+            [
+                c
+                for c in cierres or []
+                if isinstance(c, dict)
+                and un_viaje_cerrado_entero([c]).get("hay")
+            ]
+        )
+
+    except Exception:                               # noqa: BLE001
+        return 0
+
+
+def suelo_de_precio(cierres: list | None = None) -> dict:
+    """
+    Por debajo de que precio no mira el carril, y POR QUE.
+
+    Es el unico sitio donde vive ese numero, igual que el cupo.
+    Mientras dure la prueba de humo son 400.000; en cuanto se
+    complete un viaje vuelve a 1.000.000 solo.
+    """
+
+    primero = un_viaje_cerrado_entero(cierres)
+
+    if primero.get("hay"):
+        return {
+            "available": True,
+            "suelo": PRECIO_QUE_NO_PAGA_LA_FICHA,
+            "estado": "NORMAL",
+            "reason": (
+                f"Suelo de {_euros(PRECIO_QUE_NO_PAGA_LA_FICHA)} "
+                f"EUR: por debajo, la prima de reventa medida no "
+                f"paga la ficha. La prueba de humo termino."
+            ),
+        }
+
+    return {
+        "available": True,
+        "suelo": SUELO_DE_LA_PRUEBA,
+        "estado": "PRUEBA_DE_HUMO",
+        "reason": (
+            f"PRUEBA DE HUMO: suelo bajado a "
+            f"{_euros(SUELO_DE_LA_PRUEBA)} EUR para que el "
+            f"carril tenga mercado con el tope por operacion de "
+            f"hoy. No busca ganar dinero: busca COMPLETAR un "
+            f"viaje de punta a punta. Vuelve a "
+            f"{_euros(PRECIO_QUE_NO_PAGA_LA_FICHA)} en cuanto "
+            f"pase una vez."
+        ),
+    }
+
+
 def cupo_del_reset(cierres: list | None = None) -> dict:
     """
     Cuantas operaciones caben en este ciclo de reset, y POR QUE.
@@ -273,11 +387,11 @@ def cupo_del_reset(cierres: list | None = None) -> dict:
     if primero.get("hay"):
         return {
             "available": True,
-            "cupo": CUPO_PLENO,
-            "estado": "PLENO",
+            "cupo": CUPO_DE_ESTRENO,
+            "estado": "ESTRENO",
             "reason": (
-                f"Cupo de {CUPO_PLENO} por ciclo de reset: ya se "
-                f"cerro un viaje entero"
+                f"Cupo de {CUPO_DE_ESTRENO} por ciclo de reset: "
+                f"ya se completo un viaje entero"
                 + (
                     f" ({primero.get('player_name')}, "
                     f"+{_euros(primero.get('profit'))} EUR)"
@@ -290,14 +404,14 @@ def cupo_del_reset(cierres: list | None = None) -> dict:
 
     return {
         "available": True,
-        "cupo": CUPO_DE_ESTRENO,
-        "estado": "ESTRENO",
+        "cupo": CUPO_DE_LA_PRUEBA,
+        "estado": "PRUEBA_DE_HUMO",
         "reason": (
-            f"Cupo de {CUPO_DE_ESTRENO} por ciclo de reset: "
-            f"todavia no se ha cerrado ningun viaje entero "
+            f"Cupo de {CUPO_DE_LA_PRUEBA} por ciclo de reset: "
+            f"PRUEBA DE HUMO. Un viaje, de punta a punta "
             f"-comprado, listado, oferta recibida y cobrada por "
-            f"encima del suelo-. Sube a {CUPO_PLENO} en cuanto "
-            f"pase una vez."
+            f"encima del suelo-. Sube a {CUPO_DE_ESTRENO} en "
+            f"cuanto pase una vez."
         ),
     }
 
@@ -358,6 +472,12 @@ def importe_de_la_puja(
         "available": False,
         "amount": 0,
         "capped_by": None,
+        # EL TOPE, COMO DATO Y NO DENTRO DE UNA FRASE.
+        #
+        #     Estaba solo en el texto del motivo, asi que para
+        #     saber el numero habia que leer una cadena. Un dato,
+        #     un nombre (regla 33).
+        "tope": None,
         "reason": None,
     }
 
@@ -425,6 +545,7 @@ def importe_de_la_puja(
                 "available": True,
                 "amount": 0,
                 "capped_by": cual,
+                "tope": tope,
                 "reason": (
                     f"La puja de {_euros(bruto)} EUR pasa el tope "
                     f"`{cual}` ({_euros(tope)} EUR). NO se recorta "
@@ -437,6 +558,7 @@ def importe_de_la_puja(
             "available": True,
             "amount": bruto,
             "capped_by": None,
+            "tope": tope,
             "reason": (
                 f"{_euros(bruto)} EUR = {_euros(precio)} x "
                 f"{multiplicador:.4f} (la curva), dentro del tope "
@@ -453,6 +575,140 @@ def importe_de_la_puja(
             ),
         }
 
+
+
+def los_que_se_pueden_pagar(
+    candidatos: list | None,
+    curva: float,
+    presupuesto=None,
+    tope_por_operacion=None,
+) -> dict:
+    """
+    De los candidatos, a quien se le puede pagar la puja. Y el
+    resto, con su nombre.
+
+    SINTOMA (12/09/2026)
+
+        Se bajo el suelo a 400.000 para que el carril pudiera
+        comprar por fin algo, y siguio sin comprar. El panel
+        decia "8 llegan al suelo, 0 fuera" y el carril elegia a
+        CANCELO, de 5.970.000, con un tope por operacion de
+        843.612. Siete veces.
+
+    CAUSA
+
+        EL TOPE SE APLICABA AL PAGAR, NUNCA AL ELEGIR.
+
+        `importe_de_la_puja` lo miraba —y hacia bien en no
+        recortar a la baja— pero para entonces el candidato ya
+        estaba elegido y el cupo, gastado en un nombre imposible.
+        Y el orden de preferencia va por prima de reventa, que
+        prefiere a los caros: el carril elegia sistematicamente
+        al que menos podia pagar.
+
+    CONSECUENCIA
+
+        El mismo tope, un paso antes. No es un umbral nuevo:
+        es `MAX_SINGLE_SPECULATION_PERCENT`, el que ya habia,
+        preguntado cuando todavia sirve de algo.
+
+        Y los que no caben salen por su nombre, para que la
+        pantalla diga POR QUE no se compro en vez de callarse.
+    """
+
+    salida = {
+        "available": False,
+        "caben": [],
+        "no_caben": [],
+        "tope": None,
+        "reason": None,
+    }
+
+    try:
+        caben = []
+
+        no_caben = []
+
+        tope = None
+
+        for candidato in candidatos or []:
+
+            if not isinstance(candidato, dict):
+                continue
+
+            precio = safe_int(
+                candidato.get("market_price")
+                or (candidato.get("margen") or {}).get(
+                    "market_price"
+                )
+            )
+
+            cuanto = importe_de_la_puja(
+                precio,
+                curva=curva,
+                presupuesto=presupuesto,
+                tope_por_operacion=tope_por_operacion,
+            )
+
+            if tope is None:
+                tope = cuanto.get("tope")
+
+            if safe_int(cuanto.get("amount")) > 0:
+                caben.append(candidato)
+
+            else:
+                no_caben.append(
+                    {
+                        "name": (
+                            candidato.get("name")
+                            or (
+                                candidato.get("margen") or {}
+                            ).get("name")
+                        ),
+                        "market_price": precio,
+                        "reason": cuanto.get("reason"),
+                        "capped_by": cuanto.get("capped_by"),
+                    }
+                )
+
+        # Regla 24: si no venia ninguno, se dice, no se pasa en
+        # vacio como si todo estuviera bien.
+        if not (candidatos or []):
+            return {
+                **salida,
+                "available": True,
+                "reason": (
+                    "No habia candidatos que mirar: el tope no "
+                    "ha descartado a nadie porque no habia nadie."
+                ),
+            }
+
+        return {
+            "available": True,
+            "caben": caben,
+            "no_caben": no_caben,
+            "tope": tope,
+            "reason": (
+                f"{len(caben)} de {len(candidatos)} se pueden "
+                f"pagar"
+                + (
+                    f"; {len(no_caben)} pasan el tope por "
+                    f"operacion"
+                    if no_caben
+                    else ""
+                )
+                + "."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **salida,
+            "reason": (
+                f"No se pudo mirar quien se puede pagar: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
 
 
 # ============================================================
@@ -541,6 +797,23 @@ def margen_esperado(
         posicion = safe_int(ficha.get("position"))
 
         prima_posicion = PRIMA_POR_POSICION.get(posicion)
+
+        # LOS BARATOS SE RECOMPRAN PEOR, Y ESO ESTA MEDIDO APARTE
+        #
+        #     Las dos tablas salen de las MISMAS 34 recompras,
+        #     partidas de dos formas: por posicion y por tramo de
+        #     precio. Para un jugador de menos de 1 M la que
+        #     describe su caso es la del TRAMO (+1,52 %), no la
+        #     de su posicion.
+        #
+        #     Sin esto, la prueba de humo salia optimista: a un
+        #     medio de 660.000 le aplicaba +2,85 % cuando su
+        #     tramo se recompra a +1,52 %. Casi dos puntos de
+        #     margen inventados, justo en el rango donde se va a
+        #     jugar la prueba.
+        if precio < PRECIO_QUE_NO_PAGA_LA_FICHA:
+
+            prima_posicion = PRIMA_DEL_TRAMO_BARATO
 
         if prima_posicion is None:
             return {

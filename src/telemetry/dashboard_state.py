@@ -4579,6 +4579,10 @@ def build_dashboard_state() -> dict:
         from src.analysis.la_rendija import (
             con_margen,
             cupo_del_reset,
+            los_que_se_pueden_pagar,
+            suelo_de_precio,
+            viajes_completados,
+            un_viaje_cerrado_entero,
             en_vivo,
             ritmo_de_los_candidatos,
             se_apaga_sola,
@@ -4607,6 +4611,8 @@ def build_dashboard_state() -> dict:
 
         _cupo = cupo_del_reset(_cierres)
 
+        _suelo = suelo_de_precio(_cierres)
+
         from src.analysis.market_rate_gate import (
             build_market_rates,
         )
@@ -4632,10 +4638,14 @@ def build_dashboard_state() -> dict:
         #
         # El tablero de fichajes mira a todo el mercado; el
         # carril solo compra del Computer, con estado `ok` y de
-        # 1 M para arriba -por debajo, un +1,52 % sobre 150.000
-        # son 2.250 EUR y no pagan la ficha-. Pintar la lista del
-        # tablero diria el ritmo de jugadores que este carril no
-        # va a comprar.
+        # su SUELO para arriba. Pintar la lista del tablero diria
+        # el ritmo de jugadores que este carril no va a comprar.
+        #
+        # EL SUELO SE PREGUNTA, NO SE ESCRIBE. Aqui ponia
+        # `>= 1_000_000` a mano. Al bajarlo a 400.000 para la
+        # prueba de humo, la pantalla habria seguido pintando la
+        # lista vieja: dos verdades sobre el mismo numero, y la
+        # de la pantalla, falsa.
         _candidatos = [
             {
                 "player_id": safe_int(t.get("id")),
@@ -4644,7 +4654,7 @@ def build_dashboard_state() -> dict:
                 "market_price": safe_int(t.get("market_price")),
             }
             for t in ((acquisition or {}).get("targets") or [])
-            if safe_int(t.get("market_price")) >= 1_000_000
+            if safe_int(t.get("market_price")) >= _suelo["suelo"]
             and str(t.get("status") or "").lower() == "ok"
             # SOLO EL MERCADO DEL COMPUTER. La puerta del
             # mercado de rivales sigue cerrada por regla del
@@ -4668,11 +4678,41 @@ def build_dashboard_state() -> dict:
             rates=_rates,
         )
 
+        # QUIEN SE PUEDE PAGAR DE VERDAD.
+        #
+        #     Sin esto el panel decia "8 llegan al suelo, 0
+        #     fuera" mientras el carril elegia a Cancelo,
+        #     5.970.000, contra un tope de 843.612. Ocho
+        #     candidatos y ni uno comprable: el numero de la
+        #     pantalla era cierto y la conclusion que sugeria,
+        #     falsa.
+        _pagables = los_que_se_pueden_pagar(
+            _margen.get("entran") or [],
+            curva=float(_prima),
+            presupuesto=(
+                (acquisition or {}).get("budgets") or {}
+            ).get("speculation"),
+        )
+
         rendija_ahora = {
             "available": True,
+            "pagables": _pagables,
             "cupo": _cupo["cupo"],
             "cupo_estado": _cupo["estado"],
             "cupo_reason": _cupo["reason"],
+            "suelo": _suelo["suelo"],
+            "suelo_estado": _suelo["estado"],
+            "suelo_reason": _suelo["reason"],
+
+            # LA LINEA QUE EL DUENO QUIERE VER CADA DIA.
+            #
+            #     Cuando ponga 1, empieza el negocio de
+            #     verdad. Hasta entonces, todo lo del carril
+            #     es teoria sobre codigo que no ha comprado
+            #     nada.
+            "viajes_completados": viajes_completados(
+                _cierres
+            ),
             "apagado": se_apaga_sola(_cierres),
             "ritmo": ritmo_de_los_candidatos(
                 _candidatos, rates=_rates
