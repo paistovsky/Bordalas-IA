@@ -4251,7 +4251,19 @@ def run_cycle(
                 or {}
             ).get("user")
             or {}
-        ).get("id")
+        ).get("id"),
+
+        # LA PLANTILLA, PARA PODER RECONOCER UNA DERROTA.
+        #
+        #     Sin ella el libro solo sabia reconocer victorias
+        #     —el jugador aparece comprado por nosotros en el
+        #     tablon— y cuando el tablon no traia la operacion se
+        #     quedaba PENDING para siempre. El 12/09 publicaba
+        #     `lost: 0` y `win_rate: 1.0` en una liga donde el
+        #     76 % de las subastas estan disputadas.
+        #
+        #     O la tienes o no la tienes.
+        roster=snapshot.get("my_team"),
     )
 
     if bid_outcomes.get("lost_with_margin"):

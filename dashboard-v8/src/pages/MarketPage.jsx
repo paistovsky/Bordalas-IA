@@ -1215,8 +1215,28 @@ function ListingsPanel({ listings }) {
               <tr key={player.id || player.name}>
                 <td>{player.name}</td>
                 <td className="n">{formatEuros(player.listed_price)}</td>
-                <td className={Number(player.hours_to_expiry) <= 3 ? "n down" : "n dim"}>
-                  {player.hours_to_expiry ?? "—"} h
+                {/* CADUCADO NO ES "CADUCA AHORA" (12/09/2026).
+
+                    Ocho listados salian con "0,0 h" clavado y
+                    parecia un contador roto. No lo estaba:
+                    llevaban 2,3 horas caducados, y un
+                    `max(x, 0.0)` convertia "llego tarde" en
+                    "justo a tiempo". El reloj de 48 h es exacto
+                    —medido en los 13, al segundo— y renovar SI
+                    lo reinicia. Lo que no habia pasado era una
+                    renovacion desde el 10/09. */}
+                <td className={
+                  player.expired
+                    ? "n crit"
+                    : Number(player.hours_to_expiry) <= 3
+                    ? "n down"
+                    : "n dim"
+                }>
+                  {player.hours_to_expiry == null
+                    ? "sin medir"
+                    : player.expired
+                    ? `caducó hace ${player.expired_for_hours} h`
+                    : `${player.hours_to_expiry} h`}
                 </td>
               </tr>
             ))}

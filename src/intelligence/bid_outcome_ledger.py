@@ -211,6 +211,181 @@ def _epoch(iso: str) -> float:
         return 0.0
 
 
+# ============================================================
+# EL RESET QUE RESUELVE UNA PUJA
+# ============================================================
+#
+# SINTOMA (12/09/2026)
+#
+#     Cuatro pujas de la misma tanda en la ventana del 12/09:
+#
+#         04:46:55  Caceres      1.503.751  -> PENDING
+#         04:46:55  Fortuño        150.376  -> WON
+#         04:46:55  Diego Conde    240.601  -> WON
+#         04:52:15  Sotelo       1.604.001  -> PENDING
+#
+#     Las cuatro se resolvieron a las 07:00 del mismo dia.
+#     Caceres y Sotelo no estan en la plantilla: se perdieron. El
+#     libro decia PENDING.
+#
+#     Publicado: `lost: 0`, `win_rate: 1.0` sobre 5 pujas, en una
+#     liga donde el 76 % de las subastas estan disputadas.
+#
+# CAUSA
+#
+#     El detector sabia reconocer una VICTORIA —el jugador
+#     aparece en una operacion del tablon comprada por
+#     nosotros— y no tenia forma de reconocer una DERROTA cuando
+#     el tablon no trae la operacion: sin candidata, se quedaba
+#     PENDING hasta caducar a UNKNOWN 72 horas despues.
+#
+#     Es el septimo caso del mismo patron: un valor por defecto
+#     se traga el caso importante. Y encima el que se traga es el
+#     UNICO QUE ENSEÑA ALGO — ganar no dice cuanto hay que pujar;
+#     perder, si.
+#
+# LA REGLA, QUE NO NECESITA EL TABLON
+#
+#     Una puja cuyo reset YA HA PASADO y cuyo jugador NO esta en
+#     la plantilla es LOST. No hay tercera opcion: o lo tienes o
+#     no lo tienes.
+#
+#     PENDING se queda solo para las pujas cuyo reset aun no ha
+#     llegado.
+RESET_MADRID_MINUTOS = 7 * 60
+
+
+def _reset_que_la_resuelve(placed_at: str):
+    """
+    El instante UTC del reset que resuelve una puja puesta a esa
+    hora. `None` si no se sabe.
+
+    Las 07:00 de Madrid siguientes a la puja. Se apoya en la zona
+    de silencio, que ya sabe de Madrid y de horarios de verano,
+    para no escribir aqui un desfase a mano (doctrina 35).
+    """
+
+    try:
+        from datetime import timedelta
+
+        from src.analysis.zona_de_silencio import _hora_de_madrid
+
+        puesta = datetime.fromisoformat(placed_at)
+
+        if puesta.tzinfo is None:
+            puesta = puesta.replace(tzinfo=timezone.utc)
+
+        madrid = _hora_de_madrid(puesta)
+
+        minutos = madrid.hour * 60 + madrid.minute
+
+        dias = 0 if minutos < RESET_MADRID_MINUTOS else 1
+
+        reset_madrid = (madrid + timedelta(days=dias)).replace(
+            hour=RESET_MADRID_MINUTOS // 60,
+            minute=RESET_MADRID_MINUTOS % 60,
+            second=0,
+            microsecond=0,
+        )
+
+        # Y DE VUELTA A UTC, QUE NO ES LO MISMO.
+        #
+        #     `_hora_de_madrid` devuelve la HORA DE PARED de
+        #     Madrid, todavia etiquetada UTC. Devolverla tal cual
+        #     daria "07:00+00:00", que como instante son las
+        #     09:00 de Madrid: dos horas tarde, y la puja se
+        #     quedaria sin resolver toda la mañana.
+        #
+        #     Es la doctrina 35 otra vez —una hora sin zona es un
+        #     dato con dos nombres— y aqui las dos caras del
+        #     mismo numero se llamaban igual.
+        from src.analysis.market_clock import madrid_offset_hours
+
+        return reset_madrid - timedelta(
+            hours=madrid_offset_hours(puesta)
+        )
+
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def _en_la_plantilla(roster) -> set:
+    """
+    Los ids de nuestra plantilla. `None` si no se sabe.
+
+    DISTINGUIR "NO ESTA" DE "NO SE SABE" ES TODO EL PUNTO
+    (doctrina 36). Si el roster no llega, esta funcion devuelve
+    `None` y NO se marca nada como perdido: un libro que inventa
+    derrotas es peor que uno que no mide.
+    """
+
+    if roster is None:
+        return None
+
+    ids = set()
+
+    for jugador in roster or []:
+
+        if isinstance(jugador, dict):
+            try:
+                ids.add(int(jugador.get("id")))
+            except (TypeError, ValueError):
+                continue
+
+    # Regla 24: una plantilla vacia es sospechosa -tenemos 15- y
+    # tratarla como "no tiene a nadie" marcaria TODO como
+    # perdido. Sin plantilla, no se sabe.
+    return ids or None
+
+
+def _quedo_sin_ella(entrada, en_plantilla, momento) -> bool:
+    """
+    ¿Esta puja se perdio? Solo dice True cuando SE SABE.
+
+    Tres condiciones, y las tres tienen que darse:
+
+        1. se sabe quien esta en la plantilla
+        2. el reset que resolvia esta puja YA PASO
+        3. el jugador NO esta en la plantilla
+
+    Si falta cualquiera de las tres, esto devuelve False y la
+    puja se queda como estaba. No marcar una derrota que no
+    consta es barato; inventarla envenena la calibracion de la
+    prima de puja, que es el numero que decide cuanto pagamos de
+    mas.
+    """
+
+    if not en_plantilla:
+        return False
+
+    try:
+        jugador = int(entrada.get("player_id"))
+
+    except (TypeError, ValueError):
+        return False
+
+    if jugador in en_plantilla:
+        return False
+
+    reset = _reset_que_la_resuelve(
+        entrada.get("placed_at") or ""
+    )
+
+    if reset is None:
+        return False
+
+    try:
+        ahora = datetime.fromisoformat(momento)
+
+        if ahora.tzinfo is None:
+            ahora = ahora.replace(tzinfo=timezone.utc)
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+    return ahora >= reset
+
+
 def reconcile(
     board,
     our_user_id: int | None,
@@ -219,6 +394,7 @@ def reconcile(
     path: Path | None = None,
     save: bool = True,
     ahora: str | None = None,
+    roster=None,
 ) -> dict:
     """
     Cierra las pujas pendientes contra las subastas ya resueltas.
@@ -238,6 +414,11 @@ def reconcile(
 
     momento = ahora or _ahora()
     limite = _epoch(momento) - HORAS_PARA_CADUCAR * 3600
+
+    # `None` si no se sabe. Sin plantilla no se marca nada como
+    # perdido: un libro que inventa derrotas es peor que uno que
+    # no mide.
+    en_plantilla = _en_la_plantilla(roster)
 
     ops_por_jugador: dict[int, list] = {}
     for event_id, fecha, operacion in _operaciones(board):
@@ -259,6 +440,28 @@ def reconcile(
         ]
 
         if not candidatas:
+
+            # O LA TIENES O NO LA TIENES.
+            #
+            #     Si el reset que resolvia esta puja ya paso y el
+            #     jugador no esta en la plantilla, se perdio. No
+            #     hace falta el tablon para eso, y es justo
+            #     cuando el tablon no trae la operacion cuando
+            #     esto importa.
+            perdida = _quedo_sin_ella(
+                entrada, en_plantilla, momento
+            )
+
+            if perdida:
+                entrada["outcome"] = "LOST"
+                entrada["resolved_at"] = momento
+                entrada["resolved_by"] = "RESET_SIN_JUGADOR"
+                # Sin operacion en el tablon no se sabe por
+                # cuanto nos ganaron: se cuenta la derrota y no
+                # el margen (los margenes se cuentan aparte).
+                entrada["margin"] = None
+                continue
+
             if puesta and puesta < limite:
                 entrada["outcome"] = "UNKNOWN"
                 entrada["resolved_at"] = momento
@@ -420,6 +623,7 @@ def sync_bid_outcomes(
     *,
     board_path: Path | None = None,
     path: Path | None = None,
+    roster=None,
 ) -> dict:
     """
     El enganche del ciclo: cierra pendientes y devuelve el resumen.
@@ -445,7 +649,9 @@ def sync_bid_outcomes(
         }
 
     try:
-        libro = reconcile(eventos, our_user_id, path=path)
+        libro = reconcile(
+            eventos, our_user_id, path=path, roster=roster
+        )
         return summary(libro)
     except Exception:
         return {"available": False, "error": "El libro de pujas no pudo cerrarse."}

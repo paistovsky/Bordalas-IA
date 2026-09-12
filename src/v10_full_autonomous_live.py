@@ -273,6 +273,20 @@ def _estado_publicado(cycle: dict | None) -> dict:
         "solvency_clock": None,
         "operations_locked": False,
         "phase": None,
+
+        # EL DINERO, PUBLICADO AQUI (12/09/2026)
+        #
+        #     `balance` y `speculation` SI vienen en
+        #     `result["state"]` —esta funcion ya los usa para el
+        #     reloj de solvencia— pero estaban solo dentro, y el
+        #     carril se los buscaba por su cuenta en
+        #     `cycle["state"]`, que no existe.
+        #
+        #     Se publican para que las dos rutas lean LOS MISMOS
+        #     CAMPOS DEL MISMO SITIO. Un tercer camino a los
+        #     mismos datos es un cuarto fallo esperando.
+        "balance": None,
+        "speculation": {},
     }
 
     try:
@@ -302,6 +316,10 @@ def _estado_publicado(cycle: dict | None) -> dict:
             estado.get("operations_locked")
         )
         publicado["phase"] = estado.get("phase")
+
+        publicado["balance"] = estado.get("balance")
+
+        publicado["speculation"] = especulacion
 
         publicado["exposure"] = {
             "available_budget": bolsillo.get("available_budget"),
@@ -617,18 +635,64 @@ def _correr_el_carril(cycle: dict, accion_principal):
     """
     El carril de la rendija. Nunca lanza: si algo falla, el ciclo
     sigue y el motivo queda escrito.
+
+    SINTOMA (12/09/2026, foto de las 14:22)
+
+        Dos dias encendido, llamado y con dinero, y VIAJES
+        COMPLETADOS en 0. No era ninguna de las cinco puertas: le
+        llegaba la lista de candidatos VACIA.
+
+        La misma foto, el mismo segundo:
+
+            la pantalla   Trent 2.760.000 +2,67 %, Ruben Garcia
+                          2.680.000 +1,57 %, y tres que pasan el
+                          tope
+            el ejecutor   "0 llegan al suelo, 0 fuera. No habia
+                          candidatos que mirar."
+
+        Dos listas distintas, y la del ejecutor vacia.
+
+    CAUSA — Y ESTABA ESCRITA OCHENTA LINEAS MAS ARRIBA
+
+        Esto hacia `cycle["state"]`, y `run_cycle` NO devuelve
+        eso: devuelve {snapshot, result, execution, post_action}.
+        El docstring de `_estado_publicado` lo dice literalmente
+        —"leer `cycle["state"]` buscando `acquisition` devuelve
+        vacio: cero candidatos, cero pujas y ni un error en el
+        log"— y esta funcion se caia justo en ese agujero. La
+        nota que avisaba y el codigo que se estrellaba convivian
+        en el mismo fichero.
+
+        No se caia solo `objetivos`. Se caia TODO lo que sale de
+        ahi: `caja` None, `comprometido` None, `presupuesto`
+        None, y la curva cayendo a su defecto `[[1.0, 0]]`, o sea
+        una prima de puja del 0,00 %.
+
+    LA PRUEBA CRUZADA
+
+        `la_subasta` SI compro esta mañana —Fortuño y Diego
+        Conde, adjudicados a las 07:00— y `_pujar_en_el_reset` es
+        la unica funcion del fichero que llamaba a
+        `_estado_publicado`. La que come del plato lleno actua;
+        la que come del vacio no. No eran dos teorias
+        compitiendo: una nunca se sento a la mesa.
+
+    CONSECUENCIA
+
+        UN SOLO SITIO decide que es "el tablero de esta vuelta".
+        Las dos rutas leen de ahi, y los mismos campos.
     """
 
     try:
         from src.actions.carril_executor import correr
 
-        estado = (cycle or {}).get("state") or {}
+        # EL MISMO PLATO QUE `_pujar_en_el_reset`. No se arma
+        # aqui nada por cuenta propia.
+        publicado = _estado_publicado(cycle)
 
-        tablero = (
-            estado.get("acquisition")
-            or (cycle or {}).get("acquisition")
-            or {}
-        )
+        tablero = publicado.get("acquisition") or {}
+
+        especulacion = publicado.get("speculation") or {}
 
         from src.analysis.market_rate_gate import (
             build_market_rates,
@@ -648,30 +712,22 @@ def _correr_el_carril(cycle: dict, accion_principal):
             rates=build_market_rates(),
             prima_de_puja=(float(curva[0][0]) - 1.0) * 100.0,
             curva=float(curva[0][0]),
+
             # EL CARRIL TIENE BOLSILLO PROPIO (12/09/2026).
             #
-            #     Ya no sale de `budgets.speculation`: mientras
-            #     salia de ahi valia 843.612 EUR, menos que el
-            #     suelo de 1.000.000, y el carril no podia
-            #     comprar nada por construccion.
-            #
-            #     Lo que se le pasa ahora es LA CAJA, que es lo
-            #     que acota su tope propio de 3.000.000. El
-            #     presupuesto del motor de especular se sigue
-            #     pasando porque otras cuentas lo miran, pero ya
-            #     no decide el tope.
-            caja=(estado.get("balance")),
+            #     Su tope son 3.000.000 en euros, acotado por la
+            #     caja LIBRE. `presupuesto` se sigue pasando
+            #     porque otras cuentas lo miran, pero ya no
+            #     decide el tope.
+            caja=publicado.get("balance"),
+
             # Lo ya apartado en pujas vivas NO es caja. El motor
             # de especular ya descuenta lo del carril de lo suyo;
-            # esto es el mismo descuento en el otro sentido, que
-            # faltaba.
+            # esto es el mismo descuento en el otro sentido.
             comprometido=(
-                (
-                    (estado.get("speculation") or {}).get(
-                        "bid_exposure"
-                    )
-                    or {}
-                ).get("committed_total")
+                (especulacion.get("bid_exposure") or {}).get(
+                    "committed_total"
+                )
             ),
             presupuesto=(
                 (tablero.get("budgets") or {}).get(

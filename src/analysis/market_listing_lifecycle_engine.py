@@ -314,11 +314,39 @@ def analyze_listing_lifecycle(
         )
     )
 
-    if hours_to_expiry is not None:
-        hours_to_expiry = max(
-            hours_to_expiry,
-            0.0,
-        )
+    # EL SIGNO NO SE TIRA (12/09/2026)
+    #
+    #     Aqui habia un `max(hours_to_expiry, 0.0)`. Ocho
+    #     listados salian en la pantalla con "0.0 h" clavado y
+    #     parecia un contador roto.
+    #
+    #     No lo estaba: ESTABAN CADUCADOS DE VERDAD, desde hacia
+    #     2,28 horas. El clamp convertia "caduco hace rato" en
+    #     "caduca ahora mismo", que son dos cosas distintas y la
+    #     segunda no alarma a nadie.
+    #
+    #     Medido ese dia sobre nuestros 13 listados:
+    #
+    #         until - date = 48,00 h   en los 13, al segundo
+    #         los ocho de "0.0"        listados el 10/09 a las
+    #                                  10:25 y 10:35 -> caducados
+    #                                  a las 10:25/10:35 del 12
+    #
+    #     Y renovar SI reinicia el reloj: el libro de
+    #     renovaciones del 10/09 (10:25:48 y 10:35:31) casa AL
+    #     MINUTO con la fecha de listado de esos seis. Lo que no
+    #     habia pasado es una renovacion desde entonces.
+    #
+    #     NINGUNA DECISION CAMBIA POR QUITARLO: todos los que lo
+    #     leen comparan con `<=`, y un negativo cumple igual que
+    #     un cero. Lo que cambia es que ahora se puede ver.
+    caducado = bool(
+        hours_to_expiry is not None and hours_to_expiry < 0
+    )
+
+    caducado_hace = (
+        round(-hours_to_expiry, 2) if caducado else None
+    )
 
     next_cycle = (
         get_next_future_computer_cycle(
@@ -445,9 +473,17 @@ def analyze_listing_lifecycle(
             renew_urgent = True
 
             reason = (
-                f"{reason} Quedan "
-                f"{round(hours_to_expiry, 2)} h de vida: "
-                "es urgente."
+                f"{reason} "
+                + (
+                    f"Caduco hace {caducado_hace} h: llega "
+                    f"tarde."
+                    if caducado
+                    else (
+                        f"Quedan "
+                        f"{round(hours_to_expiry, 2)} h de "
+                        f"vida: es urgente."
+                    )
+                )
             )
 
     else:
@@ -516,6 +552,17 @@ def analyze_listing_lifecycle(
                 is not None
                 else None
             ),
+
+        # DOS CASOS, DOS NOMBRES (regla 33).
+        #
+        #     "caduca en 0,0 h" y "caduco hace 2,3 h" se
+        #     publicaban con el mismo numero. El segundo es el
+        #     que hay que mirar.
+        "expired":
+            caducado,
+
+        "expired_for_hours":
+            caducado_hace,
 
         "expiry_warning":
             expiry_warning,
