@@ -1,5 +1,8 @@
 ﻿name: Bordalas IA Live
 
+on:
+ workflow_dispatch:
+
 permissions:
   contents: read
   actions: read
