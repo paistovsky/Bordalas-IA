@@ -140,6 +140,7 @@ def correr(
     from src.analysis.libro_de_viajes import (
         cuantos_en_este_reset,
     )
+    from src.analysis.bid_jitter import apply_bid_jitter
 
     # EL HECHO, NO LA INTENCION.
     #
@@ -309,6 +310,51 @@ def correr(
 
             importe = safe_int(cuanto.get("amount"))
 
+            # ============================================
+            # EL DESVIO, QUE YA EXISTIA Y NO LO USABA NADIE
+            # ============================================
+            #
+            #     12/09/2026. La primera puja del carril de la
+            #     historia fue por Trent: 2.760.000 EUR. El
+            #     precio de mercado, redondo clavado.
+            #
+            #     Las cuatro de la rueda esa misma mañana iban
+            #     desviadas —1.604.001, 1.503.751, 240.601,
+            #     150.376— porque la rueda SI llama a
+            #     `apply_bid_jitter`. El carril no.
+            #
+            #     Mismo patron que el plato vacio de esa tarde:
+            #     la pieza montada y sin enchufar.
+            #
+            #     Biwenger no publica como resuelve un empate.
+            #     Como no lo sabemos, pujar un numero raro un
+            #     pelo por encima es estrictamente mejor que
+            #     pujar el redondo, y no hay contra: el desvio
+            #     nunca pasa del techo ni del tope por operacion.
+            #     `ceiling` es un TECHO DE IMPORTE, no el tamaño
+            #     del desvio: la rueda le pasa el menor de sus
+            #     limites ya comprobados. Aqui el limite ya
+            #     comprobado es el bolsillo del carril, que es lo
+            #     que `importe_de_la_puja` acaba de respetar.
+            #
+            #     (Se intento primero con `jitter_ceiling`, que
+            #     devuelve 13.800 para un jugador de 2,76 M: el
+            #     techo quedaba por debajo del suelo `precio + 1`
+            #     y `apply_bid_jitter` devolvia el importe limpio
+            #     sin desviar nada. Dos cosas distintas con
+            #     nombres parecidos.)
+            desvio = apply_bid_jitter(
+                importe,
+                safe_int(fila.get("market_price")),
+                ceiling=safe_int(cuanto.get("tope")) or importe,
+                player_id=pid,
+                single_operation_limit=(
+                    cuanto.get("tope")
+                ),
+            )
+
+            importe = safe_int(desvio.get("bid")) or importe
+
             if pid <= 0 or importe <= 0:
                 fallidas.append(
                     {
@@ -319,6 +365,11 @@ def correr(
                 )
                 continue
 
+            # La MISMA marca de tiempo para los dos libros: si
+            # discrepan, un dia habra que cruzarlos y no se
+            # podra.
+            puesta_en = _ahora()
+
             try:
                 # LA UNICA ESCRITURA DE ESTE FICHERO.
                 resultado = escritor.place_bid(
@@ -327,13 +378,61 @@ def correr(
                     execute=True,
                 )
 
+                # ====================================
+                # EL MISMO LIBRO QUE LA RUEDA
+                # ====================================
+                #
+                #     El carril tenia libro propio
+                #     (`libro_del_carril.jsonl`) y no aparecia en
+                #     `bid_outcome_ledger`. Asi que el arreglo de
+                #     esta tarde —que el libro sepa perder— no le
+                #     servia: su primera puja se habria resuelto
+                #     a las 07:00 sin que nadie se enterara de si
+                #     gano o perdio.
+                #
+                #     `target_source` es el campo que ya lleva el
+                #     origen —SUBASTA_CARTERA, ACQUISITION_BOARD—
+                #     asi que el carril usa ese y no uno nuevo:
+                #     un dato, un nombre (regla 33).
+                #
+                #     Blindado: una puja ya confirmada por
+                #     Biwenger no puede caerse por un fallo
+                #     apuntandola.
+                try:
+                    from src.intelligence.bid_outcome_ledger import (
+                        record_bid,
+                    )
+
+                    record_bid(
+                        pid,
+                        importe,
+                        player_name=fila.get("name"),
+                        market_price=safe_int(
+                            fila.get("market_price")
+                        ),
+                        recommended_bid=safe_int(
+                            cuanto.get("amount")
+                        ),
+                        intent="REVENDER",
+                        target_source=MARCA,
+                        market_rate_percent_per_day=(
+                            fila.get("rate_percent_per_day")
+                        ),
+                        placed_at=puesta_en,
+                    )
+
+                except Exception:                   # noqa: BLE001
+                    pass
+
                 anotacion = {
-                    "at": _ahora(),
+                    "at": puesta_en,
                     "marca": MARCA,
                     "player_id": pid,
                     "player_name": fila.get("name"),
                     "position": safe_int(fila.get("position")),
                     "amount": importe,
+                    "clean": safe_int(desvio.get("clean")),
+                    "jitter": safe_int(desvio.get("jitter")),
                     "market_price": safe_int(
                         fila.get("market_price")
                     ),

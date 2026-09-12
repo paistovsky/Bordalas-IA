@@ -222,6 +222,7 @@ TESTS = [
     "src.analysis.test_la_rendija_v1",
     "src.analysis.test_esta_enchufado_v1",
     "src.analysis.test_el_plato_del_carril_v1",
+    "src.analysis.test_la_puja_del_carril_v1",
     "src.analysis.test_el_libro_sabe_perder_v1",
     "src.analysis.test_el_reloj_de_48h_v1",
     "src.analysis.test_los_relojes_v1",
