@@ -817,6 +817,150 @@ def test_la_rendija_esta_armada() -> None:
             os.environ[APAGADO_ENV] = antes
 
 
+# ============================================================
+# 8. Y ALGUIEN LA LLAMA
+# ============================================================
+
+
+def test_el_ciclo_llama_al_carril() -> None:
+    """
+    EL FALLO DEL 12/09/2026.
+
+    La rendija se encendio el 11 y al dia siguiente no habia
+    comprado nada. No fue ninguna de las cinco puertas: era que
+    NADIE LLAMABA AL CARRIL. Los modulos escritos, 24 guardias en
+    verde, el estado publicado y la pantalla pintando "EN VIVO"
+    sobre codigo que no corria.
+
+    `en_vivo = True` era la bandera del modulo, no una prueba de
+    que se ejecutara. Armar algo y no enchufarlo es PEOR que no
+    armarlo, porque la pantalla dice que funciona.
+    """
+
+    from pathlib import Path
+
+    raiz = Path(__file__).parents[2]
+
+    ciclo = (
+        raiz / "src" / "v10_full_autonomous_live.py"
+    ).read_text(encoding="utf-8")
+
+    assert "_correr_el_carril" in ciclo, (
+        "el ciclo no llama al carril: la rendija esta encendida "
+        "y no la ejecuta nadie"
+    )
+
+    assert '"carril": carril' in ciclo, (
+        "el ciclo no publica lo que hizo el carril"
+    )
+
+    ejecutor = (
+        raiz / "src" / "actions" / "carril_executor.py"
+    ).read_text(encoding="utf-8")
+
+    # La unica escritura, y ninguna otra.
+    assert "place_bid" in ejecutor, ejecutor[:0]
+
+    for prohibida in (
+        "accept_offer",
+        "list_player_for_sale",
+        "cancel_bid",
+        "counter_offer",
+    ):
+        assert prohibida not in ejecutor, (
+            f"el carril escribe `{prohibida}`, y solo puede pujar"
+        )
+
+
+def test_el_disparo_deliberado_viaja_hasta_el_silencio() -> None:
+    """
+    Los disparos de las 04:45 y 04:50 caen DENTRO de la zona de
+    silencio a proposito, y la zona los salva si se le dice que
+    son deliberados.
+
+    `permiso()` llamaba a `permite_escribir(momento)` sin el
+    disparo, asi que los bloqueaba igual que a los del cron —
+    justo en la ventana del reset, que es para lo que estan.
+    """
+
+    # 04:50 de Madrid.
+    en_la_ventana = datetime(
+        2026, 9, 12, 2, 50, tzinfo=timezone.utc
+    )
+
+    assert permiso(ahora=en_la_ventana)["blocked_by"] == (
+        "SILENCIO"
+    ), "sin decir el disparo tiene que seguir bloqueando"
+
+    assert permiso(
+        ahora=en_la_ventana, disparo="schedule"
+    )["blocked_by"] == "SILENCIO", (
+        "el cron NO puede escribir en la zona de silencio"
+    )
+
+    for deliberado in ("ventana", "workflow_dispatch", "manual"):
+        visto = permiso(
+            ahora=en_la_ventana, disparo=deliberado
+        )
+
+        assert visto["puede"] is True, (deliberado, visto)
+
+    # Y el ciclo se lo pasa.
+    from pathlib import Path
+
+    ejecutor = (
+        Path(__file__).parents[2]
+        / "src"
+        / "actions"
+        / "carril_executor.py"
+    ).read_text(encoding="utf-8")
+
+    assert "disparo=disparo" in ejecutor, (
+        "el ejecutor no le pasa el disparo al permiso"
+    )
+
+
+def test_el_filtro_es_el_suelo_no_el_cero() -> None:
+    """
+    EL ARREGLO PENDIENTE.
+
+    El suelo de cobro es coste + 1 %, y el margen es
+    oferta/coste - 1. Un margen entre 0 y 1 % es un viaje que
+    espera una oferta que NOSOTROS MISMOS RECHAZARIAMOS.
+
+    Ayer entro asi Robbie Ure, con +0,49 %.
+    """
+
+    from src.analysis.salida_del_viaje import SUELO_DEL_VIAJE
+
+    ure = {
+        "player_id": 9,
+        "name": "Robbie Ure",
+        "position": 4,
+        "market_price": 3_590_000,
+    }
+
+    visto = con_margen(
+        [ure],
+        prima_de_puja=0.28,
+        rates={9: {"rate_percent_per_day": -1.01}},
+    )
+
+    assert visto["entran"] == [], (
+        f"Robbie Ure vuelve a entrar con un margen que no llega "
+        f"al suelo: {visto}"
+    )
+
+    assert visto["fuera"], visto
+
+    # Y su margen SI era positivo: el filtro viejo lo dejaba
+    # pasar. Si esto dejara de ser positivo, la guardia estaria
+    # probando otra cosa.
+    assert 0 < visto["fuera"][0]["margen_percent"] < (
+        SUELO_DEL_VIAJE * 100
+    ), visto
+
+
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
@@ -842,6 +986,9 @@ TESTS = [
     test_sin_ritmo_se_usa_el_supuesto_y_se_dice,
     test_se_publica_si_llega_al_suelo_de_venta,
     test_la_rendija_esta_armada,
+    test_el_ciclo_llama_al_carril,
+    test_el_disparo_deliberado_viaja_hasta_el_silencio,
+    test_el_filtro_es_el_suelo_no_el_cero,
 ]
 
 

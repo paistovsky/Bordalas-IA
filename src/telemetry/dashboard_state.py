@@ -3162,6 +3162,33 @@ def bloque_de_la_subasta(
         }
 
 
+def _saldo_fresco(market_status: dict | None):
+    """
+    El saldo de AHORA, no el de la foto. `None` si no se puede.
+
+    Nunca lanza: si la llamada falla se devuelve `None`, y el
+    cuadre de la caja dira "no se sabe" en vez de ponerse rojo
+    contra un saldo caduco.
+    """
+
+    try:
+        from src.biwenger.client import cliente_del_ciclo
+
+        cliente = cliente_del_ciclo()
+
+        estado = (cliente.get_market() or {}).get("status") or {}
+
+        saldo = estado.get("balance")
+
+        if saldo is not None:
+            return saldo
+
+    except Exception as error:                      # noqa: BLE001
+        print(f"Saldo fresco: no se pudo pedir ({error}).")
+
+    return None
+
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -3246,7 +3273,15 @@ def build_dashboard_state() -> dict:
         catalog=snapshot.get("catalog", {}),
         current_user_id=board.get("current_user_id"),
         own_finances=board.get("own_finances", {}),
-        own_balance=market_status.get("balance"),
+        # EL SALDO, FRESCO Y NO DE LA FOTO.
+        #
+        #     El cuadre de la caja compara contra este numero.
+        #     Con el de la foto dio un rojo falso de 140.977 EUR
+        #     el 12/09: la reconstruccion estaba bien y lo viejo
+        #     era el saldo. Se pide a la API, y si no se puede,
+        #     se manda `None` para que el cuadre diga "no se
+        #     sabe" en vez de comparar contra algo caduco.
+        own_balance=_saldo_fresco(market_status),
         own_maximum_bid=market_status.get("maximumBid"),
     )
 

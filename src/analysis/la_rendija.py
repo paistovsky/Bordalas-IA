@@ -550,10 +550,11 @@ def con_margen(
 ) -> dict:
     """
     Los candidatos con su margen esperado, y FUERA los que no
-    ganan dinero.
+    llegan al suelo de cobro.
 
     Es el unico filtro que este carril anade, y no filtra por
-    direccion del precio: filtra por que la operacion gane.
+    direccion del precio: filtra por que la operacion se pueda
+    CERRAR con ganancia.
     """
 
     vacio = {
@@ -593,7 +594,16 @@ def con_margen(
                 fuera.append(fila)
                 continue
 
-            if fila["gana"]:
+            # EL FILTRO ES EL SUELO, NO EL CERO (12/09/2026).
+            #
+            #     El suelo de cobro es coste + 1 %, y el margen
+            #     es oferta/coste - 1. Asi que un margen entre 0
+            #     y 1 % es un viaje que espera una oferta que
+            #     NOSOTROS MISMOS RECHAZARIAMOS: entra y no
+            #     puede cerrarse.
+            #
+            #     Ayer entro asi Robbie Ure, con +0,49 %.
+            if fila["llega_al_suelo"]:
                 entran.append({**candidato, "margen": fila})
 
             else:
@@ -615,7 +625,8 @@ def con_margen(
             "ritmo_supuesto": supuesto,
             "con_supuesto": supuestos,
             "reason": (
-                f"{len(entran)} con margen positivo, "
+                f"{len(entran)} llegan al suelo "
+                f"(+{SUELO_DEL_VIAJE * 100:.0f} %), "
                 f"{len(fuera)} fuera"
                 + (
                     f"; {supuestos} de los que entran usan el "
@@ -821,6 +832,7 @@ def permiso(
     operaciones_en_este_reset: int = 0,
     cierres: list | None = None,
     armada: bool | None = None,
+    disparo: str | None = None,
 ) -> dict:
     """
     ¿Puede escribir el carril de la rendija ahora mismo?
@@ -888,7 +900,16 @@ def permiso(
             permite_escribir,
         )
 
-        silencio = permite_escribir(momento)
+        # EL DISPARO VIAJA (12/09/2026).
+        #
+        #     Aqui se llamaba sin `disparo`, asi que un
+        #     disparo DELIBERADO -el de las 04:45 y 04:50,
+        #     puestos a proposito dentro de la zona- se
+        #     bloqueaba igual que uno del cron. La zona
+        #     existe para que el cron no escriba mientras el
+        #     mercado se resuelve, no para vetar lo que se
+        #     programo a mano para esa hora.
+        silencio = permite_escribir(momento, disparo=disparo)
 
         if not silencio.get("allowed", True):
             return {

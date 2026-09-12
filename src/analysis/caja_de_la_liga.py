@@ -496,6 +496,19 @@ def cuadra(caja_reconstruida, saldo_real) -> dict:
     encontro el `splitRound`, con un hueco de 870.000 clavados.
     """
 
+    # EL SALDO CONTRA EL QUE SE COMPARA TIENE QUE SER DE AHORA
+    #
+    #     12/09/2026: la alarma salio en ROJO por 140.977 EUR y
+    #     la reconstruccion era CORRECTA — coincidia al euro con
+    #     el saldo real de la API. Lo que estaba viejo era el
+    #     otro lado: se comparaba contra el `balance` de la FOTO,
+    #     y entre la foto y ahora habian entrado dos compras del
+    #     reset (390.977) y una racha diaria (250.000).
+    #
+    #     Un rojo falso gasta la confianza igual que un verde
+    #     falso, y peor: ensena a no mirar la alarma. Asi que el
+    #     saldo se pide fresco, y si no se puede pedir, NO se
+    #     compara contra uno viejo: se dice que no se sabe.
     if caja_reconstruida is None or saldo_real is None:
         return {
             "available": False,

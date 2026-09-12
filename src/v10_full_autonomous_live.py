@@ -613,6 +613,72 @@ def _anotar_en_el_libro(enviadas: list | None) -> None:
 RENOVACION_EN_VIVO = True
 
 
+def _correr_el_carril(cycle: dict, accion_principal):
+    """
+    El carril de la rendija. Nunca lanza: si algo falla, el ciclo
+    sigue y el motivo queda escrito.
+    """
+
+    try:
+        from src.actions.carril_executor import correr
+
+        estado = (cycle or {}).get("state") or {}
+
+        tablero = (
+            estado.get("acquisition")
+            or (cycle or {}).get("acquisition")
+            or {}
+        )
+
+        from src.analysis.market_rate_gate import (
+            build_market_rates,
+        )
+
+        # LA PRIMA DE PUJA, de la curva calibrada en vivo. No se
+        # escribe: sale del modelo de puja de los rivales.
+        curva = (
+            (tablero.get("premium_model") or {}).get("curve")
+            or [[1.0, 0]]
+        )
+
+        return correr(
+            accion_principal=accion_principal,
+            objetivos=tablero.get("targets") or [],
+            rates=build_market_rates(),
+            prima_de_puja=(float(curva[0][0]) - 1.0) * 100.0,
+            disparo=_disparo_de_este_ciclo(),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "executed": False,
+            "reason": (
+                f"El carril no se pudo correr: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+def _disparo_de_este_ciclo():
+    """
+    Que ha disparado esta vuelta: el cron o algo deliberado.
+
+    Importa porque los disparos de las 04:45 y 04:50 caen DENTRO
+    de la zona de silencio A PROPOSITO, y la zona los salva si
+    se le dice que son deliberados. Sin esto, el carril se
+    bloqueaba justo en la ventana del reset.
+    """
+
+    try:
+        import os
+
+        return os.getenv("GITHUB_EVENT_NAME") or "schedule"
+
+    except Exception:                               # noqa: BLE001
+        return "schedule"
+
+
 def _renovar_en_la_ventana(cycle: dict | None) -> dict:
     """
     Renovar los listados que no llegan vivos a la proxima
@@ -946,6 +1012,24 @@ def run_full_autonomous_cycle() -> dict:
                     action_taken
                 )
 
+    # ==========================================================
+    # 3) EL CARRIL DE LA RENDIJA (12/09/2026)
+    # ==========================================================
+    #
+    #     Va DESPUES de la accion principal y NO consume
+    #     `write_used`: una puja de revender no compite por el
+    #     hueco de la vuelta. Perderla no cuesta nada -esta
+    #     medido- y cuesta centimos de peticiones.
+    #
+    #     ESTE BLOQUE ES LO QUE FALTABA. La rendija se encendio
+    #     el 11/09 y al dia siguiente no habia comprado nada: no
+    #     era ninguna de las cinco puertas, era que NADIE LA
+    #     LLAMABA. `en_vivo = True` era la bandera del modulo, y
+    #     la pantalla decia EN VIVO sobre codigo que no corria.
+    #
+    #     Si revienta, no tumba el ciclo: `correr` nunca lanza.
+    carril = _correr_el_carril(cycle, action_taken)
+
     payload = {
         "version": "V10.13.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -970,6 +1054,7 @@ def run_full_autonomous_cycle() -> dict:
             "maximum_full_reads": 2,
         },
         "v10_write_verification": v10_verification,
+        "carril": carril,
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
