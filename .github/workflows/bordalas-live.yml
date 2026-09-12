@@ -1,27 +1,5 @@
 ﻿name: Bordalas IA Live
 
-on:
-  workflow_dispatch:
-
-  schedule:
-    # Una vuelta por hora, SALTANDO la ventana del reset del mercado.
-    #
-    # El reset de Biwenger cae entre las 05:00 y las 07:00 de Madrid (fuente
-    # oficial). El cron de GitHub es SIEMPRE UTC, sin zona horaria:
-    #     verano   (CEST, UTC+2) -> la ventana son las 03:00-05:00 UTC
-    #     invierno (CET,  UTC+1) -> la ventana son las 04:00-06:00 UTC
-    # Se salta UTC 03-06, que cubre las dos estaciones. Quedan 20 vueltas.
-    #
-    # NO volver a un "* * * *" horario: cualquier cadencia que no salte esas
-    # horas acaba ejecutando dentro de la ventana. Reducido el 08/09/2026 tras
-    # el bloqueo por exceso de peticiones; reordenado el 10/09/2026 por el reset.
-    #
-    # Los dos momentos que importan los dispara un cron externo (cron-job.org,
-    # Europe/Madrid, con horario de verano automatico):
-    #     04:45 y 04:50  ventana: pujar y renovar
-    #     07:15          despues del reset: leer resultado y cobrar
-    - cron: "7 0-2,7-23 * * *"
-
 permissions:
   contents: read
   actions: read
