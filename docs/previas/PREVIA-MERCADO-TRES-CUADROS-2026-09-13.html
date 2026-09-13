@@ -1,0 +1,324 @@
+<title>MERCADO — previa 3 cuadros</title>
+<style>
+:root{--bg:#0b1117;--pan:#111a24;--bd:#1e2b38;--tx:#c8d3de;--dim:#7b8794;--gr:#4ade80;--am:#eab308;--bl:#60a5fa;--mo:#a78bfa;--rd:#ef4444}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font:13px/1.45 "Segoe UI",system-ui,sans-serif;padding:18px}
+h1{font-size:15px;letter-spacing:.16em;margin:0 0 3px;font-weight:600}
+.sub{color:var(--dim);font-size:11px;letter-spacing:.1em;margin-bottom:16px}
+.cajas{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:18px}
+.caja{background:var(--pan);border:1px solid var(--bd);border-radius:6px;padding:12px 14px}
+.caja h2{font-size:9.5px;letter-spacing:.14em;color:var(--dim);margin:0 0 8px;font-weight:600}
+.big{font-size:22px;font-weight:600;color:#e6edf3}.small{font-size:11px;color:var(--dim);margin-top:3px}.neg{color:var(--rd)}
+.caja ul{list-style:none;margin:0;padding:0;font-size:11.5px}
+.caja li{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #16212c}
+.caja li em{font-style:normal;color:var(--dim)}
+.panel{background:var(--pan);border:1px solid var(--bd);border-radius:6px;overflow:hidden;margin-bottom:18px}
+.panel>header{padding:12px 14px 10px;border-bottom:1px solid var(--bd)}
+.panel h2{font-size:12px;letter-spacing:.14em;margin:0;font-weight:600}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;font-size:9.5px;letter-spacing:.14em;color:var(--dim);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+thead th.r{text-align:right}thead th.ctr{text-align:center}
+td{padding:8px 10px;border-bottom:1px solid #16212c;vertical-align:middle}
+tr.hi td{background:#101d18}
+tr.mas td{color:var(--dim);font-size:11px;font-style:italic;text-align:center}
+.esc{width:17px;height:17px;object-fit:contain;vertical-align:-4px;margin-right:7px}
+.nm{color:#e6edf3;font-weight:600}
+.pos{font-size:9.5px;font-weight:700;letter-spacing:.06em;margin-left:3px}
+.pos.por{color:var(--am)}.pos.def{color:var(--bl)}.pos.med{color:var(--gr)}.pos.del{color:var(--rd)}
+.es{text-align:center;font-size:14px}
+.ok{color:var(--gr)}.inj{color:var(--rd);font-weight:700}.dud{color:var(--am);font-weight:700}.unk{color:var(--dim)}
+.card{display:inline-block;width:9px;height:13px;border-radius:1.5px;vertical-align:-1px}.card.red{background:var(--rd)}
+.pt{text-align:right;color:#e6edf3;font-variant-numeric:tabular-nums;font-weight:600;padding-right:14px}
+.ppm{text-align:right;font-variant-numeric:tabular-nums;padding-right:14px}
+.cp{color:var(--gr);font-size:13px}
+.ti{width:74px}.titw{display:flex;flex-direction:column;gap:3px}
+.titn{font-size:11px;font-variant-numeric:tabular-nums;font-weight:600}
+.bar{display:block;height:3px;background:#1e2b38;border-radius:2px;overflow:hidden}.bar b{display:block;height:100%;border-radius:2px}
+.t-hi{color:var(--gr)}b.t-hi{background:var(--gr)}.t-md{color:var(--am)}b.t-md{background:var(--am)}.t-lo{color:var(--dim)}b.t-lo{background:#3d4a58}
+.pr{color:#e6edf3}.up{color:var(--gr);font-size:10.5px}.down{color:var(--rd);font-size:10.5px}.flat{color:var(--dim);font-size:10.5px}
+.comp{color:#e6edf3}.riv{color:var(--mo)}.nos{color:var(--bl)}.libre{color:var(--gr)}
+.cd{font-variant-numeric:tabular-nums}.cd.urg{color:var(--am)}
+.ac span{font-weight:600;font-size:11.5px}
+.a-puja,.a-bid{color:var(--gr)}.a-no{color:var(--am)}.a-riv{color:var(--mo)}.a-nada{color:var(--dim)}
+.v-sell{color:var(--gr)}.v-rer{color:var(--am)}.v-keep{color:var(--bl)}.v-hold{color:var(--dim)}.v-never{color:var(--mo)}
+.i-mejora{color:var(--gr)}.i-chollo{color:var(--am)}.i-nada{color:var(--dim)}.i-nuestro{color:var(--bl)}
+.pos-d{color:var(--gr);font-size:13px}.neg-d{color:var(--dim)}.ref{color:var(--dim);font-size:10px}
+.tit-si{color:var(--bl);font-size:10px;font-weight:700}
+.once{color:var(--bl)}.rev{color:var(--gr)}.muted{color:var(--dim)}.puja{color:var(--am)}
+.pw{color:#9fb0c0;font-size:11.5px;max-width:330px}
+.q,.c,.vd,.pq,.pj,.tm,.es,.pt,.ac,.ppm,.dl{white-space:nowrap}
+.nota{margin:0 0 18px;font-size:11px;color:var(--dim);border-left:2px solid var(--bd);padding-left:10px}
+.res{padding:10px 14px;font-size:11px;color:var(--dim);border-top:1px solid var(--bd)}.res b{color:#e6edf3}
+.aviso{margin:0;padding:10px 14px;background:#241d10;border-bottom:1px solid var(--bd);color:#f0c674;font-size:11.5px}
+.leyenda{margin-top:6px;font-size:11px;color:var(--dim)}.leyenda span{margin-right:16px}
+</style>
+<h1>MERCADO</h1>
+<div class="sub">JORNADA 7 · PREVIA · DATOS REALES DE HOY</div>
+<div class="cajas">
+  <div class="caja"><h2>RELOJ DEL MERCADO</h2><div class="big"><span class="cd" data-t="1789362000">--:--:--</span></div><div class="small">próximo reset · 14/09 07:00 de Madrid</div></div>
+  <div class="caja"><h2>CAJA</h2><div class="big neg">-1.299.834 €</div><div class="small">se puede comprometer hasta 7.658.149 €</div></div>
+  <div class="caja"><h2>NUESTRAS PUBLICACIONES</h2><div class="big">16</div><div class="small" style="margin-bottom:6px">14 con oferta del Computer</div><ul><li><span>Mangala</span><em>2.498.100 €</em></li><li><span>Pablo Ibáñez</span><em>2.420.500 €</em></li><li><span>Jonny</span><em>2.352.000 €</em></li><li><span>Dituro</span><em>2.373.400 €</em></li><li><span>Olasagasti</span><em>3.256.200 €</em></li></ul></div>
+</div>
+
+<div class="panel"><header><h2>1 · OBJETIVOS DE HOY</h2>
+<div class="sub" style="margin:4px 0 0">LO QUE HAY EN EL MERCADO AHORA · 61 · DE MAYOR A MENOR INTERÉS</div></header>
+<div class="wrap"><table><thead><tr><th>QUIÉN</th><th class="ctr">EST.</th><th class="r">PTS</th><th>TITULAR</th><th>CUÁNTO CUESTA</th><th>QUIÉN LO VENDE</th><th>TERMINA EN</th><th>ACCIÓN</th><th>PARA QUÉ</th><th>PUJARÍAMOS</th><th>POR QUÉ</th></tr></thead>
+<tbody><tr class="hi"><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/65.png" alt="" title="Málaga" onerror="this.style.visibility='hidden'"><span class="nm">Larrubia</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">14</td><td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">4.750.000 €</span><br><span class="down">▼ 40.000 €</span></td><td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-puja">puja puesta</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Vale 2.915.815 EUR para nosotros y ya cuesta 4.750.000. No hay margen.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/93.png" alt="" title="Osasuna" onerror="this.style.visibility='hidden'"><span class="nm">Sergio Herrera</span> <span class="pos por">POR</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">11</td><td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">3.850.000 €</span><br><span class="down">▼ 40.000 €</span></td><td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-no">no compensa</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Vale 2.514.068 EUR para nosotros y ya cuesta 3.850.000. No hay margen.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/2.png" alt="" title="Atlético" onerror="this.style.visibility='hidden'"><span class="nm">Marcos Llorente</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">16</td><td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">5.670.000 €</span><br><span class="down">▼ 10.000 €</span></td><td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-no">no compensa</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Vale 2.014.584 EUR para nosotros y ya cuesta 5.670.000. No hay margen.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/6.png" alt="" title="Deportivo" onerror="this.style.visibility='hidden'"><span class="nm">Giménez</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">12</td><td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">3.100.000 €</span><br><span class="up">▲ 100.000 €</span></td><td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-no">rinde poco</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Como especulacion rinde un 0.43 % (13.373 EUR sobre 3.100.001 inmovilizados) y se exige al menos un 3 %. Por debajo de eso la subida estimada esta dentro del ruido del precio y el dinero rinde mas en otra operacion.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/3.png" alt="" title="Barcelona" onerror="this.style.visibility='hidden'"><span class="nm">Pedri</span> <span class="pos med">MED</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">36</td><td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">15.820.000 €</span><br><span class="up">▲ 70.000 €</span></td><td class="vd"><span class="riv">◆ Luismi_Haz</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Lo vende Luismi_Haz y pide 15.820.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/3.png" alt="" title="Barcelona" onerror="this.style.visibility='hidden'"><span class="nm">Gordon</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">30</td><td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">12.370.000 €</span><br><span class="up">▲ 100.000 €</span></td><td class="vd"><span class="riv">◆ Pollo17</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Lo vende Pollo17 y pide 12.370.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/19.png" alt="" title="Villarreal" onerror="this.style.visibility='hidden'"><span class="nm">Pépé</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">32</td><td class="ti"><div class="titw"><span class="titn t-hi">80%</span><i class="bar"><b class="t-hi" style="width:80%"></b></i></div></td>
+<td class="c"><span class="pr">11.440.000 €</span><br><span class="up">▲ 40.000 €</span></td><td class="vd"><span class="riv">◆ Pollo17</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Lo vende Pollo17 y pide 12.310.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/2.png" alt="" title="Atlético" onerror="this.style.visibility='hidden'"><span class="nm">Baena</span> <span class="pos med">MED</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">36</td><td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">10.350.000 €</span><br><span class="up">▲ 60.000 €</span></td><td class="vd"><span class="riv">◆ Manzagool</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Lo vende Manzagool y pide 10.290.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td></tr>
+<tr class=""><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/2.png" alt="" title="Atlético" onerror="this.style.visibility='hidden'"><span class="nm">Kang-in Lee</span> <span class="pos med">MED</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">25</td><td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">9.040.000 €</span><br><span class="up">▲ 40.000 €</span></td><td class="vd"><span class="riv">◆ Luismi_Haz</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td><td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td><td class="pj"><span class="muted">no pujaríamos</span></td><td class="pw">Lo vende Luismi_Haz y pide 9.040.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td></tr>
+<tr class="mas"><td colspan="11">… y 52 más, mismo orden</td></tr></tbody></table></div></div>
+
+<div class="panel"><header><h2>2 · LO NUESTRO A LA VENTA</h2>
+<div class="sub" style="margin:4px 0 0">16 PUBLICADOS · 14 CON OFERTA · QUÉ VA A HACER PEPE CON CADA UNO</div></header>
+<div class="aviso">Comprado para revender y todavía sin poner a la venta: <b>Trent</b>. Mientras no esté publicado, el Computer no le hace ninguna oferta.</div>
+<div class="wrap"><table><thead><tr><th>QUIÉN</th><th class="ctr">EST.</th><th class="r">PTS</th><th>VALE</th><th>NOS OFRECEN</th><th>LA OFERTA CADUCA EN</th><th>QUÉ VA A HACER</th><th>POR QUÉ</th></tr></thead>
+<tbody><tr><td class="q"><span class="nm">Diego Conde</span> <span class="pos por">POR</span><br><span class="ref"><span class="muted">banquillo</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">0</td>
+<td class="c"><span class="pr">240.000 €</span></td>
+<td class="c"><span class="pr">244.800 €</span><br><span class="up">+2.0 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-rer">pedir otra oferta</span></td>
+<td class="pw">Prima de 2.0 %: ni para cobrarla ni para conservarla. Quedan 3 intento(s) para buscar una mejor.</td></tr>
+<tr><td class="q"><span class="nm">Dituro</span> <span class="pos por">POR</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">4</td>
+<td class="c"><span class="pr">2.310.000 €</span></td>
+<td class="c"><span class="pr">2.373.400 €</span><br><span class="up">+2.7 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-keep">buena, la conservamos</span></td>
+<td class="pw">Oferta Computer buena, pero el jugador no esta para vender: se conserva la opcionalidad.</td></tr>
+<tr><td class="q"><span class="nm">Zubeldia</span> <span class="pos def">DEF</span><br><span class="ref"><span class="muted">banquillo</span></span></td>
+<td class="es"><span class="inj" title="Lesionado">✚</span></td><td class="pt">11</td>
+<td class="c"><span class="pr">1.800.000 €</span></td>
+<td class="c"><span class="pr">1.847.000 €</span><br><span class="up">+2.6 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-keep">buena, la conservamos</span></td>
+<td class="pw">Oferta Computer buena, pero el jugador no esta para vender: se conserva la opcionalidad.</td></tr>
+<tr><td class="q"><span class="nm">Jutglà</span> <span class="pos del">DEL</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">14</td>
+<td class="c"><span class="pr">3.050.000 €</span></td>
+<td class="c"><span class="pr">3.115.700 €</span><br><span class="up">+2.2 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-keep">buena, la conservamos</span></td>
+<td class="pw">Oferta Computer buena, pero el jugador no esta para vender: se conserva la opcionalidad.</td></tr>
+<tr><td class="q"><span class="nm">Expósito</span> <span class="pos med">MED</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">26</td>
+<td class="c"><span class="pr">5.280.000 €</span></td>
+<td class="c"><span class="pr">5.358.600 €</span><br><span class="up">+1.5 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-keep">buena, la conservamos</span></td>
+<td class="pw">Oferta Computer buena, pero el jugador no esta para vender: se conserva la opcionalidad.</td></tr>
+<tr><td class="q"><span class="nm">Mangala</span> <span class="pos med">MED</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">13</td>
+<td class="c"><span class="pr">2.410.000 €</span></td>
+<td class="c"><span class="pr">2.498.100 €</span><br><span class="up">+3.7 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">guardar para tapar deuda</span></td>
+<td class="pw">Oferta marcada SOLVENCY_RESERVED. Se conserva como garantía de liquidez y no se acepta ni rerollea mientras siga reservada.</td></tr>
+<tr><td class="q"><span class="nm">Cepeda</span> <span class="pos del">DEL</span><br><span class="ref"><span class="muted">banquillo</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">17</td>
+<td class="c"><span class="pr">640.000 €</span></td>
+<td class="c"><span class="pr">638.400 €</span><br><span class="down">-0.2 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">esperar mejor oferta</span></td>
+<td class="pw">Computer Reroll Engine considera que el reroll no compensa con la informacion actual.</td></tr>
+<tr><td class="q"><span class="nm">Manu Sánchez</span> <span class="pos def">DEF</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">12</td>
+<td class="c"><span class="pr">1.620.000 €</span></td>
+<td class="c"><span class="pr">1.602.100 €</span><br><span class="down">-1.1 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">esperar mejor oferta</span></td>
+<td class="pw">Computer Reroll Engine considera que el reroll no compensa con la informacion actual.</td></tr>
+<tr><td class="q"><span class="nm">Jonny</span> <span class="pos def">DEF</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">18</td>
+<td class="c"><span class="pr">2.380.000 €</span></td>
+<td class="c"><span class="pr">2.352.000 €</span><br><span class="down">-1.2 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">esperar mejor oferta</span></td>
+<td class="pw">Computer Reroll Engine considera que el reroll no compensa con la informacion actual.</td></tr>
+<tr><td class="q"><span class="nm">Olasagasti</span> <span class="pos med">MED</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">28</td>
+<td class="c"><span class="pr">3.300.000 €</span></td>
+<td class="c"><span class="pr">3.256.200 €</span><br><span class="down">-1.3 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">esperar mejor oferta</span></td>
+<td class="pw">Computer Reroll Engine considera que el reroll no compensa con la informacion actual.</td></tr>
+<tr><td class="q"><span class="nm">Pablo Ibáñez</span> <span class="pos med">MED</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">23</td>
+<td class="c"><span class="pr">2.460.000 €</span></td>
+<td class="c"><span class="pr">2.420.500 €</span><br><span class="down">-1.6 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">esperar mejor oferta</span></td>
+<td class="pw">Computer Reroll Engine considera que el reroll no compensa con la informacion actual.</td></tr>
+<tr><td class="q"><span class="nm">Pablo Durán</span> <span class="pos del">DEL</span><br><span class="ref"><span class="muted">banquillo</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">9</td>
+<td class="c"><span class="pr">430.000 €</span></td>
+<td class="c"><span class="pr">420.800 €</span><br><span class="down">-2.1 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">esperar mejor oferta</span></td>
+<td class="pw">Oferta Computer sin señal ejecutable especifica; se conserva en observacion.</td></tr>
+<tr><td class="q"><span class="nm">Djené</span> <span class="pos def">DEF</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">7</td>
+<td class="c"><span class="pr">1.840.000 €</span></td>
+<td class="c"><span class="pr">1.773.900 €</span><br><span class="down">-3.6 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-hold">esperar mejor oferta</span></td>
+<td class="pw">Oferta Computer sin señal ejecutable especifica; se conserva en observacion.</td></tr>
+<tr><td class="q"><span class="nm">Yamal</span> <span class="pos del">DEL</span><br><span class="ref"><span class="tit-si">TITULAR</span></span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">45</td>
+<td class="c"><span class="pr">21.720.000 €</span></td>
+<td class="c"><span class="pr">20.680.800 €</span><br><span class="down">-4.8 %</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="v-never">no se vende nunca</span></td>
+<td class="pw">Jugador Franchise/NEVER_AUTO_SELL.</td></tr></tbody></table>
+<div class="res">Renovaciones: Renovar: Ventana abierta y nada que renovar: 0 listado(s) mirados y ninguno lo necesita.</div></div></div>
+
+<div class="panel"><header><h2>3 · TODOS LOS JUGADORES DE LA LIGA</h2>
+<div class="sub" style="margin:4px 0 0">572 EN EL CATÁLOGO · ORDENADOS POR CALIDAD-PRECIO, ESTÉN DONDE ESTÉN</div></header>
+<div class="wrap"><table><thead><tr><th>QUIÉN</th><th class="ctr">EST.</th><th class="r">PTS</th><th>JUGADOS</th><th>PRECIO</th><th class="r">PTS QUE SUMA<br>POR MILLÓN</th><th>NOS SUMA</th><th>DÓNDE ESTÁ</th><th>INTERÉS</th></tr></thead>
+<tbody><tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/17.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Juan Iglesias</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">30</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">5/6</span><i class="bar"><b class="t-hi" style="width:83%"></b></i></div></td>
+<td class="c"><span class="pr">3.000.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">7.7</b></td><td class="dl"><b class="pos-d">+23</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="libre">◇ libre, aún no ha salido</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/5.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Lago</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">18</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">5/6</span><i class="bar"><b class="t-hi" style="width:83%"></b></i></div></td>
+<td class="c"><span class="pr">1.510.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">7.3</b></td><td class="dl"><b class="pos-d">+11</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="libre">◇ libre, aún no ha salido</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/17.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Castrín</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">18</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">1.610.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">6.8</b></td><td class="dl"><b class="pos-d">+11</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="riv">◆ Pollo17</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/91.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Yusi</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">15</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">1.240.000 €</span> <span class="flat">=</span></td>
+<td class="ppm"><b class="cp">6.5</b></td><td class="dl"><b class="pos-d">+8</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="riv">◆ Prinzipote</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/5.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Starfelt</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">21</td>
+<td class="ti"><div class="titw"><span class="titn t-md">3/6</span><i class="bar"><b class="t-md" style="width:50%"></b></i></div></td>
+<td class="c"><span class="pr">2.190.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">6.4</b></td><td class="dl"><b class="pos-d">+14</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="riv">◆ Manzagool</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/5.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Radu</span> <span class="pos por">POR</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">27</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">5/6</span><i class="bar"><b class="t-hi" style="width:83%"></b></i></div></td>
+<td class="c"><span class="pr">3.690.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">6.2</b></td><td class="dl"><b class="pos-d">+23</b><br><span class="ref">sobre Dituro (4)</span></td>
+<td class="vd"><span class="riv">◆ Alvaro Retamosa Sanguino</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/70.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Camello</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">48</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">5.580.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">6.1</b></td><td class="dl"><b class="pos-d">+34</b><br><span class="ref">sobre Jutglà (14)</span></td>
+<td class="vd"><span class="riv">◆ Luismi_Haz</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/10.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">De la Fuente</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">30</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">3.880.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">5.9</b></td><td class="dl"><b class="pos-d">+23</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="riv">◆ Pollo17</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/17.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Suazo</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">17</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">5/6</span><i class="bar"><b class="t-hi" style="width:83%"></b></i></div></td>
+<td class="c"><span class="pr">1.720.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">5.8</b></td><td class="dl"><b class="pos-d">+10</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="libre">◇ libre, aún no ha salido</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/10.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Ryan</span> <span class="pos por">POR</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">29</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">4.610.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">5.4</b></td><td class="dl"><b class="pos-d">+25</b><br><span class="ref">sobre Dituro (4)</span></td>
+<td class="vd"><span class="riv">◆ Pollo17</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/65.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Alfonso Herrero</span> <span class="pos por">POR</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">25</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">3.960.000 €</span> <span class="flat">=</span></td>
+<td class="ppm"><b class="cp">5.3</b></td><td class="dl"><b class="pos-d">+21</b><br><span class="ref">sobre Dituro (4)</span></td>
+<td class="vd"><span class="riv">◆ DiosMande a Rodri al Palancas</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/91.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Mariano</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">41</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">5.180.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">5.2</b></td><td class="dl"><b class="pos-d">+27</b><br><span class="ref">sobre Jutglà (14)</span></td>
+<td class="vd"><span class="riv">◆ Manzagool</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/8.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Andrés García</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">19</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">2.320.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">5.2</b></td><td class="dl"><b class="pos-d">+12</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="libre">◇ libre, aún no ha salido</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/812.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Hernando</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">15</td>
+<td class="ti"><div class="titw"><span class="titn t-md">4/6</span><i class="bar"><b class="t-md" style="width:66%"></b></i></div></td>
+<td class="c"><span class="pr">1.560.000 €</span> <span class="down">▼</span></td>
+<td class="ppm"><b class="cp">5.1</b></td><td class="dl"><b class="pos-d">+8</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="libre">◇ libre, aún no ha salido</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr><td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/1.png" alt="" title="" onerror="this.style.visibility='hidden'"><span class="nm">Paredes</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td><td class="pt">22</td>
+<td class="ti"><div class="titw"><span class="titn t-md">3/6</span><i class="bar"><b class="t-md" style="width:50%"></b></i></div></td>
+<td class="c"><span class="pr">2.940.000 €</span> <span class="up">▲</span></td>
+<td class="ppm"><b class="cp">5.1</b></td><td class="dl"><b class="pos-d">+15</b><br><span class="ref">sobre Djené (7)</span></td>
+<td class="vd"><span class="libre">◇ libre, aún no ha salido</span></td><td class="ac"><span class="i-mejora">mejora el once</span></td></tr>
+<tr class="mas"><td colspan="9">… y 557 más, mismo orden</td></tr></tbody></table>
+<div class="res">no juega <b>200</b> · mejora el once <b>178</b> · no disponible <b>69</b> · sin interés <b>63</b> · chollo por puntos/€ <b>45</b> · ya es nuestro <b>17</b></div></div></div>
+
+<div class="leyenda"><span><b class="ok">✔</b> disponible</span><span><b class="inj">✚</b> lesionado</span><span><i class="card red"></i> sancionado</span><span><b class="dud">?</b> duda</span>
+<span style="margin-left:20px"><b class="pos por">POR</b> <b class="pos def">DEF</b> <b class="pos med">MED</b> <b class="pos del">DEL</b></span></div>
+<div class="nota" style="margin-top:12px"><b>1</b> lo que se puede tocar hoy · <b>2</b> lo que tenemos puesto y qué se hace con ello · <b>3</b> a quién ir, esté donde esté.<br>
+En el cuadro 3 el orden es <b>puro calidad-precio</b>: puntos que nos suma por cada millón que cuesta. Da igual si hoy está en el mercado o no — eso va en «dónde está», que es información, no orden.<br>
+<b>NOS SUMA</b> = sus puntos menos los de nuestro peor titular en esa posición (POR Dituro 4 · DEF Djené 7 · MED Mangala 13 · DEL Jutglà 14).</div>
+<script>
+function tick(){const n=Date.now()/1000;document.querySelectorAll('.cd').forEach(function(e){
+let s=Math.max(0,Math.floor(+e.dataset.t-n));const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),g=String(s%60).padStart(2,'0');
+e.textContent=h+':'+m+':'+g;e.classList.toggle('urg',s<3600);});}
+tick();setInterval(tick,1000);
+</script>

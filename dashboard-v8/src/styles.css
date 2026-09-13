@@ -760,3 +760,83 @@ tr.hi td{background:#101d18}
 
 /* Nada de esto parte palabras a mitad. */
 .q,.c,.vd,.pq,.pj,.tm,.es,.pt,.ac,.ppm,.dl{white-space:nowrap}
+
+/* ============================================================
+   TODOS LOS JUGADORES DE LA LIGA (13/09/2026)
+   ------------------------------------------------------------
+   El cuadro se montó sin estas nueve clases y salía sin
+   estilo: `i-top`, `i-chollo`, `i-nada`, `i-nuestro`, `pos-d`,
+   `neg-d`, `ref`, `res`, `mal` y `bien` no existían en ninguna
+   parte de la hoja.
+
+   CONTRASTE MEDIDO sobre --pan #111a24, que es lo que hay
+   detrás. El verde oscuro #16a34a se descartó en su día por
+   quedarse en 2,21 — ilegible, no cuestión de gusto:
+
+     i-top / pos-d / bien  #4ade80  10,07
+     i-chollo              #fbbf24  10,51
+     i-nuestro             #60a5fa   6,90
+     neg-d / mal           #f87171   6,34
+     i-nada / ref          #7b8794   4,79
+   ============================================================ */
+
+.i-top{color:#4ade80;font-weight:600}
+.i-chollo{color:#fbbf24;font-weight:600}
+.i-nuestro{color:#60a5fa}
+.i-nada{color:#7b8794}
+
+/* NOS SUMA y CALIDAD-PRECIO: el signo se ve por el color. */
+.pos-d{color:#4ade80;font-variant-numeric:tabular-nums}
+.neg-d{color:#f87171;font-variant-numeric:tabular-nums}
+
+/* La vara contra la que se resta, debajo y en pequeño. */
+.ref{color:#7b8794;font-size:10px}
+
+/* EL RECUENTO: cuántos hay de cada cosa. */
+.res{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);
+     font-size:11px;color:var(--dim)}
+.res b{color:#e6edf3;font-variant-numeric:tabular-nums}
+
+/* Cuando una cuenta cuadra, y cuando no. */
+.bien{color:#4ade80}
+.mal{color:#f87171}
+
+
+/* ============================================================
+   LO NUESTRO A LA VENTA (13/09/2026)
+   ------------------------------------------------------------
+   QUÉ VA A HACER: un color por decisión del motor. Ninguno es
+   rojo salvo «sin decidir», que es el único que pide que el
+   dueño mire. Si todo fuera rojo, el rojo no significaría nada.
+
+   CONTRASTE MEDIDO sobre --pan #111a24:
+
+     aceptar y cobrar          #4ade80  10,07
+     pedir otra oferta         #fbbf24  10,51
+     buena, la conservamos     #60a5fa   6,90
+     guardar para tapar deuda  #a78bfa   6,45
+     esperar mejor oferta      #9fb0c0   7,89
+     no se vende nunca         #cbd5e1  11,82
+     sin decidir               #f87171   6,34
+   ============================================================ */
+
+.ac .d-cobra{color:#4ade80;font-weight:700}
+.ac .d-reroll{color:#fbbf24;font-weight:600}
+.ac .d-buena{color:#60a5fa;font-weight:600}
+.ac .d-deuda{color:#a78bfa;font-weight:600}
+.ac .d-espera{color:#9fb0c0}
+.ac .d-nunca{color:#cbd5e1}
+.ac .d-nada{color:#f87171;font-weight:700}
+
+/* TITULAR o banquillo, al lado del nombre y en pequeño. */
+.tit-si{font-size:9.5px;letter-spacing:.07em;color:#e6edf3;
+        border:1px solid var(--line);border-radius:3px;padding:1px 3px}
+.tit-no{font-size:9.5px;letter-spacing:.05em;color:#7b8794}
+
+/* EL AVISO ÁMBAR: comprado para revender y sin publicar.
+   Lo enciende el HECHO, no la intención: si no hay ninguno, no
+   se pinta. Texto #fcd34d sobre #2a2010 = 11,10. */
+.aviso-ambar{background:#2a2010;border:1px solid #7c5e10;
+             border-radius:6px;padding:7px 9px;margin-bottom:9px;
+             font-size:11.5px;color:#fcd34d}
+.aviso-ambar b{color:#fde68a}

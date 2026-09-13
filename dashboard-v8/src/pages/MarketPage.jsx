@@ -1,3 +1,4 @@
+import LoNuestroALaVentaPanel from "../components/LoNuestroALaVentaPanel";
 import TodaLaLigaPanel from "../components/TodaLaLigaPanel";
 import { useEffect, useState } from "react";
 import {
@@ -1341,16 +1342,31 @@ export default function MarketPage({ data }) {
         exposure={data.exposure}
       />
 
-      {/* LA LISTA DE LA COMPRA, debajo de la caja registradora.
-
-          Arriba, lo que hay HOY en el mercado. Aqui, los 570 del
-          catalogo por lo que nos mejorarian — incluidos los
-          libres, que antes no existian en ninguna parte. */}
-      <TodaLaLigaPanel data={data} />
 
       <div style={{ marginTop: 11 }}>
         <OffersPanel offers={data.offers || []} />
       </div>
+
+      {/* LO NUESTRO A LA VENTA (13/09/2026).
+
+          El orden de la pagina lo fijo el dueño: primero las tres
+          cajas, luego lo que se compra HOY, luego lo que tenemos
+          PUBLICADO, y la liga entera al final.
+
+          Va aqui y no abajo porque es una decision de hoy: hay
+          ofertas que caducan en nueve horas. */}
+      <LoNuestroALaVentaPanel data={data} />
+
+      {/* LA LISTA DE LA COMPRA, ABAJO DEL TODO (13/09/2026).
+
+          Arriba lo que se decide hoy; aqui los 570 del catalogo
+          por lo que nos mejorarian, incluidos los libres — que
+          antes no existian en ninguna parte de la pantalla.
+
+          Va la ultima porque es la mas larga y la menos urgente:
+          se mira cuando se quiere mirar, no cuando hay que
+          decidir. */}
+      <TodaLaLigaPanel data={data} />
     </>
   );
 }

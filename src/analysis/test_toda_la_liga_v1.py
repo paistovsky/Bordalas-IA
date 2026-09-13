@@ -216,18 +216,22 @@ def test_sin_once_no_se_inventa_una_vara() -> None:
 def test_cada_jugador_cae_en_su_grupo() -> None:
     """
     El orden de las etiquetas importa: "no disponible" gana a
-    "mejora el once" —un lesionado no mejora nada— y "ya es
-    nuestro" gana a todo.
+    "nos mejora" —un lesionado no mejora nada— y "ya es nuestro"
+    gana a todo, porque no hay nada que decidir.
+
+    Y DONDE ESTA NO ES UNA ETIQUETA (13/09/2026, noche). Los tres
+    que nos mejoran llevan la misma —"nos mejora"— este en el
+    mercado del Computer, libre o en la plantilla de un rival.
     """
 
     visto = _liga()
 
     espera = {
-        "En el mercado": "MEJORA EL ONCE · pujable hoy",
-        "Libre bueno": "mejora el once · libre",
-        "De un rival": "mejora el once · lo tiene un rival",
+        "En el mercado": "nos mejora",
+        "Libre bueno": "nos mejora",
+        "De un rival": "nos mejora",
         "Lesionado bueno": "no disponible",
-        "Apenas juega": "no juega",
+        "Apenas juega": "no disponible",
         "Barato y flojo": "chollo · muchos puntos por euro",
         "Yamal": "ya es nuestro",
         "Djene": "ya es nuestro",
@@ -244,10 +248,20 @@ def test_cada_jugador_cae_en_su_grupo() -> None:
     assert visto["total"] == len(CATALOGO)
 
 
-def test_el_orden_es_por_escalon_y_luego_por_lo_que_suma() -> None:
+def test_el_orden_es_por_escalon_y_luego_por_calidad_precio() -> None:
     """
-    Dentro de cada grupo, por NOS SUMA descendente y luego por
-    puntos por millon.
+    DENTRO DE CADA GRUPO MANDA LA CALIDAD-PRECIO.
+
+        calidad_precio = nos_suma / (precio / 1.000.000)
+
+    Con el fixture, los tres que nos mejoran salen asi:
+
+        Libre bueno     +16 / 2,00 M  =  8,0
+        En el mercado   +18 / 3,00 M  =  6,0
+        De un rival     +15 / 4,00 M  =  3,8
+
+    El que mas suma en bruto es "En el mercado" (+18) y NO es el
+    primero: por eso esta guardia mide la division y no la resta.
     """
 
     visto = _liga()
@@ -256,13 +270,200 @@ def test_el_orden_es_por_escalon_y_luego_por_lo_que_suma() -> None:
 
     assert escalones == sorted(escalones), escalones
 
-    # El primero es el que se puede pujar HOY.
-    assert visto["players"][0]["etiqueta"] == (
-        "MEJORA EL ONCE · pujable hoy"
-    ), visto["players"][0]
+    mejoran = [
+        f for f in visto["players"] if f["etiqueta"] == "nos mejora"
+    ]
+
+    # REGLA 24: con la lista vacia esto no probaria nada.
+    assert len(mejoran) == 3, mejoran
+
+    assert [f["name"] for f in mejoran] == [
+        "Libre bueno",
+        "En el mercado",
+        "De un rival",
+    ], [(f["name"], f["calidad_precio"]) for f in mejoran]
+
+    assert [f["calidad_precio"] for f in mejoran] == [
+        8.0,
+        6.0,
+        3.8,
+    ], mejoran
+
+    # EL QUE MAS SUMA EN BRUTO NO ES EL PRIMERO.
+    assert max(mejoran, key=lambda f: f["nos_suma"])["name"] == (
+        "En el mercado"
+    ), mejoran
 
     # Y los nuestros, al final.
     assert visto["players"][-1]["etiqueta"] == "ya es nuestro"
+
+
+def test_estar_en_el_mercado_no_adelanta() -> None:
+    """
+    ESTAR HOY EN EL MERCADO DEL COMPUTER DEJO DE ORDENAR.
+
+    SINTOMA (13/09/2026)
+
+        La primera version ponia arriba a los que se podian pujar
+        hoy. El dueño lo vio y dijo que no:
+
+            "que no sean primero los que estan hoy en el mercado.
+             Quiero que Pepe me diga cual es el que mas le
+             interesa por calidad-precio."
+
+    CONSECUENCIA
+
+        Con el mercado ordenando, la respuesta a "cual me
+        interesa mas" cambiaba cada mañana a las 07:00 sin que
+        cambiara ni un punto ni un euro. Era la pregunta "que
+        puedo comprar hoy" disfrazada de "que me conviene".
+
+    En el fixture, "En el mercado" es EL QUE MAS SUMA (+18) y
+    esta en el mercado del Computer. Aun asi va segundo, detras
+    de un libre con mejor calidad-precio.
+    """
+
+    visto = _liga()
+
+    nombres = [f["name"] for f in visto["players"]]
+
+    assert nombres.index("Libre bueno") < nombres.index(
+        "En el mercado"
+    ), nombres
+
+    # 1. LA ETIQUETA NO DICE DONDE ESTA.
+    del_mercado = _por_nombre(visto, "En el mercado")
+
+    assert del_mercado["de_quien"] == "computer", del_mercado
+
+    assert del_mercado["etiqueta"] == "nos mejora", del_mercado
+
+    assert _por_nombre(visto, "Libre bueno")["etiqueta"] == (
+        "nos mejora"
+    )
+
+    assert _por_nombre(visto, "De un rival")["etiqueta"] == (
+        "nos mejora"
+    )
+
+    # 2. QUITAR EL MERCADO NO MUEVE NI UNA FILA.
+    #
+    #    Es la prueba de verdad: si el orden dependiera de quien
+    #    esta hoy en venta, la lista cambiaria.
+    sin_mercado = _liga(en_el_mercado=set())
+
+    assert [f["name"] for f in sin_mercado["players"]] == (
+        nombres
+    ), [f["name"] for f in sin_mercado["players"]]
+
+    # 3. Y EL ESCALON TAMPOCO SALE DE AHI.
+    import ast
+
+    fuente = (
+        RAIZ / "src" / "analysis" / "toda_la_liga.py"
+    ).read_text(encoding="utf-8")
+
+    cuerpo = ast.parse(fuente)
+
+    etiqueta = next(
+        nodo
+        for nodo in ast.walk(cuerpo)
+        if isinstance(nodo, ast.FunctionDef)
+        and nodo.name == "_etiqueta"
+    )
+
+    # Sin docstring: esta guardia se ha puesto roja ocho veces
+    # por el texto que la explica.
+    codigo = ast.dump(
+        ast.Module(body=etiqueta.body[1:], type_ignores=[])
+    )
+
+    for del_mercado in ("computer", "en_el_mercado"):
+        assert del_mercado not in codigo, (
+            f"`_etiqueta` vuelve a mirar `{del_mercado}`: estar "
+            f"hoy en el mercado no es un escalon"
+        )
+
+
+def test_ninguna_plantilla_llega_vacia() -> None:
+    """
+    LAS OCHO PLANTILLAS, CONTADAS Y PUBLICADAS.
+
+    SINTOMA (13/09/2026)
+
+        El recuento daba mas "libres" de los que parecian
+        razonables. Una plantilla que llega vacia no se nota: sus
+        jugadores pasan a contarse como libres, y un libre es
+        alguien a quien se puede fichar.
+
+    CONSECUENCIA
+
+        Pepe recomendaria pujar por alguien que ya tiene dueño.
+        No falla nada: la lista queda mal y callada.
+
+    LA CUENTA
+
+        los de cada plantilla + los libres = el catalogo
+
+    Con el fixture: 8 nuestros + 1 de Pollo17 = 9 con dueño, y
+    14 - 9 = 5 libres.
+    """
+
+    visto = _liga()
+
+    censo = visto["plantillas"]
+
+    # REGLA 24: sin equipos esto no probaria nada.
+    assert censo["equipos"], censo
+
+    assert len(censo["equipos"]) == 1 + len(MANAGERS), censo
+
+    assert censo["total"] == len(CATALOGO), censo
+
+    assert censo["con_dueño"] == 9, censo
+
+    assert censo["libres"] == 5, censo
+
+    assert censo["cuadra"] is True, censo
+
+    assert censo["descuadre"] == 0, censo
+
+    # NINGUNA VACIA.
+    assert censo["vacias"] == [], censo
+
+    for equipo in censo["equipos"]:
+        assert equipo["jugadores"] > 0, equipo
+
+    # LA NUESTRA SE DISTINGUE.
+    nuestra = [e for e in censo["equipos"] if e["es_nuestra"]]
+
+    assert len(nuestra) == 1, censo
+
+    assert nuestra[0]["jugadores"] == len(NUESTRA_PLANTILLA)
+
+    # UNA PLANTILLA VACIA SE VE, y no se disuelve en los libres.
+    hueca = _liga(
+        managers=[{"name": "Pollo17", "roster": []}]
+    )["plantillas"]
+
+    assert hueca["vacias"] == ["Pollo17"], hueca
+
+    assert hueca["libres"] == 6, hueca
+
+    # Y UN DESCUADRE SE PUBLICA COMO NUMERO, no como sospecha.
+    #
+    #     Dos managers con el mismo jugador: la suma de las
+    #     plantillas dice 2 y los con dueño dicen 1.
+    doble = _liga(
+        managers=[
+            {"name": "Pollo17", "roster": [{"id": 9003}]},
+            {"name": "Mex", "roster": [{"id": 9003}]},
+        ]
+    )["plantillas"]
+
+    assert doble["cuadra"] is False, doble
+
+    assert doble["descuadre"] == 1, doble
 
 
 def test_el_corte_del_chollo_consta_como_no_medido() -> None:
@@ -384,7 +585,9 @@ TESTS = [
     test_nos_suma_usa_al_peor_titular,
     test_sin_once_no_se_inventa_una_vara,
     test_cada_jugador_cae_en_su_grupo,
-    test_el_orden_es_por_escalon_y_luego_por_lo_que_suma,
+    test_el_orden_es_por_escalon_y_luego_por_calidad_precio,
+    test_estar_en_el_mercado_no_adelanta,
+    test_ninguna_plantilla_llega_vacia,
     test_el_corte_del_chollo_consta_como_no_medido,
     test_esta_lista_no_decide_nada,
     test_el_panel_esta_montado_y_lee_lo_publicado,

@@ -1158,6 +1158,20 @@ def _ofertas_entrantes(
 
                 "amount": safe_int(oferta.get("amount")),
 
+                # POR ID Y POR NOMBRE (13/09/2026).
+                #
+                #     El id estaba y se tiraba. Cruzar una oferta
+                #     con su publicacion por el NOMBRE es cruzar
+                #     por un texto que Biwenger escribe como
+                #     quiere: dos "Rodrigo" y el cuadro enseña la
+                #     decision del otro.
+                "player_ids": [
+                    safe_int(pid)
+                    for pid in (
+                        oferta.get("requestedPlayers") or []
+                    )
+                ],
+
                 "player_names": _nombres_de_jugadores(
                     snapshot,
                     oferta.get("requestedPlayers") or [],
@@ -1369,6 +1383,10 @@ def compact_offers(
         offers.append(
             {
                 "players": names,
+
+                # El id, para que el cuadro de LO NUESTRO A LA
+                # VENTA cruce por numero y no por texto.
+                "player_ids": entrante.get("player_ids") or [],
 
                 "amount": safe_int(
                     entrante.get("amount")
@@ -3544,6 +3562,17 @@ def build_dashboard_state() -> dict:
                 or {}
             ).get("players"),
             nuestra_plantilla=snapshot.get("my_team"),
+            # LAS SIETE PLANTILLAS RIVALES.
+            #
+            #     `is_us` NO EXISTE EN `rival_intelligence`
+            #     (13/09/2026). Se calcula mas abajo, al montar
+            #     las filas del panel de rivales. Filtrar por el
+            #     aqui dejaba pasar las ocho, la nuestra incluida,
+            #     y nuestros diecisiete jugadores se contaban dos
+            #     veces en el censo de plantillas.
+            #
+            #     Se compara contra el id del tablon, que es el
+            #     mismo dato con el que lo hace `compact_rivals`.
             managers=[
                 manager
                 for manager in (
@@ -3551,7 +3580,8 @@ def build_dashboard_state() -> dict:
                     or []
                 )
                 if isinstance(manager, dict)
-                and not manager.get("is_us")
+                and safe_int(manager.get("user_id"))
+                != safe_int(board.get("current_user_id"))
             ],
             en_el_mercado=_en_el_mercado,
         )
@@ -4996,6 +5026,58 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # ==========================================================
+    # LO NUESTRO A LA VENTA (13/09/2026)
+    # ==========================================================
+    #
+    #     Que va a hacer Pepe con cada publicacion. Hasta hoy la
+    #     pantalla enseñaba un numero —"16 publicados"— y nada
+    #     mas: diecisiete jugadores en plantilla, dieciseis en el
+    #     escaparate, catorce con una oferta encima de la mesa, y
+    #     ni una sola de esas decisiones a la vista.
+    #
+    #     TODO ESTO YA LO CALCULA EL MOTOR. Es juntar las
+    #     publicaciones (`listing_lifecycle`) con las decisiones
+    #     por oferta que ya se compactan arriba: ni una peticion
+    #     mas y ni un umbral nuevo.
+    #
+    #     Y NO DECIDE NADA: aqui no se vende ni se acepta nada.
+    try:
+        from src.analysis.lo_nuestro_a_la_venta import (
+            lo_nuestro_a_la_venta,
+        )
+
+        _a_la_venta = lo_nuestro_a_la_venta(
+            listados=(
+                (state.get("listing_lifecycle") or {}).get(
+                    "players"
+                )
+            ),
+            ofertas=offers_compactas,
+            catalogo=_del_catalogo,
+            once=(
+                (
+                    (snapshot.get("user_lineup") or {}).get(
+                        "data"
+                    )
+                    or {}
+                ).get("lineup")
+                or {}
+            ).get("players"),
+            sin_listar=(rendija_ahora or {}).get("sin_listar"),
+            renovacion=plan_de_renovacion,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _a_la_venta = {
+            "available": False,
+            "players": [],
+            "reason": (
+                f"No se pudo montar lo nuestro a la venta: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     dashboard = {
         "meta": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -5198,6 +5280,10 @@ def build_dashboard_state() -> dict:
         "offers": offers_compactas,
         "speculation": compact_speculation(state),
         "listings": compact_listings(state),
+
+        # QUE VA A HACER PEPE CON CADA PUBLICACION. La etiqueta
+        # la decide el motor; el cuadro solo la traduce.
+        "loNuestroALaVenta": _a_la_venta,
 
         # LA ZONA DE SILENCIO y lo que se quedo sin hacer por
         # ella. Una barandilla que frena en silencio es

@@ -53,29 +53,35 @@ PARTIDOS_PARA_CHOLLO = 4
 
 POSICIONES = {1: "POR", 2: "DEF", 3: "MED", 4: "DEL"}
 
-# El orden de las etiquetas es el orden del cuadro.
+# LAS ETIQUETAS, Y EL ORDEN DEL CUADRO (13/09/2026, noche)
+#
+#     ESTAR HOY EN EL MERCADO DEJO DE ORDENAR.
+#
+#     La primera version ponia arriba "nos suma Y esta en el
+#     mercado del Computer". El dueño lo vio y dijo que no:
+#
+#         "que no sean primero los que estan hoy en el mercado.
+#          Quiero que Pepe me diga cual es el que mas le interesa
+#          por CALIDAD-PRECIO y ese este el primero."
+#
+#     Donde esta pasa a ser una columna informativa. Lo que
+#     ordena es cuanto nos añade por cada millon que cuesta:
+#
+#         calidad_precio = nos_suma / (precio / 1.000.000)
 ETIQUETAS = (
-    "MEJORA EL ONCE · pujable hoy",
-    "mejora el once · libre",
-    "mejora el once · lo tiene un rival",
+    "nos mejora",
     "chollo · muchos puntos por euro",
-    "para revender",
     "sin interés",
-    "no juega",
     "no disponible",
     "ya es nuestro",
 )
 
 ESCALON = {
-    "MEJORA EL ONCE · pujable hoy": 0,
-    "mejora el once · libre": 1,
-    "mejora el once · lo tiene un rival": 2,
-    "chollo · muchos puntos por euro": 3,
-    "para revender": 5,
-    "sin interés": 6,
-    "no juega": 7,
-    "no disponible": 8,
-    "ya es nuestro": 9,
+    "nos mejora": 0,
+    "chollo · muchos puntos por euro": 1,
+    "sin interés": 2,
+    "no disponible": 3,
+    "ya es nuestro": 4,
 }
 
 
@@ -152,13 +158,144 @@ def _de_quien_es(pid, nuestros, del_computer, de_rivales):
     return "libre"
 
 
+def _las_ocho_plantillas(catalogo, nuestros, managers) -> dict:
+    """
+    CUANTOS JUGADORES TRAE CADA PLANTILLA. Publicado, no deducido.
+
+    SINTOMA (13/09/2026)
+
+        El recuento del cuadro daba mas "libres" de los que
+        parecian razonables. Una plantilla que llega vacia —o a
+        medias— no se nota en ninguna parte: sus jugadores pasan
+        a contarse como LIBRES, y un libre es alguien a quien se
+        puede fichar.
+
+    CONSECUENCIA
+
+        Pepe recomendaria pujar por un jugador que ya tiene
+        dueño. No falla nada: la lista queda MAL Y CALLADA.
+
+    LA CUENTA QUE TIENE QUE CUADRAR
+
+        los de cada plantilla + los libres = el catalogo entero
+
+    `cuadra` dice si sale. Si no sale, la diferencia va publicada
+    en `descuadre` para que se vea el numero, no la sospecha.
+
+    Forma fija. Nunca lanza.
+    """
+
+    try:
+        equipos = []
+
+        vistos = set(nuestros)
+
+        equipos.append(
+            {
+                "nombre": "Pepe Bordalás",
+                "es_nuestra": True,
+                "jugadores": len(nuestros),
+            }
+        )
+
+        for manager in managers or []:
+
+            if not isinstance(manager, dict):
+                continue
+
+            suyos = set()
+
+            for jugador in manager.get("roster") or []:
+
+                pid = safe_int(
+                    jugador.get("id")
+                    if isinstance(jugador, dict)
+                    else jugador
+                )
+
+                if pid:
+                    suyos.add(pid)
+
+            vistos |= suyos
+
+            equipos.append(
+                {
+                    "nombre": (
+                        manager.get("name")
+                        or manager.get("manager")
+                        or "sin nombre"
+                    ),
+                    "es_nuestra": False,
+                    "jugadores": len(suyos),
+                }
+            )
+
+        # LOS TRES NUMEROS SE CUENTAN POR SEPARADO.
+        #
+        #     La primera version sacaba `libres` restando —
+        #     `total - con_dueño`— y entonces la suma cuadraba
+        #     SIEMPRE. Una cuenta que no puede fallar no
+        #     comprueba nada.
+        #
+        #     Contados aparte, el descuadre aparece cuando un
+        #     jugador esta en dos plantillas o cuando una
+        #     plantilla trae a alguien que no esta en el
+        #     catalogo.
+        del_catalogo = {
+            safe_int(pid)
+            for pid, ficha in (catalogo or {}).items()
+            if isinstance(ficha, dict)
+        }
+
+        total = len(del_catalogo)
+
+        con_dueño = len(vistos & del_catalogo)
+
+        libres = len(del_catalogo - vistos)
+
+        suma = sum(e["jugadores"] for e in equipos)
+
+        return {
+            "equipos": equipos,
+            "suma_de_las_plantillas": suma,
+            "con_dueño": con_dueño,
+            "libres": libres,
+            "total": total,
+            "vacias": [
+                e["nombre"] for e in equipos if not e["jugadores"]
+            ],
+            "cuadra": (
+                suma == con_dueño
+                and con_dueño + libres == total
+            ),
+            # Positivo: alguien contado dos veces, o un jugador de
+            # plantilla que no esta en el catalogo.
+            "descuadre": suma - con_dueño,
+        }
+
+    except Exception:                               # noqa: BLE001
+        return {
+            "equipos": [],
+            "suma_de_las_plantillas": 0,
+            "con_dueño": 0,
+            "libres": 0,
+            "total": 0,
+            "vacias": [],
+            "cuadra": False,
+            "descuadre": 0,
+        }
+
+
 def _etiqueta(fila) -> str:
     """
     A que grupo va. Nunca vacia, y en este orden.
 
-    El orden importa: "no disponible" gana a "mejora el once"
-    porque un lesionado no mejora nada, y "ya es nuestro" gana a
-    todo porque no hay nada que decidir.
+    El orden importa: "no disponible" gana a "nos mejora" —un
+    lesionado no mejora nada— y "ya es nuestro" gana a todo,
+    porque no hay nada que decidir.
+
+    DONDE ESTA NO ENTRA AQUI. Estar hoy en el mercado del
+    Computer es una columna informativa, no un escalon.
     """
 
     if fila["de_quien"] == "nuestro":
@@ -167,23 +304,11 @@ def _etiqueta(fila) -> str:
     if str(fila.get("status") or "").lower() in (
         "injured",
         "sanctioned",
-    ):
+    ) or fila["played"] < PARTIDOS_PARA_JUZGAR:
         return "no disponible"
 
-    if fila["played"] < PARTIDOS_PARA_JUZGAR:
-        return "no juega"
-
-    suma = fila.get("nos_suma")
-
-    if suma is not None and suma > 0:
-
-        if fila["de_quien"] == "computer":
-            return "MEJORA EL ONCE · pujable hoy"
-
-        if fila["de_quien"] == "libre":
-            return "mejora el once · libre"
-
-        return "mejora el once · lo tiene un rival"
+    if (fila.get("nos_suma") or 0) > 0:
+        return "nos mejora"
 
     if (
         fila.get("puntos_por_millon") is not None
@@ -192,9 +317,6 @@ def _etiqueta(fila) -> str:
         and fila["played"] >= PARTIDOS_PARA_CHOLLO
     ):
         return "chollo · muchos puntos por euro"
-
-    if fila["de_quien"] == "computer":
-        return "para revender"
 
     return "sin interés"
 
@@ -219,6 +341,7 @@ def toda_la_liga(
         "players": [],
         "vara": {},
         "recuento": {},
+        "plantillas": {},
         "total": 0,
         "chollo_sin_medir": PUNTOS_POR_MILLON_CHOLLO,
         "reason": None,
@@ -271,6 +394,10 @@ def toda_la_liga(
                     de_rivales.add(pid)
 
         del_computer = set(en_el_mercado or set())
+
+        plantillas = _las_ocho_plantillas(
+            catalogo, nuestros, managers
+        )
 
         filas = []
 
@@ -329,18 +456,39 @@ def toda_la_liga(
                 ),
             }
 
+            # CALIDAD-PRECIO: lo que nos añade por cada millon.
+            #
+            #     Es lo que ordena el cuadro desde el 13/09 por
+            #     la noche. Solo tiene sentido cuando NOS SUMA:
+            #     dividir un numero negativo entre el precio
+            #     ordena por "cual nos empeora menos por euro",
+            #     que no es una pregunta que nadie haga.
+            fila["calidad_precio"] = (
+                round(
+                    fila["nos_suma"] / (precio / 1_000_000), 1
+                )
+                if fila["nos_suma"] is not None
+                and fila["nos_suma"] > 0
+                and precio > 0
+                else None
+            )
+
             fila["etiqueta"] = _etiqueta(fila)
 
             fila["escalon"] = ESCALON.get(fila["etiqueta"], 9)
 
             filas.append(fila)
 
-        # Dentro de cada escalon: por lo que nos suma, y luego
-        # por puntos por millon.
+        # DENTRO DE CADA ESCALON
+        #
+        #     El de los que nos mejoran, por CALIDAD-PRECIO. Los
+        #     demas por puntos por millon, que es lo unico que
+        #     los separa: si no nos suman, "cuanto nos añade por
+        #     euro" no existe.
         filas.sort(
             key=lambda f: (
                 f["escalon"],
-                -(f["nos_suma"] or 0),
+                -(f["calidad_precio"] or 0),
                 -(f["puntos_por_millon"] or 0),
             )
         )
@@ -360,6 +508,7 @@ def toda_la_liga(
                 for pos, dato in vara.items()
             },
             "recuento": recuento,
+            "plantillas": plantillas,
             "total": len(filas),
             "chollo_sin_medir": PUNTOS_POR_MILLON_CHOLLO,
             "reason": (

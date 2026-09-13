@@ -35,11 +35,10 @@ const DE_QUIEN = {
 };
 
 const TONO_ETIQUETA = {
-  "MEJORA EL ONCE · pujable hoy": "i-top",
-  "mejora el once · libre": "i-mejora",
-  "mejora el once · lo tiene un rival": "i-riv",
+  "nos mejora": "i-top",
   "chollo · muchos puntos por euro": "i-chollo",
-  "para revender": "i-rev",
+  "sin interés": "i-nada",
+  "no disponible": "i-nada",
   "ya es nuestro": "i-nuestro"
 };
 
@@ -63,6 +62,8 @@ function Estado({ status }) {
 
 export default function TodaLaLigaPanel({ data }) {
   const liga = data.todaLaLiga || {};
+
+  const censo = liga.plantillas || {};
 
   if (!liga.available) {
     return (
@@ -92,8 +93,8 @@ export default function TodaLaLigaPanel({ data }) {
         <div>
           <h2>TODOS LOS JUGADORES DE LA LIGA</h2>
           <div className="sub">
-            {liga.total} del catálogo, por lo que nos mejorarían ·
-            la vara es nuestro peor titular de cada posición
+            {liga.total} del catálogo, por CALIDAD-PRECIO ·
+            lo que nos añaden por cada millón que cuestan
           </div>
         </div>
       </div>
@@ -108,8 +109,9 @@ export default function TodaLaLigaPanel({ data }) {
               <th>JUGADOS</th>
               <th className="n">PRECIO</th>
               <th className="r">PTS/M€</th>
-              <th>DE QUIÉN ES</th>
               <th className="n">NOS SUMA</th>
+              <th className="r">CALIDAD-PRECIO</th>
+              <th>DÓNDE ESTÁ</th>
               <th>INTERÉS</th>
             </tr>
           </thead>
@@ -184,12 +186,6 @@ export default function TodaLaLigaPanel({ data }) {
                     {fila.puntos_por_millon ?? "—"}
                   </td>
 
-                  <td className="vd">
-                    <span className={clase}>
-                      {rombo} {texto}
-                    </span>
-                  </td>
-
                   {/* NOS SUMA: la vara, con nombre debajo. Sin
                       referencia NO se resta y se dice. */}
                   <td className="dl">
@@ -211,6 +207,32 @@ export default function TodaLaLigaPanel({ data }) {
                         </span>
                       </>
                     )}
+                  </td>
+
+                  {/* CALIDAD-PRECIO: lo que nos añade por cada
+                      millón. Es lo que ORDENA el cuadro.
+
+                      Solo tiene sentido cuando nos suma: dividir
+                      un negativo entre el precio ordenaría por
+                      "cuál nos empeora menos por euro", que no es
+                      una pregunta que nadie haga. */}
+                  <td className="ppm">
+                    {fila.calidad_precio == null ? (
+                      <span className="unk">—</span>
+                    ) : (
+                      <b className="pos-d">{fila.calidad_precio}</b>
+                    )}
+                  </td>
+
+                  {/* DÓNDE ESTÁ: informativo, y nada más.
+
+                      Estar hoy en el mercado del Computer dejó de
+                      ordenar el 13/09 por la noche. Lo que manda
+                      es la calidad-precio. */}
+                  <td className="vd">
+                    <span className={clase}>
+                      {rombo} {texto}
+                    </span>
                   </td>
 
                   <td>
@@ -239,7 +261,49 @@ export default function TodaLaLigaPanel({ data }) {
           ))}
       </div>
 
+      {/* EL CENSO DE LAS OCHO PLANTILLAS (13/09/2026).
+
+          Una plantilla que llega a medias no se nota en ninguna
+          parte: sus jugadores se cuentan como LIBRES, y un libre
+          es alguien a quien se puede fichar. Aquí va la cuenta
+          entera, con el descuadre si lo hay. */}
+      {censo.equipos && censo.equipos.length ? (
+        <p className="note" style={{ textAlign: "left" }}>
+          <b>LAS OCHO PLANTILLAS</b>{" "}
+          {censo.equipos
+            .map((e) => `${e.nombre} ${e.jugadores}`)
+            .join(" · ")}{" "}
+          = <b>{censo.con_dueño}</b> con dueño +{" "}
+          <b>{censo.libres}</b> libres ={" "}
+          <b>{censo.total}</b> del catálogo.{" "}
+          {censo.vacias && censo.vacias.length ? (
+            <b className="mal">
+              Llegan vacías: {censo.vacias.join(", ")} — sus
+              jugadores se están contando como libres.
+            </b>
+          ) : censo.cuadra ? (
+            <span className="bien">La cuenta cuadra.</span>
+          ) : (
+            <b className="mal">
+              La cuenta NO cuadra: sobran {censo.descuadre}. Hay
+              jugadores contados dos veces o fuera del catálogo.
+            </b>
+          )}
+        </p>
+      ) : (
+        <p className="note" style={{ textAlign: "left" }}>
+          <b className="mal">
+            Las plantillas no llegaron: no se puede saber cuántos
+            de los {liga.total} están libres de verdad.
+          </b>
+        </p>
+      )}
+
       <p className="note" style={{ textAlign: "left" }}>
+        <b>CALIDAD-PRECIO</b> = lo que nos suma dividido entre lo
+        que cuesta, en millones. Es lo que ordena el cuadro:{" "}
+        <b>estar hoy en el mercado no adelanta a nadie</b>, sólo
+        se dice en DÓNDE ESTÁ.{" "}
         <b>NOS SUMA</b> son sus puntos menos los del peor titular
         nuestro en su posición — hoy{" "}
         {Object.entries(liga.vara || {})
