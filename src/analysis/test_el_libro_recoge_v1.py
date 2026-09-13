@@ -539,6 +539,500 @@ def test_el_nombre_sale_del_catalogo_si_la_venta_no_lo_trae() -> None:
     assert _nombre_en_la_foto(foto, 999_999) is None
 
 
+# ============================================================
+# 4. LO QUE SE RESOLVIO ENTRE DOS DESPLIEGUES
+# ============================================================
+#
+# SINTOMA (13/09/2026)
+#
+#     Trent en el banquillo, sin publicar, y el carril sin saber
+#     que lo tenia. Se gano la puja en el reset de las 07:00 y la
+#     recogida de pujas vivas se desplego a las 08:xx: para
+#     entonces ya no habia puja VIVA que recoger.
+#
+#     Llego tarde POR UNA HORA, y la mitad que falta del primer
+#     viaje del carril se quedo sin registrar.
+#
+# EL AGUJERO ERA DE FORMA, NO DE HORA
+#
+#     Mirar solo pujas vivas deja fuera todo lo que se resuelve
+#     entre dos despliegues. Mirar LA PLANTILLA no: un jugador
+#     que tenemos y que el tablon dice que compramos es una
+#     compra, la viera alguien pujar o no.
+
+
+TRENT_REAL = 37499
+
+TRENT_GANADO = 2_760_000
+
+# 07:06:58 de Madrid del 13/09 = 05:06:58 UTC: el reset que la
+# resolvio.
+RESUELTA_EPOCH = 1789268818
+
+
+def _plantilla_con_trent() -> dict:
+    return {
+        "league": {"user": {"id": YO, "name": "Pepe"}},
+        "my_team": [
+            {"id": 1599, "name": "Jonny", "position": 2},
+            {"id": TRENT_REAL, "name": "Trent", "position": 2},
+        ],
+        "market": {"status": {}, "sales": [], "offers": []},
+    }
+
+
+def _tablon_con_la_compra() -> list:
+    """
+    El tablon: el Computer nos vendio a Trent en el reset.
+
+    EL TIPO DE EVENTO IMPORTA. Medido el 13/09 sobre el tablon
+    real, nuestras compras llegan como `market` (21) y como
+    `transfer` (1, comprado a un rival). Las dos cuentan: un
+    jugador comprado a un manager es tan nuestro como uno
+    comprado al Computer.
+    """
+
+    return [
+        {
+            "id": 5551,
+            "date": RESUELTA_EPOCH,
+            "type": "market",
+            "content": [
+                {
+                    "player": TRENT_REAL,
+                    "amount": TRENT_GANADO,
+                    "from": None,
+                    "to": {"id": YO, "name": "Pepe"},
+                }
+            ],
+        },
+        # Y uno que NO nos vendieron a nosotros.
+        {
+            "id": 5552,
+            "date": RESUELTA_EPOCH,
+            "type": "market",
+            "content": [
+                {
+                    "player": 28087,
+                    "amount": 3_677_000,
+                    "from": None,
+                    "to": {"id": 99999, "name": "Pollo17"},
+                }
+            ],
+        },
+    ]
+
+
+def test_lo_que_se_resolvio_sin_nosotros_se_recoge() -> None:
+    """
+    EL CASO DE TRENT.
+
+    Plantilla con Trent, tablon con la compra, libro vacio.
+    Despues de recoger: la entrada existe, con el importe real y
+    ganada.
+    """
+
+    from src.intelligence.bid_outcome_ledger import (
+        recoger_compras_de_la_plantilla,
+    )
+
+    libro = _libro_vacio()
+
+    visto = recoger_compras_de_la_plantilla(
+        _plantilla_con_trent(),
+        _tablon_con_la_compra(),
+        YO,
+        ledger=libro,
+    )
+
+    assert visto["available"] is True, visto
+
+    assert len(visto["recogidas"]) == 1, visto
+
+    entrada = libro["bids"][
+        [
+            k
+            for k, v in libro["bids"].items()
+            if v["player_id"] == TRENT_REAL
+        ][0]
+    ]
+
+    # EL IMPORTE REAL, el del tablon.
+    assert entrada["amount"] == TRENT_GANADO, entrada
+
+    assert entrada["player_name"] == "Trent", entrada
+
+    # LO TENEMOS: la puja se gano. No es una deduccion, es la
+    # plantilla.
+    assert entrada["outcome"] == "WON", entrada
+
+    assert entrada["resolved_by"] == "EN_LA_PLANTILLA", entrada
+
+    assert entrada["recorded_by"] == "PLANTILLA", entrada
+
+    # Y Jonny NO entra: nadie nos lo vendio, es del sorteo
+    # inicial. Esa es la linea que separa una compra de un
+    # regalo, y no hace falta saber cual fue el sorteo.
+    assert 1599 not in {
+        v["player_id"] for v in libro["bids"].values()
+    }, libro
+
+    # Ni el que se llevo otro.
+    assert 28087 not in {
+        v["player_id"] for v in libro["bids"].values()
+    }, libro
+
+
+def test_tambien_se_ve_lo_comprado_a_un_rival() -> None:
+    """
+    LAS COMPRAS NO VIENEN TODAS DEL MISMO TIPO DE EVENTO.
+
+    Medido el 13/09 sobre el tablon real: `market` 21 y
+    `transfer` 1 —un jugador comprado a un manager—. El filtro
+    que usa `reconcile` solo acepta `market`, asi que esa compra
+    se le escapaba.
+
+    Para "¿que hemos comprado?" las dos cuentan.
+    """
+
+    from src.intelligence.bid_outcome_ledger import (
+        recoger_compras_de_la_plantilla,
+    )
+
+    OTRO = 39874
+
+    foto = _plantilla_con_trent()
+
+    foto["my_team"].append(
+        {"id": OTRO, "name": "Comprado a un rival", "position": 3}
+    )
+
+    tablon = _tablon_con_la_compra() + [
+        {
+            "id": 5553,
+            "date": RESUELTA_EPOCH - 86_400,
+            "type": "transfer",
+            "content": [
+                {
+                    "player": OTRO,
+                    "amount": 463_500,
+                    "from": {"id": 99999, "name": "Prinzipote"},
+                    "to": {"id": YO, "name": "Pepe"},
+                }
+            ],
+        }
+    ]
+
+    libro = _libro_vacio()
+
+    recoger_compras_de_la_plantilla(foto, tablon, YO, ledger=libro)
+
+    vistos = {v["player_id"] for v in libro["bids"].values()}
+
+    assert OTRO in vistos, (
+        "una compra a un rival no se recoge: llega como "
+        "`transfer` y el filtro solo miraba `market`"
+    )
+
+    assert TRENT_REAL in vistos, vistos
+
+
+def test_la_hora_dice_si_es_la_de_la_puja_o_la_del_reset() -> None:
+    """
+    DOCTRINA 35, EN UN CASO NUEVO.
+
+    Del tablon solo se sabe CUANDO SE RESOLVIO, no cuando se
+    pujo. Son dos horas distintas —aqui, 16:45 del 12 y 07:06 del
+    13— y publicarlas con el mismo nombre haria creer que la puja
+    se puso en el reset.
+
+    Si el libro del carril prueba la hora de la puja, se usa esa.
+    Si no, la del tablon Y SE DICE.
+    """
+
+    from src.intelligence.bid_outcome_ledger import (
+        recoger_compras_de_la_plantilla,
+    )
+
+    # 1. SIN PRUEBA: la del tablon, y marcada.
+    with tempfile.TemporaryDirectory() as tmp:
+
+        libro = _libro_vacio()
+
+        recoger_compras_de_la_plantilla(
+            _plantilla_con_trent(),
+            _tablon_con_la_compra(),
+            YO,
+            ledger=libro,
+            ruta_del_carril=Path(tmp) / "no_existe.jsonl",
+            ruta_de_viajes=Path(tmp) / "viajes.jsonl",
+        )
+
+        entrada = list(libro["bids"].values())[0]
+
+        assert entrada["placed_at_is_resolution"] is True, (
+            entrada
+        )
+
+        assert entrada["target_source"] == "DESCONOCIDO", entrada
+
+    # 2. CON EL LIBRO DEL CARRIL DELANTE: su hora y su marca.
+    with tempfile.TemporaryDirectory() as tmp:
+
+        del_carril = Path(tmp) / "libro_del_carril.jsonl"
+
+        del_carril.write_text(
+            json.dumps(
+                {
+                    "at": "2026-09-12T14:45:03+00:00",
+                    "marca": "RENDIJA",
+                    "player_id": TRENT_REAL,
+                    "player_name": "Trent",
+                    "amount": TRENT_GANADO,
+                }
+            )
+            + chr(10),
+            encoding="utf-8",
+        )
+
+        libro = _libro_vacio()
+
+        visto = recoger_compras_de_la_plantilla(
+            _plantilla_con_trent(),
+            _tablon_con_la_compra(),
+            YO,
+            ledger=libro,
+            ruta_del_carril=del_carril,
+            ruta_de_viajes=Path(tmp) / "viajes.jsonl",
+        )
+
+        entrada = list(libro["bids"].values())[0]
+
+        assert entrada["placed_at"] == (
+            "2026-09-12T14:45:03+00:00"
+        ), entrada
+
+        assert entrada["placed_at_is_resolution"] is False, (
+            entrada
+        )
+
+        assert entrada["target_source"] == "RENDIJA", entrada
+
+        # Y SI VINO DEL CARRIL, SE ABRE EL VIAJE. Un jugador
+        # comprado para revender que no esta marcado VIAJE es
+        # medio viaje: lo juzgaria el motor de ofertas de
+        # siempre, con la pregunta equivocada.
+        assert visto["viajes_abiertos"], visto
+
+        assert visto["viajes_abiertos"][0]["name"] == "Trent"
+
+
+def test_la_plantilla_no_se_recoge_dos_veces() -> None:
+    """La misma foto dos veces deja una sola entrada."""
+
+    from src.intelligence.bid_outcome_ledger import (
+        recoger_compras_de_la_plantilla,
+    )
+
+    libro = _libro_vacio()
+
+    foto = _plantilla_con_trent()
+
+    tablon = _tablon_con_la_compra()
+
+    primera = recoger_compras_de_la_plantilla(
+        foto, tablon, YO, ledger=libro
+    )
+
+    segunda = recoger_compras_de_la_plantilla(
+        foto, tablon, YO, ledger=libro
+    )
+
+    assert len(primera["recogidas"]) == 1, primera
+
+    assert segunda["recogidas"] == [], segunda
+
+    assert len(libro["bids"]) == 1, libro
+
+
+def test_una_plantilla_vacia_no_se_toma_por_buena() -> None:
+    """
+    REGLA 24. Tenemos 15 jugadores: una plantilla vacia es una
+    lectura rota, no una plantilla sin nadie.
+
+    Si se tomara por buena, esto no recogeria nada mientras
+    parece que si — que es el fallo que vino a arreglar.
+    """
+
+    from src.intelligence.bid_outcome_ledger import (
+        recoger_compras_de_la_plantilla,
+    )
+
+    libro = _libro_vacio()
+
+    visto = recoger_compras_de_la_plantilla(
+        {"league": {"user": {"id": YO}}, "my_team": []},
+        _tablon_con_la_compra(),
+        YO,
+        ledger=libro,
+    )
+
+    assert visto["available"] is False, visto
+
+    assert "lectura rota" in visto["reason"], visto
+
+    assert libro["bids"] == {}, libro
+
+
+def test_cero_viajes_no_es_todo_bien() -> None:
+    """
+    EL INDICADOR QUE TAPABA EL FALLO.
+
+    El panel decia "todos los viajes abiertos estan publicados"
+    teniendo CERO viajes, mientras Trent estaba en el banquillo
+    sin publicar.
+
+    Un indicador que se enciende con la AUSENCIA de datos es la
+    regla 24 y la doctrina 37 a la vez — y tapo justo el fallo
+    que tenia que enseñar.
+    """
+
+    from src.actions.escaparate_executor import viajes_sin_listar
+
+    ninguno = viajes_sin_listar([], [])
+
+    assert ninguno["hay_viajes"] is False, ninguno
+
+    assert ninguno["abiertos"] == 0, ninguno
+
+    assert "no hay nada que mirar" in ninguno["reason"], ninguno
+
+    assert "todo vaya bien" in ninguno["reason"], ninguno
+
+    # Con un viaje publicado, SI es "todo bien" — y se distingue.
+    bien = viajes_sin_listar(
+        [{"player_id": TRENT_REAL, "name": "Trent"}],
+        [{"player_id": TRENT_REAL}],
+    )
+
+    assert bien["hay_viajes"] is True, bien
+    assert bien["ok"] is True, bien
+    assert bien["abiertos"] == 1, bien
+
+    # Y con uno sin publicar, rojo.
+    mal = viajes_sin_listar(
+        [{"player_id": TRENT_REAL, "name": "Trent"}], []
+    )
+
+    assert mal["ok"] is False, mal
+    assert mal["hay_viajes"] is True, mal
+
+    # La pantalla tiene que poder distinguir los tres.
+    panel = (
+        Path(__file__).parents[2] / "dashboard-v8" / "src"
+        / "components" / "RendijaPanel.jsx"
+    ).read_text(encoding="utf-8")
+
+    for dato in ("hay_viajes", "NADA QUE MIRAR"):
+        assert dato in panel, (
+            f"la pantalla no distingue «cero viajes» de «todos "
+            f"publicados»: falta `{dato}`"
+        )
+
+
+def test_un_viaje_sin_coste_sigue_contando_para_publicar() -> None:
+    """
+    EL SEGUNDO SITIO DONDE TRENT DESAPARECIA.
+
+    `abiertos` aparta a `sin_coste` los viajes cuya ficha no trae
+    `acquisition_cost`, y hace bien: `que_cobrar` no puede
+    juzgarlos contra el suelo sin saber lo que costaron.
+
+    Pero PUBLICAR no depende del coste. Trent se abrio como viaje
+    y desaparecio de la cuenta por no traer coste: el panel decia
+    "cero viajes" mientras el jugador estaba en el banquillo sin
+    publicar.
+
+    Dos filtros correctos por separado que juntos tapan el fallo.
+    """
+
+    import ast
+
+    fuente = (
+        Path(__file__).parents[2] / "src" / "telemetry"
+        / "dashboard_state.py"
+    ).read_text(encoding="utf-8")
+
+    codigo = chr(10).join(
+        linea
+        for linea in fuente.splitlines()
+        if not linea.strip().startswith("#")
+    )
+
+    assert 'sin_coste' in codigo, (
+        "la telemetria no cuenta los viajes de coste desconocido "
+        "para la comprobacion de sin listar: un viaje sin coste "
+        "vuelve a ser invisible"
+    )
+
+    # Y el comportamiento, no solo el codigo.
+    from src.actions.escaparate_executor import viajes_sin_listar
+
+    sin_coste = [
+        {
+            "player_id": TRENT_REAL,
+            "name": "Trent",
+            "cost": 0,
+            "opened_at": "2026-09-13T06:45:00+00:00",
+        }
+    ]
+
+    visto = viajes_sin_listar(sin_coste, [])
+
+    assert visto["ok"] is False, visto
+
+    assert visto["abiertos"] == 1, visto
+
+    assert "Trent" in visto["reason"], visto
+
+
+def test_el_ciclo_recoge_tambien_por_la_plantilla() -> None:
+    """
+    Sin el enganche, la via no corre nunca y no haria ruido.
+    """
+
+    import ast
+
+    fuente = (
+        Path(__file__).parents[2] / "src" / "intelligence"
+        / "bid_outcome_ledger.py"
+    ).read_text(encoding="utf-8")
+
+    dentro = set()
+
+    for nodo in ast.walk(ast.parse(fuente)):
+
+        if (
+            isinstance(nodo, ast.FunctionDef)
+            and nodo.name == "sync_bid_outcomes"
+        ):
+            for hijo in ast.walk(nodo):
+
+                if isinstance(hijo, ast.Call) and isinstance(
+                    hijo.func, ast.Name
+                ):
+                    dentro.add(hijo.func.id)
+
+    for via in (
+        "recoger_pujas_vivas",
+        "recoger_compras_de_la_plantilla",
+    ):
+        assert via in dentro, (
+            f"`sync_bid_outcomes` no llama a `{via}`: esa via no "
+            f"corre nunca"
+        )
+
+
 TESTS = [
     test_el_libro_recoge_la_puja_que_no_anoto,
     test_el_nombre_sale_del_catalogo_si_la_venta_no_lo_trae,
@@ -548,6 +1042,14 @@ TESTS = [
     test_lo_recogido_se_resuelve_sin_esperar_otro_ciclo,
     test_aubameyang_se_cierra_como_perdida,
     test_el_ciclo_le_pasa_la_foto_al_libro,
+    test_lo_que_se_resolvio_sin_nosotros_se_recoge,
+    test_tambien_se_ve_lo_comprado_a_un_rival,
+    test_la_hora_dice_si_es_la_de_la_puja_o_la_del_reset,
+    test_la_plantilla_no_se_recoge_dos_veces,
+    test_una_plantilla_vacia_no_se_toma_por_buena,
+    test_cero_viajes_no_es_todo_bien,
+    test_un_viaje_sin_coste_sigue_contando_para_publicar,
+    test_el_ciclo_recoge_tambien_por_la_plantilla,
 ]
 
 

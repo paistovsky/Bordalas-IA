@@ -509,6 +509,376 @@ def _nombre_en_la_foto(snapshot, player_id):
         return None
 
 
+def _lo_que_prueba_el_carril(player_id: int, ruta=None) -> dict:
+    """
+    Lo que el libro del carril prueba sobre esta compra.
+
+    Devuelve `{marca, amount, at}` o `{}`. El carril escribe su
+    libro en el mismo instante en que puja, asi que de ahi salen
+    las tres cosas que el tablon no sabe: de que via vino, con
+    que importe se pujo, y a que hora.
+
+    Nunca lanza.
+    """
+
+    try:
+        destino = ruta or LIBRO_DEL_CARRIL
+
+        if not destino.exists():
+            return {}
+
+        for linea in destino.read_text(
+            encoding="utf-8"
+        ).splitlines():
+
+            if not linea.strip():
+                continue
+
+            fila = json.loads(linea)
+
+            if int(fila.get("player_id") or 0) != int(player_id):
+                continue
+
+            return {
+                "marca": fila.get("marca"),
+                "amount": safe_int(fila.get("amount")),
+                "at": fila.get("at"),
+            }
+
+        return {}
+
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
+def _compras_del_tablon(board, our_user_id) -> dict:
+    """
+    Lo que el tablon dice que hemos COMPRADO: {player_id: (importe, fecha_iso)}.
+
+    Del tablon y no de la plantilla: la plantilla dice que lo
+    tenemos, el tablon dice CUANTO COSTO y CUANDO. Los jugadores
+    del sorteo inicial no aparecen aqui —nadie nos los vendio— y
+    por eso esta funcion distingue sola una compra de un regalo.
+
+    Nunca lanza.
+    """
+
+    compras = {}
+
+    try:
+        # RECORRIDO PROPIO, Y NO `_operaciones`, A PROPOSITO.
+        #
+        #     `_operaciones` acepta solo eventos `market` —lo que
+        #     necesita `reconcile`— y medido el 13/09 sobre el
+        #     tablon real, nuestras compras llegan asi:
+        #
+        #         market     21
+        #         transfer    1   <- comprado a un rival
+        #
+        #     Para "¿que hemos comprado?" las dos cuentan: un
+        #     jugador comprado a un manager es tan nuestro como
+        #     uno comprado al Computer.
+        #
+        #     No se toca el filtro de `_operaciones`: cambiarlo
+        #     mueve como se resuelven las pujas ya anotadas, y
+        #     eso es otra decision. Queda dicho en el informe.
+        eventos = (
+            board.get("events")
+            if isinstance(board, dict)
+            else board
+        ) or []
+
+        for evento in eventos:
+
+            if not isinstance(evento, dict):
+                continue
+
+            if evento.get("type") not in (
+                None,
+                "market",
+                "transfer",
+            ):
+                continue
+
+            fecha = evento.get("date")
+
+            for operacion in (evento.get("content") or []):
+
+                if not isinstance(operacion, dict):
+                    continue
+
+
+                destino = operacion.get("to")
+
+                if not isinstance(destino, dict):
+                    continue
+
+                if safe_int(destino.get("id")) != int(our_user_id):
+                    continue
+
+                pid = safe_int(operacion.get("player"))
+
+                if pid <= 0:
+                    continue
+
+                cuando = None
+
+                try:
+                    cuando = datetime.fromtimestamp(
+                        int(fecha), timezone.utc
+                    ).isoformat()
+
+                except Exception:                       # noqa: BLE001
+                    cuando = None
+
+                # La mas reciente manda: si un jugador se compro,
+                # se vendio y se volvio a comprar, la que cuenta es
+                # la ultima.
+                anterior = compras.get(pid)
+
+                if anterior is None or (
+                    cuando and anterior[1] and cuando > anterior[1]
+                ):
+                    compras[pid] = (
+                        safe_int(operacion.get("amount")),
+                        cuando,
+                    )
+
+        return compras
+
+    except Exception:                               # noqa: BLE001
+        return compras
+
+
+def recoger_compras_de_la_plantilla(
+    snapshot,
+    board,
+    our_user_id,
+    *,
+    ledger: dict,
+    ruta_del_carril=None,
+    ruta_de_viajes=None,
+) -> dict:
+    """
+    Un jugador NUESTRO que no esta en el libro es una compra que
+    no anotamos.
+
+    SINTOMA (13/09/2026)
+
+        Trent en el banquillo, sin publicar, y el carril sin
+        saber que lo tenia. Se gano la puja en el reset de las
+        07:00 y `recoger_pujas_vivas` se desplego a las 08:xx:
+        para entonces ya no habia puja VIVA que recoger.
+
+        Llego tarde por una hora, y la mitad que falta del primer
+        viaje del carril se quedo sin registrar.
+
+    EL AGUJERO ERA DE FORMA, NO DE HORA
+
+        Recoger solo pujas VIVAS deja fuera todo lo que se
+        resuelve entre dos despliegues. Mirar LA PLANTILLA no:
+        un jugador que tenemos y que el tablon dice que compramos
+        es una compra, la viera alguien pujar o no.
+
+        Esta via cierra el agujero para siempre, no solo para
+        hoy.
+
+    DE DONDE SALE CADA COSA
+
+        el importe   del TABLON, que es lo que se pago de verdad
+        la hora      del libro del carril si lo prueba; si no, la
+                     del tablon —que es cuando se resolvio, no
+                     cuando se pujo, y se dice—
+        el origen    solo si el libro del carril lo prueba
+
+    Y SI VINO DEL CARRIL, SE ABRE EL VIAJE. Un jugador comprado
+    para revender que no esta marcado VIAJE es medio viaje: lo
+    juzgaria el motor de ofertas de siempre, con la pregunta
+    equivocada.
+
+    Forma fija. Nunca lanza.
+    """
+
+    salida = {
+        "available": False,
+        "recogidas": [],
+        "viajes_abiertos": [],
+        "reason": None,
+    }
+
+    try:
+        if not snapshot or our_user_id is None:
+            return {
+                **salida,
+                "reason": (
+                    "Sin foto o sin saber quienes somos no se "
+                    "recoge nada."
+                ),
+            }
+
+        plantilla = snapshot.get("my_team") or []
+
+        if not plantilla:
+            # REGLA 24: una plantilla vacia es una lectura rota
+            # -tenemos 15- y tratarla como buena no recogeria
+            # nada mientras parece que si.
+            return {
+                **salida,
+                "reason": (
+                    "La plantilla llega vacia: no se recoge "
+                    "nada, porque eso no es una plantilla sin "
+                    "nadie, es una lectura rota."
+                ),
+            }
+
+        compras = _compras_del_tablon(board, our_user_id)
+
+        ya_estan = {
+            int(e.get("player_id") or 0)
+            for e in (ledger.get("bids") or {}).values()
+            if isinstance(e, dict)
+        }
+
+        recogidas = []
+
+        viajes = []
+
+        for ficha in plantilla:
+
+            if not isinstance(ficha, dict):
+                continue
+
+            pid = safe_int(ficha.get("id"))
+
+            if pid <= 0 or pid in ya_estan:
+                continue
+
+            comprado = compras.get(pid)
+
+            if not comprado:
+                # No consta que nos lo vendiera nadie: es del
+                # sorteo inicial. No es una compra sin anotar.
+                continue
+
+            importe, cuando_del_tablon = comprado
+
+            if importe <= 0:
+                continue
+
+            prueba = _lo_que_prueba_el_carril(
+                pid, ruta_del_carril
+            )
+
+            puesta = prueba.get("at") or cuando_del_tablon
+
+            if not puesta:
+                continue
+
+            record_bid(
+                pid,
+                importe,
+                player_name=(
+                    ficha.get("name")
+                    or _nombre_en_la_foto(snapshot, pid)
+                ),
+                market_price=_precio_en_la_foto(snapshot, pid),
+                target_source=(
+                    prueba.get("marca") or ORIGEN_SIN_PROBAR
+                ),
+                placed_at=puesta,
+                ledger=ledger,
+                save=False,
+            )
+
+            entrada = ledger["bids"][_clave(pid, puesta)]
+
+            # LO TENEMOS: la puja se gano. Eso no es una
+            # deduccion, es la plantilla.
+            entrada["outcome"] = "WON"
+
+            entrada["margin"] = 0
+
+            entrada["resolved_at"] = cuando_del_tablon
+
+            entrada["resolved_by"] = "EN_LA_PLANTILLA"
+
+            entrada["recorded_by"] = "PLANTILLA"
+
+            # Y si la hora no la prueba el carril, se dice: la
+            # del tablon es cuando se RESOLVIO, no cuando se
+            # pujo (doctrina 35, un dato con dos nombres).
+            entrada["placed_at_is_resolution"] = not prueba.get(
+                "at"
+            )
+
+            ya_estan.add(pid)
+
+            recogidas.append(
+                {
+                    "player_id": pid,
+                    "name": entrada["player_name"],
+                    "amount": importe,
+                    "placed_at": puesta,
+                    "target_source": entrada["target_source"],
+                }
+            )
+
+            # SI VINO DEL CARRIL, ES UN VIAJE ABIERTO.
+            if str(entrada["target_source"]).upper() == "RENDIJA":
+
+                try:
+                    from src.analysis.libro_de_viajes import (
+                        abrir,
+                    )
+
+                    marca = abrir(
+                        player_id=pid,
+                        name=entrada["player_name"],
+                        position=ficha.get("position"),
+                        ruta=ruta_de_viajes,
+                    )
+
+                    if marca.get("opened"):
+                        viajes.append(
+                            {
+                                "player_id": pid,
+                                "name": entrada["player_name"],
+                            }
+                        )
+
+                except Exception:                   # noqa: BLE001
+                    pass
+
+        return {
+            "available": True,
+            "recogidas": recogidas,
+            "viajes_abiertos": viajes,
+            "reason": (
+                f"{len(recogidas)} compra(s) de la plantilla que "
+                f"no estaban en el libro"
+                + (
+                    f"; {len(viajes)} viaje(s) abierto(s)."
+                    if viajes
+                    else "."
+                )
+                if recogidas
+                else (
+                    "Ninguna compra de la plantilla falta en el "
+                    "libro."
+                )
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **salida,
+            "reason": (
+                f"No se pudieron recoger las compras de la "
+                f"plantilla: {type(error).__name__}: {error}"
+            ),
+        }
+
+
 def recoger_pujas_vivas(
     snapshot,
     our_user_id,
@@ -989,6 +1359,18 @@ def sync_bid_outcomes(
             snapshot, our_user_id, ledger=libro
         )
 
+        # Y LO QUE YA SE RESOLVIO ENTRE DOS DESPLIEGUES.
+        #
+        #     Mirar solo pujas VIVAS deja fuera todo lo que se
+        #     resuelve mientras no corremos. Trent se gano a las
+        #     07:00 y la recogida se desplego a las 08:xx: para
+        #     entonces no habia puja viva que ver.
+        #
+        #     La plantilla si lo sabe.
+        de_la_plantilla = recoger_compras_de_la_plantilla(
+            snapshot, eventos, our_user_id, ledger=libro
+        )
+
         libro = reconcile(
             eventos,
             our_user_id,
@@ -1000,6 +1382,8 @@ def sync_bid_outcomes(
         resumen = summary(libro)
 
         resumen["recogidas_del_tablon"] = recogidas
+
+        resumen["recogidas_de_la_plantilla"] = de_la_plantilla
 
         return resumen
     except Exception:

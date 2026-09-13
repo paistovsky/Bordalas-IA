@@ -443,12 +443,33 @@ def viajes_sin_listar(
             and safe_int(v.get("player_id")) not in en_venta
         ]
 
+        # CERO VIAJES NO ES "TODO BIEN" (13/09/2026)
+        #
+        #     El panel decia "todos los viajes abiertos estan
+        #     publicados" teniendo CERO viajes abiertos, mientras
+        #     Trent estaba en el banquillo sin publicar y su
+        #     compra nunca habia entrado en el libro.
+        #
+        #     Un indicador que dice "todo bien" cuando NO TIENE
+        #     NADA QUE MIRAR es la regla 24 y la doctrina 37 a la
+        #     vez: se enciende con la ausencia de datos en vez de
+        #     con un hecho. Y tapo justo el fallo que tenia que
+        #     enseñar.
+        cuantos = len(
+            [v for v in (viajes or []) if isinstance(v, dict)]
+        )
+
         return {
             "available": True,
             "ok": not huerfanos,
+            "hay_viajes": cuantos > 0,
+            "abiertos": cuantos,
             "players": huerfanos,
             "reason": (
-                "Todos los viajes abiertos estan publicados."
+                "NO HAY NINGUN VIAJE ABIERTO: esto no dice que "
+                "todo vaya bien, dice que no hay nada que mirar."
+                if not cuantos
+                else "Todos los viajes abiertos estan publicados."
                 if not huerfanos
                 else (
                     "VIAJES SIN LISTAR: "

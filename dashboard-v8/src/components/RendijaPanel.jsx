@@ -169,6 +169,36 @@ export default function RendijaPanel({ data }) {
         </b>
       </div>
 
+      {/* VIAJES ABIERTOS — Y "CERO" NO ES "TODO BIEN".
+
+          El 13/09 el estado decia «todos los viajes abiertos
+          estan publicados» teniendo CERO viajes, mientras Trent
+          estaba en el banquillo sin publicar y su compra no
+          habia entrado en el libro. Un indicador que se
+          enciende con la AUSENCIA de datos tapa justo el fallo
+          que tenia que enseñar. */}
+      <div className="kv">
+        <span>Viajes abiertos</span>
+        <b className="mono">
+          {rendija.sin_listar?.abiertos ?? "—"}{" "}
+          <span
+            className={
+              rendija.sin_listar?.ok === false
+                ? "pill crit"
+                : rendija.sin_listar?.hay_viajes
+                ? "pill ok"
+                : "pill idle"
+            }
+          >
+            {rendija.sin_listar?.ok === false
+              ? "SIN LISTAR"
+              : rendija.sin_listar?.hay_viajes
+              ? "publicados"
+              : "NADA QUE MIRAR"}
+          </span>
+        </b>
+      </div>
+
       {/* EL SUELO, Y POR QUE ESE Y NO OTRO.
 
           Igual que el cupo: se pinta lo que dice

@@ -4653,8 +4653,24 @@ def build_dashboard_state() -> dict:
             plantilla=(roster or {}).get("players") or []
         )
 
+        # LOS DE COSTE DESCONOCIDO TAMBIEN CUENTAN (13/09/2026)
+        #
+        #     `abiertos` aparta a `sin_coste` los viajes cuya
+        #     ficha no trae `acquisition_cost`, y hace bien:
+        #     `que_cobrar` no puede juzgarlos contra el suelo sin
+        #     saber lo que costaron.
+        #
+        #     Pero PUBLICAR no depende del coste. Trent se abrio
+        #     como viaje el 13/09 y desaparecio de esta cuenta
+        #     por no traer coste: el panel decia "cero viajes"
+        #     mientras el jugador estaba en el banquillo sin
+        #     publicar, que es justo lo que esta guardia existe
+        #     para ver.
         _sin_listar = viajes_sin_listar(
-            viajes=_abiertos.get("viajes") or [],
+            viajes=(
+                (_abiertos.get("viajes") or [])
+                + (_abiertos.get("sin_coste") or [])
+            ),
             listados=(compact_listings(state) or {}).get("rows") or [],
         )
 
