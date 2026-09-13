@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -1582,6 +1582,47 @@ def compact_speculation(state: dict) -> dict:
         ),
         "candidates": compact,
     }
+
+
+def _momento_de_la_foto(snapshot) -> datetime | None:
+    """
+    Cuando se tomo la foto. `None` si no se puede saber.
+
+    POR QUE EXISTE (14/09/2026, madrugada)
+
+        Todo lo que la pantalla dice en relativo —"hace 27 dias",
+        "hoy a las 10:08"— habla de LA FOTO, no del momento en
+        que alguien abre el navegador. Medirlo contra el reloj
+        del lector hace que el mismo `status.json` diga cosas
+        distintas segun cuando se mire.
+
+    EL SELLO LLEGA SIN ZONA
+
+        El recolector lo escribe con `datetime.now()`, que en
+        local es Madrid y en el runner es UTC. Se supone UTC,
+        igual que el resto de marcas de esta casa, y queda dicho
+        aqui porque es una SUPOSICION y no una medicion.
+
+        Sin sello se devuelve `None`, y quien lo reciba dira la
+        fecha entera en vez de "hoy": inventarse la referencia
+        seria peor que no tenerla.
+    """
+
+    try:
+        marca = (snapshot or {}).get("timestamp")
+
+        if not marca:
+            return None
+
+        cuando = datetime.fromisoformat(str(marca))
+
+        if cuando.tzinfo is None:
+            cuando = cuando.replace(tzinfo=timezone.utc)
+
+        return cuando
+
+    except (TypeError, ValueError):
+        return None
 
 
 def compact_listings(state: dict) -> dict:
@@ -4957,6 +4998,28 @@ def build_dashboard_state() -> dict:
                 + (_abiertos.get("sin_coste") or [])
             ),
             listados=(compact_listings(state) or {}).get("rows") or [],
+
+            # «HOY» ES RESPECTO A LA FOTO (14/09/2026, madrugada)
+            #
+            #     El cartel dice "lo compramos HOY a las 10:08 y
+            #     sigue sin publicar". Ese "sigue" es una
+            #     afirmacion sobre LA FOTO: en el snapshot de las
+            #     17:17 no estaba publicado.
+            #
+            #     Si "hoy" fuera respecto a la hora de leer, la
+            #     misma foto diria cosas distintas segun cuando
+            #     se abriera la pantalla — y a las 00:15 diria
+            #     "ayer" de algo que la foto vio hoy.
+            #
+            #     Es la doctrina 38 con otra cara: lo que se
+            #     afirma no puede depender de cuando se pregunta.
+            #
+            #     El sello de la foto llega SIN ZONA (el
+            #     recolector usa `datetime.now()`), asi que se
+            #     supone UTC igual que el resto de marcas de esta
+            #     casa. Queda dicho aqui porque es una suposicion,
+            #     no una medicion.
+            ahora=(snapshot or {}).get("timestamp"),
         )
 
         # LOS CANDIDATOS DEL CARRIL, NO LOS DEL TABLERO.
@@ -5333,6 +5396,22 @@ def build_dashboard_state() -> dict:
             marcador=marcador_estado,
             objetivos=(acquisition or {}).get("targets"),
             jornada_de_hoy=state.get("target_matchday"),
+
+            # LA EDAD SE MIDE CONTRA LA FOTO, no contra el reloj
+            # de quien abre la pantalla (14/09/2026, madrugada).
+            #
+            #     "El tablero es de hace 27 dias" es una
+            #     afirmacion sobre la foto: en el snapshot de las
+            #     17:17 llevaba 27 dias sin refrescarse. Si se
+            #     midiera contra la hora de leer, el mismo
+            #     `status.json` diria 27 por la tarde y 28 por la
+            #     noche sin que nada hubiera cambiado.
+            #
+            #     Misma familia que el cartel del carril, que se
+            #     arreglo esta madrugada: `_cuando` leia
+            #     `datetime.now()` y la guardia se ponia roja
+            #     sola a medianoche.
+            ahora=_momento_de_la_foto(snapshot),
         )
 
     except Exception as error:                      # noqa: BLE001

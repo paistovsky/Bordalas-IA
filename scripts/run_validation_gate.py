@@ -251,6 +251,7 @@ TESTS = [
     "src.analysis.test_los_sentidos_v1",
     "src.analysis.test_el_calendario_v1",
     "src.analysis.test_los_rivales_v1",
+    "src.analysis.test_el_reloj_de_las_guardias_v1",
     "src.analysis.test_el_plato_del_carril_v1",
     "src.analysis.test_la_puja_del_carril_v1",
     "src.analysis.test_los_dos_techos_v1",
@@ -470,8 +471,40 @@ def main() -> int:
                 + (proceso.stdout or "")
             ).strip().splitlines()
 
-            for linea in salida[-6:]:
-                print(f"            {linea[:100]}")
+            # EL NOMBRE DE LA QUE FALLA, NO SOLO CUANTAS
+            # (14/09/2026, madrugada)
+            #
+            #     El registro de CI decia "46/47" y nada mas: las
+            #     seis ultimas lineas de un modulo son su propio
+            #     banner de resumen, asi que el nombre de la
+            #     subprueba se quedaba justo fuera de la ventana.
+            #
+            #     Hubo que correr el modulo suelto a mano para
+            #     saber cual era. Veinte minutos, de madrugada, y
+            #     con el reset encima.
+            #
+            #     UNA VERJA QUE DICE CUANTAS FALLAN Y NO CUAL NO
+            #     ES UNA VERJA: ES UN AVISO.
+            #
+            #     Cada modulo de esta casa imprime "FALLA <nombre>:
+            #     <motivo>" por subprueba. Se sacan TODAS, enteras
+            #     y las primeras: el motivo de la primera suele
+            #     explicar las demas.
+            por_su_nombre = [
+                linea
+                for linea in salida
+                if linea.lstrip().startswith("FALLA")
+            ]
+
+            for linea in por_su_nombre:
+                print(f"        -> {linea.strip()[:400]}")
+
+            # Y el final de la salida, para lo que no siga ese
+            # formato: una excepcion, un import roto, un
+            # `SystemExit` sin mensaje.
+            if not por_su_nombre:
+                for linea in salida[-8:]:
+                    print(f"           {linea[:120]}")
 
             fallos.append(modulo)
 

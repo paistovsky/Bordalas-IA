@@ -473,13 +473,50 @@ def publicar(
 # ============================================================
 
 
-def _cuando(marca) -> str:
+def _cuando(marca, ahora=None) -> str:
     """
     "hoy a las 08:08", "ayer a las 21:40" o "el 11/09 a las 07:15".
 
-    La fecha en formato de maquina —2026-09-13T08:08— no la lee
-    nadie de un vistazo. Nunca lanza: si no se puede leer, se
-    dice "en algun momento", que es la verdad.
+    LA HORA SE RECIBE, NO SE BUSCA (14/09/2026, madrugada)
+
+    SINTOMA
+
+        `test_el_cartel_dice_lo_que_pasa_en_una_frase` paso todo
+        el dia en verde y se puso roja a medianoche sin que nadie
+        tocara nada. La frase decia "hoy a las 10:08" a las 23:59
+        y "AYER a las 10:08" a las 00:01.
+
+    CAUSA
+
+        Esto leia `datetime.now()`. La guardia compara la frase
+        ENTERA contra un texto fijo, asi que la comparacion
+        dependia de a que hora se corriera.
+
+    CONSECUENCIA
+
+        Una verja que se pone roja sola no se puede creer. Y la
+        siguiente vez que se ponga roja de verdad, el primer
+        pensamiento va a ser "sera la hora otra vez".
+
+    DOCTRINA 50
+
+        Una guardia que depende del reloj del sistema falla sola
+        a medianoche. No hace falta que nadie toque el codigo:
+        basta con que pase el tiempo.
+
+    Misma familia que `placed_at` con `_ahora()`, y mismo arreglo
+    que la zona de silencio: `permite_escribir` RECIBE el momento.
+
+    SIN REFERENCIA NO SE DICE "HOY"
+
+        Con `ahora=None` sale la fecha entera —"el 13/09 a las
+        10:08"— en vez de caer en el reloj del sistema. Un
+        respaldo que mira la hora seria la misma bomba con otro
+        nombre; y "hoy" sin saber cual es hoy no es una palabra
+        que se pueda escribir.
+
+    Nunca lanza: si la marca no se puede leer, se dice "en algun
+    momento", que es la verdad.
     """
 
     try:
@@ -492,7 +529,18 @@ def _cuando(marca) -> str:
 
         cuando = _hora_de_madrid(cuando)
 
-        hoy = _hora_de_madrid(datetime.now(timezone.utc)).date()
+        if ahora is None:
+            return f"el {cuando:%d/%m} a las {cuando:%H:%M}"
+
+        referencia = ahora
+
+        if isinstance(referencia, str):
+            referencia = datetime.fromisoformat(referencia)
+
+        if referencia.tzinfo is None:
+            referencia = referencia.replace(tzinfo=timezone.utc)
+
+        hoy = _hora_de_madrid(referencia).date()
 
         dias = (hoy - cuando.date()).days
 
@@ -513,6 +561,7 @@ def _cuando(marca) -> str:
 def viajes_sin_listar(
     viajes: list | None,
     listados: list | None,
+    ahora=None,
 ) -> dict:
     """
     Un jugador marcado VIAJE que termina el ciclo SIN LISTAR.
@@ -595,7 +644,7 @@ def viajes_sin_listar(
                             f"{h['name'] or h['player_id']} esta "
                             f"comprado para revender y no esta a "
                             f"la venta. Lo compramos "
-                            f"{_cuando(h['opened_at'])} y sigue "
+                            f"{_cuando(h['opened_at'], ahora)} y sigue "
                             f"sin publicar, asi que no recibira "
                             f"oferta del Computer."
                         )

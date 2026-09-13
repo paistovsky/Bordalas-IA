@@ -195,7 +195,29 @@ def estado_de_la_ventana(
                 ),
             }
 
-        momento = ahora or datetime.now(timezone.utc)
+        # SIN REFERENCIA NO SE DICE "HACE" (14/09/2026)
+        #
+        #     Esto era `ahora or datetime.now(timezone.utc)`. Un
+        #     respaldo que mira el reloj es la misma bomba que
+        #     tumbo la verja esta madrugada: solo estalla el dia
+        #     que alguien se olvide de pasar la hora, que es
+        #     justo el dia en que nadie lo esta mirando.
+        #
+        #     Produccion ya le pasa `_ahora`. Sin ella se dice
+        #     que no se sabe.
+        if ahora is None:
+            return {
+                **vacio,
+                "available": True,
+                "ever": bool(ultima),
+                "reason": (
+                    "No se ha pasado la hora de referencia: sin "
+                    "ella no se puede decir cuanto hace de la "
+                    "ultima ventana."
+                ),
+            }
+
+        momento = ahora
 
         if momento.tzinfo is None:
             momento = momento.replace(tzinfo=timezone.utc)

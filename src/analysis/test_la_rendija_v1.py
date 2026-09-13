@@ -2030,9 +2030,31 @@ def test_el_cartel_dice_lo_que_pasa_en_una_frase() -> None:
     y la consecuencia concreta: que el Computer no ofrecera nada.
 
     Y sin repetir el titulo: el motivo ya empieza por el nombre.
+
+    LA HORA SE LE PASA (14/09/2026, madrugada)
+
+        Esta guardia paso todo el 13/09 en verde y se puso roja a
+        las 00:00 sin que nadie tocara nada: la frase decia "hoy
+        a las 10:08" hasta las 23:59 y "ayer a las 10:08" a las
+        00:01, porque `_cuando` leia `datetime.now()`.
+
+        NO SE HA AFLOJADO NADA. La comprobacion sigue siendo la
+        frase ENTERA, palabra por palabra, incluido el "hoy": esa
+        palabra es la que le dice al dueño si el jugador lleva dos
+        horas o veintiseis sin publicar, que es de lo que va el
+        cartel.
+
+        Lo que ha cambiado es que la hora de referencia entra por
+        la puerta, como en `permite_escribir`.
     """
 
     from src.actions.escaparate_executor import viajes_sin_listar
+
+    # LA FOTO: el 13/09 a las 17:17, la misma que el snapshot de
+    # produccion. Fija, escrita aqui, y sin tocar el reloj.
+    LA_FOTO = datetime(
+        2026, 9, 13, 17, 17, 17, tzinfo=timezone.utc
+    )
 
     visto = viajes_sin_listar(
         [
@@ -2044,6 +2066,7 @@ def test_el_cartel_dice_lo_que_pasa_en_una_frase() -> None:
             }
         ],
         [],
+        ahora=LA_FOTO,
     )
 
     texto = visto["reason"]
@@ -2090,6 +2113,65 @@ def test_el_cartel_dice_lo_que_pasa_en_una_frase() -> None:
     assert 'className="alert warn"' in trozo, (
         "el cartel sigue en rojo: el rojo se reserva para lo que "
         "cuesta puntos o dinero HOY"
+    )
+
+    # ========================================================
+    # Y LA MISMA FOTO DICE LA MISMA FRASE SIEMPRE.
+    # ========================================================
+    #
+    #     Esto es lo que habria cazado el fallo el 13/09 por la
+    #     tarde, en vez de a las 00:00. Se pide el cartel con la
+    #     misma foto y horas de referencia repartidas por todo el
+    #     dia: si alguna palabra cambia, la frase depende del
+    #     reloj.
+    from src.actions.escaparate_executor import _cuando
+
+    #     EL DIA ES EL DE MADRID, NO EL DE UTC. En septiembre
+    #     Madrid va dos horas por delante, asi que el dia cambia
+    #     a las 22:00 UTC. Las horas de abajo se quedan todas
+    #     dentro del 13/09 DE MADRID a proposito: 21:59 UTC son
+    #     las 23:59 de Madrid, la ultima que sigue siendo "hoy".
+    frases = {
+        _cuando(
+            "2026-09-13T08:08:00+00:00",
+            datetime(2026, 9, 13, h, m, tzinfo=timezone.utc),
+        )
+        for h, m in (
+            (6, 30),
+            (12, 0),
+            (17, 17),
+            (21, 0),
+            (21, 59),
+        )
+    }
+
+    assert frases == {"hoy a las 10:08"}, (
+        f"la frase cambia segun la hora a la que se pregunte: "
+        f"{sorted(frases)}"
+    )
+
+    # Y AL DIA SIGUIENTE DICE "AYER", que es lo que tiene que
+    # decir: la palabra no sobra, informa de cuanto lleva parado.
+    #
+    #     22:00 UTC son ya las 00:00 de Madrid: el primer momento
+    #     del 14. Es el limite exacto, y se deja escrito porque
+    #     si algun dia se compara en UTC este caso lo dira.
+    assert _cuando(
+        "2026-09-13T08:08:00+00:00",
+        datetime(2026, 9, 13, 22, 0, tzinfo=timezone.utc),
+    ) == "ayer a las 10:08"
+
+    assert _cuando(
+        "2026-09-13T08:08:00+00:00",
+        datetime(2026, 9, 14, 8, 0, tzinfo=timezone.utc),
+    ) == "ayer a las 10:08"
+
+    # SIN REFERENCIA, LA FECHA ENTERA Y NINGUN "HOY".
+    #
+    #     El respaldo no puede ser mirar el reloj: seria la misma
+    #     bomba con otro nombre.
+    assert _cuando("2026-09-13T08:08:00+00:00") == (
+        "el 13/09 a las 10:08"
     )
 
 

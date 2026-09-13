@@ -189,9 +189,15 @@ def test_los_sentidos_no_se_inventan_la_edad() -> None:
 
         cuanto = edad(sin_marca, AHORA)
 
-        assert cuanto["dias"] is None, sin_marca
-        assert cuanto["horas"] is None, sin_marca
-        assert cuanto["texto"] == "sin dato", sin_marca
+        # EL MENSAJE DICE LO QUE SALIO, no solo lo que entro.
+        #
+        #     Estos decian `, sin_marca`, que para el primer caso
+        #     es `None`. En el registro de CI se leia "FALLA
+        #     test_los_sentidos_no_se_inventan_la_edad: None", que
+        #     no ayuda a nadie.
+        assert cuanto["dias"] is None, (sin_marca, cuanto)
+        assert cuanto["horas"] is None, (sin_marca, cuanto)
+        assert cuanto["texto"] == "sin dato", (sin_marca, cuanto)
 
         otro = _sentidos(
             lineup={

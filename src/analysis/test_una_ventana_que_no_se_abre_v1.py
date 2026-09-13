@@ -187,12 +187,19 @@ def test_el_libro_de_la_ventana_apunta_y_se_lee():
             "sin libro tendria que devolver None"
         )
 
+        # SE LE PASA LA HORA AL APUNTAR Y AL LEER (14/09/2026).
+        #
+        #     Antes se apuntaba con el reloj y se leia con el
+        #     reloj: verde por casualidad, porque los dos miraban
+        #     el mismo. Con una hora escrita aqui, la prueba dice
+        #     lo mismo se corra cuando se corra.
         apuntar_ventana(
             seconds_to_reset=300,
             bids=3,
             renewals=8,
             trigger="workflow_dispatch",
             executed=True,
+            at=AHORA.isoformat(),
             ruta=ruta,
         )
 
@@ -202,9 +209,16 @@ def test_el_libro_de_la_ventana_apunta_y_se_lee():
         assert ultima["renewals"] == 8
         assert ultima["executed"] is True
 
-        estado = estado_de_la_ventana(ultima)
+        estado = estado_de_la_ventana(ultima, AHORA)
 
         assert estado["red"] is False
+
+        # Y SIN HORA SE DICE QUE NO SE SABE, no se mira el reloj.
+        sin_hora = estado_de_la_ventana(ultima)
+
+        assert sin_hora["available"] is True, sin_hora
+        assert sin_hora["hours_since"] is None, sin_hora
+        assert "hora de referencia" in sin_hora["reason"], sin_hora
 
 
 # ============================================================

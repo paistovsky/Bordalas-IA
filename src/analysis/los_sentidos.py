@@ -115,7 +115,25 @@ def edad(valor, ahora=None) -> dict:
             "zona_supuesta": False,
         }
 
-    referencia = ahora or datetime.now(timezone.utc)
+    # SIN REFERENCIA NO SE DICE "HACE N DIAS" (14/09/2026)
+    #
+    #     Esto era `ahora or datetime.now(timezone.utc)`. Con el
+    #     respaldo puesto, la edad de cada sentido se medía
+    #     contra el reloj de quien abre la pantalla: el mismo
+    #     `status.json` decía 27 días por la tarde y 28 por la
+    #     noche sin que nada hubiera cambiado.
+    #
+    #     Y es la misma forma exacta que tumbó la verja esta
+    #     madrugada con el cartel del carril.
+    if ahora is None:
+        return {
+            "dias": None,
+            "horas": None,
+            "texto": "sin referencia",
+            "zona_supuesta": sin_zona,
+        }
+
+    referencia = ahora
 
     if referencia.tzinfo is None:
         referencia = referencia.replace(tzinfo=timezone.utc)
@@ -199,7 +217,10 @@ def los_sentidos(
     }
 
     try:
-        ahora = ahora or datetime.now(timezone.utc)
+        # La hora viaja a las ocho filas. Si no llega, cada una
+        # dira "sin referencia" en vez de un numero medido contra
+        # el reloj del que mira.
+        ahora = ahora
 
         filas = [
             _el_tablero(lineup, jornada_de_hoy, ahora),
