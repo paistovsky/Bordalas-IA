@@ -829,6 +829,7 @@ def recoger_compras_de_la_plantilla(
                 try:
                     from src.analysis.libro_de_viajes import (
                         abrir,
+                        anotar_coste,
                     )
 
                     marca = abrir(
@@ -836,6 +837,14 @@ def recoger_compras_de_la_plantilla(
                         name=entrada["player_name"],
                         position=ficha.get("position"),
                         ruta=ruta_de_viajes,
+                        # LO QUE COSTO, DEL TABLON.
+                        #
+                        #     Es lo unico que lo prueba: la ficha
+                        #     de la plantilla no trae
+                        #     `owner.price`. Y sin coste el suelo
+                        #     de cobro es 0 y cualquier oferta lo
+                        #     pasa.
+                        coste=importe,
                     )
 
                     if marca.get("opened"):
@@ -844,6 +853,16 @@ def recoger_compras_de_la_plantilla(
                                 "player_id": pid,
                                 "name": entrada["player_name"],
                             }
+                        )
+
+                    else:
+                        # YA ESTABA ABIERTO, Y PUEDE ESTAR SIN
+                        # PRECIO. El viaje de Trent se abrio el
+                        # 13/09 sin coste; `abrir` no vuelve a
+                        # abrir lo ya abierto, con razon. Esto le
+                        # pone el precio que el tablon prueba.
+                        anotar_coste(
+                            pid, importe, ruta=ruta_de_viajes
                         )
 
                 except Exception:                   # noqa: BLE001

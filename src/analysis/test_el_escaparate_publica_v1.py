@@ -376,6 +376,122 @@ def test_publica_de_verdad_y_se_apaga_sin_desplegar() -> None:
     )
 
 
+def test_el_escaparate_tiene_turno() -> None:
+    """
+    PUBLICAR NO COMPITE POR LA ESCRITURA DE LA VUELTA.
+
+    SINTOMA (13/09/2026)
+
+        Dos vueltas seguidas —14:05 y 14:10— gastando la
+        escritura en renovar, con Trent comprado y sin publicar.
+        Y la cola de prioridades no lo incluye:
+
+            650 ofertas · 500 solvencia · 350 renovar · 0 espera
+
+        Publicar un viaje no estaba en la lista, asi que no
+        llegaba nunca.
+
+    LA REGLA, LA MISMA QUE LA PUJA DEL CARRIL
+
+        Va DESPUES de la accion principal y NO consume
+        `write_used`. Es la segunda mitad de la misma operacion,
+        cuesta UNA peticion, y un listado no arriesga nada: no es
+        una venta, es poner el cartel.
+
+        Meterlo en la cola seria peor: competiria por un turno
+        que no necesita gastar, y podria desplazar un cobro.
+
+    LOS DOS LIMITES DUROS
+
+        nunca desplaza una renovacion urgente ni un cobro —no
+        puede: no toca `write_used` y corre despues—
+        una publicacion por vuelta
+    """
+
+    import ast
+
+    fuente = (
+        RAIZ / "src" / "v10_full_autonomous_live.py"
+    ).read_text(encoding="utf-8")
+
+    arbol = ast.parse(fuente)
+
+    # 1. EL CICLO LO LLAMA, y despues de la accion principal.
+    #    Se compara la posicion en el codigo: la accion sale de
+    #    `_write_used`/`action_taken`, y el escaparate va detras.
+    assert "escaparate = _llenar_el_escaparate(" in fuente, (
+        "el ciclo no llena el escaparate"
+    )
+
+    assert fuente.index("carril = _correr_el_carril(") < (
+        fuente.index("escaparate = _llenar_el_escaparate(")
+    ), (
+        "el escaparate corre ANTES que el carril: primero se "
+        "compra, luego se publica lo comprado"
+    )
+
+    # 2. Y NO CONSUME LA ESCRITURA DE LA VUELTA.
+    dentro = None
+
+    for nodo in ast.walk(arbol):
+
+        if (
+            isinstance(nodo, ast.FunctionDef)
+            and nodo.name == "_llenar_el_escaparate"
+        ):
+            dentro = ast.get_source_segment(fuente, nodo) or ""
+
+    assert dentro, "no existe `_llenar_el_escaparate`"
+
+    assert "write_used" not in dentro, (
+        "el escaparate toca `write_used`: entonces compite con "
+        "el cobro y con la renovacion urgente, que es justo lo "
+        "que no puede hacer"
+    )
+
+    # 3. CON LA ACCION PRINCIPAL OCUPADA EN OTRA COSA, PUBLICA
+    #    IGUAL. Se ejecuta de verdad.
+    from src.actions.escaparate_executor import que_publicar
+
+    VIAJE_ABIERTO = [
+        {
+            "player_id": TRENT["id"],
+            "name": "Trent",
+            "via": "RENDIJA",
+            "state": "ABIERTO",
+            "cost": 2_760_000,
+        }
+    ]
+
+    # REGLA 24: si el fixture no trae viaje abierto, esta guardia
+    # no comprueba nada.
+    assert VIAJE_ABIERTO, "el fixture no trae ningun viaje"
+
+    assert VIAJE_ABIERTO[0]["state"] == "ABIERTO"
+
+    for ocupada in (
+        "RENEW_MARKET_LISTING",
+        "MONITOR_OFFERS",
+        "SAVE_LINEUP",
+        "MONITOR_SOLVENCY",
+    ):
+        plan = que_publicar(
+            ganadas=VIAJE_ABIERTO,
+            plantilla=[TRENT, JONNY],
+            ya_listados=[],
+            titulares=EL_ONCE,
+        )
+
+        assert plan["publicar"], (
+            f"con la vuelta ocupada en {ocupada}, el viaje no se "
+            f"publica: se queda en el banquillo otra vuelta"
+        )
+
+        assert len(plan["publicar"]) == 1, (
+            "mas de una publicacion en la misma vuelta"
+        )
+
+
 TESTS = [
     test_publicar_no_toca_a_un_titular,
     test_solo_se_publican_viajes_del_carril,
@@ -384,6 +500,7 @@ TESTS = [
     test_el_precio_sale_de_la_regla_de_salida,
     test_el_escaparate_respeta_la_zona_de_silencio,
     test_publica_de_verdad_y_se_apaga_sin_desplegar,
+    test_el_escaparate_tiene_turno,
 ]
 
 

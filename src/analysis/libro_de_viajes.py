@@ -140,6 +140,7 @@ def abrir(
     position=None,
     via: str = RENDIJA,
     ruta: Path | None = None,
+    coste=None,
 ) -> dict:
     """
     Marca a un jugador como VIAJE. Forma fija, nunca lanza.
@@ -177,6 +178,24 @@ def abrir(
         "position": safe_int(position) or None,
         "via": via,
         "state": ABIERTO,
+
+        # LO QUE COSTO, SI SE PUEDE PROBAR (13/09/2026)
+        #
+        #     El coste salia de `acquisition_cost` de la ficha,
+        #     que viene de `owner.price`. Medido ese dia: la
+        #     plantilla que devuelve Biwenger NO TRAE `owner`, ni
+        #     siquiera la clave. Asi que el coste era 0 siempre.
+        #
+        #     Y el suelo de cobro es coste + 1 %: con coste 0 el
+        #     suelo es 0 y cualquier oferta lo pasa. Medido: una
+        #     oferta de 2.400.000 por Trent —que costo 2.760.000—
+        #     se vendia.
+        #
+        #     El tablon SI lo prueba: dice cuanto se pago y
+        #     cuando. Se guarda aqui, en el momento en que se
+        #     sabe, y deja de depender de que Biwenger publique
+        #     `owner.price` algun dia.
+        "cost": safe_int(coste) or None,
     }
 
     if not _apuntar(fila, ruta):
@@ -197,6 +216,96 @@ def abrir(
         "player_id": pid,
         "entry": fila,
         "reason": f"{name or pid} marcado VIAJE por la {via}.",
+    }
+
+
+def anotar_coste(player_id, coste, ruta: Path | None = None) -> dict:
+    """
+    Le pone precio a un viaje que se abrio sin saberlo.
+
+    POR QUE HACE FALTA, Y NO BASTA CON `abrir`
+
+        El viaje de Trent se abrio el 13/09 sin coste, porque la
+        ficha no traia `owner.price` —Biwenger no lo publica—. Y
+        `abrir` no vuelve a abrir lo ya abierto, con razon.
+
+        El libro es un DIARIO: `_ultimo_estado` fusiona los
+        apuntes de cada jugador y lo que no es `None` gana. Asi
+        que un apunte nuevo con el coste lo completa sin borrar
+        nada y sin reescribir el pasado.
+
+    Solo con un coste PROBADO. Un coste inventado aqui es peor
+    que no tenerlo: fija un suelo falso y el viaje se cobra por
+    debajo de lo que costo sin que nadie lo note.
+
+    Forma fija. Nunca lanza.
+    """
+
+    pid = safe_int(player_id)
+
+    importe = safe_int(coste)
+
+    if pid <= 0 or importe <= 0:
+        return {
+            "available": False,
+            "noted": False,
+            "reason": (
+                "Sin jugador o sin importe probado no se anota "
+                "coste: un coste inventado fija un suelo falso."
+            ),
+        }
+
+    estado = _ultimo_estado(ruta)
+
+    fila = estado.get(pid) or {}
+
+    if fila.get("state") != ABIERTO:
+        return {
+            "available": True,
+            "noted": False,
+            "player_id": pid,
+            "reason": (
+                f"{fila.get('name') or pid} no tiene un viaje "
+                f"abierto: no hay a que ponerle precio."
+            ),
+        }
+
+    if safe_int(fila.get("cost")) > 0:
+        return {
+            "available": True,
+            "noted": False,
+            "player_id": pid,
+            "cost": safe_int(fila.get("cost")),
+            "reason": (
+                f"{fila.get('name') or pid} ya tiene coste "
+                f"anotado: no se pisa."
+            ),
+        }
+
+    if not _apuntar(
+        {
+            "at": _ahora(),
+            "player_id": pid,
+            "state": ABIERTO,
+            "cost": importe,
+        },
+        ruta,
+    ):
+        return {
+            "available": False,
+            "noted": False,
+            "reason": "No se pudo escribir en el libro.",
+        }
+
+    return {
+        "available": True,
+        "noted": True,
+        "player_id": pid,
+        "cost": importe,
+        "reason": (
+            f"{fila.get('name') or pid}: coste anotado, "
+            f"{importe} EUR."
+        ),
     }
 
 
@@ -327,8 +436,15 @@ def abiertos(
 
             ficha = por_id.get(pid) or {}
 
+            # EL DEL LIBRO MANDA, y va primero.
+            #
+            #     Se anoto en el momento en que se pudo probar
+            #     —del tablon— y no depende de que Biwenger
+            #     publique `owner.price`, que medido el 13/09 no
+            #     lo hace: la ficha no trae ni la clave.
             coste = safe_int(
-                ficha.get("acquisition_cost")
+                fila.get("cost")
+                or ficha.get("acquisition_cost")
                 or ficha.get("owner_price")
             )
 

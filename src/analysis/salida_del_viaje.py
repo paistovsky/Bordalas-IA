@@ -374,6 +374,45 @@ def que_cobrar(
             coste = safe_int(viaje.get("cost"))
 
             # ------------------------------------------
+            # PROHIBICION 0: SIN COSTE NO SE VENDE
+            # ------------------------------------------
+            #
+            #     SINTOMA (13/09/2026). El viaje de Trent salia
+            #     con `cost: 0` —su ficha no traia todavia
+            #     `owner.price`— y el suelo es coste + 1 %. Con
+            #     coste 0 el suelo es 0 y CUALQUIER oferta lo
+            #     pasa.
+            #
+            #     Medido: con una oferta de 2.400.000 por un
+            #     jugador que costo 2.760.000, `que_cobrar` lo
+            #     vendia. 360.000 de perdida, y el panel diria
+            #     que el primer viaje del carril salio bien.
+            #
+            #     UN SUELO QUE NO SE PUEDE CALCULAR NO ES UN
+            #     SUELO DE CERO: ES UN "NO VENDER".
+            #
+            #     Va la PRIMERA, antes que las otras cinco
+            #     prohibiciones, porque no depende de nada mas:
+            #     si no se sabe lo que costo, no hay conversacion
+            #     que tener sobre la oferta.
+            #
+            #     Y no se salva ni con el corte de perdidas: ese
+            #     existe para vender POR DEBAJO del suelo a
+            #     sabiendas, y aqui no hay suelo que conocer.
+            if coste <= 0:
+                _saltar(
+                    viaje,
+                    (
+                        f"No se sabe lo que costo "
+                        f"{viaje.get('name') or pid}: sin coste "
+                        f"no hay suelo, y un suelo que no se "
+                        f"puede calcular no es cero, es NO "
+                        f"VENDER."
+                    ),
+                )
+                continue
+
+            # ------------------------------------------
             # PROHIBICION 2: el once no se toca
             # ------------------------------------------
             if nombre and nombre in del_once:

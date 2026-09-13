@@ -1713,6 +1713,218 @@ def test_un_viaje_de_tres_millones_no_rompe_la_solvencia() -> None:
     assert CUPO_DE_LA_PRUEBA == 1
 
 
+def test_un_viaje_sin_coste_no_se_cobra() -> None:
+    """
+    UN SUELO QUE NO SE PUEDE CALCULAR NO ES UN SUELO DE CERO.
+
+    SINTOMA (13/09/2026)
+
+        El viaje de Trent salia con `cost: 0` porque su ficha no
+        traia `owner.price` —medido ese dia: la plantilla que
+        devuelve Biwenger NO TRAE `owner`, ni la clave—.
+
+        Y el suelo de cobro es coste + 1 %. Con coste 0 el suelo
+        es 0 y CUALQUIER oferta lo pasa.
+
+        Medido: con una oferta de 2.400.000 por un jugador que
+        costo 2.760.000, `que_cobrar` lo vendia. 360.000 de
+        perdida, y el panel diria que el primer viaje del carril
+        salio bien.
+
+    ES UN "NO VENDER", y va antes que las otras cinco
+    prohibiciones: si no se sabe lo que costo, no hay
+    conversacion que tener sobre la oferta.
+    """
+
+    from src.analysis.salida_del_viaje import que_cobrar
+
+    OFERTA_ALTISIMA = 99_000_000
+
+    for sin_coste in (0, None, "", -1):
+
+        visto = que_cobrar(
+            viajes=[
+                {
+                    "player_id": 37499,
+                    "name": "Trent",
+                    "position": 2,
+                    "cost": sin_coste,
+                    "state": "ABIERTO",
+                }
+            ],
+            ofertas=[
+                {
+                    "player_id": 37499,
+                    "amount": OFERTA_ALTISIMA,
+                    "offer_id": 1,
+                }
+            ],
+            titulares=[1599],
+            porteros_en_plantilla=2,
+        )
+
+        assert visto["sell"] == [], (
+            f"se cobra un viaje con coste `{sin_coste}` y una "
+            f"oferta de {OFERTA_ALTISIMA}: el suelo salio 0 y "
+            f"cualquier oferta lo pasa"
+        )
+
+        assert visto["skipped"], (sin_coste, visto)
+
+        assert "no hay suelo" in visto["skipped"][0]["reason"], (
+            visto["skipped"][0]
+        )
+
+    # NI CON EL CORTE DE PERDIDAS. Ese existe para vender POR
+    # DEBAJO del suelo a sabiendas; aqui no hay suelo que
+    # conocer, asi que no hay nada que saber.
+    con_corte = que_cobrar(
+        viajes=[
+            {
+                "player_id": 37499,
+                "name": "Trent",
+                "position": 2,
+                "cost": 0,
+                "state": "ABIERTO",
+            }
+        ],
+        ofertas=[
+            {"player_id": 37499, "amount": 10, "offer_id": 1}
+        ],
+        titulares=[1599],
+        porteros_en_plantilla=2,
+        corte_de_perdidas=True,
+    )
+
+    assert con_corte["sell"] == [], con_corte
+
+    # Y CON COSTE, EL SUELO VUELVE A MANDAR: no se ha roto el
+    # camino normal, solo se ha tapado el agujero.
+    COSTE = 2_760_000
+
+    def _con(importe):
+        return que_cobrar(
+            viajes=[
+                {
+                    "player_id": 37499,
+                    "name": "Trent",
+                    "position": 2,
+                    "cost": COSTE,
+                    "state": "ABIERTO",
+                }
+            ],
+            ofertas=[
+                {
+                    "player_id": 37499,
+                    "amount": importe,
+                    "offer_id": 1,
+                }
+            ],
+            titulares=[1599],
+            porteros_en_plantilla=2,
+        )
+
+    assert _con(2_400_000)["sell"] == [], "vende por debajo"
+
+    assert _con(2_790_000)["sell"], "no cobra una oferta buena"
+
+
+def test_el_coste_se_guarda_cuando_se_puede_probar() -> None:
+    """
+    DE DONDE SALE EL COSTE, QUE ERA EL FONDO DEL PROBLEMA.
+
+    Salia de `acquisition_cost` de la ficha, que viene de
+    `owner.price`. Biwenger NO lo publica: medido el 13/09 sobre
+    la plantilla real, la ficha no trae ni la clave.
+
+    El tablon SI lo prueba —dice cuanto se pago y cuando—, asi
+    que el coste se anota en el libro EN EL MOMENTO EN QUE SE
+    SABE, y deja de depender de que Biwenger lo publique algun
+    dia.
+
+    Y un coste inventado seria peor que ninguno: fija un suelo
+    falso y el viaje se cobra por debajo sin que nadie lo note.
+    """
+
+    import tempfile
+
+    from pathlib import Path
+
+    from src.analysis.libro_de_viajes import (
+        abiertos,
+        abrir,
+        anotar_coste,
+    )
+
+    PLANTILLA = [
+        {"id": 37499, "name": "Trent", "position": 2}
+    ]
+
+    with tempfile.TemporaryDirectory() as tmp:
+
+        ruta = Path(tmp) / "viajes.jsonl"
+
+        # 1. EL CASO DE TRENT: abierto sin saber lo que costo.
+        abrir(
+            player_id=37499,
+            name="Trent",
+            position=2,
+            ruta=ruta,
+        )
+
+        primero = abiertos(plantilla=PLANTILLA, ruta=ruta)
+
+        assert primero["viajes"] == [], primero
+
+        assert len(primero["sin_coste"]) == 1, primero
+
+        # 2. El tablon lo prueba, y el libro lo recoge.
+        visto = anotar_coste(37499, 2_760_000, ruta=ruta)
+
+        assert visto["noted"] is True, visto
+
+        despues = abiertos(plantilla=PLANTILLA, ruta=ruta)
+
+        assert len(despues["viajes"]) == 1, despues
+
+        assert despues["viajes"][0]["cost"] == 2_760_000
+
+        # 3. NO SE PISA lo ya anotado.
+        assert anotar_coste(37499, 999, ruta=ruta)["noted"] is (
+            False
+        )
+
+        assert abiertos(plantilla=PLANTILLA, ruta=ruta)[
+            "viajes"
+        ][0]["cost"] == 2_760_000
+
+        # 4. Y sin importe probado, no se anota nada.
+        for sin_prueba in (0, None, -1):
+            assert anotar_coste(
+                37499, sin_prueba, ruta=ruta
+            )["noted"] is False, sin_prueba
+
+    # 5. Y al abrir con coste, ya viene puesto: los viajes que
+    #    vengan despues no pasan por esto.
+    with tempfile.TemporaryDirectory() as tmp:
+
+        ruta = Path(tmp) / "viajes.jsonl"
+
+        abrir(
+            player_id=37499,
+            name="Trent",
+            position=2,
+            ruta=ruta,
+            coste=2_760_000,
+        )
+
+        nuevo = abiertos(plantilla=PLANTILLA, ruta=ruta)
+
+        assert nuevo["viajes"], nuevo
+
+        assert nuevo["viajes"][0]["cost"] == 2_760_000
+
+
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
@@ -1741,6 +1953,8 @@ TESTS = [
     test_el_ciclo_llama_al_carril,
     test_la_hora_declarada_manda_en_el_silencio,
     test_el_filtro_es_el_suelo_no_el_cero,
+    test_un_viaje_sin_coste_no_se_cobra,
+    test_el_coste_se_guarda_cuando_se_puede_probar,
     test_la_prueba_de_humo_es_de_cupo_no_de_suelo,
     test_al_completar_un_viaje_vuelve_todo_a_su_sitio,
     test_los_baratos_usan_la_prima_de_su_tramo,
