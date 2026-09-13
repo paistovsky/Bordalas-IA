@@ -425,9 +425,13 @@ def test_no_se_publica_a_quien_no_esta_en_plantilla() -> None:
     jugador de otro.
     """
 
+    # EL ONCE HACE FALTA desde el 13/09: sin saber quienes son
+    # los titulares no se publica nada, y esta guardia probaria
+    # otra cosa. Se le da uno para que llegue a lo suyo.
     visto = que_publicar(
         [{"player_id": 99999, "name": "Fantasma"}],
         plantilla=[{"id": 19862, "name": "Exposito"}],
+        titulares=[19862],
     )
 
     assert visto["publicar"] == [], visto

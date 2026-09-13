@@ -145,6 +145,123 @@ def _alcanzable(objetivo: str, desde: Path, vistos=None) -> bool:
 # ============================================================
 
 
+def _funciones_que_llama_el_ciclo() -> set:
+    """
+    Las funciones que el ciclo LLAMA. Del arbol, no de un grep.
+
+    POR QUE HACIA FALTA (13/09/2026)
+
+        `test_ninguna_pieza_armada_esta_desenchufada` comprobaba
+        que el MODULO fuera alcanzable por imports. Y
+        `escaparate_executor` lo era —la telemetria lo importa
+        para `viajes_sin_listar`— mientras `publicar()` y
+        `que_publicar()` NO LOS LLAMABA NADIE.
+
+        Trent llevaba medio dia en el banquillo sin publicar y la
+        guardia estaba en verde: medir que se puede importar es
+        medir la intencion. Doctrina 37, tercera vez.
+    """
+
+    llamadas = set()
+
+    try:
+        arbol = ast.parse(_lee(CICLO))
+
+    except (SyntaxError, AssertionError):
+        return llamadas
+
+    for nodo in ast.walk(arbol):
+
+        if not isinstance(nodo, ast.Call):
+            continue
+
+        if isinstance(nodo.func, ast.Name):
+            llamadas.add(nodo.func.id)
+
+        elif isinstance(nodo.func, ast.Attribute):
+            llamadas.add(nodo.func.attr)
+
+    return llamadas
+
+
+def test_el_ciclo_llama_al_escaparate_no_solo_lo_importa() -> None:
+    """
+    QUE SE LLAME, no que se pueda importar.
+
+    `publicar()` existia, el modulo era alcanzable, la guardia
+    verde — y el jugador comprado para revender seguia en el
+    banquillo porque nadie ejecutaba la funcion.
+    """
+
+    llamadas = _funciones_que_llama_el_ciclo()
+
+    assert "_llenar_el_escaparate" in llamadas, (
+        "el ciclo no llena el escaparate: lo comprado para "
+        "revender se queda sin publicar y no llega ninguna oferta"
+    )
+
+    ciclo = _lee(CICLO)
+
+    assert '"escaparate": escaparate' in ciclo, (
+        "el ciclo no publica lo que hizo el escaparate: no habria "
+        "forma de ver por que no publico"
+    )
+
+    # Y que la funcion llame de verdad a las dos del ejecutor.
+    dentro = set()
+
+    for nodo in ast.walk(ast.parse(ciclo)):
+
+        if (
+            isinstance(nodo, ast.FunctionDef)
+            and nodo.name == "_llenar_el_escaparate"
+        ):
+            for hijo in ast.walk(nodo):
+
+                if isinstance(hijo, ast.Call) and isinstance(
+                    hijo.func, ast.Name
+                ):
+                    dentro.add(hijo.func.id)
+
+    for cual in ("que_publicar", "publicar"):
+        assert cual in dentro, (
+            f"`_llenar_el_escaparate` no llama a `{cual}`"
+        )
+
+
+def test_las_piezas_que_escriben_se_llaman() -> None:
+    """
+    La misma pregunta para todas las que ESCRIBEN.
+
+    Alcanzar el modulo no basta: lo que importa es que el ciclo
+    ejecute su entrada. Si mañana alguien arma una quinta ruta y
+    no la llama, esto se pone rojo el mismo dia.
+    """
+
+    llamadas = _funciones_que_llama_el_ciclo()
+
+    ENTRADAS = {
+        "el carril": "_correr_el_carril",
+        "el escaparate": "_llenar_el_escaparate",
+        "la renovacion": "_renovar_en_la_ventana",
+        "la subasta del reset": "_pujar_en_el_reset",
+    }
+
+    sueltas = [
+        f"{como} (`{fn}`)"
+        for como, fn in ENTRADAS.items()
+        if fn not in llamadas
+    ]
+
+    assert not sueltas, (
+        "estas rutas escriben y el ciclo no las ejecuta: "
+        + " · ".join(sueltas)
+    )
+
+    # Regla 24: si la lista se vaciara, esto pasaria en vacio.
+    assert len(ENTRADAS) >= 4, ENTRADAS
+
+
 def test_el_carril_esta_enchufado() -> None:
     """
     EL FALLO DEL 12/09.
@@ -265,6 +382,8 @@ def test_el_ciclo_deja_dicho_que_el_carril_corrio() -> None:
 TESTS = [
     test_el_buscador_de_caminos_no_miente,
     test_el_carril_esta_enchufado,
+    test_el_ciclo_llama_al_escaparate_no_solo_lo_importa,
+    test_las_piezas_que_escriben_se_llaman,
     test_ninguna_pieza_armada_esta_desenchufada,
     test_el_ciclo_deja_dicho_que_el_carril_corrio,
     test_el_indicador_no_se_enciende_con_la_bandera,

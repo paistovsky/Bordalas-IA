@@ -108,13 +108,29 @@ def que_publicar(
     ganadas: list | None,
     plantilla: list | None = None,
     ya_listados: list | None = None,
+    titulares=None,
 ) -> dict:
     """
-    Que pujas ganadas hay que marcar y listar. Forma fija.
+    Que viajes del carril hay que publicar. Forma fija.
 
-    `ganadas` son las operaciones de la rendija que el reset ha
-    resuelto a nuestro favor. `plantilla` da el precio de mercado
-    y el coste.
+    `ganadas` son VIAJES ABIERTOS DEL CARRIL —lo que el libro de
+    viajes marca con via RENDIJA—, no cualquier compra. Un
+    jugador que el libro no marca como viaje del carril no se
+    toca, venga de donde venga.
+
+    `plantilla` da el precio de mercado y el coste.
+
+    NUNCA UN TITULAR
+    ================
+
+    `titulares` son los ids del once. Ni aunque el libro diga que
+    es un viaje: vender al que juega es perder puntos por ganar
+    plusvalia, y los puntos son el motor.
+
+    Y SIN SABER QUIENES SON, NO SE PUBLICA (regla 24). Una lista
+    de titulares vacia no es "no hay titulares": es que no se ha
+    podido leer el once, y publicar a ciegas podria sacar al
+    mejor jugador del equipo al escaparate.
     """
 
     vacio = {
@@ -136,6 +152,30 @@ def que_publicar(
                 "reason": (
                     "Ninguna puja de la rendija ganada en este "
                     "reset."
+                ),
+            }
+
+        # LA BARANDILLA DEL TITULAR, ANTES DE NADA.
+        #
+        #     Sin saber quienes son NO SE PUBLICA. Una lista
+        #     vacia no es "no hay titulares": es que no se ha
+        #     podido leer el once, y a ciegas esto podria sacar
+        #     al mejor jugador del equipo al escaparate.
+        del_once = {
+            safe_int(t.get("id") if isinstance(t, dict) else t)
+            for t in (titulares or [])
+        }
+
+        del_once.discard(0)
+
+        if not del_once:
+            return {
+                **vacio,
+                "available": True,
+                "reason": (
+                    "No se sabe quienes son los titulares: no se "
+                    "publica nada. Publicar a ciegas puede sacar "
+                    "al que juega."
                 ),
             }
 
@@ -190,6 +230,22 @@ def que_publicar(
                 )
                 continue
 
+            # NUNCA UN TITULAR. Ni aunque el libro diga que es
+            # un viaje: vender al que juega es cambiar puntos por
+            # plusvalia, y los puntos son el motor economico.
+            if pid in del_once:
+                _saltar(
+                    fila,
+                    (
+                        f"{nombre} es TITULAR: no se publica "
+                        f"aunque el libro lo marque como viaje."
+                    ),
+                )
+                continue
+
+            # IDEMPOTENTE, Y CONTRA LA FOTO. `en_venta` sale de
+            # lo que Biwenger dice que esta publicado ahora
+            # mismo, no de lo que creemos recordar haber hecho.
             if pid in en_venta:
                 _saltar(
                     fila,
@@ -280,9 +336,15 @@ def publicar(
         "reason": None,
     }
 
+    # UNA PUBLICACION POR VUELTA, como todo lo demas.
+    #
+    #     El carril compra de uno en uno (cupo 1), asi que en la
+    #     practica no habra dos; pero si algun dia se acumulan,
+    #     se publica el primero y el resto espera. Una vuelta,
+    #     una escritura.
     pendientes = [
         f for f in (filas or []) if isinstance(f, dict)
-    ]
+    ][:1]
 
     if not pendientes:
         return {

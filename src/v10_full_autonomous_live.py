@@ -631,6 +631,46 @@ def _anotar_en_el_libro(enviadas: list | None) -> None:
 RENOVACION_EN_VIVO = True
 
 
+# EL INTERRUPTOR DEL ESCAPARATE
+#
+#     ENCENDIDO el 13/09/2026, con autorizacion expresa del
+#     dueno. Antes de hoy `publicar()` existia y no lo llamaba
+#     nadie: Trent llevaba medio dia comprado para revender y
+#     parado en el banquillo.
+#
+#     LO QUE HACE Y LO QUE NO
+#
+#         publica  un viaje del carril que no esta en venta
+#         no toca  nada que el libro no marque RENDIJA
+#         no toca  a un titular, ni aunque el libro lo marque
+#         no vende nada: listar no es vender, y quien juzga las
+#                  ofertas sigue siendo `que_cobrar`
+#
+#     Se apaga sin desplegar con `ESCAPARATE_APAGADO=1`, igual
+#     que las otras rutas: el dia que haya que pararlo no se
+#     puede depender de un commit.
+ESCAPARATE_EN_VIVO = True
+
+ESCAPARATE_APAGADO_ENV = "ESCAPARATE_APAGADO"
+
+
+def _escaparate_en_vivo() -> bool:
+    """¿Publica de verdad? Nunca lanza."""
+
+    try:
+        import os
+
+        apagado = str(
+            os.getenv(ESCAPARATE_APAGADO_ENV, "0")
+        ).strip().lower() in ("1", "true", "si", "yes")
+
+        return bool(ESCAPARATE_EN_VIVO) and not apagado
+
+    except Exception:                               # noqa: BLE001
+        # Si no se sabe, NO se escribe.
+        return False
+
+
 def _correr_el_carril(cycle: dict, accion_principal):
     """
     El carril de la rendija. Nunca lanza: si algo falla, el ciclo
@@ -743,6 +783,183 @@ def _correr_el_carril(cycle: dict, accion_principal):
             "executed": False,
             "reason": (
                 f"El carril no se pudo correr: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+def _titulares_del_once(cycle) -> list:
+    """
+    Los ids del once titular. Lista vacia si no se sabe.
+
+    De `user_lineup.data.lineup.players`, que es lo que Biwenger
+    publica como alineacion puesta. Vacia significa NO SE SABE, y
+    quien la recibe se abstiene — nunca "no hay titulares".
+    """
+
+    try:
+        alineacion = (
+            (
+                ((cycle or {}).get("snapshot") or {}).get(
+                    "user_lineup"
+                )
+                or {}
+            ).get("data")
+            or {}
+        ).get("lineup") or {}
+
+        return [
+            int(jugador.get("id"))
+            for jugador in (alineacion.get("players") or [])
+            if isinstance(jugador, dict) and jugador.get("id")
+        ]
+
+    except Exception:                               # noqa: BLE001
+        return []
+
+
+def _llenar_el_escaparate(cycle, accion_principal):
+    """
+    Publica el viaje del carril que se compro y no esta en venta.
+
+    SINTOMA (13/09/2026)
+
+        Trent comprado el 12 para revender, ganado en el reset de
+        las 07:00, y a mediodia seguia en el banquillo SIN
+        PUBLICAR. Los otros cinco suplentes si estaban.
+
+        `publicar()` y `que_publicar()` existian y NO LOS LLAMABA
+        NADIE. Tercera vez del mismo patron —el carril, el plato
+        vacio, y esto—: la pieza montada y sin enchufar.
+
+        Un viaje comprado y fuera del escaparate es medio viaje:
+        se ha pagado la compra y no se ha puesto a la venta, asi
+        que no llega ninguna oferta y la plusvalia no existe.
+
+    LAS CONDICIONES, QUE SON DURAS
+
+        solo viajes del carril   lo que el libro marca RENDIJA;
+                                 lo demas no se toca
+        nunca un titular         ni aunque el libro lo marque
+        zona de silencio         por la misma puerta que la
+                                 renovacion
+        una por vuelta
+        idempotente              contra LA FOTO, no la memoria
+        el precio                de la regla de salida que ya
+                                 existe
+
+    Nunca lanza: si algo falla el ciclo sigue y el motivo queda
+    escrito.
+    """
+
+    salida = {
+        "available": False,
+        "executed": False,
+        "listed": [],
+        "failed": [],
+        "reason": None,
+    }
+
+    try:
+        import os
+
+        from datetime import datetime, timezone
+
+        from src.actions.escaparate_executor import (
+            publicar,
+            que_publicar,
+        )
+        from src.analysis.libro_de_viajes import abiertos
+        from src.analysis.zona_de_silencio import (
+            permite_escribir,
+        )
+        from src.telemetry.dashboard_state import (
+            compact_listings,
+        )
+
+        estado = (
+            (cycle or {}).get("result") or {}
+        ).get("state") or {}
+
+        plantilla = (
+            (cycle or {}).get("snapshot") or {}
+        ).get("my_team") or []
+
+        # LA ZONA DE SILENCIO, PRIMERO. Por la misma puerta que
+        # la renovacion: la hora decide, no quien llama.
+        silencio = permite_escribir(
+            datetime.now(timezone.utc),
+            os.environ.get("GITHUB_EVENT_NAME"),
+        )
+
+        if not silencio.get("allowed"):
+            return {
+                **salida,
+                "available": True,
+                "reason": (
+                    f"No se publica: {silencio.get('reason')}"
+                ),
+            }
+
+        # SOLO VIAJES DEL CARRIL. Del libro, y los de coste
+        # desconocido tambien: publicar no depende del coste.
+        libro = abiertos(plantilla=plantilla)
+
+        viajes = [
+            v
+            for v in (
+                (libro.get("viajes") or [])
+                + (libro.get("sin_coste") or [])
+            )
+            if str(v.get("via") or "").upper() == "RENDIJA"
+        ]
+
+        if not viajes:
+            return {
+                **salida,
+                "available": True,
+                "reason": (
+                    "Ningun viaje del carril abierto y sin "
+                    "publicar."
+                ),
+            }
+
+        plan = que_publicar(
+            ganadas=viajes,
+            plantilla=plantilla,
+            # CONTRA LA FOTO, no contra la memoria: lo que
+            # Biwenger dice que esta publicado AHORA.
+            ya_listados=(compact_listings(estado) or {}).get(
+                "rows"
+            )
+            or [],
+            titulares=_titulares_del_once(cycle),
+        )
+
+        if not plan.get("publicar"):
+            return {
+                **salida,
+                "available": True,
+                "reason": plan.get("reason"),
+                "plan": plan,
+            }
+
+        hecho = publicar(
+            plan["publicar"],
+            en_vivo=_escaparate_en_vivo(),
+        )
+
+        return {
+            **hecho,
+            "plan": plan,
+            "silencio": silencio,
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **salida,
+            "reason": (
+                f"El escaparate no se pudo llenar: "
                 f"{type(error).__name__}: {error}"
             ),
         }
@@ -1144,6 +1361,14 @@ def run_full_autonomous_cycle() -> dict:
     #     Si revienta, no tumba el ciclo: `correr` nunca lanza.
     carril = _correr_el_carril(cycle, action_taken)
 
+    # Y EL ESCAPARATE, DESPUES DE COMPRAR.
+    #
+    #     El orden importa: primero se compra, luego se publica
+    #     lo comprado. Un viaje que entra en esta vuelta se
+    #     publica en la siguiente, cuando el reset ya lo ha
+    #     resuelto y el jugador esta en la plantilla.
+    escaparate = _llenar_el_escaparate(cycle, action_taken)
+
     payload = {
         "version": "V10.13.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1169,6 +1394,7 @@ def run_full_autonomous_cycle() -> dict:
         },
         "v10_write_verification": v10_verification,
         "carril": carril,
+        "escaparate": escaparate,
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)

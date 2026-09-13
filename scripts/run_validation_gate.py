@@ -221,6 +221,7 @@ TESTS = [
     "src.analysis.test_la_caja_de_la_liga_v1",
     "src.analysis.test_la_rendija_v1",
     "src.analysis.test_esta_enchufado_v1",
+    "src.analysis.test_el_escaparate_publica_v1",
     "src.analysis.test_el_plato_del_carril_v1",
     "src.analysis.test_la_puja_del_carril_v1",
     "src.analysis.test_los_dos_techos_v1",
