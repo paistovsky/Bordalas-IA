@@ -1,120 +1,96 @@
 /* EL ORDEN DEL CUADRO DE OBJETIVOS (13/09/2026)
  *
- * POR QUE AGRUPADO Y NO UNA SOLA LISTA
+ * UNA SOLA LISTA, DE MAYOR A MENOR INTERÉS.
  *
- *   No hay un orden único porque no hay un solo interés. "Para
- *   el once" se mide en PUNTOS y "para revender" en PRIMA DEL
- *   COMPUTER, y no tenemos el cambio entre las dos unidades.
+ *   Estuvo agrupada por "para qué" durante una tarde. El dueño
+ *   lo vio y prefiere lista corrida: lo que quiere saber no es
+ *   de qué tipo es cada fila, sino CUÁNTO LE FALTA A PEPE PARA
+ *   ACTUAR.
  *
- *   Ordenar los sesenta por uno solo haría que la mitad de las
- *   filas salieran ordenadas por un criterio que no decide sobre
- *   ellas.
+ * EL ESCALÓN
  *
- * EL ORDEN
- *
- *   1. los que ya tienen PUJA PUESTA
- *   2. PARA EL ONCE      con el criterio del TABLÓN
- *   3. PARA REVENDER     con el criterio del CARRIL
- *   4. NO VALE           al final
+ *   0  puja puesta                             ya está hecho
+ *   1  pujar                                   se hace hoy
+ *   2  no compensa · rinde poco · no hay caja   le falta poco
+ *   3  lo vende un rival                       puerta cerrada
+ *   4  no vale · no disponible                 nada que hacer
  *
  * CERO PUNTUACIONES INVENTADAS
  *
- *   El bloque del once conserva el orden en que LLEGA, que ya es
- *   el del tablón —`(decision, escalón, -expected_value,
- *   -our_value)`—.
- *
- *   El de revender se ordena por `acquisition.orden_del_carril`,
- *   una lista de ids que publica la telemetría llamando a
- *   `orden_de_preferencia`, la MISMA función del motor. La
- *   pantalla no reimplementa la tabla de primas medidas: un
- *   dato, un sitio.
- *
- *   Si esa lista no viniera, el bloque conserva su orden de
- *   llegada y no se inventa nada.
+ *   Dentro de cada escalón se conserva EL ORDEN EN QUE LLEGA,
+ *   que ya es el del motor —`(decision, escalón de despliegue,
+ *   -expected_value, -our_value)`—. La pantalla solo agrupa por
+ *   lo que ella misma puede leer de `decision`, que es un dato
+ *   publicado, no un cálculo.
  */
 
-export const BLOQUES = [
-  { clave: "once", titulo: "PARA EL ONCE" },
-  { clave: "revender", titulo: "PARA REVENDER" },
-  { clave: "noVale", titulo: "NO VALE" },
-  { clave: "sinSaber", titulo: "SIN CLASIFICAR" }
-];
+/** La acción, en cristiano. Nunca vacía. */
+export function accionDe(fila) {
+  if (Number(fila?.live_bid || 0) > 0) return "puja puesta";
+
+  const decision = String(fila?.decision || "").toUpperCase();
+
+  switch (decision) {
+    case "BID":
+      return "pujar";
+    case "SUPERA_PRESUPUESTO":
+      return "no hay caja";
+    case "RENDIMIENTO_INSUFICIENTE":
+      return "rinde poco";
+    case "MERCADO_DE_RIVAL":
+      return "lo vende un rival";
+    case "SIN_VALOR":
+      return "no vale";
+    case "NO_DISPONIBLE":
+      return "no disponible";
+    default:
+      return decision ? "no compensa" : "sin decidir";
+  }
+}
+
+const ESCALON = {
+  "puja puesta": 0,
+  pujar: 1,
+  "no compensa": 2,
+  "rinde poco": 2,
+  "no hay caja": 2,
+  "lo vende un rival": 3,
+  "no vale": 4,
+  "no disponible": 4,
+  "sin decidir": 4
+};
+
+export function escalonDe(fila) {
+  const escalon = ESCALON[accionDe(fila)];
+
+  return escalon === undefined ? 4 : escalon;
+}
 
 export function tienePuja(fila) {
   return Number(fila?.live_bid || 0) > 0;
 }
 
-/** A qué bloque va esta fila. Nunca devuelve vacío. */
-export function bloqueDe(fila) {
+/** Para qué sirve. Nunca vacío. */
+export function paraQueDe(fila) {
   const via = String(fila?.intent || "").toUpperCase();
 
-  if (via === "SPECULATION") return "revender";
+  if (via === "SPECULATION") return "para revender";
 
-  if (via === "XI_UPGRADE" || via === "KEEP") return "once";
+  if (via === "XI_UPGRADE" || via === "KEEP") return "para el once";
 
-  const decision = String(fila?.decision || "").toUpperCase();
-
-  if (decision === "SIN_VALOR" || decision === "NO_DISPONIBLE") {
-    return "noVale";
-  }
-
-  return "sinSaber";
+  return "—";
 }
 
 /**
- * Las filas agrupadas, cada bloque con SU criterio.
+ * Las filas, en una sola lista y por escalón.
  *
- * Devuelve `[{ clave, titulo, filas }]`, con el bloque de puja
- * viva delante. Nunca lanza.
+ * `sort` en JavaScript es estable, así que dentro de cada
+ * escalón se conserva el orden de llegada — el del motor.
+ *
+ * Nunca lanza.
  */
-export function agrupado(targets, ordenDelCarril) {
+export function porInteres(targets) {
   const filas = Array.isArray(targets) ? targets : [];
 
-  const conPuja = filas.filter(tienePuja);
-
-  const resto = filas.filter((fila) => !tienePuja(fila));
-
-  // EL CRITERIO DEL CARRIL, tal como lo publica el motor.
-  const posicion = new Map(
-    (Array.isArray(ordenDelCarril) ? ordenDelCarril : []).map(
-      (id, indice) => [Number(id), indice]
-    )
-  );
-
-  const porElCarril = (unas) =>
-    [...unas].sort((a, b) => {
-      const ia = posicion.has(Number(a.id))
-        ? posicion.get(Number(a.id))
-        : Number.MAX_SAFE_INTEGER;
-
-      const ib = posicion.has(Number(b.id))
-        ? posicion.get(Number(b.id))
-        : Number.MAX_SAFE_INTEGER;
-
-      return ia - ib;
-    });
-
-  const grupos = BLOQUES.map(({ clave, titulo }) => {
-    const suyas = resto.filter((fila) => bloqueDe(fila) === clave);
-
-    return {
-      clave,
-      titulo,
-      // El once y los demás conservan su orden de llegada, que ya
-      // es el del tablón. Solo revender se reordena, y con la
-      // lista del motor.
-      filas: clave === "revender" ? porElCarril(suyas) : suyas
-    };
-  }).filter((grupo) => grupo.filas.length);
-
-  return conPuja.length
-    ? [
-        {
-          clave: "conPuja",
-          titulo: "YA TENEMOS PUJA PUESTA",
-          filas: conPuja
-        },
-        ...grupos
-      ]
-    : grupos;
+  return [...filas].sort((a, b) => escalonDe(a) - escalonDe(b));
 }

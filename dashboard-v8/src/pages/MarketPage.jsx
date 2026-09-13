@@ -1,4 +1,10 @@
-import { agrupado } from "../lib/orden";
+import { useEffect, useState } from "react";
+import {
+  accionDe,
+  paraQueDe,
+  porInteres,
+  tienePuja
+} from "../lib/orden";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 import { tonoDe } from "../lib/tono";
 
@@ -723,55 +729,180 @@ function CashPanel({ exposure, especulacion = {} }) {
   );
 }
 
-/* LAS TRES COSAS QUE LA TABLA NECESITA SABER (13/09/2026)
+/* EL CUADRO DE OBJETIVOS (13/09/2026)
  *
- * Ninguna inventa nada: leen lo que el motor ya publica. La
- * pantalla no puede tener una opinion propia sobre a quien pujar.
+ * Once columnas, una sola lista, y todo lo que se pinta sale de
+ * un campo publicado. La pantalla no calcula nada.
  */
 
-const POS = { 1: "POR", 2: "DEF", 3: "MED", 4: "DEL" };
+const POS = { 1: "por", 2: "def", 3: "med", 4: "del" };
 
-/* PARA QUE. Nunca vacio.
+const ESCUDO =
+  "https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/";
+
+/* EL ESTADO, SOLO EL ICONO.
  *
- *   "no se sabe" y "no vale" son cosas distintas, y un hueco en
- *   blanco las dice las dos a la vez. */
-function paraQue(target) {
-  const via = String(target.intent || "").toUpperCase();
+ *   Biwenger dice `sanctioned` y NO dice si fue doble amarilla o
+ *   roja directa. Se pinta tarjeta roja para los dos: inventar
+ *   la distincion seria peor que no tenerla. */
+function Estado({ status }) {
+  const cual = String(status || "").toLowerCase();
 
-  if (via === "SPECULATION") return "para revender";
+  if (cual === "ok") {
+    return (
+      <span className="ok" title="Disponible">
+        ✔
+      </span>
+    );
+  }
 
-  if (via === "XI_UPGRADE" || via === "KEEP") return "para el once";
+  if (cual === "injured") {
+    return (
+      <span className="inj" title="Lesionado">
+        ✚
+      </span>
+    );
+  }
 
-  // Sin via, lo que mande la decision.
-  const decision = String(target.decision || "").toUpperCase();
+  if (cual === "sanctioned") {
+    return <i className="card red" title="Sancionado" />;
+  }
 
-  if (decision === "SIN_VALOR") return "no vale";
+  if (cual === "doubt") {
+    return (
+      <span className="dud" title="Duda">
+        ?
+      </span>
+    );
+  }
 
-  if (decision === "NO_DISPONIBLE") return "no se puede comprar";
-
-  if (!via) return "no se sabe";
-
-  return via.toLowerCase();
+  return (
+    <span className="unk" title="Sin dato">
+      –
+    </span>
+  );
 }
 
-/* POR QUE. La frase del motor, entera.
- *
- *   Y si la del once dice algo más —"sustituiría a un titular
- *   confirmado por alguien que está al 30 %"— se añade: es la
- *   que explica lo que las columnas quitadas decidían. */
-function porQue(target) {
+/* LA TITULARIDAD, con barrita. Verde >=80, ambar 50-79, gris
+   por debajo. Sin dato NO se pinta un cero: se dice. */
+function Titular({ probabilidad }) {
+  if (probabilidad == null) {
+    return <span className="unk">sin dato</span>;
+  }
+
+  const pct = Math.round(Number(probabilidad) * 100);
+
+  const tono = pct >= 80 ? "t-hi" : pct >= 50 ? "t-md" : "t-lo";
+
+  return (
+    <div className="titw">
+      <span className={`titn ${tono}`}>{pct}%</span>
+      <i className="bar">
+        <b className={tono} style={{ width: `${pct}%` }} />
+      </i>
+    </div>
+  );
+}
+
+/* QUIEN LO VENDE. Mismo rombo para los dos; el color dice cual.
+   El Computer no tiene nombre de manager: su ausencia ES el
+   dato, no un hueco. */
+function Vende({ fila }) {
+  const rival = fila.seller_name;
+
+  return rival ? (
+    <span className="riv" title={rival}>
+      ◆ {rival}
+    </span>
+  ) : (
+    <span className="comp">◆ Computer</span>
+  );
+}
+
+/* PARA QUE. Nunca vacio: "no se sabe" y "no vale" son cosas
+   distintas y un hueco las dice las dos. */
+function ParaQue({ fila }) {
+  const cual = paraQueDe(fila);
+
+  const clase =
+    cual === "para el once"
+      ? "once"
+      : cual === "para revender"
+      ? "rev"
+      : "muted";
+
+  return <span className={clase}>{cual}</span>;
+}
+
+/* POR QUE. La frase del motor, entera, mas la del once cuando
+   añade algo. */
+function porQue(fila) {
   const partes = [];
 
-  if (target.reason) partes.push(String(target.reason));
+  if (fila.reason) partes.push(String(fila.reason));
 
-  const once = String(target.xi_reason || "");
+  const once = String(fila.xi_reason || "");
 
   if (once && !partes.includes(once)) partes.push(once);
 
-  if (!partes.length) return "Sin motivo publicado.";
-
-  return partes.join(" ");
+  return partes.join(" ") || "Sin motivo publicado.";
 }
+
+/* LA CUENTA ATRAS, POR FILA Y EN VIVO (13/09/2026)
+ *
+ *   Antes usaba el reset para todas. Hoy todas vencen ahi, asi
+ *   que daba igual — pero el dia que un rival publique algo con
+ *   otro vencimiento, el numero seria falso y nadie lo notaria.
+ *
+ *   Cada venta trae su propio `until`. Segundo a segundo, y en
+ *   ambar cuando queda menos de una hora.
+ *
+ *   Sin `until` NO se pinta un cero: se dice que no se sabe.
+ */
+function CuentaAtras({ until }) {
+  const [ahora, setAhora] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!until) return undefined;
+
+    const t = setInterval(() => setAhora(Date.now()), 1000);
+
+    return () => clearInterval(t);
+  }, [until]);
+
+  if (!until) return <span className="unk">sin dato</span>;
+
+  const quedan = Math.max(
+    0,
+    Math.floor(Number(until) - ahora / 1000)
+  );
+
+  const h = Math.floor(quedan / 3600);
+  const m = Math.floor((quedan % 3600) / 60);
+  const sg = quedan % 60;
+
+  const dd = (n) => String(n).padStart(2, "0");
+
+  return (
+    <span
+      className={`cd${quedan < 3600 ? " urg" : ""}`}
+      title={new Date(Number(until) * 1000).toLocaleString(
+        "es-ES"
+      )}
+    >
+      {quedan ? `${dd(h)}:${dd(m)}:${dd(sg)}` : "vencido"}
+    </span>
+  );
+}
+
+const TONO_ACCION = {
+  "puja puesta": "a-puja",
+  pujar: "a-bid",
+  "no hay caja": "a-no",
+  "rinde poco": "a-no",
+  "no compensa": "a-no",
+  "lo vende un rival": "a-riv"
+};
 
 function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
   if (!acquisition?.available) {
@@ -785,17 +916,13 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
 
   const objetivos = acquisition.targets || [];
 
-  /* AGRUPADO POR "PARA QUE", cada bloque con SU criterio.
+  /* UNA SOLA LISTA, de mayor a menor interes.
    *
-   *   No hay un orden unico porque no hay un solo interes: el
-   *   once se mide en puntos y la reventa en prima del Computer,
-   *   y no tenemos el cambio entre las dos unidades.
-   *
-   *   Ver `orden.js`. */
-  const bloques = agrupado(
-    acquisition.targets,
-    acquisition.orden_del_carril
-  );
+   *   Estuvo agrupada por "para que" una tarde. El dueño lo vio
+   *   y prefiere lista corrida: lo que quiere saber no es de que
+   *   tipo es cada fila, sino CUANTO LE FALTA A PEPE PARA
+   *   ACTUAR. Ver `orden.js`. */
+  const filas = porInteres(acquisition.targets);
 
   // Contado sobre las filas que se estan pintando, no sobre un
   // resumen aparte. Si la tabla no lo ensena, no cuenta.
@@ -923,99 +1050,124 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
         <thead>
           <tr>
             <th>QUIÉN</th>
+            <th className="ctr">EST.</th>
+            <th className="r">PTS</th>
+            <th>TITULAR</th>
             <th className="n">CUÁNTO CUESTA</th>
+            <th>QUIÉN LO VENDE</th>
+            <th>TERMINA EN</th>
+            <th>ACCIÓN</th>
             <th>PARA QUÉ</th>
             <th className="n">PUJARÍAMOS</th>
             <th>POR QUÉ</th>
           </tr>
         </thead>
-        {bloques.map((bloque) => (
-          <tbody key={bloque.clave}>
-            {/* CADA BLOQUE CON SU NUMERO. Hoy no se veia cuantos
-                hay de cada cosa, y es informacion gratis. */}
-            <tr>
-              <th
-                colSpan={5}
-                style={{
-                  textAlign: "left",
-                  paddingTop: 10,
-                  fontSize: 9,
-                  letterSpacing: ".08em"
-                }}
-              >
-                {bloque.titulo} ({bloque.filas.length})
-              </th>
-            </tr>
-            {bloque.filas.map((target) => {
-            const puja = Number(target.live_bid || 0) > 0;
+        <tbody>
+          {filas.map((fila) => {
+            const puja = tienePuja(fila);
 
-            const sube = Number(target.price_increment || 0);
+            const accion = accionDe(fila);
+
+            const sube = Number(fila.price_increment || 0);
 
             return (
-              <tr
-                key={target.id}
-                className={puja ? "row-live" : undefined}
-              >
-                {/* QUIEN: nombre, posicion y equipo, juntos. */}
-                <td>
-                  {puja ? (
-                    <span
-                      className="pill live"
-                      style={{ marginRight: 6 }}
-                    >
-                      PUJA PUESTA
-                    </span>
+              <tr key={fila.id} className={puja ? "hi" : undefined}>
+                {/* QUIEN: escudo + nombre + posicion. El escudo
+                    sustituye al nombre del equipo; el nombre va
+                    en el `title`. */}
+                <td className="q">
+                  {fila.team_id ? (
+                    <img
+                      className="esc"
+                      src={`${ESCUDO}${fila.team_id}.png`}
+                      alt=""
+                      title={fila.team || ""}
+                      onError={(e) => {
+                        e.currentTarget.style.visibility =
+                          "hidden";
+                      }}
+                    />
                   ) : null}
-                  <b>{target.name}</b>
-                  <div className="dim" style={{ fontSize: 9 }}>
-                    {POS[target.position] || "—"}
-                    {target.team ? ` · ${target.team}` : ""}
-                  </div>
+                  <span className="nm">{fila.name}</span>{" "}
+                  <span
+                    className={`pos ${POS[fila.position] || ""}`}
+                  >
+                    {positionLabel(fila.position)}
+                  </span>
                 </td>
 
-                {/* CUANTO CUESTA: precio y hacia donde va, en una
-                    sola celda. Eran dos columnas. */}
-                <td className="n">
-                  <b>{formatEuros(target.market_price)}</b>
-                  <div
+                <td className="es">
+                  <Estado status={fila.status} />
+                </td>
+
+                <td className="pt">{fila.points ?? "—"}</td>
+
+                <td className="ti">
+                  <Titular
+                    probabilidad={fila.starter_probability}
+                  />
+                </td>
+
+                <td className="c">
+                  <span className="pr">
+                    {formatEuros(fila.market_price)}
+                  </span>
+                  <br />
+                  <span
                     className={
-                      sube > 0 ? "up" : sube < 0 ? "down" : "dim"
+                      sube > 0 ? "up" : sube < 0 ? "down" : "flat"
                     }
-                    style={{ fontSize: 9 }}
                   >
                     {sube > 0
-                      ? `▲ sube ${formatEuros(sube)}`
+                      ? `▲ ${formatEuros(sube)}`
                       : sube < 0
-                      ? `▼ baja ${formatEuros(-sube)}`
+                      ? `▼ ${formatEuros(-sube)}`
                       : "= igual"}
-                  </div>
+                  </span>
                 </td>
 
-                {/* PARA QUE: NUNCA vacio. Si no se sabe, se dice
-                    que no se sabe, que es otra cosa. */}
-                <td>{paraQue(target)}</td>
+                <td className="vd">
+                  <Vende fila={fila} />
+                </td>
 
-                {/* PUJARIAMOS: NUNCA vacio. Si no vamos a pujar,
-                    lo dice CON ESAS PALABRAS. Estuvo en blanco
-                    todos los dias por esto: la decision no es
-                    BID, asi que `bid` vale 0 — y un cero en
-                    blanco se lee como un dato que falta. */}
+                {/* TERMINA EN: la hora de ESTA venta, no la del
+                    reset. Hoy todas vencen ahi y daria igual; el
+                    dia que un rival publique con otro
+                    vencimiento, el numero del reset seria falso
+                    y nadie lo notaria. */}
+                <td className="tm">
+                  <CuentaAtras until={fila.until} />
+                </td>
+
+                <td className="ac">
+                  <span
+                    className={TONO_ACCION[accion] || "a-nada"}
+                  >
+                    {accion}
+                  </span>
+                </td>
+
+                <td className="pq">
+                  <ParaQue fila={fila} />
+                </td>
+
+                {/* NUNCA EN BLANCO. Estuvo vacia todos los dias:
+                    `bid` vale 0 porque la decision no es BID, y
+                    un hueco se lee como un dato que falta. */}
                 <td className="n">
-                  {target.decision === "BID" &&
-                  Number(target.bid || 0) > 0 ? (
-                    <b>{formatEuros(target.bid)}</b>
+                  {fila.decision === "BID" &&
+                  Number(fila.bid || 0) > 0 ? (
+                    <b>{formatEuros(fila.bid)}</b>
                   ) : (
-                    <span className="dim">no pujaríamos</span>
+                    <span className="muted">no pujaríamos</span>
                   )}
                 </td>
 
-                {/* POR QUE: la frase entera, sin recortar. */}
-                <td className="sub">{porQue(target)}</td>
+                <td className="pw">{porQue(fila)}</td>
               </tr>
             );
           })}
-          </tbody>
-        ))}
+        </tbody>
       </table>
 
       {recortados > 0 && (

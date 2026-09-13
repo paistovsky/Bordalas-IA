@@ -59,8 +59,8 @@ MERCADO = RAIZ / "dashboard-v8" / "src" / "pages" / "MarketPage.jsx"
 
 ORDEN = RAIZ / "dashboard-v8" / "src" / "lib" / "orden.js"
 
-# El guion que comprueba los bloques, con node.
-GUION_DE_BLOQUES = 'import { agrupado } from "./src/lib/orden.js";\n\nconst filas = [\n  { id: 10, name: "once 1",     intent: "XI_UPGRADE" },\n  { id: 11, name: "once 2",     intent: "XI_UPGRADE" },\n  { id: 20, name: "revender A", intent: "SPECULATION" },\n  { id: 21, name: "revender B", intent: "SPECULATION" },\n  { id: 22, name: "revender C", intent: "SPECULATION" },\n  { id: 30, name: "basura",     decision: "SIN_VALOR" }\n];\n\nconst bloques = agrupado(filas, [22, 21, 20]);\n\nconst de = (clave) =>\n  (bloques.find((b) => b.clave === clave) || { filas: [] })\n    .filas.map((f) => f.name);\n\nconsole.log(JSON.stringify({\n  claves: bloques.map((b) => b.clave),\n  once: de("once"),\n  revender: de("revender"),\n  noVale: de("noVale"),\n  sinOrden: agrupado(filas, [])\n    .find((b) => b.clave === "revender")\n    .filas.map((f) => f.name)\n}));\n'
+# El guion que comprueba el orden, con node.
+GUION_DEL_ORDEN = 'import { porInteres, accionDe } from "./src/lib/orden.js";\n\nconst filas = [\n  { id: 1, name: "de un rival", decision: "MERCADO_DE_RIVAL" },\n  { id: 2, name: "sin caja 1",  decision: "SUPERA_PRESUPUESTO" },\n  { id: 3, name: "no vale",     decision: "SIN_VALOR" },\n  { id: 4, name: "CON PUJA",    decision: "MERCADO_DE_RIVAL", live_bid: 2760000 },\n  { id: 5, name: "sin caja 2",  decision: "SUPERA_PRESUPUESTO" },\n  { id: 6, name: "a pujar",     decision: "BID" }\n];\n\nconst f = porInteres(filas);\n\nconsole.log(JSON.stringify({\n  primera: f[0].name,\n  cuantas: f.length,\n  orden: f.map((x) => x.name),\n  acciones: f.map(accionDe),\n  vacia: porInteres([]).length,\n  rota: porInteres(null).length\n}));\n'
 
 
 # Las que el dueño mando fuera, con sus palabras: "no quiero
@@ -78,9 +78,15 @@ FUERA = (
     "SOLO MIRAR",
 )
 
-LAS_CINCO = (
+LAS_ONCE = (
     "QUIÉN",
+    "EST.",
+    "PTS",
+    "TITULAR",
     "CUÁNTO CUESTA",
+    "QUIÉN LO VENDE",
+    "TERMINA EN",
+    "ACCIÓN",
     "PARA QUÉ",
     "PUJARÍAMOS",
     "POR QUÉ",
@@ -107,12 +113,18 @@ def _cabeceras() -> list:
 # ============================================================
 
 
-def test_el_cuadro_tiene_cinco_columnas() -> None:
-    """Ni una mas. Eran doce."""
+def test_el_cuadro_tiene_las_columnas_del_diseño() -> None:
+    """
+    Once, en este orden, y las del diseño aprobado.
+
+    Eran doce sin sentido; se quedaron en cinco; y el diseño las
+    devuelve a once, pero ahora todas se leen: estado, puntos,
+    titularidad, quien vende, cuando termina y que se va a hacer.
+    """
 
     cabeceras = _cabeceras()
 
-    assert cabeceras == list(LAS_CINCO), cabeceras
+    assert cabeceras == list(LAS_ONCE), cabeceras
 
 
 def test_las_que_sobraban_ya_no_se_pintan() -> None:
@@ -177,18 +189,16 @@ def test_pujariamos_nunca_sale_en_blanco() -> None:
     # Y cuando SI se puja, sale el importe. Se mira el CUERPO de
     # la tabla, no la cabecera: "PUJARÍAMOS" sale en las dos y
     # la primera rebanada cogia la de arriba.
-    # El cuerpo son ahora VARIOS `<tbody>`, uno por bloque, asi
-    # que se mira desde donde empieza el mapa de bloques.
     cuerpo = fuente[
-        fuente.index("bloques.map(") : fuente.index("</table>")
+        fuente.index("<tbody>") : fuente.index("</tbody>")
     ]
 
-    assert 'target.decision === "BID"' in cuerpo, (
+    assert 'fila.decision === "BID"' in cuerpo, (
         "la columna no mira la decision: pintaria un importe que "
         "el motor no va a pujar"
     )
 
-    assert "formatEuros(target.bid)" in cuerpo, (
+    assert "formatEuros(fila.bid)" in cuerpo, (
         "no pinta el importe cuando la decision es BID"
     )
 
@@ -201,30 +211,47 @@ def test_para_que_nunca_sale_en_blanco() -> None:
     blanco las dice las dos a la vez.
     """
 
-    fuente = MERCADO.read_text(encoding="utf-8")
+    # `paraQueDe` y `accionDe` viven en `orden.js` desde el
+    # diseño de los dos cuadros: se prueban donde estan.
+    orden = ORDEN.read_text(encoding="utf-8")
 
-    trozo = fuente[
-        fuente.index("function paraQue(") : fuente.index(
-            "function porQue("
+    trozo = orden[orden.index("export function paraQueDe(") :]
+
+    for caso in ("para revender", "para el once"):
+        assert caso in trozo, (
+            f"`paraQueDe` no contempla «{caso}»"
+        )
+
+    # Y SIEMPRE devuelve algo: sin via conocida, un guion, que es
+    # decir "no se sabe" y no dejar un hueco.
+    assert 'return "—"' in trozo, (
+        "hay un camino que deja la celda vacia"
+    )
+
+    # LA ACCION TAMPOCO. Ocho estados, todos con palabras.
+    accion = orden[
+        orden.index("export function accionDe(") : orden.index(
+            "const ESCALON"
         )
     ]
 
     for caso in (
-        "para revender",
-        "para el once",
+        "puja puesta",
+        "pujar",
+        "no hay caja",
+        "rinde poco",
+        "lo vende un rival",
         "no vale",
-        "no se sabe",
+        "no disponible",
+        "no compensa",
     ):
-        assert caso in trozo, (
-            f"`paraQue` no contempla «{caso}»"
+        assert caso in accion, (
+            f"`accionDe` no contempla «{caso}»"
         )
 
-    # Y SIEMPRE devuelve algo: no hay camino que acabe vacio.
-    assert "return" in trozo
-
-    assert '""' not in trozo.replace('String(target.intent || "")', "").replace(
-        'String(target.decision || "")', ""
-    ), "hay un camino que devuelve cadena vacia"
+    assert '"sin decidir"' in accion, (
+        "sin decision la celda se quedaria vacia"
+    )
 
 
 def test_el_por_que_enseña_la_frase_entera() -> None:
@@ -240,9 +267,11 @@ def test_el_por_que_enseña_la_frase_entera() -> None:
 
     trozo = fuente[fuente.index("function porQue(") :][:900]
 
-    assert "target.reason" in trozo, trozo[:0]
+    assert "fila.reason" in trozo, (
+        "no enseña el motivo del motor"
+    )
 
-    assert "target.xi_reason" in trozo, (
+    assert "fila.xi_reason" in trozo, (
         "no enseña el motivo del once, que es donde vive la "
         "explicacion que el dueño entendio"
     )
@@ -259,12 +288,20 @@ def test_el_por_que_enseña_la_frase_entera() -> None:
 
 def test_el_que_tiene_puja_va_primero() -> None:
     """
-    LO QUE ESTA EN JUEGO SE LEE PRIMERO.
+    UNA SOLA LISTA, DE MAYOR A MENOR INTERES.
 
-    En el orden del propio motor el que tiene puja viva va el
-    ULTIMO: la clave lleva `bool(has_live_bid)` y `False` va
-    antes que `True`. Tiene sentido para el motor —con ese ya no
-    hay nada que hacer— y ninguno para quien mira.
+    Estuvo agrupada por "para que" una tarde. El dueño lo vio y
+    prefiere lista corrida: lo que quiere saber no es de que tipo
+    es cada fila, sino CUANTO LE FALTA A PEPE PARA ACTUAR.
+
+        0  puja puesta
+        1  pujar
+        2  no compensa · rinde poco · no hay caja
+        3  lo vende un rival
+        4  no vale · no disponible
+
+    Y dentro de cada escalon, el orden en que LLEGA — que ya es
+    el del motor. Cero puntuaciones inventadas.
 
     Se ejecuta de verdad con `node`.
     """
@@ -273,34 +310,12 @@ def test_el_que_tiene_puja_va_primero() -> None:
         print("     AVISO: sin `node` no se puede ejecutar.")
         return
 
-    guion = """
-import { agrupado } from "./src/lib/orden.js";
-
-const filas = [
-  { id: 1, name: "sin puja A", live_bid: 0, intent: "SPECULATION" },
-  { id: 2, name: "sin puja B", live_bid: 0, intent: "SPECULATION" },
-  { id: 3, name: "CON PUJA",   live_bid: 2760000, intent: "SPECULATION" },
-  { id: 4, name: "sin puja C", live_bid: 0, intent: "SPECULATION" }
-];
-
-const bloques = agrupado(filas, [1, 2, 4]);
-
-console.log(JSON.stringify({
-  primerBloque: bloques[0].clave,
-  primera: bloques[0].filas[0].name,
-  cuantas: bloques.reduce((n, b) => n + b.filas.length, 0),
-  resto: bloques[1].filas.map((f) => f.name),
-  vacia: agrupado([], []).length,
-  rota: agrupado(null, null).length
-}));
-"""
-
     carpeta = RAIZ / "dashboard-v8"
 
     fichero = carpeta / "_orden_de_prueba.mjs"
 
     try:
-        fichero.write_text(guion, encoding="utf-8")
+        fichero.write_text(GUION_DEL_ORDEN, encoding="utf-8")
 
         salida = subprocess.run(
             ["node", str(fichero)],
@@ -320,27 +335,37 @@ console.log(JSON.stringify({
 
     visto = json.loads(salida.stdout.strip().splitlines()[-1])
 
-    assert visto["primerBloque"] == "conPuja", visto
+    # REGLA 24: si el fixture llegara vacio, esto no probaria
+    # nada. Seis filas, una con puja.
+    assert visto["cuantas"] == 6, visto
 
     assert visto["primera"] == "CON PUJA", (
         f"la primera fila es «{visto['primera']}»: lo que esta "
         f"en juego no se lee primero"
     )
 
-    # REGLA 24: si el fixture llegara vacio, esto no probaria
-    # nada. Cuatro filas, y una con puja.
-    assert visto["cuantas"] == 4, visto
-
-    # Y EL RESTO CONSERVA SU ORDEN. La pantalla no puede tener
-    # una opinion propia sobre a quien pujar.
-    assert visto["resto"] == [
-        "sin puja A",
-        "sin puja B",
-        "sin puja C",
+    # EL ESCALON MANDA, y dentro de el se conserva la llegada.
+    assert visto["orden"] == [
+        "CON PUJA",
+        "a pujar",
+        "sin caja 1",
+        "sin caja 2",
+        "de un rival",
+        "no vale",
     ], (
-        f"el resto no sigue el orden del carril: "
-        f"{visto['resto']}"
+        f"el orden no sigue el escalon de accion: "
+        f"{visto['orden']}"
     )
+
+    # LA ACCION, EN CRISTIANO y nunca vacia.
+    assert visto["acciones"] == [
+        "puja puesta",
+        "pujar",
+        "no hay caja",
+        "no hay caja",
+        "lo vende un rival",
+        "no vale",
+    ], visto
 
     # Nunca lanza.
     assert visto["vacia"] == 0, visto
@@ -355,125 +380,15 @@ def test_la_tabla_usa_ese_orden_y_no_otro() -> None:
 
     fuente = MERCADO.read_text(encoding="utf-8")
 
-    assert "agrupado(" in fuente, (
-        "la tabla no agrupa por «para que»"
+    assert "porInteres(" in fuente, (
+        "la tabla no ordena por interes"
     )
 
-    assert "bloque.filas.map(" in fuente, (
+    assert "filas.map(" in fuente, (
         "la tabla recorre otra cosa: el orden no se aplicaria"
     )
 
     assert ORDEN.exists(), "no existe `orden.js`"
-
-
-def test_cada_bloque_usa_su_propio_orden() -> None:
-    """
-    NO HAY UN ORDEN UNICO PORQUE NO HAY UN SOLO INTERES.
-
-    "Para el once" se mide en PUNTOS y "para revender" en PRIMA
-    DEL COMPUTER, y no tenemos el cambio entre las dos unidades.
-    Ordenar los sesenta por uno solo haria que la mitad de las
-    filas salieran ordenadas por un criterio que no decide sobre
-    ellas.
-
-        el once      conserva el orden de LLEGADA, que ya es el
-                     del tablon
-        revender     por `orden_del_carril`, la lista de ids que
-                     publica la telemetria llamando a
-                     `orden_de_preferencia`, la MISMA funcion del
-                     motor
-
-    Si algun dia alguien unifica los dos ordenes, esta guardia se
-    pone roja y se habla antes, en vez de enterarse por la
-    pantalla.
-    """
-
-    if shutil.which("node") is None:
-        print("     AVISO: sin `node` no se puede ejecutar.")
-        return
-
-    carpeta = RAIZ / "dashboard-v8"
-
-    fichero = carpeta / "_bloques_de_prueba.mjs"
-
-    try:
-        fichero.write_text(GUION_DE_BLOQUES, encoding="utf-8")
-
-        salida = subprocess.run(
-            ["node", str(fichero)],
-            cwd=str(carpeta),
-            capture_output=True,
-            text=True,
-            timeout=120,
-        )
-
-    finally:
-        if fichero.exists():
-            fichero.unlink()
-
-    assert salida.returncode == 0, (
-        salida.stdout + salida.stderr
-    )
-
-    visto = json.loads(salida.stdout.strip().splitlines()[-1])
-
-    # REGLA 24: si el fixture no trajera los tres bloques, esto
-    # no probaria nada.
-    assert visto["claves"] == ["once", "revender", "noVale"], (
-        visto
-    )
-
-    # EL ONCE: orden de llegada, que es el del TABLON.
-    assert visto["once"] == ["once 1", "once 2"], (
-        f"el bloque del once ha cambiado de orden: "
-        f"{visto['once']}. Ese orden es el del tablon y la "
-        f"pantalla no puede tener otro"
-    )
-
-    # REVENDER: el del CARRIL, aunque llegue al reves.
-    assert visto["revender"] == [
-        "revender C",
-        "revender B",
-        "revender A",
-    ], (
-        f"el bloque de revender no usa el orden del carril: "
-        f"{visto['revender']}"
-    )
-
-    # NO VALE, al final.
-    assert visto["noVale"] == ["basura"], visto
-
-    # Y SIN LA LISTA DEL MOTOR no se inventa un orden: se queda
-    # como llega.
-    assert visto["sinOrden"] == [
-        "revender A",
-        "revender B",
-        "revender C",
-    ], (
-        f"sin el orden del motor la pantalla se ha inventado "
-        f"uno: {visto['sinOrden']}"
-    )
-
-
-def test_cada_bloque_lleva_su_numero() -> None:
-    """
-    Hoy no se ve cuantos hay de cada cosa, y es informacion
-    gratis.
-    """
-
-    fuente = MERCADO.read_text(encoding="utf-8")
-
-    assert "bloque.titulo" in fuente, (
-        "los bloques no llevan cabecera"
-    )
-
-    assert "bloque.filas.length" in fuente, (
-        "la cabecera no dice cuantos hay"
-    )
-
-    assert "bloques.map(" in fuente, (
-        "la tabla no recorre los bloques"
-    )
 
 
 def test_el_orden_del_carril_lo_publica_el_motor() -> None:
@@ -515,17 +430,166 @@ def test_el_orden_del_carril_lo_publica_el_motor() -> None:
         )
 
 
+def test_la_cuenta_atras_es_por_fila() -> None:
+    """
+    CADA VENTA TIENE SU HORA DE FIN, Y NO ES LA DEL RESET.
+
+    La cuenta atras usaba el reset para todas. Hoy todas vencen
+    ahi, asi que daba igual — y por eso nadie lo habria notado.
+    El dia que un rival publique algo con otro vencimiento, el
+    numero seria falso.
+
+    Cada venta trae su `until` en `market.sales`. Esta guardia
+    exige que la fila lo lleve y que la pantalla lo use.
+    """
+
+    # 1. LA TELEMETRIA LO PUBLICA POR FILA.
+    estado = (
+        RAIZ / "src" / "telemetry" / "dashboard_state.py"
+    ).read_text(encoding="utf-8")
+
+    assert '_fila["until"]' in estado, (
+        "la telemetria no publica la hora de fin de cada venta: "
+        "la cuenta atras tendria que inventarsela"
+    )
+
+    assert "market" in estado and "sales" in estado
+
+    # 2. Y SALE DEL `until` DE SU VENTA, no del reset.
+    fuente = MERCADO.read_text(encoding="utf-8")
+
+    cuerpo = fuente[
+        fuente.index("<tbody>") : fuente.index("</tbody>")
+    ]
+
+    assert "until={fila.until}" in cuerpo, (
+        "la cuenta atras no usa el `until` de la fila"
+    )
+
+    for del_reset in (
+        "marketClock",
+        "seconds_to_reset",
+        "hours_to_reset",
+    ):
+        assert del_reset not in cuerpo, (
+            f"la cuenta atras vuelve a usar `{del_reset}`: seria "
+            f"la misma para todas las filas"
+        )
+
+    # 3. DOS VENCIMIENTOS DISTINTOS DAN DOS CUENTAS DISTINTAS.
+    #    Se comprueba sobre la funcion que las calcula.
+    componente = fuente[
+        fuente.index("function CuentaAtras(") :
+    ][:1400]
+
+    assert "setInterval" in componente, (
+        "la cuenta atras no corre: se quedaria congelada"
+    )
+
+    assert "Number(until)" in componente, componente[:0]
+
+    # Sin `until` NO se pinta un cero.
+    assert "sin dato" in componente, (
+        "sin hora de fin pintaria un cero, que se lee como "
+        "«vence ya»"
+    )
+
+    # Y en ambar por debajo de una hora.
+    assert "3600" in componente, (
+        "no avisa cuando queda menos de una hora"
+    )
+
+
+def test_las_columnas_nuevas_salen_del_catalogo() -> None:
+    """
+    PUNTOS Y PARTIDOS JUGADOS, DE DONDE VIENEN.
+
+    `acquisition.targets` no trae `points` ni los partidos: estan
+    en `catalog.data.players[id]`, que YA SE PIDE en el ciclo.
+    Es juntarlo, no pedir mas.
+
+    Y no se calcula nada: se copia.
+    """
+
+    estado = (
+        RAIZ / "src" / "telemetry" / "dashboard_state.py"
+    ).read_text(encoding="utf-8")
+
+    assert "_catalogo_por_id" in estado, (
+        "no hay de donde sacar los puntos"
+    )
+
+    for campo in ("points", "playedHome", "playedAway"):
+        assert campo in estado, (
+            f"la telemetria no lee `{campo}` del catalogo"
+        )
+
+    assert '_fila["points"]' in estado, (
+        "los puntos no llegan a la fila"
+    )
+
+    assert '_fila["played"]' in estado, (
+        "los partidos jugados no llegan a la fila"
+    )
+
+    # LA PANTALLA LOS PINTA.
+    fuente = MERCADO.read_text(encoding="utf-8")
+
+    cuerpo = fuente[
+        fuente.index("<tbody>") : fuente.index("</tbody>")
+    ]
+
+    assert "fila.points" in cuerpo, "no se pintan los puntos"
+
+    assert "fila.starter_probability" in cuerpo, (
+        "no se pinta la titularidad"
+    )
+
+    assert "fila.status" in cuerpo, "no se pinta el estado"
+
+    assert "fila.team_id" in cuerpo, "no se pinta el escudo"
+
+
+def test_el_sancionado_no_se_inventa_la_tarjeta() -> None:
+    """
+    Biwenger dice `sanctioned` y NO dice si fue doble amarilla o
+    roja directa.
+
+    Se pinta tarjeta roja para los dos. Inventar la distincion
+    seria peor que no tenerla: parece un dato y no lo es.
+    """
+
+    fuente = MERCADO.read_text(encoding="utf-8")
+
+    estado = fuente[
+        fuente.index("function Estado(") :
+    ][:1200]
+
+    assert "sanctioned" in estado, estado[:0]
+
+    assert "card red" in estado, (
+        "el sancionado no se pinta con tarjeta"
+    )
+
+    for inventado in ("amarilla", "doble", "directa"):
+        assert inventado not in estado.lower(), (
+            f"se inventa la distincion `{inventado}`, que "
+            f"Biwenger no publica"
+        )
+
+
 TESTS = [
-    test_el_cuadro_tiene_cinco_columnas,
+    test_el_cuadro_tiene_las_columnas_del_diseño,
     test_las_que_sobraban_ya_no_se_pintan,
     test_pujariamos_nunca_sale_en_blanco,
     test_para_que_nunca_sale_en_blanco,
     test_el_por_que_enseña_la_frase_entera,
     test_el_que_tiene_puja_va_primero,
     test_la_tabla_usa_ese_orden_y_no_otro,
-    test_cada_bloque_usa_su_propio_orden,
-    test_cada_bloque_lleva_su_numero,
     test_el_orden_del_carril_lo_publica_el_motor,
+    test_la_cuenta_atras_es_por_fila,
+    test_las_columnas_nuevas_salen_del_catalogo,
+    test_el_sancionado_no_se_inventa_la_tarjeta,
 ]
 
 

@@ -3212,6 +3212,44 @@ def _saldo_fresco(market_status: dict | None):
     return None
 
 
+def _catalogo_por_id(snapshot) -> dict:
+    """
+    El catalogo indexado por id. `{}` si no se puede leer.
+
+    Biwenger lo publica como un diccionario con la clave en
+    TEXTO —`{"17731": {...}}`— y las ventas del mercado traen el
+    jugador sin nombre ni puntos. De aqui salen los dos.
+
+    Nunca lanza.
+    """
+
+    try:
+        crudo = (
+            (snapshot or {}).get("catalog") or {}
+        ).get("data") or {}
+
+        jugadores = crudo.get("players") or {}
+
+        if isinstance(jugadores, dict):
+            return {
+                safe_int(ficha.get("id") or clave): ficha
+                for clave, ficha in jugadores.items()
+                if isinstance(ficha, dict)
+            }
+
+        if isinstance(jugadores, list):
+            return {
+                safe_int(ficha.get("id")): ficha
+                for ficha in jugadores
+                if isinstance(ficha, dict)
+            }
+
+        return {}
+
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -3416,6 +3454,51 @@ def build_dashboard_state() -> dict:
         available_budget=exposure.get("available_budget") or None,
         acquisition_budget=presupuesto_fichajes or None,
     )
+
+    # ==========================================================
+    # LO QUE LA FILA NO TRAIA Y LA PANTALLA NECESITA
+    # (13/09/2026)
+    # ==========================================================
+    #
+    #     Tres datos que ya se piden en el ciclo y no llegaban al
+    #     cuadro de objetivos. No se calcula nada nuevo: se
+    #     juntan.
+    #
+    #     `points` y los partidos jugados        del CATALOGO
+    #     `until`, la hora de fin de cada venta  del MERCADO
+    #
+    #     EL `until` IMPORTA AUNQUE HOY DE IGUAL. La cuenta atras
+    #     usaba el reset para todas, y hoy todas vencen ahi. El
+    #     dia que un rival publique algo con otro vencimiento, el
+    #     numero seria falso y nadie lo notaria.
+    _del_catalogo = _catalogo_por_id(snapshot)
+
+    _vence = {
+        safe_int(
+            (venta.get("player") or {}).get("id")
+            if isinstance(venta.get("player"), dict)
+            else venta.get("player")
+        ): venta.get("until")
+        for venta in (
+            (snapshot.get("market") or {}).get("sales") or []
+        )
+        if isinstance(venta, dict)
+    }
+
+    for _fila in (acquisition.get("targets") or []):
+
+        if not isinstance(_fila, dict):
+            continue
+
+        _ficha = _del_catalogo.get(safe_int(_fila.get("id"))) or {}
+
+        _fila["points"] = safe_int(_ficha.get("points"))
+
+        _fila["played"] = safe_int(
+            _ficha.get("playedHome")
+        ) + safe_int(_ficha.get("playedAway"))
+
+        _fila["until"] = _vence.get(safe_int(_fila.get("id")))
 
     points_market = calibrate_points_market(
         snapshot.get("catalog", {})

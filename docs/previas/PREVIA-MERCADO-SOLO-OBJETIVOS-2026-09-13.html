@@ -1,0 +1,257 @@
+<title>MERCADO — previa</title>
+<style>
+:root{--bg:#0b1117;--pan:#111a24;--bd:#1e2b38;--tx:#c8d3de;--dim:#7b8794;--gr:#4ade80;--am:#eab308;--bl:#60a5fa;--mo:#a78bfa;--rd:#ef4444}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font:13px/1.45 "Segoe UI",system-ui,sans-serif;padding:18px}
+h1{font-size:15px;letter-spacing:.16em;margin:0 0 3px;font-weight:600}
+.sub{color:var(--dim);font-size:11px;letter-spacing:.1em;margin-bottom:16px}
+.cajas{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:18px}
+.caja{background:var(--pan);border:1px solid var(--bd);border-radius:6px;padding:12px 14px}
+.caja h2{font-size:9.5px;letter-spacing:.14em;color:var(--dim);margin:0 0 8px;font-weight:600}
+.big{font-size:22px;font-weight:600;color:#e6edf3} .small{font-size:11px;color:var(--dim);margin-top:3px} .neg{color:var(--rd)}
+.caja ul{list-style:none;margin:0;padding:0;font-size:11.5px}
+.caja li{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #16212c}
+.caja li em{font-style:normal;color:var(--dim)}
+.panel{background:var(--pan);border:1px solid var(--bd);border-radius:6px;overflow:hidden}
+.panel>header{padding:12px 14px 10px;border-bottom:1px solid var(--bd)}
+.panel h2{font-size:12px;letter-spacing:.14em;margin:0;font-weight:600}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;font-size:9.5px;letter-spacing:.14em;color:var(--dim);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+thead th.r{text-align:right} thead th.ctr{text-align:center}
+td{padding:8px 10px;border-bottom:1px solid #16212c;vertical-align:middle}
+tr.hi td{background:#101d18}
+tr.mas td{color:var(--dim);font-size:11px;font-style:italic;text-align:center}
+.esc{width:17px;height:17px;object-fit:contain;vertical-align:-4px;margin-right:7px}
+.nm{color:#e6edf3;font-weight:600}
+.pos{font-size:9.5px;font-weight:700;letter-spacing:.06em;margin-left:3px}
+.pos.por{color:var(--am)} .pos.def{color:var(--bl)} .pos.med{color:var(--gr)} .pos.del{color:var(--rd)}
+.es{text-align:center;font-size:14px}
+.ok{color:var(--gr)} .inj{color:var(--rd);font-weight:700} .dud{color:var(--am);font-weight:700} .unk{color:var(--dim)}
+.card{display:inline-block;width:9px;height:13px;border-radius:1.5px;vertical-align:-1px} .card.red{background:var(--rd)}
+.pt{text-align:right;color:#e6edf3;font-variant-numeric:tabular-nums;font-weight:600;padding-right:14px}
+.ti{width:78px}
+.titw{display:flex;flex-direction:column;gap:3px}
+.titn{font-size:11px;font-variant-numeric:tabular-nums;font-weight:600}
+.bar{display:block;height:3px;background:#1e2b38;border-radius:2px;overflow:hidden}
+.bar b{display:block;height:100%;border-radius:2px}
+.t-hi{color:var(--gr)} b.t-hi{background:var(--gr)}
+.t-md{color:var(--am)} b.t-md{background:var(--am)}
+.t-lo{color:var(--dim)} b.t-lo{background:#3d4a58}
+.pr{color:#e6edf3} .up{color:var(--gr);font-size:10.5px} .down{color:var(--rd);font-size:10.5px} .flat{color:var(--dim);font-size:10.5px}
+.comp{color:#e6edf3} .riv{color:var(--mo)}
+.cd{font-variant-numeric:tabular-nums} .cd.urg{color:var(--am)}
+.ac span{font-weight:600;font-size:11.5px}
+.a-puja,.a-bid{color:var(--gr)} .a-no{color:var(--am)} .a-riv{color:var(--mo)} .a-nada{color:var(--dim)}
+.once{color:var(--bl)} .rev{color:var(--gr)} .muted{color:var(--dim)} .puja{color:var(--am)}
+.pw{color:#9fb0c0;font-size:11.5px;max-width:330px}
+.q,.c,.vd,.pq,.pj,.tm,.es,.pt,.ac{white-space:nowrap}
+.nota{margin-top:14px;font-size:11px;color:var(--dim);border-left:2px solid var(--bd);padding-left:10px}
+.leyenda{margin-top:10px;font-size:11px;color:var(--dim)} .leyenda span{margin-right:16px}
+</style>
+<h1>MERCADO</h1>
+<div class="sub">JORNADA 7 · PREVIA DE DISEÑO · datos reales de hoy</div>
+<div class="cajas">
+  <div class="caja"><h2>RELOJ DEL MERCADO</h2><div class="big"><span class="cd" data-t="1789362000">--:--:--</span></div><div class="small">próximo reset · 14/09 07:00 de Madrid</div></div>
+  <div class="caja"><h2>CAJA</h2><div class="big neg">-1.299.834 €</div><div class="small">se puede comprometer hasta 7.658.149 €</div></div>
+  <div class="caja"><h2>NUESTRAS PUBLICACIONES</h2><div class="big">16</div><div class="small" style="margin-bottom:6px">14 con oferta del Computer</div><ul><li><span>Mangala</span><em>2.498.100 €</em></li><li><span>Pablo Ibáñez</span><em>2.420.500 €</em></li><li><span>Jonny</span><em>2.352.000 €</em></li><li><span>Dituro</span><em>2.373.400 €</em></li><li><span>Olasagasti</span><em>3.256.200 €</em></li><li><span>Yamal</span><em>20.680.800 €</em></li></ul></div>
+</div>
+<div class="panel"><header><h2>OBJETIVOS DE HOY</h2>
+<div class="sub" style="margin:4px 0 0">DE MAYOR A MENOR INTERÉS DE PEPE · 61 EN EL MERCADO</div></header>
+<div class="wrap"><table>
+<thead><tr><th>QUIÉN</th><th class="ctr">EST.</th><th class="r">PTS</th><th>TITULAR</th><th>CUÁNTO CUESTA</th><th>QUIÉN LO VENDE</th><th>TERMINA EN</th><th>ACCIÓN</th><th>PARA QUÉ</th><th>PUJARÍAMOS</th><th>POR QUÉ</th></tr></thead>
+<tbody>
+<tr class="hi">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/65.png" alt="" title="Málaga" onerror="this.style.visibility='hidden'"><span class="nm">Larrubia</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">14</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">4.750.000 €</span><br><span class="down">▼ 40.000 €</span></td>
+<td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-puja">puja puesta</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Vale 2.915.815 EUR para nosotros y ya cuesta 4.750.000. No hay margen.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/93.png" alt="" title="Osasuna" onerror="this.style.visibility='hidden'"><span class="nm">Sergio Herrera</span> <span class="pos por">POR</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">11</td>
+<td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">3.850.000 €</span><br><span class="down">▼ 40.000 €</span></td>
+<td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-no">no compensa</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Vale 2.514.068 EUR para nosotros y ya cuesta 3.850.000. No hay margen.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/2.png" alt="" title="Atlético" onerror="this.style.visibility='hidden'"><span class="nm">Marcos Llorente</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">16</td>
+<td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">5.670.000 €</span><br><span class="down">▼ 10.000 €</span></td>
+<td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-no">no compensa</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Vale 2.014.584 EUR para nosotros y ya cuesta 5.670.000. No hay margen.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/6.png" alt="" title="Deportivo" onerror="this.style.visibility='hidden'"><span class="nm">Giménez</span> <span class="pos def">DEF</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">12</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">3.100.000 €</span><br><span class="up">▲ 100.000 €</span></td>
+<td class="vd"><span class="comp">◆ Computer</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-no">rinde poco</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Como especulacion rinde un 0.43 % (13.373 EUR sobre 3.100.001 inmovilizados) y se exige al menos un 3 %. Por debajo de eso la subida estimada esta dentro del ruido del precio y el dinero rinde mas en otra operacion.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/3.png" alt="" title="Barcelona" onerror="this.style.visibility='hidden'"><span class="nm">Pedri</span> <span class="pos med">MED</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">36</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">15.820.000 €</span><br><span class="up">▲ 70.000 €</span></td>
+<td class="vd"><span class="riv">◆ Luismi_Haz</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Luismi_Haz y pide 15.820.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/3.png" alt="" title="Barcelona" onerror="this.style.visibility='hidden'"><span class="nm">Gordon</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">30</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">12.370.000 €</span><br><span class="up">▲ 100.000 €</span></td>
+<td class="vd"><span class="riv">◆ Pollo17</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Pollo17 y pide 12.370.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/19.png" alt="" title="Villarreal" onerror="this.style.visibility='hidden'"><span class="nm">Pépé</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">32</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">80%</span><i class="bar"><b class="t-hi" style="width:80%"></b></i></div></td>
+<td class="c"><span class="pr">11.440.000 €</span><br><span class="up">▲ 40.000 €</span></td>
+<td class="vd"><span class="riv">◆ Pollo17</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Pollo17 y pide 12.310.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/2.png" alt="" title="Atlético" onerror="this.style.visibility='hidden'"><span class="nm">Baena</span> <span class="pos med">MED</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">36</td>
+<td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">10.350.000 €</span><br><span class="up">▲ 60.000 €</span></td>
+<td class="vd"><span class="riv">◆ Manzagool</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Manzagool y pide 10.290.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/2.png" alt="" title="Atlético" onerror="this.style.visibility='hidden'"><span class="nm">Kang-in Lee</span> <span class="pos med">MED</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">25</td>
+<td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">9.040.000 €</span><br><span class="up">▲ 40.000 €</span></td>
+<td class="vd"><span class="riv">◆ Luismi_Haz</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Luismi_Haz y pide 9.040.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/1.png" alt="" title="Athletic" onerror="this.style.visibility='hidden'"><span class="nm">Nico Williams</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">21</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">100%</span><i class="bar"><b class="t-hi" style="width:100%"></b></i></div></td>
+<td class="c"><span class="pr">8.120.000 €</span><br><span class="up">▲ 70.000 €</span></td>
+<td class="vd"><span class="riv">◆ Manzagool</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Manzagool y pide 8.050.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/87.png" alt="" title="Betis" onerror="this.style.visibility='hidden'"><span class="nm">Parrott</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">13</td>
+<td class="ti"><div class="titw"><span class="titn t-md">50%</span><i class="bar"><b class="t-md" style="width:50%"></b></i></div></td>
+<td class="c"><span class="pr">6.470.000 €</span><br><span class="up">▲ 20.000 €</span></td>
+<td class="vd"><span class="riv">◆ Luismi_Haz</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Luismi_Haz y pide 6.470.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/70.png" alt="" title="Rayo Vallecano" onerror="this.style.visibility='hidden'"><span class="nm">Camello</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">48</td>
+<td class="ti"><div class="titw"><span class="titn t-md">70%</span><i class="bar"><b class="t-md" style="width:70%"></b></i></div></td>
+<td class="c"><span class="pr">5.760.000 €</span><br><span class="up">▲ 180.000 €</span></td>
+<td class="vd"><span class="riv">◆ Luismi_Haz</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Luismi_Haz y pide 5.760.000 EUR. No pasaria el liston (SUPERA_PRESUPUESTO), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/91.png" alt="" title="Alavés" onerror="this.style.visibility='hidden'"><span class="nm">Mariano</span> <span class="pos del">DEL</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">41</td>
+<td class="ti"><div class="titw"><span class="titn t-lo">40%</span><i class="bar"><b class="t-lo" style="width:40%"></b></i></div></td>
+<td class="c"><span class="pr">5.290.000 €</span><br><span class="up">▲ 110.000 €</span></td>
+<td class="vd"><span class="riv">◆ Manzagool</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Manzagool y pide 5.180.000 EUR. No pasaria el liston (SUPERA_PRESUPUESTO), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="">
+<td class="q"><img class="esc" src="https://cdn.biwenger.com/cdn-cgi/image/f=avif/i/t/87.png" alt="" title="Betis" onerror="this.style.visibility='hidden'"><span class="nm">Álvaro Valles</span> <span class="pos por">POR</span></td>
+<td class="es"><span class="ok" title="Disponible">✔</span></td>
+<td class="pt">28</td>
+<td class="ti"><div class="titw"><span class="titn t-hi">90%</span><i class="bar"><b class="t-hi" style="width:90%"></b></i></div></td>
+<td class="c"><span class="pr">4.930.000 €</span><br><span class="up">▲ 40.000 €</span></td>
+<td class="vd"><span class="riv">◆ Manzagool</span></td>
+<td class="tm"><span class="cd" data-t="1789362000">--:--:--</span></td>
+<td class="ac"><span class="a-riv">lo vende un rival</span></td>
+<td class="pq"><b class="rev">para revender</b></td>
+<td class="pj"><span class="muted">no pujaríamos</span></td>
+<td class="pw">Lo vende Manzagool y pide 4.890.000 EUR. No pasaria el liston (RENDIMIENTO_INSUFICIENTE), pero la compra a managers esta cerrada: se ofrece, no se compra, y la tasa de aceptacion no esta medida. Se mira.</td>
+</tr>
+<tr class="mas"><td colspan="11">… y 47 más, mismo orden</td></tr>
+</tbody></table></div></div>
+<div class="leyenda"><span><b class="ok">✔</b> disponible</span><span><b class="inj">✚</b> lesionado</span><span><i class="card red"></i> sancionado</span><span><b class="dud">?</b> duda</span>
+<span style="margin-left:20px"><b class="pos por">POR</b> <b class="pos def">DEF</b> <b class="pos med">MED</b> <b class="pos del">DEL</b></span></div>
+<div class="nota">Previa con datos reales de hoy. PTS son los puntos de esta temporada; TITULAR, la probabilidad de jugar el próximo partido según las fuentes del ojeador.</div>
+<script>
+function tick(){const now=Date.now()/1000;
+document.querySelectorAll('.cd').forEach(function(e){let s=Math.max(0,Math.floor(+e.dataset.t-now));
+const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),g=String(s%60).padStart(2,'0');
+e.textContent=h+':'+m+':'+g;e.classList.toggle('urg',s<3600);});}
+tick();setInterval(tick,1000);
+</script>
