@@ -79,9 +79,18 @@ NO_SE_PINTAN = {
     # memoria de lo que apuntamos.
     "publicacion": "memoria propia; la pantalla enseña la foto",
 
-    # La segunda opinion a horizonte de temporada. Vive en
-    # AUDITORIA a traves de `seasonHorizon`, con otro nombre.
-    "sombra": "se pinta via `seasonHorizon`",
+    # EL LIBRO DE SOMBRA DE LAS COMPUERTAS.
+    #
+    #     71 casos en 4 dias; hacen falta 280 para decidir si se
+    #     retira alguna. Es un contador que corre solo y que no
+    #     dice nada hasta que llega al final.
+    #
+    #     Al escribir esta lista puse aqui que se pintaba via
+    #     `seasonHorizon`. ERA FALSO: `seasonHorizon` sale de
+    #     `raw.season_horizon`, que es otra clave. Un motivo
+    #     inventado en una lista de excepciones es exactamente la
+    #     podredumbre contra la que existe esta guardia.
+    "sombra": "contador de compuertas; sin cuadro hasta los 280",
 }
 
 
