@@ -4535,8 +4535,42 @@ def build_dashboard_state() -> dict:
             ]
         )[:12]
 
+        # EL ORDEN DEL CARRIL, ENTERO Y COMO LISTA DE IDS
+        # (13/09/2026)
+        #
+        #     `preferencia` se corta en 12 porque su panel enseña
+        #     una lista corta. Pero el cuadro de MERCADO ordena
+        #     el bloque "para revender" con ESTE criterio, y hoy
+        #     hay 43 filas de esas: con solo 12 publicadas, 35
+        #     quedarian ordenadas por el criterio del TABLON, que
+        #     no es el que decide sobre ellas.
+        #
+        #     ESTO NO CALCULA NADA NUEVO. Es la MISMA llamada a
+        #     `orden_de_preferencia` —la del motor— sin cortar, y
+        #     publicada como lista de ids para que la pantalla no
+        #     tenga que reimplementar la tabla de primas medidas.
+        #
+        #     Un dato, un nombre: si la pantalla ordenara por su
+        #     cuenta, la tabla de recompras viviria en dos
+        #     sitios.
+        orden_del_carril = [
+            safe_int(fila.get("id"))
+            for fila in orden_de_preferencia(
+                [
+                    dict(fila)
+                    for fila in (
+                        (acquisition or {}).get("targets") or []
+                    )
+                    if isinstance(fila, dict)
+                ]
+            )
+            if safe_int(fila.get("id"))
+        ]
+
     except Exception as error:                      # noqa: BLE001
         preferencia = []
+
+        orden_del_carril = []
 
     # ==========================================================
     # EL LIBRO EN LA SOMBRA (10/09/2026)
@@ -5087,7 +5121,17 @@ def build_dashboard_state() -> dict:
                 #     le pasara `state` a secas, esta pantalla
                 #     diria "no hay candidatos" mientras el
                 #     ciclo puja por tres.
-                "acquisition": acquisition,
+                # EL TABLERO, CON EL ORDEN DEL CARRIL DENTRO.
+        #
+        #     La pantalla ordena el bloque "para revender" con el
+        #     criterio del carril, que es el que decide sobre esas
+        #     filas. Se le da hecho —es la misma llamada del
+        #     motor— para que no reimplemente la tabla de primas
+        #     medidas: un dato, un sitio.
+        "acquisition": {
+            **(acquisition or {}),
+            "orden_del_carril": orden_del_carril,
+        },
                 "exposure": exposure,
                 "market_clock": market_clock,
                 "rival_intelligence": {

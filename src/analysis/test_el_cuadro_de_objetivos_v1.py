@@ -59,6 +59,9 @@ MERCADO = RAIZ / "dashboard-v8" / "src" / "pages" / "MarketPage.jsx"
 
 ORDEN = RAIZ / "dashboard-v8" / "src" / "lib" / "orden.js"
 
+# El guion que comprueba los bloques, con node.
+GUION_DE_BLOQUES = 'import { agrupado } from "./src/lib/orden.js";\n\nconst filas = [\n  { id: 10, name: "once 1",     intent: "XI_UPGRADE" },\n  { id: 11, name: "once 2",     intent: "XI_UPGRADE" },\n  { id: 20, name: "revender A", intent: "SPECULATION" },\n  { id: 21, name: "revender B", intent: "SPECULATION" },\n  { id: 22, name: "revender C", intent: "SPECULATION" },\n  { id: 30, name: "basura",     decision: "SIN_VALOR" }\n];\n\nconst bloques = agrupado(filas, [22, 21, 20]);\n\nconst de = (clave) =>\n  (bloques.find((b) => b.clave === clave) || { filas: [] })\n    .filas.map((f) => f.name);\n\nconsole.log(JSON.stringify({\n  claves: bloques.map((b) => b.clave),\n  once: de("once"),\n  revender: de("revender"),\n  noVale: de("noVale"),\n  sinOrden: agrupado(filas, [])\n    .find((b) => b.clave === "revender")\n    .filas.map((f) => f.name)\n}));\n'
+
 
 # Las que el dueño mando fuera, con sus palabras: "no quiero
 # verlo, no me sirve".
@@ -174,8 +177,10 @@ def test_pujariamos_nunca_sale_en_blanco() -> None:
     # Y cuando SI se puja, sale el importe. Se mira el CUERPO de
     # la tabla, no la cabecera: "PUJARÍAMOS" sale en las dos y
     # la primera rebanada cogia la de arriba.
+    # El cuerpo son ahora VARIOS `<tbody>`, uno por bloque, asi
+    # que se mira desde donde empieza el mapa de bloques.
     cuerpo = fuente[
-        fuente.index("<tbody>") : fuente.index("</tbody>")
+        fuente.index("bloques.map(") : fuente.index("</table>")
     ]
 
     assert 'target.decision === "BID"' in cuerpo, (
@@ -269,23 +274,24 @@ def test_el_que_tiene_puja_va_primero() -> None:
         return
 
     guion = """
-import { conPujaPrimero } from "./src/lib/orden.js";
+import { agrupado } from "./src/lib/orden.js";
 
 const filas = [
-  { name: "sin puja A", live_bid: 0 },
-  { name: "sin puja B", live_bid: 0 },
-  { name: "CON PUJA",   live_bid: 2760000 },
-  { name: "sin puja C", live_bid: 0 }
+  { id: 1, name: "sin puja A", live_bid: 0, intent: "SPECULATION" },
+  { id: 2, name: "sin puja B", live_bid: 0, intent: "SPECULATION" },
+  { id: 3, name: "CON PUJA",   live_bid: 2760000, intent: "SPECULATION" },
+  { id: 4, name: "sin puja C", live_bid: 0, intent: "SPECULATION" }
 ];
 
-const ordenadas = conPujaPrimero(filas);
+const bloques = agrupado(filas, [1, 2, 4]);
 
 console.log(JSON.stringify({
-  primera: ordenadas[0].name,
-  cuantas: ordenadas.length,
-  resto: ordenadas.slice(1).map((f) => f.name),
-  vacia: conPujaPrimero([]).length,
-  rota: conPujaPrimero(null).length
+  primerBloque: bloques[0].clave,
+  primera: bloques[0].filas[0].name,
+  cuantas: bloques.reduce((n, b) => n + b.filas.length, 0),
+  resto: bloques[1].filas.map((f) => f.name),
+  vacia: agrupado([], []).length,
+  rota: agrupado(null, null).length
 }));
 """
 
@@ -314,6 +320,8 @@ console.log(JSON.stringify({
 
     visto = json.loads(salida.stdout.strip().splitlines()[-1])
 
+    assert visto["primerBloque"] == "conPuja", visto
+
     assert visto["primera"] == "CON PUJA", (
         f"la primera fila es «{visto['primera']}»: lo que esta "
         f"en juego no se lee primero"
@@ -330,9 +338,8 @@ console.log(JSON.stringify({
         "sin puja B",
         "sin puja C",
     ], (
-        f"el resto ha cambiado de orden: {visto['resto']}. Eso "
-        f"seria una puntuacion nueva, y la pantalla no puede "
-        f"tener una"
+        f"el resto no sigue el orden del carril: "
+        f"{visto['resto']}"
     )
 
     # Nunca lanza.
@@ -348,15 +355,164 @@ def test_la_tabla_usa_ese_orden_y_no_otro() -> None:
 
     fuente = MERCADO.read_text(encoding="utf-8")
 
-    assert "conPujaPrimero(acquisition.targets)" in fuente, (
-        "la tabla no ordena por la funcion"
+    assert "agrupado(" in fuente, (
+        "la tabla no agrupa por «para que»"
     )
 
-    assert "ordenados.map(" in fuente, (
+    assert "bloque.filas.map(" in fuente, (
         "la tabla recorre otra cosa: el orden no se aplicaria"
     )
 
     assert ORDEN.exists(), "no existe `orden.js`"
+
+
+def test_cada_bloque_usa_su_propio_orden() -> None:
+    """
+    NO HAY UN ORDEN UNICO PORQUE NO HAY UN SOLO INTERES.
+
+    "Para el once" se mide en PUNTOS y "para revender" en PRIMA
+    DEL COMPUTER, y no tenemos el cambio entre las dos unidades.
+    Ordenar los sesenta por uno solo haria que la mitad de las
+    filas salieran ordenadas por un criterio que no decide sobre
+    ellas.
+
+        el once      conserva el orden de LLEGADA, que ya es el
+                     del tablon
+        revender     por `orden_del_carril`, la lista de ids que
+                     publica la telemetria llamando a
+                     `orden_de_preferencia`, la MISMA funcion del
+                     motor
+
+    Si algun dia alguien unifica los dos ordenes, esta guardia se
+    pone roja y se habla antes, en vez de enterarse por la
+    pantalla.
+    """
+
+    if shutil.which("node") is None:
+        print("     AVISO: sin `node` no se puede ejecutar.")
+        return
+
+    carpeta = RAIZ / "dashboard-v8"
+
+    fichero = carpeta / "_bloques_de_prueba.mjs"
+
+    try:
+        fichero.write_text(GUION_DE_BLOQUES, encoding="utf-8")
+
+        salida = subprocess.run(
+            ["node", str(fichero)],
+            cwd=str(carpeta),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+
+    finally:
+        if fichero.exists():
+            fichero.unlink()
+
+    assert salida.returncode == 0, (
+        salida.stdout + salida.stderr
+    )
+
+    visto = json.loads(salida.stdout.strip().splitlines()[-1])
+
+    # REGLA 24: si el fixture no trajera los tres bloques, esto
+    # no probaria nada.
+    assert visto["claves"] == ["once", "revender", "noVale"], (
+        visto
+    )
+
+    # EL ONCE: orden de llegada, que es el del TABLON.
+    assert visto["once"] == ["once 1", "once 2"], (
+        f"el bloque del once ha cambiado de orden: "
+        f"{visto['once']}. Ese orden es el del tablon y la "
+        f"pantalla no puede tener otro"
+    )
+
+    # REVENDER: el del CARRIL, aunque llegue al reves.
+    assert visto["revender"] == [
+        "revender C",
+        "revender B",
+        "revender A",
+    ], (
+        f"el bloque de revender no usa el orden del carril: "
+        f"{visto['revender']}"
+    )
+
+    # NO VALE, al final.
+    assert visto["noVale"] == ["basura"], visto
+
+    # Y SIN LA LISTA DEL MOTOR no se inventa un orden: se queda
+    # como llega.
+    assert visto["sinOrden"] == [
+        "revender A",
+        "revender B",
+        "revender C",
+    ], (
+        f"sin el orden del motor la pantalla se ha inventado "
+        f"uno: {visto['sinOrden']}"
+    )
+
+
+def test_cada_bloque_lleva_su_numero() -> None:
+    """
+    Hoy no se ve cuantos hay de cada cosa, y es informacion
+    gratis.
+    """
+
+    fuente = MERCADO.read_text(encoding="utf-8")
+
+    assert "bloque.titulo" in fuente, (
+        "los bloques no llevan cabecera"
+    )
+
+    assert "bloque.filas.length" in fuente, (
+        "la cabecera no dice cuantos hay"
+    )
+
+    assert "bloques.map(" in fuente, (
+        "la tabla no recorre los bloques"
+    )
+
+
+def test_el_orden_del_carril_lo_publica_el_motor() -> None:
+    """
+    LA PANTALLA NO REIMPLEMENTA LA TABLA DE PRIMAS MEDIDAS.
+
+    `expected_buyback_percent` sale de 34 recompras medidas. Si
+    la pantalla ordenara por su cuenta, esa tabla viviria en dos
+    sitios y el dia que se remida cambiaria uno solo.
+
+    La telemetria llama a `orden_de_preferencia` —la del motor— y
+    publica el resultado como lista de ids.
+    """
+
+    estado = (
+        RAIZ / "src" / "telemetry" / "dashboard_state.py"
+    ).read_text(encoding="utf-8")
+
+    assert "orden_del_carril" in estado, (
+        "la telemetria no publica el orden del carril"
+    )
+
+    assert "orden_de_preferencia(" in estado, (
+        "no se usa la funcion del motor"
+    )
+
+    # Y la pantalla lo LEE, no lo calcula.
+    orden = ORDEN.read_text(encoding="utf-8")
+
+    for inventado in (
+        "expected_buyback_percent",
+        "3.67",
+        "2.85",
+        "1.52",
+    ):
+        assert inventado not in orden, (
+            f"`orden.js` lleva `{inventado}`: la tabla de primas "
+            f"medidas viviria en dos sitios"
+        )
 
 
 TESTS = [
@@ -367,6 +523,9 @@ TESTS = [
     test_el_por_que_enseña_la_frase_entera,
     test_el_que_tiene_puja_va_primero,
     test_la_tabla_usa_ese_orden_y_no_otro,
+    test_cada_bloque_usa_su_propio_orden,
+    test_cada_bloque_lleva_su_numero,
+    test_el_orden_del_carril_lo_publica_el_motor,
 ]
 
 

@@ -1,4 +1,4 @@
-import { conPujaPrimero } from "../lib/orden";
+import { agrupado } from "../lib/orden";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 import { tonoDe } from "../lib/tono";
 
@@ -785,8 +785,17 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
 
   const objetivos = acquisition.targets || [];
 
-  // Los que ya tienen puja puesta, primeros. Ver `orden.js`.
-  const ordenados = conPujaPrimero(acquisition.targets);
+  /* AGRUPADO POR "PARA QUE", cada bloque con SU criterio.
+   *
+   *   No hay un orden unico porque no hay un solo interes: el
+   *   once se mide en puntos y la reventa en prima del Computer,
+   *   y no tenemos el cambio entre las dos unidades.
+   *
+   *   Ver `orden.js`. */
+  const bloques = agrupado(
+    acquisition.targets,
+    acquisition.orden_del_carril
+  );
 
   // Contado sobre las filas que se estan pintando, no sobre un
   // resumen aparte. Si la tabla no lo ensena, no cuenta.
@@ -920,8 +929,24 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th>POR QUÉ</th>
           </tr>
         </thead>
-        <tbody>
-          {ordenados.map((target) => {
+        {bloques.map((bloque) => (
+          <tbody key={bloque.clave}>
+            {/* CADA BLOQUE CON SU NUMERO. Hoy no se veia cuantos
+                hay de cada cosa, y es informacion gratis. */}
+            <tr>
+              <th
+                colSpan={5}
+                style={{
+                  textAlign: "left",
+                  paddingTop: 10,
+                  fontSize: 9,
+                  letterSpacing: ".08em"
+                }}
+              >
+                {bloque.titulo} ({bloque.filas.length})
+              </th>
+            </tr>
+            {bloque.filas.map((target) => {
             const puja = Number(target.live_bid || 0) > 0;
 
             const sube = Number(target.price_increment || 0);
@@ -989,7 +1014,8 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
               </tr>
             );
           })}
-        </tbody>
+          </tbody>
+        ))}
       </table>
 
       {recortados > 0 && (
