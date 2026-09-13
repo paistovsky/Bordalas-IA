@@ -397,12 +397,85 @@ def test_el_carril_llama_al_desvio_por_donde_la_rueda() -> None:
     )
 
 
+def test_la_hora_de_la_puja_se_pasa_no_se_deduce() -> None:
+    """
+    LA VERJA ROJA DEL 13/09/2026, Y EL CICLO PARADO.
+
+        04:45 verde · 04:50 verde · 07:15 ROJO · 08:07 ROJO
+
+    Mismo commit. Entre medias solo paso el reset de las 07:00.
+
+    EL MECANISMO
+
+        El ejecutor anotaba `placed_at` con `_ahora()` en vez de
+        con el `momento` que se le pasa. Y de `placed_at` depende
+        CUAL ES EL RESET que resuelve la puja: una puesta antes
+        de las 07:00 de Madrid se resuelve en el reset de ese
+        dia; una puesta despues, en el del dia siguiente.
+
+        Asi que al pasar el reset de las 07:00, la puja del
+        fixture dejaba de estar resuelta y la guardia hermana se
+        ponia roja sin que nadie hubiera tocado una linea.
+
+    ES LA SEGUNDA VEZ. `test_peticiones_v1` deducia la fase del
+    reloj en vez de que se la dieran. Una prueba que cambia con
+    la hora y no con el codigo no prueba el codigo, y una que
+    para el ciclo de produccion cuesta dinero: esta lo tuvo
+    parado desde las 04:50.
+
+    EL ARREGLO NUNCA ES RELAJAR LA ASERCION. Es que la hora se le
+    PASE.
+    """
+
+    libro, escritor, salida = _una_vuelta()
+
+    assert escritor.pujas, salida.get("reason")
+
+    entrada = list(libro["bids"].values())[0]
+
+    # LA HORA QUE SE LE DIO, no la del reloj de la maquina.
+    assert entrada["placed_at"] == CUANDO.isoformat(), (
+        f"`placed_at` sale {entrada['placed_at']} y se le paso "
+        f"{CUANDO.isoformat()}: el ejecutor deduce la hora en vez "
+        f"de usar la que recibe, y entonces esta guardia depende "
+        f"del reloj"
+    )
+
+    # Y EL CODIGO, no solo el resultado: que no vuelva a
+    # colarse un `_ahora()` donde hay un `momento`.
+    fuente = (
+        RAIZ / "src" / "actions" / "carril_executor.py"
+    ).read_text(encoding="utf-8")
+
+    codigo = chr(10).join(
+        linea
+        for linea in fuente.splitlines()
+        if not linea.strip().startswith("#")
+    )
+
+    assert "puesta_en = _ahora()" not in codigo, (
+        "ha vuelto `puesta_en = _ahora()`: es el fallo que dejo "
+        "el ciclo parado el 13/09"
+    )
+
+    # Los `_ahora()` que QUEDAN son de `ran_at` —cuando corrio de
+    # verdad— y esos si son ahora: es el indicador de la doctrina
+    # 37, que lo enciende el hecho.
+    assert codigo.count("_ahora()") == 4, (
+        f"hay {codigo.count('_ahora()')} usos de `_ahora()` y se "
+        f"esperaban 4 (la definicion y los tres `ran_at`). Si has "
+        f"añadido uno, comprueba que no sea una hora que deberia "
+        f"venir dada"
+    )
+
+
 TESTS = [
     test_la_puja_del_carril_se_anota,
     test_el_carril_tambien_pierde,
     test_el_carril_no_puja_redondo,
     test_el_desvio_no_pasa_del_tope_por_operacion,
     test_el_carril_llama_al_desvio_por_donde_la_rueda,
+    test_la_hora_de_la_puja_se_pasa_no_se_deduce,
 ]
 
 

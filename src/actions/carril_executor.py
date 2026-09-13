@@ -365,10 +365,35 @@ def correr(
                 )
                 continue
 
-            # La MISMA marca de tiempo para los dos libros: si
-            # discrepan, un dia habra que cruzarlos y no se
-            # podra.
-            puesta_en = _ahora()
+            # LA HORA SE LE PASA, NO SE DEDUCE (13/09/2026)
+            #
+            #     Aqui ponia `_ahora()`, y el `momento` de esta
+            #     vuelta —que puede venir dado— se ignoraba.
+            #
+            #     Costo la verja roja y el ciclo parado desde las
+            #     04:50: la guardia pasaba a las 04:45 y a las
+            #     04:50 y se ponia roja a las 07:15 y a las 08:07
+            #     CON EL MISMO COMMIT. Lo unico que cambiaba era
+            #     el reloj.
+            #
+            #     El mecanismo: de `placed_at` depende cual es el
+            #     reset que resuelve la puja. Con la hora de
+            #     verdad, una puja "puesta" antes de las 07:00 de
+            #     Madrid se resuelve en el reset de ese dia; una
+            #     puesta despues, en el del dia siguiente. La
+            #     guardia reconciliaba a una hora fija, asi que
+            #     al pasar el reset de las 07:00 la puja dejaba
+            #     de estar resuelta.
+            #
+            #     Es la segunda vez: `test_peticiones_v1` deducia
+            #     la fase del reloj en vez de que se la dieran.
+            #     Una prueba que cambia con la hora y no con el
+            #     codigo no prueba el codigo.
+            #
+            #     Y la misma marca para los dos libros: si
+            #     discrepan, un dia habra que cruzarlos y no se
+            #     podra.
+            puesta_en = momento.isoformat()
 
             try:
                 # LA UNICA ESCRITURA DE ESTE FICHERO.
