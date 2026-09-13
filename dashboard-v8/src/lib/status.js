@@ -302,6 +302,13 @@ export function normalizeStatus(raw = {}) {
        una lista blanca: lo que no se nombre aqui muere en `raw`
        y el cuadro sale vacio sin poder decir por que — ya pasó
        con `todaLaLiga`. Hay guardia. */
+    losRivales: raw.losRivales || {
+      available: false,
+      managers: [],
+      lectura: {},
+      reason: "La telemetría no publicó `losRivales` en este ciclo."
+    },
+
     losSentidos: raw.losSentidos || {
       available: false,
       sentidos: [],

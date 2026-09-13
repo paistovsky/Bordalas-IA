@@ -926,3 +926,54 @@ td.pj-c .muted{font-size:11px}
 /* Nuestros jugadores dentro de la fila de su equipo. */
 .minijug{display:inline-block;margin-right:8px;color:#cbd5e1;
          font-size:11px;white-space:nowrap}
+
+
+/* ============================================================
+   ESTRATEGIA: OJEADOR, QUIEN MEJORA EL ONCE, LOS RIVALES
+   ------------------------------------------------------------
+   CONTRASTE MEDIDO sobre --pan #111a24:
+
+     a-todas (unanimidad)  #4ade80  10,07
+     a-dos                 #fbbf24  10,51
+     a-una                 #7b8794   4,79
+     no-vigila             #fbbf24  10,51
+     no-cerrado            #f87171   6,34
+     no-ciego              #fca5a5   9,24
+   ============================================================ */
+
+/* EL REPARTO de arriba de un cuadro: el numero que da el tamaño
+   de lo que se esta mirando. */
+.reparto{margin:0 0 9px;padding:7px 9px;background:var(--pan2);
+         border:1px solid var(--line);border-radius:6px;
+         font-size:11.5px;color:#9fb0c0;text-align:left}
+.reparto b{font-variant-numeric:tabular-nums}
+
+/* ACUERDO ENTRE FUENTES. Una sola fuente no es un consenso. */
+.a-todas{color:#4ade80;font-weight:600}
+.a-dos{color:#fbbf24}
+.a-una{color:#7b8794}
+
+/* ¿SE PUEDE FICHAR HOY? Tres noes distintos, tres colores: cada
+   uno lleva a un arreglo distinto y juntarlos los esconde. */
+.no-vigila{color:#fbbf24}
+.no-cerrado{color:#f87171}
+.no-ciego{color:#fca5a5}
+.ya-nuestro{color:#60a5fa}
+
+/* Subtitulo de la segunda tabla de un mismo cuadro. */
+.sub2{font:700 11px/1 sans-serif;letter-spacing:.08em;
+      text-transform:uppercase;color:var(--dim);
+      margin:13px 0 7px}
+
+/* LOS DOS TECHOS, al pie de los planes (13/09/2026, noche).
+   Uno se calcula y el otro no: se ven los dos, en columnas
+   iguales, para que no parezca que hay uno solo. */
+.techos{display:grid;grid-template-columns:1fr 1fr;gap:10px;
+        margin-top:11px}
+.techo{background:var(--pan2);border:1px solid var(--line);
+       border-radius:6px;padding:9px 11px}
+.techo h4{font:700 11px/1 sans-serif;letter-spacing:.06em;
+          text-transform:uppercase;color:#e6edf3;margin-bottom:6px}
+.techo p{font-size:11.5px;color:#9fb0c0;margin-bottom:5px}
+.techo small{font-size:10.5px;color:var(--dim)}
+@media (max-width:900px){.techos{grid-template-columns:1fr}}

@@ -1,3 +1,6 @@
+import ElOjeadorPanel from "../components/ElOjeadorPanel";
+import QuienMejoraElOncePanel from "../components/QuienMejoraElOncePanel";
+import LosRivalesPanel from "../components/LosRivalesPanel";
 import LosSentidosPanel from "../components/LosSentidosPanel";
 import ElCalendarioPanel from "../components/ElCalendarioPanel";
 import DoctrinaPanel from "../components/DoctrinaPanel";
@@ -285,9 +288,18 @@ export default function BrainPage({ data }) {
           plazo arriba, y debajo la maquinaria que lo ejecuta. */}
       <StrategyPanel data={data} />
 
+      {/* EL ORDEN DE LA PAGINA (13/09/2026, noche):
+          los sentidos, el plan, el ojeador, quien mejora el
+          once, el calendario, los rivales y los planes. */}
+      <ElOjeadorPanel data={data} />
+
+      <QuienMejoraElOncePanel data={data} />
+
       {/* EL CALENDARIO. Dato vivo, cero decisiones: es para ver
           si dice cosas sensatas antes de conectarlo a nada. */}
       <ElCalendarioPanel data={data} />
+
+      <LosRivalesPanel data={data} />
 
       {/* Como piensa tapar la deuda, que es la primera pregunta
           cuando el saldo esta en rojo. */}
@@ -300,6 +312,7 @@ export default function BrainPage({ data }) {
       <SolvencyPlansPanel
         solvency={data.solvency || {}}
         summary={data.summary || {}}
+        data={data}
       />
 
       <section className="pan">

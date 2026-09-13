@@ -3655,6 +3655,7 @@ def build_dashboard_state() -> dict:
                 != safe_int(board.get("current_user_id"))
             ],
             en_el_mercado=_en_el_mercado,
+            nuestro_id=board.get("current_user_id"),
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -5272,6 +5273,38 @@ def build_dashboard_state() -> dict:
         }
 
     # ==========================================================
+    # LOS RIVALES (13/09/2026, noche)
+    # ==========================================================
+    #
+    #     La clasificacion dice el puesto y los puntos. No dice lo
+    #     unico que explica la diferencia entre dos managers con
+    #     los mismos puntos: CUANTO LES CUESTA HACERLOS.
+    #
+    #     Es juntar `fantasy_standings` con el censo de
+    #     plantillas, y contar los puestos en vez de escribirlos.
+    #     Ni una peticion mas.
+    try:
+        from src.analysis.los_rivales import los_rivales
+
+        _los_rivales = los_rivales(
+            clasificacion=(
+                (league_center or {}).get("fantasy_standings")
+            ),
+            plantillas=_toda_la_liga.get("plantillas"),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _los_rivales = {
+            "available": False,
+            "managers": [],
+            "lectura": {},
+            "reason": (
+                f"No se pudieron montar los rivales: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # ==========================================================
     # LOS SENTIDOS DE PEPE (13/09/2026, noche)
     # ==========================================================
     #
@@ -5517,6 +5550,10 @@ def build_dashboard_state() -> dict:
         # DE QUE SE ENTERA PEPE Y DE CUANDO. El cuadro que
         # explica por que hoy no se puja por nadie.
         "losSentidos": _los_sentidos,
+
+        # LOS OCHO, CON LO QUE SACAN POR MILLON. Los puestos van
+        # contados, no escritos.
+        "losRivales": _los_rivales,
 
         # LOS PROXIMOS PARTIDOS DE LOS NUESTROS. Para mirar: no
         # decide nada todavia.

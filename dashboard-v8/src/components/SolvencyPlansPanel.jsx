@@ -154,7 +154,13 @@ function Plan({ plan, elegido }) {
   );
 }
 
-export default function SolvencyPlansPanel({ solvency, summary }) {
+export default function SolvencyPlansPanel({
+  solvency,
+  summary,
+  // Para el pie de los dos techos, que salen del
+  // bloque de objetivos.
+  data
+}) {
   const necesita = Boolean(solvency?.needed);
   const planes = solvency?.plans || {};
   const lista = planes.plans || [];
@@ -308,11 +314,106 @@ export default function SolvencyPlansPanel({ solvency, summary }) {
         </p>
       </div>
 
+      {/* LOS DOS TECHOS, AL PIE (13/09/2026, noche).
+
+          Son las dos preguntas de cualquier puja: hasta dónde se
+          puede pagar por alguien QUE SE VA A REVENDER, y hasta
+          dónde por alguien QUE SE QUEDA.
+
+          El primero se calcula. El segundo NO, y se dice con la
+          frase del motor. Un techo supuesto sería el número que
+          uno quiera, y con él se puja de verdad. */}
+      <LosDosTechos data={data} />
+
       <p className="note" style={{ textAlign: "left" }}>
         Que exista un plan C no significa que vaya a pasar. Significa que
         aunque todo salga mal, la deuda se puede tapar. Para eso se calculan
         los tres.
       </p>
     </section>
+  );
+}
+
+function LosDosTechos({ data }) {
+  /* Se coge del primer objetivo que traiga el bloque: el techo
+     del comerciante se calcula POR JUGADOR —depende de su
+     precio— y lo que interesa aquí es enseñar que los dos
+     existen y cuál de ellos no se sabe.
+
+     No se promedia nada: promediar dos techos de dos jugadores
+     distintos daría un número que no es el techo de nadie. */
+  const filas = (data?.acquisition?.targets || []).filter(
+    (t) => t && t.los_dos_techos
+  );
+
+  if (!filas.length) {
+    return (
+      <p className="note" style={{ textAlign: "left" }}>
+        <b className="mal">
+          No llegó ningún objetivo con los dos techos: no se
+          puede decir hasta dónde pujaría Pepe por nadie.
+        </b>
+      </p>
+    );
+  }
+
+  const muestra = filas[0];
+
+  const techos = muestra.los_dos_techos || {};
+
+  const comerciante = techos.comerciante || {};
+
+  const seQueda = techos.el_que_se_queda || {};
+
+  const conQueda = filas.filter(
+    (t) =>
+      ((t.los_dos_techos || {}).el_que_se_queda || {}).available
+  ).length;
+
+  return (
+    <div className="techos">
+      <div className="techo">
+        <h4>El techo del comerciante</h4>
+        <p>
+          {comerciante.available ? (
+            <>
+              <b className="pos-d">SE CALCULA.</b>{" "}
+              {comerciante.reason}
+            </>
+          ) : (
+            <>
+              <b className="mal">No se calcula.</b>{" "}
+              {comerciante.reason}
+            </>
+          )}
+        </p>
+        <small>
+          Ejemplo sobre {muestra.name}. Se calcula por jugador:
+          depende de lo que cueste.
+        </small>
+      </div>
+
+      <div className="techo">
+        <h4>El techo del que se queda</h4>
+        <p>
+          {seQueda.available ? (
+            <>
+              <b className="pos-d">SE CALCULA.</b>{" "}
+              {seQueda.reason}
+            </>
+          ) : (
+            <>
+              <b className="mal">NO SE CALCULA</b> para ninguno de
+              los {filas.length} objetivos ({conQueda} con dato).{" "}
+              <span className="bloquea">{seQueda.reason}</span>
+            </>
+          )}
+        </p>
+        <small>
+          Mientras no se calcule, en una subasta por un titular no
+          se compite: no hay con qué decidir hasta dónde subir.
+        </small>
+      </div>
+    </div>
   );
 }

@@ -336,19 +336,40 @@ def _el_ojeador(scout, ahora) -> dict:
     if jornada is not None:
         de_cuando = f"Jornada {jornada} · {cuanto['texto']}"
 
-    fuentes = [
-        f for f in (datos.get("sources") or []) if isinstance(f, dict)
-    ]
+    # LAS FUENTES SON UN DICCIONARIO, NO UNA LISTA.
+    #
+    #     `scout.sources` es `{"FUTBOLFANTASY": {...}, ...}`.
+    #     Recorrerlo como lista da las CLAVES —cadenas— y el
+    #     filtro `isinstance(f, dict)` las tiraba todas: salia
+    #     "0 de 0 fuentes vivas" con tres fuentes vivas.
+    #
+    #     Un cero por una suposicion sobre la forma del dato es
+    #     el mismo fallo que "0 jornadas · 0 fichas": se lee como
+    #     una averia y no lo es.
+    #
+    #     Y el motor ya publica el recuento en `sources_ok`: se
+    #     coge de ahi en vez de volver a contarlo, que es como
+    #     dos numeros de la misma cosa acaban discrepando.
+    fuentes = datos.get("sources") or {}
 
-    vivas = len(
-        [
-            f
-            for f in fuentes
-            if str(f.get("status") or "").upper()
-            in ("OK", "VIVA", "ALIVE")
-            or f.get("available")
-        ]
-    )
+    if isinstance(fuentes, dict):
+        total = len(fuentes)
+
+        vivas = safe_int(
+            datos.get("sources_ok"),
+            default=len(
+                [
+                    v
+                    for v in fuentes.values()
+                    if isinstance(v, dict) and v.get("ok")
+                ]
+            ),
+        )
+
+    else:
+        total = len(fuentes)
+
+        vivas = safe_int(datos.get("sources_ok"))
 
     return {
         "sentido": "Ojeador de precios",
@@ -364,7 +385,7 @@ def _el_ojeador(scout, ahora) -> dict:
             f"{cuanto['texto']}. No está roto: está caduco."
         ),
         "detalle": (
-            f"{vivas} de {len(fuentes)} fuentes vivas · "
+            f"{vivas} de {total} fuentes vivas · "
             f"{safe_int(datos.get('players_count'))} jugadores"
         ),
     }
@@ -375,9 +396,10 @@ def _la_prensa(press, ahora) -> dict:
 
     cuanto = edad(datos.get("generated_at"), ahora)
 
-    fuentes = [
-        f for f in (datos.get("sources") or []) if isinstance(f, dict)
-    ]
+    # Misma precaucion que en el ojeador: puede llegar como
+    # diccionario o como lista, y contarlo mal da un cero que
+    # parece una averia.
+    fuentes = datos.get("sources") or {}
 
     return {
         "sentido": "Prensa",

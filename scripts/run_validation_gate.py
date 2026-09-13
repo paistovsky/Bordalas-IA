@@ -250,6 +250,7 @@ TESTS = [
     "src.analysis.test_la_lista_blanca_v1",
     "src.analysis.test_los_sentidos_v1",
     "src.analysis.test_el_calendario_v1",
+    "src.analysis.test_los_rivales_v1",
     "src.analysis.test_el_plato_del_carril_v1",
     "src.analysis.test_la_puja_del_carril_v1",
     "src.analysis.test_los_dos_techos_v1",

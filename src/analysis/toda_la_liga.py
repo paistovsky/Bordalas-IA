@@ -158,7 +158,9 @@ def _de_quien_es(pid, nuestros, del_computer, de_rivales):
     return "libre"
 
 
-def _las_ocho_plantillas(catalogo, nuestros, managers) -> dict:
+def _las_ocho_plantillas(
+    catalogo, nuestros, managers, nuestro_id=None
+) -> dict:
     """
     CUANTOS JUGADORES TRAE CADA PLANTILLA. Publicado, no deducido.
 
@@ -193,6 +195,13 @@ def _las_ocho_plantillas(catalogo, nuestros, managers) -> dict:
         equipos.append(
             {
                 "nombre": "Pepe Bordalás",
+                # EL ID, PARA CRUZAR POR NUMERO Y NO POR TEXTO.
+                #
+                #     La clasificacion de la liga y este censo se
+                #     cruzan en el cuadro de rivales. Por nombre
+                #     funciona hasta que alguien se cambia el
+                #     suyo; el id no cambia nunca.
+                "user_id": safe_int(nuestro_id) or None,
                 "es_nuestra": True,
                 "jugadores": len(nuestros),
             }
@@ -224,6 +233,9 @@ def _las_ocho_plantillas(catalogo, nuestros, managers) -> dict:
                         manager.get("name")
                         or manager.get("manager")
                         or "sin nombre"
+                    ),
+                    "user_id": (
+                        safe_int(manager.get("user_id")) or None
                     ),
                     "es_nuestra": False,
                     "jugadores": len(suyos),
@@ -327,6 +339,7 @@ def toda_la_liga(
     nuestra_plantilla: list | None,
     managers: list | None,
     en_el_mercado: set | None = None,
+    nuestro_id=None,
 ) -> dict:
     """
     Los 570, con su etiqueta y lo que nos sumarian. Forma fija.
@@ -396,7 +409,7 @@ def toda_la_liga(
         del_computer = set(en_el_mercado or set())
 
         plantillas = _las_ocho_plantillas(
-            catalogo, nuestros, managers
+            catalogo, nuestros, managers, nuestro_id
         )
 
         filas = []
