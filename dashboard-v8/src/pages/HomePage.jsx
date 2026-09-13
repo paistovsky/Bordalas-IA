@@ -1,5 +1,6 @@
 import PitchXI from "../components/PitchXI";
 import PosiblesCambiosPanel from "../components/PosiblesCambiosPanel";
+import PujasVivasPanel from "../components/PujasVivasPanel";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
 import TimelinePanel from "../components/TimelinePanel";
 import { formatMoney } from "../lib/utils";
@@ -7,12 +8,17 @@ import { formatMoney } from "../lib/utils";
 /* INICIO: LA TIRA Y CUATRO PANELES (10/09/2026)
  *
  * Arriba, la tira de estado -que vive en `KpiStrip`- con las dos
- * cuentas atras corriendo. Debajo, cuatro paneles y solo cuatro:
+ * cuentas atras corriendo. Debajo, cinco paneles:
  *
  *   1. EL XI PARA LA JORNADA      quien juega
  *   2. CLASIFICACION E INTELIGENCIA  como vamos y quien aprieta
- *   3. CRONOLOGIA DE BORDALAS     que hizo y que hara
- *   4. POSIBLES CAMBIOS           quien esta fuera, y por que
+ *   3. PUJAS EN VIVO              que esta en juego AHORA
+ *   4. CRONOLOGIA DE BORDALAS     que hizo y que hara
+ *   5. POSIBLES CAMBIOS           quien esta fuera, y por que
+ *
+ *   Las pujas en vivo van ENCIMA de la cronologia: lo primero
+ *   que se lee tiene que ser lo que esta pasando ahora, no lo
+ *   que va a pasar.
  *
  * LO QUE SE FUE, Y NO SE BORRO
  *
@@ -99,7 +105,16 @@ export default function HomePage({ data }) {
           {/* 2. ¿VAMOS GANANDO? */}
           <StandingsIntelPanel data={data} />
 
-          {/* 3. ¿QUÉ HIZO Y QUÉ HARÁ? */}
+          {/* 3. ¿QUÉ ESTÁ EN JUEGO AHORA MISMO?
+
+              Va ENCIMA de la cronología a propósito: lo primero
+              que se lee tiene que ser lo que está pasando, no lo
+              que va a pasar. Las pujas vivas salían como un paso
+              dentro de la cronología, mezcladas con lo de
+              mañana. */}
+          <PujasVivasPanel data={data} />
+
+          {/* 4. ¿QUÉ HIZO Y QUÉ HARÁ? */}
           <TimelinePanel data={data} />
         </div>
       </div>

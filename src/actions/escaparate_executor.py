@@ -473,6 +473,43 @@ def publicar(
 # ============================================================
 
 
+def _cuando(marca) -> str:
+    """
+    "hoy a las 08:08", "ayer a las 21:40" o "el 11/09 a las 07:15".
+
+    La fecha en formato de maquina —2026-09-13T08:08— no la lee
+    nadie de un vistazo. Nunca lanza: si no se puede leer, se
+    dice "en algun momento", que es la verdad.
+    """
+
+    try:
+        cuando = datetime.fromisoformat(str(marca))
+
+        if cuando.tzinfo is None:
+            cuando = cuando.replace(tzinfo=timezone.utc)
+
+        from src.analysis.zona_de_silencio import _hora_de_madrid
+
+        cuando = _hora_de_madrid(cuando)
+
+        hoy = _hora_de_madrid(datetime.now(timezone.utc)).date()
+
+        dias = (hoy - cuando.date()).days
+
+        cuandito = (
+            "hoy"
+            if dias == 0
+            else "ayer"
+            if dias == 1
+            else f"el {cuando:%d/%m}"
+        )
+
+        return f"{cuandito} a las {cuando:%H:%M}"
+
+    except Exception:                               # noqa: BLE001
+        return "en algun momento"
+
+
 def viajes_sin_listar(
     viajes: list | None,
     listados: list | None,
@@ -534,14 +571,36 @@ def viajes_sin_listar(
                 else "Todos los viajes abiertos estan publicados."
                 if not huerfanos
                 else (
-                    "VIAJES SIN LISTAR: "
-                    + " · ".join(
-                        f"{h['name'] or h['player_id']}"
-                        f" (desde {str(h['opened_at'])[:16]})"
+                    # LA PANTALLA HABLA EL IDIOMA DEL QUE LEE
+                    # (13/09/2026)
+                    #
+                    #     Decia: "VIAJE COMPRADO Y SIN LISTAR.
+                    #     VIAJES SIN LISTAR: Trent (desde
+                    #     2026-09-13T08:08). Comprados para
+                    #     revender y no estan en venta: cada
+                    #     vuelta asi es escaparate tirado."
+                    #
+                    #     Cuatro cosas mal: "viaje" es jerga
+                    #     NUESTRA -el dueño no ha usado esa
+                    #     palabra nunca-, lo decia dos veces, la
+                    #     fecha en formato de maquina, y
+                    #     "escaparate tirado" es una metafora
+                    #     inventada aqui.
+                    #
+                    #     Una frase, lo que es, y la consecuencia
+                    #     concreta: que el Computer no le va a
+                    #     ofrecer nada.
+                    " · ".join(
+                        (
+                            f"{h['name'] or h['player_id']} esta "
+                            f"comprado para revender y no esta a "
+                            f"la venta. Lo compramos "
+                            f"{_cuando(h['opened_at'])} y sigue "
+                            f"sin publicar, asi que no recibira "
+                            f"oferta del Computer."
+                        )
                         for h in huerfanos
                     )
-                    + ". Comprados para revender y no estan en "
-                    "venta: cada vuelta asi es escaparate tirado."
                 )
             ),
         }

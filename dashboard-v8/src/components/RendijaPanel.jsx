@@ -155,7 +155,11 @@ export default function RendijaPanel({ data }) {
           Hasta que ponga 1, todo lo del carril es teoria sobre
           codigo que no ha comprado nada. */}
       <div className="kv">
-        <span>VIAJES COMPLETADOS</span>
+        {/* "VIAJES COMPLETADOS" es la frase del propio dueño,
+            de su encargo del 12/09, y en el INFORME se queda tal
+            cual. Pero en la pantalla vale la regla general: lo
+            que se lee dice lo que es. */}
+        <span>COMPRAS PARA REVENDER, YA VENDIDAS</span>
         <b className="mono">
           <span
             className={
@@ -178,7 +182,7 @@ export default function RendijaPanel({ data }) {
           enciende con la AUSENCIA de datos tapa justo el fallo
           que tenia que enseñar. */}
       <div className="kv">
-        <span>Viajes abiertos</span>
+        <span>Compradas para revender, sin vender</span>
         <b className="mono">
           {rendija.sin_listar?.abiertos ?? "—"}{" "}
           <span
@@ -191,9 +195,9 @@ export default function RendijaPanel({ data }) {
             }
           >
             {rendija.sin_listar?.ok === false
-              ? "SIN LISTAR"
+              ? "SIN PUBLICAR"
               : rendija.sin_listar?.hay_viajes
-              ? "publicados"
+              ? "a la venta"
               : "NADA QUE MIRAR"}
           </span>
         </b>
@@ -343,7 +347,8 @@ export default function RendijaPanel({ data }) {
                           }`}
                     </td>
                     {/* EL MARGEN ESPERADO, que es el número
-                        que decide si el viaje gana dinero. En
+                        que decide si la operación gana dinero.
+                        En
                         rojo si no llega al suelo de venta: esa
                         operación espera una oferta que nosotros
                         mismos rechazaríamos. */}

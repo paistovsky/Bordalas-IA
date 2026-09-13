@@ -198,14 +198,22 @@ export default function App() {
           </div>
         )}
 
-        {/* UN VIAJE COMPRADO Y FUERA DEL ESCAPARATE
-            Es el estado que no puede existir: se compro para
-            revender y no esta en venta. Cada vuelta asi es una
-            tanda de ofertas que no llega, y sin esto no lo
-            notaria nadie. Con nombre y hora. */}
+        {/* COMPRADO PARA REVENDER Y FUERA DEL ESCAPARATE
+
+            NARANJA, NO ROJO (13/09/2026). Esto cuesta un día de
+            escaparate, que es poco. El rojo se reserva para lo
+            que cuesta puntos o dinero HOY: deuda sin cubrir, XI
+            a punto de cerrarse mal, oferta buena caducando.
+
+            Si todo es rojo, el rojo no significa nada.
+
+            Y SIN TITULAR REPETIDO: el motivo ya es una frase
+            entera y empieza por el nombre. Ponerle encima
+            "VIAJE COMPRADO Y SIN LISTAR" decia lo mismo dos
+            veces, y con una palabra —"viaje"— que es jerga
+            nuestra y que el dueño no ha usado nunca. */}
         {data.rendija?.sin_listar?.ok === false && (
-          <div className="alert crit">
-            <b>VIAJE COMPRADO Y SIN LISTAR.</b>{" "}
+          <div className="alert warn">
             {data.rendija.sin_listar.reason}
           </div>
         )}

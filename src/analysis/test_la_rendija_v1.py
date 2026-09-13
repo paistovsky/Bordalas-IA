@@ -470,7 +470,13 @@ def test_un_viaje_no_puede_acabar_el_ciclo_sin_listar() -> None:
 
     # Nombre Y hora, que es lo que pidio el dueno.
     assert "Exposito" in huerfano["reason"], huerfano
-    assert "2026-09-11T10:00" in huerfano["reason"], huerfano
+    # LA HORA EN CRISTIANO, y en Madrid: 10:00 UTC son las 12:00.
+    # El formato de maquina no lo lee nadie de un vistazo.
+    assert "el 11/09 a las 12:00" in huerfano["reason"], (
+        huerfano
+    )
+
+    assert "2026-09-11T" not in huerfano["reason"], huerfano
 
     # Y publicado, no molesta.
     bien = viajes_sin_listar(
@@ -1925,6 +1931,168 @@ def test_el_coste_se_guarda_cuando_se_puede_probar() -> None:
         assert nuevo["viajes"][0]["cost"] == 2_760_000
 
 
+def test_la_pantalla_no_habla_en_jerga() -> None:
+    """
+    LA PANTALLA HABLA EL IDIOMA DEL QUE LEE.
+
+    SINTOMA (13/09/2026). El cartel decia:
+
+        "VIAJE COMPRADO Y SIN LISTAR. VIAJES SIN LISTAR: Trent
+         (desde 2026-09-13T08:08). Comprados para revender y no
+         estan en venta: cada vuelta asi es escaparate tirado."
+
+    Cuatro cosas mal: "viaje" es jerga NUESTRA —el dueño no ha
+    usado esa palabra nunca—, lo decia dos veces, la fecha en
+    formato de maquina, y "escaparate tirado" es una metafora
+    inventada aqui.
+
+    Los nombres de los CAMPOS del estado se quedan como estan
+    —`viajes_completados`, `hay_viajes`—: eso es el contrato que
+    lee el codigo, no texto que lea nadie. Lo que no puede tener
+    jerga es lo que se pinta.
+    """
+
+    import re
+
+    from pathlib import Path
+
+    raiz = Path(__file__).parents[2]
+
+    for ruta in (
+        raiz / "dashboard-v8" / "src" / "App.jsx",
+        raiz
+        / "dashboard-v8"
+        / "src"
+        / "components"
+        / "RendijaPanel.jsx",
+    ):
+        fuente = ruta.read_text(encoding="utf-8")
+
+        # Sin comentarios: los de JSX CUENTAN el incidente y
+        # nombran la palabra. Octava vez que una guardia
+        # tropieza con su propia documentacion.
+        codigo = re.sub(
+            r"\{/\*.*?\*/\}", "", fuente, flags=re.S
+        )
+
+        codigo = chr(10).join(
+            linea
+            for linea in codigo.splitlines()
+            if not linea.strip().startswith("//")
+        )
+
+        # UNA PALABRA, NO UN IDENTIFICADOR.
+        #
+        #     `rendija.viajes_completados` y `hay_viajes` son
+        #     nombres de campo del estado: el contrato que lee el
+        #     codigo, no texto que lea nadie. Se distinguen por
+        #     lo que tienen ANTES —un punto o un guion bajo— o
+        #     por lo que sigue.
+        #
+        #     Intentar extraer "el texto visible" de un JSX con
+        #     expresiones regulares no funciono: el primer
+        #     intento caza atributos enteros. Esto pregunta otra
+        #     cosa y se puede contestar bien.
+        for encaje in re.finditer(
+            r"[Vv]iaje|VIAJE", codigo
+        ):
+            antes = (
+                codigo[encaje.start() - 1]
+                if encaje.start()
+                else " "
+            )
+
+            despues = codigo[encaje.end() : encaje.end() + 2]
+
+            es_identificador = (
+                antes in "._"
+                or antes.isalnum()
+                or despues.startswith("_")
+                or despues.startswith("s_")
+            )
+
+            assert es_identificador, (
+                f"{ruta.name} pinta la palabra «viaje», que es "
+                f"jerga nuestra: "
+                f"...{codigo[max(0, encaje.start() - 40):encaje.end() + 30]}... "
+                f"Donde ponga eso, que ponga lo que es: "
+                f"«comprado para revender»"
+            )
+
+        assert "escaparate tirado" not in codigo, (
+            f"{ruta.name} usa una metafora inventada"
+        )
+
+
+def test_el_cartel_dice_lo_que_pasa_en_una_frase() -> None:
+    """
+    Una frase, con el nombre, cuando se compro en HORA DE MADRID,
+    y la consecuencia concreta: que el Computer no ofrecera nada.
+
+    Y sin repetir el titulo: el motivo ya empieza por el nombre.
+    """
+
+    from src.actions.escaparate_executor import viajes_sin_listar
+
+    visto = viajes_sin_listar(
+        [
+            {
+                "player_id": 37499,
+                "name": "Trent",
+                "opened_at": "2026-09-13T08:08:00+00:00",
+                "cost": 2_760_000,
+            }
+        ],
+        [],
+    )
+
+    texto = visto["reason"]
+
+    assert texto.startswith("Trent esta comprado para revender"), (
+        texto
+    )
+
+    assert "no esta a la venta" in texto, texto
+
+    assert "no recibira oferta del Computer" in texto, texto
+
+    # LA HORA, EN MADRID Y EN CRISTIANO.
+    #
+    #     08:08 UTC son las 10:08 de Madrid. El cartel viejo
+    #     enseñaba el 08:08 crudo de la marca de tiempo, que es
+    #     la hora de otro sitio.
+    assert "hoy a las 10:08" in texto, texto
+
+    assert "2026-09-13T" not in texto, (
+        "la fecha sigue en formato de maquina"
+    )
+
+    # Y NO SE REPITE. La pantalla no le pone titulo encima.
+    from pathlib import Path
+
+    app = (
+        Path(__file__).parents[2] / "dashboard-v8" / "src"
+        / "App.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "VIAJE COMPRADO Y SIN LISTAR" not in app.replace(
+        '"VIAJE COMPRADO Y SIN LISTAR" decia lo mismo dos', ""
+    ), "el titulo repetido ha vuelto"
+
+    # NARANJA, NO ROJO: cuesta un dia de escaparate, no puntos.
+    trozo = app[
+        app.index("sin_listar?.ok === false") : app.index(
+            "sin_listar?.ok === false"
+        )
+        + 200
+    ]
+
+    assert 'className="alert warn"' in trozo, (
+        "el cartel sigue en rojo: el rojo se reserva para lo que "
+        "cuesta puntos o dinero HOY"
+    )
+
+
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
@@ -1954,6 +2122,8 @@ TESTS = [
     test_la_hora_declarada_manda_en_el_silencio,
     test_el_filtro_es_el_suelo_no_el_cero,
     test_un_viaje_sin_coste_no_se_cobra,
+    test_la_pantalla_no_habla_en_jerga,
+    test_el_cartel_dice_lo_que_pasa_en_una_frase,
     test_el_coste_se_guarda_cuando_se_puede_probar,
     test_la_prueba_de_humo_es_de_cupo_no_de_suelo,
     test_al_completar_un_viaje_vuelve_todo_a_su_sitio,
