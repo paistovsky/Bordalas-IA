@@ -3500,6 +3500,72 @@ def build_dashboard_state() -> dict:
 
         _fila["until"] = _vence.get(safe_int(_fila.get("id")))
 
+    # ==========================================================
+    # TODOS LOS JUGADORES DE LA LIGA (13/09/2026)
+    # ==========================================================
+    #
+    #     La lista de la compra, frente a la caja registradora
+    #     del cuadro de objetivos.
+    #
+    #     Hacia falta porque un jugador libre que el Computer no
+    #     ha sacado hoy NO EXISTIA en ninguna parte: medido, de
+    #     once "chollos" publicados sin dueño, cero menciones en
+    #     toda la foto.
+    #
+    #     TODO ESTO YA SE PIDE. Es juntar el catalogo con las
+    #     ocho plantillas y con el once: ni una peticion mas.
+    #
+    #     Y NO DECIDE NADA. Es una lista para mirar.
+    try:
+        from src.analysis.toda_la_liga import toda_la_liga
+
+        _en_el_mercado = {
+            safe_int(
+                (venta.get("player") or {}).get("id")
+                if isinstance(venta.get("player"), dict)
+                else venta.get("player")
+            )
+            for venta in (
+                (snapshot.get("market") or {}).get("sales") or []
+            )
+            if isinstance(venta, dict)
+            and not (venta.get("user") or {}).get("id")
+        }
+
+        _toda_la_liga = toda_la_liga(
+            catalogo=_del_catalogo,
+            once=(
+                (
+                    (snapshot.get("user_lineup") or {}).get(
+                        "data"
+                    )
+                    or {}
+                ).get("lineup")
+                or {}
+            ).get("players"),
+            nuestra_plantilla=snapshot.get("my_team"),
+            managers=[
+                manager
+                for manager in (
+                    (rival_intelligence or {}).get("managers")
+                    or []
+                )
+                if isinstance(manager, dict)
+                and not manager.get("is_us")
+            ],
+            en_el_mercado=_en_el_mercado,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _toda_la_liga = {
+            "available": False,
+            "players": [],
+            "reason": (
+                f"No se pudo montar la liga entera: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     points_market = calibrate_points_market(
         snapshot.get("catalog", {})
     )
@@ -5188,6 +5254,16 @@ def build_dashboard_state() -> dict:
         # decide: si el tramo de un jugador esta medido y rinde
         # por debajo del liston, `hold_value` no le da valor.
         "hold_route": via_tener,
+
+        # LOS 570 DE LA LIGA, con su etiqueta y lo que nos
+        # sumarian. La lista de la compra, frente a la caja
+        # registradora del cuadro de objetivos.
+        #
+        #     Un jugador libre que el Computer no ha sacado hoy
+        #     NO EXISTIA en ninguna parte de la pantalla.
+        #
+        #     Y NO DECIDE NADA: es una lista para mirar.
+        "todaLaLiga": _toda_la_liga,
 
         # Lo que Pepe hizo al pujar, no solo lo que pensaba pujar.
         "bid_outcomes": bid_outcome_summary(),

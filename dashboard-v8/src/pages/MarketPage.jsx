@@ -1,3 +1,4 @@
+import TodaLaLigaPanel from "../components/TodaLaLigaPanel";
 import { useEffect, useState } from "react";
 import {
   accionDe,
@@ -1339,6 +1340,13 @@ export default function MarketPage({ data }) {
         pointsMarket={data.pointsMarket}
         exposure={data.exposure}
       />
+
+      {/* LA LISTA DE LA COMPRA, debajo de la caja registradora.
+
+          Arriba, lo que hay HOY en el mercado. Aqui, los 570 del
+          catalogo por lo que nos mejorarian — incluidos los
+          libres, que antes no existian en ninguna parte. */}
+      <TodaLaLigaPanel data={data} />
 
       <div style={{ marginTop: 11 }}>
         <OffersPanel offers={data.offers || []} />
