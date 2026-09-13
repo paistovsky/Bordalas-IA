@@ -94,6 +94,12 @@ main{flex:1;padding:14px 16px;min-width:0}
   color:var(--warn);border-color:rgba(234,179,8,.45);
   background:rgba(234,179,8,.10);
 }
+/* RACHA 5/5: hay 250.000 EUR esperando a que alguien pulse
+   canjear en la app. Misma pildora, mismo tamaño, en rojo. */
+.freshness.cobrar{
+  color:var(--crit);border-color:rgba(239,68,68,.45);
+  background:rgba(239,68,68,.10);
+}
 
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-bottom:12px}
 .kpi{background:var(--pan);border:1px solid var(--line);border-radius:9px;padding:9px 12px}

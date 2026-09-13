@@ -21,14 +21,36 @@ import { tonoDe } from "../lib/tono";
  * competidores y la ruta de puja ajustada no se activaba nunca.
  */
 
-// VERY_HIGH faltaba y caia al gris del `||`: la amenaza mas
-// alta del tablero se pintaba igual que "ninguna". Va primero
-// para que se vea que existe.
+/* LOS SEIS NIVELES, Y NINGUNO AL GRIS POR DEFECTO.
+ *
+ * `VERY_HIGH` faltaba y caia al gris del `||`: la amenaza mas
+ * alta del tablero se pintaba igual que "ninguna". Y el 13/09 se
+ * vio que faltaban OTROS DOS por el mismo motivo —`VERY_LOW` y
+ * `US`, que el motor si produce—, asi que el rival mas inofensivo
+ * y NOSOTROS MISMOS salian del mismo color que un desconocido.
+ *
+ * LOW SIGUE EN GRIS A PROPOSITO (13/09/2026)
+ *
+ *   El dueño pidio verde oscuro. Medido sobre el fondo del panel
+ *   (#111a24): el verde oscuro no se lee.
+ *
+ *     green-700  #15803d   contraste 3.02   justo
+ *     green-800  #166534   contraste 2.21   NO SE LEE
+ *
+ *   La propuesta, los dos legibles y distinguibles entre si:
+ *     VERY_LOW  green-400  #4ade80   contraste 7.19
+ *     LOW       green-500  #22c55e   contraste 5.84
+ *
+ *   Sin respuesta no se sustituye por otro ni se deja ilegible:
+ *   se queda como estaba.
+ */
 const THREAT = {
   VERY_HIGH: "pill crit",
   HIGH: "pill crit",
   MEDIUM: "pill warn",
   LOW: "pill idle",
+  VERY_LOW: "pill ok",
+  US: "pill me",
   NONE: "pill idle"
 };
 

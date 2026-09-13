@@ -4821,6 +4821,20 @@ def build_dashboard_state() -> dict:
             "current_user_id": board.get("current_user_id"),
             "mode": "LIVE",
             "cycle_minutes": CADENCIA_MINUTOS,
+
+            # LA RACHA DIARIA, TAL CUAL VIENE (13/09/2026)
+            #
+            #     `account.dailyStreak`, un 0-5 que Biwenger
+            #     publica en la CUENTA. Se lee, no se estima: ni
+            #     de `lastAccess` ni de los eventos `bonus`.
+            #
+            #     `None` si no se pudo leer, y la pantalla dira
+            #     "SIN MEDIR". Un contador que finge saber es
+            #     peor que no tenerlo: el dueño se fia y pierde
+            #     los 250.000.
+            "daily_streak": (
+                (snapshot or {}).get("daily_streak")
+            ),
         },
         "summary": {
             "balance": safe_int(state.get("balance")),

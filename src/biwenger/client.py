@@ -158,6 +158,17 @@ class BiwengerClient:
 
         account = self.get_account()
 
+        # LA CUENTA, GUARDADA (13/09/2026)
+        #
+        #     Esta llamada ya se hacia para elegir liga y de ella
+        #     solo se usaba `leagues`: el resto se tiraba.
+        #
+        #     Dentro viene `account.dailyStreak`, la racha diaria
+        #     —un 0-5 que vale 250.000 EUR al llegar a cinco—.
+        #     Guardarla aqui la deja disponible SIN UNA PETICION
+        #     MAS: el dueño autorizo una, y no hace falta.
+        self.account = account
+
         leagues = account.get("leagues", [])
 
         if not leagues:

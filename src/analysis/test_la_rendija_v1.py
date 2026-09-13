@@ -2093,6 +2093,152 @@ def test_el_cartel_dice_lo_que_pasa_en_una_frase() -> None:
     )
 
 
+def test_ningun_nivel_de_amenaza_cae_al_gris() -> None:
+    """
+    TERCERA VEZ EL MISMO FALLO.
+
+    `VERY_HIGH` faltaba en el mapa de colores y caia al gris del
+    `||`: la amenaza mas alta del tablero se pintaba igual que
+    "ninguna". Se arreglo.
+
+    El 13/09 se vio que faltaban OTROS DOS por el mismo motivo:
+    `VERY_LOW` y `US`. El rival mas inofensivo y NOSOTROS MISMOS
+    salian del color de un desconocido.
+
+    Esta guardia lee los niveles que el MOTOR produce y exige que
+    la pantalla tenga color para todos. Ya no hace falta que a
+    alguien se le ocurra mirar.
+    """
+
+    import re
+
+    from pathlib import Path
+
+    raiz = Path(__file__).parents[2]
+
+    motor = (
+        raiz / "src" / "analysis" / "rival_intelligence_engine.py"
+    ).read_text(encoding="utf-8")
+
+    # Los niveles, del motor. Se buscan donde se asignan.
+    del_motor = set(
+        re.findall(
+            r'level\s*=\s*\(?\s*"([A-Z_]+)"', motor
+        )
+    ) | {"US"}
+
+    assert len(del_motor) >= 6, (
+        f"solo se han encontrado {del_motor}: si el motor ha "
+        f"cambiado como nombra los niveles, esta guardia deja de "
+        f"comprobar nada"
+    )
+
+    panel = (
+        raiz
+        / "dashboard-v8"
+        / "src"
+        / "components"
+        / "StandingsIntelPanel.jsx"
+    ).read_text(encoding="utf-8")
+
+    mapa = panel[
+        panel.index("const THREAT = {") : panel.index(
+            "const THREAT = {"
+        )
+        + 400
+    ]
+
+    faltan = [
+        nivel
+        for nivel in sorted(del_motor)
+        if f"{nivel}:" not in mapa
+    ]
+
+    assert not faltan, (
+        f"la pantalla no tiene color para {faltan}: caen al gris "
+        f"por defecto y se pintan igual que «ninguna amenaza»"
+    )
+
+
+def test_la_racha_se_lee_y_no_se_estima() -> None:
+    """
+    250.000 EUR POR ACORDARSE DE PULSAR UN BOTON.
+
+    Medido sobre 34 dias del tablon: Pollo17 cobro 750.000 de
+    racha diaria y nosotros 250.000. Medio millon de diferencia.
+
+    SE LEE, NO SE ESTIMA. Biwenger la publica en la CUENTA
+    —`account.dailyStreak`, un 0-5— y asi la lee su propia app.
+    Confirmado contra la API el 13/09: GET /api/v2/account
+    devuelve `data.account.dailyStreak`.
+
+    NO se deduce de `lastAccess` ni de los eventos `bonus`: un
+    contador que finge saber es peor que no tenerlo, porque se
+    confia en el y se pierden los 250.000.
+    """
+
+    import re
+
+    from pathlib import Path
+
+    raiz = Path(__file__).parents[2]
+
+    colector = (
+        raiz / "src" / "collectors" / "league_collector.py"
+    ).read_text(encoding="utf-8")
+
+    codigo = chr(10).join(
+        linea
+        for linea in colector.splitlines()
+        if not linea.strip().startswith("#")
+    )
+
+    assert "get_account()" in codigo, (
+        "el colector no pide la cuenta: la racha no puede venir "
+        "de ningun otro sitio"
+    )
+
+    assert '"dailyStreak"' in codigo or (
+        'get("dailyStreak")' in codigo
+    ), "no se lee `dailyStreak`"
+
+    assert '"daily_streak"' in codigo, (
+        "la racha no viaja en la foto"
+    )
+
+    # Y NO SE DEDUCE de otra cosa.
+    for inventada in ("lastAccess", "bonus"):
+        assert inventada not in codigo, (
+            f"la racha se esta deduciendo de `{inventada}` en vez "
+            f"de leerse"
+        )
+
+    # LA PANTALLA: el numero, y "SIN MEDIR" si no viene.
+    app = (
+        raiz / "dashboard-v8" / "src" / "App.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "daily_streak" in app, "la pantalla no lee la racha"
+
+    assert "RACHA SIN MEDIR" in app, (
+        "sin dato la pantalla no dice «sin medir»: pintaria un "
+        "numero inventado"
+    )
+
+    # 5/5 EN ROJO: hay 250.000 esperando a que alguien canjee.
+    assert "freshness cobrar" in app, (
+        "la racha no se pone en rojo al llegar a 5"
+    )
+
+    estilos = (
+        raiz / "dashboard-v8" / "src" / "styles.css"
+    ).read_text(encoding="utf-8")
+
+    assert ".freshness.cobrar" in estilos, (
+        "falta el estilo de la pildora roja"
+    )
+
+
 TESTS = [
     test_el_carril_no_escribe_en_la_zona_de_silencio,
     test_con_una_emergencia_el_carril_se_calla,
@@ -2123,6 +2269,8 @@ TESTS = [
     test_el_filtro_es_el_suelo_no_el_cero,
     test_un_viaje_sin_coste_no_se_cobra,
     test_la_pantalla_no_habla_en_jerga,
+    test_ningun_nivel_de_amenaza_cae_al_gris,
+    test_la_racha_se_lee_y_no_se_estima,
     test_el_cartel_dice_lo_que_pasa_en_una_frase,
     test_el_coste_se_guarda_cuando_se_puede_probar,
     test_la_prueba_de_humo_es_de_cupo_no_de_suelo,

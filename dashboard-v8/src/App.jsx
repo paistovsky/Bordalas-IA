@@ -161,6 +161,36 @@ export default function App() {
                 )}`
               : `próximo ciclo en ${mmss(ciclo.seconds)}`}
           </span>
+
+          {/* LA RACHA DIARIA (13/09/2026)
+
+              250.000 EUR por entrar cinco días seguidos y pulsar
+              canjear. En 34 días medidos, Pollo17 se llevó
+              750.000 y nosotros 250.000: medio millón por
+              acordarse.
+
+              Se LEE de `account.dailyStreak`, no se estima. Si
+              no viene, "SIN MEDIR" — nunca un número inventado:
+              un contador que finge saber es peor que no tenerlo,
+              porque se confía en él y se pierden los 250.000.
+
+              En ROJO al llegar a 5/5: hay 250.000 esperando a
+              que alguien pulse canjear en la app. */}
+          <span
+            className={
+              data.meta?.daily_streak == null
+                ? "freshness stale"
+                : Number(data.meta.daily_streak) >= 5
+                ? "freshness cobrar"
+                : "freshness"
+            }
+          >
+            {data.meta?.daily_streak == null
+              ? "● RACHA SIN MEDIR"
+              : Number(data.meta.daily_streak) >= 5
+              ? `● RACHA 5/5 · CANJEA 250.000`
+              : `● RACHA ${data.meta.daily_streak}/5`}
+          </span>
         </div>
 
         {error && (

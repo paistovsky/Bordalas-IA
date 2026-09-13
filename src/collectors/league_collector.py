@@ -79,6 +79,52 @@ def collect_league_snapshot() -> None:
         )
         user_lineup = None
 
+    # LA RACHA DIARIA (13/09/2026)
+    #
+    #     250.000 EUR por entrar cinco dias seguidos y pulsar
+    #     canjear. Medido sobre 34 dias del tablon: Pollo17 se
+    #     llevo 750.000 y nosotros 250.000. Medio millon de
+    #     diferencia por acordarse.
+    #
+    #     NO SE ESTIMA, SE LEE. Biwenger la publica en la CUENTA
+    #     —`account.dailyStreak`, un 0-5— y su propia app la lee
+    #     asi: `this.s.account$()?.dailyStreak ?? 0`.
+    #
+    #     Confirmado contra la API el 13/09: GET /api/v2/account
+    #     devuelve `data.account.dailyStreak`. Hoy, 2.
+    #
+    #     NO viene en la liga, ni en la plantilla, ni en el
+    #     mercado: por eso la foto no la traia. Es UNA peticion
+    #     mas por vuelta, de solo lectura.
+    #
+    #     Y si falla, `None` — nunca un numero inventado: quien
+    #     lo pinte dira "SIN MEDIR". Un contador que finge saber
+    #     es peor que no tenerlo, porque el dueño se fia y pierde
+    #     los 250.000.
+    #     Y NO CUESTA UNA PETICION: `select_league()` ya pedia
+    #     la cuenta al arrancar y tiraba todo menos `leagues`.
+    #     Ahora la guarda. El dueño autorizo una peticion mas y
+    #     no hace falta ninguna.
+    try:
+        account = getattr(client, "account", None)
+
+        if account is None:
+            account = client.get_account()
+
+        daily_streak = (
+            (account.get("account") or {}).get("dailyStreak")
+        )
+
+        print(f"  Racha diaria: {daily_streak}")
+
+    except Exception as error:
+        print(
+            f"  No se pudo leer la racha: "
+            f"{type(error).__name__}: {error}"
+        )
+
+        daily_streak = None
+
     print("Obteniendo mercado...")
     market = client.get_market()
 
@@ -144,6 +190,10 @@ def collect_league_snapshot() -> None:
 
         # El once de la jornada que viene, leido donde se escribe.
         "user_lineup": user_lineup,
+
+        # LA RACHA, TAL CUAL. Sin mezclar con `lastAccess` ni
+        # deducirla de los eventos `bonus`: es un dato medido.
+        "daily_streak": daily_streak,
 
         "market": market,
 
