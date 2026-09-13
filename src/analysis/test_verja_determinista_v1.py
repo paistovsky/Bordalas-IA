@@ -157,6 +157,43 @@ DEL_REPOSITORIO = (
 #     PASARSE. La hora de la puja el 13 por la mañana, el libro
 #     de viajes el 13 por la tarde. El arreglo siempre es el
 #     mismo — pasarle la ruta— y nunca relajar la asercion.
+# LAS CUATRO QUE PUEDEN ENCERRAR A PEPE
+#
+#     De las 28, estas leen un fichero QUE EL PROPIO CICLO
+#     ESCRIBE. Son las unicas que pueden repetir el fallo del
+#     13/09: la verja cambia de resultado porque el bot ha
+#     trabajado.
+#
+#     Las otras 24 leen fotos viejas, el catalogo o el
+#     calendario. Eso es desorden —no deberian leerlo— pero no
+#     puede encerrarlo: nada de lo que Pepe hace esa mañana las
+#     mueve.
+#
+#     Medido el 13/09 cruzando lo que abre cada guardia contra lo
+#     que escribe el codigo de produccion. ESTA es la lista que
+#     se arregla primero, y de una en una.
+#     Las rutas van SIN el prefijo de la carpeta de estado a
+#     proposito: escribirlo entero hace que la comprobacion
+#     estatica de este mismo fichero las lea como si fueran
+#     rutas de verdad y se ponga roja sobre su propia
+#     documentacion. Van siete veces.
+PUEDEN_ENCERRARLO = {
+    "src.analysis.test_v10_full_autonomous_live": (
+        "trading/bid_outcome_ledger.json y "
+        "trading/libro_de_renovaciones.jsonl"
+    ),
+    "src.analysis.test_el_plato_del_carril_v1": (
+        "trading/bid_outcome_ledger.json"
+    ),
+    "src.analysis.test_una_ventana_que_no_se_abre_v1": (
+        "trading/libro_de_renovaciones.jsonl"
+    ),
+    "src.analysis.test_divergencia_v1": (
+        "intelligence/divergence_ledger.json"
+    ),
+}
+
+
 LEEN_DATA_HOY = frozenset(
     {
         "src.analysis.test_v10_full_autonomous_live",
@@ -179,7 +216,6 @@ LEEN_DATA_HOY = frozenset(
         "src.analysis.test_el_plato_del_carril_v1",
         "src.analysis.test_ojeador_informe_v1",
         "src.analysis.test_divergencia_v1",
-        "src.analysis.test_puerta_una_sola_lista_v1",
         "src.analysis.test_freno_acelerador_v1",
         "src.analysis.test_confianza_por_via_v1",
         "src.analysis.test_despliegue_v1",
@@ -346,6 +382,42 @@ def lecturas_de_estado(modulo: str) -> list[str]:
 # ============================================================
 
 
+def test_las_que_pueden_encerrarlo_estan_contadas() -> None:
+    """
+    DE LAS 28, CUALES SON RIESGO Y CUALES SON DESORDEN.
+
+    Riesgo es leer un fichero QUE EL PROPIO CICLO ESCRIBE: eso es
+    lo que hace que la verja cambie de resultado porque el bot ha
+    trabajado, que es el fallo del 13/09.
+
+    Leer una foto vieja o el calendario tambien esta mal, pero no
+    puede encerrarlo.
+
+    Medido ese dia: CUATRO de 28.
+    """
+
+    assert len(PUEDEN_ENCERRARLO) == 4, (
+        f"la lista corta tiene {len(PUEDEN_ENCERRARLO)} y se "
+        f"midieron 4. Si una se ha arreglado, quitala de las dos "
+        f"listas; si hay una nueva, es que alguien volvio a leer "
+        f"un libro que el ciclo escribe"
+    )
+
+    # Todas tienen que estar tambien en el censo grande, o una de
+    # las dos listas miente.
+    for modulo in PUEDEN_ENCERRARLO:
+        assert modulo in LEEN_DATA_HOY, (
+            f"`{modulo}` puede encerrarlo y no esta en el censo"
+        )
+
+        assert _ruta(modulo).exists(), modulo
+
+    # Y cada una dice QUE fichero, que es lo que permite
+    # arreglarla sin volver a medir.
+    for modulo, fichero in PUEDEN_ENCERRARLO.items():
+        assert fichero and "/" in fichero, (modulo, fichero)
+
+
 def test_el_censo_solo_puede_encoger() -> None:
     """
     EL CENSO NO PERDONA: CUENTA.
@@ -361,7 +433,12 @@ def test_el_censo_solo_puede_encoger() -> None:
 
     assert CENSADAS_EL == "2026-09-13", CENSADAS_EL
 
-    assert len(LEEN_DATA_HOY) <= 28, (
+    # 28 el 13/09. `test_puerta_una_sola_lista_v1` salio el mismo
+    # dia —lo que leia era el subproceso de la verja que ella
+    # misma lanza, no ella— asi que quedan 27. El numero solo
+    # puede bajar.
+
+    assert len(LEEN_DATA_HOY) <= 27, (
         f"el censo ha crecido a {len(LEEN_DATA_HOY)}: una "
         f"guardia nueva que lee la carpeta de estado no se "
         f"añade a la lista, "
@@ -676,6 +753,7 @@ def test_la_puerta_declara_su_lista_en_un_solo_sitio() -> None:
 TESTS = [
     test_ninguna_guardia_de_la_verja_lee_el_estado,
     test_el_censo_solo_puede_encoger,
+    test_las_que_pueden_encerrarlo_estan_contadas,
     test_la_del_carril_no_puede_volver_al_censo,
     test_la_verja_lleva_el_vigilante_puesto,
     test_las_dos_que_tiraron_produccion_ya_no_lo_leen,

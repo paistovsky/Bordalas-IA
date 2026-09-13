@@ -51,6 +51,20 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 
+# LA RAIZ, EN EL CAMINO (13/09/2026)
+#
+#     `python scripts/run_validation_gate.py` pone `scripts/` en
+#     `sys.path`, NO la raiz. Asi que el import del censo de mas
+#     abajo fallaba —ModuleNotFoundError— y caia a su `except`,
+#     dejando la lista VACIA: no se perdonaba ninguna y la verja
+#     fallaba por las 30.
+#
+#     No se vio antes porque yo lo corria con `PYTHONPATH=.` y
+#     con `python -c`, que si mete el directorio actual. Dos
+#     formas de arrancar lo mismo y solo una reproduce CI.
+if str(RAIZ) not in sys.path:
+    sys.path.insert(0, str(RAIZ))
+
 
 # ============================================================
 # LAS GUARDIAS
@@ -329,6 +343,9 @@ def main() -> int:
 
     fallos = []
 
+    # Lo que ha abierto cada guardia. Se imprime SIEMPRE.
+    censadas = {}
+
     # EL VIGILANTE DE `data/` (13/09/2026)
     #
     #     Viaja DENTRO de la ejecucion que ya se hace: Python
@@ -359,12 +376,21 @@ def main() -> int:
     #     lo que evita la proxima. La lista solo puede encoger.
     try:
         from src.analysis.test_verja_determinista_v1 import (
+            CENSADAS_EL,
             DEUDA,
             LEEN_DATA_HOY,
         )
 
-    except Exception:                               # noqa: BLE001
-        DEUDA, LEEN_DATA_HOY = {}, frozenset()
+    except Exception as error:                      # noqa: BLE001
+        # SIN CENSO NO SE PERDONA NADA, Y SE DICE. El 13/09 este
+        # `except` se comio un ModuleNotFoundError en silencio y
+        # la verja fallo por las 30.
+        print(
+            f"AVISO: no se pudo leer el censo de lecturas "
+            f"({type(error).__name__}): no se perdonara ninguna."
+        )
+
+        DEUDA, LEEN_DATA_HOY, CENSADAS_EL = {}, frozenset(), "?"
 
     for indice, modulo in enumerate(modulos, start=1):
 
@@ -387,6 +413,9 @@ def main() -> int:
                 if "VIGILANTE-DATA:" in linea
             }
         )
+
+        if abiertos:
+            censadas[modulo] = abiertos
 
         if (
             abiertos
@@ -438,6 +467,40 @@ def main() -> int:
                 break
 
     print("=" * 66)
+
+    # EL NUMERO, SIEMPRE, CON LAS RUTAS.
+    #
+    #     Un detector que el primer dia bloquea todo se acaba
+    #     desactivando, y entonces no queda nada. Este no bloquea
+    #     por las censadas — pero NO se calla: la deuda se ve en
+    #     cada vuelta, con nombre y fichero, o deja de existir.
+    if censadas:
+        print()
+        print(
+            f"LEEN LA CARPETA DE ESTADO AL CORRERSE: "
+            f"{len(censadas)} de {len(modulos)}"
+        )
+        print(
+            "  (censadas el "
+            + str(CENSADAS_EL)
+            + "; la lista solo puede encoger)"
+        )
+
+        for modulo in sorted(censadas):
+            corto = modulo.rsplit(".", 1)[-1]
+
+            nuevas = (
+                ""
+                if modulo in LEEN_DATA_HOY or modulo in DEUDA
+                else "   <- NUEVA, no censada"
+            )
+
+            print(f"  {corto}{nuevas}")
+
+            for ruta in censadas[modulo]:
+                print(f"      {ruta}")
+
+        print()
 
     if fallos:
         print(f"FALLAN {len(fallos)} de {len(modulos)}:")
