@@ -379,6 +379,7 @@ def main() -> int:
             CENSADAS_EL,
             DEUDA,
             LEEN_DATA_HOY,
+            PUEDEN_ENCERRARLO,
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -390,7 +391,9 @@ def main() -> int:
             f"({type(error).__name__}): no se perdonara ninguna."
         )
 
-        DEUDA, LEEN_DATA_HOY, CENSADAS_EL = {}, frozenset(), "?"
+        DEUDA, LEEN_DATA_HOY = {}, frozenset()
+
+        CENSADAS_EL, PUEDEN_ENCERRARLO = "?", {}
 
     for indice, modulo in enumerate(modulos, start=1):
 
@@ -414,36 +417,36 @@ def main() -> int:
             }
         )
 
+        # EL VIGILANTE AVISA Y NO TUMBA (13/09/2026)
+        #
+        #     Decision del dueño, y con el motivo escrito porque
+        #     importa mas que la decision:
+        #
+        #     EL VIGILANTE MIDE DEUDA NUESTRA, no si el codigo
+        #     funciona. Y llevaba cuatro horas siendo lo unico
+        #     que tenia a Pepe parado, con ofertas sin cobrar y
+        #     publicaciones sin renovar.
+        #
+        #     Un detector que apaga el bot el primer dia se acaba
+        #     apagando el, y entonces no queda nada.
+        #
+        #     Y HAY UNA RAZON ESTRUCTURAL, ademas: el censo se
+        #     construye en la maquina del dueño, donde esos
+        #     ficheros no existen; en CI la cache los restaura y
+        #     aparecen lecturas que aqui no se ven. Alguna —el
+        #     archivo de prensa por fecha— trae un fichero nuevo
+        #     cada dia, asi que el censo caducaria solo. EL CENSO
+        #     NO SE PUEDE CONSTRUIR DESDE LOCAL.
+        #
+        #     Lo que SI tumba es una guardia rota. Eso no cambia.
+        #
+        #     Y lo que salva a este aviso de volverse ruido: el
+        #     numero sale SIEMPRE, el censo solo puede ENCOGER, y
+        #     las que pueden encerrar a Pepe —las que leen un
+        #     fichero que el ciclo escribe— se arreglan una a
+        #     una, cada una con su guardia propia y esa si roja.
         if abiertos:
             censadas[modulo] = abiertos
-
-        if (
-            abiertos
-            and modulo not in DEUDA
-            and modulo not in LEEN_DATA_HOY
-        ):
-            print(
-                f"  {indice:>2}/{len(modulos)}  FALLA "
-                f"{modulo.rsplit('.', 1)[-1]}"
-            )
-            print(
-                "            LEE `data/` AL CORRERSE. `data/` se "
-                "restaura entre ciclos, asi que esta guardia"
-            )
-            print(
-                "            depende de lo que el bot hizo esa "
-                "mañana. Pasale la ruta; no la relajes."
-            )
-
-            for ruta in abiertos:
-                print(f"            -> {ruta}")
-
-            fallos.append(modulo)
-
-            if args.parar:
-                break
-
-            continue
 
         corto = modulo.rsplit(".", 1)[-1]
 
@@ -483,19 +486,32 @@ def main() -> int:
         print(
             "  (censadas el "
             + str(CENSADAS_EL)
-            + "; la lista solo puede encoger)"
+            + "; la lista solo puede encoger)."
+        )
+        print(
+            "  ESTO NO TUMBA LA VERJA: mide deuda nuestra, no "
+            "si el codigo funciona."
         )
 
         for modulo in sorted(censadas):
             corto = modulo.rsplit(".", 1)[-1]
 
+            # Las no censadas se marcan, que es lo que hace
+            # util el aviso: la deuda vieja se conoce, la nueva
+            # hay que verla el dia que aparece.
             nuevas = (
                 ""
                 if modulo in LEEN_DATA_HOY or modulo in DEUDA
                 else "   <- NUEVA, no censada"
             )
 
-            print(f"  {corto}{nuevas}")
+            peligro = (
+                "   <- LEE UN FICHERO QUE EL CICLO ESCRIBE"
+                if modulo in PUEDEN_ENCERRARLO
+                else ""
+            )
+
+            print(f"  {corto}{nuevas}{peligro}")
 
             for ruta in censadas[modulo]:
                 print(f"      {ruta}")

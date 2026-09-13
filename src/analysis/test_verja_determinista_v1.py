@@ -157,26 +157,46 @@ DEL_REPOSITORIO = (
 #     PASARSE. La hora de la puja el 13 por la mañana, el libro
 #     de viajes el 13 por la tarde. El arreglo siempre es el
 #     mismo — pasarle la ruta— y nunca relajar la asercion.
-# LAS CUATRO QUE PUEDEN ENCERRAR A PEPE
+# LAS CINCO QUE PUEDEN ENCERRAR A PEPE
 #
-#     De las 28, estas leen un fichero QUE EL PROPIO CICLO
+#     De las censadas, estas leen un fichero QUE EL PROPIO CICLO
 #     ESCRIBE. Son las unicas que pueden repetir el fallo del
 #     13/09: la verja cambia de resultado porque el bot ha
 #     trabajado.
 #
-#     Las otras 24 leen fotos viejas, el catalogo o el
-#     calendario. Eso es desorden —no deberian leerlo— pero no
-#     puede encerrarlo: nada de lo que Pepe hace esa mañana las
-#     mueve.
+#     Las demas leen fotos viejas, el catalogo o el calendario.
+#     Eso es desorden —no deberian leerlo— pero no puede
+#     encerrarlo: nada de lo que Pepe hace esa mañana las mueve.
 #
 #     Medido el 13/09 cruzando lo que abre cada guardia contra lo
-#     que escribe el codigo de produccion. ESTA es la lista que
-#     se arregla primero, y de una en una.
+#     que escribe el codigo de produccion.
+#
+# Y UNA DE ELLAS NO LEIA: ESCRIBIA
+#
+#     `test_el_libro_recoge_v1` llamaba a
+#     `recoger_compras_de_la_plantilla` sin rutas, y esa, cuando
+#     el libro del carril prueba el origen, ABRE UN VIAJE. Con el
+#     libro del carril presente —que en CI lo esta— la guardia
+#     escribia `libro_de_viajes.jsonl` de produccion.
+#
+#     Reproducido en local poniendo ese libro a mano: la guardia
+#     creo el viaje de Trent. Y desde que el escaparate esta
+#     enchufado, un viaje escrito por una guardia es un jugador
+#     que Pepe publica.
+#
+#     Eso no es deuda: es una guardia actuando sobre produccion.
+#     Se arreglo el mismo dia —pasandole las rutas— y por eso no
+#     esta en esta lista.
+#
+#     LO QUE ESTA LISTA ES: la cola de trabajo, de una en una, y
+#     cada arreglo con SU guardia propia que prohiba a ESA
+#     guardia abrir ESE fichero. Ahi si, roja.
+#
 #     Las rutas van SIN el prefijo de la carpeta de estado a
 #     proposito: escribirlo entero hace que la comprobacion
-#     estatica de este mismo fichero las lea como si fueran
-#     rutas de verdad y se ponga roja sobre su propia
-#     documentacion. Van siete veces.
+#     estatica de este mismo fichero las lea como rutas de verdad
+#     y se ponga roja sobre su propia documentacion. Van siete
+#     veces.
 PUEDEN_ENCERRARLO = {
     "src.analysis.test_v10_full_autonomous_live": (
         "trading/bid_outcome_ledger.json y "
@@ -191,7 +211,29 @@ PUEDEN_ENCERRARLO = {
     "src.analysis.test_divergencia_v1": (
         "intelligence/divergence_ledger.json"
     ),
+    "src.analysis.test_peticiones_v1": (
+        "autopilot/cache_biwenger.json"
+    ),
 }
+
+
+# LAS QUE YA NO PUEDEN, Y NO PUEDEN VOLVER
+#
+#     Comprobadas el 13/09 con el libro del carril presente, que
+#     es la condicion que se da en CI y no en local:
+#
+#         test_la_puja_del_carril_v1      no toca nada
+#         test_el_escaparate_publica_v1   no toca nada
+#         test_el_libro_recoge_v1         arreglada el mismo dia
+#
+#     Cada una con su guardia propia mas abajo.
+ARREGLADAS = frozenset(
+    {
+        "src.analysis.test_la_puja_del_carril_v1",
+        "src.analysis.test_el_libro_recoge_v1",
+        "src.analysis.test_el_escaparate_publica_v1",
+    }
+)
 
 
 LEEN_DATA_HOY = frozenset(
@@ -393,14 +435,24 @@ def test_las_que_pueden_encerrarlo_estan_contadas() -> None:
     Leer una foto vieja o el calendario tambien esta mal, pero no
     puede encerrarlo.
 
-    Medido ese dia: CUATRO de 28.
+    Medido ese dia: CINCO. Y una sexta que no LEIA sino que
+    ESCRIBIA el libro de viajes de produccion, arreglada el mismo
+    dia porque eso no es deuda: es una guardia actuando sobre
+    produccion.
     """
 
-    assert len(PUEDEN_ENCERRARLO) == 4, (
+    assert len(PUEDEN_ENCERRARLO) <= 5, (
         f"la lista corta tiene {len(PUEDEN_ENCERRARLO)} y se "
-        f"midieron 4. Si una se ha arreglado, quitala de las dos "
+        f"midieron 5. Si una se ha arreglado, quitala de las dos "
         f"listas; si hay una nueva, es que alguien volvio a leer "
         f"un libro que el ciclo escribe"
+    )
+
+    # Regla 24: si se vaciara, esta guardia dejaria de comprobar
+    # nada y habria que quitarla a proposito.
+    assert PUEDEN_ENCERRARLO, (
+        "la lista corta esta vacia: si de verdad ya no queda "
+        "ninguna, quita esta guardia y dilo en el informe"
     )
 
     # Todas tienen que estar tambien en el censo grande, o una de
@@ -474,17 +526,75 @@ def test_la_del_carril_no_puede_volver_al_censo() -> None:
     pone rojo.
     """
 
-    for arreglada in (
-        "src.analysis.test_la_puja_del_carril_v1",
-        "src.analysis.test_el_libro_recoge_v1",
-        "src.analysis.test_el_escaparate_publica_v1",
-    ):
+    assert ARREGLADAS, (
+        "la lista de arregladas esta vacia: entonces esta "
+        "guardia no comprueba nada"
+    )
+
+    for arreglada in ARREGLADAS:
         assert arreglada not in LEEN_DATA_HOY, (
             f"`{arreglada}` ha vuelto al censo: se arregla "
             f"pasandole la ruta, no pidiendo permiso"
         )
 
         assert arreglada not in DEUDA, arreglada
+
+
+def test_el_vigilante_avisa_y_no_tumba() -> None:
+    """
+    DECISION DEL DUEÑO, 13/09/2026, Y EL MOTIVO IMPORTA MAS.
+
+    El vigilante mide DEUDA NUESTRA, no si el codigo funciona. Y
+    llevaba cuatro horas siendo lo unico que tenia a Pepe parado,
+    con ofertas sin cobrar y publicaciones sin renovar.
+
+    Un detector que apaga el bot el primer dia se acaba apagando
+    el, y entonces no queda nada.
+
+    Y HAY UNA RAZON ESTRUCTURAL: el censo se construye en la
+    maquina del dueño, donde esos ficheros no existen; en CI la
+    cache los restaura y aparecen lecturas que en local no se
+    ven. Alguna —el archivo de prensa por fecha— trae un fichero
+    nuevo cada dia, asi que el censo caducaria solo. EL CENSO NO
+    SE PUEDE CONSTRUIR DESDE LOCAL.
+
+    Lo que lo salva de volverse ruido son las tres condiciones de
+    abajo, y esta guardia las exige.
+    """
+
+    raiz = Path(__file__).resolve().parents[2]
+
+    corredor = (
+        raiz / "scripts" / "run_validation_gate.py"
+    ).read_text(encoding="utf-8")
+
+    # 1. NO TUMBA. Lo que abre no puede acabar en `fallos`.
+    cuerpo = corredor[
+        corredor.index("if abiertos:") : corredor.index(
+            "corto = modulo.rsplit"
+        )
+    ]
+
+    assert "fallos.append" not in cuerpo, (
+        "el vigilante vuelve a tumbar la verja: mide deuda "
+        "nuestra, no si el codigo funciona"
+    )
+
+    # 2. PERO NO SE CALLA. El numero, siempre.
+    assert "LEEN LA CARPETA DE ESTADO AL CORRERSE" in corredor
+
+    assert "NO TUMBA LA VERJA" in corredor, (
+        "el aviso no dice que no tumba: quien lo lea creera que "
+        "la verja esta rota"
+    )
+
+    # 3. Y marca las que pueden encerrarlo, que son la cola de
+    #    trabajo de verdad.
+    assert "PUEDEN_ENCERRARLO" in corredor, (
+        "el aviso no distingue deuda de riesgo"
+    )
+
+    assert "LEE UN FICHERO QUE EL CICLO ESCRIBE" in corredor
 
 
 def test_la_verja_lleva_el_vigilante_puesto() -> None:
@@ -755,6 +865,7 @@ TESTS = [
     test_el_censo_solo_puede_encoger,
     test_las_que_pueden_encerrarlo_estan_contadas,
     test_la_del_carril_no_puede_volver_al_censo,
+    test_el_vigilante_avisa_y_no_tumba,
     test_la_verja_lleva_el_vigilante_puesto,
     test_las_dos_que_tiraron_produccion_ya_no_lo_leen,
     test_la_deuda_esta_explicada,

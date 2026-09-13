@@ -125,6 +125,39 @@ def _libro_vacio() -> dict:
     return {"version": 1, "bids": {}}
 
 
+# `None` es un VALOR aqui —"no sabemos quienes somos"— asi que
+# no puede servir tambien de "no me lo has pasado". Un centinela.
+_SIN_DECIR = object()
+
+
+def _recoger(foto, ledger, quien=_SIN_DECIR, carril=None):
+    """
+    `recoger_pujas_vivas` CON RUTA PROPIA, siempre.
+
+    Sin ella, `_origen_probado` abre el
+    `libro_del_carril.jsonl` de produccion —que en CI existe— y
+    la guardia pasa a depender de lo que el carril pujara esa
+    mañana. Es el fallo del 13/09 otra vez, un paso mas abajo.
+    """
+
+    import tempfile
+
+    from src.intelligence.bid_outcome_ledger import (
+        recoger_pujas_vivas,
+    )
+
+    with tempfile.TemporaryDirectory() as tmp:
+
+        return recoger_pujas_vivas(
+            foto,
+            YO if quien is _SIN_DECIR else quien,
+            ledger=ledger,
+            ruta_del_carril=(
+                carril or Path(tmp) / "sin_carril.jsonl"
+            ),
+        )
+
+
 # ============================================================
 # 1. LO QUE NO SE ANOTO, SE RECOGE
 # ============================================================
@@ -142,9 +175,7 @@ def test_el_libro_recoge_la_puja_que_no_anoto() -> None:
 
     libro = _libro_vacio()
 
-    visto = recoger_pujas_vivas(
-        _foto_con_la_puja_viva(), YO, ledger=libro
-    )
+    visto = _recoger(_foto_con_la_puja_viva(), libro)
 
     assert visto["available"] is True, visto
 
@@ -190,9 +221,9 @@ def test_no_duplica_lo_que_ya_tiene() -> None:
 
     foto = _foto_con_la_puja_viva()
 
-    primera = recoger_pujas_vivas(foto, YO, ledger=libro)
+    primera = _recoger(foto, libro)
 
-    segunda = recoger_pujas_vivas(foto, YO, ledger=libro)
+    segunda = _recoger(foto, libro)
 
     assert len(primera["recogidas"]) == 1, primera
 
@@ -216,7 +247,7 @@ def test_no_duplica_lo_que_ya_tiene() -> None:
         save=False,
     )
 
-    tercera = recoger_pujas_vivas(foto, YO, ledger=otro)
+    tercera = _recoger(foto, otro)
 
     assert tercera["recogidas"] == [], tercera
 
@@ -238,9 +269,7 @@ def test_solo_recoge_pujas_NUESTRAS() -> None:
 
     libro = _libro_vacio()
 
-    recoger_pujas_vivas(
-        _foto_con_la_puja_viva(), YO, ledger=libro
-    )
+    _recoger(_foto_con_la_puja_viva(), libro)
 
     jugadores = {
         e["player_id"] for e in libro["bids"].values()
@@ -254,8 +283,8 @@ def test_solo_recoge_pujas_NUESTRAS() -> None:
     # ajenas como nuestras es peor que no verlas (regla 24).
     a_ciegas = _libro_vacio()
 
-    visto = recoger_pujas_vivas(
-        _foto_con_la_puja_viva(), None, ledger=a_ciegas
+    visto = _recoger(
+        _foto_con_la_puja_viva(), a_ciegas, quien=None
     )
 
     assert visto["available"] is False, visto
@@ -287,11 +316,8 @@ def test_el_origen_no_se_inventa() -> None:
 
         libro = _libro_vacio()
 
-        recoger_pujas_vivas(
-            _foto_con_la_puja_viva(),
-            YO,
-            ledger=libro,
-            ruta_del_carril=vacio,
+        _recoger(
+            _foto_con_la_puja_viva(), libro, carril=vacio
         )
 
         entrada = list(libro["bids"].values())[0]
@@ -322,11 +348,8 @@ def test_el_origen_no_se_inventa() -> None:
 
         libro = _libro_vacio()
 
-        recoger_pujas_vivas(
-            _foto_con_la_puja_viva(),
-            YO,
-            ledger=libro,
-            ruta_del_carril=del_carril,
+        _recoger(
+            _foto_con_la_puja_viva(), libro, carril=del_carril
         )
 
         entrada = list(libro["bids"].values())[0]
@@ -353,11 +376,8 @@ def test_el_origen_no_se_inventa() -> None:
 
         libro = _libro_vacio()
 
-        recoger_pujas_vivas(
-            _foto_con_la_puja_viva(),
-            YO,
-            ledger=libro,
-            ruta_del_carril=del_carril,
+        _recoger(
+            _foto_con_la_puja_viva(), libro, carril=del_carril
         )
 
         assert list(libro["bids"].values())[0][
@@ -388,9 +408,7 @@ def test_lo_recogido_se_resuelve_sin_esperar_otro_ciclo() -> None:
 
     libro = _libro_vacio()
 
-    recoger_pujas_vivas(
-        _foto_con_la_puja_viva(), YO, ledger=libro
-    )
+    _recoger(_foto_con_la_puja_viva(), libro)
 
     # Ya paso el reset de las 07:00 del 13/09, y Trent no esta en
     # la plantilla.
@@ -638,12 +656,28 @@ def test_lo_que_se_resolvio_sin_nosotros_se_recoge() -> None:
 
     libro = _libro_vacio()
 
-    visto = recoger_compras_de_la_plantilla(
-        _plantilla_con_trent(),
-        _tablon_con_la_compra(),
-        YO,
-        ledger=libro,
-    )
+    # SUS PROPIAS RUTAS, SIEMPRE.
+    #
+    #     Sin ellas, `recoger_compras_de_la_plantilla` abre el
+    #     viaje en `libro_de_viajes.jsonl` DE PRODUCCION cuando el
+    #     libro del carril prueba el origen — y en CI ese libro
+    #     existe. Reproducido el 13/09: la guardia escribio el
+    #     viaje de Trent.
+    #
+    #     Una guardia que lee estado ajeno es deuda. Una que lo
+    #     ESCRIBE es otra cosa: desde que el escaparate esta
+    #     enchufado, un viaje escrito aqui es un jugador que Pepe
+    #     publica.
+    with tempfile.TemporaryDirectory() as tmp:
+
+        visto = recoger_compras_de_la_plantilla(
+            _plantilla_con_trent(),
+            _tablon_con_la_compra(),
+            YO,
+            ledger=libro,
+            ruta_del_carril=Path(tmp) / "carril.jsonl",
+            ruta_de_viajes=Path(tmp) / "viajes.jsonl",
+        )
 
     assert visto["available"] is True, visto
 
@@ -725,7 +759,16 @@ def test_tambien_se_ve_lo_comprado_a_un_rival() -> None:
 
     libro = _libro_vacio()
 
-    recoger_compras_de_la_plantilla(foto, tablon, YO, ledger=libro)
+    with tempfile.TemporaryDirectory() as tmp:
+
+        recoger_compras_de_la_plantilla(
+            foto,
+            tablon,
+            YO,
+            ledger=libro,
+            ruta_del_carril=Path(tmp) / "carril.jsonl",
+            ruta_de_viajes=Path(tmp) / "viajes.jsonl",
+        )
 
     vistos = {v["player_id"] for v in libro["bids"].values()}
 
@@ -840,13 +883,20 @@ def test_la_plantilla_no_se_recoge_dos_veces() -> None:
 
     tablon = _tablon_con_la_compra()
 
-    primera = recoger_compras_de_la_plantilla(
-        foto, tablon, YO, ledger=libro
-    )
+    with tempfile.TemporaryDirectory() as tmp:
 
-    segunda = recoger_compras_de_la_plantilla(
-        foto, tablon, YO, ledger=libro
-    )
+        rutas = {
+            "ruta_del_carril": Path(tmp) / "carril.jsonl",
+            "ruta_de_viajes": Path(tmp) / "viajes.jsonl",
+        }
+
+        primera = recoger_compras_de_la_plantilla(
+            foto, tablon, YO, ledger=libro, **rutas
+        )
+
+        segunda = recoger_compras_de_la_plantilla(
+            foto, tablon, YO, ledger=libro, **rutas
+        )
 
     assert len(primera["recogidas"]) == 1, primera
 
@@ -870,12 +920,16 @@ def test_una_plantilla_vacia_no_se_toma_por_buena() -> None:
 
     libro = _libro_vacio()
 
-    visto = recoger_compras_de_la_plantilla(
-        {"league": {"user": {"id": YO}}, "my_team": []},
-        _tablon_con_la_compra(),
-        YO,
-        ledger=libro,
-    )
+    with tempfile.TemporaryDirectory() as tmp:
+
+        visto = recoger_compras_de_la_plantilla(
+            {"league": {"user": {"id": YO}}, "my_team": []},
+            _tablon_con_la_compra(),
+            YO,
+            ledger=libro,
+            ruta_del_carril=Path(tmp) / "carril.jsonl",
+            ruta_de_viajes=Path(tmp) / "viajes.jsonl",
+        )
 
     assert visto["available"] is False, visto
 
