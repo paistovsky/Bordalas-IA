@@ -122,6 +122,25 @@ def _correr(libro, escritor, tmp: Path):
         ledger.save_ledger = lambda l, path=None: None
 
         return correr(
+            # SU PROPIO LIBRO DE VIAJES, EN UN TEMPORAL.
+            #
+            #     Sin esto, `correr` preguntaba el cupo a
+            #     `data/trading/libro_de_viajes.jsonl` —el de
+            #     verdad—. `data/trading` se restaura entre
+            #     ciclos, asi que la verja dependia de lo que
+            #     Pepe hubiera hecho esa mañana:
+            #
+            #         08:23 verde · 10:07 verde · 10:50 ROJO
+            #
+            #     y el mismo commit. El ciclo de las 10:07 anoto
+            #     a Trent como viaje y gasto el cupo del reset.
+            #     Pepe se echaba el candado a si mismo
+            #     trabajando.
+            #
+            #     Cero lecturas de `data/`. Ni con fallback, ni
+            #     "si existe lo uso": el escenario lo monta esta
+            #     guardia entero.
+            ruta_de_viajes=tmp / "libro_de_viajes.jsonl",
             accion_principal="MONITOR_OFFERS",
             cierres=[],
             objetivos=[TRENT],
@@ -142,15 +161,51 @@ def _correr(libro, escritor, tmp: Path):
         ledger.save_ledger = original_save
 
 
-def _una_vuelta(tmp_dir=None):
+def _una_vuelta(viajes_ya_abiertos=0):
+    """
+    Una vuelta del carril con TODO el escenario montado aqui.
+
+    `viajes_ya_abiertos` permite probar el cupo sin depender de
+    lo que haya hecho el bot: se escriben en el libro temporal.
+    """
+
+    import json
     import tempfile
+
+    from datetime import timedelta
 
     libro = {"version": 1, "bids": {}}
 
     escritor = _EscritorDeMentira()
 
     with tempfile.TemporaryDirectory() as tmp:
-        salida = _correr(libro, escritor, Path(tmp))
+
+        carpeta = Path(tmp)
+
+        if viajes_ya_abiertos:
+
+            # Dentro del ciclo de reset del fixture, para que
+            # cuenten: `cuantos_en_este_reset` mira `at`.
+            de_hoy = (CUANDO - timedelta(minutes=5)).isoformat()
+
+            (carpeta / "libro_de_viajes.jsonl").write_text(
+                "".join(
+                    json.dumps(
+                        {
+                            "at": de_hoy,
+                            "player_id": 900 + i,
+                            "name": f"Ya comprado {i}",
+                            "via": "RENDIJA",
+                            "state": "ABIERTO",
+                        }
+                    )
+                    + chr(10)
+                    for i in range(viajes_ya_abiertos)
+                ),
+                encoding="utf-8",
+            )
+
+        salida = _correr(libro, escritor, carpeta)
 
     return libro, escritor, salida
 
@@ -469,6 +524,45 @@ def test_la_hora_de_la_puja_se_pasa_no_se_deduce() -> None:
     )
 
 
+def test_el_cupo_del_reset_se_prueba_con_libro_propio() -> None:
+    """
+    LO QUE SE GANA AL MONTAR EL ESCENARIO UNO MISMO.
+
+    Mientras el cupo salia del libro de verdad, esta guardia no
+    podia probarlo: dependia de si el bot habia comprado esa
+    mañana. Con el libro propio se prueba en los dos sentidos,
+    siempre igual.
+
+    Cupo 1 (PRUEBA_DE_HUMO): con cero viajes abiertos se puja;
+    con uno, no. Y la guardia NO relaja nada — sigue exigiendo
+    que con el cupo libre el carril puje de verdad.
+    """
+
+    from src.analysis.la_rendija import CUPO_DE_LA_PRUEBA
+
+    assert CUPO_DE_LA_PRUEBA == 1, CUPO_DE_LA_PRUEBA
+
+    # Cupo libre: PUJA.
+    _l, escritor, salida = _una_vuelta(viajes_ya_abiertos=0)
+
+    assert escritor.pujas, salida.get("reason")
+
+    # Cupo gastado: no puja, y lo dice con el motivo bueno.
+    _l2, agotado, bloqueada = _una_vuelta(viajes_ya_abiertos=1)
+
+    assert agotado.pujas == [], (
+        "el carril puja con el cupo del reset gastado"
+    )
+
+    assert "Ya van 1" in (bloqueada.get("reason") or ""), (
+        bloqueada
+    )
+
+    assert bloqueada.get("blocked_by") == "CUPO_DEL_RESET", (
+        bloqueada
+    )
+
+
 TESTS = [
     test_la_puja_del_carril_se_anota,
     test_el_carril_tambien_pierde,
@@ -476,6 +570,7 @@ TESTS = [
     test_el_desvio_no_pasa_del_tope_por_operacion,
     test_el_carril_llama_al_desvio_por_donde_la_rueda,
     test_la_hora_de_la_puja_se_pasa_no_se_deduce,
+    test_el_cupo_del_reset_se_prueba_con_libro_propio,
 ]
 
 

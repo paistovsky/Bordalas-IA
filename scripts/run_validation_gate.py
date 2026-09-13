@@ -42,8 +42,14 @@ USO
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
+
+from pathlib import Path
+
+
+RAIZ = Path(__file__).resolve().parents[1]
 
 
 # ============================================================
@@ -323,13 +329,92 @@ def main() -> int:
 
     fallos = []
 
+    # EL VIGILANTE DE `data/` (13/09/2026)
+    #
+    #     Viaja DENTRO de la ejecucion que ya se hace: Python
+    #     importa `sitecustomize` solo al arrancar, y cada
+    #     guardia ya corre en su propio proceso. Coste cero.
+    #
+    #     Una guardia que corriera las otras 119 para vigilarlas
+    #     duplicaria la verja entera —medido: no termina en diez
+    #     minutos— y una verja lenta se acaba saltando.
+    entorno = dict(os.environ)
+
+    entorno["BORDALAS_VIGILA_DATA"] = "1"
+
+    entorno["PYTHONPATH"] = os.pathsep.join(
+        x
+        for x in (
+            str(RAIZ / "scripts" / "vigila_data"),
+            entorno.get("PYTHONPATH") or "",
+        )
+        if x
+    )
+
+    # LAS QUE TIENEN PERMISO, Y POR ESCRITO. Una definicion.
+    #
+    #     `LEEN_DATA_HOY` es el censo del 13/09: 28 guardias que
+    #     abren `data/` al correrse. No se perdonan, se cuentan —
+    #     y el vigilante falla por CUALQUIERA QUE NO ESTE, que es
+    #     lo que evita la proxima. La lista solo puede encoger.
+    try:
+        from src.analysis.test_verja_determinista_v1 import (
+            DEUDA,
+            LEEN_DATA_HOY,
+        )
+
+    except Exception:                               # noqa: BLE001
+        DEUDA, LEEN_DATA_HOY = {}, frozenset()
+
     for indice, modulo in enumerate(modulos, start=1):
 
         proceso = subprocess.run(
             [sys.executable, "-m", modulo],
             capture_output=True,
             text=True,
+            env=entorno,
         )
+
+        # LO QUE HA ABIERTO DE VERDAD.
+        #
+        #     Una guardia que lee `data/` no falla hoy: falla el
+        #     dia que el bot trabaje. Asi que se trata como un
+        #     fallo AHORA, con su nombre y su fichero.
+        abiertos = sorted(
+            {
+                linea.split("VIGILANTE-DATA:", 1)[1].strip()
+                for linea in (proceso.stderr or "").splitlines()
+                if "VIGILANTE-DATA:" in linea
+            }
+        )
+
+        if (
+            abiertos
+            and modulo not in DEUDA
+            and modulo not in LEEN_DATA_HOY
+        ):
+            print(
+                f"  {indice:>2}/{len(modulos)}  FALLA "
+                f"{modulo.rsplit('.', 1)[-1]}"
+            )
+            print(
+                "            LEE `data/` AL CORRERSE. `data/` se "
+                "restaura entre ciclos, asi que esta guardia"
+            )
+            print(
+                "            depende de lo que el bot hizo esa "
+                "mañana. Pasale la ruta; no la relajes."
+            )
+
+            for ruta in abiertos:
+                print(f"            -> {ruta}")
+
+            fallos.append(modulo)
+
+            if args.parar:
+                break
+
+            continue
 
         corto = modulo.rsplit(".", 1)[-1]
 

@@ -119,6 +119,7 @@ def correr(
     disparo: str | None = None,
     ahora: datetime | None = None,
     ruta_del_libro: Path | None = None,
+    ruta_de_viajes: Path | None = None,
 ) -> dict:
     """
     Una vuelta del carril. Forma fija, nunca lanza.
@@ -164,8 +165,29 @@ def correr(
         momento = ahora or datetime.now(timezone.utc)
 
         # Cuantas van en ESTE ciclo de reset, de 07:00 a 07:00.
+        # EL LIBRO SE LE PASA, NO SE DEDUCE (13/09/2026)
+        #
+        #     Aqui se llamaba sin `ruta`, asi que
+        #     `cuantos_en_este_reset` leia
+        #     `data/trading/libro_de_viajes.jsonl` —el de verdad—.
+        #
+        #     En produccion es lo correcto. En una guardia no:
+        #     `data/trading` se restaura entre ciclos con
+        #     `actions/cache@v4`, asi que la verja pasaba a
+        #     depender de lo que Pepe hubiera hecho esa mañana.
+        #
+        #     08:23 verde · 10:07 verde · 10:50 ROJO, mismo
+        #     commit. Entre medias, el ciclo de las 10:07 anoto a
+        #     Trent como viaje y gasto el cupo: Pepe se echaba el
+        #     candado a si mismo TRABAJANDO.
+        #
+        #     Es la segunda vez esta semana que algo se deduce
+        #     en vez de pasarse —antes fue la hora de la puja— y
+        #     la leccion es la misma: lo que decide tiene que
+        #     entrar por la puerta, no buscarse la vida.
         ya_van = cuantos_en_este_reset(
-            desde_epoch=_epoch_del_ultimo_reset(momento)
+            desde_epoch=_epoch_del_ultimo_reset(momento),
+            ruta=ruta_de_viajes,
         )
 
         puerta = permiso(

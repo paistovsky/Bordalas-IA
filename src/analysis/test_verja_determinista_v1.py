@@ -111,6 +111,91 @@ DEL_REPOSITORIO = (
 # igual: mientras eso se cumpla, la promesa de la verja aguanta.
 #
 # Esta lista solo deberia encoger.
+# ============================================================
+# EL CENSO DE LAS QUE ABREN `data/` AL CORRERSE (13/09/2026)
+# ============================================================
+#
+# SINTOMA
+#
+#     `test_la_puja_del_carril_v1` verde a las 08:23, verde a las
+#     10:07 y ROJO a las 10:50. EL MISMO COMMIT.
+#
+#     Entre medias, el ciclo de las 10:07 anoto a Trent como
+#     viaje del carril y gasto el cupo del reset. `data/trading`
+#     se restaura entre ciclos con `actions/cache@v4`, asi que la
+#     verja paso a depender de lo que Pepe hubiera hecho esa
+#     mañana.
+#
+#     Pepe se echaba el candado a si mismo TRABAJANDO.
+#
+# POR QUE `lecturas_de_estado` NO LO CAZO
+#
+#     Busca la ruta `data/` ESCRITA en el codigo de la guardia. Y
+#     la guardia no la escribia: llamaba a `correr()`, que
+#     llamaba a `cuantos_en_este_reset()`, que por defecto abre
+#     `data/trading/libro_de_viajes.jsonl`.
+#
+#     La lectura era TRANSITIVA, tres saltos mas abajo, en codigo
+#     de produccion que hace bien su trabajo. Mirar el texto caza
+#     la primera forma del fallo; solo EJECUTAR caza la segunda.
+#
+# LO QUE SE MIDIO AL PONER EL VIGILANTE
+#
+#     No era una guardia. ERAN VEINTIOCHO.
+#
+#     Y ahi esta la decision: hacer fallar la verja por las 28
+#     dejaria a Pepe parado, que es exactamente lo contrario de
+#     lo que se venia a arreglar. Asi que se censan con fecha, y
+#     el vigilante falla por CUALQUIERA QUE NO ESTE EN LA LISTA.
+#
+#     Esto NO las perdona: las cuenta. La lista solo puede
+#     encoger, y cada una que salga es una menos de la que
+#     depende la verja. La que mordio el 13/09 —la del carril—
+#     ya no esta, y no puede volver: hay guardia.
+#
+#     La causa de fondo se repite: algo que se DEDUCE en vez de
+#     PASARSE. La hora de la puja el 13 por la mañana, el libro
+#     de viajes el 13 por la tarde. El arreglo siempre es el
+#     mismo — pasarle la ruta— y nunca relajar la asercion.
+LEEN_DATA_HOY = frozenset(
+    {
+        "src.analysis.test_v10_full_autonomous_live",
+        "src.analysis.test_position_guardrail_v1",
+        "src.analysis.test_external_name_safety_v1",
+        "src.analysis.test_portfolio_budget_v1",
+        "src.analysis.test_roster_plan_guardrail_v1",
+        "src.analysis.test_acquisition_wiring_v1",
+        "src.analysis.test_mercado_rivales_v1",
+        "src.analysis.test_peticiones_v1",
+        "src.analysis.test_encender_las_pujas_v1",
+        "src.analysis.test_una_ventana_que_no_se_abre_v1",
+        "src.analysis.test_suelo_de_titulares_v1",
+        "src.analysis.test_plantillas_rivales_v1",
+        "src.analysis.test_pujar_por_el_xi_v1",
+        "src.analysis.test_reventa_al_computer_v1",
+        "src.analysis.test_contraoferta_v1",
+        "src.analysis.test_starter_aware_xi_v1",
+        "src.analysis.test_plantillas_rivales_llenas_v1",
+        "src.analysis.test_el_plato_del_carril_v1",
+        "src.analysis.test_ojeador_informe_v1",
+        "src.analysis.test_divergencia_v1",
+        "src.analysis.test_puerta_una_sola_lista_v1",
+        "src.analysis.test_freno_acelerador_v1",
+        "src.analysis.test_confianza_por_via_v1",
+        "src.analysis.test_despliegue_v1",
+        "src.analysis.test_orden_de_venta_v1",
+        "src.analysis.test_no_contar_dos_veces_v1",
+        "src.analysis.test_fuera_de_muestra_v1",
+        "src.analysis.test_arbitro_v1",
+    }
+)
+
+# Medidas el 13/09/2026. Si alguna se arregla, SALE de la lista;
+# si alguien añade una, la verja se pone roja y hay que venir
+# aqui a leer por que.
+CENSADAS_EL = "2026-09-13"
+
+
 DEUDA = {
     "src.analysis.test_el_ciclo_publica_v1": (
         "10/09/2026: nacio de la caida de produccion de esta "
@@ -259,6 +344,112 @@ def lecturas_de_estado(modulo: str) -> list[str]:
 # ============================================================
 # REGLA A: NADIE NOMBRA EL ESTADO
 # ============================================================
+
+
+def test_el_censo_solo_puede_encoger() -> None:
+    """
+    EL CENSO NO PERDONA: CUENTA.
+
+    28 guardias abrian `data/` al correrse el 13/09/2026. Hacer
+    fallar la verja por las 28 habria dejado a Pepe parado, que
+    es lo contrario de lo que se venia a arreglar.
+
+    Asi que se censan, y el vigilante falla por cualquiera que NO
+    este en la lista — que es lo que evita la proxima. La lista
+    solo puede encoger.
+    """
+
+    assert CENSADAS_EL == "2026-09-13", CENSADAS_EL
+
+    assert len(LEEN_DATA_HOY) <= 28, (
+        f"el censo ha crecido a {len(LEEN_DATA_HOY)}: una "
+        f"guardia nueva que lee la carpeta de estado no se "
+        f"añade a la lista, "
+        f"se arregla pasandole la ruta"
+    )
+
+    # Regla 24: si se vaciara del todo, esta guardia dejaria de
+    # comprobar nada y habria que quitarla a proposito.
+    assert LEEN_DATA_HOY, (
+        "el censo esta vacio: si de verdad ya no la lee "
+        "ninguna, quita esta guardia y la lista, y dilo en el "
+        "informe"
+    )
+
+    # Todas tienen que existir: una entrada que sobra es una
+    # guardia borrada que dejo su permiso detras.
+    for modulo in LEEN_DATA_HOY:
+        assert _ruta(modulo).exists(), (
+            f"`{modulo}` esta censada y no existe: quita la "
+            f"entrada"
+        )
+
+
+def test_la_del_carril_no_puede_volver_al_censo() -> None:
+    """
+    LA QUE MORDIO, POR SU NOMBRE.
+
+    `test_la_puja_del_carril_v1` leia el libro de viajes de
+    verdad y por eso la verja dependia de lo que el bot hubiera
+    comprado esa mañana. Se arreglo pasandole la ruta.
+
+    Si alguien la devuelve al censo en vez de arreglarla, esto se
+    pone rojo.
+    """
+
+    for arreglada in (
+        "src.analysis.test_la_puja_del_carril_v1",
+        "src.analysis.test_el_libro_recoge_v1",
+        "src.analysis.test_el_escaparate_publica_v1",
+    ):
+        assert arreglada not in LEEN_DATA_HOY, (
+            f"`{arreglada}` ha vuelto al censo: se arregla "
+            f"pasandole la ruta, no pidiendo permiso"
+        )
+
+        assert arreglada not in DEUDA, arreglada
+
+
+def test_la_verja_lleva_el_vigilante_puesto() -> None:
+    """
+    El vigilante vive en un `sitecustomize` y lo enciende la
+    verja. Si la verja dejara de ponerlo, no vigilaria nadie y
+    nadie se enteraria — que es como estaba el 13/09 por la
+    mañana.
+    """
+
+    raiz = Path(__file__).resolve().parents[2]
+
+    corredor = (
+        raiz / "scripts" / "run_validation_gate.py"
+    ).read_text(encoding="utf-8")
+
+    for pieza in (
+        "BORDALAS_VIGILA_DATA",
+        "vigila_data",
+        "VIGILANTE-DATA:",
+        "LEEN_DATA_HOY",
+    ):
+        assert pieza in corredor, (
+            f"la verja no enciende el vigilante de la carpeta "
+            f"de estado: falta `{pieza}`"
+        )
+
+    vigilante = (
+        raiz / "scripts" / "vigila_data" / "sitecustomize.py"
+    )
+
+    assert vigilante.exists(), (
+        "no existe el vigilante de la carpeta de estado"
+    )
+
+    fuente = vigilante.read_text(encoding="utf-8")
+
+    # NO impide la lectura: la apunta. Impedirla cambiaria el
+    # resultado de la guardia y estariamos midiendo otra cosa.
+    assert "atexit" in fuente, fuente[:0]
+
+    assert 'MARCA = "VIGILANTE-DATA:"' in fuente
 
 
 def test_ninguna_guardia_de_la_verja_lee_el_estado() -> None:
@@ -484,6 +675,9 @@ def test_la_puerta_declara_su_lista_en_un_solo_sitio() -> None:
 
 TESTS = [
     test_ninguna_guardia_de_la_verja_lee_el_estado,
+    test_el_censo_solo_puede_encoger,
+    test_la_del_carril_no_puede_volver_al_censo,
+    test_la_verja_lleva_el_vigilante_puesto,
     test_las_dos_que_tiraron_produccion_ya_no_lo_leen,
     test_la_deuda_esta_explicada,
     test_los_vigilados_pasan_con_el_estado_vacio,
