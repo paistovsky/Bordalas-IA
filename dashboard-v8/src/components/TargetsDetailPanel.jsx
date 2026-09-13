@@ -1,19 +1,30 @@
-import { conPujaPrimero } from "../lib/orden";
 import { formatEuros, formatMoney, positionLabel } from "../lib/utils";
 import { tonoDe } from "../lib/tono";
 
-/* POR QUE UN "CLAVE" SALE SIN VALOR (21/08/2026)
+/* EL DETALLE DE LOS OBJETIVOS (13/09/2026)
  *
- *   "Ya veo a Sergio Herrera. Me dice clave y sin valorar. ¿Por?"
+ * ESTA TABLA VIVIA EN MERCADO Y TENIA DOCE COLUMNAS QUE EL DUEÑO
+ * NO ENTENDIA.
  *
- *   SIN VALOR no quiere decir que el jugador sea malo: quiere
- *   decir que no vale NADA PARA NOSOTROS, casi siempre porque esa
- *   posicion ya esta cubierta mejor de lo que el la cubriria.
+ *   "No quiero verlo, no me sirve." — ojeador, diverge, se paga
+ *   solo, ganar, bolsillo, con su confianza, tener, puesto,
+ *   sustituye, solo mirar.
  *
- *   El motivo se calculaba y viajaba en `xi_decision`, y solo se
- *   veia pasando el raton por la fila. Un motivo que hay que
- *   cazar con el raton es un motivo que nadie lee.
+ *   MERCADO se quedó con cinco columnas y la frase entera del
+ *   POR QUÉ, que es lo que hace falta para DECIDIR.
+ *
+ * PERO NO SE HA BORRADO NI UN CÁLCULO.
+ *
+ *   La tabla entera está aquí, tal cual, con sus veinticinco
+ *   columnas y todos sus ayudantes — en AUDITORÍA, que es donde
+ *   vive lo que sirve para COMPROBAR.
+ *
+ *   Se quitó la caja, no la cuenta.
+ *
+ *   Y lo que decidía alguna de esas columnas sale además DENTRO
+ *   de la frase del POR QUÉ en Mercado, con palabras.
  */
+
 const MOTIVO_DEL_ONCE = {
   MEJORA_INSUFICIENTE: "no mejora lo bastante el XI",
   NO_SE_TOCA_UN_DIOS: "no se toca a un Dios",
@@ -549,231 +560,8 @@ function Tener({ hold, precio }) {
   );
 }
 
-function ClockPanel({ clock }) {
-  if (!clock?.available) {
-    return (
-      <section className="pan">
-        <h2>RELOJ DEL MERCADO</h2>
-        <div className="empty">{clock?.reason || "Sin deducir."}</div>
-      </section>
-    );
-  }
 
-  return (
-    <section className="pan">
-      <div className="pan-head">
-        <div>
-          <h2>RELOJ DEL MERCADO</h2>
-          <div className="sub">Reset Computer · {clock.next_reset_local}</div>
-        </div>
-        <span className={clock.window_state === "CRITICAL" ? "pill crit" : clock.window_state === "CLOSING" ? "pill warn" : "pill ok"}>
-          {clock.window_state}
-        </span>
-      </div>
-
-      <div className="kv"><span>Quedan</span><b className="mono">{Number(clock.hours_to_reset).toFixed(2)} h</b></div>
-      <div className="kv"><span>Jugadores del Computer</span><b className="mono">{clock.computer_listings}</b></div>
-      <div className="kv"><span>Se puede pujar</span><b className={clock.bidding_window_open ? "up" : "down"}>{clock.bidding_window_open ? "SÍ" : "NO"}</b></div>
-
-      {/* Un plazo para actuar que estaba en los datos y no se
-          pintaba en ninguna parte. Publicar despues del reset
-          es publicar un dia tarde. */}
-      <div className="kv">
-        <span>Hay que publicar antes del reset</span>
-        <b className={clock.must_publish_before_reset ? "down" : "dim"}>
-          {clock.must_publish_before_reset ? "SÍ" : "no hace falta"}
-        </b>
-      </div>
-
-      <div className="kv"><span>Origen del dato</span><span className="tag">{clock.source}</span></div>
-
-      {clock.listings_stale && (
-        <div className="alert warn" style={{ marginTop: 9, marginBottom: 0 }}>
-          El snapshot es anterior al último reset: puede traer jugadores que ya
-          no existen. No se puja sobre datos caducados.
-        </div>
-      )}
-    </section>
-  );
-}
-
-function CashPanel({ exposure, especulacion = {} }) {
-  if (!exposure?.available) {
-    return (
-      <section className="pan">
-        <h2>CAJA</h2>
-        <div className="empty">{exposure?.reason || "Sin presupuesto calculado."}</div>
-      </section>
-    );
-  }
-
-  /* EL BOLSILLO QUE MANDA AQUI (21/08/2026)
-   *
-   *   Este panel enseñaba el presupuesto de ESPECULAR: 15 % de la
-   *   caja y 60 % del margen de deuda. Debajo de una tabla de
-   *   fichajes.
-   *
-   *   Esa misma noche Pepe puso una puja de 2,08 M -con el de
-   *   fichar, que es el que decide- y este panel seguia diciendo
-   *   "Libre 0 €" porque 2,08 M ya se pasaba del techo de
-   *   apostar. El numero de al lado contradecia lo que el bot
-   *   acababa de hacer.
-   *
-   *   Manda el de fichar. El de especular se queda debajo, con su
-   *   nombre puesto. */
-  const fichajes = exposure.acquisition || {};
-  const hayFichajes = Boolean(fichajes.available);
-
-  const bolsillo = hayFichajes ? fichajes : exposure;
-
-  const cash = Number(bolsillo.cash_budget || 0);
-  const debt = Number(bolsillo.debt_budget || 0);
-  const committed = Number(exposure.committed_total || 0);
-
-  /* El bruto, no el autorizado.
-   *
-   *   El denominador era `total_budget`, que ya viene con lo
-   *   comprometido descontado, y ademas se pintaba lo
-   *   comprometido como un tramo mas. La barra sumaba mas del
-   *   100 % y salia llena siempre. */
-  const bruto = Math.max(cash + debt, 1);
-
-  const ancho = (valor) =>
-    `${Math.min((Math.max(valor, 0) / bruto) * 100, 100)}%`;
-
-  const libre = Number(
-    bolsillo.available_budget ?? Math.max(bruto - committed, 0)
-  );
-
-  return (
-    <section className="pan">
-      <h2>CAJA</h2>
-      <div className="sub">
-        {hayFichajes
-          ? "De dónde sale lo que puede gastar en fichar"
-          : "De dónde sale lo que puede gastar"}
-      </div>
-
-      <div className="bar">
-        <i style={{ width: ancho(cash), background: "#22c55e" }} />
-        <i style={{ width: ancho(debt), background: "#3b82f6" }} />
-      </div>
-      <div className="legend">
-        <span style={{ color: "#22c55e" }}>caja {formatMoney(cash)}</span>
-        <span style={{ color: "#3b82f6" }}>
-          deuda segura {formatMoney(debt)}
-        </span>
-      </div>
-
-      <div className="kv" style={{ marginTop: 8 }}>
-        <span>Pujas vivas</span><b className="mono">{exposure.operation_count || 0}</b>
-      </div>
-      <div className="kv">
-        <span>Comprometido</span>
-        <b className="mono">{formatEuros(committed)}</b>
-      </div>
-      <div className="kv">
-        <span>Libre para fichar</span>
-        <b className="mono up">{formatEuros(libre)}</b>
-      </div>
-
-      {hayFichajes && (
-        <>
-          <div className="kv">
-            <span>Libre para especular</span>
-            <b className="mono">
-              {formatEuros(exposure.available_budget)}
-            </b>
-          </div>
-
-          {fichajes.capped_by_biwenger && (
-            <div className="kv">
-              <span>Techo de Biwenger</span>
-              <b className="mono">
-                {formatEuros(fichajes.maximum_bid)}
-              </b>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* EL TOPE POR OPERACION (05/09/2026)
-       *
-       *   El motor lo publica desde siempre como
-       *   `single_operation_limit`. El lector del dashboard
-       *   buscaba `max_operation`, que no existia en ningun sitio,
-       *   asi que la pantalla decia 0: lo contrario de lo que
-       *   decia el motor. Se arreglo en el lector el 04/09 y
-       *   hasta hoy no se veia por ninguna parte.
-       *
-       *   Va aqui porque un presupuesto sin tope por operacion se
-       *   lee como "puedes gastarlo de una vez", y no. */}
-      {Number(especulacion.max_operation || 0) > 0 && (
-        <div className="kv">
-          <span>Tope por operación</span>
-          <b
-            className="mono"
-            title="Lo máximo que puede irse en una sola operación especulativa: el 40 % del bolsillo."
-          >
-            {formatEuros(especulacion.max_operation)}
-          </b>
-        </div>
-      )}
-    </section>
-  );
-}
-
-/* LAS TRES COSAS QUE LA TABLA NECESITA SABER (13/09/2026)
- *
- * Ninguna inventa nada: leen lo que el motor ya publica. La
- * pantalla no puede tener una opinion propia sobre a quien pujar.
- */
-
-const POS = { 1: "POR", 2: "DEF", 3: "MED", 4: "DEL" };
-
-/* PARA QUE. Nunca vacio.
- *
- *   "no se sabe" y "no vale" son cosas distintas, y un hueco en
- *   blanco las dice las dos a la vez. */
-function paraQue(target) {
-  const via = String(target.intent || "").toUpperCase();
-
-  if (via === "SPECULATION") return "para revender";
-
-  if (via === "XI_UPGRADE" || via === "KEEP") return "para el once";
-
-  // Sin via, lo que mande la decision.
-  const decision = String(target.decision || "").toUpperCase();
-
-  if (decision === "SIN_VALOR") return "no vale";
-
-  if (decision === "NO_DISPONIBLE") return "no se puede comprar";
-
-  if (!via) return "no se sabe";
-
-  return via.toLowerCase();
-}
-
-/* POR QUE. La frase del motor, entera.
- *
- *   Y si la del once dice algo más —"sustituiría a un titular
- *   confirmado por alguien que está al 30 %"— se añade: es la
- *   que explica lo que las columnas quitadas decidían. */
-function porQue(target) {
-  const partes = [];
-
-  if (target.reason) partes.push(String(target.reason));
-
-  const once = String(target.xi_reason || "");
-
-  if (once && !partes.includes(once)) partes.push(once);
-
-  if (!partes.length) return "Sin motivo publicado.";
-
-  return partes.join(" ");
-}
-
-function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
+export default function TargetsDetailPanel({ acquisition, pointsMarket, exposure = {} }) {
   if (!acquisition?.available) {
     return (
       <section className="pan">
@@ -784,9 +572,6 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
   }
 
   const objetivos = acquisition.targets || [];
-
-  // Los que ya tienen puja puesta, primeros. Ver `orden.js`.
-  const ordenados = conPujaPrimero(acquisition.targets);
 
   // Contado sobre las filas que se estan pintando, no sobre un
   // resumen aparte. Si la tabla no lo ensena, no cuenta.
@@ -901,91 +686,260 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
       </div>
 
       <table>
-        {/* CINCO COLUMNAS. NI UNA MAS (13/09/2026)
-
-            Eran doce y el dueño no las entendia. Las que se han
-            ido —ojeador, diverge, se paga solo, ganar, bolsillo,
-            con su confianza, tener, puesto, sustituye, solo
-            mirar— siguen calculandose y se ven en AUDITORIA.
-
-            Lo que decidia alguna de ellas no se pierde: sale
-            DENTRO de la frase del POR QUE, con palabras. Esa
-            frase ya se escribia y la pantalla se la tragaba. */}
         <thead>
           <tr>
-            <th>QUIÉN</th>
-            <th className="n">CUÁNTO CUESTA</th>
-            <th>PARA QUÉ</th>
+            <th>JUGADOR</th>
+            <th></th>
+            <th>EQUIPO</th>
+            <th className="n">MERCADO</th>
+            <th className="n">TIT.</th>
+            <th>JERARQUÍA</th>
+            <th>LESIÓN</th>
+            <th>SANCIÓN</th>
+            {/* LAS DOS OPINIONES, PEGADAS (06/09/2026)
+                Pepe le da el mismo 0,17 % a uno que subio un
+                17 % ayer y a uno que bajo un 2 %. El ojeador
+                los separa. Eso solo se ve con las dos
+                columnas juntas. */}
+            <th className="n">PEPE DICE</th>
+            <th className="n">OJEADOR</th>
+            <th>DIVERGE</th>
+            <th className="n">ANTES / AHORA</th>
+            <th className="n">CON SU CONFIANZA</th>
+            <th className="n">TENER</th>
+            <th className="n">VALE PARA NOSOTROS</th>
+            <th className="n">SE PAGA SOLO</th>
+            <th>VENDE</th>
+            <th className="n">PUESTO</th>
             <th className="n">PUJARÍAMOS</th>
-            <th>POR QUÉ</th>
+            <th className="n">GANAR</th>
+            <th>INTENCIÓN</th>
+            <th>BOLSILLO</th>
+            <th>SUSTITUYE</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          {ordenados.map((target) => {
-            const puja = Number(target.live_bid || 0) > 0;
-
-            const sube = Number(target.price_increment || 0);
+          {(acquisition.targets || []).map((target) => {
+            const { tono: tone, etiqueta: label } = tonoDe(
+              DECISION,
+              target.decision
+            );
+            const bids = target.decision === "BID";
+            const viva = Number(target.live_bid || 0) > 0;
 
             return (
               <tr
                 key={target.id}
-                className={puja ? "row-live" : undefined}
+                className={viva ? "live" : bids ? "" : "off"}
+                /* TODO EL PORQUE, EN UN SOLO SITIO (21/08/2026)
+                   Las letras pequeñas debajo de cada etiqueta
+                   convertian la tabla en una pared de gris. El
+                   detalle vive aqui, en el recuadro que sale al
+                   pasar el raton por la fila. */
+                title={
+                  [
+                    MOTIVO_DEL_ONCE[target.xi_decision],
+                    estadoFisico(target),
+                    target.xi_reason,
+                    target.reason
+                  ]
+                    .filter(Boolean)
+                    .join("  —  ") || undefined
+                }
               >
-                {/* QUIEN: nombre, posicion y equipo, juntos. */}
+                <td>{target.name}</td>
+                <td className="dim">{positionLabel(target.position)}</td>
+                <td className="dim">{target.team || "—"}</td>
+                <td className="n">{formatEuros(target.market_price)}</td>
+
+                {/* La respuesta a "¿cómo es eso mejorar el XI?".
+                    Un candidato con más puntos que el nuestro
+                    puede ser suplente, y hasta ahora eso no se
+                    veía en ninguna columna. */}
+                <td className={`n ${STARTER_TONE(target.starter_probability)}`}>
+                  {target.starter_probability != null
+                    ? `${Math.round(Number(target.starter_probability))}%`
+                    : <span className="dim">sin dato</span>}
+                </td>
+
+                {/* Lo estructural, al lado de lo semanal. Un
+                    Reserva al 70 % esta semana sigue siendo un
+                    Reserva, y esta columna es la que lo dice.
+
+                    La linea de estado fisico que colgaba de aqui
+                    se ha ido a sus dos columnas propias. */}
                 <td>
-                  {puja ? (
+                  <Hierarchy label={target.hierarchy} />
+                </td>
+
+                {/* Lo que Pepe espera que rinda. Sale de su
+                    propia explicacion; si algun dia deja de
+                    decirlo, aqui pone "—" y no se inventa. */}
+                <td className="n dim" title="Rendimiento esperado por el motor de especulación.">
+                  {target.pepe_yield_percent != null
+                    ? `${String(target.pepe_yield_percent).replace(".", ",")} %`
+                    : "—"}
+                </td>
+
+                {/* Y lo que dicen las webs. No manda: es una
+                    segunda opinion escrita al lado. */}
+                <td className="n">
+                  <ScoutVerdict scout={target.scout} />
+                </td>
+
+                {/* PRECIO CONTRA DEMANDA (07/09/2026)
+                    Cuando el precio se mueve a un lado y la gente
+                    puja al otro. Es una HIPOTESIS sin comprobar:
+                    el libro empieza a medirla hoy. */}
+                <td>
+                  <Divergencia divergence={target.divergence} />
+                </td>
+
+                {/* LO QUE CAMBIA CON LAS REGLAS NUEVAS (08/09/2026)
+                    Este es el primer cambio de la semana que mueve
+                    dinero de verdad. El dueño tiene que poder ver
+                    que decidia Pepe antes y que decide ahora, fila
+                    a fila, antes de que se gaste un euro. */}
+                <td className="n">
+                  <AntesAhora gate={target.market_gate} valor={target.our_value} />
+                </td>
+
+                {/* CADA VIA CON SU CONFIANZA (09/09/2026)
+                    En sombra: el motor sigue decidiendo con la
+                    columna de al lado. Aqui se ve que via ganaria
+                    y por cuanto si cada apuesta llevase la
+                    confianza de lo que de verdad apuesta. */}
+                <td className="n">
+                  <ConSuConfianza
+                    sombra={target.confidence_shadow}
+                    gate={target.market_gate}
+                    valor={target.our_value}
+                  />
+                </td>
+
+                {/* LA CUARTA VIA (14/09/2026)
+                    Las otras tres se cobran el mismo dia; esta se
+                    cobra por quedarse el activo en la rampa.
+                    Sale del retrotest: comprar a mas del 1 %/dia y
+                    vender a tres dias da +4,47 % de mediana con un
+                    5 % de operaciones en perdida. */}
+                <td className="n">
+                  <Tener hold={target.as_hold} precio={target.market_price} />
+                </td>
+
+                <td>
+                  <Lesion
+                    absence={target.absence}
+                    availability={target.availability}
+                  />
+                </td>
+
+                <td>
+                  <Sancion absence={target.absence} />
+                </td>
+
+                <td className="n">{formatEuros(target.our_value)}</td>
+
+                {/* LO QUE EL FICHAJE DEVUELVE EN CAJA (21/08/2026)
+
+                    Biwenger abona 30.000 € por punto al cerrar
+                    cada jornada. La columna MERCADO dice si algo
+                    está caro comparado con otros; ésta dice si se
+                    paga solo.
+
+                    Un punto es un punto: da igual en qué jornada
+                    llegue, paga lo mismo. Por eso el coste por
+                    punto y el abono son comparables sin inventar
+                    horizontes. */}
+                <td className="n">
+                  {target.pays_for_itself == null ? (
+                    <span className="dim">—</span>
+                  ) : target.pays_for_itself ? (
                     <span
-                      className="pill live"
-                      style={{ marginRight: 6 }}
+                      className="pill ok"
+                      title={`Cuesta ${formatEuros(target.cost_per_point)} por punto y cada punto abona 30.000 €. Devuelve ${formatEuros(target.abono_return)} solo en abonos.`}
                     >
-                      PUJA PUESTA
+                      SÍ · {formatEuros(target.abono_return)}
                     </span>
-                  ) : null}
-                  <b>{target.name}</b>
-                  <div className="dim" style={{ fontSize: 9 }}>
-                    {POS[target.position] || "—"}
-                    {target.team ? ` · ${target.team}` : ""}
-                  </div>
-                </td>
-
-                {/* CUANTO CUESTA: precio y hacia donde va, en una
-                    sola celda. Eran dos columnas. */}
-                <td className="n">
-                  <b>{formatEuros(target.market_price)}</b>
-                  <div
-                    className={
-                      sube > 0 ? "up" : sube < 0 ? "down" : "dim"
-                    }
-                    style={{ fontSize: 9 }}
-                  >
-                    {sube > 0
-                      ? `▲ sube ${formatEuros(sube)}`
-                      : sube < 0
-                      ? `▼ baja ${formatEuros(-sube)}`
-                      : "= igual"}
-                  </div>
-                </td>
-
-                {/* PARA QUE: NUNCA vacio. Si no se sabe, se dice
-                    que no se sabe, que es otra cosa. */}
-                <td>{paraQue(target)}</td>
-
-                {/* PUJARIAMOS: NUNCA vacio. Si no vamos a pujar,
-                    lo dice CON ESAS PALABRAS. Estuvo en blanco
-                    todos los dias por esto: la decision no es
-                    BID, asi que `bid` vale 0 — y un cero en
-                    blanco se lee como un dato que falta. */}
-                <td className="n">
-                  {target.decision === "BID" &&
-                  Number(target.bid || 0) > 0 ? (
-                    <b>{formatEuros(target.bid)}</b>
                   ) : (
-                    <span className="dim">no pujaríamos</span>
+                    <span
+                      className="dim"
+                      title={`Cuesta ${formatEuros(target.cost_per_point)} por punto y cada punto abona 30.000 €.`}
+                    >
+                      no
+                    </span>
                   )}
                 </td>
 
-                {/* POR QUE: la frase entera, sin recortar. */}
-                <td className="sub">{porQue(target)}</td>
+                {/* A QUIÉN SE LE COMPRA, CON NOMBRE.
+                    "Un rival" no informa de nada: de cada mánager
+                    se sabe cuánto suele pagar, así que saber si es
+                    Prinzipote o Pollo17 cambia lo que esperas que
+                    pase con la puja. */}
+                <td className={target.seller_kind === "MANAGER" ? "rival" : "dim"}>
+                  {target.seller_name || "Computer"}
+                </td>
+
+                <td className="n strong">
+                  {viva ? formatEuros(target.live_bid) : "—"}
+                </td>
+                {/* EL DESVIO, CON SU PRECIO (13/09/2026)
+                    "Quiero poder mirar la pantalla y ver cuanto
+                    nos esta costando el seguro. Si en un mes ha
+                    costado mas de lo que ha ganado, se apaga."
+
+                    Arriba lo que se puja de verdad; debajo, lo
+                    que habria salido sin desvio y la diferencia
+                    en euros. */}
+                <td className="n">
+                  {bids ? (
+                    <>
+                      <b>{formatEuros(target.bid)}</b>
+                      {target.bid_jitter ? (
+                        <div
+                          className="dim"
+                          style={{ fontSize: 9 }}
+                          title={`Sin desvio serian ${formatEuros(
+                            target.bid_clean
+                          )}. El desvio impide que la puja se pueda enumerar desde la curva de primas publicada.`}
+                        >
+                          limpia {formatEuros(target.bid_clean)} ·{" "}
+                          <span className="down">
+                            +{formatEuros(target.bid_jitter)}
+                          </span>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td className="n">
+                  {target.win_probability != null
+                    ? `${Math.round(target.win_probability * 100)}%`
+                    : "—"}
+                </td>
+                <td className="dim">{target.intent || "—"}</td>
+
+                {/* DE QUE BOLSILLO SALE (10/09/2026)
+                    La columna de al lado dice la intencion; esta
+                    dice por que es esa y cuanto valdria llenando
+                    un hueco. En sombra hasta que se encienda. */}
+                <td>
+                  <Bolsillo
+                    deployment={target.deployment}
+                    concentration={target.concentration}
+                  />
+                </td>
+                <td className="dim">{target.replaces || "—"}</td>
+                <td>
+                  {viva ? (
+                    <span className="pill live">PUJA PUESTA</span>
+                  ) : (
+                    <span className={`pill ${tone}`}>{label}</span>
+                  )}
+                </td>
               </tr>
             );
           })}
@@ -1028,143 +982,5 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
         candidatas. Pasa el ratón por una fila para ver el porqué completo.
       </p>
     </section>
-  );
-}
-
-function OffersPanel({ offers }) {
-  return (
-    <section className="pan">
-      <h2>OFERTAS RECIBIDAS</h2>
-      <div className="sub">Del Computer y de rivales</div>
-
-      {offers.length ? (
-        <table>
-          <thead>
-            <tr>
-              <th>JUGADOR</th>
-              <th className="n">IMPORTE</th>
-              <th className="n">VS VALOR</th>
-              <th className="n">EXPIRA</th>
-              <th>ACCIÓN</th>
-            </tr>
-          </thead>
-          <tbody>
-            {offers.map((offer, index) => {
-              const premium = Number(offer.premium_percent || 0);
-              return (
-                <tr key={index}>
-                  <td>{(offer.players || []).join(", ") || "—"}</td>
-                  <td className="n">{formatEuros(offer.amount)}</td>
-                  <td className={premium >= 0 ? "n up" : "n down"}>
-                    {premium >= 0 ? "+" : ""}{premium.toFixed(1)}%
-                  </td>
-                  <td className="n dim">
-                    {offer.hours_to_expiry != null ? `${offer.hours_to_expiry}h` : "—"}
-                  </td>
-                  <td className="dim">{offer.action_label || offer.action || "—"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      ) : (
-        <div className="empty">Sin ofertas activas.</div>
-      )}
-    </section>
-  );
-}
-
-function ListingsPanel({ listings }) {
-  const rows = listings?.renew_required || [];
-
-  return (
-    <section className="pan">
-      <div className="pan-head">
-        <div>
-          <h2>NUESTRAS PUBLICACIONES</h2>
-          <div className="sub">{listings?.listing_count ?? 0} en el mercado</div>
-        </div>
-        {rows.length ? <span className="pill warn">{rows.length} POR RENOVAR</span> : null}
-      </div>
-
-      {rows.length ? (
-        <table>
-          <thead>
-            <tr><th>JUGADOR</th><th className="n">PRECIO</th><th className="n">CADUCA EN</th></tr>
-          </thead>
-          <tbody>
-            {rows.map((player) => (
-              <tr key={player.id || player.name}>
-                <td>{player.name}</td>
-                <td className="n">{formatEuros(player.listed_price)}</td>
-                {/* CADUCADO NO ES "CADUCA AHORA" (12/09/2026).
-
-                    Ocho listados salian con "0,0 h" clavado y
-                    parecia un contador roto. No lo estaba:
-                    llevaban 2,3 horas caducados, y un
-                    `max(x, 0.0)` convertia "llego tarde" en
-                    "justo a tiempo". El reloj de 48 h es exacto
-                    —medido en los 13, al segundo— y renovar SI
-                    lo reinicia. Lo que no habia pasado era una
-                    renovacion desde el 10/09. */}
-                <td className={
-                  player.expired
-                    ? "n crit"
-                    : Number(player.hours_to_expiry) <= 3
-                    ? "n down"
-                    : "n dim"
-                }>
-                  {player.hours_to_expiry == null
-                    ? "sin medir"
-                    : player.expired
-                    ? `caducó hace ${player.expired_for_hours} h`
-                    : `${player.hours_to_expiry} h`}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <div className="empty">Ninguna publicación necesita renovarse.</div>
-      )}
-    </section>
-  );
-}
-
-export default function MarketPage({ data }) {
-  return (
-    <>
-      {/* ARRIBA, SOLO TRES COSAS (13/09/2026)
-
-          El dueño leyó el cuadro de objetivos y no entendía doce
-          columnas. No le faltaba contexto: el cuadro estaba
-          escrito para quien lo programó.
-
-          Reloj · caja · nuestras publicaciones. Y debajo, lo
-          único que se decide aquí.
-
-          LO QUE SE VA NO SE BORRA: se quita de MERCADO y se ve
-          en AUDITORÍA, que es donde vive lo que sirve para
-          comprobar. Ningún cálculo desaparece; lo que no puede
-          es estar donde el dueño decide. */}
-      <div className="grid g3">
-        <ClockPanel clock={data.marketClock} />
-        <CashPanel
-          exposure={data.exposure}
-          especulacion={data.speculation}
-        />
-        <ListingsPanel listings={data.listings} />
-      </div>
-
-      <TargetsPanel
-        acquisition={data.acquisition}
-        pointsMarket={data.pointsMarket}
-        exposure={data.exposure}
-      />
-
-      <div style={{ marginTop: 11 }}>
-        <OffersPanel offers={data.offers || []} />
-      </div>
-    </>
   );
 }

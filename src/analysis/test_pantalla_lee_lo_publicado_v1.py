@@ -143,7 +143,12 @@ CADENAS = [
         "hold_route",
         "holdRoute",
         "ViaTenerPanel",
-        ["MarketPage.jsx"],
+        # MOVIDO A AUDITORIA el 13/09/2026. El dueño no entendia
+        # doce columnas en la pantalla donde decide, asi que
+        # MERCADO se quedo con tres cuadros y el cuadro de
+        # objetivos. Ni un calculo se borro: se ven aqui, que es
+        # donde vive lo que sirve para COMPROBAR.
+        ["AuditPage.jsx"],
     ),
     (
         "vara",
@@ -161,13 +166,23 @@ CADENAS = [
         "season_horizon",
         "seasonHorizon",
         "SeasonHorizonPanel",
-        ["MarketPage.jsx"],
+        # MOVIDO A AUDITORIA el 13/09/2026. El dueño no entendia
+        # doce columnas en la pantalla donde decide, asi que
+        # MERCADO se quedo con tres cuadros y el cuadro de
+        # objetivos. Ni un calculo se borro: se ven aqui, que es
+        # donde vive lo que sirve para COMPROBAR.
+        ["AuditPage.jsx"],
     ),
     (
         "roster_expansion",
         "rosterExpansion",
         "RosterExpansionPanel",
-        ["MarketPage.jsx"],
+        # MOVIDO A AUDITORIA el 13/09/2026. El dueño no entendia
+        # doce columnas en la pantalla donde decide, asi que
+        # MERCADO se quedo con tres cuadros y el cuadro de
+        # objetivos. Ni un calculo se borro: se ven aqui, que es
+        # donde vive lo que sirve para COMPROBAR.
+        ["AuditPage.jsx"],
     ),
     (
         "scout",
@@ -541,40 +556,56 @@ def test_ningun_panel_nuevo_decide_nada() -> None:
 
 
 
-def test_las_dos_opiniones_estan_pegadas_en_mercado() -> None:
+def test_las_dos_opiniones_estan_pegadas_en_auditoria() -> None:
     """
-    Lo que hay que ver es la DIFERENCIA: Pepe le da el mismo
-    0,17 % a uno que subio un 17 % ayer y a uno que bajo un 2 %.
-    En columnas separadas por media tabla, nadie las compara.
+    LAS DOS SEGUNDAS OPINIONES, JUNTAS — Y YA NO EN MERCADO.
+
+    Nacieron pegadas al cuadro de objetivos porque comparar "lo
+    que Pepe valora" con "lo que valdria a temporada" obliga a
+    tener las dos cosas delante.
+
+    El 13/09 MERCADO se quedo con lo que se DECIDE —reloj, caja,
+    publicaciones y cinco columnas— y todo lo que sirve para
+    COMPROBAR bajo a AUDITORIA. Las dos opiniones son eso:
+    comprobacion.
+
+    Lo que NO puede pasar es que se separen: en paginas distintas
+    nadie las compara. Siguen pegadas, en el sitio nuevo.
     """
 
-    fuente = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+    auditoria = (
+        DASHBOARD / "pages" / "AuditPage.jsx"
+    ).read_text(encoding="utf-8")
 
-    assert "PEPE DICE" in fuente, "falta la columna de Pepe"
-    assert "OJEADOR" in fuente, "falta la columna del ojeador"
-    assert "target.scout" in fuente, (
-        "la tabla no lee el veredicto del ojeador"
-    )
-    assert "pepe_yield_percent" in fuente, (
-        "la tabla no lee lo que Pepe dice que rinde"
-    )
+    for panel in ("SeasonHorizonPanel", "RosterExpansionPanel"):
+        assert panel in auditoria, (
+            f"`{panel}` no esta en AUDITORIA: se ha borrado en "
+            f"vez de moverse"
+        )
 
-    # Las cabeceras, contiguas. Se compara sobre el `<th>` y no
-    # sobre la palabra suelta: "OJEADOR" tambien sale en los
-    # comentarios del fichero, y ahi el indice no significa nada.
-    cabecera_pepe = '<th className="n">PEPE DICE</th>'
-    cabecera_ojeador = '<th className="n">OJEADOR</th>'
+    # PEGADAS: nada entre ellas salvo el hueco.
+    entre = auditoria[
+        auditoria.index("<SeasonHorizonPanel") : auditoria.index(
+            "<RosterExpansionPanel"
+        )
+    ]
 
-    assert cabecera_pepe in fuente and cabecera_ojeador in fuente
-
-    hueco = fuente.index(cabecera_ojeador) - (
-        fuente.index(cabecera_pepe) + len(cabecera_pepe)
-    )
-
-    assert 0 <= hueco < 40, (
-        f'las dos columnas se han separado ({hueco} caracteres)'
+    assert "Panel" not in entre.replace(
+        "SeasonHorizonPanel", ""
+    ), (
+        "se ha colado un panel entre las dos opiniones: hay que "
+        "poder compararlas de un vistazo"
     )
 
+    # Y NO en Mercado, que es donde se decide.
+    mercado = (
+        DASHBOARD / "pages" / "MarketPage.jsx"
+    ).read_text(encoding="utf-8")
+
+    for panel in ("SeasonHorizonPanel", "RosterExpansionPanel"):
+        assert panel not in mercado, (
+            f"`{panel}` ha vuelto a MERCADO"
+        )
 
 def test_sin_veredicto_no_se_pinta_un_cero() -> None:
     """
@@ -606,7 +637,7 @@ def test_el_ojeador_publica_a_quien_no_pudo_identificar() -> None:
 
 
 
-def test_la_divergencia_se_ve_en_mercado_y_no_como_recomendacion() -> None:
+def test_la_divergencia_se_ve_en_el_detalle_y_no_como_recomendacion() -> None:
     """
     Es una HIPOTESIS. El estudio del 07/09 midio que el precio de
     Biwenger tiene un momento enorme, asi que una divergencia es
@@ -614,7 +645,18 @@ def test_la_divergencia_se_ve_en_mercado_y_no_como_recomendacion() -> None:
     medida.
     """
 
-    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+    # MIRA EL DETALLE, NO MERCADO (13/09/2026)
+    #
+    #     Esta columna vivia en el cuadro de MERCADO. El dueño no
+    #     entendia doce columnas en la pantalla donde decide, asi
+    #     que MERCADO se quedo con cinco y el detalle entero bajo
+    #     a AUDITORIA -`TargetsDetailPanel`-.
+    #
+    #     NI UN CALCULO SE HA BORRADO: se quito la caja, no la
+    #     cuenta. Por eso esta guardia sigue en pie; solo mira
+    #     donde vive ahora.
+
+    mercado = _lee(DASHBOARD / "components" / "TargetsDetailPanel.jsx")
 
     assert "DIVERGE" in mercado, "falta la columna de divergencia"
     assert "target.divergence" in mercado, (
@@ -657,7 +699,18 @@ def test_se_ve_lo_que_decidia_antes_y_lo_que_decide_ahora() -> None:
     fila a fila y sin leer el codigo.
     """
 
-    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+    # MIRA EL DETALLE, NO MERCADO (13/09/2026)
+    #
+    #     Esta columna vivia en el cuadro de MERCADO. El dueño no
+    #     entendia doce columnas en la pantalla donde decide, asi
+    #     que MERCADO se quedo con cinco y el detalle entero bajo
+    #     a AUDITORIA -`TargetsDetailPanel`-.
+    #
+    #     NI UN CALCULO SE HA BORRADO: se quito la caja, no la
+    #     cuenta. Por eso esta guardia sigue en pie; solo mira
+    #     donde vive ahora.
+
+    mercado = _lee(DASHBOARD / "components" / "TargetsDetailPanel.jsx")
 
     assert "ANTES / AHORA" in mercado, (
         "falta la columna de comparacion"
@@ -701,7 +754,18 @@ def test_se_ve_que_via_gana_con_cada_esquema() -> None:
     euro. Sin ver que via gana con cada uno, no se puede.
     """
 
-    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+    # MIRA EL DETALLE, NO MERCADO (13/09/2026)
+    #
+    #     Esta columna vivia en el cuadro de MERCADO. El dueño no
+    #     entendia doce columnas en la pantalla donde decide, asi
+    #     que MERCADO se quedo con cinco y el detalle entero bajo
+    #     a AUDITORIA -`TargetsDetailPanel`-.
+    #
+    #     NI UN CALCULO SE HA BORRADO: se quito la caja, no la
+    #     cuenta. Por eso esta guardia sigue en pie; solo mira
+    #     donde vive ahora.
+
+    mercado = _lee(DASHBOARD / "components" / "TargetsDetailPanel.jsx")
 
     assert "CON SU CONFIANZA" in mercado, "falta la columna de la sombra"
     assert "target.confidence_shadow" in mercado, (
@@ -731,7 +795,7 @@ def test_la_sombra_dice_que_no_manda() -> None:
     )
 
 
-def test_el_bolsillo_se_ve_en_mercado() -> None:
+def test_el_bolsillo_se_ve_en_el_detalle() -> None:
     """
     SINTOMA
 
@@ -745,7 +809,18 @@ def test_el_bolsillo_se_ve_en_mercado() -> None:
     saber si el bolsillo elegido es el correcto.
     """
 
-    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+    # MIRA EL DETALLE, NO MERCADO (13/09/2026)
+    #
+    #     Esta columna vivia en el cuadro de MERCADO. El dueño no
+    #     entendia doce columnas en la pantalla donde decide, asi
+    #     que MERCADO se quedo con cinco y el detalle entero bajo
+    #     a AUDITORIA -`TargetsDetailPanel`-.
+    #
+    #     NI UN CALCULO SE HA BORRADO: se quito la caja, no la
+    #     cuenta. Por eso esta guardia sigue en pie; solo mira
+    #     donde vive ahora.
+
+    mercado = _lee(DASHBOARD / "components" / "TargetsDetailPanel.jsx")
 
     assert "BOLSILLO" in mercado, "falta la columna del bolsillo"
     assert "target.deployment" in mercado, (
@@ -915,7 +990,18 @@ def test_el_desvio_de_puja_se_ve_con_su_precio() -> None:
     tiempo.
     """
 
-    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+    # MIRA EL DETALLE, NO MERCADO (13/09/2026)
+    #
+    #     Esta columna vivia en el cuadro de MERCADO. El dueño no
+    #     entendia doce columnas en la pantalla donde decide, asi
+    #     que MERCADO se quedo con cinco y el detalle entero bajo
+    #     a AUDITORIA -`TargetsDetailPanel`-.
+    #
+    #     NI UN CALCULO SE HA BORRADO: se quito la caja, no la
+    #     cuenta. Por eso esta guardia sigue en pie; solo mira
+    #     donde vive ahora.
+
+    mercado = _lee(DASHBOARD / "components" / "TargetsDetailPanel.jsx")
 
     assert "target.bid_clean" in mercado, (
         "no se ve el importe que habria salido sin desvio"
@@ -935,7 +1021,18 @@ def test_las_cuatro_vias_se_ven_una_al_lado_de_otra() -> None:
     no se puede comprobar mirando.
     """
 
-    mercado = _lee(DASHBOARD / "pages" / "MarketPage.jsx")
+    # MIRA EL DETALLE, NO MERCADO (13/09/2026)
+    #
+    #     Esta columna vivia en el cuadro de MERCADO. El dueño no
+    #     entendia doce columnas en la pantalla donde decide, asi
+    #     que MERCADO se quedo con cinco y el detalle entero bajo
+    #     a AUDITORIA -`TargetsDetailPanel`-.
+    #
+    #     NI UN CALCULO SE HA BORRADO: se quito la caja, no la
+    #     cuenta. Por eso esta guardia sigue en pie; solo mira
+    #     donde vive ahora.
+
+    mercado = _lee(DASHBOARD / "components" / "TargetsDetailPanel.jsx")
 
     assert "target.as_hold" in mercado, (
         "la tabla no lee la via TENER"
@@ -1034,17 +1131,17 @@ TESTS = [
     test_no_queda_ni_un_componente_huerfano,
     test_los_paneles_nuevos_avisan_cuando_no_hay_dato,
     test_el_tope_por_operacion_se_ve,
-    test_las_dos_opiniones_estan_pegadas_en_mercado,
+    test_las_dos_opiniones_estan_pegadas_en_auditoria,
     test_sin_veredicto_no_se_pinta_un_cero,
     test_el_ojeador_publica_a_quien_no_pudo_identificar,
-    test_la_divergencia_se_ve_en_mercado_y_no_como_recomendacion,
+    test_la_divergencia_se_ve_en_el_detalle_y_no_como_recomendacion,
     test_la_diferencia_contra_el_control_no_se_pinta_sin_muestra,
     test_se_ve_lo_que_decidia_antes_y_lo_que_decide_ahora,
     test_el_motivo_del_freno_viaja_a_la_pantalla,
     test_se_ve_que_via_gana_con_cada_esquema,
     test_las_tres_vias_se_pintan_con_nombre,
     test_la_sombra_dice_que_no_manda,
-    test_el_bolsillo_se_ve_en_mercado,
+    test_el_bolsillo_se_ve_en_el_detalle,
     test_el_interruptor_se_ve_apagado_en_pantalla,
     test_la_concentracion_avisa_y_dice_el_motivo,
     test_el_orden_de_venta_se_ve_entero,

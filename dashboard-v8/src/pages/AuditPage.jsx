@@ -10,6 +10,10 @@ import RacePanel from "../components/RacePanel";
 import RendijaPanel from "../components/RendijaPanel";
 import ScoutPanel from "../components/ScoutPanel";
 import VentanaPanel from "../components/VentanaPanel";
+import TargetsDetailPanel from "../components/TargetsDetailPanel";
+import ViaTenerPanel from "../components/ViaTenerPanel";
+import SeasonHorizonPanel from "../components/SeasonHorizonPanel";
+import RosterExpansionPanel from "../components/RosterExpansionPanel";
 import { ago, formatMoney } from "../lib/utils";
 
 /* LO QUE BAJO DE INICIO EL 10/09/2026
@@ -392,6 +396,37 @@ export default function AuditPage({ data }) {
           )}
         </section>
       )}
+
+      {/* LO QUE SE FUE DE MERCADO (13/09/2026)
+
+          El dueño no entendía doce columnas en la pantalla donde
+          decide. Estos tres paneles se quitaron de MERCADO y
+          viven aquí, que es donde vive lo que sirve para
+          COMPROBAR.
+
+          Ni un cálculo se ha borrado: se han movido, y siguen
+          leyendo exactamente los mismos datos. */}
+      {/* EL DETALLE DE LOS OBJETIVOS, ENTERO.
+
+          Las doce columnas que se fueron de MERCADO. Ni una se
+          ha borrado: se quito la caja, no la cuenta. */}
+      <div style={{ marginTop: 11 }}>
+        <TargetsDetailPanel
+          acquisition={data.acquisition}
+          pointsMarket={data.pointsMarket}
+          exposure={data.exposure}
+        />
+      </div>
+
+      <ViaTenerPanel data={data} />
+
+      <div style={{ marginTop: 11 }}>
+        <SeasonHorizonPanel data={data} />
+      </div>
+
+      <div style={{ marginTop: 11 }}>
+        <RosterExpansionPanel data={data} />
+      </div>
 
       <RendijaPanel data={data} />
 
