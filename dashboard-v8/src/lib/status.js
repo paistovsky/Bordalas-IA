@@ -261,6 +261,47 @@ export function normalizeStatus(raw = {}) {
 
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
-    consistency: raw.consistency || { available: false, ok: true, checks: [] }
+    consistency: raw.consistency || { available: false, ok: true, checks: [] },
+
+    /* LOS DOS CUADROS NUEVOS DE MERCADO (13/09/2026, noche)
+     *
+     * SÍNTOMA
+     *
+     *   `todaLaLiga` se publicaba con `available: true` y 570
+     *   jugadores dentro, y el cuadro enseñaba «No se ha podido
+     *   montar la lista de la liga».
+     *
+     * CAUSA
+     *
+     *   Esto es una LISTA BLANCA. Copia clave por clave y tira
+     *   todo lo que no esté nombrado aquí. El dato llegaba al
+     *   navegador, entraba en `raw`, y moría en esta función.
+     *
+     *   Y peor: `liga.reason` también se perdía, así que el
+     *   cuadro ni siquiera podía decir por qué estaba vacío. Se
+     *   veía igual que una avería de datos.
+     *
+     * CONSECUENCIA
+     *
+     *   Dos cuadros construidos, medidos y con guardias, que en
+     *   pantalla no existían. Nadie se entera hasta que alguien
+     *   abre la página.
+     *
+     * Mismo nombre que publica la telemetría, sin traducir: un
+     * dato, un nombre (doctrina 39). */
+    todaLaLiga: raw.todaLaLiga || {
+      available: false,
+      players: [],
+      reason:
+        "La telemetría no publicó `todaLaLiga` en este ciclo."
+    },
+
+    loNuestroALaVenta: raw.loNuestroALaVenta || {
+      available: false,
+      players: [],
+      reason:
+        "La telemetría no publicó `loNuestroALaVenta` en este " +
+        "ciclo."
+    }
   };
 }

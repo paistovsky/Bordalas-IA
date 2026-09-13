@@ -840,3 +840,46 @@ tr.hi td{background:#101d18}
              border-radius:6px;padding:7px 9px;margin-bottom:9px;
              font-size:11.5px;color:#fcd34d}
 .aviso-ambar b{color:#fde68a}
+
+
+/* ============================================================
+   VEINTE FILAS Y A BAJAR (13/09/2026, noche)
+   ------------------------------------------------------------
+   Los tres cuadros de MERCADO recortaban: el de objetivos a 60
+   —"2 se quedan fuera por el tope de la lista"— y el de la liga
+   a 120 de 570. Un recorte es una respuesta incompleta a la
+   pregunta "¿quién me interesa?".
+
+   Con scroll dentro del propio cuadro no hace falta ninguno.
+
+   LA CABECERA SE QUEDA. Una tabla de 570 filas sin cabecera
+   fija no se puede leer: a la fila treinta ya no se sabe qué
+   columna es cuál.
+
+   La altura son veinte filas de 29 px más la cabecera. No es un
+   umbral de nada: es cuánto ocupa en la pantalla.
+   ============================================================ */
+
+.scroll-y{max-height:calc(20 * 29px + 30px);overflow-y:auto;
+          overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll-y>.tbl{min-width:640px}
+
+.scroll-y thead th{position:sticky;top:0;z-index:2;
+                   background:var(--pan);
+                   box-shadow:inset 0 -1px 0 var(--line)}
+
+/* La barra, discreta: el cuadro ya tiene bastante contorno. */
+.scroll-y::-webkit-scrollbar{width:9px;height:9px}
+.scroll-y::-webkit-scrollbar-thumb{background:#2b3a4a;border-radius:5px}
+.scroll-y::-webkit-scrollbar-track{background:transparent}
+
+/* PUJARÍAMOS: su ancho y su alineación (13/09/2026, noche).
+
+   No tenía ninguno de los dos y se comía el sitio de POR QUÉ,
+   que es la columna larga. Ancho fijo, a la derecha como el
+   resto de columnas de dinero, y sin partir «no pujaríamos» a
+   mitad de palabra. */
+th.pj-h,td.pj-c{width:118px;min-width:118px;text-align:right;
+                white-space:nowrap;padding-right:14px}
+td.pj-c{font-variant-numeric:tabular-nums}
+td.pj-c .muted{font-size:11px}

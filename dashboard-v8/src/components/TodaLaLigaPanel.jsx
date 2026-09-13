@@ -99,7 +99,7 @@ export default function TodaLaLigaPanel({ data }) {
         </div>
       </div>
 
-      <div className="scroll-x">
+      <div className="scroll-y">
         <table className="tbl">
           <thead>
             <tr>
@@ -116,7 +116,7 @@ export default function TodaLaLigaPanel({ data }) {
             </tr>
           </thead>
           <tbody>
-            {(liga.players || []).slice(0, 120).map((fila) => {
+            {(liga.players || []).map((fila) => {
               const j = jugados(fila);
 
               const [clase, rombo, texto] =

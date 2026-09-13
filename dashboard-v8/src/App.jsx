@@ -242,11 +242,23 @@ export default function App() {
             "VIAJE COMPRADO Y SIN LISTAR" decia lo mismo dos
             veces, y con una palabra —"viaje"— que es jerga
             nuestra y que el dueño no ha usado nunca. */}
-        {data.rendija?.sin_listar?.ok === false && (
-          <div className="alert warn">
-            {data.rendija.sin_listar.reason}
-          </div>
-        )}
+        {/* SOLO EN MERCADO (13/09/2026, noche).
+
+            Esta tira de avisos sale en todas las páginas, así
+            que el recado de un jugador concreto aparecía también
+            en INICIO. INICIO es la portada: lo que se hace con
+            un jugador se hace en MERCADO, y el aviso tiene que
+            estar donde está la acción.
+
+            Lo demás de esta tira sigue saliendo en todas: un
+            ciclo parado o una caja que no cuadra afectan a toda
+            la pantalla, no a un cuadro. */}
+        {page === "market" &&
+          data.rendija?.sin_listar?.ok === false && (
+            <div className="alert warn">
+              {data.rendija.sin_listar.reason}
+            </div>
+          )}
 
         {/* LA CAJA DE LOS RIVALES NO CUADRA (10/09/2026)
             De la caja cuelgan CAJA, PATRIMONIO, TOPE, PUJA,

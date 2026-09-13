@@ -145,7 +145,7 @@ export default function LoNuestroALaVentaPanel({ data }) {
 
       {aviso.hay ? <Aviso aviso={aviso} /> : null}
 
-      <div className="scroll-x">
+      <div className="scroll-y">
         <table className="tbl">
           <thead>
             <tr>

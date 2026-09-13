@@ -57,6 +57,18 @@ DASHBOARD_STATUS = Path("dashboard") / "data" / "status.json"
 REACT_DASHBOARD_STATUS = Path("dashboard-v8") / "public" / "data" / "status.json"
 PLAYER_MAPPING_CACHE = Path("data") / "player_mapping_cache.json"
 PLAYER_PHOTO_CACHE = Path("data") / "dashboard_player_photo_cache.json"
+# CUANTAS FILAS PIDE LA PANTALLA (13/09/2026, noche)
+#
+#     El cuadro de objetivos recortaba a 60 y se dejaba fuera 2
+#     de los 62 valorados. Desde que la tabla lleva scroll no hay
+#     motivo para recortar: se piden todas.
+#
+#     No es un umbral. Ninguna decision del motor depende de
+#     esto: es cuantas filas viajan a la pantalla. El tope por
+#     defecto de `build_acquisition_board` se queda como estaba
+#     para todo el que lo llame sin decir nada.
+FILAS_DEL_CUADRO = 10_000
+
 FULL_AUTONOMOUS_STATUS = (
     Path("data") / "trading" / "v10_full_autonomous_status.json"
 )
@@ -1573,9 +1585,52 @@ def compact_speculation(state: dict) -> dict:
 
 
 def compact_listings(state: dict) -> dict:
+    """
+    Lo que tenemos publicado. Forma fija.
+
+    LA CLAVE `rows` NO EXISTIA (13/09/2026, noche)
+
+        Dos sitios la pedian —el escaparate, para saber que ya
+        esta en venta, y `viajes_sin_listar`, para lo mismo— y
+        los dos recibian `[]` SIEMPRE. La comprobacion de "esto
+        ya esta publicado" no podia dar nunca que si.
+
+        No es un fallo silencioso cualquiera: es el que hace que
+        el escaparate no sepa distinguir un jugador en venta de
+        uno que no lo esta. Un dato, un nombre (doctrina 33): la
+        lista de publicaciones se llama `rows` y sale de aqui.
+    """
+
     lifecycle = state.get("listing_lifecycle", {}) or {}
     return {
         "listing_count": safe_int(lifecycle.get("listing_count")),
+
+        # LAS PUBLICACIONES, UNA A UNA. Es el dato que el motor
+        # ya calcula y que esta funcion tiraba.
+        "rows": [
+            {
+                "player_id": safe_int(item.get("player_id")),
+                "name": item.get("name"),
+                "listed_price": safe_int(
+                    item.get("listed_price")
+                ),
+                "hours_to_expiry": (
+                    round(
+                        safe_float(item.get("hours_to_expiry")),
+                        1,
+                    )
+                    if item.get("hours_to_expiry") is not None
+                    else None
+                ),
+                "expired": bool(item.get("expired")),
+                "renew_required": bool(
+                    item.get("renew_required")
+                ),
+                "action": item.get("action"),
+            }
+            for item in (lifecycle.get("players") or [])
+            if isinstance(item, dict)
+        ],
         "renew_required_count": safe_int(
             lifecycle.get("renew_required_count")
         ),
@@ -3471,6 +3526,22 @@ def build_dashboard_state() -> dict:
         current_user_id=board.get("current_user_id"),
         available_budget=exposure.get("available_budget") or None,
         acquisition_budget=presupuesto_fichajes or None,
+
+        # SIN TOPE DE PANTALLA (13/09/2026, noche)
+        #
+        #     El cuadro decia "enseña 60 de 62 jugadores
+        #     valorados; 2 se quedan fuera por el tope de la
+        #     lista". Con la tabla en scroll el tope no hace
+        #     falta: caben las sesenta y dos.
+        #
+        #     EL TOPE NO SE TOCA EN EL MOTOR. `build_acquisition_
+        #     board` sigue con su 60 por defecto para todo el que
+        #     lo llame; cuantas filas enseña la PANTALLA lo
+        #     decide la pantalla, y ese es este sitio.
+        #
+        #     No es un umbral de decision: ninguna puja depende
+        #     de esto. Es cuantas filas se pintan.
+        limit=FILAS_DEL_CUADRO,
     )
 
     # ==========================================================
@@ -5067,6 +5138,69 @@ def build_dashboard_state() -> dict:
             sin_listar=(rendija_ahora or {}).get("sin_listar"),
             renovacion=plan_de_renovacion,
         )
+
+        # POR QUE NO SE PUBLICO (13/09/2026, noche)
+        #
+        # SINTOMA
+        #
+        #     Trent llevaba diez horas comprado para revender y
+        #     sin poner a la venta. La pantalla lo decia con la
+        #     hora de la compra. NINGUNA pantalla decia por que.
+        #
+        # CAUSA
+        #
+        #     El escaparate calcula su veredicto —zona de
+        #     silencio, ningun viaje abierto, no se sabe quienes
+        #     son los titulares, es TITULAR, sin valor de
+        #     mercado— y lo escribe en
+        #     `v10_full_autonomous_status.json`, que ninguna
+        #     pantalla lee. El motivo existia y moria ahi.
+        #
+        # CONSECUENCIA
+        #
+        #     Un cartel rojo sin explicacion. La segunda vez en
+        #     dos dias que se da por publicado algo que no lo
+        #     estaba, y las dos veces porque el motivo no salia.
+        #
+        # Es telemetria pura: se copia lo que el ciclo ya
+        # decidio. Ni una decision nueva.
+        _del_ciclo = load_full_autonomous_status() or {}
+
+        _del_escaparate = _del_ciclo.get("escaparate") or {}
+
+        _a_la_venta["por_que_no_se_publico"] = {
+            "available": bool(_del_escaparate),
+            "reason": _del_escaparate.get("reason"),
+            "executed": bool(_del_escaparate.get("executed")),
+            "listed": _del_escaparate.get("listed") or [],
+            "failed": _del_escaparate.get("failed") or [],
+
+            # Uno a uno, con el motivo de cada uno. Es lo que
+            # contesta "¿y por que Trent no?".
+            "saltados": [
+                {
+                    "name": x.get("name"),
+                    "player_id": x.get("player_id"),
+                    "reason": x.get("reason"),
+                }
+                for x in (
+                    (_del_escaparate.get("plan") or {}).get(
+                        "saltados"
+                    )
+                    or []
+                )
+                if isinstance(x, dict)
+            ],
+
+            # La edad del veredicto. Ese fichero solo se
+            # reescribe cuando el motor con permiso ejecuta, y el
+            # observador corre mucho mas a menudo: sin la edad,
+            # un motivo de ayer se lee como el de ahora.
+            "age_seconds": _edad_en_segundos(
+                _del_ciclo.get("timestamp")
+            ),
+            "stale": bool(cycle_telemetry.get("stale")),
+        }
 
     except Exception as error:                      # noqa: BLE001
         _a_la_venta = {

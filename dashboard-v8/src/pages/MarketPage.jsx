@@ -792,7 +792,43 @@ function Titular({ probabilidad }) {
     return <span className="unk">sin dato</span>;
   }
 
-  const pct = Math.round(Number(probabilidad) * 100);
+  /* EL DATO YA VIENE DE 0 A 100 (13/09/2026, noche)
+   *
+   * SÍNTOMA
+   *
+   *   En TITULAR salían `10000%`, `8000%`, `7000%`, `5000%`.
+   *
+   * CAUSA
+   *
+   *   Esto multiplicaba otra vez por cien. `starter_probability`
+   *   lo publica el motor de 0 a 100 y los otros TRES sitios que
+   *   lo pintan lo tratan así: `SquadTable`, `DoctrinaPanel` y
+   *   `PosiblesCambiosPanel` lo redondean y ya está. Éste era el
+   *   único que se salía.
+   *
+   * POR QUÉ LA BARRA SÍ ESTABA BIEN
+   *
+   *   No lo estaba: con `width: 10000%` el navegador la pinta
+   *   entera y `.bar` la recorta, así que se veía llena. Era el
+   *   mismo error dos veces, y sólo se notaba en el número.
+   *
+   * Y NO SE FÍA DE QUE VENGA BIEN. Un porcentaje que se sale de
+   * 0-100 es un dato roto, no un dato grande: se recorta y se
+   * dice, porque pintar 10000 % es afirmar algo imposible. */
+  const crudo = Math.round(Number(probabilidad));
+
+  if (!Number.isFinite(crudo) || crudo < 0 || crudo > 100) {
+    return (
+      <span
+        className="unk"
+        title={`El motor publicó ${probabilidad}, que no es un porcentaje`}
+      >
+        fuera de rango
+      </span>
+    );
+  }
+
+  const pct = crudo;
 
   const tono = pct >= 80 ? "t-hi" : pct >= 50 ? "t-md" : "t-lo";
 
@@ -810,14 +846,51 @@ function Titular({ probabilidad }) {
    El Computer no tiene nombre de manager: su ausencia ES el
    dato, no un hueco. */
 function Vende({ fila }) {
-  const rival = fila.seller_name;
+  /* QUIÉN VENDE LO DICE EL MOTOR, no el nombre.
+   *
+   * SÍNTOMA (13/09/2026, noche)
+   *
+   *   `◆ Computer` y `◆ Pollo17` salían los dos en morado.
+   *
+   * CAUSA
+   *
+   *   Esto preguntaba «¿hay nombre de vendedor?» y daba por
+   *   Computer al que no lo tenía. Pero el motor publica
+   *   `seller_name: "Computer"` para las veinte filas suyas —un
+   *   nombre, no un hueco—, así que la rama blanca NUNCA se
+   *   ejecutaba. Código muerto que parecía correcto.
+   *
+   * CONSECUENCIA
+   *
+   *   Lo único que distingue «esto se puede comprar» de «esto es
+   *   el escaparate de otro» se veía igual en las sesenta filas.
+   *
+   *   Y no lo caza ninguna guardia de clases: las dos clases
+   *   existen y están bien escritas. Se pintaba la que no era.
+   *
+   * `seller_kind` es COMPUTER o MANAGER y ya viene en la fila.
+   * Se pregunta a él. */
+  const delComputer =
+    String(fila.seller_kind || "").toUpperCase() === "COMPUTER";
 
-  return rival ? (
-    <span className="riv" title={rival}>
-      ◆ {rival}
+  if (delComputer) {
+    return <span className="comp">◆ Computer</span>;
+  }
+
+  /* Sin `seller_kind` no se adivina: se dice. Pintarlo de un
+     color u otro sería inventarse de quién es. */
+  if (!fila.seller_kind) {
+    return (
+      <span className="unk" title="El motor no dijo de quién es">
+        ◇ sin dato
+      </span>
+    );
+  }
+
+  return (
+    <span className="riv" title={fila.seller_name}>
+      ◆ {fila.seller_name || "rival sin nombre"}
     </span>
-  ) : (
-    <span className="comp">◆ Computer</span>
   );
 }
 
@@ -1038,7 +1111,10 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
         </div>
       </div>
 
-      <table>
+      {/* VEINTE FILAS Y A BAJAR. La cabecera se queda fija: a
+          la fila treinta ya no se sabe qué columna es cuál. */}
+      <div className="scroll-y">
+      <table className="tbl">
         {/* CINCO COLUMNAS. NI UNA MAS (13/09/2026)
 
             Eran doce y el dueño no las entendia. Las que se han
@@ -1060,7 +1136,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
             <th>TERMINA EN</th>
             <th>ACCIÓN</th>
             <th>PARA QUÉ</th>
-            <th className="n">PUJARÍAMOS</th>
+            <th className="n pj-h">PUJARÍAMOS</th>
             <th>POR QUÉ</th>
           </tr>
         </thead>
@@ -1156,7 +1232,7 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
                 {/* NUNCA EN BLANCO. Estuvo vacia todos los dias:
                     `bid` vale 0 porque la decision no es BID, y
                     un hueco se lee como un dato que falta. */}
-                <td className="n">
+                <td className="n pj-c">
                   {fila.decision === "BID" &&
                   Number(fila.bid || 0) > 0 ? (
                     <b>{formatEuros(fila.bid)}</b>
@@ -1171,13 +1247,24 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
           })}
         </tbody>
       </table>
+      </div>
 
+      {/* EL TOPE SE QUITÓ (13/09/2026, noche).
+
+          Con la tabla en scroll salen los 62 valorados, así que
+          la frase de "2 se quedan fuera por el tope de la lista"
+          ya no es verdad.
+
+          El aviso NO se borra: se queda por si algún día el
+          motor recorta de verdad. Lo enciende el hecho —que
+          `hidden` traiga un número— y no la intención. */}
       {recortados > 0 && (
         <div className="alert warn">
           Esta tabla enseña {acquisition.shown} de{" "}
           {acquisition.valued} jugadores valorados.{" "}
-          <b>{recortados} se quedan fuera</b> por el tope de la lista, no
-          porque Pepe no los haya mirado.
+          <b>{recortados} se quedan fuera</b>, y no porque Pepe no
+          los haya mirado. La pantalla no pone ningún tope: éste
+          viene del motor.
         </div>
       )}
 
@@ -1343,9 +1430,26 @@ export default function MarketPage({ data }) {
       />
 
 
-      <div style={{ marginTop: 11 }}>
-        <OffersPanel offers={data.offers || []} />
-      </div>
+      {/* OFERTAS RECIBIDAS: EL CUADRO VIEJO, Y SOLO DE RESERVA.
+
+          SON EL MISMO DATO. Las mismas catorce filas que «LO
+          NUESTRO A LA VENTA», con menos columnas: sin escudo,
+          sin puntos, sin estado, sin si es titular y con un solo
+          reloj para todas.
+
+          Dos cuadros con las mismas filas y números distintos es
+          la forma más rápida de que nadie se fíe de ninguno de
+          los dos. Así que no conviven: en cuanto el nuevo tiene
+          datos, éste desaparece.
+
+          No se borra porque es el respaldo del día que la
+          telemetría no publique `loNuestroALaVenta`. Mejor la
+          tabla vieja que un hueco. */}
+      {!data.loNuestroALaVenta?.available && (
+        <div style={{ marginTop: 11 }}>
+          <OffersPanel offers={data.offers || []} />
+        </div>
+      )}
 
       {/* LO NUESTRO A LA VENTA (13/09/2026).
 
