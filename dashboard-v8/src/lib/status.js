@@ -296,6 +296,25 @@ export function normalizeStatus(raw = {}) {
         "La telemetría no publicó `todaLaLiga` en este ciclo."
     },
 
+    /* LOS SENTIDOS Y EL CALENDARIO (13/09/2026, noche).
+
+       Mismo nombre que publica la telemetria. Esta funcion es
+       una lista blanca: lo que no se nombre aqui muere en `raw`
+       y el cuadro sale vacio sin poder decir por que — ya pasó
+       con `todaLaLiga`. Hay guardia. */
+    losSentidos: raw.losSentidos || {
+      available: false,
+      sentidos: [],
+      ciego: { hay: false },
+      reason: "La telemetría no publicó `losSentidos` en este ciclo."
+    },
+
+    elCalendario: raw.elCalendario || {
+      available: false,
+      equipos: [],
+      reason: "La telemetría no publicó `elCalendario` en este ciclo."
+    },
+
     loNuestroALaVenta: raw.loNuestroALaVenta || {
       available: false,
       players: [],

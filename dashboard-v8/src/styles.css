@@ -883,3 +883,46 @@ th.pj-h,td.pj-c{width:118px;min-width:118px;text-align:right;
                 white-space:nowrap;padding-right:14px}
 td.pj-c{font-variant-numeric:tabular-nums}
 td.pj-c .muted{font-size:11px}
+
+
+/* ============================================================
+   ESTRATEGIA: LOS SENTIDOS Y EL CALENDARIO (13/09/2026, noche)
+   ------------------------------------------------------------
+   CONTRASTE MEDIDO sobre --pan #111a24. El verde oscuro que se
+   descartó el 12/09 por quedarse en 2,21 sigue descartado:
+
+     vivo / blando      #4ade80  10,07
+     viejo / normal     #fbbf24  10,51
+     muerto / duro      #f87171   6,34
+     la frase del motor #fca5a5   9,24
+     sin dato           #7b8794   4,79
+   ============================================================ */
+
+.s-vivo{color:#4ade80;font-weight:600}
+.s-viejo{color:#fbbf24;font-weight:600}
+.s-muerto{color:#f87171;font-weight:700}
+
+/* La frase del motor, copiada entera. Se distingue del texto de
+   la pantalla para que se vea de quién es. */
+.bloquea{color:#fca5a5;font-size:11px;font-style:italic}
+
+/* LOS TRES PRÓXIMOS PARTIDOS, como etiquetas. */
+.partidos{white-space:normal;max-width:340px}
+.part{display:inline-block;margin:1px 4px 1px 0;padding:1px 5px;
+      border:1px solid var(--line);border-radius:4px;
+      font-size:10.5px;white-space:nowrap}
+.part b{font-variant-numeric:tabular-nums}
+.t-duro{color:#f87171;border-color:#5b2020}
+.t-normal{color:#fbbf24;border-color:#5b4a10}
+.t-blando{color:#4ade80;border-color:#1d4a2e}
+.t-sindato{color:#7b8794}
+
+/* EL VEREDICTO, en cristiano. */
+.v-duro{color:#f87171;font-weight:600}
+.v-normal{color:#fbbf24}
+.v-blando{color:#4ade80;font-weight:600}
+.v-sindato{color:#7b8794}
+
+/* Nuestros jugadores dentro de la fila de su equipo. */
+.minijug{display:inline-block;margin-right:8px;color:#cbd5e1;
+         font-size:11px;white-space:nowrap}

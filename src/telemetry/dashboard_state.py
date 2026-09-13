@@ -5212,6 +5212,107 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # ==========================================================
+    # EL CALENDARIO DE LALIGA (13/09/2026, noche)
+    # ==========================================================
+    #
+    #     `data/calendar/laliga_calendar.json` lleva vivo desde
+    #     siempre —380 partidos, refrescado hoy— y NO LO MIRA
+    #     NADIE: ni una decision, ni una pantalla.
+    #
+    #     Esto lo cruza con la clasificacion de LaLiga y con
+    #     nuestros jugadores. Las tres piezas ya se piden: ni una
+    #     peticion mas.
+    #
+    #     Y NO DECIDE NADA. Es para mirar, hasta que el dueño
+    #     diga si tiene sentido.
+    try:
+        import json as _json
+
+        from src.analysis.el_calendario import el_calendario
+        from src.analysis.matchday_calendar_engine import (
+            CACHE_FILE as _CALENDARIO,
+        )
+
+        _cal = (
+            _json.loads(
+                _CALENDARIO.read_text(encoding="utf-8")
+            )
+            if _CALENDARIO.exists()
+            else {}
+        )
+
+        _el_calendario = el_calendario(
+            calendario=_cal,
+            clasificacion=(
+                (
+                    (league_center or {}).get("laliga") or {}
+                ).get("standings")
+            ),
+            # Los nuestros salen del cuadro de la liga, que ya los
+            # trae con `team_id` y con quien es de quien.
+            nuestros=[
+                f
+                for f in (_toda_la_liga.get("players") or [])
+                if isinstance(f, dict)
+                and f.get("de_quien") == "nuestro"
+            ],
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _el_calendario = {
+            "available": False,
+            "equipos": [],
+            "sin_casar": [],
+            "casan_todas": None,
+            "reason": (
+                f"No se pudo leer el calendario: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # ==========================================================
+    # LOS SENTIDOS DE PEPE (13/09/2026, noche)
+    # ==========================================================
+    #
+    #     De que se entera Pepe, de cuando es cada cosa, y que
+    #     deja de decidir cuando un sentido se apaga.
+    #
+    #     Hoy hay 64 objetivos y NI UNA PUJA porque el tablero de
+    #     titulares es de la jornada 2. Eso estaba en la pantalla
+    #     repetido 64 veces, fila a fila, y no se veia: parecia
+    #     prudencia y era ceguera.
+    #
+    #     Todo lo que lee ya se publica. La EDAD se calcula aqui
+    #     —nunca un numero de dias escrito a mano— y el motivo de
+    #     cada bloqueo es la frase del motor, entera.
+    try:
+        from src.analysis.los_sentidos import los_sentidos
+
+        _los_sentidos = los_sentidos(
+            lineup=lineup_payload,
+            scout=scout,
+            press=press,
+            vara=vara,
+            rival_intelligence=rival_intelligence,
+            toda_la_liga=_toda_la_liga,
+            calendario=_el_calendario,
+            marcador=marcador_estado,
+            objetivos=(acquisition or {}).get("targets"),
+            jornada_de_hoy=state.get("target_matchday"),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _los_sentidos = {
+            "available": False,
+            "sentidos": [],
+            "ciego": {"hay": False},
+            "reason": (
+                f"No se pudieron montar los sentidos: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     dashboard = {
         "meta": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -5413,6 +5514,14 @@ def build_dashboard_state() -> dict:
 
         "offers": offers_compactas,
         "speculation": compact_speculation(state),
+        # DE QUE SE ENTERA PEPE Y DE CUANDO. El cuadro que
+        # explica por que hoy no se puja por nadie.
+        "losSentidos": _los_sentidos,
+
+        # LOS PROXIMOS PARTIDOS DE LOS NUESTROS. Para mirar: no
+        # decide nada todavia.
+        "elCalendario": _el_calendario,
+
         "listings": compact_listings(state),
 
         # QUE VA A HACER PEPE CON CADA PUBLICACION. La etiqueta

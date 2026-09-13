@@ -1,3 +1,5 @@
+import LosSentidosPanel from "../components/LosSentidosPanel";
+import ElCalendarioPanel from "../components/ElCalendarioPanel";
 import DoctrinaPanel from "../components/DoctrinaPanel";
 import ArbiterPanel from "../components/ArbiterPanel";
 import StrategyPanel from "../components/StrategyPanel";
@@ -270,9 +272,22 @@ export default function BrainPage({ data }) {
 
   return (
     <>
+      {/* LOS SENTIDOS, EL PRIMERO DE TODO (13/09/2026, noche).
+
+          Es el cuadro que da sentido a la pagina: antes de mirar
+          que decide Pepe hay que saber de que se entera. Hoy hay
+          64 objetivos y ni una puja porque el tablero de
+          titulares es de la jornada 2, y eso estaba repetido 64
+          veces fila a fila sin verse. */}
+      <LosSentidosPanel data={data} />
+
       {/* El plan primero y el mecanismo despues: a corto y largo
           plazo arriba, y debajo la maquinaria que lo ejecuta. */}
       <StrategyPanel data={data} />
+
+      {/* EL CALENDARIO. Dato vivo, cero decisiones: es para ver
+          si dice cosas sensatas antes de conectarlo a nada. */}
+      <ElCalendarioPanel data={data} />
 
       {/* Como piensa tapar la deuda, que es la primera pregunta
           cuando el saldo esta en rojo. */}
