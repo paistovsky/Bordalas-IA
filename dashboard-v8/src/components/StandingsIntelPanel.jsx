@@ -29,27 +29,30 @@ import { tonoDe } from "../lib/tono";
  * `US`, que el motor si produce—, asi que el rival mas inofensivo
  * y NOSOTROS MISMOS salian del mismo color que un desconocido.
  *
- * LOW SIGUE EN GRIS A PROPOSITO (13/09/2026)
+ * LOS DOS VERDES, MEDIDOS (13/09/2026)
  *
- *   El dueño pidio verde oscuro. Medido sobre el fondo del panel
- *   (#111a24): el verde oscuro no se lee.
+ *   El dueño pidio verde CLARO para VERY_LOW y verde OSCURO para
+ *   LOW. Medido sobre el fondo del panel (#111a24), el verde
+ *   oscuro no se lee:
  *
- *     green-700  #15803d   contraste 3.02   justo
- *     green-800  #166534   contraste 2.21   NO SE LEE
+ *     green-700  #15803d   contraste 3,02   justo
+ *     green-800  #166534   contraste 2,21   NO SE LEE
  *
- *   La propuesta, los dos legibles y distinguibles entre si:
- *     VERY_LOW  green-400  #4ade80   contraste 7.19
- *     LOW       green-500  #22c55e   contraste 5.84
+ *   Se paro y se pregunto en vez de sustituirlo por otro. La
+ *   pareja aprobada mantiene la intencion —el mas inofensivo,
+ *   mas claro— y los dos se leen:
  *
- *   Sin respuesta no se sustituye por otro ni se deja ilegible:
- *   se queda como estaba.
+ *     VERY_LOW  green-400  #4ade80   contraste 7,19
+ *     LOW       green-500  #22c55e   contraste 5,84
+ *
+ *   1,35x de diferencia de luminancia: se distinguen.
  */
 const THREAT = {
   VERY_HIGH: "pill crit",
   HIGH: "pill crit",
   MEDIUM: "pill warn",
-  LOW: "pill idle",
-  VERY_LOW: "pill ok",
+  LOW: "pill ok",
+  VERY_LOW: "pill ok-claro",
   US: "pill me",
   NONE: "pill idle"
 };

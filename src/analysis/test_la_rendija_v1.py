@@ -2159,6 +2159,153 @@ def test_ningun_nivel_de_amenaza_cae_al_gris() -> None:
         f"por defecto y se pintan igual que «ninguna amenaza»"
     )
 
+    # Y LOS DOS VERDES SE DISTINGUEN.
+    #
+    #     El dueño pidio VERY_LOW claro y LOW oscuro. El verde
+    #     oscuro da 2,21 de contraste sobre el fondo del panel:
+    #     no se ve. La pareja aprobada mantiene la intencion —el
+    #     mas inofensivo, mas claro— y los dos se leen.
+    assert '"pill ok-claro"' in mapa, (
+        "VERY_LOW ya no usa el verde claro"
+    )
+
+    assert 'LOW: "pill ok"' in mapa, (
+        "LOW ya no usa el verde medio"
+    )
+
+
+def test_ningun_color_de_la_amenaza_es_ilegible() -> None:
+    """
+    NO ES CUESTION DE GUSTO, ES QUE NO SE VE.
+
+    El verde oscuro que se pidio primero da 2,21 de contraste
+    sobre el fondo del panel (#111a24). Se midio antes de
+    ponerlo, se paro y se pregunto.
+
+    Esta guardia lo mide sola, para que la proxima vez no dependa
+    de que a alguien se le ocurra.
+
+    El listón es 3,0 —el minimo de WCAG para texto grande y en
+    negrita, que es lo que son estas pildoras—. Por debajo de ahi
+    no es un color flojo: es invisible.
+    """
+
+    import re
+
+    from pathlib import Path
+
+    raiz = Path(__file__).parents[2]
+
+    css = (
+        raiz / "dashboard-v8" / "src" / "styles.css"
+    ).read_text(encoding="utf-8")
+
+    jsx = (
+        raiz
+        / "dashboard-v8"
+        / "src"
+        / "components"
+        / "StandingsIntelPanel.jsx"
+    ).read_text(encoding="utf-8")
+
+    FONDO = (17, 26, 36)          # --pan  #111a24
+
+    MINIMO = 3.0
+
+    VARIABLES = {
+        "--ok": "#22c55e",
+        "--warn": "#eab308",
+        "--crit": "#ef4444",
+        "--blue": "#3b82f6",
+        "--dim": "#7b8794",
+    }
+
+    def _lineal(canal):
+        canal = canal / 255
+
+        return (
+            canal / 12.92
+            if canal <= 0.03928
+            else ((canal + 0.055) / 1.055) ** 2.4
+        )
+
+    def _luz(rgb):
+        r, v, a = [_lineal(x) for x in rgb]
+
+        return 0.2126 * r + 0.7152 * v + 0.0722 * a
+
+    def _contraste(a, b):
+        la, lb = _luz(a), _luz(b)
+
+        return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+    def _hex(texto):
+        texto = texto.lstrip("#")
+
+        return tuple(
+            int(texto[i : i + 2], 16) for i in (0, 2, 4)
+        )
+
+    def _sobre(color, alfa, fondo):
+        return tuple(
+            round(fondo[i] * (1 - alfa) + color[i] * alfa)
+            for i in range(3)
+        )
+
+    trozo = jsx[
+        jsx.index("const THREAT = {") : jsx.index(
+            "};", jsx.index("const THREAT = {")
+        )
+    ]
+
+    niveles = re.findall(r'(\w+):\s*"pill ([\w-]+)"', trozo)
+
+    assert len(niveles) >= 6, niveles
+
+    flojos = []
+
+    for nivel, clase in niveles:
+
+        regla = re.search(
+            r"\.pill\."
+            + re.escape(clase)
+            + r"[,{][^}]*background:rgba\(([\d.,\s]+)\)"
+            r";color:(var\(--\w+\)|#[0-9a-fA-F]{6})",
+            css,
+        )
+
+        assert regla, (
+            f"`pill {clase}` no tiene regla de color: "
+            f"{nivel} se pintaria con el estilo base"
+        )
+
+        partes = [
+            float(x) for x in regla.group(1).split(",")
+        ]
+
+        color = regla.group(2)
+
+        if color.startswith("var("):
+            color = VARIABLES[color[4:-1]]
+
+        fondo = _sobre(
+            tuple(int(x) for x in partes[:3]),
+            partes[3],
+            FONDO,
+        )
+
+        visto = _contraste(_hex(color), fondo)
+
+        if visto < MINIMO:
+            flojos.append(f"{nivel} ({color}): {visto:.2f}")
+
+    assert not flojos, (
+        "estos colores no se leen sobre el fondo del panel: "
+        + " · ".join(flojos)
+        + ". No es cuestion de gusto: por debajo de "
+        f"{MINIMO} el texto es invisible."
+    )
+
 
 def test_la_racha_se_lee_y_no_se_estima() -> None:
     """
@@ -2270,6 +2417,7 @@ TESTS = [
     test_un_viaje_sin_coste_no_se_cobra,
     test_la_pantalla_no_habla_en_jerga,
     test_ningun_nivel_de_amenaza_cae_al_gris,
+    test_ningun_color_de_la_amenaza_es_ilegible,
     test_la_racha_se_lee_y_no_se_estima,
     test_el_cartel_dice_lo_que_pasa_en_una_frase,
     test_el_coste_se_guarda_cuando_se_puede_probar,

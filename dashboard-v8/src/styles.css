@@ -173,6 +173,13 @@ tbody tr:hover td{opacity:1}
 
 .pill{display:inline-block;font-size:9px;font-weight:750;letter-spacing:.05em;padding:1.5px 6px;border-radius:9px;white-space:nowrap}
 .pill.ok{background:rgba(34,197,94,.16);color:var(--ok)}
+/* DOS VERDES QUE SE LEEN (13/09/2026)
+   El mas claro para la amenaza mas baja, como se pidio. El verde
+   OSCURO que se pidio primero da 2,21 de contraste sobre el fondo
+   del panel (#111a24): no es cuestion de gusto, es que no se ve.
+     ok-claro  green-400 #4ade80  contraste 7,19  VERY_LOW
+     ok        green-500 #22c55e  contraste 5,84  LOW          */
+.pill.ok-claro{background:rgba(74,222,128,.16);color:#4ade80}
 .pill.warn{background:rgba(234,179,8,.16);color:var(--warn)}
 .pill.crit,.pill.no{background:rgba(239,68,68,.16);color:var(--crit)}
 .pill.me{background:rgba(59,130,246,.18);color:var(--blue)}
