@@ -133,6 +133,44 @@ export default function MarcadorPage({ data }) {
             coincidan, la nota de arriba no vale.
           </div>
         )}
+
+        {/* LO QUE SE PERDIÓ, Y DESDE CUÁNDO SE MIDE (14/09/2026)
+
+            Seis jornadas descartadas por lo mismo: «no se anotó
+            qué once jugó esa jornada». Están PERDIDAS y no se
+            reconstruyen: un once a ojo daría una nota inventada,
+            y una nota inventada es peor que no tener nota porque
+            se usa para decidir.
+
+            El número se CUENTA, no se escribe (regla 18): «6
+            jornadas» puesto a mano sería verdad hoy y mentira la
+            semana que viene, que es justo cuando nadie estaría
+            mirando este número. */}
+        {marcador.el_once_anotado?.available &&
+          marcador.el_once_anotado.irrecuperables > 0 && (
+            <div className="alert warn" style={{ marginTop: 11 }}>
+              <b>
+                {marcador.el_once_anotado.irrecuperables} jornada(s)
+                sin once anotado, irrecuperables.
+              </b>{" "}
+              {marcador.el_once_anotado.desde
+                ? `La medición empieza en la jornada ${marcador.el_once_anotado.desde}.`
+                : "Todavía no hay ninguna anotada: la medición no ha empezado."}{" "}
+              <span className="dim">
+                No se reconstruyen: un once a ojo daría una nota
+                inventada, y esa se usaría para decidir.
+              </span>
+            </div>
+          )}
+
+        {/* Y SI EL ONCE DE ESTA JORNADA YA ESTÁ CONGELADO, SE DICE
+            CON EL MARGEN QUE TENÍA. Es la única prueba de que se
+            anotó ANTES del primer partido. */}
+        {marcador.congelado_este_ciclo?.anotado && (
+          <p className="note" style={{ textAlign: "left" }}>
+            {marcador.congelado_este_ciclo.reason}
+          </p>
+        )}
       </section>
 
       {ultima && (

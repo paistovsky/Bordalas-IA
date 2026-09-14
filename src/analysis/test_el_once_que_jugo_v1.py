@@ -672,6 +672,38 @@ def test_las_jornadas_perdidas_se_cuentan_y_no_se_reconstruyen() -> None:
             f"perdidas no se reconstruyen"
         )
 
+    # Y SE DICE EN LA PANTALLA (14/09/2026)
+    #
+    #     Hasta hoy el numero se calculaba y se publicaba en
+    #     `marcador.el_once_anotado`, y no lo pintaba nadie. Un
+    #     dato que no se ve no avisa de nada: la pagina del
+    #     marcador decia "0 de 6 fiables" sin decir que seis
+    #     estan PERDIDAS y desde cual empieza a contar.
+    pagina = (
+        Path(__file__).parents[2]
+        / "dashboard-v8"
+        / "src"
+        / "pages"
+        / "MarcadorPage.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "el_once_anotado" in pagina, (
+        "la pagina del marcador no dice cuantas jornadas se "
+        "perdieron ni desde cual se mide"
+    )
+
+    assert "irrecuperables" in pagina, (
+        "la pagina no dice que las jornadas perdidas son "
+        "irrecuperables"
+    )
+
+    # EL NUMERO SE CUENTA, NO SE ESCRIBE (regla 18). Un "6"
+    # escrito a mano es verdad hoy y mentira la semana que viene.
+    assert "6 jornada" not in pagina, (
+        "la pagina trae el numero de jornadas perdidas escrito a "
+        "mano: tiene que salir del recuento"
+    )
+
 
 TESTS = [
     test_el_once_se_anota_antes_del_primer_partido,
