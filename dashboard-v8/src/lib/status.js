@@ -296,6 +296,27 @@ export function normalizeStatus(raw = {}) {
         "La telemetría no publicó `todaLaLiga` en este ciclo."
     },
 
+    /* EL VESTUARIO LIBRE (14/09/2026). La lista de la compra:
+       catálogo menos las ocho plantillas.
+
+       Sin dato, `available: false` y los recuentos a cero — NUNCA
+       una lista vacía que parezca "no hay nadie libre". Que no se
+       pudiera calcular y que no haya libres son cosas distintas,
+       y la segunda sería falsa: hay 450. */
+    elVestuarioLibre: raw.elVestuarioLibre || {
+      available: false,
+      players: [],
+      vigilados: [],
+      total_catalogo: 0,
+      con_dueno: 0,
+      libres: 0,
+      candidatos: 0,
+      recuento: {},
+      cortes: {},
+      reason:
+        "La telemetría no publicó `elVestuarioLibre` en este ciclo."
+    },
+
     /* LOS SENTIDOS Y EL CALENDARIO (13/09/2026, noche).
 
        Mismo nombre que publica la telemetria. Esta funcion es

@@ -3440,6 +3440,73 @@ def _catalogo_por_id(snapshot) -> dict:
         return {}
 
 
+def _con_los_vigilados(acquisition, vestuario) -> dict:
+    """Marca en el cuadro de objetivos a los del vestuario libre.
+
+    LA MARCA SE PONE DESPUES DE DECIDIR, Y ESO ES EL PUNTO
+    (14/09/2026)
+
+        El encargo es explicito: "Lo de «marcado como vigilado»
+        tampoco autoriza a pujar: solo a que Pepe lo mire cuando
+        aparezca, con el mismo liston que a cualquier otro."
+
+        La forma mas fuerte de garantizarlo no es prometerlo en
+        un comentario: es que el tablero YA HAYA DECIDIDO cuando
+        se pone la marca. `build_acquisition_board` corre antes y
+        no sabe nada de esta lista, asi que la marca no puede
+        haber influido en `decision`, `bid` ni en ningun liston —
+        no por disciplina, sino porque llega tarde para hacerlo.
+
+        Lo unico que cambia es DONDE SE VE: una fila marcada se
+        puede destacar en la pantalla.
+
+    Forma fija. Si algo falta, devuelve el tablero tal cual: una
+    marca que no se puede poner no es motivo para quedarse sin
+    cuadro de objetivos.
+    """
+
+    try:
+
+        vigilados = {
+            safe_int(pid)
+            for pid in (
+                (vestuario or {}).get("vigilados") or []
+            )
+        }
+
+        if not vigilados or not isinstance(acquisition, dict):
+            return acquisition
+
+        filas = acquisition.get("targets")
+
+        if not isinstance(filas, list):
+            return acquisition
+
+        marcadas = 0
+
+        for fila in filas:
+
+            if not isinstance(fila, dict):
+                continue
+
+            # SOLO SE AÑADE LA MARCA. No se toca `decision`, ni
+            # `bid`, ni `would_*`: lo que el tablero decidio se
+            # queda exactamente como lo decidio.
+            if safe_int(fila.get("id")) in vigilados:
+                fila["vigilado"] = True
+                marcadas += 1
+
+            else:
+                fila["vigilado"] = False
+
+        acquisition["vigilados_en_el_cuadro"] = marcadas
+
+        return acquisition
+
+    except Exception:                               # noqa: BLE001
+        return acquisition
+
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -3953,6 +4020,61 @@ def build_dashboard_state() -> dict:
             "players": [],
             "reason": (
                 f"No se pudo montar la liga entera: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # ==========================================================
+    # EL VESTUARIO LIBRE (14/09/2026)
+    # ==========================================================
+    #
+    #     La lista de la compra. Pepe no podia querer a nadie que
+    #     no estuviera HOY en el escaparate: su universo eran los
+    #     veinte que el Computer saca cada mañana, y los 450
+    #     libres restantes no existian en ninguna parte.
+    #
+    #     Catalogo menos las ocho plantillas, calculado en cada
+    #     vuelta. Ni una peticion mas: la liga entera ya esta
+    #     montada aqui arriba.
+    #
+    #     ESTO NO PUJA. Es una lista para MIRAR, y hay una
+    #     guardia que recorre el arbol del modulo para
+    #     demostrarlo: `test_la_lista_no_puja`.
+    try:
+        from src.analysis.el_vestuario_libre import (
+            el_vestuario_libre,
+        )
+
+        _el_vestuario = el_vestuario_libre(
+            _toda_la_liga,
+
+            # LAS OCHO PLANTILLAS, no la caja `de_quien` de la
+            # liga: alli `computer` pisa a `rival` y colaria como
+            # libre a quien ya compro otro. Medido: seis de los
+            # veinte del escaparate del 13/09 ya tenian dueño en
+            # el censo del 14/09.
+            nuestra_plantilla=snapshot.get("my_team"),
+            managers=[
+                manager
+                for manager in (
+                    (rival_intelligence or {}).get("managers")
+                    or []
+                )
+                if isinstance(manager, dict)
+                and safe_int(manager.get("user_id"))
+                != safe_int(board.get("current_user_id"))
+            ],
+            en_el_mercado=_en_el_mercado,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _el_vestuario = {
+            "available": False,
+            "players": [],
+            "vigilados": [],
+            "libres": 0,
+            "reason": (
+                f"No se pudo montar el vestuario libre: "
                 f"{type(error).__name__}: {error}"
             ),
         }
@@ -6015,7 +6137,9 @@ def build_dashboard_state() -> dict:
         "market_clock": market_clock,
         "position_guardrail": compact_guardrail(liquidity),
         "exposure": exposure,
-        "acquisition": acquisition,
+        "acquisition": _con_los_vigilados(
+            acquisition, _el_vestuario
+        ),
         "points_market": points_market,
         "ledger_audit": compact_ledger_audit(ledger_audit),
 
@@ -6061,6 +6185,11 @@ def build_dashboard_state() -> dict:
         #
         #     Y NO DECIDE NADA: es una lista para mirar.
         "todaLaLiga": _toda_la_liga,
+
+        # LA LISTA DE LA COMPRA. Catalogo menos las ocho
+        # plantillas, ordenada por lo que nos suma contra la
+        # vara. NO PUJA: es una lista para mirar.
+        "elVestuarioLibre": _el_vestuario,
 
         # Lo que Pepe hizo al pujar, no solo lo que pensaba pujar.
         "bid_outcomes": bid_outcome_summary(),

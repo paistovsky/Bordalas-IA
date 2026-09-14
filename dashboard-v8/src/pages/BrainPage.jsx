@@ -1,5 +1,6 @@
 import ElOjeadorPanel from "../components/ElOjeadorPanel";
 import QuienMejoraElOncePanel from "../components/QuienMejoraElOncePanel";
+import ElVestuarioLibrePanel from "../components/ElVestuarioLibrePanel";
 import LosRivalesPanel from "../components/LosRivalesPanel";
 import LaPuertaDeLosManagersPanel from "../components/LaPuertaDeLosManagersPanel";
 import LosSentidosPanel from "../components/LosSentidosPanel";
@@ -295,6 +296,11 @@ export default function BrainPage({ data }) {
       <ElOjeadorPanel data={data} />
 
       <QuienMejoraElOncePanel data={data} />
+
+      {/* LA LISTA DE LA COMPRA. Va justo debajo de quién mejora
+          el once porque contesta la pregunta siguiente: de esos,
+          a cuáles se puede llegar sin pedirle permiso a nadie. */}
+      <ElVestuarioLibrePanel data={data} />
 
       {/* EL CALENDARIO. Dato vivo, cero decisiones: es para ver
           si dice cosas sensatas antes de conectarlo a nada. */}
