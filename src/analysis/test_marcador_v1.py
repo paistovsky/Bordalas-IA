@@ -619,6 +619,141 @@ def test_el_marcador_no_toca_biwenger():
             )
 
 
+def test_la_fecha_del_dato_no_es_la_de_la_escritura():
+    """Dos hechos distintos, dos campos. Doctrina 39.
+
+    EL FALLO (14/09/2026)
+
+        La entrada de la jornada 1 decia `visto: 2026-09-06` y
+        llevaba los totales del 17/08. `visto` era
+        `datetime.now()` al escribir y se leia como si fuera de
+        cuando son los datos: veinte dias entre lo que el campo
+        parecia y lo que era.
+
+        Un campo que dice una cosa y se llama como otra no se
+        arregla renombrandolo a medias: son DOS hechos y hacen
+        falta los dos.
+
+            datos_de    el sello de la foto de la que salen
+            escrito_en  cuando lo escribimos nosotros
+
+    DOCTRINA 50: las dos horas van escritas. Esta guardia no
+    mira el reloj del sistema ni para la foto ni para la
+    escritura.
+    """
+
+    import tempfile
+
+    from pathlib import Path as _Path
+
+    # Una foto de hace un mes, escrita hoy. Es el caso exacto de
+    # la jornada 1, con las fechas puestas a mano.
+    DE_LA_FOTO = "2026-08-17T21:42:23"
+    DE_LA_ESCRITURA = "2026-09-14T22:10:00"
+
+    # REGLA 24: sin las dos fechas esto no probaria nada.
+    assert DE_LA_FOTO and DE_LA_ESCRITURA, "faltan las fechas"
+
+    assert DE_LA_FOTO[:10] != DE_LA_ESCRITURA[:10], (
+        "las dos fechas de esta prueba son del mismo dia: asi no "
+        "distingue una de otra"
+    )
+
+    foto = {
+        "timestamp": DE_LA_FOTO,
+        "rounds": {"data": {
+            "round": {"id": 4899},
+            "league": {"standings": [
+                {"id": 1, "name": "Pepe", "points": 29},
+            ]},
+        }},
+        "user_lineup": {"data": {"lineup": {
+            "type": "4-4-2",
+            "players": [
+                {"id": j["id"]} for j in plantilla()[:11]
+            ],
+        }}},
+        "my_team": [
+            {**j, "points": 2} for j in plantilla()
+        ],
+        "catalog": {"data": {"players": {}}},
+    }
+
+    directorio = tempfile.TemporaryDirectory()
+
+    state, fichero = M.STATE_DIRECTORY, M.LEDGER_FILE
+
+    try:
+        M.STATE_DIRECTORY = _Path(directorio.name)
+        M.LEDGER_FILE = M.STATE_DIRECTORY / "marcador.json"
+
+        M.observar(
+            foto,
+            current_user_id=1,
+            escrito_en=DE_LA_ESCRITURA,
+        )
+
+        entrada = json.loads(
+            M.LEDGER_FILE.read_text(encoding="utf-8")
+        )["jornadas"]["4899"]
+
+    finally:
+        M.STATE_DIRECTORY, M.LEDGER_FILE = state, fichero
+        directorio.cleanup()
+
+    # LOS DOS CAMPOS, Y LOS DOS CON ALGO DENTRO.
+    assert entrada.get("datos_de"), (
+        "no se escribio de cuando son los datos"
+    )
+
+    assert entrada.get("escrito_en"), (
+        "no se escribio cuando lo escribimos"
+    )
+
+    # Y DISTINTOS. Es el punto entero.
+    assert entrada["datos_de"] != entrada["escrito_en"], (
+        f"los dos campos traen la misma fecha "
+        f"({entrada['datos_de']}): se ha vuelto a confundir "
+        f"cuando se tomo la foto con cuando la escribimos"
+    )
+
+    assert entrada["datos_de"].startswith("2026-08-17"), entrada
+
+    assert entrada["escrito_en"].startswith("2026-09-14"), entrada
+
+    # SIN SELLO NO SE INVENTA UNO. Una foto que no dice cuando se
+    # tomo deja `datos_de` vacio, y eso es mas honrado que
+    # ponerle la fecha de la escritura.
+    sin_sello = {k: v for k, v in foto.items() if k != "timestamp"}
+
+    directorio = tempfile.TemporaryDirectory()
+
+    try:
+        M.STATE_DIRECTORY = _Path(directorio.name)
+        M.LEDGER_FILE = M.STATE_DIRECTORY / "marcador.json"
+
+        M.observar(
+            sin_sello,
+            current_user_id=1,
+            escrito_en=DE_LA_ESCRITURA,
+        )
+
+        muda = json.loads(
+            M.LEDGER_FILE.read_text(encoding="utf-8")
+        )["jornadas"]["4899"]
+
+    finally:
+        M.STATE_DIRECTORY, M.LEDGER_FILE = state, fichero
+        directorio.cleanup()
+
+    assert muda.get("datos_de") is None, (
+        f"se le invento una fecha a una foto sin sello: "
+        f"{muda.get('datos_de')}"
+    )
+
+    assert muda.get("escrito_en"), muda
+
+
 def test_observar_guarda_la_ultima_foto_de_la_jornada():
     """
     Se llama en cada ciclo, dos veces por hora. La observacion
@@ -679,6 +814,7 @@ def main():
         test_contra_la_liga_manda_el_dato_oficial,
         test_un_jugador_vendido_conserva_su_nombre,
         test_el_marcador_no_toca_biwenger,
+        test_la_fecha_del_dato_no_es_la_de_la_escritura,
         test_observar_guarda_la_ultima_foto_de_la_jornada,
     ]
 

@@ -252,10 +252,33 @@ export default function MarcadorPage({ data }) {
             </thead>
             <tbody>
               {jornadas.map((jornada) => {
+                /* DE CUÁNDO SON LOS DATOS DE ESTA FILA
+                   (14/09/2026)
+
+                   `visto` era la hora de ESCRITURA disfrazada de
+                   hora del dato: la entrada de la J1 decía
+                   06/09 y llevaba los totales del 17/08.
+
+                   Ahora son dos campos. Las entradas escritas
+                   antes del cambio no se traducen —nadie sabe de
+                   cuándo son— y se marcan aquí, que es más
+                   honrado que enseñar una fecha falsa. */
+                const viejaDeAntes = jornada.antes_del_cambio ? (
+                  <span
+                    className="dim"
+                    title="Entrada escrita antes de que se separasen las dos fechas: no consta de cuándo son sus datos."
+                  >
+                    {" "}·&nbsp;sin&nbsp;fecha&nbsp;de&nbsp;dato
+                  </span>
+                ) : null;
+
                 if (!jornada.medible) {
                   return (
                     <tr key={jornada.round_id}>
-                      <td>J{jornada.round_id}</td>
+                      <td>
+                        J{jornada.round_id}
+                        {viejaDeAntes}
+                      </td>
                       <td colSpan={8} className="dim">
                         {jornada.motivo}
                       </td>
@@ -265,7 +288,10 @@ export default function MarcadorPage({ data }) {
 
                 return (
                   <tr key={jornada.round_id}>
-                    <td>J{jornada.round_id}</td>
+                    <td>
+                      J{jornada.round_id}
+                      {viejaDeAntes}
+                    </td>
                     <td className="mono">{jornada.formacion || "—"}</td>
                     <td className="n mono">{jornada.puntos_once}</td>
                     <td className="mono">{jornada.mejor_formacion}</td>

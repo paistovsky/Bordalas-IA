@@ -648,10 +648,24 @@ def jornada_en_curso(snapshot: dict) -> int:
 #     once, y ahi no hay dos versiones de nada.
 
 
+def sello_de_la_foto(snapshot) -> str | None:
+    """De cuando son los datos de esta foto. `None` si no consta.
+
+    Es el `timestamp` que el propio snapshot trae escrito. No se
+    deduce del nombre del fichero ni del reloj: si la foto no
+    dice cuando se tomo, no se sabe, y eso se dice.
+    """
+
+    momento = _momento((snapshot or {}).get("timestamp"))
+
+    return momento.isoformat() if momento is not None else None
+
+
 def observar(
     snapshot: dict,
     current_user_id=None,
     once_alternativo: dict | None = None,
+    escrito_en=None,
 ) -> dict:
     """Anota la jornada en curso tal y como se ve ahora mismo.
 
@@ -784,9 +798,41 @@ def observar(
 
     ledger = cargar_ledger()
 
+    # LA HORA DE LA ESCRITURA ENTRA POR LA PUERTA (doctrina 50).
+    #
+    #     Es la unica de las dos que es legitimamente "ahora": lo
+    #     que se escribe es que NOSOTROS escribimos, y eso pasa
+    #     ahora. Aun asi se deja entrar por parametro para que
+    #     las guardias no dependan del reloj del sistema.
+    escritura = (
+        _momento(escrito_en) or datetime.now()
+    ).isoformat()
+
     ledger["jornadas"][str(round_id)] = {
         "round_id": round_id,
-        "visto": datetime.now().isoformat(),
+        # DOS FECHAS, PORQUE SON DOS HECHOS (14/09/2026)
+        #
+        #     `visto` era `datetime.now()` al escribir y se leia
+        #     como si fuera de cuando son los datos. La entrada
+        #     de la jornada 1 decia `visto: 2026-09-06` y llevaba
+        #     los totales del 17/08: veinte dias de diferencia
+        #     entre lo que el campo parecia y lo que era.
+        #
+        #     Doctrina 39: un campo que dice una cosa y se llama
+        #     como otra. No se arregla renombrando —son DOS
+        #     hechos distintos y los dos hacen falta—.
+        #
+        #         datos_de    el sello de la foto de la que salen
+        #         escrito_en  cuando lo escribimos nosotros
+        #
+        #     `visto` SE SIGUE ESCRIBIENDO con el valor que
+        #     siempre tuvo. Las entradas viejas no se traducen ni
+        #     se reinterpretan: el que lea una entrada sin
+        #     `datos_de` sabe que es de antes del cambio, y eso
+        #     es mas honrado que adivinarle una fecha.
+        "visto": escritura,
+        "datos_de": sello_de_la_foto(snapshot),
+        "escrito_en": escritura,
         "clasificacion": clasificacion,
         "mi_user_id": safe_int(current_user_id),
         "mi_once": {
@@ -831,7 +877,7 @@ def observar(
         "nombres": nombres,
     }
 
-    ledger["updated_at"] = datetime.now().isoformat()
+    ledger["updated_at"] = escritura
 
     guardar_ledger(ledger)
 
@@ -1363,6 +1409,32 @@ def _reconstruccion_completa(actual: dict) -> tuple[bool, str | None]:
     )
 
 
+def _fechas_de(jornada) -> dict:
+    """Las dos fechas de una entrada, para la pantalla.
+
+    LAS ENTRADAS VIEJAS NO SE TRADUCEN (14/09/2026). Antes del
+    cambio solo habia `visto`, que era la hora de ESCRITURA
+    disfrazada de hora del dato. Traducirla a `datos_de` seria
+    inventarle a cada entrada una fecha que nadie sabe.
+
+    Asi que si falta `datos_de`, se dice: `antes_del_cambio`. El
+    que lea la pantalla sabe que de esa entrada no consta de
+    cuando son los datos, en vez de creerse una fecha falsa.
+    """
+
+    datos = jornada if isinstance(jornada, dict) else {}
+
+    de_la_foto = datos.get("datos_de")
+
+    return {
+        "datos_de": de_la_foto,
+        "escrito_en": (
+            datos.get("escrito_en") or datos.get("visto")
+        ),
+        "antes_del_cambio": not de_la_foto,
+    }
+
+
 def marcador(calendario: dict | None = None) -> dict:
     """Lee el ledger y contesta las tres preguntas.
 
@@ -1516,6 +1588,7 @@ def marcador(calendario: dict | None = None) -> dict:
                 "round_id": safe_int(actual.get("round_id")),
                 "medible": False,
                 "motivo": motivo,
+                **_fechas_de(actual),
 
                 # Que falta, en datos y no solo en la frase, para
                 # que la pantalla pueda pintarlo sin reparsear.
@@ -1591,6 +1664,7 @@ def marcador(calendario: dict | None = None) -> dict:
         filas.append({
             "round_id": safe_int(actual.get("round_id")),
             "medible": True,
+            **_fechas_de(actual),
 
             # UN NUMERO COJO NO ES UNA NOTA (17/09/2026)
             #
