@@ -3570,13 +3570,14 @@ def build_dashboard_state() -> dict:
                     _ventana_del_once = _j.get("safety_deadline")
                     break
 
-        _el_once = (
-            (
-                (snapshot.get("user_lineup") or {}).get("data")
-                or {}
-            ).get("lineup")
-            or {}
-        )
+        # LA FUENTE UNICA (14/09/2026). La ruta estaba escrita a
+        # mano aqui y otra vez, distinta, dentro del marcador.
+        # Ahora las dos llaman a `once_del_dueno`: si algun dia
+        # Biwenger mueve el once de sitio, se cambia en una linea
+        # y no en dos que pueden quedar desparejadas.
+        from src.analysis.el_once_que_jugo import once_del_dueno
+
+        _el_once = once_del_dueno(snapshot)
 
         _once_congelado = anotar_el_once(
             round_id=jornada_en_curso(snapshot),

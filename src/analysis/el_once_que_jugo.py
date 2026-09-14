@@ -140,6 +140,50 @@ def ids_del_once(once) -> list:
     return salida
 
 
+def once_del_dueno(snapshot) -> dict:
+    """La alineacion vigente del dueño. LA FUENTE, en singular.
+
+    Forma fija —siempre un dict— y nunca lanza.
+
+    POR QUE ESTA FUNCION EXISTE (14/09/2026)
+
+        Biwenger publica nuestro once en DOS sitios y no dicen lo
+        mismo. Medido en la foto del 13/09 a las 17:17:
+
+            standings[mi].lineup      4-4-2, guardado el 08/09
+            user_lineup.data.lineup   3-5-2, guardado el 13/09
+
+        Coinciden 10 de los 11. Cambia el dibujo y cambia un
+        nombre: Zubeldia (defensa) por Ruben Garcia (medio),
+        coherente con el paso de 4-4-2 a 3-5-2.
+
+        Y el motor leia de los dos: `marcador.observar()` de
+        `standings`, el libro de las jornadas de `user_lineup`.
+        Dos ideas distintas de "el once de esa jornada" viviendo
+        en el mismo sitio.
+
+    POR QUE GANA `user_lineup`, Y NO ES CUESTION DE GUSTO
+
+        Es la alineacion VIGENTE del dueño, la que Biwenger usa
+        para pagar. `standings` es una copia que se quedo parada
+        el 08/09: cinco dias mirando un once que ya no existia.
+
+    UNA FUENTE, UN SITIO. Quien quiera el once del dueño llama
+    aqui. Si algun dia cambia la ruta, cambia en una linea.
+    """
+
+    try:
+        return (
+            (
+                (snapshot or {}).get("user_lineup") or {}
+            ).get("data")
+            or {}
+        ).get("lineup") or {}
+
+    except (AttributeError, TypeError):
+        return {}
+
+
 def _momento(valor):
     """Una marca de tiempo con zona, o `None`. Nunca lanza."""
 

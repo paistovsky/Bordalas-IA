@@ -631,28 +631,21 @@ def jornada_en_curso(snapshot: dict) -> int:
     )
 
 
-def _mi_fila(snapshot: dict, current_user_id) -> dict:
-    """La fila de Pepe en la clasificacion.
-
-    Se busca por id de usuario. Si no lo tenemos, no se adivina
-    por nombre: una fila equivocada haria que el cuadre diera
-    falso positivo para siempre.
-    """
-
-    user_id = safe_int(current_user_id)
-
-    if not user_id:
-        return {}
-
-    for fila in (_liga(snapshot).get("standings") or []):
-
-        if not isinstance(fila, dict):
-            continue
-
-        if safe_int(fila.get("id")) == user_id:
-            return fila
-
-    return {}
+# `_mi_fila` VIVIA AQUI Y SE BORRO (14/09/2026)
+#
+#     Buscaba la fila de Pepe en `standings` para sacarle el
+#     `lineup`. Era el unico motivo por el que este modulo miraba
+#     ahi, y ese once llevaba cinco dias parado.
+#
+#     Ahora el once sale de `once_del_dueno` y esta funcion no la
+#     usaba nadie mas. Dejarla habria sido dejar la puerta
+#     abierta para que la segunda fuente volviera sin discusion:
+#     una fuente, un sitio, y ni una funcion de mas que apunte a
+#     la otra.
+#
+#     La clasificacion SI se sigue leyendo de `standings` —es
+#     donde vive— pero eso son los puntos de los managers, no el
+#     once, y ahi no hay dos versiones de nada.
 
 
 def observar(
@@ -712,46 +705,42 @@ def observar(
         })
 
     # ============================================================
-    # PENDIENTE: LAS DOS FUENTES DEL ONCE (14/09/2026)
+    # LA FUENTE UNICA DEL ONCE (14/09/2026)
     # ============================================================
     #
-    # BIWENGER PUBLICA NUESTRO ONCE EN DOS SITIOS Y NO DICEN LO
-    # MISMO. Medido en la foto del 13/09/2026 a las 17:17:
+    # HASTA HOY ESTA FUNCION LEIA LA OTRA. Biwenger publica
+    # nuestro once en dos sitios y no dicen lo mismo. Medido en la
+    # foto del 13/09/2026 a las 17:17:
     #
     #     standings[mi].lineup      4-4-2   guardado el 08/09 05:20
     #     user_lineup.data.lineup   3-5-2   guardado el 13/09 06:26
     #
-    #     Coinciden 10 de los 11 jugadores. Cambia el dibujo y
-    #     cambia un nombre: `standings` trae a Zubeldia (8376,
-    #     defensa) donde `user_lineup` trae a Ruben Garcia (1602,
-    #     medio). Es coherente con el cambio de 4-4-2 a 3-5-2.
+    #     Coinciden 10 de los 11. Cambia el dibujo y cambia un
+    #     nombre: `standings` traia a Zubeldia (8376, defensa)
+    #     donde `user_lineup` trae a Ruben Garcia (1602, medio),
+    #     coherente con el paso de 4-4-2 a 3-5-2.
     #
-    # Y LAS DOS FORMAS SON DISTINTAS: `standings` trae ids sueltos
-    # y `user_lineup` la ficha entera. Tratar la segunda como la
-    # primera da `safe_int(dict)` = 0 en los once y el once sale
-    # vacio, sin ruido.
+    # `observar()` leia `standings` y el libro de las jornadas
+    # leia `user_lineup`: dos ideas distintas de "el once de esa
+    # jornada" en el mismo motor, y ademas con escrituras
+    # asimetricas —esta sobreescribe la jornada en curso en cada
+    # vuelta, el libro escribe una linea y no la toca nunca—.
     #
-    # ESTA FUNCION LEE LA VIEJA. `observar()` anota en el ledger
-    # el once de `standings`, que en esa foto llevaba cinco dias
-    # sin actualizarse. El libro nuevo -`el_once_que_jugo`, desde
-    # `dashboard_state`- lee `user_lineup`, que es la vigente.
+    # AHORA LAS DOS LEEN DE `once_del_dueno`, que es la vigente:
+    # la que Biwenger usa para pagar. `standings` era una copia
+    # parada el 08/09.
     #
-    #     Las dos escriben en sitios distintos y en momentos
-    #     distintos: `observar()` en cada vuelta, sobreescribiendo
-    #     la jornada en curso; el libro una sola vez por jornada,
-    #     dentro de la ventana de 90 min antes del primer partido
-    #     y nunca reescrito.
-    #
-    # NO SE TOCA AQUI. Cambiar de fuente mueve la reconstruccion
-    # del once y con ella la nota, que es el numero que decide si
-    # "mejorar el once" gana la discusion: es una decision, no una
-    # traduccion, y le toca su propia rama —la de la fuente unica—.
-    #
-    # Mientras no se haga, el marcador sigue reconstruyendo con un
-    # once que puede ser viejo, y eso explica parte del "el once
-    # que anotamos no es el que jugo".
-    mi_fila = _mi_fila(snapshot, current_user_id)
-    alineacion = mi_fila.get("lineup") or {}
+    # Y LAS DOS FORMAS SON DISTINTAS: `standings` traia ids
+    # sueltos y `user_lineup` la ficha entera. Por eso los ids
+    # salen por `ids_del_once`, que entiende las dos; hacerlo a
+    # mano con `safe_int(dict)` daria 0 en los once y el once
+    # saldria VACIO, sin ruido.
+    from src.analysis.el_once_que_jugo import (
+        ids_del_once,
+        once_del_dueno,
+    )
+
+    alineacion = once_del_dueno(snapshot)
 
     # LOS NOMBRES, DEL CATALOGO Y NO DE LA PLANTILLA (21/08/2026)
     #
@@ -773,7 +762,11 @@ def observar(
         for j in plantilla
     }
 
-    for player_id in (alineacion.get("players") or []):
+    # LOS IDS, POR `ids_del_once`: `user_lineup` trae la ficha
+    # entera y `safe_int(dict)` daria 0 en los once.
+    once_de_hoy = ids_del_once(alineacion)
+
+    for player_id in once_de_hoy:
 
         clave = str(safe_int(player_id))
 
@@ -798,10 +791,7 @@ def observar(
         "mi_user_id": safe_int(current_user_id),
         "mi_once": {
             "formation": alineacion.get("type"),
-            "players": [
-                safe_int(p)
-                for p in (alineacion.get("players") or [])
-            ],
+            "players": list(once_de_hoy),
         },
         "plantilla": plantilla,
         "totales": totales,

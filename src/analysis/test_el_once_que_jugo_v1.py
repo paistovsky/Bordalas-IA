@@ -705,7 +705,171 @@ def test_las_jornadas_perdidas_se_cuentan_y_no_se_reconstruyen() -> None:
     )
 
 
+
+def test_el_once_vive_en_un_solo_sitio() -> None:
+    """Las dos rutas devuelven el mismo once. Una fuente, un sitio.
+
+    EL FALLO (14/09/2026)
+
+        Biwenger publica nuestro once en dos sitios y no dicen lo
+        mismo. Medido en la foto del 13/09 a las 17:17:
+
+            standings[mi].lineup      4-4-2, guardado el 08/09
+            user_lineup.data.lineup   3-5-2, guardado el 13/09
+
+        Coinciden 10 de los 11: Zubeldia (8376, defensa) por
+        Ruben Garcia (1602, medio), coherente con el cambio de
+        dibujo.
+
+        Y el motor leia de los dos. `marcador.observar()` de
+        `standings` —una copia parada cinco dias— y este libro de
+        `user_lineup`, que es la vigente: la que Biwenger usa
+        para pagar.
+
+        Dos ideas distintas de "el once de esa jornada" en el
+        mismo motor, y con escrituras asimetricas ademas: una
+        sobreescribe la jornada en curso en cada vuelta y la otra
+        escribe una linea y no la toca nunca.
+
+    ES LA HERMANA DE `test_las_dos_rutas_leen_el_mismo_tablero`,
+    que ya nos salvo una vez: si alguien añade una tercera ruta
+    con su propia lectura, esta se pone roja.
+    """
+
+    import tempfile
+
+    from pathlib import Path as _Path
+
+    from src.analysis import marcador as M
+    from src.analysis.el_once_que_jugo import (
+        ids_del_once,
+        once_del_dueno,
+    )
+
+    # LA FOTO DEL 13/09, con las dos fuentes y sus dos formas.
+    #
+    #     `standings` trae ids sueltos; `user_lineup` la ficha
+    #     entera. Y dicen onces distintos a proposito: si dijeran
+    #     el mismo, esta guardia seria verde sin probar nada.
+    VIEJO = [17482, 1599, 1721, 9983, 8376, 19862,
+             29661, 14800, 41606, 26271, 3159]
+
+    VIGENTE = [17482, 1599, 1721, 9983, 29661, 19862,
+               14800, 41606, 1602, 26271, 3159]
+
+    # REGLA 24: sin once no se prueba nada, por ninguna ruta.
+    assert VIEJO, "el once viejo llego vacio"
+    assert VIGENTE, "el once vigente llego vacio"
+
+    assert len(VIEJO) == len(VIGENTE) == 11, (VIEJO, VIGENTE)
+
+    # Y TIENEN QUE SER DISTINTOS, o esta guardia no prueba nada.
+    assert set(VIEJO) != set(VIGENTE), (
+        "las dos fuentes de la foto dicen el mismo once: esta "
+        "prueba ya no distingue de cual se lee"
+    )
+
+    foto = {
+        "rounds": {"data": {
+            "round": {"id": 4903},
+            "league": {"standings": [{
+                "id": 14175949,
+                "name": "Pepe",
+                "points": 186,
+                "lineup": {
+                    "type": "4-4-2",
+                    "date": 1788844848,
+                    "players": list(VIEJO),
+                },
+            }]},
+        }},
+        "user_lineup": {"data": {"lineup": {
+            "type": "3-5-2",
+            "date": 1789280811,
+            "players": [
+                {"id": pid, "name": f"Jugador {pid}"}
+                for pid in VIGENTE
+            ],
+        }}},
+        "my_team": [
+            {"id": pid, "name": f"Jugador {pid}", "position": 2,
+             "points": 3}
+            for pid in set(VIEJO) | set(VIGENTE)
+        ],
+        "catalog": {"data": {"players": {}}},
+    }
+
+    # RUTA 1: el libro de las jornadas.
+    del_libro = ids_del_once(once_del_dueno(foto))
+
+    assert del_libro, "el libro leyo un once vacio"
+
+    # RUTA 2: el marcador. Escribe en un ledger temporal —regla
+    # 23: ninguna guardia toca estado de produccion—.
+    directorio = tempfile.TemporaryDirectory()
+
+    state, fichero = M.STATE_DIRECTORY, M.LEDGER_FILE
+
+    try:
+        M.STATE_DIRECTORY = _Path(directorio.name)
+        M.LEDGER_FILE = M.STATE_DIRECTORY / "marcador.json"
+
+        M.observar(foto, current_user_id=14175949)
+
+        anotado = json.loads(
+            M.LEDGER_FILE.read_text(encoding="utf-8")
+        )["jornadas"]["4903"]["mi_once"]
+
+    finally:
+        M.STATE_DIRECTORY, M.LEDGER_FILE = state, fichero
+        directorio.cleanup()
+
+    del_marcador = anotado["players"]
+
+    assert del_marcador, (
+        "el marcador anoto un once VACIO: es lo que pasa al "
+        "tratar la ficha entera como un id suelto"
+    )
+
+    # LAS DOS RUTAS, EL MISMO ONCE.
+    assert del_marcador == del_libro, (
+        f"las dos rutas leen onces distintos: "
+        f"marcador {del_marcador} / libro {del_libro}"
+    )
+
+    # Y ES EL VIGENTE, NO EL PARADO. Se dice cual, no solo que
+    # coincidan: dos rutas leyendo la copia vieja tambien
+    # coincidirian.
+    assert set(del_marcador) == set(VIGENTE), del_marcador
+
+    assert 1602 in del_marcador, (
+        "falta Ruben Garcia: se esta leyendo el once del 08/09"
+    )
+
+    assert 8376 not in del_marcador, (
+        "esta Zubeldia: se esta leyendo el once del 08/09"
+    )
+
+    # Y LA FORMACION TAMBIEN SALE DE LA VIGENTE.
+    assert anotado["formation"] == "3-5-2", anotado
+
+    # EL MODULO YA NO MIRA `standings` PARA EL ONCE. Si alguien
+    # devuelve la segunda fuente, se entera.
+    fuente = (
+        _Path(__file__).parents[2]
+        / "src" / "analysis" / "marcador.py"
+    ).read_text(encoding="utf-8")
+
+    assert fuente, "el modulo del marcador llego vacio"
+
+    assert "def _mi_fila" not in fuente, (
+        "ha vuelto `_mi_fila`: era el unico motivo por el que el "
+        "marcador miraba el `lineup` de `standings`"
+    )
+
+
 TESTS = [
+    test_el_once_vive_en_un_solo_sitio,
     test_el_once_se_anota_antes_del_primer_partido,
     test_las_dos_formas_del_once_valen,
     test_una_alineacion_a_medias_no_se_anota,
