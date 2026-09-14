@@ -282,6 +282,7 @@ TESTS = [
     "src.analysis.test_el_once_que_jugo_v1",
     "src.analysis.test_el_orden_del_tiempo_v1",
     "src.analysis.test_el_vestuario_libre_v1",
+    "src.analysis.test_los_libros_v1",
     "src.analysis.test_el_plato_del_carril_v1",
     "src.analysis.test_la_puja_del_carril_v1",
     "src.analysis.test_los_dos_techos_v1",
