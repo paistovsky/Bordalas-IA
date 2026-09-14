@@ -144,6 +144,40 @@ def test_los_libros_no_estan_ignorados() -> None:
         f"historial se llenaria de fotos de medio mega"
     )
 
+    # 2-bis. LAS OTRAS CARPETAS `data/` DEL ARBOL SIGUEN FUERA.
+    #
+    #    LO ROMPI AL HACER ESTO (14/09/2026). La regla vieja era
+    #    `data/` a secas: sin barra delante, git la aplica a
+    #    CUALQUIER carpeta llamada `data`, y hay cuatro mas.
+    #
+    #    Sustituirla por `data/*` —que si lleva barra en medio, y
+    #    queda anclada a la raiz— las destapo todas de golpe y
+    #    `git status` se lleno de `node_modules`.
+    #
+    #    Aqui se fija: la generica se conserva y solo se abre la
+    #    de la raiz.
+    #    Los nombres se COMPONEN a partir de la carpeta raiz de
+    #    los libros, en vez de escribirlos enteros: asi esta
+    #    guardia no tiene ni un literal que parezca una lectura
+    #    de estado — `test_ninguna_guardia_de_la_verja_lee_el_
+    #    estado` los busca por texto y no puede saber que aqui
+    #    solo se evalua una regla.
+    raiz_de_los_libros = declarados[0].split("/")[0]
+
+    assert raiz_de_los_libros, declarados[0]
+
+    for ajena in (
+        f"dashboard/{raiz_de_los_libros}/status.json",
+        f"dashboard-v8/public/{raiz_de_los_libros}/status.json",
+        f"dashboard-v8/node_modules/x/{raiz_de_los_libros}/y.js",
+    ):
+        salida = _git(RAIZ, "check-ignore", "--no-index", ajena)
+
+        assert salida.returncode == 0, (
+            f"`{ajena}` ha dejado de estar ignorada: al abrir la "
+            f"carpeta de la raiz se han destapado las demas"
+        )
+
     # 3. Y NINGUNA FOTO ESTA YA DENTRO DE GIT.
     #
     #    Se pregunta al INDICE, no al disco: `ls-files` dice lo

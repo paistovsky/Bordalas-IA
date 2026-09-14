@@ -281,7 +281,31 @@ def lineas_para_gitignore() -> list:
     # reglas de arriba abajo y gana la ULTIMA que encaja, asi que
     # primero se cierra el nivel y luego se abre lo que se
     # rescata. Se agrupa por carpeta para que ademas se lea.
-    lineas = ["data/*"]
+    #
+    # Y TODO VA ANCLADO CON `/` AL PRINCIPIO (14/09/2026)
+    #
+    #     La regla vieja era `data/` a secas. Sin barra delante,
+    #     git la aplica a CUALQUIER carpeta llamada `data` a
+    #     cualquier profundidad — que era justo lo que hacia
+    #     falta, porque hay varias:
+    #
+    #         dashboard/data/
+    #         dashboard-v8/public/data/
+    #         dashboard-v8/dist/data/
+    #         dashboard-v8/node_modules/*/data/
+    #
+    #     La primera version de esto la sustituyo por `data/*`, y
+    #     `data/*` SI lleva barra en medio, asi que queda anclado
+    #     a la raiz: las cuatro de arriba se destaparon de golpe y
+    #     `git status` se lleno de `node_modules`.
+    #
+    #     Asi que se conserva la regla generica y se abre SOLO la
+    #     de la raiz, con `/` delante en todo lo demas.
+    lineas = [
+        "data/",
+        "!/data/",
+        "/data/*",
+    ]
 
     por_carpeta = {}
 
@@ -294,10 +318,10 @@ def lineas_para_gitignore() -> list:
     for carpeta in sorted(por_carpeta):
 
         lineas.append("")
-        lineas.append(f"!{carpeta}/")
-        lineas.append(f"{carpeta}/*")
+        lineas.append(f"!/{carpeta}/")
+        lineas.append(f"/{carpeta}/*")
 
         for ruta in por_carpeta[carpeta]:
-            lineas.append(f"!{ruta}")
+            lineas.append(f"!/{ruta}")
 
     return lineas

@@ -32,40 +32,43 @@ __pycache__/
 #     python scripts/guardar_los_libros.py --gitignore
 #
 # Hay guardia: `test_los_libros_no_estan_ignorados`.
-data/*
+data/
+!/data/
+/data/*
 
-!data/autopilot/
-data/autopilot/*
-!data/autopilot/price_history.json
+!/data/autopilot/
+/data/autopilot/*
+!/data/autopilot/price_history.json
 
-!data/calendar/
-data/calendar/*
-!data/calendar/calendar_changes.jsonl
+!/data/calendar/
+/data/calendar/*
+!/data/calendar/calendar_changes.jsonl
 
-!data/intelligence/
-data/intelligence/*
-!data/intelligence/marcador.json
-!data/intelligence/onces_de_la_jornada.jsonl
-!data/intelligence/libro_de_publicacion.jsonl
-!data/intelligence/libro_en_la_sombra.jsonl
-!data/intelligence/divergence_ledger.json
+!/data/intelligence/
+/data/intelligence/*
+!/data/intelligence/marcador.json
+!/data/intelligence/onces_de_la_jornada.jsonl
+!/data/intelligence/libro_de_publicacion.jsonl
+!/data/intelligence/libro_en_la_sombra.jsonl
+!/data/intelligence/divergence_ledger.json
 
-!data/rival_intelligence/
-data/rival_intelligence/*
-!data/rival_intelligence/board_events.json
+!/data/rival_intelligence/
+/data/rival_intelligence/*
+!/data/rival_intelligence/board_events.json
 
-!data/solvency/
-data/solvency/*
-!data/solvency/bitacora_del_saldo.jsonl
-!data/solvency/censo_de_ofertas.jsonl
-!data/solvency/pujas_bajo_precio.jsonl
+!/data/solvency/
+/data/solvency/*
+!/data/solvency/bitacora_del_saldo.jsonl
+!/data/solvency/censo_de_ofertas.jsonl
+!/data/solvency/pujas_bajo_precio.jsonl
 
-!data/trading/
-data/trading/*
-!data/trading/bid_outcome_ledger.json
-!data/trading/libro_de_renovaciones.jsonl
-!data/trading/libro_del_carril.jsonl
-!data/trading/position_ledger.json
+!/data/trading/
+/data/trading/*
+!/data/trading/bid_outcome_ledger.json
+!/data/trading/libro_de_renovaciones.jsonl
+!/data/trading/libro_del_carril.jsonl
+!/data/trading/position_ledger.json
+
 *.db
 *.sqlite
 *.sqlite3
