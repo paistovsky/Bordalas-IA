@@ -1,6 +1,7 @@
 import ElOjeadorPanel from "../components/ElOjeadorPanel";
 import QuienMejoraElOncePanel from "../components/QuienMejoraElOncePanel";
 import LosRivalesPanel from "../components/LosRivalesPanel";
+import LaPuertaDeLosManagersPanel from "../components/LaPuertaDeLosManagersPanel";
 import LosSentidosPanel from "../components/LosSentidosPanel";
 import ElCalendarioPanel from "../components/ElCalendarioPanel";
 import DoctrinaPanel from "../components/DoctrinaPanel";
@@ -300,6 +301,13 @@ export default function BrainPage({ data }) {
       <ElCalendarioPanel data={data} />
 
       <LosRivalesPanel data={data} />
+
+      {/* CUANTAS VECES SE HA CRUZADO LA PUERTA DE LOS MANAGERS.
+          Va justo debajo de los rivales porque es la misma
+          pregunta con el numero delante: 49 de 69 objetivos
+          mueren en MERCADO_DE_RIVAL, y hasta hoy nadie habia
+          contado si esa puerta se cruza. */}
+      <LaPuertaDeLosManagersPanel data={data} />
 
       {/* Como piensa tapar la deuda, que es la primera pregunta
           cuando el saldo esta en rojo. */}

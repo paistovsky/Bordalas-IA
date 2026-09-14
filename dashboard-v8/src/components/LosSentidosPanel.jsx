@@ -104,6 +104,7 @@ export default function LosSentidosPanel({ data }) {
               <th>EL SENTIDO</th>
               <th>PARA QUÉ SIRVE</th>
               <th>DE CUÁNDO ES</th>
+              <th>CUÁNTO PUEDE ENVEJECER</th>
               <th className="ctr">ESTADO</th>
               <th>QUÉ DECIDE HOY — Y QUÉ DEJA SIN DECIDIR</th>
             </tr>
@@ -135,10 +136,41 @@ export default function LosSentidosPanel({ data }) {
                   ) : null}
                 </td>
 
+                {/* CUÁNTO PUEDE ENVEJECER, Y POR QUÉ.
+
+                    El tope no se inventa: sale de cada cuánto
+                    cambia el dato, y el motivo apunta a la
+                    constante del módulo que lo produce. Los que
+                    no se pueden derivar salen «sin medir» y lo
+                    dicen, en vez de un número redondo. */}
+                <td className="vd">
+                  {(() => {
+                    const tope = fila.edad_maxima || {};
+
+                    if (tope.criterio === "POR_JORNADA")
+                      return <b>la jornada de hoy</b>;
+
+                    if (tope.horas != null)
+                      return <b>{tope.horas} h</b>;
+
+                    return <span className="ref">sin medir</span>;
+                  })()}
+                  <br />
+                  <span className="ref">
+                    {(fila.edad_maxima || {}).motivo}
+                  </span>
+                </td>
+
                 <td className="es">
                   <span className={TONO[fila.estado] || "s-muerto"}>
                     {ROMBO[fila.estado] || "○"} {fila.estado}
                   </span>
+                  {(fila.edad_maxima || {}).caducado ? (
+                    <>
+                      <br />
+                      <span className="bloquea">CADUCADO</span>
+                    </>
+                  ) : null}
                 </td>
 
                 <td className="pw">

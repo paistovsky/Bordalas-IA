@@ -193,6 +193,41 @@ export default function App() {
           </span>
         </div>
 
+        {/* UN SENTIDO CADUCADO SE GRITA (14/09/2026)
+
+            El tablero de titulares se cayó el 17 de agosto y
+            volvió el 14 de septiembre. Las dos veces SOLO. 27
+            días con la vía de fichar cerrada por falta de un
+            dato, y ni un aviso: su edad estaba calculada y a la
+            vista desde el 13/09, dentro de un cuadro de ocho
+            filas, y no la miró nadie.
+
+            Va ARRIBA DEL TODO y en todas las páginas, no dentro
+            del cuadro de los sentidos: un dato que hay que ir a
+            buscar no es un aviso.
+
+            Y dice QUÉ QUEDA BLOQUEADO, no sólo que el dato es
+            viejo. «El tablero es de la jornada 2» es un dato;
+            «no se puja para mejorar el once» es la razón por la
+            que alguien se levanta a mirarlo. */}
+        {data.alarmaDeLosSentidos?.hay && (
+          <div className="alert crit">
+            <b>
+              {data.alarmaDeLosSentidos.cuantos === 1
+                ? "UN SENTIDO DE PEPE ESTÁ CADUCADO."
+                : `${data.alarmaDeLosSentidos.cuantos} SENTIDOS DE PEPE ESTÁN CADUCADOS.`}
+            </b>
+            {(data.alarmaDeLosSentidos.sentidos || []).map((s, i) => (
+              <div key={i} style={{ marginTop: 4 }}>
+                {s.texto}{" "}
+                <span className="dim">
+                  Queda bloqueado: {s.que_queda_bloqueado}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {error && (
           <div className="alert warn">
             La última actualización falló ({error}). Se muestra el último estado válido.

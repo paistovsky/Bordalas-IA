@@ -63,6 +63,153 @@ VIEJO = "VIEJO"
 MUERTO = "MUERTO"
 
 
+# ============================================================
+# CUANTO PUEDE ENVEJECER CADA SENTIDO, Y POR QUE
+# ============================================================
+#
+#     EL SINTOMA QUE ESTO ARREGLA (14/09/2026)
+#
+#         El tablero de titulares se cayo el 17 de agosto y
+#         volvio el 14 de septiembre. Las dos veces SOLO, sin que
+#         nadie lo tocara. Veintisiete dias con la via de fichar
+#         cerrada por falta de un dato, y ni un aviso.
+#
+#         Y como volvio solo, se volvera a caer solo.
+#
+#         Lo que fallaba no era la deteccion: la edad se calcula
+#         desde el 13/09 y se ve en el cuadro. Lo que faltaba era
+#         que ALGUIEN GRITARA. Un numero en una tabla de ocho
+#         filas no es un aviso; es un dato que hay que ir a
+#         buscar, y a la avería que dura veintisiete dias no la
+#         va a buscar nadie.
+#
+#     EL TOPE NO SE INVENTA: SALE DE CADA CUANTO CAMBIA EL DATO
+#
+#         Cada tope de aqui abajo apunta a la constante del
+#         modulo que PRODUCE el dato. Un numero redondo puesto a
+#         ojo aqui seria un umbral nuevo sin medir, y de esos ya
+#         tenemos uno declarado (`DIAS_PARA_VIEJO`).
+#
+#         Los que no se pueden derivar salen con `medida: False`
+#         y lo dicen. Cuatro sentidos NO TIENEN RELOJ PROPIO: se
+#         recalculan de la foto en cada vuelta, asi que su edad
+#         es la de la foto y no pueden caducar por su cuenta. Lo
+#         que les pasa es que se apagan, y eso ya lo dice su
+#         estado.
+POR_JORNADA = "POR_JORNADA"
+POR_HORAS = "POR_HORAS"
+SIN_RELOJ_PROPIO = "SIN_RELOJ_PROPIO"
+
+EDAD_MAXIMA = {
+    "Tablero de titulares": {
+        "criterio": POR_JORNADA,
+        "horas": None,
+        "medida": True,
+        "motivo": (
+            "Se mide POR JORNADA, no por horas: un tablero de la "
+            "jornada 2 no dice nada de la 7 aunque se hubiera "
+            "bajado hace una hora. El motor ya lo rechaza asi "
+            "(`starter_cache_status`), y ese criterio es el "
+            "bueno: caduca cuando su jornada no es la de hoy."
+        ),
+    },
+    "Ojeador de precios": {
+        "criterio": POR_HORAS,
+        "horas": 24,
+        "medida": True,
+        "motivo": (
+            "Los precios que mira se mueven en el reset del "
+            "mercado, a las 07:00 de Madrid "
+            "(`scout/report.py: RESET_HOUR_MADRID`), y entre "
+            "reset y reset hay 24 h. Un informe de antes del "
+            "ultimo reset esta hablando de OTRO mercado. El "
+            "propio ojeador se refresca cada 6 h "
+            "(`DEFAULT_TTL_SECONDS`), asi que 24 h son cuatro "
+            "refrescos perdidos: no es un retraso, es que no "
+            "vuelve."
+        ),
+    },
+    "Prensa": {
+        "criterio": POR_HORAS,
+        "horas": 24,
+        "medida": True,
+        "motivo": (
+            "La prensa hace dos pasadas al dia: se refresca cada "
+            "12 h (`scout/press.py: DEFAULT_TTL_SECONDS`). Se "
+            "grita a las 24 h, que son DOS pasadas seguidas "
+            "perdidas. Una pasada perdida es una vuelta que no "
+            "salio; dos es que la fuente no vuelve."
+        ),
+    },
+    "Calendario de LaLiga": {
+        "criterio": POR_HORAS,
+        "horas": 12,
+        "medida": True,
+        "motivo": (
+            "Se refresca cada 6 h como mucho "
+            "(`matchday_calendar_engine.calculate_refresh_"
+            "interval`, que baja a 2 h en la semana del partido "
+            "y a 30 min en las ultimas 48 h). 12 h son dos "
+            "refrescos perdidos del tramo MAS LARGO, que es el "
+            "unico caso en que 12 h pueden ser normales."
+        ),
+    },
+    "La vara por posición": {
+        "criterio": SIN_RELOJ_PROPIO,
+        "horas": None,
+        "medida": False,
+        "motivo": (
+            "No tiene marca de tiempo propia: se recalcula de la "
+            "foto en cada vuelta, asi que su edad es la de la "
+            "foto. No puede caducar por su cuenta; lo que le "
+            "pasa es que se apaga, y eso ya lo dice su estado."
+        ),
+    },
+    "La caja de los ocho": {
+        "criterio": SIN_RELOJ_PROPIO,
+        "horas": None,
+        "medida": False,
+        "motivo": (
+            "Se reconstruye del tablon en cada vuelta: su edad "
+            "es la de la foto. Lo que le puede pasar es no "
+            "cuadrar, y eso ya lo dice su estado."
+        ),
+    },
+    "Catálogo y plantillas": {
+        "criterio": SIN_RELOJ_PROPIO,
+        "horas": None,
+        "medida": False,
+        "motivo": (
+            "Sale del censo de la foto en cada vuelta: su edad "
+            "es la de la foto. Lo que le puede pasar es no "
+            "cuadrar, y eso ya lo dice su estado."
+        ),
+    },
+    "El marcador": {
+        "criterio": SIN_RELOJ_PROPIO,
+        "horas": None,
+        "medida": False,
+        "motivo": (
+            "No envejece: se recalcula del ledger en cada "
+            "vuelta. Lo que le pasa es que no tiene ni una "
+            "jornada fiable, y eso ya lo dice su estado."
+        ),
+    },
+}
+
+# Lo que se pone cuando aparece un sentido que no esta en la
+# tabla. No se le inventa un tope: se dice que no tiene.
+SIN_TOPE = {
+    "criterio": SIN_RELOJ_PROPIO,
+    "horas": None,
+    "medida": False,
+    "motivo": (
+        "Sentido nuevo: todavia no se ha derivado cuanto puede "
+        "envejecer. Sin tope no se grita."
+    ),
+}
+
+
 def safe_int(value, default: int = 0) -> int:
     try:
         return int(value or 0)
@@ -182,6 +329,145 @@ def _estado_por_edad(cuanto, muerto_si=False) -> str:
     return VIEJO if cuanto["dias"] >= DIAS_PARA_VIEJO else VIVO
 
 
+def _el_tope(nombre) -> dict:
+    """El tope de ese sentido, o el que dice que no tiene."""
+
+    return EDAD_MAXIMA.get(nombre) or SIN_TOPE
+
+
+def _ha_caducado(fila, tope) -> dict:
+    """
+    ¿Este sentido ha pasado de su edad maxima? Forma fija.
+
+    TRES CRITERIOS, Y CADA UNO DICE CUAL ES
+
+        POR_JORNADA       la jornada del dato no es la de hoy
+        POR_HORAS         la edad pasa del tope derivado
+        SIN_RELOJ_PROPIO  no puede caducar: no tiene reloj
+
+    NO SE GRITA POR NO SABER (14/09/2026)
+
+        Si la edad no se puede medir -sin marca de tiempo, o sin
+        hora de referencia- esto NO dice "caducado". Diria que
+        hay una averia cada vez que falta un dato de apoyo, y a
+        la tercera vez nadie mira la banda.
+
+        Lo que falta se dice en `motivo`, y el estado MUERTO ya
+        cuenta ese caso por su cuenta.
+    """
+
+    criterio = tope.get("criterio")
+
+    if criterio == POR_JORNADA:
+
+        # LA DEL DATO CONTRA LA DE HOY. Sin una de las dos no se
+        # compara: se dice que no se puede.
+        suya = safe_int(fila.get("jornada"), default=0)
+
+        hoy = safe_int(fila.get("jornada_de_hoy"), default=0)
+
+        if not suya or not hoy:
+            return {
+                "caducado": False,
+                "medible": False,
+                "motivo": (
+                    "No se puede comparar por jornada: falta la "
+                    "del tablero o la de hoy."
+                ),
+            }
+
+        return {
+            "caducado": suya != hoy,
+            "medible": True,
+            "motivo": (
+                f"El tablero es de la jornada {suya} y hoy se "
+                f"juega la {hoy}."
+                if suya != hoy
+                else f"El tablero es de la jornada de hoy ({hoy})."
+            ),
+        }
+
+    if criterio == POR_HORAS:
+
+        horas = tope.get("horas")
+
+        cuanto = fila.get("edad") or {}
+
+        tiene = cuanto.get("horas")
+
+        if horas is None or tiene is None:
+            return {
+                "caducado": False,
+                "medible": False,
+                "motivo": (
+                    f"No se puede medir la edad: "
+                    f"{cuanto.get('texto') or 'sin dato'}."
+                ),
+            }
+
+        return {
+            "caducado": float(tiene) > float(horas),
+            "medible": True,
+            "motivo": (
+                f"Es de {cuanto.get('texto')} y su tope son "
+                f"{horas} h."
+            ),
+        }
+
+    return {
+        "caducado": False,
+        "medible": False,
+        "motivo": tope.get("motivo"),
+    }
+
+
+def la_alarma(filas) -> dict:
+    """
+    Los sentidos que han pasado de su edad maxima. Forma fija.
+
+    DICE QUE DECISION QUEDA BLOQUEADA, no solo que el dato es
+    viejo. "El tablero es de hace 27 dias" es un dato; "la via de
+    fichar esta cerrada" es la consecuencia, y es lo unico que
+    hace que alguien se levante a mirarlo.
+
+    SE CUENTA, NO SE ESCRIBE (regla 18). El dia que se arregle
+    el tablero esta lista se vacia sola.
+    """
+
+    caducados = [
+        f
+        for f in (filas or [])
+        if (f.get("edad_maxima") or {}).get("caducado")
+    ]
+
+    return {
+        "hay": bool(caducados),
+        "cuantos": len(caducados),
+        "sentidos": [
+            {
+                "sentido": f.get("sentido"),
+                "estado": f.get("estado"),
+                "texto": f.get("alarma_texto"),
+                "que_queda_bloqueado": f.get("que_decide"),
+                "que_bloquea": f.get("que_bloquea"),
+            }
+            for f in caducados
+        ],
+        "reason": (
+            (
+                f"{len(caducados)} sentido(s) por encima de su "
+                f"edad maxima: "
+                + ", ".join(
+                    str(f.get("sentido")) for f in caducados
+                )
+                + "."
+            )
+            if caducados
+            else "Ningun sentido ha pasado de su edad maxima."
+        ),
+    }
+
+
 def los_sentidos(
     lineup: dict | None,
     scout: dict | None,
@@ -213,6 +499,12 @@ def los_sentidos(
             "reason": None,
         },
         "dias_para_viejo_sin_medir": DIAS_PARA_VIEJO,
+        "alarma": {
+            "hay": False,
+            "cuantos": 0,
+            "sentidos": [],
+            "reason": None,
+        },
         "reason": None,
     }
 
@@ -233,6 +525,30 @@ def los_sentidos(
             _el_marcador(marcador),
         ]
 
+        # CADA SENTIDO CON SU TOPE DELANTE.
+        #
+        #     El tope y el motivo viajan EN LA FILA, no solo en
+        #     la alarma: asi el cuadro puede decir "lleva 6 h de
+        #     24" sin que nadie tenga que saberse la tabla.
+        for fila in filas:
+
+            tope = _el_tope(fila.get("sentido"))
+
+            veredicto = _ha_caducado(fila, tope)
+
+            fila["edad_maxima"] = {
+                **tope,
+                **veredicto,
+            }
+
+            fila["alarma_texto"] = (
+                f"{fila.get('sentido')}: {veredicto['motivo']}"
+                if veredicto.get("caducado")
+                else None
+            )
+
+        alarma = la_alarma(filas)
+
         return {
             "available": True,
             "sentidos": filas,
@@ -241,10 +557,25 @@ def los_sentidos(
             "muertos": [
                 f["sentido"] for f in filas if f["estado"] == MUERTO
             ],
+
+            # LA ALARMA, EN SU PROPIO BLOQUE.
+            #
+            #     El tablero se cayo 27 dias sin que nadie se
+            #     enterara. La edad estaba calculada y a la vista
+            #     desde el 13/09: lo que faltaba era que gritara.
+            "alarma": alarma,
+
             "reason": (
                 f"{len(filas)} sentidos, "
                 f"{len([f for f in filas if f['estado'] == VIVO])} "
-                f"vivos."
+                f"vivos"
+                + (
+                    f", {alarma['cuantos']} por encima de su edad "
+                    f"maxima"
+                    if alarma["hay"]
+                    else ""
+                )
+                + "."
             ),
         }
 
@@ -324,6 +655,20 @@ def _el_tablero(lineup, jornada_de_hoy, ahora) -> dict:
     if jornada is not None:
         de_cuando = f"Jornada {jornada} · {cuanto['texto']}"
 
+    # UN TABLERO DE OTRA JORNADA NO DECIDE NADA (14/09/2026)
+    #
+    #     Aqui el "que decide" solo miraba si el motor lo habia
+    #     RECHAZADO. Pero un tablero de la jornada 2 en la 7 esta
+    #     igual de inservible aunque el motor todavia no lo haya
+    #     tirado: la alarma diria "de la jornada 2" y al lado
+    #     "decide que candidatos mejoran el once", que es
+    #     justamente lo que ya no puede decidir.
+    suya = safe_int(jornada, default=0)
+
+    hoy = safe_int(jornada_de_hoy, default=0)
+
+    desfasado = bool(suya and hoy and suya != hoy)
+
     return {
         "sentido": "Tablero de titulares",
         "para_que": "Quién va a jugar el próximo partido",
@@ -339,7 +684,7 @@ def _el_tablero(lineup, jornada_de_hoy, ahora) -> dict:
         "que_decide": (
             "Nada. Sin pronóstico no se puja para mejorar el "
             "once, y el techo del que se queda no se calcula."
-            if rechazado
+            if (rechazado or desfasado)
             else "Qué candidatos mejoran el once."
         ),
     }

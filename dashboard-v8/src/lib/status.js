@@ -302,6 +302,20 @@ export function normalizeStatus(raw = {}) {
        una lista blanca: lo que no se nombre aqui muere en `raw`
        y el cuadro sale vacio sin poder decir por que — ya pasó
        con `todaLaLiga`. Hay guardia. */
+    /* LA PUERTA DE LOS MÁNAGERS. Sin dato, `available: false`
+       y `puerta_cerrada: null` — nunca `true`: «no se pudo
+       contar» y «en esta liga nadie vende» son cosas distintas,
+       y la segunda cierra el 71 % de la lista de objetivos. */
+    laPuertaDeLosManagers: raw.laPuertaDeLosManagers || {
+      available: false,
+      traspasos: [],
+      cuantos: 0,
+      puerta_cerrada: null,
+      reason:
+        "La telemetría no publicó `laPuertaDeLosManagers` en este " +
+        "ciclo."
+    },
+
     losRivales: raw.losRivales || {
       available: false,
       managers: [],
@@ -313,8 +327,27 @@ export function normalizeStatus(raw = {}) {
       available: false,
       sentidos: [],
       ciego: { hay: false },
+      alarma: { hay: false, cuantos: 0, sentidos: [] },
       reason: "La telemetría no publicó `losSentidos` en este ciclo."
     },
+
+    /* LA ALARMA DE LOS SENTIDOS, EN LA BANDA DE ARRIBA.
+       Sube al primer nivel a propósito: dentro de `losSentidos`
+       sólo la vería quien abriera ese cuadro, y la avería que
+       duró 27 días es justo la que nadie va a buscar.
+
+       Sin dato, `hay: false` — nunca `undefined`: una telemetría
+       que no publicó la alarma no es "todo bien", pero tampoco
+       se inventa un grito. Lo que falta lo dice `reason`. */
+    alarmaDeLosSentidos: raw.alarmaDeLosSentidos ||
+      (raw.losSentidos || {}).alarma || {
+        hay: false,
+        cuantos: 0,
+        sentidos: [],
+        reason:
+          "La telemetría no publicó la alarma de los sentidos en " +
+          "este ciclo."
+      },
 
     elCalendario: raw.elCalendario || {
       available: false,

@@ -1719,6 +1719,81 @@ def _same_cycle_execution(previous: dict, current: dict) -> bool:
     return 0 <= (after - before).total_seconds() <= 15 * 60
 
 
+def _con_la_alarma_de_sentidos(
+    activity,
+    sentidos,
+    ahora=None,
+) -> list:
+    """
+    El registro de actividad, con los sentidos caducados arriba.
+
+    POR QUE TAMBIEN AQUI (14/09/2026)
+
+        El tablero de titulares se cayo el 17 de agosto y volvio
+        el 14 de septiembre, las dos veces solo. Veintisiete dias.
+        Su edad estaba calculada y a la vista desde el 13/09, en
+        una tabla de ocho filas, y no la miro nadie.
+
+        Un aviso que solo vive en una pantalla se pierde cuando
+        esa pantalla no se abre. El registro de actividad es lo
+        que se mira cuando algo raro pasa, asi que la averia
+        tiene que estar tambien ahi.
+
+    Y SE VE QUE NO ES UNA EJECUCION
+
+        Estas filas no son algo que Pepe HAYA HECHO: son una
+        observacion sobre la foto. Van marcadas con su fase
+        propia -`SENTIDOS`- y con `write_performed` en falso, que
+        es la verdad: no se ha escrito nada en ningun sitio.
+
+    LA HORA ENTRA POR LA PUERTA (doctrina 50). La de la foto, la
+    misma con la que se midio la edad. Sin ella, la fila va sin
+    marca en vez de con la del proceso que la genera.
+    """
+
+    filas = list(activity or [])
+
+    alarma = (sentidos or {}).get("alarma") or {}
+
+    if not alarma.get("hay"):
+        return filas
+
+    cuando = (
+        ahora.isoformat()
+        if hasattr(ahora, "isoformat")
+        else None
+    )
+
+    for caducado in (alarma.get("sentidos") or []):
+
+        filas.append(
+            {
+                "timestamp": cuando,
+                "phase": "SENTIDOS",
+                "action": "SENTIDO_CADUCADO",
+                "label": (
+                    f"SENTIDO CADUCADO · {caducado.get('sentido')}"
+                ),
+
+                # NO ES UNA ESCRITURA Y SE DICE. Colarla entre
+                # las escrituras de la auditoria seria decir que
+                # Pepe hizo algo, y no hizo nada.
+                "write_performed": False,
+                "success": None,
+                "status": caducado.get("estado"),
+                "reason": (
+                    f"{caducado.get('texto')} "
+                    f"Queda bloqueado: "
+                    f"{caducado.get('que_queda_bloqueado')}"
+                ),
+                "http_status": None,
+                "verified_post_action": False,
+            }
+        )
+
+    return filas
+
+
 def load_activity_feed(limit: int = 100) -> list[dict]:
     if not AUTOPILOT_LOG.exists():
         return []
@@ -5261,6 +5336,74 @@ def build_dashboard_state() -> dict:
         }
 
     # ==========================================================
+    # LA PUERTA DE LOS MANAGERS (14/09/2026)
+    # ==========================================================
+    #
+    #     49 de los 69 objetivos del dia mueren en
+    #     MERCADO_DE_RIVAL: el 71 % de la lista. Y el motivo
+    #     declarado es que la tasa de aceptacion de una oferta a
+    #     otro manager NO ESTA MEDIDA.
+    #
+    #     Se puede medir sin escribir nada y sin gastar un euro:
+    #     los rivales llevan cinco semanas haciendose ofertas
+    #     entre ellos y el tablon lo publica.
+    #
+    #     MEDIDO: 8 traspasos de manager a manager en los 301
+    #     eventos del tablon, contra 166 compras al Computer. Y
+    #     Pepe esta en CUATRO de los ocho. La puerta no esta
+    #     cerrada, y no es teoria: ya la hemos cruzado.
+    #
+    #     ESTO NO OFRECE NADA A NADIE. Cuenta lo que ya paso.
+    try:
+        from src.analysis.la_puerta_de_los_managers import (
+            traspasos_entre_managers,
+        )
+
+        from src.intelligence.bid_outcome_ledger import (
+            BOARD_EVENTS_PATH,
+        )
+
+        _eventos_del_tablon = json.loads(
+            BOARD_EVENTS_PATH.read_text(encoding="utf-8")
+        )
+
+        _la_puerta = traspasos_entre_managers(
+            _eventos_del_tablon,
+
+            # EL PRECIO DE ENTONCES, NO EL DE HOY. Con el de hoy,
+            # un traspaso de agosto saldria barato o caro segun
+            # como se haya movido el jugador desde entonces: es
+            # mirar el futuro, el mismo sesgo que ya arreglo el
+            # buscador historico para las pujas.
+            precio=build_historical_price_lookup(),
+            mi_user_id=board.get("current_user_id"),
+
+            # LA HORA ENTRA POR LA PUERTA (doctrina 50).
+            ahora=_momento_de_la_foto(snapshot),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _la_puerta = {
+            "available": False,
+            "traspasos": [],
+            "cuantos": 0,
+
+            # CERO EVENTOS NO ES CERO TRASPASOS (regla 24)
+            #
+            #     `puerta_cerrada` se queda en `None` a proposito.
+            #     Un `False` aqui diria "la puerta funciona" y un
+            #     `True` diria "en esta liga nadie vende", que es
+            #     la conclusion mas cara del encargo — sacada de
+            #     un fichero que no se pudo leer.
+            "puerta_cerrada": None,
+
+            "reason": (
+                f"No se pudo contar la puerta de los managers: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # ==========================================================
     # LO NUESTRO A LA VENTA (13/09/2026)
     # ==========================================================
     #
@@ -5535,6 +5678,23 @@ def build_dashboard_state() -> dict:
             "available": False,
             "sentidos": [],
             "ciego": {"hay": False},
+
+            # SIN ALARMA NO ES «TODO BIEN» (14/09/2026)
+            #
+            #     Si esto se quedara sin la clave, la banda de
+            #     arriba leeria `undefined` y no pintaria nada:
+            #     una averia montando los sentidos se veria
+            #     exactamente igual que ocho sentidos sanos.
+            "alarma": {
+                "hay": False,
+                "cuantos": 0,
+                "sentidos": [],
+                "reason": (
+                    "No se pudieron montar los sentidos, asi que "
+                    "no se sabe si alguno esta caducado."
+                ),
+            },
+
             "reason": (
                 f"No se pudieron montar los sentidos: "
                 f"{type(error).__name__}: {error}"
@@ -5895,8 +6055,26 @@ def build_dashboard_state() -> dict:
         ),
 
         "priorities": candidates,
-        "activity": activity,
+        "activity": _con_la_alarma_de_sentidos(
+            activity,
+            _los_sentidos,
+            _momento_de_la_foto(snapshot),
+        ),
         "competitive": competitive,
+
+        # LA ALARMA, EN SU PROPIO BLOQUE (14/09/2026)
+        #
+        #     Sale en tres sitios -aqui, en la banda de arriba y
+        #     en el registro de actividad- a proposito. El
+        #     tablero se cayo 27 dias con su edad calculada y a
+        #     la vista dentro de un cuadro de ocho filas, y no lo
+        #     miro nadie. Un dato que hay que ir a buscar no es
+        #     un aviso.
+        "alarmaDeLosSentidos": (_los_sentidos or {}).get("alarma"),
+
+        # CUANTAS VECES SE HA CRUZADO LA PUERTA DE LOS MANAGERS.
+        # Una cuenta de lo que ya paso; no ofrece nada a nadie.
+        "laPuertaDeLosManagers": _la_puerta,
     }
 
     # LO ULTIMO, Y A PROPOSITO.
