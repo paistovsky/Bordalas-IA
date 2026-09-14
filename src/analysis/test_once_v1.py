@@ -874,7 +874,16 @@ def test_los_puntos_sentados_se_publican() -> None:
 
     # Y el marcador se calcula UNA vez: si se llamase dos veces
     # el banquillo podria estar mirando otra foto que la pantalla.
-    assert fuente.count("build_marcador()") == 1, (
+    #
+    # SE CUENTA LA LLAMADA, NO SU FORMA (14/09/2026). Antes se
+    # buscaba el literal `build_marcador()`, con los parentesis
+    # vacios. El dia que el marcador paso a recibir el calendario
+    # —`build_marcador(calendario_desde_la_foto(...))`— el
+    # contador bajo a cero y la guardia se puso roja sin que
+    # nadie hubiera llamado dos veces. Contando `build_marcador(`
+    # se cubren las dos formas y se sigue cazando la segunda
+    # llamada, que es lo que importaba.
+    assert fuente.count("build_marcador(") == 1, (
         "el marcador se calcula mas de una vez por ciclo"
     )
 

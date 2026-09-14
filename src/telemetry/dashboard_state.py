@@ -39,6 +39,7 @@ from src.telemetry.squads import (
 from src.analysis.marcador import (
     observar as anotar_jornada,
     estado_para_dashboard as build_marcador,
+    calendario_desde_la_foto,
 )
 from src.analysis.intelligent_bid_engine import (
     build_market_seller_lookup,
@@ -4278,7 +4279,35 @@ def build_dashboard_state() -> dict:
     #
     #     Ni el banquillo, ni el sesgo por posicion, ni la
     #     comparacion con Mex tocan un umbral. Miden y publican.
-    marcador_estado = build_marcador()
+    # EL ORDEN DEL MARCADOR SALE DEL CALENDARIO (14/09/2026)
+    #
+    #     `round_id` no es el tiempo: la jornada 6 de esta liga
+    #     viene partida en dos ids y uno de ellos se jugo diez
+    #     dias antes que la jornada 5. Ordenar por id ponia las
+    #     fotos al reves y publicaba un "mejor once" de -55.
+    #
+    #     El calendario se construye aqui, que es donde estan la
+    #     foto y el fichero de LaLiga, y entra por la puerta.
+    try:
+
+        from src.analysis.matchday_calendar_engine import (
+            CACHE_FILE as _CALENDARIO_LALIGA,
+        )
+
+        _calendario_laliga = (
+            json.loads(
+                _CALENDARIO_LALIGA.read_text(encoding="utf-8")
+            )
+            if _CALENDARIO_LALIGA.exists()
+            else {}
+        )
+
+    except (OSError, ValueError, ImportError):
+        _calendario_laliga = {}
+
+    marcador_estado = build_marcador(
+        calendario_desde_la_foto(snapshot, _calendario_laliga)
+    )
 
     try:
         from src.analysis.banquillo import puntos_en_el_banquillo

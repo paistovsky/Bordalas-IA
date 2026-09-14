@@ -71,7 +71,7 @@ QUE NO HACE
 
 import json
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -121,6 +121,423 @@ def ensure_state_directory() -> None:
         parents=True,
         exist_ok=True,
     )
+
+
+# ============================================================
+# EL ORDEN DEL TIEMPO
+# ============================================================
+#
+# `round_id` NO ES EL TIEMPO (14/09/2026)
+#
+#     Este motor ordenaba las jornadas por `round_id` y daba por
+#     hecho que ese orden era el del calendario. Es falso, y esta
+#     liga lo demuestra sola: la jornada 6 viene PARTIDA EN DOS
+#     IDS porque uno de sus partidos se adelanto.
+#
+#         round 4903  Jornada 5              10 partidos  13-14/09
+#         round 4904  Jornada 6               1 partido      03/09
+#         round 5125  Jornada 6 (aplazada)   19 partidos  15-17/09
+#
+#     Ordenando por id, 4903 queda como "previa" de 4904 — pero
+#     el partido de 4904 se jugo DIEZ DIAS ANTES. La resta de
+#     totales acumulados va entonces al reves y salen puntos
+#     negativos: es el `mejor_puntos: -55` que aparecio en
+#     pantalla, un "mejor once posible" que no puede existir.
+#
+#     Y la lista de jornadas que publica Biwenger no viene
+#     ordenada por id tampoco: 4904 aparece entre 4901 y 4902.
+#
+# LA CLAVE DE ORDEN ES LA HORA DEL PRIMER PARTIDO.
+#
+#     No se deduce del id, no se deduce del nombre y no se
+#     deduce del momento en que miramos: se pregunta al
+#     calendario, que es quien lo sabe. Una jornada sin hora no
+#     se coloca a ojo — se queda sin medir y se dice.
+
+
+def _momento(valor):
+    """Una marca de tiempo con zona, o `None`. Nunca lanza.
+
+    Acepta lo que traen las dos fuentes: ISO (calendario de
+    LaLiga) y epoch en segundos (partidos de Biwenger).
+    """
+
+    if valor is None:
+        return None
+
+    if isinstance(valor, datetime):
+        cuando = valor
+
+    elif isinstance(valor, (int, float)):
+
+        try:
+            cuando = datetime.fromtimestamp(
+                float(valor), timezone.utc
+            )
+
+        except (OverflowError, OSError, ValueError):
+            return None
+
+    else:
+
+        try:
+            cuando = datetime.fromisoformat(
+                str(valor).replace("Z", "+00:00")
+            )
+
+        except (TypeError, ValueError):
+            return None
+
+    if cuando.tzinfo is None:
+        return cuando.replace(tzinfo=timezone.utc)
+
+    return cuando
+
+
+def calendario_de_jornadas(
+    rondas,
+    partidos=None,
+    kickoff_por_jornada=None,
+) -> dict:
+    """Cuando se jugo cada jornada. Forma fija. Nunca lanza.
+
+    Devuelve `{round_id: {"primer_partido", "fuente", "nombre"}}`.
+
+    DOS FUENTES, Y LA BUENA GANA
+
+        `partidos` son los partidos de verdad, con su `round` y
+        su fecha: es la hora EXACTA del primer partido de ese
+        `round_id` y manda siempre que este.
+
+        `kickoff_por_jornada` es el calendario de LaLiga, por
+        NUMERO de jornada. Sirve de respaldo para las jornadas
+        de las que ya no quedan partidos a la vista.
+
+        La fuente se escribe en cada fila. Una hora de respaldo
+        no es lo mismo que una medida, y quien lea esto tiene
+        que poder distinguirlas sin preguntar.
+
+    NO SE INVENTA NINGUNA. Una jornada sin hora en ninguna de las
+    dos fuentes sale sin `primer_partido`, y el marcador la deja
+    sin medir en vez de colocarla donde le parezca.
+    """
+
+    salida = {}
+
+    try:
+
+        # 1. EL RESPALDO: el calendario de LaLiga, por numero.
+        por_numero = {}
+
+        for numero, cuando in (kickoff_por_jornada or {}).items():
+
+            momento = _momento(cuando)
+
+            if momento is not None:
+                por_numero[safe_int(numero)] = momento
+
+        for ronda in (rondas or []):
+
+            if not isinstance(ronda, dict):
+                continue
+
+            round_id = safe_int(ronda.get("id"))
+
+            if not round_id:
+                continue
+
+            nombre = str(ronda.get("name") or "")
+
+            # "Jornada 6" y "Jornada 6 (aplazada)" son la MISMA
+            # jornada de LaLiga: las dos caen en el numero 6.
+            numero = None
+
+            for trozo in nombre.replace("(", " ").split():
+
+                if trozo.isdigit():
+                    numero = int(trozo)
+                    break
+
+            respaldo = por_numero.get(numero)
+
+            salida[round_id] = {
+                "round_id": round_id,
+                "nombre": nombre,
+                "numero": numero,
+                "primer_partido": (
+                    respaldo.isoformat()
+                    if respaldo is not None
+                    else None
+                ),
+                "fuente": (
+                    "CALENDARIO_DE_LALIGA"
+                    if respaldo is not None
+                    else None
+                ),
+            }
+
+        # 2. LA BUENA: los partidos de verdad. Pisan al respaldo.
+        primero = {}
+
+        for partido in (partidos or []):
+
+            if not isinstance(partido, dict):
+                continue
+
+            ronda = partido.get("round")
+
+            round_id = safe_int(
+                ronda.get("id")
+                if isinstance(ronda, dict)
+                else ronda
+            )
+
+            momento = _momento(
+                partido.get("date")
+                or partido.get("kickoff")
+            )
+
+            if not round_id or momento is None:
+                continue
+
+            if (
+                round_id not in primero
+                or momento < primero[round_id]
+            ):
+                primero[round_id] = momento
+
+        for round_id, momento in primero.items():
+
+            fila = salida.setdefault(
+                round_id,
+                {
+                    "round_id": round_id,
+                    "nombre": "",
+                    "numero": None,
+                    "primer_partido": None,
+                    "fuente": None,
+                },
+            )
+
+            fila["primer_partido"] = momento.isoformat()
+            fila["fuente"] = "PARTIDOS_DE_LA_JORNADA"
+
+        return salida
+
+    except Exception:                               # noqa: BLE001
+        return salida
+
+
+def kickoff_por_jornada(calendario_laliga) -> dict:
+    """`{numero de jornada: primer partido}` del calendario oficial.
+
+    Forma fija. Nunca lanza. Es el RESPALDO de
+    `calendario_de_jornadas`: sirve para las jornadas viejas, de
+    las que Biwenger ya no publica partidos.
+    """
+
+    salida = {}
+
+    try:
+
+        for jornada in (
+            (calendario_laliga or {}).get("matchdays") or []
+        ):
+
+            if not isinstance(jornada, dict):
+                continue
+
+            numero = safe_int(jornada.get("matchday"))
+
+            if not numero:
+                continue
+
+            for partido in (jornada.get("matches") or []):
+
+                if not isinstance(partido, dict):
+                    continue
+
+                momento = _momento(partido.get("kickoff"))
+
+                if momento is None:
+                    continue
+
+                if (
+                    numero not in salida
+                    or momento < salida[numero]
+                ):
+                    salida[numero] = momento
+
+        return {
+            numero: momento.isoformat()
+            for numero, momento in salida.items()
+        }
+
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
+def calendario_desde_la_foto(
+    snapshot,
+    calendario_laliga=None,
+) -> dict:
+    """El calendario de jornadas que sale de la foto. Nunca lanza.
+
+    La foto entra por la puerta (regla 23): esta funcion no lee
+    disco, la llama quien ya la tiene cargada.
+
+    De la foto salen las dos cosas: la lista de jornadas de la
+    temporada (`season.rounds`) y los partidos con fecha que
+    todavia se ven. El calendario de LaLiga pone el respaldo.
+    """
+
+    try:
+
+        catalogo = (
+            (snapshot or {}).get("catalog") or {}
+        ).get("data") or {}
+
+        rondas = (
+            (catalogo.get("season") or {}).get("rounds") or []
+        )
+
+        partidos = []
+
+        for equipo in (catalogo.get("teams") or {}).values():
+
+            if isinstance(equipo, dict):
+                partidos.extend(equipo.get("nextGames") or [])
+
+        for evento in (catalogo.get("activeEvents") or []):
+
+            if isinstance(evento, dict):
+                partidos.extend(evento.get("games") or [])
+
+        return calendario_de_jornadas(
+            rondas,
+            partidos=partidos,
+            kickoff_por_jornada=kickoff_por_jornada(
+                calendario_laliga
+            ),
+        )
+
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
+def orden_en_el_tiempo(jornadas, calendario) -> dict:
+    """Las jornadas observadas, en el orden en que se jugaron.
+
+    Forma fija. Nunca lanza.
+
+        `ordenadas`  las que tienen hora, de antes a despues
+        `sin_hora`   las que no se pueden colocar, con su motivo
+
+    LOS EMPATES SE DESHACEN POR ID, y solo por estabilidad: dos
+    jornadas con el mismo primer partido son un caso raro, y lo
+    que no puede pasar es que el orden cambie entre dos vueltas
+    sin que cambien los datos.
+    """
+
+    ordenadas = []
+    sin_hora = []
+
+    try:
+
+        for jornada in (jornadas or []):
+
+            if not isinstance(jornada, dict):
+                continue
+
+            round_id = safe_int(jornada.get("round_id"))
+
+            fila = (calendario or {}).get(round_id) or {}
+
+            momento = _momento(fila.get("primer_partido"))
+
+            if momento is None:
+                sin_hora.append({
+                    "round_id": round_id,
+                    "motivo": (
+                        f"No se sabe cuando se jugo la jornada "
+                        f"{round_id}: sin la hora de su primer "
+                        f"partido no se puede saber que jornada "
+                        f"va antes, y la resta de totales daria "
+                        f"un numero inventado."
+                    ),
+                })
+                continue
+
+            ordenadas.append({
+                "round_id": round_id,
+                "jornada": jornada,
+                "momento": momento,
+                "fuente": fila.get("fuente"),
+            })
+
+        ordenadas.sort(
+            key=lambda item: (item["momento"], item["round_id"])
+        )
+
+        return {
+            "ordenadas": ordenadas,
+            "sin_hora": sin_hora,
+        }
+
+    except Exception:                               # noqa: BLE001
+        return {"ordenadas": ordenadas, "sin_hora": sin_hora}
+
+
+def jornadas_en_medio(anterior, actual, calendario) -> list:
+    """Las jornadas del calendario que caen ENTRE dos observadas.
+
+    Forma fija, siempre una lista. Nunca lanza.
+
+    POR QUE HACE FALTA AUNQUE EL ORDEN YA ESTE BIEN
+
+        Ordenar arregla la causa, pero no el hueco. Si en el
+        libro estan la 1 y la 4 y faltan la 2 y la 3, la resta de
+        totales cubre TRES jornadas y se publica como si fuera
+        una. El numero sale mal de otra manera, y ningun orden lo
+        ve: hay que preguntarle al calendario quien falta.
+
+    Se miran las que caen ESTRICTAMENTE en medio. Una jornada con
+    el mismo primer partido que otra —las dos mitades de una
+    jornada partida— no cuenta como hueco.
+    """
+
+    faltan = []
+
+    try:
+
+        desde = _momento(anterior)
+        hasta = _momento(actual)
+
+        if desde is None or hasta is None:
+            return faltan
+
+        for round_id, fila in (calendario or {}).items():
+
+            momento = _momento(
+                (fila or {}).get("primer_partido")
+            )
+
+            if momento is None:
+                continue
+
+            if desde < momento < hasta:
+                faltan.append({
+                    "round_id": safe_int(round_id),
+                    "nombre": (fila or {}).get("nombre") or "",
+                    "primer_partido": momento.isoformat(),
+                })
+
+        faltan.sort(key=lambda item: item["primer_partido"])
+
+        return faltan
+
+    except Exception:                               # noqa: BLE001
+        return faltan
 
 
 def ledger_vacio() -> dict:
@@ -602,10 +1019,32 @@ def mejor_once(
 def _puntos_de_la_jornada(
     actual: dict,
     previa: dict | None,
-) -> dict | None:
+) -> tuple:
     """Puntos por jugador en esa jornada, por diferencia de totales.
 
-    Devuelve None cuando no se puede medir. No se estima.
+    Devuelve `(puntos, motivo)`. Con `puntos` en `None` cuando no
+    se puede medir, y entonces `motivo` dice por que. No se
+    estima nunca.
+
+    EL INVARIANTE: UNA DIFERENCIA NEGATIVA ES IMPOSIBLE
+    (14/09/2026)
+
+        `totales` es el acumulado de temporada de cada jugador.
+        Un jugador NO PIERDE puntos de temporada: la diferencia
+        entre dos fotos solo puede ser cero o mas.
+
+        Si sale negativa, no es que puntuara mal. Es que las dos
+        fotos estan al reves — la que se esta usando de "previa"
+        se tomo DESPUES que la actual.
+
+        Eso es lo que producia el `mejor_puntos: -55`: once
+        jugadores a -5, todas las formaciones obligadas y un
+        "mejor once posible" negativo, que no existe. El motor
+        publicaba el numero en vez de darse cuenta de que el
+        orden estaba mal.
+
+        Ahora se comprueba y se dice. Una jornada con una
+        diferencia negativa no se mide.
     """
 
     totales = actual.get("totales") or {}
@@ -614,9 +1053,11 @@ def _puntos_de_la_jornada(
 
         if safe_int(actual.get("round_id")) == PRIMERA_JORNADA:
             # No hay nada antes: el total ES la jornada.
-            return dict(totales)
+            return dict(totales), None
 
-        return None
+        return None, (
+            "Sin observacion de la jornada anterior."
+        )
 
     anteriores = previa.get("totales") or {}
 
@@ -635,7 +1076,30 @@ def _puntos_de_la_jornada(
             - safe_int(anteriores.get(player_id))
         )
 
-    return puntos
+    negativos = sorted(
+        (
+            (player_id, valor)
+            for player_id, valor in puntos.items()
+            if valor < 0
+        ),
+        key=lambda par: par[1],
+    )
+
+    if negativos:
+
+        peor = negativos[0]
+
+        return None, (
+            f"{len(negativos)} jugador(es) con puntos negativos "
+            f"al restar los totales de la jornada "
+            f"{safe_int(previa.get('round_id'))} a los de la "
+            f"{safe_int(actual.get('round_id'))} (el mayor, "
+            f"{peor[1]} en el jugador {peor[0]}). Un jugador no "
+            f"pierde puntos de temporada: las dos fotos estan al "
+            f"reves. No se mide esta jornada."
+        )
+
+    return puntos, None
 
 
 def _puntos_del_once(puntos: dict, once) -> int | None:
@@ -708,11 +1172,22 @@ def _puntos_de_la_clasificacion(
 
     antes = totales(previa)
 
-    return {
+    medido = {
         user_id: puntos - antes.get(user_id, 0)
         for user_id, puntos in ahora.items()
         if user_id in antes
     }
+
+    # EL MISMO INVARIANTE QUE CON LOS JUGADORES (14/09/2026)
+    #
+    #     La clasificacion tambien es acumulada, asi que un
+    #     manager tampoco puede perder puntos de temporada. Si la
+    #     resta sale negativa, las dos fotos estan al reves y lo
+    #     que hay que publicar es el motivo, no el numero.
+    if any(valor < 0 for valor in medido.values()):
+        return None
+
+    return medido
 
 
 def _reconstruccion_completa(actual: dict) -> tuple[bool, str | None]:
@@ -772,40 +1247,110 @@ def _reconstruccion_completa(actual: dict) -> tuple[bool, str | None]:
     )
 
 
-def marcador() -> dict:
-    """Lee el ledger y contesta las tres preguntas."""
+def marcador(calendario: dict | None = None) -> dict:
+    """Lee el ledger y contesta las tres preguntas.
+
+    EL ORDEN SALE DEL CALENDARIO, NO DEL ID (14/09/2026)
+
+        `calendario` es `{round_id: {"primer_partido", ...}}`, tal
+        y como lo construye `calendario_de_jornadas`. Con el se
+        hacen dos cosas que el `round_id` no permitia:
+
+            1. ORDENAR por la hora del primer partido, que es el
+               orden en que Biwenger acredito los puntos.
+
+            2. VER LOS HUECOS: si entre dos jornadas observadas
+               el calendario tiene otra que no esta en el libro,
+               la resta cubre mas de una jornada y no se mide.
+
+        Sin calendario no se ordena a ojo: se dice que no se
+        puede medir. Medir menos es mejor que medir mal, y este
+        numero es el que decide si "mejorar el once" gana la
+        discusion.
+    """
 
     ledger = cargar_ledger()
 
-    jornadas = sorted(
-        (ledger.get("jornadas") or {}).values(),
-        key=lambda item: safe_int(item.get("round_id")),
+    colocadas = orden_en_el_tiempo(
+        list((ledger.get("jornadas") or {}).values()),
+        calendario,
     )
 
-    filas = []
+    jornadas = [item["jornada"] for item in colocadas["ordenadas"]]
+
+    filas = [
+        {
+            "round_id": safe_int(perdida.get("round_id")),
+            "medible": False,
+            "motivo": perdida.get("motivo"),
+        }
+        for perdida in colocadas["sin_hora"]
+    ]
+
     previa = None
+    momento_previo = None
 
-    for indice, actual in enumerate(jornadas):
+    for indice, item in enumerate(colocadas["ordenadas"]):
 
-        # La jornada en curso todavia no ha cerrado: sus puntos
+        actual = item["jornada"]
+
+        # La ultima observada todavia no ha cerrado: sus puntos
         # de clasificacion siguen a cero y contarla hundiria la
         # media. Solo se miden las que ya tienen sucesora.
         cerrada = indice < len(jornadas) - 1
 
         anterior = previa
 
-        puntos = _puntos_de_la_jornada(actual, anterior)
-        previa = actual
+        # EL HUECO. Se mira ANTES de restar: si entre la previa y
+        # esta falta alguna jornada, la resta no es de una
+        # jornada y el numero no significa lo que dice.
+        hueco = (
+            jornadas_en_medio(
+                momento_previo,
+                item["momento"],
+                calendario,
+            )
+            if anterior is not None
+            else []
+        )
 
-        if not cerrada or puntos is None:
+        puntos, motivo_puntos = _puntos_de_la_jornada(
+            actual, anterior
+        )
+
+        previa = actual
+        momento_previo = item["momento"]
+
+        if not cerrada or hueco or puntos is None:
+
+            if not cerrada:
+                motivo = "Jornada en curso."
+
+            elif hueco:
+                cuales = ", ".join(
+                    f"{f['nombre'] or f['round_id']}"
+                    for f in hueco
+                )
+
+                motivo = (
+                    f"Falta la observacion de "
+                    f"{len(hueco)} jornada(s) en medio "
+                    f"({cuales}): la resta de totales cubriria "
+                    f"{len(hueco) + 1} jornadas juntas y se "
+                    f"publicaria como si fuera una. No se mide."
+                )
+
+            else:
+                motivo = motivo_puntos
+
             filas.append({
                 "round_id": safe_int(actual.get("round_id")),
                 "medible": False,
-                "motivo": (
-                    "Jornada en curso."
-                    if not cerrada
-                    else "Sin observacion de la jornada anterior."
-                ),
+                "motivo": motivo,
+
+                # Que falta, en datos y no solo en la frase, para
+                # que la pantalla pueda pintarlo sin reparsear.
+                "jornadas_que_faltan": hueco,
             })
             continue
 
@@ -1018,7 +1563,16 @@ def marcador() -> dict:
     ]
 
     resumen = {
-        "jornadas_observadas": len(jornadas),
+        # TODAS las observadas, tengan hora o no: si una se cae
+        # del orden por no saber cuando se jugo, tiene que seguir
+        # contando como observada o el hueco se vuelve invisible.
+        "jornadas_observadas": len(filas),
+        "jornadas_sin_hora": len(colocadas["sin_hora"]),
+        "jornadas_con_hueco": len([
+            f
+            for f in filas
+            if f.get("jornadas_que_faltan")
+        ]),
         "jornadas_medibles": len(medibles),
         "jornadas_fiables": len(fiables),
         "jornadas_descartadas": len(medibles) - len(fiables),
@@ -1176,16 +1730,20 @@ def _veredicto(eficiencia, cuantas: int) -> str:
 # ============================================================
 
 
-def estado_para_dashboard() -> dict:
+def estado_para_dashboard(calendario: dict | None = None) -> dict:
     """El marcador tal y como lo consume la seccion MARCADOR.
 
     Se declara `available` siempre que se pueda leer el ledger,
     aunque no haya ninguna jornada cerrada: la pantalla tiene que
     poder decir "todavia no hay nada" en vez de desaparecer.
+
+    `calendario` entra por la puerta (regla 23): lo construye
+    quien tiene la foto y el calendario de LaLiga delante, no
+    este modulo.
     """
 
     try:
-        datos = marcador()
+        datos = marcador(calendario)
     except Exception as error:                      # noqa: BLE001
         return {
             "available": False,

@@ -93,6 +93,34 @@ def plantilla():
     return jugadores
 
 
+# EL CALENDARIO ENTRA POR LA PUERTA (14/09/2026)
+#
+#     `marcador()` ya no ordena por `round_id`: la clave es la
+#     hora del primer partido, y sin ella no mide nada. No es un
+#     capricho de estas pruebas — es la unica forma de no volver
+#     a poner dos fotos al reves, que es lo que publicaba un
+#     "mejor once posible" de -55 puntos.
+#
+#     Estas guardias trabajan con la 1 y la 2, seguidas y sin
+#     nada en medio, asi que el calendario son dos lineas.
+CALENDARIO = {
+    4899: {
+        "round_id": 4899,
+        "nombre": "Jornada 1",
+        "numero": 1,
+        "primer_partido": "2026-08-15T19:30:00+00:00",
+        "fuente": "CALENDARIO_DE_LALIGA",
+    },
+    4900: {
+        "round_id": 4900,
+        "nombre": "Jornada 2",
+        "numero": 2,
+        "primer_partido": "2026-08-20T21:00:00+00:00",
+        "fuente": "CALENDARIO_DE_LALIGA",
+    },
+}
+
+
 def escribir_ledger(fichero: Path, jornadas: list[dict]) -> None:
 
     fichero.parent.mkdir(parents=True, exist_ok=True)
@@ -186,7 +214,11 @@ def test_la_jornada_se_mide_por_diferencia_de_totales():
     despues_de_j2[300] += 2
     despues_de_j2[400] = 11
 
-    puntos = M._puntos_de_la_jornada(
+    # `_puntos_de_la_jornada` devuelve `(puntos, motivo)` desde
+    # que comprueba el invariante de las diferencias negativas
+    # (14/09/2026). El motivo tiene que venir vacio: esta resta
+    # es de las buenas.
+    puntos, motivo = M._puntos_de_la_jornada(
         {"round_id": 4900, "totales": {
             str(k): v for k, v in despues_de_j2.items()
         }},
@@ -194,6 +226,8 @@ def test_la_jornada_se_mide_por_diferencia_de_totales():
             str(k): v for k, v in despues_de_j1.items()
         }},
     )
+
+    assert motivo is None, motivo
 
     assert puntos["300"] == 2, (
         "se estan contando puntos de jornadas anteriores"
@@ -209,16 +243,26 @@ def test_sin_observacion_previa_no_se_inventa():
     medir, y tiene que decirlo.
     """
 
-    assert M._puntos_de_la_jornada(
+    sin_previa, motivo = M._puntos_de_la_jornada(
         {"round_id": 4903, "totales": {"300": 40}},
         None,
-    ) is None
+    )
+
+    assert sin_previa is None
+
+    # Y SE DICE POR QUE. Un `None` mudo obliga a abrir el codigo
+    # para saber si falta un dato o si el dato esta mal.
+    assert motivo, "no se dijo por que no se puede medir"
 
     # La primera de la temporada si: no hay nada antes.
-    assert M._puntos_de_la_jornada(
+    primera, motivo_primera = M._puntos_de_la_jornada(
         {"round_id": M.PRIMERA_JORNADA, "totales": {"300": 7}},
         None,
-    ) == {"300": 7}
+    )
+
+    assert primera == {"300": 7}
+
+    assert motivo_primera is None, motivo_primera
 
 
 def test_el_mejor_once_es_un_once_legal():
@@ -317,7 +361,7 @@ def test_la_jornada_en_curso_no_cuenta():
 
         escribir_ledger(fichero, [j1, j2])
 
-        datos = M.marcador()
+        datos = M.marcador(CALENDARIO)
 
     por_jornada = {
         f["round_id"]: f for f in datos["jornadas"]
@@ -359,7 +403,7 @@ def test_el_contrafactual_dice_lo_que_se_dejo_en_el_banquillo():
 
         escribir_ledger(fichero, [j1, j2])
 
-        datos = M.marcador()
+        datos = M.marcador(CALENDARIO)
 
     fila = datos["jornadas"][0]
 
@@ -394,7 +438,7 @@ def test_el_cuadre_avisa_cuando_el_marcador_miente():
 
         escribir_ledger(fichero, [j1, j2])
 
-        datos = M.marcador()
+        datos = M.marcador(CALENDARIO)
 
     assert datos["jornadas"][0]["cuadra"] is False
     assert datos["resumen"]["cuadra_todo"] is False
@@ -431,7 +475,7 @@ def test_una_jornada_que_no_cuadra_no_puntua():
 
         escribir_ledger(fichero, [j1, j2])
 
-        datos = M.marcador()
+        datos = M.marcador(CALENDARIO)
 
     resumen = datos["resumen"]
 
@@ -482,7 +526,7 @@ def test_contra_la_liga_manda_el_dato_oficial():
 
         escribir_ledger(fichero, [j1, j2])
 
-        datos = M.marcador()
+        datos = M.marcador(CALENDARIO)
 
     fila = datos["jornadas"][0]
 
