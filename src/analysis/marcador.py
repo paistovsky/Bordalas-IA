@@ -711,6 +711,45 @@ def observar(
             "points": safe_int(fila.get("points")),
         })
 
+    # ============================================================
+    # PENDIENTE: LAS DOS FUENTES DEL ONCE (14/09/2026)
+    # ============================================================
+    #
+    # BIWENGER PUBLICA NUESTRO ONCE EN DOS SITIOS Y NO DICEN LO
+    # MISMO. Medido en la foto del 13/09/2026 a las 17:17:
+    #
+    #     standings[mi].lineup      4-4-2   guardado el 08/09 05:20
+    #     user_lineup.data.lineup   3-5-2   guardado el 13/09 06:26
+    #
+    #     Coinciden 10 de los 11 jugadores. Cambia el dibujo y
+    #     cambia un nombre: `standings` trae a Zubeldia (8376,
+    #     defensa) donde `user_lineup` trae a Ruben Garcia (1602,
+    #     medio). Es coherente con el cambio de 4-4-2 a 3-5-2.
+    #
+    # Y LAS DOS FORMAS SON DISTINTAS: `standings` trae ids sueltos
+    # y `user_lineup` la ficha entera. Tratar la segunda como la
+    # primera da `safe_int(dict)` = 0 en los once y el once sale
+    # vacio, sin ruido.
+    #
+    # ESTA FUNCION LEE LA VIEJA. `observar()` anota en el ledger
+    # el once de `standings`, que en esa foto llevaba cinco dias
+    # sin actualizarse. El libro nuevo -`el_once_que_jugo`, desde
+    # `dashboard_state`- lee `user_lineup`, que es la vigente.
+    #
+    #     Las dos escriben en sitios distintos y en momentos
+    #     distintos: `observar()` en cada vuelta, sobreescribiendo
+    #     la jornada en curso; el libro una sola vez por jornada,
+    #     dentro de la ventana de 90 min antes del primer partido
+    #     y nunca reescrito.
+    #
+    # NO SE TOCA AQUI. Cambiar de fuente mueve la reconstruccion
+    # del once y con ella la nota, que es el numero que decide si
+    # "mejorar el once" gana la discusion: es una decision, no una
+    # traduccion, y le toca su propia rama —la de la fuente unica—.
+    #
+    # Mientras no se haga, el marcador sigue reconstruyendo con un
+    # once que puede ser viejo, y eso explica parte del "el once
+    # que anotamos no es el que jugo".
     mi_fila = _mi_fila(snapshot, current_user_id)
     alineacion = mi_fila.get("lineup") or {}
 
