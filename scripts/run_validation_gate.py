@@ -489,6 +489,56 @@ def main() -> int:
 
         corto = modulo.rsplit(".", 1)[-1]
 
+        # UNA GUARDIA MUDA NO HA PROBADO NADA (14/09/2026)
+        #
+        #     La verja corre cada guardia como `python -m
+        #     <modulo>`. Un fichero registrado que define sus
+        #     `test_*` pero NO tiene un `if __name__ ==
+        #     "__main__"` se importa, no ejecuta nada y devuelve
+        #     0. La verja lo cuenta como OK.
+        #
+        #     Paso de verdad: `test_el_orden_del_tiempo_v1` se
+        #     registro asi y salio "OK" durante un commit entero
+        #     sin haberse ejecutado ni una vez. Pasaba al
+        #     correrla a mano, asi que no se vio por ningun lado.
+        #
+        #     Es la tercera vez que aparece esta familia: el
+        #     workflow con la lista a mano (07/09), el `tail` que
+        #     devuelve 0 (doctrina 52) y esta. Siempre lo mismo
+        #     —verde por no haber ejecutado, no por haber
+        #     pasado— y siempre callada.
+        #
+        # LA REGLA, QUE ES HERMANA DE LA 24
+        #
+        #     Ninguna guardia pasa con las manos vacias, y
+        #     ninguna pasa sin decir que ha probado. Si no
+        #     imprime una sola linea, no cuenta como verde.
+        #
+        #     Medido sobre las 134 del 14/09: todas dicen algo.
+        #     Tres de ellas corren al importar y sin `main`, y
+        #     tambien imprimen — asi que la regla no obliga a una
+        #     forma concreta de escribir la guardia, solo a que
+        #     deje constancia.
+        mudo = (
+            proceso.returncode == 0
+            and not (proceso.stdout or "").strip()
+        )
+
+        if mudo:
+            print(
+                f"  {indice:>2}/{len(modulos)}  MUDA  {corto}"
+            )
+
+            fallos.append(modulo)
+
+            print(
+                "             no imprimio nada: probablemente "
+                "le falta `if __name__ == \"__main__\": main()` "
+                "y no se ha ejecutado ninguna prueba"
+            )
+
+            continue
+
         if proceso.returncode == 0:
             print(f"  {indice:>2}/{len(modulos)}  OK    {corto}")
 
