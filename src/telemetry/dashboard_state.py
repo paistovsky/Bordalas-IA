@@ -3435,6 +3435,94 @@ def build_dashboard_state() -> dict:
     except Exception as error:                      # noqa: BLE001
         print(f"Marcador: no se pudo anotar la jornada ({error}).")
 
+    # ==========================================================
+    # EL ONCE QUE VA A JUGAR, CONGELADO (14/09/2026)
+    # ==========================================================
+    #
+    #     Siete jornadas observadas y CERO fiables, todas
+    #     descartadas por lo mismo: "no se anoto que once jugo".
+    #
+    #     `anotar_jornada` de ahi arriba SOBREESCRIBE en cada
+    #     vuelta, asi que la alineacion que sobrevive es la
+    #     ultima que se escribio — y esa puede ser de antes del
+    #     partido, de despues de que el dueño la cambiara a mano,
+    #     o de ninguna parte si esa jornada no corrio ningun
+    #     ciclo. Tres cosas distintas que no se distinguen.
+    #
+    #     Este libro escribe UNA linea por jornada, en la ultima
+    #     vuelta antes del primer partido, y no la reescribe. A
+    #     partir del pitido el once ya no puede cambiar sin que
+    #     Biwenger lo sepa: lo que hay ahi es lo que jugo.
+    #
+    #     SE ANOTA EL ONCE DE BIWENGER, no nuestra recomendacion.
+    #     Si anotaramos la nuestra y el dueño la cambiara, el
+    #     marcador compararia nuestra idea contra los puntos que
+    #     pago Biwenger por otro once: descuadraria otra vez, y
+    #     esta vez sin enterarnos, porque los once nombres
+    #     estarian ahi.
+    try:
+        import json as _json
+
+        from src.analysis.el_once_que_jugo import anotar_el_once
+        from src.analysis.marcador import jornada_en_curso
+        from src.analysis.matchday_calendar_engine import (
+            CACHE_FILE as _CALENDARIO,
+        )
+
+        _jornada_laliga = safe_int(state.get("target_matchday"))
+
+        _primer_partido = None
+
+        # LA VENTANA SALE DEL MOTOR DE CALENDARIO, no de aqui.
+        #
+        #     `safety_deadline` son noventa minutos antes del
+        #     primer partido y es el momento que este sistema ya
+        #     llama "el ultimo seguro". Anotar antes de eso no
+        #     prueba nada: el dueño todavia puede cambiar el once.
+        _ventana_del_once = None
+
+        if _CALENDARIO.exists() and _jornada_laliga:
+
+            for _j in (
+                _json.loads(
+                    _CALENDARIO.read_text(encoding="utf-8")
+                ).get("matchdays")
+                or []
+            ):
+                if safe_int(_j.get("matchday")) == _jornada_laliga:
+                    _primer_partido = _j.get("first_kickoff")
+                    _ventana_del_once = _j.get("safety_deadline")
+                    break
+
+        _el_once = (
+            (
+                (snapshot.get("user_lineup") or {}).get("data")
+                or {}
+            ).get("lineup")
+            or {}
+        )
+
+        _once_congelado = anotar_el_once(
+            round_id=jornada_en_curso(snapshot),
+            once=_el_once,
+            primer_partido=_primer_partido,
+            desde=_ventana_del_once,
+
+            # LA HORA ES LA DE LA FOTO (doctrina 50). La misma
+            # que usa el resto de la pantalla, y no el reloj del
+            # proceso que la genera.
+            ahora=_momento_de_la_foto(snapshot),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _once_congelado = {
+            "anotado": False,
+            "reason": (
+                f"No se pudo anotar el once: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     market_status = (
         snapshot.get("market", {})
         .get("status", {})
@@ -5425,6 +5513,28 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    try:
+        from src.analysis.el_once_que_jugo import lo_que_se_perdio
+
+        _lo_que_se_perdio = lo_que_se_perdio(
+            [
+                j.get("round_id")
+                for j in (
+                    (marcador_estado or {}).get("jornadas") or []
+                )
+                if isinstance(j, dict)
+            ]
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _lo_que_se_perdio = {
+            "available": False,
+            "reason": (
+                f"No se pudo contar lo que falta: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     dashboard = {
         "meta": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -5679,7 +5789,15 @@ def build_dashboard_state() -> dict:
         # publica aunque este vacio: la pantalla tiene que poder
         # decir "todavia no hay jornadas cerradas" en vez de
         # desaparecer y dejar al dueño sin saber si mide o no.
-        "marcador": marcador_estado,
+        # EL MARCADOR, Y LO QUE SE PERDIO ANTES DE EMPEZAR A
+        # ANOTAR EL ONCE. El numero se cuenta; las jornadas sin
+        # once son IRRECUPERABLES y se dice, porque reconstruir
+        # una a ojo daria una nota inventada.
+        "marcador": {
+            **(marcador_estado or {}),
+            "el_once_anotado": _lo_que_se_perdio,
+            "congelado_este_ciclo": _once_congelado,
+        },
 
         # El once: los puntos sentados, el sesgo por posicion y
         # el equipo que habia que mirar. No decide nada.
