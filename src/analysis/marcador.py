@@ -1055,6 +1055,93 @@ def mejor_once(
     return mejor
 
 
+def foto_a_medias(jornada) -> str | None:
+    """¿Esta foto se tomo a mitad del abono? Devuelve el motivo.
+
+    `None` si la foto es buena. Nunca lanza.
+
+    UN CERO DE TODA LA LIGA NO ES UN CERO (14/09/2026)
+
+        Que los SIETE managers marquen 0 a la vez, teniendo los
+        jugadores puntos, no es un resultado posible: es que el
+        abono todavia no habia pasado cuando se tomo la foto.
+
+        Biwenger acredita los puntos de la jornada a los
+        managers DESPUES de puntuar a los jugadores. Entre una
+        cosa y la otra hay una ventana, y en esta liga duro
+        TRES DIAS en la jornada 1: 39 fotos guardadas entre el
+        15/08 y el 17/08 tienen la clasificacion a cero mientras
+        los jugadores iban de 9 a 29 puntos.
+
+        Una foto asi no puede servir de referencia para restar
+        nada. Restarle a la siguiente da el acumulado ENTERO de
+        la temporada, que es de donde salia el `186` publicado
+        como si fueran los puntos de una jornada.
+
+    LA CONTRADICCION ESTA DENTRO DE LA PROPIA FOTO
+
+        Suma de la clasificacion igual a cero Y totales de
+        jugador mayores que cero. No hace falta nada de fuera
+        para verlo, ni otra foto con la que comparar.
+
+    Y UN CERO DE VERDAD NO ES ESTO
+
+        Antes del primer partido TODO esta a cero -la liga y los
+        jugadores-, y eso no es una foto a medias: es una foto de
+        antes de que pasara nada. Por eso se exige que los
+        jugadores SI tengan puntos.
+
+        En esta liga son 46 fotos, del 12/08 al 14/08, y no se
+        marcan.
+
+    ES LA HERMANA DEL INVARIANTE DE LAS NEGATIVAS. Aquel caza lo
+    imposible; este caza lo que parece un dato y es un hueco.
+    """
+
+    try:
+
+        datos = jornada if isinstance(jornada, dict) else {}
+
+        clasificacion = [
+            f
+            for f in (datos.get("clasificacion") or [])
+            if isinstance(f, dict)
+        ]
+
+        # SIN MANAGERS NO SE DICE NADA. Una clasificacion vacia
+        # no es una foto a medias: es una foto sin clasificacion,
+        # y esa ya se cae sola por no tener con quien comparar.
+        if not clasificacion:
+            return None
+
+        liga = sum(
+            safe_int(f.get("points")) for f in clasificacion
+        )
+
+        if liga:
+            return None
+
+        jugadores = sum(
+            safe_int(valor)
+            for valor in (datos.get("totales") or {}).values()
+        )
+
+        if jugadores <= 0:
+            # Todo a cero: es de antes del primer partido.
+            return None
+
+        return (
+            f"Foto a medias: los {len(clasificacion)} managers "
+            f"marcan 0 puntos a la vez mientras los jugadores ya "
+            f"suman {jugadores}. Eso no es un resultado, es que "
+            f"el abono no habia pasado cuando se tomo la foto. "
+            f"No sirve de referencia para restar nada."
+        )
+
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def _puntos_de_la_jornada(
     actual: dict,
     previa: dict | None,
@@ -1353,6 +1440,27 @@ def marcador(calendario: dict | None = None) -> dict:
             else []
         )
 
+        # LA FOTO A MEDIAS, POR LOS DOS LADOS (14/09/2026)
+        #
+        #     Si la foto de ESTA jornada se tomo a mitad del
+        #     abono, sus puntos de manager son un cero falso.
+        #
+        #     Y si es la foto ANTERIOR la que esta a medias, el
+        #     cero falso se convierte en la referencia de la
+        #     resta: restarle cero a un acumulado devuelve el
+        #     acumulado entero. Eso es lo que publicaba 186
+        #     puntos como si fueran los de una jornada.
+        #
+        #     Las dos cosas se dicen con su nombre en vez de
+        #     dejar que salga un numero que parece bueno.
+        a_medias = foto_a_medias(actual)
+
+        referencia_a_medias = (
+            foto_a_medias(anterior)
+            if anterior is not None
+            else None
+        )
+
         puntos, motivo_puntos = _puntos_de_la_jornada(
             actual, anterior
         )
@@ -1360,18 +1468,40 @@ def marcador(calendario: dict | None = None) -> dict:
         previa = actual
         momento_previo = item["momento"]
 
-        if not cerrada or hueco or puntos is None:
+        if (
+            not cerrada
+            or hueco
+            or a_medias
+            or referencia_a_medias
+            or puntos is None
+        ):
+
+            # TODOS LOS MOTIVOS, NO SOLO EL PRIMERO (14/09/2026)
+            #
+            #     Una jornada puede estar rota por dos sitios a la
+            #     vez —la 4 de esta liga lo esta: le faltan tres
+            #     jornadas en medio Y su referencia es una foto a
+            #     medias— y quedarse con el primero esconde el
+            #     otro.
+            #
+            #     Arreglar uno y ver que sigue sin medirse, sin
+            #     saber por que, es exactamente la tarde que no
+            #     queremos.
+            motivos = []
 
             if not cerrada:
-                motivo = "Jornada en curso."
+                motivos.append("Jornada en curso.")
 
-            elif hueco:
+            if a_medias:
+                motivos.append(a_medias)
+
+            if hueco:
                 cuales = ", ".join(
                     f"{f['nombre'] or f['round_id']}"
                     for f in hueco
                 )
 
-                motivo = (
+                motivos.append(
                     f"Falta la observacion de "
                     f"{len(hueco)} jornada(s) en medio "
                     f"({cuales}): la resta de totales cubriria "
@@ -1379,8 +1509,18 @@ def marcador(calendario: dict | None = None) -> dict:
                     f"publicaria como si fuera una. No se mide."
                 )
 
-            else:
-                motivo = motivo_puntos
+            if referencia_a_medias:
+                motivos.append(
+                    f"La jornada anterior "
+                    f"({safe_int(anterior.get('round_id'))}) "
+                    f"tampoco sirve de referencia. "
+                    f"{referencia_a_medias}"
+                )
+
+            if not motivos and motivo_puntos:
+                motivos.append(motivo_puntos)
+
+            motivo = " ".join(motivos) or None
 
             filas.append({
                 "round_id": safe_int(actual.get("round_id")),
@@ -1390,6 +1530,12 @@ def marcador(calendario: dict | None = None) -> dict:
                 # Que falta, en datos y no solo en la frase, para
                 # que la pantalla pueda pintarlo sin reparsear.
                 "jornadas_que_faltan": hueco,
+
+                # En datos tambien: una foto a medias no es lo
+                # mismo que un hueco, y la pantalla tiene que
+                # poder distinguirlas sin leer la frase.
+                "foto_a_medias": bool(a_medias),
+                "referencia_a_medias": bool(referencia_a_medias),
             })
             continue
 
@@ -1611,6 +1757,12 @@ def marcador(calendario: dict | None = None) -> dict:
             f
             for f in filas
             if f.get("jornadas_que_faltan")
+        ]),
+        "jornadas_a_medias": len([
+            f
+            for f in filas
+            if f.get("foto_a_medias")
+            or f.get("referencia_a_medias")
         ]),
         "jornadas_medibles": len(medibles),
         "jornadas_fiables": len(fiables),

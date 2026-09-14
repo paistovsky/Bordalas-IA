@@ -139,7 +139,7 @@ class ledger_temporal:
 def _jornada(
     round_id: int,
     totales: dict,
-    puntos_de_liga: int = 0,
+    puntos_de_liga: int = 1,
 ) -> dict:
     """Una observacion con lo justo para que el motor la mida."""
 
@@ -416,6 +416,182 @@ def test_una_jornada_con_hueco_no_se_mide() -> None:
 
 
 # ============================================================
+# 2-bis. UNA FOTO A CERO NO ES REFERENCIA
+# ============================================================
+
+
+def test_una_foto_a_cero_no_es_referencia() -> None:
+    """Los siete a cero con los jugadores puntuando es un hueco.
+
+    EL CUARTO CASO (14/09/2026)
+
+        Que TODA la liga marque 0 a la vez, teniendo los
+        jugadores puntos, no es un resultado posible: es que el
+        abono no habia pasado cuando se tomo la foto.
+
+        En esta liga duro TRES DIAS en la jornada 1 — 39 fotos
+        guardadas entre el 15/08 y el 17/08 con la clasificacion
+        a cero mientras los jugadores iban de 9 a 29 puntos — y
+        la que entro en el libro es justo la ultima de ellas.
+
+        Restarle a la siguiente devuelve el acumulado ENTERO de
+        la temporada. De ahi salia el 186.
+
+    ES LA HERMANA DEL INVARIANTE DE LAS NEGATIVAS, por el otro
+    lado: aquel caza lo imposible, este caza lo que parece un
+    dato y es un hueco. El invariante NO lo coge, porque cero no
+    es negativo.
+    """
+
+    managers = [
+        {"user_id": 14175949, "name": "Pepe", "points": 0},
+        {"user_id": 14154203, "name": "Prinzipote", "points": 0},
+        {"user_id": 14145555, "name": "Pollo17", "points": 0},
+    ]
+
+    # REGLA 24: sin managers no se ha mirado nada. Una
+    # clasificacion vacia suma cero y haria verde esta guardia
+    # sin que existiera la contradiccion que busca.
+    assert managers, "la lista de managers llego vacia"
+
+    assert sum(m["points"] for m in managers) == 0, managers
+
+    a_medias = {
+        "round_id": 4899,
+        "clasificacion": managers,
+        "totales": {"100": 7, "101": 4, "102": 0},
+    }
+
+    motivo = M.foto_a_medias(a_medias)
+
+    assert motivo, (
+        "una foto con los tres managers a cero y los jugadores "
+        "puntuando no se detecto como foto a medias"
+    )
+
+    assert "a medias" in motivo.lower(), motivo
+
+    # EL NUMERO DE MANAGERS VA DENTRO, contado y no escrito.
+    assert str(len(managers)) in motivo, (motivo, managers)
+
+    # Y UN CERO DE VERDAD NO ES ESTO. Antes del primer partido
+    # todo esta a cero, y eso es una foto de antes de que pasara
+    # nada: 46 de las guardadas son asi y no se marcan.
+    antes_de_empezar = {
+        "round_id": 4899,
+        "clasificacion": managers,
+        "totales": {"100": 0, "101": 0, "102": 0},
+    }
+
+    assert M.foto_a_medias(antes_de_empezar) is None, (
+        "una foto de antes del primer partido se esta marcando "
+        "como foto a medias"
+    )
+
+    # Ni una foto buena, claro.
+    buena = {
+        "round_id": 4900,
+        "clasificacion": [
+            {**m, "points": 30 + i}
+            for i, m in enumerate(managers)
+        ],
+        "totales": {"100": 9, "101": 4, "102": 0},
+    }
+
+    assert M.foto_a_medias(buena) is None, buena
+
+    # EL INVARIANTE DE LAS NEGATIVAS NO LO COGE. Se comprueba a
+    # proposito: es la razon de que este caso exista aparte.
+    _, motivo_resta = M._puntos_de_la_jornada(
+        {"round_id": 4900, "totales": {"100": 9}},
+        a_medias,
+    )
+
+    assert motivo_resta is None, (
+        "si el invariante ya lo cazara, esta guardia sobraria: "
+        "revisa cual de las dos esta mal"
+    )
+
+    # Y AHORA EL MOTOR ENTERO.
+    with ledger_temporal() as libro:
+
+        _escribir(
+            libro,
+            [
+                # La 1, a medias: managers a cero, jugadores no.
+                _jornada(
+                    4899,
+                    {str(100 + i): 2 for i in range(16)},
+                    puntos_de_liga=0,
+                ),
+                # La 2, sana. Se apoya en la de arriba.
+                _jornada(
+                    4900,
+                    {str(100 + i): 5 for i in range(16)},
+                    puntos_de_liga=140,
+                ),
+                # La 3, solo para que la 2 cuente como cerrada.
+                _jornada(
+                    4901,
+                    {str(100 + i): 8 for i in range(16)},
+                    puntos_de_liga=190,
+                ),
+            ],
+        )
+
+        datos = M.marcador(_calendario())
+
+    filas = {f["round_id"]: f for f in datos["jornadas"]}
+
+    # REGLA 24.
+    assert filas, "el marcador no devolvio ninguna jornada"
+
+    # 1. LA FOTO A MEDIAS NO SE MIDE.
+    primera = filas[4899]
+
+    assert not primera["medible"], primera
+
+    assert primera.get("foto_a_medias") is True, primera
+
+    assert "a medias" in (primera.get("motivo") or "").lower(), (
+        primera
+    )
+
+    # 2. NI LA QUE SE APOYA EN ELLA.
+    segunda = filas[4900]
+
+    assert not segunda["medible"], (
+        f"la jornada 2 se midio apoyandose en una foto a medias: "
+        f"{segunda}"
+    )
+
+    assert segunda.get("referencia_a_medias") is True, segunda
+
+    assert "referencia" in (segunda.get("motivo") or "").lower(), (
+        segunda
+    )
+
+    # 3. Y NO SE PUBLICA NINGUNA MEDIA QUE SALGA DE AHI.
+    resumen = datos["resumen"]
+
+    assert resumen["eficiencia_media"] is None, resumen
+
+    assert resumen["diferencia_media"] is None, resumen
+
+    assert resumen["jornadas_a_medias"] >= 2, resumen
+
+    # Ni numeros sueltos en las filas.
+    for fila in (primera, segunda):
+        for campo in (
+            "eficiencia",
+            "puntos_biwenger",
+            "diferencia_liga",
+            "mejor_puntos",
+        ):
+            assert fila.get(campo) is None, (campo, fila)
+
+
+# ============================================================
 # 3. UNA DIFERENCIA NEGATIVA NO SE PUBLICA
 # ============================================================
 
@@ -528,3 +704,60 @@ def test_una_diferencia_negativa_no_se_publica() -> None:
             f"la jornada {fila['round_id']} publica un mejor "
             f"once de {techo_publicado} puntos, que no existe"
         )
+
+
+# ============================================================
+# EL ARRANQUE, QUE FALTABA
+# ============================================================
+#
+# ESTE FICHERO SE REGISTRO EN LA VERJA SIN `main` (14/09/2026)
+#
+#     La verja corre cada guardia como `python -m <modulo>`. Sin
+#     un `main`, eso importa el fichero, no ejecuta nada y
+#     devuelve 0.
+#
+#     Resultado: las tres guardias del orden del tiempo salieron
+#     "OK" en la verja durante un commit entero SIN HABERSE
+#     EJECUTADO NI UNA VEZ. Pasaban al correrlas a mano, asi que
+#     el fallo no se vio por ningun lado.
+#
+#     Es el mismo fallo silencioso que la cabecera de la verja
+#     cuenta del workflow y que la doctrina 52 cuenta del `tail`:
+#     verde por no haber ejecutado, no por haber pasado. Tercera
+#     vez que aparece la misma familia, y esta vez desde dentro.
+#
+#     `test_la_verja_ejecuta_lo_que_registra` lo fija para todas.
+
+TESTS = [
+    test_el_orden_no_es_el_id,
+    test_una_jornada_con_hueco_no_se_mide,
+    test_una_foto_a_cero_no_es_referencia,
+    test_una_diferencia_negativa_no_se_publica,
+]
+
+
+def main() -> None:
+    fallos = 0
+
+    for test in TESTS:
+        try:
+            test()
+            print(f"OK   {test.__name__}")
+
+        except AssertionError as error:
+            fallos += 1
+            print(f"FALLA {test.__name__}: {error}")
+
+    print("=" * 60)
+    print(
+        f"EL ORDEN DEL TIEMPO V1: "
+        f"{len(TESTS) - fallos}/{len(TESTS)} OK"
+    )
+    print("=" * 60)
+
+    if fallos:
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()
