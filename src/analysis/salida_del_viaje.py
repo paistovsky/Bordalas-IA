@@ -254,6 +254,105 @@ def precio_de_salida(
     return int(max(0, safe_int(coste)) * (1 + suelo))
 
 
+def como_va_el_viaje(
+    coste,
+    importe,
+    suelo: float = SUELO_DEL_VIAJE,
+) -> dict:
+    """
+    Como va un viaje contra su suelo, dicho en cristiano.
+
+    POR QUE VIVE AQUI Y NO EN LA PANTALLA (14/09/2026)
+
+        El cuadro de reventas etiquetaba a Trent con "buena, la
+        conservamos", que es la frase del motor de OFERTAS: habla
+        de la plantilla. Un jugador comprado para revender no se
+        conserva — o se cobra por encima del suelo, o se espera.
+
+        Pero la regla no puede vivir en el cuadro. La pantalla
+        traduce decisiones, no las toma, y hay guardia que cuenta
+        las comparaciones del modulo para que siga siendo verdad.
+
+        Asi que la regla vive donde vive la decision: aqui, al
+        lado de `que_cobrar`, con el mismo `precio_de_salida` y el
+        mismo suelo. Si el suelo cambia, cambian las dos a la vez.
+
+    TRES ESTADOS Y NINGUNO ES «CONSERVAR»
+
+        sin coste conocido    ->  no hay suelo que calcular
+        por debajo del suelo  ->  se espera, y falta X
+        del suelo para arriba ->  se cobra
+
+    CUANTO FALTA, QUE ES EL NUMERO QUE HACE FALTA
+
+        "No llega al suelo" a secas no distingue entre faltar
+        37.900 de 2.787.600 y faltar 600.000. La primera se cobra
+        el reset que viene; la segunda no se cobra nunca.
+
+    Forma fija. Nunca lanza. NO DECIDE NADA que no decida ya
+    `que_cobrar`: es la misma aritmetica, dicha para leerla.
+    """
+
+    coste = safe_int(coste)
+
+    # SIN COSTE NO HAY SUELO, y un suelo que no se puede calcular
+    # no es cero: es NO VENDER. Es la prohibicion 0 de
+    # `que_cobrar`, con las mismas palabras.
+    if coste <= 0:
+        return {
+            "que_va_a_hacer": "no se sabe lo que costo",
+            "suelo_de_cobro": None,
+            "falta_para_el_suelo": None,
+            "por_que": (
+                "No se sabe lo que costo este viaje: sin coste no "
+                "hay suelo de cobro, y un suelo que no se puede "
+                "calcular no es cero, es no vender."
+            ),
+        }
+
+    minimo = precio_de_salida(coste, suelo)
+
+    if importe is None:
+        return {
+            "que_va_a_hacer": "esperando oferta del Computer",
+            "suelo_de_cobro": minimo,
+            "falta_para_el_suelo": None,
+            "por_que": (
+                f"Viaje abierto por {_euros(coste)} y todavia sin "
+                f"oferta encima de la mesa. El suelo de cobro es "
+                f"{_euros(minimo)} (coste + {suelo * 100:.0f} %)."
+            ),
+        }
+
+    importe = safe_int(importe)
+
+    if importe < minimo:
+        return {
+            "que_va_a_hacer": "no llega al suelo de cobro",
+            "suelo_de_cobro": minimo,
+            "falta_para_el_suelo": minimo - importe,
+            "por_que": (
+                f"La oferta ({_euros(importe)}) se queda "
+                f"{_euros(minimo - importe)} por debajo del suelo "
+                f"de cobro ({_euros(minimo)} = coste "
+                f"{_euros(coste)} + {suelo * 100:.0f} %). Se "
+                f"espera al proximo reset."
+            ),
+        }
+
+    return {
+        "que_va_a_hacer": "pasa el suelo de cobro: se cobra",
+        "suelo_de_cobro": minimo,
+        "falta_para_el_suelo": 0,
+        "por_que": (
+            f"La oferta ({_euros(importe)}) pasa el suelo de "
+            f"cobro ({_euros(minimo)} = coste {_euros(coste)} + "
+            f"{suelo * 100:.0f} %): el viaje se cierra en "
+            f"ganancia."
+        ),
+    }
+
+
 def que_cobrar(
     viajes: list | None,
     ofertas: list | None,

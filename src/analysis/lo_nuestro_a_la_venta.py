@@ -75,9 +75,11 @@ UN VIAJE DEL CARRIL NO SE «CONSERVA» (14/09/2026)
     Por eso las filas que son un viaje abierto se etiquetan con
     la regla del carril, no con la del motor de ofertas.
 
-    Y EL SUELO NO SE ESCRIBE AQUI: sale de `precio_de_salida`,
-    la misma funcion con la que `que_cobrar` decide de verdad. La
-    pantalla no fija un segundo umbral; traduce el que ya hay.
+    Y LA REGLA NO SE ESCRIBE AQUI: `como_va_el_viaje` vive en
+    `salida_del_viaje`, al lado de `que_cobrar` y con el mismo
+    suelo. Esta pantalla no compara nada —ni un `<` ni un `>` en
+    todo el modulo, y hay guardia que los cuenta—: traduce lo que
+    el carril ya decide.
 
 ESTO NO DECIDE NADA
 
@@ -92,15 +94,19 @@ REGLA 23
 
 from __future__ import annotations
 
-# EL SUELO DE COBRO SE PREGUNTA, NO SE ESCRIBE.
+# LA REGLA DEL CARRIL LA DECIDE EL CARRIL.
 #
-#     `precio_de_salida` y `SUELO_DEL_VIAJE` son los mismos que
-#     usa `que_cobrar` para decidir de verdad. Copiar aqui el
-#     "coste + 1 %" daria dos verdades sobre el mismo numero, y
-#     el dia que una cambiara, la de la pantalla seria la falsa.
+#     `como_va_el_viaje` vive en `salida_del_viaje`, al lado de
+#     `que_cobrar` y con el mismo suelo. Aqui no se compara nada:
+#     esta pantalla no tiene ni un umbral propio, y hay guardia
+#     que lo comprueba contando comparaciones en el AST.
+#
+#     Escribir aqui "coste + 1 %" daria dos verdades sobre el
+#     mismo numero, y el dia que una cambiara, la de la pantalla
+#     seria la falsa.
 from src.analysis.salida_del_viaje import (
     SUELO_DEL_VIAJE,
-    precio_de_salida,
+    como_va_el_viaje,
 )
 
 
@@ -177,16 +183,6 @@ def _por_jugador(ofertas) -> dict:
     return indice
 
 
-def _euros(valor) -> str:
-    """12.345.678. Para que el motivo se lea sin contar ceros."""
-
-    try:
-        return f"{int(valor):,}".replace(",", ".")
-
-    except (TypeError, ValueError):
-        return "?"
-
-
 def _viajes_abiertos(viajes) -> dict:
     """
     Los viajes abiertos, por id, con su coste.
@@ -215,82 +211,6 @@ def _viajes_abiertos(viajes) -> dict:
             indice.setdefault(pid, fila)
 
     return indice
-
-
-def _lo_que_se_hace_con_un_viaje(coste, importe, suelo) -> dict:
-    """
-    Que pasa con un viaje del carril, y cuanto falta.
-
-    TRES ESTADOS Y NINGUNO ES «CONSERVAR»
-
-        sin coste conocido  ->  no hay suelo que calcular
-        por debajo del suelo ->  se espera, y falta X
-        del suelo para arriba ->  se cobra
-
-    El numero que hace falta es CUANTO FALTA. "No llega al suelo"
-    a secas no distingue entre faltar 37.900 de 2.787.600 y
-    faltar 600.000: la primera se cobra el reset que viene y la
-    segunda no se cobra nunca.
-    """
-
-    coste = safe_int(coste)
-
-    # SIN COSTE NO HAY SUELO, y un suelo que no se puede calcular
-    # no es cero: es NO VENDER. Misma regla que la prohibicion 0
-    # de `que_cobrar`, dicha en cristiano.
-    if coste <= 0:
-        return {
-            "que_va_a_hacer": "no se sabe lo que costo",
-            "suelo_de_cobro": None,
-            "falta_para_el_suelo": None,
-            "por_que": (
-                "No se sabe lo que costo este viaje: sin coste no "
-                "hay suelo de cobro, y un suelo que no se puede "
-                "calcular no es cero, es no vender."
-            ),
-        }
-
-    minimo = precio_de_salida(coste, suelo)
-
-    if importe is None:
-        return {
-            "que_va_a_hacer": "esperando oferta del Computer",
-            "suelo_de_cobro": minimo,
-            "falta_para_el_suelo": None,
-            "por_que": (
-                f"Viaje abierto por {_euros(coste)} y todavia sin "
-                f"oferta encima de la mesa. El suelo de cobro es "
-                f"{_euros(minimo)} (coste + {suelo * 100:.0f} %)."
-            ),
-        }
-
-    importe = safe_int(importe)
-
-    if importe < minimo:
-        return {
-            "que_va_a_hacer": "no llega al suelo de cobro",
-            "suelo_de_cobro": minimo,
-            "falta_para_el_suelo": minimo - importe,
-            "por_que": (
-                f"La oferta ({_euros(importe)}) se queda "
-                f"{_euros(minimo - importe)} por debajo del suelo "
-                f"de cobro ({_euros(minimo)} = coste "
-                f"{_euros(coste)} + {suelo * 100:.0f} %). Se "
-                f"espera al proximo reset."
-            ),
-        }
-
-    return {
-        "que_va_a_hacer": "pasa el suelo de cobro: se cobra",
-        "suelo_de_cobro": minimo,
-        "falta_para_el_suelo": 0,
-        "por_que": (
-            f"La oferta ({_euros(importe)}) pasa el suelo de "
-            f"cobro ({_euros(minimo)} = coste {_euros(coste)} + "
-            f"{suelo * 100:.0f} %): el viaje se cierra en "
-            f"ganancia."
-        ),
-    }
 
 
 def _titulares(once) -> set:
@@ -406,7 +326,7 @@ def lo_nuestro_a_la_venta(
             )
 
             del_carril = (
-                _lo_que_se_hace_con_un_viaje(
+                como_va_el_viaje(
                     viaje.get("cost"), importe, suelo
                 )
                 if viaje

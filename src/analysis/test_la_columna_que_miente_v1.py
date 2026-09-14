@@ -311,6 +311,8 @@ def test_un_viaje_del_carril_no_se_conserva() -> None:
         y luego cambiara el del motor, aqui se veria.
     """
 
+    import ast
+
     from src.analysis.salida_del_viaje import (
         SUELO_DEL_VIAJE,
         precio_de_salida,
@@ -321,6 +323,37 @@ def test_un_viaje_del_carril_no_se_conserva() -> None:
         precio_de_salida(2_760_000, SUELO_DEL_VIAJE)
         == SUELO_DE_TRENT
     ), precio_de_salida(2_760_000, SUELO_DEL_VIAJE)
+
+    # Y LA REGLA VIVE EN EL MOTOR, NO EN LA PANTALLA.
+    #
+    #     La primera version la escribio dentro del cuadro de
+    #     reventas, y la guardia de ese cuadro se puso roja: alli
+    #     no puede haber ni un `<`. Tenia razon — una pantalla que
+    #     compara es una pantalla que decide.
+    #
+    #     Asi que la regla se fue a `salida_del_viaje`, al lado de
+    #     `que_cobrar` y con el mismo suelo. Esta comprobacion
+    #     impide que vuelva.
+    cuadro = (
+        RAIZ / "src" / "analysis" / "lo_nuestro_a_la_venta.py"
+    ).read_text(encoding="utf-8")
+
+    assert not [
+        nodo
+        for nodo in ast.walk(ast.parse(cuadro))
+        if isinstance(nodo, ast.Compare)
+        and any(
+            isinstance(op, (ast.Gt, ast.GtE, ast.Lt, ast.LtE))
+            for op in nodo.ops
+        )
+    ], (
+        "el cuadro de reventas ha vuelto a comparar: la regla del "
+        "carril tiene que vivir en `salida_del_viaje`"
+    )
+
+    assert "como_va_el_viaje" in cuadro, (
+        "el cuadro ya no llama a la regla del carril"
+    )
 
     visto = _venta()
 
