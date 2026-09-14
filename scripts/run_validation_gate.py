@@ -245,6 +245,7 @@ TESTS = [
     "src.analysis.test_el_cuadro_de_objetivos_v1",
     "src.analysis.test_toda_la_liga_v1",
     "src.analysis.test_lo_nuestro_a_la_venta_v1",
+    "src.analysis.test_la_columna_que_miente_v1",
     "src.analysis.test_la_pantalla_de_mercado_v1",
     "src.analysis.test_la_hoja_de_estilos_v1",
     "src.analysis.test_la_lista_blanca_v1",

@@ -5012,6 +5012,17 @@ def build_dashboard_state() -> dict:
     # ------------------------------------------------------
     # Observador puro: lee el cupo vigente y mide el ritmo de
     # los candidatos. No decide nada y no escribe nada.
+    #
+    # LOS VIAJES, DECLARADOS FUERA DEL `try` (14/09/2026)
+    #
+    #     El cuadro de reventas los necesita para no etiquetar un
+    #     viaje como "lo conservamos". Si se quedaran dentro del
+    #     bloque de la rendija, un fallo ahi dejaria el nombre sin
+    #     definir y el `except` del cuadro de reventas se lo
+    #     tragaria: la pantalla entera de lo publicado en blanco
+    #     por una averia de otro sitio.
+    _abiertos = None
+
     try:
         from src.analysis.la_rendija import (
             bolsillo_del_carril,
@@ -5289,6 +5300,23 @@ def build_dashboard_state() -> dict:
             ).get("players"),
             sin_listar=(rendija_ahora or {}).get("sin_listar"),
             renovacion=plan_de_renovacion,
+
+            # LOS VIAJES DEL CARRIL, PARA QUE NO SE «CONSERVEN»
+            # (14/09/2026)
+            #
+            #     Trent salia con "buena, la conservamos". La
+            #     decision era la correcta —la oferta se quedaba
+            #     37.900 por debajo del suelo de cobro— pero esa
+            #     frase es la del motor de ofertas, que habla de
+            #     la plantilla. Un viaje no se conserva: se cobra
+            #     o se espera, y lo que hace falta saber es
+            #     cuanto falta.
+            #
+            #     Van los de `sin_coste` tambien: son justo los
+            #     que no se pueden juzgar contra el suelo, y la
+            #     fila tiene que decirlo en vez de heredar una
+            #     etiqueta que no le toca.
+            viajes=_abiertos,
         )
 
         # POR QUE NO SE PUBLICO (13/09/2026, noche)

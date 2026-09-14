@@ -36,7 +36,14 @@ const TONO = {
   "guardar para tapar deuda": "d-deuda",
   "esperar mejor oferta": "d-espera",
   "no se vende nunca": "d-nunca",
-  "sin decidir": "d-nada"
+  "sin decidir": "d-nada",
+
+  /* LAS DEL CARRIL. Un viaje no se «conserva»: o pasa el suelo
+     de cobro o se espera. */
+  "no llega al suelo de cobro": "d-espera",
+  "pasa el suelo de cobro: se cobra": "d-cobra",
+  "esperando oferta del Computer": "d-espera",
+  "no se sabe lo que costo": "d-nada"
 };
 
 /* Igual que en los otros dos cuadros: Biwenger dice `sanctioned`
@@ -140,6 +147,16 @@ export default function LoNuestroALaVentaPanel({ data }) {
             {venta.publicados} publicados · {venta.con_oferta} con
             oferta · qué va a hacer Pepe con cada uno
           </p>
+
+          {/* CONTRA QUÉ SE MIDE LA PRIMA (14/09/2026)
+              Sin esta línea el lector la medía contra la única
+              cifra grande de la fila —lo que pedimos— y veía un
+              robo del 35 % donde la oferta estaba a −4,2 %. */}
+          <p className="sub">
+            la prima se mide contra el{" "}
+            {venta.prima_contra || "PRECIO DE MERCADO"}, no contra
+            lo que pedimos
+          </p>
         </div>
       </div>
 
@@ -152,7 +169,8 @@ export default function LoNuestroALaVentaPanel({ data }) {
               <th>QUIÉN</th>
               <th className="ctr">EST.</th>
               <th className="r">PTS</th>
-              <th className="n">VALE</th>
+              <th className="n">LO QUE PEDIMOS</th>
+              <th className="n">PRECIO DE MERCADO</th>
               <th className="n">NOS OFRECEN</th>
               <th>LA OFERTA CADUCA EN</th>
               <th>QUÉ VA A HACER</th>
@@ -190,8 +208,26 @@ export default function LoNuestroALaVentaPanel({ data }) {
 
                 <td className="pt">{fila.points}</td>
 
+                {/* LO QUE PEDIMOS: el precio publicado. Lo
+                    elegimos nosotros, así que no mide nada — y
+                    por eso ya no se llama VALE. */}
                 <td className="c">
-                  <span className="pr">{formatEuros(fila.vale)}</span>
+                  <span className="pr">
+                    {formatEuros(fila.lo_que_pedimos)}
+                  </span>
+                </td>
+
+                {/* PRECIO DE MERCADO: lo que Biwenger dice que
+                    vale, y contra lo que se mide la prima. Sin
+                    dato NO se repite el de al lado: se dice. */}
+                <td className="c">
+                  {fila.precio_de_mercado == null ? (
+                    <span className="unk">sin dato</span>
+                  ) : (
+                    <span className="pr">
+                      {formatEuros(fila.precio_de_mercado)}
+                    </span>
+                  )}
                 </td>
 
                 {/* NOS OFRECEN, con la prima al lado. Sin prima
@@ -232,11 +268,24 @@ export default function LoNuestroALaVentaPanel({ data }) {
                 </td>
 
                 {/* QUÉ VA A HACER: traducido del motor, nunca
-                    decidido aquí. */}
+                    decidido aquí.
+
+                    De un VIAJE del carril habla el carril, y lo
+                    que hace falta saber es cuánto falta para el
+                    suelo: «no llega» a secas no distingue entre
+                    faltar 37.900 de 2.787.600 y faltar 600.000. */}
                 <td className="ac">
                   <span className={TONO[fila.que_va_a_hacer] || "d-nada"}>
                     {fila.que_va_a_hacer}
                   </span>
+                  {fila.es_viaje && fila.falta_para_el_suelo > 0 ? (
+                    <>
+                      {" "}
+                      <span className="unk">
+                        faltan {formatEuros(fila.falta_para_el_suelo)}
+                      </span>
+                    </>
+                  ) : null}
                 </td>
 
                 <td className="pw">{fila.por_que}</td>
