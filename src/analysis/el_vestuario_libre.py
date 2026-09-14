@@ -68,8 +68,26 @@ REGLA 23
 from __future__ import annotations
 
 
-# Cuantos se enseñan con nombre. El dueño pidio veinte.
-LOS_QUE_SE_ENSEÑAN = 20
+# Cuantos se enseñan de CADA POSICION. Cinco por puesto son los
+# veinte que pidio el dueño, pero repartidos.
+#
+# POR QUE POR POSICION, Y NO TODOS JUNTOS (14/09/2026)
+#
+#     La primera version sacaba los veinte mejores de la liga
+#     entera y salian TRECE DEFENSAS. No era un fallo del orden:
+#     nuestra vara en defensa es Djene con 7 puntos, asi que casi
+#     cualquier defensa titular la supera por diez.
+#
+#     Pero hay una razon estructural para separarlas, y no es de
+#     gusto: NO SE PUEDE FICHAR A UN DEFENSA PARA MEJORAR LA
+#     DELANTERA. La vara es por posicion por construccion, asi
+#     que ordenar las cuatro juntas mezcla cuatro carreras
+#     distintas en una tabla.
+#
+#     Separadas se ven las dos cosas a la vez: quien nos mejora, y
+#     donde tenemos el agujero — que hoy es la defensa, y eso es
+#     informacion, no ruido.
+LOS_QUE_SE_ENSEÑAN = 5
 
 # Por debajo de esto, sus puntos no dicen nada todavia. Es el
 # mismo corte que ya usa `toda_la_liga` para no llamar chollo a
@@ -168,6 +186,7 @@ def el_vestuario_libre(
     nuestra_plantilla=None,
     managers=None,
     en_el_mercado=None,
+    caja_de_fichar=None,
     cuantos: int = LOS_QUE_SE_ENSEÑAN,
 ) -> dict:
     """Los libres, contados y ordenados. Forma fija. Nunca lanza.
@@ -277,29 +296,55 @@ def el_vestuario_libre(
             and safe_int(f.get("played")) >= PARTIDOS_PARA_JUZGAR
         ]
 
-        # EL ORDEN: calidad-precio primero, y lo que nos suma
-        # como desempate.
+        # EL ORDEN: LO QUE NOS SUMA. (14/09/2026)
         #
-        #     El dueño lo dijo con estas palabras el 13/09: "cual
-        #     es el que mas le interesa por CALIDAD-PRECIO y ese
-        #     este el primero".
+        #     La primera version ordenaba por `calidad_precio`, y
+        #     el segundo de la lista salia Herrando: 10 puntos,
+        #     3 partidos, 350.000 EUR, nos suma +3. Estaba ahi
+        #     por BARATO.
         #
-        #     El desempate por `nos_suma` no es decorativo: entre
-        #     dos con la misma calidad-precio, el que mas suma
-        #     arregla mas once. Y el tercer criterio es el id,
+        #     Y no era cuestion de subir los cortes: el orden
+        #     estaba mal planteado. `calidad_precio` divide por el
+        #     precio, asi que el barato gana SIEMPRE. Lo que esta
+        #     lista contesta no es "quien sale a cuenta" —esa la
+        #     contesta el carril— sino A QUIEN QUEREMOS.
+        #
+        #     Asi que se ordena por `nos_suma` y el precio se
+        #     queda de columna. Herrando se cae solo al fondo de
+        #     los defensas con su +3, sin tocar ningun umbral.
+        #
+        #     Desempates: calidad-precio primero —entre dos que
+        #     suman lo mismo, mejor el barato— y el id al final,
         #     solo para que el orden no baile entre dos vueltas
         #     con los mismos datos.
-        candidatos.sort(
-            key=lambda f: (
-                -safe_float(f.get("calidad_precio")),
+        def _orden(f):
+            return (
                 -safe_int(f.get("nos_suma")),
+                -safe_float(f.get("calidad_precio")),
                 safe_int(f.get("id")),
             )
-        )
+
+        candidatos.sort(key=_orden)
 
         tope = max(0, safe_int(cuantos))
 
-        primeros = candidatos[:tope]
+        # LOS MEJORES DE CADA PUESTO, no los mejores de la liga.
+        por_puesto = {}
+
+        for f in candidatos:
+
+            clave = POSICIONES.get(
+                safe_int(f.get("position")), "?"
+            )
+
+            por_puesto.setdefault(clave, []).append(f)
+
+        primeros = []
+
+        # Orden fijo de los puestos, para que la pantalla no
+        # tenga que decidirlo y no baile entre vueltas.
+        for clave in ("POR", "DEF", "MED", "DEL"):
+            primeros.extend(por_puesto.get(clave, [])[:tope])
 
         players = [
             {
@@ -325,6 +370,22 @@ def el_vestuario_libre(
                 # el mercado pasa por el mismo liston que
                 # cualquier otro.
                 "vigilado": True,
+
+                # SI HOY NOS LO PODRIAMOS PERMITIR (14/09/2026)
+                #
+                #     No filtra a nadie, y es a proposito: un
+                #     jugador que hoy no podemos pagar puede ser
+                #     justo a quien hay que vender algo para
+                #     llegar. Solo que se vea.
+                #
+                #     Sin caja no se dice que no: se dice que no
+                #     se sabe. `None` no es `False`.
+                "nos_lo_podemos_permitir": (
+                    None
+                    if caja_de_fichar is None
+                    else safe_int(f.get("price"))
+                    <= safe_int(caja_de_fichar)
+                ),
 
                 # Y si HOY esta en el escaparate, se dice. Vale
                 # el conjunto que entra por la puerta y tambien
@@ -356,6 +417,17 @@ def el_vestuario_libre(
             "libres": len(libres),
             "candidatos": len(candidatos),
             "players": players,
+
+            # LOS MISMOS, AGRUPADOS POR PUESTO. La pantalla no
+            # tiene que reagrupar ni decidir el orden: cuatro
+            # tablas, y cada una contra su propia vara.
+            "por_puesto": {
+                clave: [
+                    p for p in players if p["posicion"] == clave
+                ]
+                for clave in ("POR", "DEF", "MED", "DEL")
+            },
+
             "vigilados": [p["id"] for p in players],
             "recuento": {
                 "por_posicion": por_posicion,
@@ -367,17 +439,30 @@ def el_vestuario_libre(
                 "en_el_mercado_hoy": len([
                     p for p in players if p["en_el_mercado"]
                 ]),
+                "nos_los_podriamos_permitir": len([
+                    p
+                    for p in players
+                    if p["nos_lo_podemos_permitir"]
+                ]),
             },
             "cortes": {
                 "partidos_para_juzgar": PARTIDOS_PARA_JUZGAR,
                 "nos_suma_minimo": NOS_SUMA_MINIMO,
+                "por_posicion": tope,
+                "caja_de_fichar": (
+                    safe_int(caja_de_fichar)
+                    if caja_de_fichar is not None
+                    else None
+                ),
             },
             "reason": (
                 f"{len(libres)} libres de {len(todos)} del "
                 f"catalogo. {len(candidatos)} nos suman y han "
                 f"jugado {PARTIDOS_PARA_JUZGAR}+ partidos; se "
-                f"enseñan los {len(players)} primeros por "
-                f"calidad-precio. Esta lista NO puja."
+                f"enseñan los {tope} mejores de cada puesto "
+                f"({len(players)} en total), por lo que nos "
+                f"suman contra la vara de SU posicion. Esta "
+                f"lista NO puja."
             ),
         }
 

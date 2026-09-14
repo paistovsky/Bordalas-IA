@@ -14,11 +14,16 @@
      para demostrarlo. «Vigilado» tampoco autoriza nada: cambia
      dónde se ve, no si se puja.
 
-   POR QUÉ SE ORDENA POR CALIDAD-PRECIO
+   POR QUÉ POR POSICIÓN Y POR QUÉ POR «NOS SUMA»
 
-     Lo pidió el dueño con estas palabras el 13/09: "cuál es el
-     que más le interesa por CALIDAD-PRECIO y ese esté el
-     primero". NOS SUMA va al lado para poder mirarlo a mano. */
+     No se puede fichar a un defensa para mejorar la delantera.
+     La vara es por posición por construcción, así que las cuatro
+     van en cuatro tablas, cada una contra su propia vara.
+
+     Y se ordena por lo que nos SUMA, no por calidad-precio: eso
+     divide por el precio y el barato gana siempre — con el orden
+     viejo el segundo de la lista era un defensa de 350.000 € que
+     nos sumaba +3. El precio se queda de columna. */
 
 const POS = { POR: "por", DEF: "def", MED: "med", DEL: "del" };
 
@@ -41,9 +46,11 @@ export default function ElVestuarioLibrePanel({ data }) {
     );
   }
 
+  const porPuesto = v.por_puesto || {};
   const filas = v.players || [];
   const r = v.recuento || {};
   const cortes = v.cortes || {};
+  const PUESTOS = ["POR", "DEF", "MED", "DEL"];
 
   return (
     <section className="pan">
@@ -51,8 +58,9 @@ export default function ElVestuarioLibrePanel({ data }) {
         <div>
           <h2>EL VESTUARIO LIBRE</h2>
           <p className="sub">
-            Catálogo menos las ocho plantillas. Los {filas.length}{" "}
-            primeros por calidad-precio.
+            Catálogo menos las ocho plantillas. Los{" "}
+            {cortes.por_posicion} mejores de cada puesto, por lo que
+            nos suman contra la vara de su posición.
           </p>
         </div>
       </div>
@@ -77,61 +85,86 @@ export default function ElVestuarioLibrePanel({ data }) {
         )}
       </p>
 
-      <div className="scroll-y">
-        <table className="tbl">
-          <thead>
-            <tr>
-              <th className="n">#</th>
-              <th>QUIÉN</th>
-              <th className="ctr">POS</th>
-              <th className="n">PTS</th>
-              <th className="n">JUG</th>
-              <th className="n">PRECIO</th>
-              <th className="n">NOS SUMA</th>
-              <th className="n">PTS/M€</th>
-              <th>MEJORA A</th>
-              <th className="ctr">HOY</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filas.map((p, i) => (
-              <tr key={p.id}>
-                <td className="n dim">{i + 1}</td>
-                <td>{p.name}</td>
-                <td className={`ctr ${POS[p.posicion] || ""}`}>
-                  {p.posicion}
-                </td>
-                <td className="n mono">{p.points}</td>
-                <td className="n mono dim">{p.played}</td>
-                <td className="n mono">{euros(p.price)}</td>
-                <td className="n mono ok">+{p.nos_suma}</td>
-                <td className="n mono">{p.calidad_precio}</td>
-                <td className="dim">
-                  {p.vara_nombre
-                    ? `${p.vara_nombre} (${p.vara_puntos})`
-                    : "—"}
-                </td>
-                <td className="ctr">
-                  {p.en_el_mercado ? (
-                    <span className="comp" title="Hoy está en el escaparate del Computer. Vigilado: pasa por el mismo listón que cualquier otro.">
-                      ◆ ESCAPARATE
-                    </span>
-                  ) : (
-                    <span className="dim">—</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {PUESTOS.map((puesto) => {
+        const grupo = porPuesto[puesto] || [];
+        if (!grupo.length) return null;
+        const vara = grupo[0];
+
+        return (
+          <div key={puesto} className="scroll-y">
+            {/* LA VARA DE ESTE PUESTO, EN LA CABECERA. Sin ella
+                «nos suma» es un número sin contra qué. */}
+            <p className="reparto">
+              <b className={POS[puesto] || ""}>{puesto}</b> — mejoran a{" "}
+              <b>
+                {vara.vara_nombre} ({vara.vara_puntos} pts)
+              </b>
+              , nuestro peor titular del puesto
+            </p>
+
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th className="n">#</th>
+                  <th>QUIÉN</th>
+                  <th className="n">PTS</th>
+                  <th className="n">JUG</th>
+                  <th className="n">PRECIO</th>
+                  <th className="n">NOS SUMA</th>
+                  <th className="n">PTS/M€</th>
+                  <th className="ctr">¿HOY?</th>
+                  <th className="ctr">MERCADO</th>
+                </tr>
+              </thead>
+              <tbody>
+                {grupo.map((p, i) => (
+                  <tr key={p.id}>
+                    <td className="n dim">{i + 1}</td>
+                    <td>{p.name}</td>
+                    <td className="n mono">{p.points}</td>
+                    <td className="n mono dim">{p.played}</td>
+                    <td className="n mono">{euros(p.price)}</td>
+                    <td className="n mono ok">+{p.nos_suma}</td>
+                    <td className="n mono dim">{p.calidad_precio}</td>
+                    <td className="ctr">
+                      {/* SI HOY LLEGARÍAMOS. No filtra a nadie:
+                          uno que no podemos pagar puede ser justo
+                          a quien hay que vender algo para llegar. */}
+                      {p.nos_lo_podemos_permitir === null ? (
+                        <span className="dim" title="No se sabe: no llegó la caja de fichar de esta vuelta.">?</span>
+                      ) : p.nos_lo_podemos_permitir ? (
+                        <span className="ok" title="Cabe en la caja de fichar de esta vuelta.">✔</span>
+                      ) : (
+                        <span className="dim" title="Hoy no llegamos. No queda descartado: habría que vender algo.">—</span>
+                      )}
+                    </td>
+                    <td className="ctr">
+                      {p.en_el_mercado ? (
+                        <span className="comp" title="Hoy está en el escaparate. Vigilado: pasa por el mismo listón que cualquier otro.">
+                          ◆
+                        </span>
+                      ) : (
+                        <span className="dim">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
 
       <p className="note" style={{ textAlign: "left" }}>
         <b>Esta lista no puja.</b> Entran los que nos suman{" "}
         {cortes.nos_suma_minimo}+ contra el peor titular nuestro de
         su posición y han jugado {cortes.partidos_para_juzgar}+
         partidos; los dos cortes están puestos para que la lista se
-        pueda mirar, <b>no están calibrados</b>. Un «vigilado» que
+        pueda mirar, <b>no están calibrados</b> — y ya no son ellos
+        los que aguantan la lista, sino el orden por NOS SUMA.
+        La columna «¿hoy?» dice si cabría en la caja de fichar de
+        esta vuelta ({euros(cortes.caja_de_fichar)} €); no descarta
+        a nadie. Un «vigilado» que
         aparezca en el escaparate pasa por el mismo listón que
         cualquier otro: la marca cambia dónde se ve, no si se puja.
       </p>

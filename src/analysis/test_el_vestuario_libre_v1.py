@@ -224,10 +224,14 @@ def test_el_vestuario_libre_no_esta_vacio() -> None:
     )
 
     # LOS CORTES VAN PUBLICADOS, no escondidos en el codigo.
-    assert vestuario["cortes"] == {
-        "partidos_para_juzgar": PARTIDOS_PARA_JUZGAR,
-        "nos_suma_minimo": NOS_SUMA_MINIMO,
-    }, vestuario["cortes"]
+    cortes = vestuario["cortes"]
+
+    assert cortes["partidos_para_juzgar"] == PARTIDOS_PARA_JUZGAR, cortes
+    assert cortes["nos_suma_minimo"] == NOS_SUMA_MINIMO, cortes
+
+    # Y cuantos se enseñan de cada puesto, que tambien decide lo
+    # que se ve y por tanto tiene que estar a la vista.
+    assert cortes["por_posicion"] >= 1, cortes
 
     # Y SIN PLANTILLAS SE ABSTIENE, en vez de devolver el
     # catalogo entero como lista de la compra.
@@ -431,8 +435,183 @@ def test_un_vigilado_no_salta_el_liston() -> None:
         )
 
 
+# ============================================================
+# 4. SE ORDENA POR LO QUE SUMA, NO POR LO QUE CUESTA
+# ============================================================
+
+
+def test_la_lista_ordena_por_lo_que_suma() -> None:
+    """El caro que suma mucho va antes que el barato que suma poco.
+
+    EL FALLO (14/09/2026)
+
+        La primera version ordenaba por `calidad_precio`, y el
+        segundo de los veinte salia Herrando: 10 puntos, 3
+        partidos, 350.000 EUR, nos suma +3. Estaba ahi por
+        BARATO.
+
+        `calidad_precio` divide por el precio, asi que el barato
+        gana siempre. Y esta lista no contesta "quien sale a
+        cuenta" —esa la contesta el carril— sino A QUIEN
+        QUEREMOS.
+
+        Con el orden nuevo Herrando cayo del puesto 2 de la lista
+        entera al 46 de 59 defensas. Sin tocar ningun umbral.
+    """
+
+    # Dos de la misma posicion: uno baratisimo que suma poco y
+    # otro caro que suma mucho. Por calidad-precio ganaria el
+    # primero; por lo que nos suma, el segundo.
+    barato = {
+        "id": 901,
+        "name": "Barato",
+        "position": 2,
+        "points": 10,
+        "played": 5,
+        "price": 100_000,
+        "de_quien": "libre",
+        "nos_suma": 3,
+        "calidad_precio": 30.0,
+        "vara_nombre": "Nuestro peor DEF",
+        "vara_puntos": 7,
+    }
+
+    caro = {
+        **barato,
+        "id": 902,
+        "name": "Caro",
+        "points": 40,
+        "price": 6_000_000,
+        "nos_suma": 33,
+        "calidad_precio": 5.5,
+    }
+
+    # REGLA 24: si los dos sumaran igual, esto no probaria nada.
+    assert caro["nos_suma"] > barato["nos_suma"], (caro, barato)
+
+    assert (
+        barato["calidad_precio"] > caro["calidad_precio"]
+    ), "el barato tiene que ganar por calidad-precio, o esta "        "prueba no distingue los dos ordenes"
+
+    liga = {
+        "available": True,
+        "players": [barato, caro],
+        "reason": None,
+    }
+
+    vestuario = el_vestuario_libre(
+        liga,
+        nuestra_plantilla=[{"id": 1}],
+        managers=[{"user_id": 2, "roster": [{"id": 3}]}],
+    )
+
+    assert vestuario["available"], vestuario["reason"]
+
+    filas = vestuario["players"]
+
+    # REGLA 24.
+    assert filas, "la lista llego vacia"
+
+    assert len(filas) == 2, filas
+
+    assert filas[0]["name"] == "Caro", (
+        f"va primero el barato que suma +{filas[0]['nos_suma']}: "
+        f"se sigue ordenando por lo que cuesta y no por lo que "
+        f"suma"
+    )
+
+    assert filas[1]["name"] == "Barato", filas
+
+    # Y EL PRECIO SIGUE ESTANDO, de columna.
+    for fila in filas:
+        assert fila["price"] > 0, fila
+        assert fila["calidad_precio"] is not None, fila
+
+
+# ============================================================
+# 5. CADA POSICION CONTRA SU PROPIA VARA
+# ============================================================
+
+
+def test_cada_posicion_tiene_su_vara() -> None:
+    """La resta de cada uno es contra el peor titular de SU puesto.
+
+    No se puede fichar a un defensa para mejorar la delantera. La
+    vara es por posicion por construccion, y esta guardia impide
+    que se mezclen: si algun dia se restara contra una vara
+    global, un delantero de 20 puntos pareceria mejorar la
+    porteria.
+    """
+
+    liga = _liga()
+
+    assert liga["available"], liga["reason"]
+
+    vara = liga.get("vara") or {}
+
+    # REGLA 24: sin vara no hay nada contra lo que restar.
+    assert vara, "la vara llego vacia"
+
+    assert len(vara) >= 2, (
+        f"esta prueba necesita varias posiciones con vara y solo "
+        f"hay {len(vara)}"
+    )
+
+    vestuario = _vestuario()
+
+    filas = vestuario["players"]
+
+    assert filas, "la lista llego vacia"
+
+    # LAS VARAS TIENEN QUE SER DISTINTAS ENTRE SI, o comprobar
+    # que cada uno usa la suya no probaria nada.
+    puntos_de_vara = {
+        v["points"] for v in vara.values()
+    }
+
+    assert len(puntos_de_vara) > 1, (
+        f"todas las varas valen lo mismo ({puntos_de_vara}): "
+        f"esta prueba no distinguiria una de otra"
+    )
+
+    for fila in filas:
+
+        # La vara se publica por ETIQUETA de posicion —"DEF"—,
+        # no por su numero.
+        referencia = vara.get(fila["posicion"])
+
+        assert referencia, (fila, vara)
+
+        # 1. EL NOMBRE DE LA VARA ES EL DE SU POSICION.
+        assert fila["vara_nombre"] == referencia["name"], (
+            f"{fila['name']} ({fila['posicion']}) se compara con "
+            f"{fila['vara_nombre']} y no con "
+            f"{referencia['name']}"
+        )
+
+        assert fila["vara_puntos"] == referencia["points"], fila
+
+        # 2. Y LA RESTA CUADRA. Es la comprobacion de verdad: el
+        #    nombre podria ser el bueno y el numero salir de otro
+        #    sitio.
+        assert (
+            fila["nos_suma"]
+            == fila["points"] - referencia["points"]
+        ), (
+            f"{fila['name']}: {fila['points']} - "
+            f"{referencia['points']} != {fila['nos_suma']}"
+        )
+
+    # Y CADA PUESTO SALE EN SU GRUPO.
+    for clave, grupo in (vestuario["por_puesto"] or {}).items():
+        for fila in grupo:
+            assert fila["posicion"] == clave, (clave, fila)
+
+
 TESTS = [
     test_el_vestuario_libre_no_esta_vacio,
+    test_la_lista_ordena_por_lo_que_suma,
+    test_cada_posicion_tiene_su_vara,
     test_la_lista_no_puja,
     test_un_vigilado_no_salta_el_liston,
 ]

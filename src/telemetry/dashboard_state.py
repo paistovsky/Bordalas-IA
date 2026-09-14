@@ -4065,6 +4065,12 @@ def build_dashboard_state() -> dict:
                 != safe_int(board.get("current_user_id"))
             ],
             en_el_mercado=_en_el_mercado,
+
+            # LA CAJA DE FICHAR DE ESTA VUELTA. No filtra a
+            # nadie: solo pinta si hoy llegariamos. Un jugador
+            # que no podemos pagar puede ser justo a quien hay
+            # que vender algo para llegar.
+            caja_de_fichar=presupuesto_fichajes,
         )
 
     except Exception as error:                      # noqa: BLE001
