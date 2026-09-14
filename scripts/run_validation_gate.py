@@ -30,6 +30,30 @@ CODIGO DE SALIDA
     el workflow pare el ciclo, asi que hay una guardia que lo
     comprueba: `test_puerta_una_sola_lista_v1`.
 
+DOCTRINA 52: LA VERJA SE CORRE A FICHERO, NUNCA A `tail`
+(14/09/2026)
+
+    En una tuberia el codigo de salida es el del ULTIMO mandato.
+    Corriendo esto asi:
+
+        python scripts/run_validation_gate.py | tail -25
+
+    `tail` devuelve 0 SIEMPRE. Tres vueltas seguidas dieron
+    "exit 0" con una guardia en rojo, y el rojo estaba impreso
+    mas arriba de las veinticinco lineas que se miraban.
+
+    Es el mismo fallo silencioso que esta cabecera cuenta del
+    workflow, pero en la mano de quien la corre: verde por no
+    haber mirado, no por haber pasado.
+
+    Asi que:
+
+        python scripts/run_validation_gate.py > salida.txt 2>&1
+        echo $?
+
+    La salida a fichero y el codigo mirado. Si no, no se ha
+    corrido.
+
 USO
 
     python scripts/run_validation_gate.py
