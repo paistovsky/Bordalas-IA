@@ -45,6 +45,8 @@ REGLA 24
 from __future__ import annotations
 
 import ast
+import re
+
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -430,9 +432,246 @@ def test_contar_la_puerta_no_ofrece_nada() -> None:
     )
 
 
+def test_el_motivo_de_la_puerta_lleva_su_numero() -> None:
+    """El motivo no puede decir que algo no esta medido si lo esta.
+
+    EL FALLO (14/09/2026)
+
+        49 de los 69 objetivos del dia —el 71 % de la lista—
+        morian con esta frase:
+
+            "la tasa de aceptacion no esta medida"
+
+        Ya no era verdad. El tablon publica los traspasos y salen
+        8 de manager a manager desde el primer dia de liga, con
+        Pepe en cuatro de ellos.
+
+        Un motivo falso es peor que no tener motivo: se deja de
+        discutir y la via se queda muerta sin que nadie vuelva a
+        mirarla.
+
+    Y CON LA BOCA PEQUEÑA
+
+        Lo medido es CUANTAS VECES se cruza la puerta, no la tasa
+        de aceptacion: para una tasa faltaria el denominador, y
+        el tablon publica lo que se cerro y no lo que se ofrecio.
+
+        Asi que esta guardia fija las dos mitades: que el motivo
+        deje de negar lo medido, y que NO se pase de frenada
+        llamandolo tasa.
+    """
+
+    from src.analysis.acquisition_board import (
+        _lo_que_sabemos_de_la_puerta,
+    )
+
+    from src.analysis.la_puerta_de_los_managers import (
+        traspasos_entre_managers,
+    )
+
+    medido = traspasos_entre_managers(
+        EVENTOS,
+        mi_user_id=YO,
+
+        # DOCTRINA 50: la hora entra por la puerta.
+        ahora=AHORA,
+    )
+
+    # REGLA 24: sin recuento esto no probaria nada. Un motivo
+    # construido sobre cero traspasos seria verde y mudo.
+    assert medido.get("available"), medido
+
+    assert medido.get("cuantos"), (
+        "el recuento llego vacio: esta guardia necesita "
+        "traspasos de verdad para probar que el motivo los lleva"
+    )
+
+    frase = _lo_que_sabemos_de_la_puerta(medido)
+
+    assert frase, "el motivo salio vacio"
+
+    # 1. EL RECUENTO VA DENTRO. No se comprueba un literal: se
+    #    comprueba que el numero MEDIDO aparece en la frase, asi
+    #    que el dia que cambie, la frase cambia con el.
+    assert str(medido["cuantos"]) in frase, (frase, medido)
+
+    assert str(medido["nuestros"]) in frase, (frase, medido)
+
+    # 2. NO SE NIEGA LO QUE ESTA MEDIDO.
+    for mentira in (
+        "no esta medida",
+        "nunca se ha medido",
+        "una sola observacion",
+    ):
+        assert mentira not in frase.lower(), (mentira, frase)
+
+    # 3. NI SE LLAMA TASA A LO QUE NO LO ES. La frase tiene que
+    #    decir que lo medido son las VECES, no el porcentaje.
+    assert "tasa de aceptacion" in frase.lower(), frase
+
+    assert "no la tasa" in frase.lower(), (
+        "el motivo no distingue entre cuantas veces se cruza la "
+        "puerta y la tasa de aceptacion, que es justo donde es "
+        "facil pasarse: " + frase
+    )
+
+    # 4. SIN DATO NO SE INVENTA UN NUMERO (regla 18). Si el
+    #    recuento no llega, la frase no puede traer un 8 a mano.
+    a_ciegas = _lo_que_sabemos_de_la_puerta(None)
+
+    assert a_ciegas, "sin datos el motivo se quedo mudo"
+
+    assert str(medido["cuantos"]) not in a_ciegas, (
+        "el motivo trae el recuento escrito a mano: sin datos "
+        "sigue diciendo el numero de hoy"
+    )
+
+    # 5. Y CERO TRASPASOS NO ES LO MISMO QUE NO SABER. Es la
+    #    conclusion mas cara del encargo y tiene frase propia.
+    vacia = _lo_que_sabemos_de_la_puerta({
+        "available": True,
+        "cuantos": 0,
+        "nuestros": 0,
+    })
+
+    assert "ni un traspaso" in vacia.lower(), vacia
+
+    # 6. Y LA FRASE FALSA NO SIGUE VIVA EN NINGUNA PANTALLA.
+    #
+    #    SE MIRA LO QUE SE PINTA, NO LO QUE SE COMENTA. Un
+    #    comentario que explica la frase que se quito —y en este
+    #    modulo hay uno— tiene que poder citarla; lo que no puede
+    #    es que la cite una cadena que acabe en pantalla.
+    #
+    #    Asi que en el .py se recorren los literales del arbol
+    #    saltando los docstrings, y no el texto del fichero. La
+    #    primera version de esta guardia miraba el texto y se
+    #    puso roja contra su propio comentario.
+    tablero = ast.parse(
+        (
+            RAIZ / "src" / "analysis" / "acquisition_board.py"
+        ).read_text(encoding="utf-8")
+    )
+
+    docs = {
+        id(nodo.body[0].value)
+        for nodo in ast.walk(tablero)
+        if isinstance(
+            nodo,
+            (
+                ast.Module,
+                ast.FunctionDef,
+                ast.AsyncFunctionDef,
+                ast.ClassDef,
+            ),
+        )
+        and nodo.body
+        and isinstance(nodo.body[0], ast.Expr)
+        and isinstance(nodo.body[0].value, ast.Constant)
+        and isinstance(nodo.body[0].value.value, str)
+    }
+
+    literales = [
+        nodo.value
+        for nodo in ast.walk(tablero)
+        if isinstance(nodo, ast.Constant)
+        and isinstance(nodo.value, str)
+        and id(nodo) not in docs
+    ]
+
+    # REGLA 24: sin literales no se ha mirado nada.
+    assert literales, "no se leyo ningun literal del tablero"
+
+    for texto in literales:
+        assert "aceptacion no esta medida" not in texto, texto
+
+    # En el JSX no hay docstrings: el texto vale.
+    panel = (
+        RAIZ
+        / "dashboard-v8"
+        / "src"
+        / "components"
+        / "QuienMejoraElOncePanel.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert panel, "el panel llego vacio"
+
+    # Fuera los comentarios, por el mismo motivo que en el .py:
+    # el panel explica en un bloque `/* */` la frase que se
+    # quito, y citarla ahi es justo lo que hay que dejar hacer.
+    sin_comentarios = re.sub(
+        r"/\*.*?\*/", "", panel, flags=re.DOTALL
+    )
+
+    sin_comentarios = re.sub(
+        r"^\s*//.*$", "", sin_comentarios, flags=re.MULTILINE
+    )
+
+    # REGLA 24: si el filtro se comiera el fichero entero, esta
+    # comprobacion seria verde sin mirar nada.
+    assert "no-cerrado" in sin_comentarios, (
+        "el filtro de comentarios se ha llevado por delante el "
+        "codigo del panel"
+    )
+
+    assert (
+        "tasa de aceptación nunca se ha medido"
+        not in sin_comentarios
+    ), "la frase falsa sigue viva en el panel"
+
+
+def test_la_puerta_no_abre_la_compra() -> None:
+    """Cambiar el motivo no autoriza escribir. Ni una oferta.
+
+    El encargo del 14/09 es explicito: la via deja de morir por
+    un motivo falso, pero NO se le ofrece nada a nadie. Cuando se
+    vea a quien propondria y por cuanto, lo autoriza el dueño.
+
+    Asi que la puerta se sigue cerrando en el mismo sitio y con
+    la misma linea. Esta guardia lo fija.
+    """
+
+    fuente = (
+        RAIZ / "src" / "analysis" / "acquisition_board.py"
+    ).read_text(encoding="utf-8")
+
+    # REGLA 24.
+    assert fuente, "el modulo llego vacio"
+
+    # LA PUERTA SE CIERRA EN UN SOLO SITIO, y sigue ahi.
+    assert fuente.count('fila["decision"] = MERCADO_DE_RIVAL') == 1, (
+        "la puerta ya no se cierra en un unico sitio: "
+        "una fila de rival podria salir como BID y ejecutarse"
+    )
+
+    # Y EL IMPORTE SIGUE A CERO. Un numero en la columna de puja
+    # sobre una fila que no se puede pujar es la familia de
+    # fallos que llevamos cinco arreglando.
+    arbol = ast.parse(fuente)
+
+    asignaciones = [
+        nodo
+        for nodo in ast.walk(arbol)
+        if isinstance(nodo, ast.Assign)
+    ]
+
+    assert asignaciones, "no se encontro ninguna asignacion"
+
+    # `would_be_decision` se sigue publicando: es lo que contesta
+    # "cuantos pasarian el liston" sin abrir la compra.
+    for campo in (
+        "would_be_decision",
+        "would_pass",
+        "would_bid",
+    ):
+        assert f'fila["{campo}"]' in fuente, campo
+
+
 TESTS = [
     test_la_puerta_se_cuenta_y_no_se_supone,
     test_contar_la_puerta_no_ofrece_nada,
+    test_el_motivo_de_la_puerta_lleva_su_numero,
+    test_la_puerta_no_abre_la_compra,
 ]
 
 

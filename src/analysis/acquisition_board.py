@@ -109,8 +109,18 @@ from src.analysis.rival_bid_model import (
 #     Al Computer se le compra al precio pedido. A un manager
 #     se le OFRECE, y acepta o no. La salida sigue valiendo
 #     -una vez el jugador es nuestro da igual a quien se le
-#     compro-, pero la ENTRADA no. De la tasa de aceptacion
-#     tenemos una sola observacion, y con una no se abre nada.
+#     compro-, pero la ENTRADA no.
+#
+#     LO QUE YA NO SE DICE (14/09/2026). Aqui ponia que de la
+#     tasa de aceptacion teniamos "una sola observacion". Era
+#     falso: el tablon publica los traspasos y salen 8 de
+#     manager a manager desde el primer dia de liga, cuatro de
+#     ellos nuestros.
+#
+#     Lo que sigue sin tenerse es la TASA: falta el denominador
+#     -cuantas ofertas se hicieron y se rechazaron-, porque el
+#     tablon publica lo que se cerro y no lo que se ofrecio. Eso
+#     se dice con esas palabras y no con otras.
 #
 # EL INTERRUPTOR
 #
@@ -130,6 +140,83 @@ MERCADO_DE_RIVAL = "MERCADO_DE_RIVAL"
 # Un estado que no llego. No es "ok" y no es una dolencia:
 # es la ausencia del dato, y se llama por su nombre.
 ESTADO_DESCONOCIDO = "desconocido"
+
+
+def _lo_que_sabemos_de_la_puerta(puerta) -> str:
+    """Que sabemos de la puerta de los managers, con su numero.
+
+    EL MOTIVO DECIA UNA COSA FALSA (14/09/2026)
+
+        Hasta hoy estas filas -49 de 69, el 71 % de la lista-
+        morian con esta frase:
+
+            "la tasa de aceptacion no esta medida"
+
+        Ya no es verdad. El tablon publica los traspasos y se
+        cuentan sin escribir nada ni gastar un euro: 8 de manager
+        a manager desde el primer dia de liga, y Pepe esta en
+        cuatro de ellos.
+
+        Un motivo falso es peor que no tener motivo, porque se
+        deja de discutir. Este dice lo que sabemos.
+
+    Y CON LA BOCA PEQUEÑA, QUE AQUI ES FACIL PASARSE
+
+        Lo medido es CUANTAS VECES SE CRUZA la puerta, no la tasa
+        de aceptacion. Para una tasa faltaria el denominador
+        -cuantas ofertas se hicieron y se rechazaron- y el tablon
+        publica lo que se cerro, no lo que se ofrecio.
+
+        Asi que la frase no dice "la puerta se cruza el X % de
+        las veces". Dice cuantas veces se cruzo, cuantas fueron
+        nuestras y cuando fue la ultima. Ni una palabra mas.
+
+    EL NUMERO SE CUENTA, NO SE ESCRIBE (regla 18). Si el recuento
+    no llega, se dice que no llego — no se pone un 8 a mano, que
+    seria verdad hoy y mentira la semana que viene.
+    """
+
+    datos = puerta if isinstance(puerta, dict) else {}
+
+    if not datos.get("available"):
+        return (
+            "No se ha podido contar cuantas veces se ha cruzado "
+            "la puerta en esta vuelta, asi que de la puerta no "
+            "se dice nada. Se mira."
+        )
+
+    cuantos = safe_int(datos.get("cuantos"))
+
+    if not cuantos:
+        return (
+            "En el tablon no consta NI UN traspaso de manager a "
+            "manager: en esta liga no parece que nadie le venda "
+            "a nadie. Se mira."
+        )
+
+    nuestros = safe_int(datos.get("nuestros"))
+
+    frase = (
+        f"La puerta se cruza: {cuantos} traspaso(s) de manager a "
+        f"manager en el tablon"
+    )
+
+    if nuestros:
+        frase += f", y {nuestros} son nuestros"
+
+    ultimo = datos.get("ultimo")
+
+    if ultimo:
+        frase += f". El ultimo, el {ultimo}"
+
+    frase += (
+        ". Lo medido es cuantas veces se cruza, no la tasa de "
+        "aceptacion: para eso faltaria saber cuantas ofertas se "
+        "rechazaron, y el tablon solo publica las que se "
+        "cerraron. Se mira."
+    )
+
+    return frase
 
 def _mercado_de_rivales_visible() -> bool:
     """
@@ -276,6 +363,7 @@ def build_acquisition_board(
     available_budget: int | None,
     limit: int = 60,
     acquisition_budget: int | None = None,
+    puerta: dict | None = None,
 ) -> dict:
     """
     Que hay en el mercado del Computer, cuanto vale para nosotros y
@@ -1196,8 +1284,8 @@ def build_acquisition_board(
                     + " ("
                     + str(fila["would_be_decision"])
                     + "), pero la compra a managers esta cerrada: "
-                    "se ofrece, no se compra, y la tasa de "
-                    "aceptacion no esta medida. Se mira."
+                    "se ofrece, no se compra. "
+                    + _lo_que_sabemos_de_la_puerta(puerta)
                 )
 
             filas.append(fila)

@@ -32,9 +32,18 @@ const SE_PUEDE = {
     "no-vigila",
     "Solo si el Computer lo saca al mercado. Pepe no lo vigila."
   ],
+  /* EL MOTIVO ERA FALSO (14/09/2026)
+     Aquí ponía «la tasa de aceptación nunca se ha medido». El
+     tablón publica los traspasos y se contaron: la puerta se
+     cruza en esta liga, y Pepe ya la ha cruzado.
+
+     Lo que sigue sin tenerse es la TASA —falta saber cuántas
+     ofertas se rechazaron—, y eso no es lo mismo. El recuento
+     no se escribe aquí: vive en el cuadro de LA PUERTA, que lo
+     cuenta en cada vuelta. */
   rival: [
     "no-cerrado",
-    "No. La compra a mánagers está cerrada: la tasa de aceptación nunca se ha medido."
+    "No. La compra a mánagers está cerrada: se ofrece, no se compra. La puerta sí se cruza en esta liga — el recuento está en LA PUERTA DE LOS MÁNAGERS."
   ],
   computer: [
     "no-ciego",

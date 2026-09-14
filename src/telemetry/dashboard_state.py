@@ -3725,12 +3725,95 @@ def build_dashboard_state() -> dict:
         else None
     )
 
+    # ==========================================================
+    # LA PUERTA DE LOS MANAGERS (14/09/2026)
+    # ==========================================================
+    #
+    #     49 de los 69 objetivos del dia mueren en
+    #     MERCADO_DE_RIVAL: el 71 % de la lista. Y el motivo
+    #     declarado es que la tasa de aceptacion de una oferta a
+    #     otro manager NO ESTA MEDIDA.
+    #
+    #     Se puede medir sin escribir nada y sin gastar un euro:
+    #     los rivales llevan cinco semanas haciendose ofertas
+    #     entre ellos y el tablon lo publica.
+    #
+    #     MEDIDO: 8 traspasos de manager a manager en los 301
+    #     eventos del tablon, contra 166 compras al Computer. Y
+    #     Pepe esta en CUATRO de los ocho. La puerta no esta
+    #     cerrada, y no es teoria: ya la hemos cruzado.
+    #
+    #     ESTO NO OFRECE NADA A NADIE. Cuenta lo que ya paso.
+    try:
+        from src.analysis.la_puerta_de_los_managers import (
+            traspasos_entre_managers,
+        )
+
+        from src.intelligence.bid_outcome_ledger import (
+            BOARD_EVENTS_PATH,
+        )
+
+        _eventos_del_tablon = json.loads(
+            BOARD_EVENTS_PATH.read_text(encoding="utf-8")
+        )
+
+        _la_puerta = traspasos_entre_managers(
+            _eventos_del_tablon,
+
+            # EL PRECIO DE ENTONCES, NO EL DE HOY. Con el de hoy,
+            # un traspaso de agosto saldria barato o caro segun
+            # como se haya movido el jugador desde entonces: es
+            # mirar el futuro, el mismo sesgo que ya arreglo el
+            # buscador historico para las pujas.
+            precio=build_historical_price_lookup(),
+            mi_user_id=board.get("current_user_id"),
+
+            # LA HORA ENTRA POR LA PUERTA (doctrina 50).
+            ahora=_momento_de_la_foto(snapshot),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        _la_puerta = {
+            "available": False,
+            "traspasos": [],
+            "cuantos": 0,
+
+            # CERO EVENTOS NO ES CERO TRASPASOS (regla 24)
+            #
+            #     `puerta_cerrada` se queda en `None` a proposito.
+            #     Un `False` aqui diria "la puerta funciona" y un
+            #     `True` diria "en esta liga nadie vende", que es
+            #     la conclusion mas cara del encargo — sacada de
+            #     un fichero que no se pudo leer.
+            "puerta_cerrada": None,
+
+            "reason": (
+                f"No se pudo contar la puerta de los managers: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     acquisition = build_acquisition_board(
         snapshot=snapshot,
         rival_intelligence=rival_intelligence,
         current_user_id=board.get("current_user_id"),
         available_budget=exposure.get("available_budget") or None,
         acquisition_budget=presupuesto_fichajes or None,
+
+        # LA PUERTA, MEDIDA, PARA QUE EL MOTIVO NO MIENTA
+        # (14/09/2026)
+        #
+        #     El motivo de las filas de rival decia "la tasa de
+        #     aceptacion no esta medida". Ya lo esta: 8 traspasos
+        #     de manager a manager en el tablon y cuatro son
+        #     nuestros. El recuento entra por la puerta para que
+        #     la frase lo lleve dentro en vez de escribirlo a
+        #     mano (regla 18).
+        #
+        #     NO ABRE LA COMPRA. La puerta se sigue cerrando en
+        #     el mismo sitio y con la misma linea; lo unico que
+        #     cambia es lo que dice.
+        puerta=_la_puerta,
 
         # SIN TOPE DE PANTALLA (13/09/2026, noche)
         #
@@ -5364,73 +5447,6 @@ def build_dashboard_state() -> dict:
             ),
         }
 
-    # ==========================================================
-    # LA PUERTA DE LOS MANAGERS (14/09/2026)
-    # ==========================================================
-    #
-    #     49 de los 69 objetivos del dia mueren en
-    #     MERCADO_DE_RIVAL: el 71 % de la lista. Y el motivo
-    #     declarado es que la tasa de aceptacion de una oferta a
-    #     otro manager NO ESTA MEDIDA.
-    #
-    #     Se puede medir sin escribir nada y sin gastar un euro:
-    #     los rivales llevan cinco semanas haciendose ofertas
-    #     entre ellos y el tablon lo publica.
-    #
-    #     MEDIDO: 8 traspasos de manager a manager en los 301
-    #     eventos del tablon, contra 166 compras al Computer. Y
-    #     Pepe esta en CUATRO de los ocho. La puerta no esta
-    #     cerrada, y no es teoria: ya la hemos cruzado.
-    #
-    #     ESTO NO OFRECE NADA A NADIE. Cuenta lo que ya paso.
-    try:
-        from src.analysis.la_puerta_de_los_managers import (
-            traspasos_entre_managers,
-        )
-
-        from src.intelligence.bid_outcome_ledger import (
-            BOARD_EVENTS_PATH,
-        )
-
-        _eventos_del_tablon = json.loads(
-            BOARD_EVENTS_PATH.read_text(encoding="utf-8")
-        )
-
-        _la_puerta = traspasos_entre_managers(
-            _eventos_del_tablon,
-
-            # EL PRECIO DE ENTONCES, NO EL DE HOY. Con el de hoy,
-            # un traspaso de agosto saldria barato o caro segun
-            # como se haya movido el jugador desde entonces: es
-            # mirar el futuro, el mismo sesgo que ya arreglo el
-            # buscador historico para las pujas.
-            precio=build_historical_price_lookup(),
-            mi_user_id=board.get("current_user_id"),
-
-            # LA HORA ENTRA POR LA PUERTA (doctrina 50).
-            ahora=_momento_de_la_foto(snapshot),
-        )
-
-    except Exception as error:                      # noqa: BLE001
-        _la_puerta = {
-            "available": False,
-            "traspasos": [],
-            "cuantos": 0,
-
-            # CERO EVENTOS NO ES CERO TRASPASOS (regla 24)
-            #
-            #     `puerta_cerrada` se queda en `None` a proposito.
-            #     Un `False` aqui diria "la puerta funciona" y un
-            #     `True` diria "en esta liga nadie vende", que es
-            #     la conclusion mas cara del encargo — sacada de
-            #     un fichero que no se pudo leer.
-            "puerta_cerrada": None,
-
-            "reason": (
-                f"No se pudo contar la puerta de los managers: "
-                f"{type(error).__name__}: {error}"
-            ),
-        }
 
     # ==========================================================
     # LO NUESTRO A LA VENTA (13/09/2026)
