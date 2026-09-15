@@ -93,7 +93,11 @@ export default function LosSentidosPanel({ data }) {
             {muertos.length} APAGADO{muertos.length === 1 ? "" : "S"}
           </span>
         ) : (
-          <span className="pill ok">LOS OCHO VIVOS</span>
+          /* SE CUENTA, NO SE ESCRIBE (regla 18). Decía «LOS OCHO
+             VIVOS» con el ocho a mano, y el día que entró el
+             noveno sentido —el guardado de los libros— la
+             pantalla habría seguido diciendo ocho. */
+          <span className="pill ok">LOS {filas.length} VIVOS</span>
         )}
       </div>
 

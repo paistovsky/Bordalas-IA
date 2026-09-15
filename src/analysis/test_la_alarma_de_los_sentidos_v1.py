@@ -128,6 +128,34 @@ MARCADOR = {"resumen": {"jornadas_medibles": 6,
                         "jornadas_fiables": 1},
             "reason": "Una jornada fiable."}
 
+# LOS LIBROS, GUARDADOS HACE DOCE MINUTOS. La vuelta anterior
+# llego a git: 18:00 contra las 18:12 de la foto.
+GUARDADO_SANO = {
+    "cuando": "2026-09-14T18:00:00+00:00",
+    "ultimo_guardado_ok": "2026-09-14T18:00:00+00:00",
+    "libros_en_disco": 12,
+    "ok": True,
+    "empujado": True,
+    "intentos": 1,
+    "motivo": None,
+}
+
+# Y LOS MISMOS LIBROS CON EL EMPUJON ATASCADO desde hace seis
+# horas: por encima del tope de cinco.
+GUARDADO_ATASCADO = {
+    "cuando": "2026-09-14T18:11:00+00:00",
+    "ultimo_guardado_ok": "2026-09-14T12:12:00+00:00",
+    "libros_en_disco": 12,
+    "ok": False,
+    "empujado": False,
+    "intentos": 3,
+    "motivo": (
+        "El empujon no salio en 3 intentos. Ultimo motivo de "
+        "git: the remote contains work that you do not have "
+        "locally."
+    ),
+}
+
 
 def _sentidos(**cambios):
     from src.analysis.los_sentidos import los_sentidos
@@ -142,6 +170,7 @@ def _sentidos(**cambios):
         "calendario": CALENDARIO_SANO,
         "marcador": MARCADOR,
         "objetivos": [],
+        "guardado_de_los_libros": GUARDADO_SANO,
         "jornada_de_hoy": LA_JORNADA,
         "ahora": AHORA,
     }
@@ -188,7 +217,7 @@ def test_un_sentido_caducado_se_grita() -> None:
     sano = _sentidos()
 
     # REGLA 24: con la lista vacia esto no probaria nada.
-    assert len(sano["sentidos"]) == 8, sano
+    assert len(sano["sentidos"]) == 9, sano
 
     assert sano["alarma"]["hay"] is False, sano["alarma"]
     assert sano["alarma"]["cuantos"] == 0, sano["alarma"]
@@ -196,7 +225,7 @@ def test_un_sentido_caducado_se_grita() -> None:
     # AHORA EL TABLERO CAIDO, como estuvo 27 dias.
     roto = _sentidos(lineup=TABLERO_CAIDO)
 
-    assert len(roto["sentidos"]) == 8, roto
+    assert len(roto["sentidos"]) == 9, roto
 
     # 1. SITIO UNO: EL BLOQUE PROPIO DEL ESTADO.
     alarma = roto["alarma"]
@@ -332,9 +361,9 @@ def test_la_edad_maxima_no_es_un_numero_redondo() -> None:
     visto = _sentidos()
 
     # REGLA 24.
-    assert len(visto["sentidos"]) == 8, visto
+    assert len(visto["sentidos"]) == 9, visto
 
-    # 1. LOS OCHO TRAEN TOPE, Y TODOS CON MOTIVO ESCRITO.
+    # 1. LOS NUEVE TRAEN TOPE, Y TODOS CON MOTIVO ESCRITO.
     for fila in visto["sentidos"]:
 
         tope = fila.get("edad_maxima") or {}
@@ -420,9 +449,265 @@ def test_la_edad_maxima_no_es_un_numero_redondo() -> None:
     )
 
 
+# ============================================================
+# 3. SI LOS LIBROS NO SE GUARDAN, SE GRITA (15/09/2026)
+# ============================================================
+
+
+def test_si_los_libros_no_se_guardan_se_grita() -> None:
+    """
+    El empujon lleva horas fallando y la pantalla tiene que
+    decirlo.
+
+    POR QUE ESTA FILA NACE HOY
+
+        Hasta hoy un empujon fallido ponia LA VUELTA ENTERA EN
+        ROJO, y eso se veia solo. Desde hoy no: la vuelta sale
+        verde y el ciclo sigue, que es lo correcto —un seguro no
+        puede tirar el coche al rio—.
+
+        Pero el precio de esa decision es que el fallo se vuelve
+        invisible. Esta guardia es lo que lo paga: si el empujon
+        se atasca, hay que enterarse ANTES de que la cache se
+        desaloje, no despues.
+    """
+
+    from src.estado.los_libros import LIBROS
+
+    # REGLA 24: SIN LIBROS DECLARADOS ESTO NO PRUEBA NADA.
+    #
+    #     Si la lista se quedara vacia no habria nada que
+    #     guardar, el guardado nunca fallaria y esta guardia
+    #     pasaria en verde para siempre sobre un proyecto que ha
+    #     dejado de proteger sus libros.
+    assert LIBROS, (
+        "no hay ni un libro declarado en `los_libros.py`: sin "
+        "libros que guardar esta alarma no vigila nada"
+    )
+
+    assert GUARDADO_SANO["libros_en_disco"] > 0, (
+        "el montaje dice que no hay libros en el disco: la "
+        "prueba no estaria mirando un guardado de verdad"
+    )
+
+    # 1. RECIEN GUARDADO: NI UNA PALABRA.
+    #
+    #    Una alarma que suena siempre deja de ser una alarma.
+    sano = _sentidos()
+
+    fila = _fila(sano, "El guardado de los libros")
+
+    assert fila["edad_maxima"]["caducado"] is False, fila
+
+    assert sano["alarma"]["hay"] is False, sano["alarma"]
+
+    # Y LA LINEA DE LA PANTALLA, TAL CUAL SE VERA.
+    assert "hace 12 min" in fila["de_cuando"], fila["de_cuando"]
+
+    assert (
+        str(GUARDADO_SANO["libros_en_disco"]) in fila["de_cuando"]
+    ), fila["de_cuando"]
+
+    assert "en git" in fila["de_cuando"], fila["de_cuando"]
+
+    assert fila["que_bloquea"] is None, fila
+
+    # 2. EL EMPUJON ATASCADO SEIS HORAS: SE GRITA.
+    roto = _sentidos(guardado_de_los_libros=GUARDADO_ATASCADO)
+
+    atascada = _fila(roto, "El guardado de los libros")
+
+    assert atascada["edad_maxima"]["caducado"] is True, (
+        f"seis horas sin llegar a git y no salta la alarma: "
+        f"{atascada}"
+    )
+
+    assert roto["alarma"]["hay"] is True, roto["alarma"]
+
+    gritos = [
+        g["sentido"] for g in roto["alarma"]["sentidos"]
+    ]
+
+    assert "El guardado de los libros" in gritos, gritos
+
+    # 3. Y DICE POR QUE, con la frase del guardador entera.
+    #
+    #    No se reescribe aqui: la pantalla no tiene autoridad
+    #    sobre el motivo por el que git rechazo el empujon.
+    assert (
+        atascada["que_bloquea"] == GUARDADO_ATASCADO["motivo"]
+    ), atascada
+
+    assert "el empujón falla" in atascada["de_cuando"], (
+        atascada["de_cuando"]
+    )
+
+    # 4. SIN DATO NO ES "TODO BIEN", pero tampoco es un grito.
+    #
+    #    La cache desalojada o la primera vuelta dejan la fila
+    #    sin fichero: MUERTO y a la vista, sin inventar una
+    #    averia que no se ha medido.
+    mudo = _sentidos(guardado_de_los_libros=None)
+
+    callada = _fila(mudo, "El guardado de los libros")
+
+    assert callada["estado"] == "MUERTO", callada
+
+    assert "sin dato" in callada["de_cuando"], callada
+
+    assert callada["edad_maxima"]["caducado"] is False, (
+        "sin saber cuando se guardo por ultima vez no se puede "
+        "afirmar que lleve horas sin guardarse"
+    )
+
+    # 5. Y LA PANTALLA TIENE QUE PINTARLO.
+    #
+    #    La fila puede estar perfecta en el estado y no verse. El
+    #    tablero estuvo 27 dias caido con su edad calculada y a
+    #    la vista dentro de un cuadro que nadie abria: por eso
+    #    esto ademas baja a una linea de AUDITORIA.
+    telemetria = (
+        RAIZ / "src" / "telemetry" / "dashboard_state.py"
+    ).read_text(encoding="utf-8")
+
+    assert '"librosGuardados"' in telemetria, (
+        "la telemetria no publica `librosGuardados`: la linea de "
+        "AUDITORIA se quedaria en SIN DATO para siempre"
+    )
+
+    auditoria = _jsx_sin_comentarios(
+        (
+            RAIZ
+            / "dashboard-v8"
+            / "src"
+            / "pages"
+            / "AuditPage.jsx"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert "librosGuardados" in auditoria, (
+        "AUDITORIA no lee `librosGuardados`"
+    )
+
+    assert "Libros guardados" in auditoria, (
+        "AUDITORIA no tiene la linea de los libros guardados"
+    )
+
+    # LA FRASE NO SE MONTA EN EL NAVEGADOR. Si la pantalla
+    # compusiera su propia version habria dos verdades, y el dia
+    # que discreparan nadie sabria cual mirar.
+    assert "de_cuando" in auditoria, (
+        "la linea de AUDITORIA no usa la frase que monta "
+        "`los_sentidos`: se la esta inventando"
+    )
+
+    for inventado in ("en git", "el empujón falla"):
+        assert inventado not in auditoria, (
+            f"la pantalla escribe {inventado!r} por su cuenta en "
+            f"vez de pintar lo que publica la telemetria"
+        )
+
+    assert "SIN DATO" in auditoria, (
+        "sin dato, la linea tiene que decirlo: una telemetria "
+        "que no publico nada no es «se estan guardando»"
+    )
+
+
+def test_el_tope_de_los_libros_sale_de_los_disparos() -> None:
+    """
+    Las cinco horas no son un numero redondo puesto a ojo.
+
+    Salen del hueco mas largo entre dos disparos declarados en
+    `config/disparos.json` —la ventana del reset, de 04:50 a
+    07:15 de Madrid— contado dos veces.
+
+    Esta guardia RECALCULA ese hueco desde el fichero. El dia que
+    alguien cambie el latido y se olvide de esto, salta.
+    """
+
+    import json
+
+    from src.analysis.los_sentidos import (
+        HORAS_SIN_GUARDAR,
+        HUECO_MAS_LARGO_MINUTOS,
+    )
+
+    declaracion = json.loads(
+        (RAIZ / "config" / "disparos.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    # TODOS LOS DISPAROS DEL DIA, en minutos desde medianoche.
+    minutos = set()
+
+    latido = declaracion.get("latido") or {}
+
+    for hora in latido.get("horas") or []:
+        minutos.add(hora * 60 + int(latido.get("minuto") or 0))
+
+    for puntual in declaracion.get("puntuales") or []:
+        hh, _, mm = str(puntual.get("madrid") or "").partition(":")
+        minutos.add(int(hh) * 60 + int(mm))
+
+    # REGLA 24: sin disparos declarados no hay hueco que medir.
+    assert len(minutos) >= 2, (
+        f"`config/disparos.json` no declara disparos "
+        f"suficientes: {sorted(minutos)}"
+    )
+
+    ordenados = sorted(minutos)
+
+    # El dia da la vuelta: el hueco de la noche tambien cuenta.
+    huecos = [
+        b - a for a, b in zip(ordenados, ordenados[1:])
+    ] + [ordenados[0] + 24 * 60 - ordenados[-1]]
+
+    assert max(huecos) == HUECO_MAS_LARGO_MINUTOS, (
+        f"el hueco mas largo entre disparos son "
+        f"{max(huecos)} min y `los_sentidos` dice "
+        f"{HUECO_MAS_LARGO_MINUTOS}: alguien cambio el latido y "
+        f"no toco el tope de los libros"
+    )
+
+    # DOS HUECOS SEGUIDOS, redondeando hacia arriba. Uno puede
+    # ser una vuelta perdida; dos seguidos es que no vuelve.
+    assert (
+        HORAS_SIN_GUARDAR * 60 >= 2 * HUECO_MAS_LARGO_MINUTOS
+    ), (
+        f"el tope ({HORAS_SIN_GUARDAR} h) es menor que dos "
+        f"huecos ({2 * HUECO_MAS_LARGO_MINUTOS} min): gritaria "
+        f"por una sola vuelta perdida"
+    )
+
+    # Y NO TANTO QUE SE VUELVA INUTIL: si se pudiera pasar un
+    # dia entero sin guardar, la cache se habria desalojado
+    # antes de que nadie mirara.
+    assert HORAS_SIN_GUARDAR * 60 <= 3 * HUECO_MAS_LARGO_MINUTOS, (
+        f"el tope ({HORAS_SIN_GUARDAR} h) deja pasar tres huecos "
+        f"enteros sin avisar"
+    )
+
+    # Y VIAJA CON SU MOTIVO, como los demas.
+    from src.analysis.los_sentidos import EDAD_MAXIMA
+
+    tope = EDAD_MAXIMA["El guardado de los libros"]
+
+    assert tope["horas"] == HORAS_SIN_GUARDAR, tope
+
+    assert tope["medida"] is True, tope
+
+    assert "disparos.json" in tope["motivo"], (
+        f"el motivo no dice de donde sale el numero: "
+        f"{tope['motivo']}"
+    )
+
+
 TESTS = [
     test_un_sentido_caducado_se_grita,
     test_la_edad_maxima_no_es_un_numero_redondo,
+    test_si_los_libros_no_se_guardan_se_grita,
+    test_el_tope_de_los_libros_sale_de_los_disparos,
 ]
 
 

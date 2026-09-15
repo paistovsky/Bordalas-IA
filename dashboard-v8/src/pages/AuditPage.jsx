@@ -59,7 +59,13 @@ function category(item) {
  * esta vuelta y qué?" no debería exigir bajar a la lista de
  * registros y buscarlo.
  */
-function CyclePanel({ cycle = {}, last = {}, competitive = {}, consistency = {} }) {
+function CyclePanel({
+  cycle = {},
+  last = {},
+  competitive = {},
+  consistency = {},
+  libros = null
+}) {
   const escribio = Boolean(cycle.write_used);
 
   return (
@@ -158,6 +164,41 @@ function CyclePanel({ cycle = {}, last = {}, competitive = {}, consistency = {} 
           </b>
         </div>
       )}
+
+      {/* LIBROS GUARDADOS (15/09/2026)
+       *
+       *   Los libros viven en git desde el 14/09. El empujón
+       *   puede fallar —el bot escribe en `main` cada hora y el
+       *   dueño también empuja— y desde hoy un empujón fallido
+       *   NO tumba la vuelta: la vuelta sale VERDE igualmente.
+       *
+       *   Así que ésta es la única línea donde se ve que lleva
+       *   una semana fallando. Sin ella volvemos a donde
+       *   estábamos la mañana del 14, y esta vez sin saberlo.
+       *
+       *   La frase la monta `los_sentidos.py`. Aquí no se resta
+       *   ninguna fecha ni se compone ningún texto: es la misma
+       *   fila que sale en el cuadro de los sentidos. */}
+      <div className="kv">
+        <span>Libros guardados</span>
+        <b
+          className={
+            !libros
+              ? "dim"
+              : libros.que_bloquea
+                ? "down"
+                : "up"
+          }
+        >
+          {libros ? libros.de_cuando : "SIN DATO"}
+        </b>
+      </div>
+
+      {libros && libros.que_bloquea ? (
+        <p className="note" style={{ textAlign: "left" }}>
+          {libros.que_bloquea}
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -243,6 +284,7 @@ export default function AuditPage({ data }) {
         last={data.lastExecution || {}}
         competitive={data.competitive || {}}
         consistency={data.consistency || {}}
+        libros={data.librosGuardados || null}
       />
 
       {/* EL LIBRO DE PUJAS (05/09/2026)

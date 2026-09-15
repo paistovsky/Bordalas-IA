@@ -352,6 +352,19 @@ export function normalizeStatus(raw = {}) {
       reason: "La telemetría no publicó `losSentidos` en este ciclo."
     },
 
+    /* ¿LLEGAN LOS LIBROS A GIT? (15/09/2026)
+
+       Es la misma fila que sale en el cuadro de los sentidos, no
+       una copia. Sin dato se queda en `null` y la línea de
+       AUDITORÍA dice SIN DATO: una telemetría que no lo publicó
+       no es "se están guardando". */
+    librosGuardados:
+      raw.librosGuardados ||
+      ((raw.losSentidos || {}).sentidos || []).find(
+        (f) => f && f.sentido === "El guardado de los libros"
+      ) ||
+      null,
+
     /* LA ALARMA DE LOS SENTIDOS, EN LA BANDA DE ARRIBA.
        Sube al primer nivel a propósito: dentro de `losSentidos`
        sólo la vería quien abriera ese cuadro, y la avería que

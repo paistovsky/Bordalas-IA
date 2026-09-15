@@ -100,6 +100,25 @@ POR_JORNADA = "POR_JORNADA"
 POR_HORAS = "POR_HORAS"
 SIN_RELOJ_PROPIO = "SIN_RELOJ_PROPIO"
 
+
+# CUANTO PUEDE PASAR SIN QUE LOS LIBROS LLEGUEN A GIT
+#
+#     El hueco mas largo entre dos disparos declarados en
+#     `config/disparos.json` es la ventana del reset: de las
+#     04:50 a las 07:15 de Madrid. Los demas son de 60 min o
+#     menos.
+#
+#     No se escribe a ojo: `test_el_tope_de_los_libros_sale_de_
+#     los_disparos` lo recalcula desde el fichero y salta si
+#     alguien cambia el latido y se olvida de esto.
+HUECO_MAS_LARGO_MINUTOS = 145
+
+# Dos huecos seguidos, redondeados hacia arriba a la hora entera
+# (4 h 50 min -> 5 h). Se redondea HACIA ARRIBA a proposito: una
+# alarma que grita por diez minutos de margen es una alarma que
+# se acaba ignorando.
+HORAS_SIN_GUARDAR = 5
+
 EDAD_MAXIMA = {
     "Tablero de titulares": {
         "criterio": POR_JORNADA,
@@ -193,6 +212,24 @@ EDAD_MAXIMA = {
             "No envejece: se recalcula del ledger en cada "
             "vuelta. Lo que le pasa es que no tiene ni una "
             "jornada fiable, y eso ya lo dice su estado."
+        ),
+    },
+    "El guardado de los libros": {
+        "criterio": POR_HORAS,
+        "horas": HORAS_SIN_GUARDAR,
+        "medida": True,
+        "motivo": (
+            f"El guardado corre en CADA vuelta (`if: always()`), "
+            f"asi que su edad es la de la ultima vuelta que "
+            f"llego a git. El hueco mas largo entre dos disparos "
+            f"de `config/disparos.json` es la ventana del reset: "
+            f"{HUECO_MAS_LARGO_MINUTOS} min, de 04:50 a 07:15 de "
+            f"Madrid. El tope son DOS huecos de esos —uno puede "
+            f"ser una vuelta que no salio o una carrera de "
+            f"empujones perdida; dos seguidos es que no vuelve— "
+            f"redondeados hacia arriba a "
+            f"{HORAS_SIN_GUARDAR} h para no gritar por diez "
+            f"minutos."
         ),
     },
 }
@@ -299,6 +336,17 @@ def edad(valor, ahora=None) -> dict:
 
     elif horas >= 1:
         texto = f"hace {int(horas)} h"
+
+    elif segundos >= 60:
+        # LOS MINUTOS, DESDE EL 15/09/2026.
+        #
+        #     Esto decia "de hace un rato" por debajo de la hora.
+        #     Para siete de los ocho sentidos daba igual —ninguno
+        #     se refresca tan rapido— pero el guardado de los
+        #     libros corre en CADA vuelta, y "de hace un rato" no
+        #     distingue una vuelta de hace diez minutos de una de
+        #     hace cincuenta.
+        texto = f"hace {int(segundos // 60)} min"
 
     else:
         texto = "de hace un rato"
@@ -478,11 +526,12 @@ def los_sentidos(
     calendario: dict | None,
     marcador: dict | None,
     objetivos: list | None,
+    guardado_de_los_libros: dict | None = None,
     jornada_de_hoy=None,
     ahora=None,
 ) -> dict:
     """
-    Los ocho sentidos, con su edad calculada y lo que bloquean.
+    Los sentidos, con su edad calculada y lo que bloquean.
 
     Forma fija. Nunca lanza. Un sentido del que no llega nada sale
     igualmente, en MUERTO y diciendo que no llego: que falte una
@@ -523,6 +572,7 @@ def los_sentidos(
             _el_catalogo(toda_la_liga),
             _el_calendario(calendario, ahora),
             _el_marcador(marcador),
+            _los_libros(guardado_de_los_libros, ahora),
         ]
 
         # CADA SENTIDO CON SU TOPE DELANTE.
@@ -937,6 +987,89 @@ def _el_calendario(calendario, ahora) -> dict:
             "Hoy no lo usa ninguna decisión. Es para mirar."
         ),
         "detalle": datos.get("reason"),
+    }
+
+
+def _los_libros(guardado, ahora) -> dict:
+    """
+    ¿Están llegando los libros a git, o solo a la caché?
+
+    EL DIA QUE ESTO IMPORTE YA SERA TARDE (15/09/2026)
+
+        Hasta el 14/09 todo `data/` vivia UNICAMENTE en una cache
+        de CI que se desaloja a los 7 dias sin uso. Ahora los
+        libros van a git, y el empujon puede fallar: el bot
+        escribe en `main` cada hora y el dueño tambien empuja.
+
+        Desde el 15/09 un empujon fallido ya NO tumba la vuelta
+        —eso costo una hora de ciclo— y justamente por eso hace
+        falta esta fila. Antes el fallo se veia porque la vuelta
+        salia roja. Ahora la vuelta sale verde, asi que el unico
+        sitio donde se ve que el empujon lleva una semana
+        fallando es aqui.
+
+    LA EDAD SE MIDE DESDE EL ULTIMO GUARDADO QUE LLEGO A GIT,
+    no desde la ultima vez que el script corrio: correr y no
+    conseguir empujar es exactamente el fallo que hay que ver.
+    """
+
+    datos = guardado or {}
+
+    cuanto = edad(datos.get("ultimo_guardado_ok"), ahora)
+
+    libros = safe_int(datos.get("libros_en_disco"))
+
+    # "OK" es el ultimo intento; la edad es la ultima vez que
+    # SALIO. Las dos cosas hacen falta: recien fallado sale
+    # "hace 12 min" y hay que decir que ese ultimo no fue.
+    ultimo_fue_bien = bool(datos.get("ok"))
+
+    return {
+        "sentido": "El guardado de los libros",
+        "para_que": "Que la temporada no viva solo en una caché",
+        "de_cuando": (
+            cuanto["texto"]
+            + (f" · {libros} libros" if libros else "")
+            + (
+                " · en git"
+                if ultimo_fue_bien
+                else " · el empujón falla desde entonces"
+            )
+            if datos
+            else "sin dato"
+        ),
+        "edad": cuanto,
+        "estado": _estado_por_edad(
+            cuanto, muerto_si=not datos
+        ),
+        "que_bloquea": (
+            None if ultimo_fue_bien else datos.get("motivo")
+        ),
+        # SIN NUMEROS ESCRITOS A MANO.
+        #
+        #     Aqui ponia "una cache que se desaloja a los 7 dias"
+        #     y `test_los_sentidos_no_se_inventan_la_edad` lo
+        #     casco por el AST. Tenia razon aunque el 7 sea una
+        #     politica de GitHub y no una edad: ese dato vive en
+        #     `src/estado/los_libros.py`, que es donde se declara
+        #     que es un libro y por que no se reconstruye.
+        "que_decide": (
+            "Nada hoy. Lo que decide es si mañana hay temporada: "
+            "sin esto, los libros vuelven a vivir solo en una "
+            "caché que se desaloja sola."
+        ),
+        "detalle": (
+            datos.get("motivo")
+            if ultimo_fue_bien
+            else None
+        ),
+
+        # Lo que la pantalla pinta en su linea de AUDITORIA, ya
+        # montado aqui: si lo montara el navegador serian dos
+        # versiones de la misma frase.
+        "libros": libros,
+        "empujado": bool(datos.get("empujado")),
+        "intentos": safe_int(datos.get("intentos")),
     }
 
 

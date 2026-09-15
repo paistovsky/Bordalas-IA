@@ -58,6 +58,19 @@ DASHBOARD_STATUS = Path("dashboard") / "data" / "status.json"
 REACT_DASHBOARD_STATUS = Path("dashboard-v8") / "public" / "data" / "status.json"
 PLAYER_MAPPING_CACHE = Path("data") / "player_mapping_cache.json"
 PLAYER_PHOTO_CACHE = Path("data") / "dashboard_player_photo_cache.json"
+
+# COMO LE FUE AL ULTIMO GUARDADO DE LOS LIBROS (15/09/2026)
+#
+#     Lo escribe `scripts/guardar_los_libros.py` al final de cada
+#     vuelta. Desde hoy un empujon fallido NO tumba el ciclo, asi
+#     que la vuelta sale verde igualmente: este fichero es el
+#     unico sitio donde se ve que lleva una semana fallando.
+#
+#     Si no esta —cache desalojada, o primera vuelta— la fila
+#     dice SIN DATO. No se supone que todo va bien.
+GUARDADO_DE_LOS_LIBROS = (
+    Path("data") / "autopilot" / "guardado_de_los_libros.json"
+)
 # CUANTAS FILAS PIDE LA PANTALLA (13/09/2026, noche)
 #
 #     El cuadro de objetivos recortaba a 60 y se dejaba fuera 2
@@ -5816,6 +5829,16 @@ def build_dashboard_state() -> dict:
     #     —nunca un numero de dias escrito a mano— y el motivo de
     #     cada bloqueo es la frase del motor, entera.
     try:
+        _guardado_de_los_libros = json.loads(
+            GUARDADO_DE_LOS_LIBROS.read_text(encoding="utf-8")
+        )
+
+    except (OSError, ValueError):
+        # Sin fichero no se inventa un "todo bien": la fila dira
+        # SIN DATO, que es lo que pasa de verdad.
+        _guardado_de_los_libros = None
+
+    try:
         from src.analysis.los_sentidos import los_sentidos
 
         _los_sentidos = los_sentidos(
@@ -5828,6 +5851,7 @@ def build_dashboard_state() -> dict:
             calendario=_el_calendario,
             marcador=marcador_estado,
             objetivos=(acquisition or {}).get("targets"),
+            guardado_de_los_libros=_guardado_de_los_libros,
             jornada_de_hoy=state.get("target_matchday"),
 
             # LA EDAD SE MIDE CONTRA LA FOTO, no contra el reloj
@@ -6101,6 +6125,23 @@ def build_dashboard_state() -> dict:
         # DE QUE SE ENTERA PEPE Y DE CUANDO. El cuadro que
         # explica por que hoy no se puja por nadie.
         "losSentidos": _los_sentidos,
+
+        # LA LINEA DE AUDITORIA: ¿llegan los libros a git?
+        #
+        #     Es LA MISMA FILA que sale en el cuadro de los
+        #     sentidos, no una copia montada aparte. Si la
+        #     pantalla montara su propia frase habria dos
+        #     versiones de la verdad, y el dia que discreparan
+        #     nadie sabria cual mirar.
+        "librosGuardados": next(
+            (
+                fila
+                for fila in (_los_sentidos or {}).get("sentidos")
+                or []
+                if fila.get("sentido") == "El guardado de los libros"
+            ),
+            None,
+        ),
 
         # LOS OCHO, CON LO QUE SACAN POR MILLON. Los puestos van
         # contados, no escritos.

@@ -153,7 +153,7 @@ def test_los_sentidos_no_se_inventan_la_edad() -> None:
     assert visto["available"] is True, visto
 
     # REGLA 24: sin filas esto no probaria nada.
-    assert len(visto["sentidos"]) == 8, visto
+    assert len(visto["sentidos"]) == 9, visto
 
     # 1. LA EDAD DE HOY: del 17/08 al 13/09 son 27 dias.
     tablero = _fila(visto, "Tablero de titulares")
@@ -389,18 +389,18 @@ def test_un_sentido_que_no_llega_sale_igual() -> None:
 
     assert visto["available"] is True, visto
 
-    assert len(visto["sentidos"]) == 8, [
+    assert len(visto["sentidos"]) == 9, [
         f["sentido"] for f in visto["sentidos"]
     ]
 
-    # Los siete que no llegaron, en MUERTO.
+    # Los que no llegaron, en MUERTO: todos.
     muertos = [
         f["sentido"]
         for f in visto["sentidos"]
         if f["estado"] == "MUERTO"
     ]
 
-    assert len(muertos) == 8, muertos
+    assert len(muertos) == 9, muertos
 
     # Y NINGUNA FILA SE QUEDA SIN DECIR PARA QUE SIRVE.
     for fila in visto["sentidos"]:
