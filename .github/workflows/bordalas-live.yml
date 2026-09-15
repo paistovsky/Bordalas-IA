@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     # Margen de seguridad para un refresco externo lento. El ciclo normal
     # debe terminar muy por debajo de este limite tras reutilizar snapshots.
-    timeout-minutes: 20
+    timeout-minutes: 35
 
     env:
       TZ: Europe/Madrid
