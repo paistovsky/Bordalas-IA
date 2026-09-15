@@ -263,6 +263,7 @@ TESTS = [
     #     apuntada en DEUDA para que no se quede aqui de adorno.
     # "src.analysis.test_la_pantalla_pinta_v1",
     "src.analysis.test_la_caja_de_la_liga_v1",
+    "src.analysis.test_el_dinero_cuadra_v1",
     "src.analysis.test_la_rendija_v1",
     "src.analysis.test_esta_enchufado_v1",
     "src.analysis.test_el_escaparate_publica_v1",
