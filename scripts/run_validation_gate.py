@@ -265,6 +265,8 @@ TESTS = [
     "src.analysis.test_la_caja_de_la_liga_v1",
     "src.analysis.test_el_dinero_cuadra_v1",
     "src.analysis.test_la_prima_de_compra_v1",
+    "src.analysis.test_el_ojeador_conectado_v1",
+    "src.analysis.test_la_etiqueta_dice_lo_que_mide_v1",
     "src.analysis.test_la_rendija_v1",
     "src.analysis.test_esta_enchufado_v1",
     "src.analysis.test_el_escaparate_publica_v1",
