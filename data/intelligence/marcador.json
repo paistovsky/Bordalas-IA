@@ -1,0 +1,1261 @@
+{
+  "version": 1,
+  "updated_at": "2026-09-15T19:18:35.617327",
+  "jornadas": {
+    "4899": {
+      "round_id": 4899,
+      "visto": "2026-08-20T20:55:51.698480",
+      "clasificacion": [
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 42
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 31
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 29
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 29
+        },
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 21
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 14
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 10
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "4-4-2",
+        "players": [
+          17482,
+          38194,
+          9065,
+          5771,
+          1599,
+          29661,
+          41271,
+          25322,
+          41606,
+          26271,
+          3159
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 2169,
+          "name": "Bigas",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 5771,
+          "name": "Yeray",
+          "position": 2
+        },
+        {
+          "id": 8376,
+          "name": "Zubeldia",
+          "position": 2
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 37525,
+          "name": "Yusi Enríquez",
+          "position": 2
+        },
+        {
+          "id": 38072,
+          "name": "Andrés Castrín",
+          "position": 2
+        },
+        {
+          "id": 39874,
+          "name": "Lucas Cepeda",
+          "position": 4
+        },
+        {
+          "id": 41271,
+          "name": "Gustavo Puerta",
+          "position": 3
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "2169": 0,
+        "3159": 0,
+        "5771": 0,
+        "8376": 0,
+        "9983": 2,
+        "17482": 2,
+        "26271": 0,
+        "29661": 2,
+        "37525": 4,
+        "38072": 0,
+        "39874": 2,
+        "41271": 4,
+        "41606": 5
+      }
+    },
+    "4900": {
+      "round_id": 4900,
+      "visto": "2026-08-25T20:54:00.928839",
+      "clasificacion": [
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 84
+        },
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 79
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 74
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 69
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 60
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 42
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 38
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "5-3-2",
+        "players": [
+          17482,
+          9983,
+          8376,
+          2169,
+          38072,
+          5771,
+          41271,
+          29661,
+          41606,
+          26271,
+          3159
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny Castro",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 8376,
+          "name": "Zubeldia",
+          "position": 2
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 37525,
+          "name": "Yusi Enríquez",
+          "position": 2
+        },
+        {
+          "id": 39874,
+          "name": "Lucas Cepeda",
+          "position": 4
+        },
+        {
+          "id": 41271,
+          "name": "Gustavo Puerta",
+          "position": 3
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1599": 7,
+        "3159": 1,
+        "8376": 0,
+        "9983": 6,
+        "14800": 7,
+        "17482": 2,
+        "26271": 3,
+        "29661": 6,
+        "37525": 8,
+        "39874": 5,
+        "41271": 6,
+        "41606": 8
+      },
+      "nombres": {
+        "1599": "Jonny Castro",
+        "3159": "Jutglà",
+        "8376": "Zubeldia",
+        "9983": "Djené",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "26271": "Yamal",
+        "29661": "Olasagasti",
+        "37525": "Yusi Enríquez",
+        "39874": "Lucas Cepeda",
+        "41271": "Gustavo Puerta",
+        "41606": "Mangala",
+        "2169": "Bigas",
+        "38072": "Andrés Castrín",
+        "5771": "Yeray"
+      }
+    },
+    "4937": {
+      "round_id": 4937,
+      "visto": "2026-08-28T18:32:26.110263",
+      "clasificacion": [
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 91
+        },
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 89
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 83
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 81
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 72
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 64
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 54
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "4-4-2",
+        "players": [
+          17482,
+          38194,
+          9065,
+          5771,
+          1599,
+          29661,
+          41271,
+          25322,
+          41606,
+          26271,
+          3159
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny Castro",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 8376,
+          "name": "Zubeldia",
+          "position": 2
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29185,
+          "name": "Pablo Durán",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 37525,
+          "name": "Yusi Enríquez",
+          "position": 2
+        },
+        {
+          "id": 39874,
+          "name": "Lucas Cepeda",
+          "position": 4
+        },
+        {
+          "id": 41271,
+          "name": "Gustavo Puerta",
+          "position": 3
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1599": 7,
+        "3159": 4,
+        "8376": -1,
+        "9983": 6,
+        "14800": 7,
+        "17482": 2,
+        "26271": 10,
+        "29185": 6,
+        "29661": 6,
+        "37525": 8,
+        "39874": 5,
+        "41271": 6,
+        "41606": 8
+      },
+      "nombres": {
+        "1599": "Jonny Castro",
+        "3159": "Jutglà",
+        "8376": "Zubeldia",
+        "9983": "Djené",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "26271": "Yamal",
+        "29185": "Pablo Durán",
+        "29661": "Olasagasti",
+        "37525": "Yusi Enríquez",
+        "39874": "Lucas Cepeda",
+        "41271": "Gustavo Puerta",
+        "41606": "Mangala",
+        "38194": "Gabriel Suazo",
+        "9065": "Ximo Navarro",
+        "5771": "Yeray",
+        "25322": "Javi Hernández"
+      }
+    },
+    "4901": {
+      "round_id": 4901,
+      "visto": "2026-09-03T20:33:00.379716",
+      "clasificacion": [
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 146
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 141
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 136
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 133
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 109
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 106
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 79
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "3-4-3",
+        "players": [
+          17482,
+          9983,
+          1599,
+          8376,
+          29661,
+          41271,
+          41606,
+          14800,
+          26271,
+          3159,
+          29185
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny Castro",
+          "position": 2
+        },
+        {
+          "id": 1721,
+          "name": "Manu Sánchez",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 8376,
+          "name": "Zubeldia",
+          "position": 2
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29185,
+          "name": "Pablo Durán",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 37525,
+          "name": "Yusi Enríquez",
+          "position": 2
+        },
+        {
+          "id": 39874,
+          "name": "Lucas Cepeda",
+          "position": 4
+        },
+        {
+          "id": 41271,
+          "name": "Gustavo Puerta",
+          "position": 3
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1599": 12,
+        "1721": 6,
+        "3159": 9,
+        "8376": 5,
+        "9983": 5,
+        "14800": 10,
+        "17482": 2,
+        "26271": 28,
+        "29185": 6,
+        "29661": 21,
+        "37525": 12,
+        "39874": 8,
+        "41271": 13,
+        "41606": 11
+      },
+      "nombres": {
+        "1599": "Jonny Castro",
+        "1721": "Manu Sánchez",
+        "3159": "Jutglà",
+        "8376": "Zubeldia",
+        "9983": "Djené",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "26271": "Yamal",
+        "29185": "Pablo Durán",
+        "29661": "Olasagasti",
+        "37525": "Yusi Enríquez",
+        "39874": "Lucas Cepeda",
+        "41271": "Gustavo Puerta",
+        "41606": "Mangala"
+      }
+    },
+    "4904": {
+      "round_id": 4904,
+      "visto": "2026-09-04T20:34:49.210857",
+      "clasificacion": [
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 146
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 141
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 136
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 133
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 109
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 106
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 79
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": null,
+        "players": []
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny Castro",
+          "position": 2
+        },
+        {
+          "id": 1721,
+          "name": "Manu Sánchez",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 8376,
+          "name": "Zubeldia",
+          "position": 2
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29185,
+          "name": "Pablo Durán",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 37525,
+          "name": "Yusi Enríquez",
+          "position": 2
+        },
+        {
+          "id": 39874,
+          "name": "Lucas Cepeda",
+          "position": 4
+        },
+        {
+          "id": 41271,
+          "name": "Gustavo Puerta",
+          "position": 3
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1599": 12,
+        "1721": 6,
+        "3159": 11,
+        "8376": 9,
+        "9983": 5,
+        "14800": 10,
+        "17482": 2,
+        "26271": 28,
+        "29185": 8,
+        "29661": 21,
+        "37525": 12,
+        "39874": 8,
+        "41271": 13,
+        "41606": 11
+      },
+      "nombres": {
+        "1599": "Jonny Castro",
+        "1721": "Manu Sánchez",
+        "3159": "Jutglà",
+        "8376": "Zubeldia",
+        "9983": "Djené",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "26271": "Yamal",
+        "29185": "Pablo Durán",
+        "29661": "Olasagasti",
+        "37525": "Yusi Enríquez",
+        "39874": "Lucas Cepeda",
+        "41271": "Gustavo Puerta",
+        "41606": "Mangala"
+      }
+    },
+    "4902": {
+      "round_id": 4902,
+      "visto": "2026-09-12T07:16:51.686089",
+      "clasificacion": [
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 198
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 186
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 180
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 167
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 141
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 125
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 98
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "4-3-3",
+        "players": [
+          17482,
+          9983,
+          1721,
+          1599,
+          8376,
+          29661,
+          14800,
+          41606,
+          26271,
+          3159,
+          29185
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny",
+          "position": 2
+        },
+        {
+          "id": 1721,
+          "name": "Manu Sánchez",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 8376,
+          "name": "Zubeldia",
+          "position": 2
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 19862,
+          "name": "Expósito",
+          "position": 3
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29185,
+          "name": "Pablo Durán",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 39874,
+          "name": "Cepeda",
+          "position": 4
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1599": 14,
+        "1721": 12,
+        "3159": 14,
+        "8376": 11,
+        "9983": 7,
+        "14800": 21,
+        "17482": 0,
+        "19862": 22,
+        "26271": 45,
+        "29185": 9,
+        "29661": 28,
+        "39874": 15,
+        "41606": 13
+      },
+      "once_alternativo": {
+        "formation": "4-4-2",
+        "players": [
+          17482,
+          9983,
+          8376,
+          1599,
+          1721,
+          14800,
+          19862,
+          29661,
+          41606,
+          26271,
+          3159
+        ],
+        "vara": "base"
+      },
+      "nombres": {
+        "1599": "Jonny",
+        "1721": "Manu Sánchez",
+        "3159": "Jutglà",
+        "8376": "Zubeldia",
+        "9983": "Djené",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "19862": "Expósito",
+        "26271": "Yamal",
+        "29185": "Pablo Durán",
+        "29661": "Olasagasti",
+        "39874": "Cepeda",
+        "41606": "Mangala"
+      },
+      "onces_por_vara": {
+        "base": {
+          "formation": "4-4-2",
+          "players": [
+            17482,
+            9983,
+            8376,
+            1599,
+            1721,
+            14800,
+            19862,
+            29661,
+            41606,
+            26271,
+            3159
+          ]
+        },
+        "factores": {
+          "formation": "4-4-2",
+          "players": [
+            17482,
+            9983,
+            8376,
+            1599,
+            1721,
+            14800,
+            19862,
+            29661,
+            41606,
+            26271,
+            3159
+          ]
+        },
+        "actual": {
+          "formation": "4-4-2",
+          "players": [
+            17482,
+            1599,
+            1721,
+            9983,
+            8376,
+            19862,
+            29661,
+            14800,
+            41606,
+            26271,
+            3159
+          ]
+        }
+      }
+    },
+    "4903": {
+      "round_id": 4903,
+      "visto": "2026-09-15T19:18:35.617327",
+      "datos_de": "2026-09-15T19:12:05.863299+00:00",
+      "escrito_en": "2026-09-15T19:18:35.617327",
+      "clasificacion": [
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 198
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 186
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 180
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 167
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 141
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 125
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 98
+        },
+        {
+          "user_id": 14456960,
+          "name": "Alvaro Retamosa Sanguino",
+          "points": 98
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "3-5-2",
+        "players": [
+          17482,
+          9983,
+          1721,
+          37499,
+          14800,
+          29661,
+          41606,
+          19862,
+          37726,
+          26271,
+          3159
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny",
+          "position": 2
+        },
+        {
+          "id": 1602,
+          "name": "Rubén García",
+          "position": 3
+        },
+        {
+          "id": 1721,
+          "name": "Manu Sánchez",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 10040,
+          "name": "Balde",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 19862,
+          "name": "Expósito",
+          "position": 3
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29185,
+          "name": "Pablo Durán",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 30334,
+          "name": "Fortuño",
+          "position": 1
+        },
+        {
+          "id": 30507,
+          "name": "Benavidez",
+          "position": 3
+        },
+        {
+          "id": 37499,
+          "name": "Trent",
+          "position": 2
+        },
+        {
+          "id": 37726,
+          "name": "Oriol Rey",
+          "position": 3
+        },
+        {
+          "id": 39736,
+          "name": "Paco Cortés",
+          "position": 4
+        },
+        {
+          "id": 41560,
+          "name": "Selu Diallo",
+          "position": 3
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1599": 18,
+        "1602": 17,
+        "1721": 17,
+        "3159": 25,
+        "9983": 13,
+        "10040": 0,
+        "14800": 23,
+        "17482": 4,
+        "19862": 26,
+        "26271": 62,
+        "29185": 9,
+        "29661": 32,
+        "30334": 0,
+        "30507": 5,
+        "37499": 12,
+        "37726": 19,
+        "39736": 4,
+        "41560": 0,
+        "41606": 16
+      },
+      "once_alternativo": {
+        "formation": "3-5-2",
+        "players": [
+          17482,
+          9983,
+          1721,
+          37499,
+          14800,
+          29661,
+          37726,
+          41606,
+          1602,
+          26271,
+          3159
+        ],
+        "vara": "base"
+      },
+      "nombres": {
+        "1599": "Jonny",
+        "1602": "Rubén García",
+        "1721": "Manu Sánchez",
+        "3159": "Jutglà",
+        "9983": "Djené",
+        "10040": "Balde",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "19862": "Expósito",
+        "26271": "Yamal",
+        "29185": "Pablo Durán",
+        "29661": "Olasagasti",
+        "30334": "Fortuño",
+        "30507": "Benavidez",
+        "37499": "Trent",
+        "37726": "Oriol Rey",
+        "39736": "Paco Cortés",
+        "41560": "Selu Diallo",
+        "41606": "Mangala"
+      },
+      "onces_por_vara": {
+        "base": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            9983,
+            1721,
+            37499,
+            14800,
+            29661,
+            37726,
+            41606,
+            1602,
+            26271,
+            3159
+          ]
+        },
+        "factores": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            9983,
+            1721,
+            37499,
+            14800,
+            29661,
+            37726,
+            41606,
+            1602,
+            26271,
+            3159
+          ]
+        },
+        "actual": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            9983,
+            1721,
+            37499,
+            14800,
+            29661,
+            41606,
+            19862,
+            1602,
+            26271,
+            3159
+          ]
+        }
+      }
+    }
+  }
+}

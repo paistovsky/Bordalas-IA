@@ -1,0 +1,4048 @@
+{
+  "version": "V10.5",
+  "updated_at": "2026-09-15T17:14:57.342574+00:00",
+  "positions": [
+    {
+      "position_id": "BID-4138078754",
+      "player_id": 31468,
+      "player_name": "Hugo González",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 4138078754,
+      "seller_id": 14151726,
+      "seller": "DiosMande a Rodri al Palancas",
+      "bid_amount": 1390000,
+      "entry_price": null,
+      "bid_created_epoch": 1786646356,
+      "bid_until_epoch": 1786756955,
+      "snapshot_player_value": 1350000,
+      "listing_price_at_bid": 1130000,
+      "speculation_score_at_bid": 87.9,
+      "trading_score_at_bid": 69.5,
+      "max_rational_bid_at_bid": 1443897,
+      "expected_exit_value_at_bid": 1617165,
+      "expected_profit_at_bid": 227165,
+      "expected_roi_at_bid_percent": 16.34,
+      "t15_after_bid": 7806168,
+      "current_value": 1350000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-13T21:58:42.307886+00:00",
+      "updated_at": "2026-08-15T01:48:35.792071+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-13T21:58:42.307893+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 4138078754,
+            "bid_amount": 1390000
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-15T01:48:35.792056+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-1567238800",
+      "player_id": 18128,
+      "player_name": "Iker Muñoz",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 1567238800,
+      "seller_id": 14145555,
+      "seller": "Pollo17",
+      "bid_amount": 480000,
+      "entry_price": null,
+      "bid_created_epoch": 1786892544,
+      "bid_until_epoch": 1786998512,
+      "snapshot_player_value": 480000,
+      "listing_price_at_bid": 1370000,
+      "speculation_score_at_bid": 80.8,
+      "trading_score_at_bid": 66.5,
+      "max_rational_bid_at_bid": 498214,
+      "expected_exit_value_at_bid": 558000,
+      "expected_profit_at_bid": 78000,
+      "expected_roi_at_bid_percent": 16.25,
+      "t15_after_bid": 12669968,
+      "current_value": 480000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-16T15:33:01.354997+00:00",
+      "updated_at": "2026-08-18T07:53:45.629060+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-16T15:33:01.355013+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 3777766031,
+            "bid_amount": 480000
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-16T16:38:52.315927+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-18T07:53:45.629044+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-3028726582",
+      "player_id": 38072,
+      "player_name": "Jugador 38072",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 3028726582,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1236001,
+      "entry_price": null,
+      "bid_created_epoch": 1786903876,
+      "bid_until_epoch": 1786942800,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1030000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-16T18:44:52.454492+00:00",
+      "updated_at": "2026-08-17T05:21:45.458726+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-16T18:44:52.454508+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 3028726582,
+            "bid_amount": 1236001
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-16T21:31:17.973428+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-17T05:21:45.458721+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-3425883337",
+      "player_id": 37525,
+      "player_name": "Yusi Enríquez",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION_MISSING_REVIEW",
+      "offer_id": 3425883337,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 504000,
+      "entry_price": 504000,
+      "bid_created_epoch": 1786903092,
+      "bid_until_epoch": 1786942800,
+      "snapshot_player_value": 360000,
+      "listing_price_at_bid": 360000,
+      "speculation_score_at_bid": 77.6,
+      "trading_score_at_bid": 64.5,
+      "max_rational_bid_at_bid": 370221,
+      "expected_exit_value_at_bid": 414648,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 12793568,
+      "current_value": 1140000,
+      "unrealized_profit": 636000,
+      "unrealized_roi_percent": 126.19,
+      "opened_at": "2026-08-17T05:21:45.458730+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-16T18:44:52.454534+00:00",
+      "updated_at": "2026-09-15T17:14:37.949306+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-16T18:44:52.454540+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 3425883337,
+            "bid_amount": 504000
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-17T05:21:45.458738+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 504000 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-17T05:22:37.120872+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -22.62
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-19T17:43:49.934532+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -10.71
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-19T18:00:07.650514+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -10.71
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T07:05:27.141738+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -4.76
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T09:05:43.604187+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -4.76
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T09:50:37.802537+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -4.76
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T10:01:21.757910+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -4.76
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T18:53:38.456359+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -4.76
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T21:39:02.671026+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -4.76
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T17:02:23.463295+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 66.67
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T19:02:44.325024+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 66.67
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166496+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 126.19
+          }
+        },
+        {
+          "type": "POSITION_MISSING",
+          "at": "2026-09-04T20:02:43.336023+00:00",
+          "detail": "La posicion abierta ya no aparece en plantilla. V10.5 no inventa un precio de venta; queda pendiente de reconciliacion de venta en V10.6.",
+          "data": {}
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-04T19:33:44.560633+00:00",
+        "action": "ROTATE_CAPITAL",
+        "priority": 75,
+        "decision_basis": "SOLVENCY_EMERGENCY",
+        "confidence": "HIGH",
+        "profit": 636000,
+        "roi_percent": 126.19,
+        "market_outlook": "STRONG_UP",
+        "sporting_protection_score": 20.0,
+        "scores": {
+          "hold": 56.0,
+          "take_profit": 65.0,
+          "cut_loss": 0.0,
+          "rotate_capital": 8.0
+        },
+        "reasons": [
+          "La posición debe considerarse fuente de liquidez por presión T-15.",
+          "Fase ROUND_TRANSITION_LOCK | T-15 tras buffer 8383540 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-3951272456",
+      "player_id": 38075,
+      "player_name": "Jugador 38075",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 3951272456,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1386001,
+      "entry_price": null,
+      "bid_created_epoch": 1786906068,
+      "bid_until_epoch": 1786942800,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1260000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-16T19:31:11.554559+00:00",
+      "updated_at": "2026-08-17T05:21:45.458747+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-16T19:31:11.554576+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 3951272456,
+            "bid_amount": 1386001
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-16T21:31:17.973443+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-17T05:21:45.458745+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2465026949",
+      "player_id": 38072,
+      "player_name": "Jugador 38072",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION_MISSING_REVIEW",
+      "offer_id": 2465026949,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1200001,
+      "entry_price": 1200001,
+      "bid_created_epoch": 1786996551,
+      "bid_until_epoch": 1787029200,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1030000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 1020000,
+      "unrealized_profit": -180001,
+      "unrealized_roi_percent": -15.0,
+      "opened_at": "2026-08-18T07:53:45.629075+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-17T19:57:28.828214+00:00",
+      "updated_at": "2026-09-15T17:14:37.949323+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-17T19:57:28.828228+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2465026949,
+            "bid_amount": 1200001
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-18T07:53:45.629081+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 1200001 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-18T07:55:11.276955+00:00",
+          "detail": "V10.6 SHADOW: NONE -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -20.0
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T09:50:37.802548+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -22.5
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T10:01:21.757919+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -22.5
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T18:53:38.456370+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -22.5
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T21:39:02.671037+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -22.5
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-23T05:10:08.251297+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -21.67
+          }
+        },
+        {
+          "type": "POSITION_MISSING",
+          "at": "2026-08-24T06:07:17.157264+00:00",
+          "detail": "La posicion abierta ya no aparece en plantilla. V10.5 no inventa un precio de venta; queda pendiente de reconciliacion de venta en V10.6.",
+          "data": {}
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-08-24T05:22:59.873535+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "HOLD_SPORTING_VALUE",
+        "confidence": "HIGH",
+        "profit": -180001,
+        "roi_percent": -15.0,
+        "market_outlook": "STRONG_UP",
+        "sporting_protection_score": 55.0,
+        "scores": {
+          "hold": 75.2,
+          "take_profit": 0.0,
+          "cut_loss": 32.0,
+          "rotate_capital": 0.0
+        },
+        "reasons": [
+          "El coste deportivo de liberar la posición sigue siendo alto.",
+          "Jugador en XI; protección deportiva 55.0/100.",
+          "Fase NORMAL | T-15 tras buffer 3168363 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-1452389454",
+      "player_id": 8376,
+      "player_name": "Jugador 8376",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION_MISSING_REVIEW",
+      "offer_id": 1452389454,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 2068001,
+      "entry_price": 2068001,
+      "bid_created_epoch": 1787053069,
+      "bid_until_epoch": 1787115600,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1880000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 1670000,
+      "unrealized_profit": -398001,
+      "unrealized_roi_percent": -19.25,
+      "opened_at": "2026-08-19T05:31:27.566456+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-18T11:40:21.466744+00:00",
+      "updated_at": "2026-09-15T17:14:37.949327+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-18T11:40:21.466761+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 1452389454,
+            "bid_amount": 2068001
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-19T05:31:27.566464+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 2068001 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-19T05:34:03.967079+00:00",
+          "detail": "V10.6 SHADOW: NONE -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -9.57
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T09:50:37.802556+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -10.54
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T10:01:21.757925+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -10.54
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T18:53:38.456378+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -10.54
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T21:39:02.671045+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -10.54
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T17:02:23.463307+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -22.15
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T19:02:44.325037+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -22.15
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-01T05:06:43.319832+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -24.08
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166507+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -20.21
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T21:03:51.659263+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -20.21
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T19:40:06.212693+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -11.51
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T22:33:50.540396+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -11.51
+          }
+        },
+        {
+          "type": "POSITION_MISSING",
+          "at": "2026-09-14T23:10:52.147318+00:00",
+          "detail": "La posicion abierta ya no aparece en plantilla. V10.5 no inventa un precio de venta; queda pendiente de reconciliacion de venta en V10.6.",
+          "data": {}
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-14T22:10:35.169295+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": -398001,
+        "roi_percent": -19.25,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 20.0,
+        "scores": {
+          "hold": 21.0,
+          "take_profit": 0.0,
+          "cut_loss": 52.0,
+          "rotate_capital": 22.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Fase NORMAL | T-15 tras buffer 6301165 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-599608130",
+      "player_id": 39874,
+      "player_name": "Lucas Cepeda",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "OPEN_POSITION_MISSING_REVIEW",
+      "offer_id": 599608130,
+      "seller_id": 14154203,
+      "seller": "MANAGER: Prinzipote",
+      "bid_amount": 463500,
+      "entry_price": 463500,
+      "bid_created_epoch": 1787054463,
+      "bid_until_epoch": 1787216663,
+      "snapshot_player_value": 450000,
+      "listing_price_at_bid": 450000,
+      "speculation_score_at_bid": 86.4,
+      "trading_score_at_bid": 77.5,
+      "max_rational_bid_at_bid": 479531,
+      "expected_exit_value_at_bid": 537075,
+      "expected_profit_at_bid": 73575,
+      "expected_roi_at_bid_percent": 15.87,
+      "t15_after_bid": 4656567,
+      "current_value": 680000,
+      "unrealized_profit": 216500,
+      "unrealized_roi_percent": 46.71,
+      "opened_at": "2026-08-19T07:36:03.967717+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-18T12:01:03.975162+00:00",
+      "updated_at": "2026-09-15T17:14:37.949330+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-18T12:01:03.975180+00:00",
+          "detail": "Puja especulativa enviada y verificada por 463500 EUR.",
+          "data": {
+            "offer_id": 599608130,
+            "expected_exit_value": 537075,
+            "expected_roi_percent": 15.87
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-19T07:36:03.967724+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 463500 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-19T07:39:00.290616+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -0.76
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T09:50:37.802562+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T10:01:21.757931+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T18:53:38.456385+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T21:39:02.671051+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-27T06:24:47.809146+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-27T19:02:34.199145+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-27T23:02:30.917801+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-27T23:32:13.401115+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": 1.4
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T17:02:23.463315+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T19:02:44.325046+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T05:03:34.122843+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T23:02:13.552409+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-02T09:02:39.939965+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-02T11:32:25.305081+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T05:32:57.050099+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T17:03:46.810283+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166515+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T23:16:29.908935+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-08T09:18:18.221586+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-08T23:21:53.360935+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": 3.56
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T16:48:14.227711+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 27.29
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T19:40:06.212704+00:00",
+          "detail": "V10.6 SHADOW: TAKE_PROFIT -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 27.29
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T22:33:50.540408+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 27.29
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-12T05:19:22.874312+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 33.76
+          }
+        },
+        {
+          "type": "POSITION_MISSING",
+          "at": "2026-09-15T12:02:13.172388+00:00",
+          "detail": "La posicion abierta ya no aparece en plantilla. V10.5 no inventa un precio de venta; queda pendiente de reconciliacion de venta en V10.6.",
+          "data": {}
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T06:21:41.370568+00:00",
+        "action": "TAKE_PROFIT",
+        "priority": 85,
+        "decision_basis": "PROFIT_HARVEST",
+        "confidence": "MEDIUM",
+        "profit": 216500,
+        "roi_percent": 46.71,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 0.0,
+        "scores": {
+          "hold": 0.0,
+          "take_profit": 95.0,
+          "cut_loss": 0.0,
+          "rotate_capital": 10.0
+        },
+        "reasons": [
+          "La plusvalía/avance de tesis compensa más que el upside restante.",
+          "La tesis de precio original ya ha alcanzado su objetivo.",
+          "Fase NORMAL | T-15 tras buffer 6017917 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-832051977",
+      "player_id": 31069,
+      "player_name": "Mikel Rodriguez",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 832051977,
+      "seller_id": null,
+      "seller": "MÁQUINA",
+      "bid_amount": 669500,
+      "entry_price": null,
+      "bid_created_epoch": 1787082615,
+      "bid_until_epoch": 1787115600,
+      "snapshot_player_value": 650000,
+      "listing_price_at_bid": 650000,
+      "speculation_score_at_bid": 96.4,
+      "trading_score_at_bid": 73.6,
+      "max_rational_bid_at_bid": 726955,
+      "expected_exit_value_at_bid": 814190,
+      "expected_profit_at_bid": 144690,
+      "expected_roi_at_bid_percent": 21.61,
+      "t15_after_bid": 8361267,
+      "current_value": 650000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-18T19:50:15.723005+00:00",
+      "updated_at": "2026-08-19T05:31:27.566480+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-18T19:50:15.723020+00:00",
+          "detail": "Puja especulativa enviada y verificada por 669500 EUR.",
+          "data": {
+            "offer_id": 832051977,
+            "expected_exit_value": 814190,
+            "expected_roi_percent": 21.61
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-19T05:31:27.566478+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-961788168",
+      "player_id": 2169,
+      "player_name": "Jugador 2169",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION_MISSING_REVIEW",
+      "offer_id": 961788168,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 2288001,
+      "entry_price": 2288001,
+      "bid_created_epoch": 1787136248,
+      "bid_until_epoch": 1787202000,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 2080000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 1850000,
+      "unrealized_profit": -438001,
+      "unrealized_roi_percent": -19.14,
+      "opened_at": "2026-08-20T05:44:40.389729+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-19T10:49:10.880549+00:00",
+      "updated_at": "2026-09-15T17:14:37.949332+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-19T10:49:10.880565+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 961788168,
+            "bid_amount": 2288001
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-20T05:44:40.389736+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 2288001 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T05:44:49.326867+00:00",
+          "detail": "V10.6 SHADOW: NONE -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -13.02
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T09:50:37.802568+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -13.02
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T10:01:21.757936+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -13.02
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T18:53:38.456390+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -13.02
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T21:39:02.671057+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -13.02
+          }
+        },
+        {
+          "type": "POSITION_MISSING",
+          "at": "2026-08-23T23:32:38.289305+00:00",
+          "detail": "La posicion abierta ya no aparece en plantilla. V10.5 no inventa un precio de venta; queda pendiente de reconciliacion de venta en V10.6.",
+          "data": {}
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-08-23T22:55:04.234470+00:00",
+        "action": "CUT_LOSS",
+        "priority": 90,
+        "decision_basis": "LOSS_AND_DETERIORATION",
+        "confidence": "HIGH",
+        "profit": -438001,
+        "roi_percent": -19.14,
+        "market_outlook": "STRONG_DOWN",
+        "sporting_protection_score": 8.0,
+        "scores": {
+          "hold": 4.4,
+          "take_profit": 35.0,
+          "cut_loss": 100.0,
+          "rotate_capital": 14.0
+        },
+        "reasons": [
+          "La pérdida y el deterioro superan el valor de seguir esperando.",
+          "Fase NORMAL | T-15 tras buffer 3168363 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-2288277305",
+      "player_id": 9983,
+      "player_name": "Jugador 9983",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 2288277305,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 2409001,
+      "entry_price": 2409001,
+      "bid_created_epoch": 1787140959,
+      "bid_until_epoch": 1787202000,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 2190000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 1820000,
+      "unrealized_profit": -589001,
+      "unrealized_roi_percent": -24.45,
+      "opened_at": "2026-08-20T05:44:40.389742+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-19T13:11:38.127443+00:00",
+      "updated_at": "2026-09-15T17:14:37.949341+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-19T13:11:38.127461+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2288277305,
+            "bid_amount": 2409001
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-20T05:44:40.389748+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 2409001 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T05:44:49.326874+00:00",
+          "detail": "V10.6 SHADOW: NONE -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -9.92
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T09:50:37.802574+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -9.92
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T10:01:21.757940+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -9.92
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T18:53:38.456396+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -9.92
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-20T21:39:02.671062+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -9.92
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-24T09:28:14.698363+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -12.83
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T17:02:23.463322+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T19:02:44.325068+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T05:03:34.122852+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T05:32:36.019641+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T05:46:03.011827+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T09:02:21.854479+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T22:32:52.793950+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T23:02:13.552415+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -8.68
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-01T05:06:43.319842+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -9.09
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166522+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -14.07
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T21:03:51.659280+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -14.07
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T19:40:06.212713+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -21.54
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T22:33:50.540429+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -21.54
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340145+00:00",
+        "action": "CUT_LOSS",
+        "priority": 90,
+        "decision_basis": "LOSS_AND_DETERIORATION",
+        "confidence": "LOW",
+        "profit": -589001,
+        "roi_percent": -24.45,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 63.0,
+        "scores": {
+          "hold": 44.7,
+          "take_profit": 0.0,
+          "cut_loss": 70.0,
+          "rotate_capital": 0.5
+        },
+        "reasons": [
+          "La pérdida y el deterioro superan el valor de seguir esperando.",
+          "Jugador en XI; protección deportiva 63.0/100.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-1230915357",
+      "player_id": 39350,
+      "player_name": "Miguel Sierra",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 1230915357,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 1504800,
+      "entry_price": null,
+      "bid_created_epoch": 1787145100,
+      "bid_until_epoch": 1787285559,
+      "snapshot_player_value": 1440000,
+      "listing_price_at_bid": 1310000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 84.0,
+      "max_rational_bid_at_bid": 1670007,
+      "expected_exit_value_at_bid": 1837008,
+      "expected_profit_at_bid": 332208,
+      "expected_roi_at_bid_percent": 22.08,
+      "t15_after_bid": 5758766,
+      "current_value": 1440000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-19T13:11:40.606655+00:00",
+      "updated_at": "2026-08-21T04:20:44.958374+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-19T13:11:40.606682+00:00",
+          "detail": "Puja especulativa enviada y verificada por 1504800 EUR.",
+          "data": {
+            "offer_id": 1230915357,
+            "expected_exit_value": 1837008,
+            "expected_roi_percent": 22.08
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-20T03:08:51.759273+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-21T04:20:44.958370+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-3788810630",
+      "player_id": 31069,
+      "player_name": "Mikel Rodriguez",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 3788810630,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 888250,
+      "entry_price": null,
+      "bid_created_epoch": 1787157913,
+      "bid_until_epoch": 1787327942,
+      "snapshot_player_value": 850000,
+      "listing_price_at_bid": 850000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 77.6,
+      "max_rational_bid_at_bid": 962169,
+      "expected_exit_value_at_bid": 1077630,
+      "expected_profit_at_bid": 197880,
+      "expected_roi_at_bid_percent": 22.49,
+      "t15_after_bid": 6383816,
+      "current_value": 850000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-19T16:45:13.661629+00:00",
+      "updated_at": "2026-08-21T16:47:57.855619+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-19T16:45:13.661648+00:00",
+          "detail": "Puja especulativa enviada y verificada por 879750 EUR.",
+          "data": {
+            "offer_id": 3330566728,
+            "expected_exit_value": 1077630,
+            "expected_roi_percent": 22.49
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-20T03:58:26.911888+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-21T16:47:57.855616+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2404314222",
+      "player_id": 27929,
+      "player_name": "André Almeida",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 2404314222,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 566500,
+      "entry_price": null,
+      "bid_created_epoch": 1787158808,
+      "bid_until_epoch": 1787327950,
+      "snapshot_player_value": 550000,
+      "listing_price_at_bid": 550000,
+      "speculation_score_at_bid": 87.8,
+      "trading_score_at_bid": 76.7,
+      "max_rational_bid_at_bid": 583294,
+      "expected_exit_value_at_bid": 653290,
+      "expected_profit_at_bid": 86790,
+      "expected_roi_at_bid_percent": 15.32,
+      "t15_after_bid": 6697066,
+      "current_value": 550000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-19T17:00:09.211821+00:00",
+      "updated_at": "2026-08-21T16:47:57.855626+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-19T17:00:09.211842+00:00",
+          "detail": "Puja especulativa enviada y verificada por 566500 EUR.",
+          "data": {
+            "offer_id": 2404314222,
+            "expected_exit_value": 653290,
+            "expected_roi_percent": 15.32
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-20T03:58:26.911895+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-21T16:47:57.855623+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2105051026",
+      "player_id": 14800,
+      "player_name": "Jugador 14800",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 2105051026,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 2079001,
+      "entry_price": 2079001,
+      "bid_created_epoch": 1787353918,
+      "bid_until_epoch": 1787374800,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1890000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 2490000,
+      "unrealized_profit": 410999,
+      "unrealized_roi_percent": 19.77,
+      "opened_at": "2026-08-22T05:38:11.061329+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-21T23:12:10.013730+00:00",
+      "updated_at": "2026-09-15T17:14:37.949347+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-21T23:12:10.013744+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2105051026,
+            "bid_amount": 2079001
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-22T05:38:11.061336+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 2079001 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-22T05:38:13.110406+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -8.61
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T17:02:23.463328+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T19:02:44.325075+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T05:03:34.122860+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T05:32:36.019649+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T05:46:03.011835+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T09:02:21.854487+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T22:32:52.793958+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SUPERIOR_REINVESTMENT",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-30T23:02:13.552420+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -1.88
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166528+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -0.43
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T21:03:51.659287+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_RECOVERY",
+            "roi_percent": -0.43
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-06T05:03:01.160018+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -0.91
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-06T10:32:39.391797+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -0.91
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T19:40:06.212720+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 14.48
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T22:33:50.540436+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": 14.48
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340159+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "HOLD_SPORTING_VALUE",
+        "confidence": "LOW",
+        "profit": 410999,
+        "roi_percent": 19.77,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 55.0,
+        "scores": {
+          "hold": 40.2,
+          "take_profit": 32.0,
+          "cut_loss": 0.0,
+          "rotate_capital": 0.0
+        },
+        "reasons": [
+          "El coste deportivo de liberar la posición sigue siendo alto.",
+          "Jugador en XI; protección deportiva 55.0/100.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-4221643680",
+      "player_id": 32338,
+      "player_name": "Agoumé",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 4221643680,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 2580010,
+      "entry_price": null,
+      "bid_created_epoch": 1787355379,
+      "bid_until_epoch": 1787374800,
+      "snapshot_player_value": 2580000,
+      "listing_price_at_bid": 2580000,
+      "speculation_score_at_bid": 57.3,
+      "trading_score_at_bid": 65.1,
+      "max_rational_bid_at_bid": 2538074,
+      "expected_exit_value_at_bid": 2842644,
+      "expected_profit_at_bid": 262634,
+      "expected_roi_at_bid_percent": 10.18,
+      "t15_after_bid": 684990,
+      "current_value": 2580000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-21T23:56:15.975899+00:00",
+      "updated_at": "2026-08-22T05:38:11.061347+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-21T23:56:15.975910+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 4221643680,
+            "bid_amount": 2580010
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-22T05:38:11.061344+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-3210030825",
+      "player_id": 1599,
+      "player_name": "Jonny Castro",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 3210030825,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1925100,
+      "entry_price": 1925100,
+      "bid_created_epoch": 1787403466,
+      "bid_until_epoch": 1787461200,
+      "snapshot_player_value": 1800000,
+      "listing_price_at_bid": 1800000,
+      "speculation_score_at_bid": 66.4,
+      "trading_score_at_bid": 66.2,
+      "max_rational_bid_at_bid": 1782321,
+      "expected_exit_value_at_bid": 1996200,
+      "expected_profit_at_bid": 71100,
+      "expected_roi_at_bid_percent": 3.69,
+      "t15_after_bid": 1753942,
+      "current_value": 2440000,
+      "unrealized_profit": 514900,
+      "unrealized_roi_percent": 26.75,
+      "opened_at": "2026-08-23T05:10:06.206673+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-22T12:58:05.170012+00:00",
+      "updated_at": "2026-09-15T17:14:37.949351+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-22T12:58:05.170027+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 3210030825,
+            "bid_amount": 1925100
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-23T05:10:06.206680+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 1925100 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-23T05:10:08.251326+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -4.94
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T17:02:23.463334+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 2.33
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T19:02:44.325081+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 2.33
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166534+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 17.92
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T21:03:51.659294+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 17.92
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-09T04:29:36.479197+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 22.07
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-09T05:23:49.453941+00:00",
+          "detail": "V10.6 SHADOW: TAKE_PROFIT -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 22.59
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T19:40:06.212726+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 23.63
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T22:33:50.540442+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 23.63
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-12T05:19:22.874329+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 23.11
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340167+00:00",
+        "action": "TAKE_PROFIT",
+        "priority": 85,
+        "decision_basis": "PROFIT_HARVEST",
+        "confidence": "LOW",
+        "profit": 514900,
+        "roi_percent": 26.75,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 8.0,
+        "scores": {
+          "hold": 4.4,
+          "take_profit": 80.0,
+          "cut_loss": 0.0,
+          "rotate_capital": 6.0
+        },
+        "reasons": [
+          "La plusvalía/avance de tesis compensa más que el upside restante.",
+          "La tesis de precio original ya ha alcanzado su objetivo.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-3615879887",
+      "player_id": 37726,
+      "player_name": "Oriol Rey",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 3615879887,
+      "seller_id": null,
+      "seller": "MÁQUINA",
+      "bid_amount": 424350,
+      "entry_price": null,
+      "bid_created_epoch": 1787471031,
+      "bid_until_epoch": 1787547600,
+      "snapshot_player_value": 410000,
+      "listing_price_at_bid": 410000,
+      "speculation_score_at_bid": 96.4,
+      "trading_score_at_bid": 87.4,
+      "max_rational_bid_at_bid": 461026,
+      "expected_exit_value_at_bid": 507129,
+      "expected_profit_at_bid": 82779,
+      "expected_roi_at_bid_percent": 19.51,
+      "t15_after_bid": 2556913,
+      "current_value": 410000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-23T07:43:51.668406+00:00",
+      "updated_at": "2026-08-24T05:22:58.891006+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-23T07:43:51.668423+00:00",
+          "detail": "Puja especulativa enviada y verificada por 424350 EUR.",
+          "data": {
+            "offer_id": 3615879887,
+            "expected_exit_value": 507129,
+            "expected_roi_percent": 19.51
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-24T05:22:58.891002+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2077296415",
+      "player_id": 38422,
+      "player_name": "Redondo",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 2077296415,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 348150,
+      "entry_price": null,
+      "bid_created_epoch": 1787648119,
+      "bid_until_epoch": 1787798630,
+      "snapshot_player_value": 330000,
+      "listing_price_at_bid": 310000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 90.8,
+      "max_rational_bid_at_bid": 384541,
+      "expected_exit_value_at_bid": 415305,
+      "expected_profit_at_bid": 67155,
+      "expected_roi_at_bid_percent": 19.29,
+      "t15_after_bid": 3304558,
+      "current_value": 330000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-25T08:55:19.742530+00:00",
+      "updated_at": "2026-08-27T03:32:51.767961+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-25T08:55:19.742552+00:00",
+          "detail": "Puja especulativa enviada y verificada por 348150 EUR.",
+          "data": {
+            "offer_id": 2077296415,
+            "expected_exit_value": 415305,
+            "expected_roi_percent": 19.29
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-27T03:32:51.767958+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2940188221",
+      "player_id": 39360,
+      "player_name": "Oso",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 2940188221,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 3357000,
+      "entry_price": null,
+      "bid_created_epoch": 1787675390,
+      "bid_until_epoch": 1787720400,
+      "snapshot_player_value": 3050000,
+      "listing_price_at_bid": 3050000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 89.7,
+      "max_rational_bid_at_bid": 3534328,
+      "expected_exit_value_at_bid": 3817075,
+      "expected_profit_at_bid": 460075,
+      "expected_roi_at_bid_percent": 13.7,
+      "t15_after_bid": 1132058,
+      "current_value": 3050000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-25T16:50:50.121472+00:00",
+      "updated_at": "2026-08-26T05:12:44.436266+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-25T16:50:50.121488+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2940188221,
+            "bid_amount": 3357000
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-26T05:12:44.436264+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2693810669",
+      "player_id": 29185,
+      "player_name": "Pablo Durán",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 2693810669,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 236531,
+      "entry_price": 236531,
+      "bid_created_epoch": 1787783327,
+      "bid_until_epoch": 1787806800,
+      "snapshot_player_value": 190000,
+      "listing_price_at_bid": 190000,
+      "speculation_score_at_bid": 93.0,
+      "trading_score_at_bid": 84.3,
+      "max_rational_bid_at_bid": 215183,
+      "expected_exit_value_at_bid": 236702,
+      "expected_profit_at_bid": 171,
+      "expected_roi_at_bid_percent": 0.07,
+      "t15_after_bid": 4482708,
+      "current_value": 400000,
+      "unrealized_profit": 163469,
+      "unrealized_roi_percent": 69.11,
+      "opened_at": "2026-08-27T06:24:46.877836+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-26T22:28:55.623930+00:00",
+      "updated_at": "2026-09-15T17:14:37.949355+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-26T22:28:55.623945+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2693810669,
+            "bid_amount": 236531
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-27T06:24:46.877844+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 236531 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-27T06:24:47.809162+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -11.22
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T17:02:23.463340+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 1.47
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-28T19:02:44.325087+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 1.47
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-03T05:02:45.092603+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 43.74
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166540+00:00",
+          "detail": "V10.6 SHADOW: TAKE_PROFIT -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 52.2
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T21:03:51.659300+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 52.2
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-05T05:32:48.377754+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 56.43
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-06T15:33:04.325900+00:00",
+          "detail": "V10.6 SHADOW: TAKE_PROFIT -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 60.66
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-08T05:21:37.509033+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 69.11
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T19:40:06.212732+00:00",
+          "detail": "V10.6 SHADOW: TAKE_PROFIT -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 81.79
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T22:33:50.540448+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> TAKE_PROFIT.",
+          "data": {
+            "decision_basis": "PROFIT_HARVEST",
+            "roi_percent": 81.79
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340172+00:00",
+        "action": "TAKE_PROFIT",
+        "priority": 85,
+        "decision_basis": "PROFIT_HARVEST",
+        "confidence": "LOW",
+        "profit": 163469,
+        "roi_percent": 69.11,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 8.0,
+        "scores": {
+          "hold": 4.4,
+          "take_profit": 95.0,
+          "cut_loss": 0.0,
+          "rotate_capital": 6.0
+        },
+        "reasons": [
+          "La plusvalía/avance de tesis compensa más que el upside restante.",
+          "La tesis de precio original ya ha alcanzado su objetivo.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-3021906351",
+      "player_id": 38422,
+      "player_name": "Redondo",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 3021906351,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 390350,
+      "entry_price": null,
+      "bid_created_epoch": 1787844709,
+      "bid_until_epoch": 1787976244,
+      "snapshot_player_value": 370000,
+      "listing_price_at_bid": 350000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 90.8,
+      "max_rational_bid_at_bid": 430227,
+      "expected_exit_value_at_bid": 464646,
+      "expected_profit_at_bid": 74296,
+      "expected_roi_at_bid_percent": 19.03,
+      "t15_after_bid": 4552627,
+      "current_value": 370000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-27T15:31:49.540902+00:00",
+      "updated_at": "2026-08-29T04:32:17.437928+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-27T15:31:49.540920+00:00",
+          "detail": "Puja especulativa enviada y verificada por 390350 EUR.",
+          "data": {
+            "offer_id": 3021906351,
+            "expected_exit_value": 464646,
+            "expected_roi_percent": 19.03
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-29T04:02:12.258080+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-29T04:32:17.437925+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-1517147638",
+      "player_id": 22975,
+      "player_name": "Dani Cárdenas",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 1517147638,
+      "seller_id": null,
+      "seller": "MÁQUINA",
+      "bid_amount": 1404000,
+      "entry_price": null,
+      "bid_created_epoch": 1787857342,
+      "bid_until_epoch": 1787893200,
+      "snapshot_player_value": 1350000,
+      "listing_price_at_bid": 1350000,
+      "speculation_score_at_bid": 97.1,
+      "trading_score_at_bid": 84.1,
+      "max_rational_bid_at_bid": 1547099,
+      "expected_exit_value_at_bid": 1701810,
+      "expected_profit_at_bid": 297810,
+      "expected_roi_at_bid_percent": 21.21,
+      "t15_after_bid": 7097977,
+      "current_value": 1350000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-27T19:02:22.725594+00:00",
+      "updated_at": "2026-08-28T05:02:30.612034+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-27T19:02:22.725614+00:00",
+          "detail": "Puja especulativa enviada y verificada por 1404000 EUR.",
+          "data": {
+            "offer_id": 1517147638,
+            "expected_exit_value": 1701810,
+            "expected_roi_percent": 21.21
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-28T05:02:30.612031+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-828968928",
+      "player_id": 25815,
+      "player_name": "Nacho Pérez",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 828968928,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 647900,
+      "entry_price": null,
+      "bid_created_epoch": 1787873512,
+      "bid_until_epoch": 1787976227,
+      "snapshot_player_value": 620000,
+      "listing_price_at_bid": 560000,
+      "speculation_score_at_bid": 95.9,
+      "trading_score_at_bid": 82.5,
+      "max_rational_bid_at_bid": 710069,
+      "expected_exit_value_at_bid": 781076,
+      "expected_profit_at_bid": 133176,
+      "expected_roi_at_bid_percent": 20.56,
+      "t15_after_bid": 4295077,
+      "current_value": 620000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-27T23:31:53.391127+00:00",
+      "updated_at": "2026-08-29T04:32:17.437935+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-27T23:31:53.391145+00:00",
+          "detail": "Puja especulativa enviada y verificada por 647900 EUR.",
+          "data": {
+            "offer_id": 828968928,
+            "expected_exit_value": 781076,
+            "expected_roi_percent": 20.56
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-28T05:02:30.612039+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-29T04:32:17.437933+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-1648980910",
+      "player_id": 15396,
+      "player_name": "Brugué",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 1648980910,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 464200,
+      "entry_price": null,
+      "bid_created_epoch": 1787893353,
+      "bid_until_epoch": 1788064970,
+      "snapshot_player_value": 440000,
+      "listing_price_at_bid": 370000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 91.4,
+      "max_rational_bid_at_bid": 521848,
+      "expected_exit_value_at_bid": 563596,
+      "expected_profit_at_bid": 99396,
+      "expected_roi_at_bid_percent": 21.41,
+      "t15_after_bid": 4478777,
+      "current_value": 440000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-28T05:02:34.530265+00:00",
+      "updated_at": "2026-08-30T05:03:28.905124+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-28T05:02:34.530281+00:00",
+          "detail": "Puja especulativa enviada y verificada por 464200 EUR.",
+          "data": {
+            "offer_id": 1648980910,
+            "expected_exit_value": 563596,
+            "expected_roi_percent": 21.41
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-28T17:02:21.858716+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-30T05:03:28.905120+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2269950242",
+      "player_id": 1721,
+      "player_name": "Jugador 1721",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 2269950242,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1564837,
+      "entry_price": 1564837,
+      "bid_created_epoch": 1787961720,
+      "bid_until_epoch": 1787979600,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1560000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 1690000,
+      "unrealized_profit": 125163,
+      "unrealized_roi_percent": 8.0,
+      "opened_at": "2026-08-29T05:06:28.414968+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-08-29T00:02:10.740691+00:00",
+      "updated_at": "2026-09-15T17:14:37.949360+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-29T00:02:10.740711+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2269950242,
+            "bid_amount": 1564837
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-08-29T05:06:28.414974+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 1564837 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-29T05:06:30.199178+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -0.31
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-08-31T05:02:45.070713+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -0.95
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T19:04:15.166546+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": -4.14
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-04T21:03:51.659306+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> CUT_LOSS.",
+          "data": {
+            "decision_basis": "LOSS_AND_DETERIORATION",
+            "roi_percent": -4.14
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-08T05:21:37.509040+00:00",
+          "detail": "V10.6 SHADOW: CUT_LOSS -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -4.14
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T19:40:06.212738+00:00",
+          "detail": "V10.6 SHADOW: HOLD -> ROTATE_CAPITAL.",
+          "data": {
+            "decision_basis": "SOLVENCY_EMERGENCY",
+            "roi_percent": 1.61
+          }
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-11T22:33:50.540454+00:00",
+          "detail": "V10.6 SHADOW: ROTATE_CAPITAL -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_WINNER",
+            "roi_percent": 1.61
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340177+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": 125163,
+        "roi_percent": 8.0,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 43.0,
+        "scores": {
+          "hold": 33.7,
+          "take_profit": 15.0,
+          "cut_loss": 0.0,
+          "rotate_capital": 0.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Jugador en XI; protección deportiva 43.0/100.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-2779259952",
+      "player_id": 41566,
+      "player_name": "Gerenabarrena",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 2779259952,
+      "seller_id": null,
+      "seller": "MÁQUINA",
+      "bid_amount": 556200,
+      "entry_price": null,
+      "bid_created_epoch": 1787963518,
+      "bid_until_epoch": 1787979600,
+      "snapshot_player_value": 540000,
+      "listing_price_at_bid": 540000,
+      "speculation_score_at_bid": 94.3,
+      "trading_score_at_bid": 78.3,
+      "max_rational_bid_at_bid": 602678,
+      "expected_exit_value_at_bid": 675000,
+      "expected_profit_at_bid": 118800,
+      "expected_roi_at_bid_percent": 21.36,
+      "t15_after_bid": 4678277,
+      "current_value": 540000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-29T00:31:58.476223+00:00",
+      "updated_at": "2026-08-29T05:06:28.414984+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-29T00:31:58.476243+00:00",
+          "detail": "Puja especulativa enviada y verificada por 556200 EUR.",
+          "data": {
+            "offer_id": 2779259952,
+            "expected_exit_value": 675000,
+            "expected_roi_percent": 21.36
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-29T05:06:28.414982+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-385313079",
+      "player_id": 9045,
+      "player_name": "Enes Ünal",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 385313079,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 4315000,
+      "entry_price": null,
+      "bid_created_epoch": 1788035242,
+      "bid_until_epoch": 1788066000,
+      "snapshot_player_value": 4210000,
+      "listing_price_at_bid": 4210000,
+      "speculation_score_at_bid": 79.6,
+      "trading_score_at_bid": 65.2,
+      "max_rational_bid_at_bid": 4349456,
+      "expected_exit_value_at_bid": 4871391,
+      "expected_profit_at_bid": 556391,
+      "expected_roi_at_bid_percent": 12.89,
+      "t15_after_bid": 447490,
+      "current_value": 4210000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-08-29T20:32:09.948022+00:00",
+      "updated_at": "2026-08-30T05:03:28.905137+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-08-29T20:32:09.948040+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 385313079,
+            "bid_amount": 4315000
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-30T05:03:28.905133+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2397700801",
+      "player_id": 41566,
+      "player_name": "Gerenabarrena",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 2397700801,
+      "seller_id": 14156489,
+      "seller": "MANAGER: Luismi_Haz",
+      "bid_amount": 689700,
+      "entry_price": null,
+      "bid_created_epoch": 1788040941,
+      "bid_until_epoch": 1788213060,
+      "snapshot_player_value": 600000,
+      "listing_price_at_bid": 600000,
+      "speculation_score_at_bid": 98.3,
+      "trading_score_at_bid": 80.9,
+      "max_rational_bid_at_bid": 690545,
+      "expected_exit_value_at_bid": 759600,
+      "expected_profit_at_bid": 132600,
+      "expected_roi_at_bid_percent": 21.15,
+      "t15_after_bid": 4051540,
+      "current_value": 600000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-29T22:02:21.914624+00:00",
+      "updated_at": "2026-08-31T22:02:12.362059+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-29T22:02:21.914641+00:00",
+          "detail": "Puja especulativa enviada y verificada por 627000 EUR.",
+          "data": {
+            "offer_id": 1851957445,
+            "expected_exit_value": 759600,
+            "expected_roi_percent": 21.15
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-08-31T22:02:12.362056+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-560143974",
+      "player_id": 22690,
+      "player_name": "Tete Morente",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 560143974,
+      "seller_id": 14145555,
+      "seller": "MANAGER: Pollo17",
+      "bid_amount": 480700,
+      "entry_price": null,
+      "bid_created_epoch": 1788130922,
+      "bid_until_epoch": 1788300947,
+      "snapshot_player_value": 420000,
+      "listing_price_at_bid": 420000,
+      "speculation_score_at_bid": 91.8,
+      "trading_score_at_bid": 79.7,
+      "max_rational_bid_at_bid": 463537,
+      "expected_exit_value_at_bid": 519162,
+      "expected_profit_at_bid": 84462,
+      "expected_roi_at_bid_percent": 19.43,
+      "t15_after_bid": 4243840,
+      "current_value": 420000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-08-30T23:02:03.036771+00:00",
+      "updated_at": "2026-09-01T22:31:52.433656+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-08-30T23:02:03.036786+00:00",
+          "detail": "Puja especulativa enviada y verificada por 434700 EUR.",
+          "data": {
+            "offer_id": 459338329,
+            "expected_exit_value": 519162,
+            "expected_roi_percent": 19.43
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-08-31T10:32:00.515617+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-01T22:31:52.433653+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-3036517211",
+      "player_id": 5697,
+      "player_name": "Mariano",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 3036517211,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 4415000,
+      "entry_price": null,
+      "bid_created_epoch": 1788499152,
+      "bid_until_epoch": 1788584400,
+      "snapshot_player_value": 4210000,
+      "listing_price_at_bid": 4210000,
+      "speculation_score_at_bid": 80.3,
+      "trading_score_at_bid": 64.7,
+      "max_rational_bid_at_bid": 4265632,
+      "expected_exit_value_at_bid": 4777508,
+      "expected_profit_at_bid": 362508,
+      "expected_roi_at_bid_percent": 8.21,
+      "t15_after_bid": 2321140,
+      "current_value": 4210000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-09-04T05:32:51.276356+00:00",
+      "updated_at": "2026-09-05T05:02:09.516808+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-04T05:32:51.276371+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 3036517211,
+            "bid_amount": 4415000
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-05T05:02:09.516806+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-4150857384",
+      "player_id": 19862,
+      "player_name": "Expósito",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 4150857384,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 5147000,
+      "entry_price": null,
+      "bid_created_epoch": 1788499178,
+      "bid_until_epoch": 1788584400,
+      "snapshot_player_value": 5130000,
+      "listing_price_at_bid": 5130000,
+      "speculation_score_at_bid": 71.0,
+      "trading_score_at_bid": 73.7,
+      "max_rational_bid_at_bid": 5005414,
+      "expected_exit_value_at_bid": 5606064,
+      "expected_profit_at_bid": 459064,
+      "expected_roi_at_bid_percent": 8.92,
+      "t15_after_bid": 1546776,
+      "current_value": 5130000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-09-04T05:32:51.276392+00:00",
+      "updated_at": "2026-09-05T05:02:09.516813+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-04T05:32:51.276396+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 4150857384,
+            "bid_amount": 5147000
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-05T05:02:09.516811+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2927165993",
+      "player_id": 27929,
+      "player_name": "André Almeida",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 2927165993,
+      "seller_id": null,
+      "seller": "MÁQUINA",
+      "bid_amount": 861000,
+      "entry_price": null,
+      "bid_created_epoch": 1788503514,
+      "bid_until_epoch": 1788584400,
+      "snapshot_player_value": 820000,
+      "listing_price_at_bid": 820000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 88.6,
+      "max_rational_bid_at_bid": 943987,
+      "expected_exit_value_at_bid": 1019506,
+      "expected_profit_at_bid": 158506,
+      "expected_roi_at_bid_percent": 18.41,
+      "t15_after_bid": 7522540,
+      "current_value": 820000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-09-04T06:31:55.053772+00:00",
+      "updated_at": "2026-09-05T05:02:09.516817+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-09-04T06:31:55.053789+00:00",
+          "detail": "Puja especulativa enviada y verificada por 861000 EUR.",
+          "data": {
+            "offer_id": 2927165993,
+            "expected_exit_value": 1019506,
+            "expected_roi_percent": 18.41
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-05T05:02:09.516815+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-916732931",
+      "player_id": 23572,
+      "player_name": "Rubén Sánchez",
+      "strategy": "SPECULATION",
+      "origin": "CONTROLLED_LIVE",
+      "status": "LOST",
+      "offer_id": 916732931,
+      "seller_id": null,
+      "seller": "MÁQUINA",
+      "bid_amount": 315000,
+      "entry_price": null,
+      "bid_created_epoch": 1788563778,
+      "bid_until_epoch": 1788584400,
+      "snapshot_player_value": 300000,
+      "listing_price_at_bid": 300000,
+      "speculation_score_at_bid": 100.0,
+      "trading_score_at_bid": 90.2,
+      "max_rational_bid_at_bid": 354638,
+      "expected_exit_value_at_bid": 383010,
+      "expected_profit_at_bid": 68010,
+      "expected_roi_at_bid_percent": 21.59,
+      "t15_after_bid": 7680908,
+      "current_value": 300000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "LIVE_DECISION_EXACT",
+      "created_at": "2026-09-04T23:16:18.581677+00:00",
+      "updated_at": "2026-09-05T05:02:09.516820+00:00",
+      "events": [
+        {
+          "type": "BID_SENT",
+          "at": "2026-09-04T23:16:18.581696+00:00",
+          "detail": "Puja especulativa enviada y verificada por 315000 EUR.",
+          "data": {
+            "offer_id": 916732931,
+            "expected_exit_value": 383010,
+            "expected_roi_percent": 21.59
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-05T05:02:09.516819+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-4174028607",
+      "player_id": 856,
+      "player_name": "Kiko Femenía",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 4174028607,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1229925,
+      "entry_price": null,
+      "bid_created_epoch": 1788600713,
+      "bid_until_epoch": 1788670800,
+      "snapshot_player_value": 1150000,
+      "listing_price_at_bid": 1150000,
+      "speculation_score_at_bid": 74.6,
+      "trading_score_at_bid": 72.9,
+      "max_rational_bid_at_bid": 1162013,
+      "expected_exit_value_at_bid": 1301455,
+      "expected_profit_at_bid": 71530,
+      "expected_roi_at_bid_percent": 5.82,
+      "t15_after_bid": 3915195,
+      "current_value": 1150000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-09-05T09:32:08.253551+00:00",
+      "updated_at": "2026-09-06T05:02:59.875802+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-05T09:32:08.253567+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 4174028607,
+            "bid_amount": 1229925
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-06T05:02:59.875799+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-3970684241",
+      "player_id": 34479,
+      "player_name": "Pépé",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 3970684241,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 11227001,
+      "entry_price": null,
+      "bid_created_epoch": 1788866932,
+      "bid_until_epoch": 1788930000,
+      "snapshot_player_value": 11200000,
+      "listing_price_at_bid": 11200000,
+      "speculation_score_at_bid": 78.1,
+      "trading_score_at_bid": 73.4,
+      "max_rational_bid_at_bid": 2973382,
+      "expected_exit_value_at_bid": 12545120,
+      "expected_profit_at_bid": 1318119,
+      "expected_roi_at_bid_percent": 11.74,
+      "t15_after_bid": 1343301,
+      "current_value": 11200000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-09-08T11:43:41.551345+00:00",
+      "updated_at": "2026-09-09T05:23:48.483931+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-08T11:43:41.551361+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 3970684241,
+            "bid_amount": 11227001
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-09-08T21:05:21.555597+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-09T05:23:48.483927+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-897214161",
+      "player_id": 25769,
+      "player_name": "Aubameyang",
+      "strategy": "SPECULATION",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 897214161,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 12391002,
+      "entry_price": null,
+      "bid_created_epoch": 1789019774,
+      "bid_until_epoch": 1789102800,
+      "snapshot_player_value": 12170000,
+      "listing_price_at_bid": 12170000,
+      "speculation_score_at_bid": 78.2,
+      "trading_score_at_bid": 64.2,
+      "max_rational_bid_at_bid": 3608383,
+      "expected_exit_value_at_bid": 13872583,
+      "expected_profit_at_bid": 1655583,
+      "expected_roi_at_bid_percent": 13.55,
+      "t15_after_bid": 2295650,
+      "current_value": 12170000,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "CURRENT_RECONSTRUCTION",
+      "created_at": "2026-09-10T07:04:17.878915+00:00",
+      "updated_at": "2026-09-11T05:35:20.685938+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-10T07:04:17.878932+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 897214161,
+            "bid_amount": 12217000
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-11T05:35:20.685935+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-727603228",
+      "player_id": 30334,
+      "player_name": "Jugador 30334",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 727603228,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 150376,
+      "entry_price": 150376,
+      "bid_created_epoch": 1789181214,
+      "bid_until_epoch": 1789189200,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 150000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 150000,
+      "unrealized_profit": -376,
+      "unrealized_roi_percent": -0.25,
+      "opened_at": "2026-09-12T05:19:20.952690+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-12T02:52:15.764569+00:00",
+      "updated_at": "2026-09-15T17:14:37.949364+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-12T02:52:15.764587+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 727603228,
+            "bid_amount": 150376
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-09-12T05:19:20.952698+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 150376 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-12T05:19:22.874342+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -0.25
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340182+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": -376,
+        "roi_percent": -0.25,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 20.0,
+        "scores": {
+          "hold": 21.0,
+          "take_profit": 0.0,
+          "cut_loss": 15.0,
+          "rotate_capital": 8.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-2661792680",
+      "player_id": 12087,
+      "player_name": "Jugador 12087",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION_MISSING_REVIEW",
+      "offer_id": 2661792680,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 240601,
+      "entry_price": 240601,
+      "bid_created_epoch": 1789181215,
+      "bid_until_epoch": 1789189200,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 240000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 240000,
+      "unrealized_profit": -601,
+      "unrealized_roi_percent": -0.25,
+      "opened_at": "2026-09-12T05:19:20.952704+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-12T02:52:15.764612+00:00",
+      "updated_at": "2026-09-15T17:14:37.949367+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-12T02:52:15.764617+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2661792680,
+            "bid_amount": 240601
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-09-12T05:19:20.952709+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 240601 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-12T05:19:22.874347+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -0.25
+          }
+        },
+        {
+          "type": "POSITION_MISSING",
+          "at": "2026-09-15T12:02:13.172426+00:00",
+          "detail": "La posicion abierta ya no aparece en plantilla. V10.5 no inventa un precio de venta; queda pendiente de reconciliacion de venta en V10.6.",
+          "data": {}
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T06:21:41.370596+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": -601,
+        "roi_percent": -0.25,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 8.0,
+        "scores": {
+          "hold": 14.4,
+          "take_profit": 0.0,
+          "cut_loss": 15.0,
+          "rotate_capital": 14.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Fase NORMAL | T-15 tras buffer 6017917 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-1385303769",
+      "player_id": 37499,
+      "player_name": "Jugador 37499",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 1385303769,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 2760000,
+      "entry_price": 2760000,
+      "bid_created_epoch": 1789224303,
+      "bid_until_epoch": 1789275600,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 2760000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 2580000,
+      "unrealized_profit": -180000,
+      "unrealized_roi_percent": -6.52,
+      "opened_at": "2026-09-13T06:27:55.741837+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-12T14:50:32.666545+00:00",
+      "updated_at": "2026-09-15T17:14:37.949370+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-12T14:50:32.666562+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 1385303769,
+            "bid_amount": 2760000
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-09-13T06:27:55.741845+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 2760000 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-13T06:27:59.065800+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -1.09
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340186+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": -180000,
+        "roi_percent": -6.52,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 43.0,
+        "scores": {
+          "hold": 33.7,
+          "take_profit": 0.0,
+          "cut_loss": 15.0,
+          "rotate_capital": 0.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Jugador en XI; protección deportiva 43.0/100.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-1303703388",
+      "player_id": 1602,
+      "player_name": "Jugador 1602",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 1303703388,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 2873240,
+      "entry_price": 2873240,
+      "bid_created_epoch": 1789243772,
+      "bid_until_epoch": 1789275600,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 2680000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 2620000,
+      "unrealized_profit": -253240,
+      "unrealized_roi_percent": -8.81,
+      "opened_at": "2026-09-13T06:27:55.741852+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-12T20:09:49.948144+00:00",
+      "updated_at": "2026-09-15T17:14:37.949374+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-12T20:09:49.948160+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 1303703388,
+            "bid_amount": 2873240
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-09-13T06:27:55.741857+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 2873240 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-13T06:27:59.065807+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "HOLD_SPORTING_VALUE",
+            "roi_percent": -7.42
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340190+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": -253240,
+        "roi_percent": -8.81,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 0.0,
+        "scores": {
+          "hold": 10.0,
+          "take_profit": 0.0,
+          "cut_loss": 35.0,
+          "rotate_capital": 18.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-1016073461",
+      "player_id": 41412,
+      "player_name": "Jugador 41412",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 1016073461,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 4797017,
+      "entry_price": null,
+      "bid_created_epoch": 1789317312,
+      "bid_until_epoch": 1789362000,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 4790000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-13T17:10:30.420417+00:00",
+      "updated_at": "2026-09-14T05:19:44.505324+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-13T17:10:30.420435+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 1016073461,
+            "bid_amount": 4797017
+          }
+        },
+        {
+          "type": "BID_UNCONFIRMED",
+          "at": "2026-09-13T19:10:13.215328+00:00",
+          "detail": "No aparece como oferta activa, pero aun no hay evidencia suficiente para marcarla LOST.",
+          "data": {}
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-14T05:19:44.505322+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-2922133591",
+      "player_id": 1676,
+      "player_name": "Jugador 1676",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "LOST",
+      "offer_id": 2922133591,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 3115017,
+      "entry_price": null,
+      "bid_created_epoch": 1789334982,
+      "bid_until_epoch": 1789362000,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 3100000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-13T22:39:19.223429+00:00",
+      "updated_at": "2026-09-14T05:19:44.505330+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-13T22:39:19.223446+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2922133591,
+            "bid_amount": 3115017
+          }
+        },
+        {
+          "type": "BID_LOST",
+          "at": "2026-09-14T05:19:44.505328+00:00",
+          "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-929035588",
+      "player_id": 37726,
+      "player_name": "Jugador 37726",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 929035588,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1122020,
+      "entry_price": 1122020,
+      "bid_created_epoch": 1789413739,
+      "bid_until_epoch": 1789448400,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1120000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 1150000,
+      "unrealized_profit": 27980,
+      "unrealized_roi_percent": 2.49,
+      "opened_at": "2026-09-15T05:28:54.858291+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-14T20:11:05.102108+00:00",
+      "updated_at": "2026-09-15T17:14:37.949377+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-14T20:11:05.102122+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 929035588,
+            "bid_amount": 1122020
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-09-15T05:28:54.858297+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 1122020 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-15T05:29:19.076020+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": 2.49
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340194+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": 27980,
+        "roi_percent": 2.49,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 35.0,
+        "scores": {
+          "hold": 29.2,
+          "take_profit": 0.0,
+          "cut_loss": 0.0,
+          "rotate_capital": 0.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Jugador en XI; protección deportiva 35.0/100.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-935346951",
+      "player_id": 10040,
+      "player_name": "Jugador 10040",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "OPEN_POSITION",
+      "offer_id": 935346951,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1604001,
+      "entry_price": 1604001,
+      "bid_created_epoch": 1789440487,
+      "bid_until_epoch": 1789448400,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1600000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 1570000,
+      "unrealized_profit": -34001,
+      "unrealized_roi_percent": -2.12,
+      "opened_at": "2026-09-15T05:28:54.858301+00:00",
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-15T02:54:37.362776+00:00",
+      "updated_at": "2026-09-15T17:14:37.949380+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-15T02:54:37.362792+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 935346951,
+            "bid_amount": 1604001
+          }
+        },
+        {
+          "type": "BID_WON",
+          "at": "2026-09-15T05:28:54.858304+00:00",
+          "detail": "Jugador detectado en plantilla. Entrada registrada por 1604001 EUR.",
+          "data": {}
+        },
+        {
+          "type": "POSITION_MANAGER_SHADOW_ACTION",
+          "at": "2026-09-15T05:29:19.076025+00:00",
+          "detail": "V10.6 SHADOW: NONE -> HOLD.",
+          "data": {
+            "decision_basis": "NO_EXIT_EDGE",
+            "roi_percent": -2.12
+          }
+        }
+      ],
+      "management_v106": {
+        "version": "V10.6",
+        "mode": "SHADOW",
+        "last_evaluated_at": "2026-09-15T17:14:57.340199+00:00",
+        "action": "HOLD",
+        "priority": 20,
+        "decision_basis": "NO_EXIT_EDGE",
+        "confidence": "LOW",
+        "profit": -34001,
+        "roi_percent": -2.12,
+        "market_outlook": "NEUTRAL",
+        "sporting_protection_score": 8.0,
+        "scores": {
+          "hold": 14.4,
+          "take_profit": 0.0,
+          "cut_loss": 15.0,
+          "rotate_capital": 6.0
+        },
+        "reasons": [
+          "No existe una ventaja suficiente para cerrar o rotar la posición.",
+          "Fase NORMAL | T-15 tras buffer 9061715 EUR."
+        ]
+      }
+    },
+    {
+      "position_id": "BID-2736256403",
+      "player_id": 31707,
+      "player_name": "Jugador 31707",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "BID_PENDING",
+      "offer_id": 2736256403,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1426025,
+      "entry_price": null,
+      "bid_created_epoch": 1789471539,
+      "bid_until_epoch": 1789534800,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1250000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-15T12:02:13.172318+00:00",
+      "updated_at": "2026-09-15T17:14:37.949385+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-15T12:02:13.172334+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 2736256403,
+            "bid_amount": 1426025
+          }
+        }
+      ]
+    },
+    {
+      "position_id": "BID-1042677470",
+      "player_id": 42396,
+      "player_name": "Jugador 42396",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "BID_PENDING",
+      "offer_id": 1042677470,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 1056003,
+      "entry_price": null,
+      "bid_created_epoch": 1789485905,
+      "bid_until_epoch": 1789534800,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 1050000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-15T16:15:04.702235+00:00",
+      "updated_at": "2026-09-15T17:14:37.949389+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-15T16:15:04.702254+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 1042677470,
+            "bid_amount": 1056003
+          }
+        }
+      ]
+    }
+  ],
+  "realized": {
+    "closed_positions": 0,
+    "profit_eur": 0
+  }
+}

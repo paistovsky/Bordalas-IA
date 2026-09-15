@@ -1,0 +1,419 @@
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "Deportivo Alavés", "away": "Getafe CF", "new_kickoff": "2026-08-15T19:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "Sevilla FC", "away": "Rayo Vallecano", "new_kickoff": "2026-08-15T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "R. Racing Club", "away": "Villarreal CF", "new_kickoff": "2026-08-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "RCD Espanyol de Barcelona", "away": "Levante UD", "new_kickoff": "2026-08-16T19:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "RC Deportivo", "away": "Elche CF", "new_kickoff": "2026-08-17T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "Atlético de Madrid", "away": "Málaga CF", "new_kickoff": "2026-08-19T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "Valencia CF", "away": "Real Betis", "new_kickoff": "2026-08-25T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "Real Madrid", "away": "Real Sociedad", "new_kickoff": "2026-08-26T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "Celta", "away": "CA Osasuna", "new_kickoff": "2026-08-27T20:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 1, "home": "FC Barcelona", "away": "Athletic Club", "new_kickoff": "2026-08-27T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Rayo Vallecano", "away": "Deportivo Alavés", "new_kickoff": "2026-08-20T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Real Betis", "away": "Real Sociedad", "new_kickoff": "2026-08-21T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Athletic Club", "away": "Sevilla FC", "new_kickoff": "2026-08-22T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Valencia CF", "away": "Celta", "new_kickoff": "2026-08-22T19:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "RCD Espanyol de Barcelona", "away": "Real Madrid", "new_kickoff": "2026-08-22T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Atlético de Madrid", "away": "Villarreal CF", "new_kickoff": "2026-08-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Getafe CF", "away": "R. Racing Club", "new_kickoff": "2026-08-23T19:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Elche CF", "away": "FC Barcelona", "new_kickoff": "2026-08-23T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "CA Osasuna", "away": "Levante UD", "new_kickoff": "2026-08-24T19:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 2, "home": "Málaga CF", "away": "RC Deportivo", "new_kickoff": "2026-08-24T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "R. Racing Club", "away": "Elche CF", "new_kickoff": "2026-08-28T19:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "Deportivo Alavés", "away": "Villarreal CF", "new_kickoff": "2026-08-28T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "Levante UD", "away": "Real Betis", "new_kickoff": "2026-08-29T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "Real Sociedad", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-08-29T19:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "Sevilla FC", "away": "Atlético de Madrid", "new_kickoff": "2026-08-29T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "Real Madrid", "away": "Málaga CF", "new_kickoff": "2026-08-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "RC Deportivo", "away": "Valencia CF", "new_kickoff": "2026-08-30T19:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "Celta", "away": "Athletic Club", "new_kickoff": "2026-08-30T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "CA Osasuna", "away": "Getafe CF", "new_kickoff": "2026-08-31T19:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 3, "home": "FC Barcelona", "away": "Rayo Vallecano", "new_kickoff": "2026-08-31T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Real Betis", "away": "Real Madrid", "new_kickoff": "2026-09-04T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Athletic Club", "away": "Atlético de Madrid", "new_kickoff": "2026-09-05T16:15:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Rayo Vallecano", "away": "R. Racing Club", "new_kickoff": "2026-09-05T18:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Villarreal CF", "away": "RC Deportivo", "new_kickoff": "2026-09-05T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Valencia CF", "away": "FC Barcelona", "new_kickoff": "2026-09-06T16:15:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Deportivo Alavés", "away": "CA Osasuna", "new_kickoff": "2026-09-06T18:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Málaga CF", "away": "Levante UD", "new_kickoff": "2026-09-06T18:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "RCD Espanyol de Barcelona", "away": "Sevilla FC", "new_kickoff": "2026-09-06T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Getafe CF", "away": "Celta", "new_kickoff": "2026-09-07T19:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 4, "home": "Elche CF", "away": "Real Sociedad", "new_kickoff": "2026-09-07T21:30:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Athletic Club", "away": "Elche CF", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Celta", "away": "Málaga CF", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Getafe CF", "away": "RC Deportivo", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Levante UD", "away": "FC Barcelona", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "CA Osasuna", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "R. Racing Club", "away": "Deportivo Alavés", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Real Madrid", "away": "Rayo Vallecano", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Real Sociedad", "away": "Atlético de Madrid", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Sevilla FC", "away": "Valencia CF", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 5, "home": "Villarreal CF", "away": "Real Betis", "new_kickoff": "2026-09-13T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Real Sociedad", "away": "Celta", "new_kickoff": "2026-09-03T21:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Deportivo Alavés", "away": "Valencia CF", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Atlético de Madrid", "away": "CA Osasuna", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "FC Barcelona", "away": "R. Racing Club", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "RC Deportivo", "away": "Sevilla FC", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Elche CF", "away": "Real Madrid", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Levante UD", "away": "Athletic Club", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Málaga CF", "away": "Villarreal CF", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Rayo Vallecano", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 6, "home": "Real Betis", "away": "Getafe CF", "new_kickoff": "2026-09-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "Athletic Club", "away": "Deportivo Alavés", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "Atlético de Madrid", "away": "Real Madrid", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "Celta", "away": "R. Racing Club", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "RC Deportivo", "away": "Real Betis", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "RCD Espanyol de Barcelona", "away": "Elche CF", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "Getafe CF", "away": "Málaga CF", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "CA Osasuna", "away": "Rayo Vallecano", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "Sevilla FC", "away": "FC Barcelona", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "Valencia CF", "away": "Real Sociedad", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 7, "home": "Villarreal CF", "away": "Levante UD", "new_kickoff": "2026-09-20T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Deportivo Alavés", "away": "Atlético de Madrid", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "FC Barcelona", "away": "Getafe CF", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Elche CF", "away": "Celta", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Levante UD", "away": "Sevilla FC", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Málaga CF", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "R. Racing Club", "away": "Valencia CF", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Rayo Vallecano", "away": "Athletic Club", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Real Betis", "away": "CA Osasuna", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Real Madrid", "away": "Villarreal CF", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 8, "home": "Real Sociedad", "away": "RC Deportivo", "new_kickoff": "2026-10-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "Celta", "away": "Deportivo Alavés", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "RC Deportivo", "away": "Levante UD", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "RCD Espanyol de Barcelona", "away": "Atlético de Madrid", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "Getafe CF", "away": "Rayo Vallecano", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "Málaga CF", "away": "Real Sociedad", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "CA Osasuna", "away": "R. Racing Club", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "Real Betis", "away": "FC Barcelona", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "Real Madrid", "away": "Sevilla FC", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "Valencia CF", "away": "Athletic Club", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 9, "home": "Villarreal CF", "away": "Elche CF", "new_kickoff": "2026-10-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Deportivo Alavés", "away": "Málaga CF", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Athletic Club", "away": "Getafe CF", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Atlético de Madrid", "away": "RC Deportivo", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "FC Barcelona", "away": "Real Madrid", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Celta", "away": "Real Betis", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "R. Racing Club", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Rayo Vallecano", "away": "Elche CF", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Real Sociedad", "away": "Levante UD", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Sevilla FC", "away": "CA Osasuna", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 10, "home": "Valencia CF", "away": "Villarreal CF", "new_kickoff": "2026-10-25T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "Athletic Club", "away": "Real Sociedad", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "FC Barcelona", "away": "Deportivo Alavés", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "RC Deportivo", "away": "CA Osasuna", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "Elche CF", "away": "Valencia CF", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "Getafe CF", "away": "Sevilla FC", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "Levante UD", "away": "Atlético de Madrid", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "R. Racing Club", "away": "Real Madrid", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "Rayo Vallecano", "away": "Celta", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "Real Betis", "away": "Málaga CF", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 11, "home": "Villarreal CF", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-11-01T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Atlético de Madrid", "away": "FC Barcelona", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Celta", "away": "Levante UD", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Elche CF", "away": "Real Betis", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "RCD Espanyol de Barcelona", "away": "RC Deportivo", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Málaga CF", "away": "R. Racing Club", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "CA Osasuna", "away": "Athletic Club", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Real Sociedad", "away": "Rayo Vallecano", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Sevilla FC", "away": "Deportivo Alavés", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Valencia CF", "away": "Real Madrid", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 12, "home": "Villarreal CF", "away": "Getafe CF", "new_kickoff": "2026-11-08T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "Deportivo Alavés", "away": "RC Deportivo", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "Athletic Club", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "FC Barcelona", "away": "Villarreal CF", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "Getafe CF", "away": "Atlético de Madrid", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "Levante UD", "away": "Elche CF", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "CA Osasuna", "away": "Málaga CF", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "R. Racing Club", "away": "Real Sociedad", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "Rayo Vallecano", "away": "Valencia CF", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "Real Madrid", "away": "Celta", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 13, "home": "Sevilla FC", "away": "Real Betis", "new_kickoff": "2026-11-22T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Celta", "away": "Villarreal CF", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "RC Deportivo", "away": "FC Barcelona", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Elche CF", "away": "Atlético de Madrid", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "RCD Espanyol de Barcelona", "away": "Getafe CF", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Levante UD", "away": "R. Racing Club", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Málaga CF", "away": "Athletic Club", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Real Betis", "away": "Rayo Vallecano", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Real Madrid", "away": "Deportivo Alavés", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Real Sociedad", "away": "Sevilla FC", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 14, "home": "Valencia CF", "away": "CA Osasuna", "new_kickoff": "2026-11-29T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "Deportivo Alavés", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "Athletic Club", "away": "Real Madrid", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "Atlético de Madrid", "away": "Real Betis", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "FC Barcelona", "away": "Celta", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "Getafe CF", "away": "Valencia CF", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "CA Osasuna", "away": "Elche CF", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "R. Racing Club", "away": "RC Deportivo", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "Rayo Vallecano", "away": "Levante UD", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "Sevilla FC", "away": "Málaga CF", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 15, "home": "Villarreal CF", "away": "Real Sociedad", "new_kickoff": "2026-12-06T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Atlético de Madrid", "away": "Valencia CF", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "RC Deportivo", "away": "Athletic Club", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Elche CF", "away": "Sevilla FC", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "RCD Espanyol de Barcelona", "away": "Celta", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Levante UD", "away": "Deportivo Alavés", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Málaga CF", "away": "FC Barcelona", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Real Betis", "away": "R. Racing Club", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Real Madrid", "away": "CA Osasuna", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Real Sociedad", "away": "Getafe CF", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 16, "home": "Villarreal CF", "away": "Rayo Vallecano", "new_kickoff": "2026-12-13T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "Deportivo Alavés", "away": "Elche CF", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "Athletic Club", "away": "Real Betis", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "FC Barcelona", "away": "Real Sociedad", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "Celta", "away": "Atlético de Madrid", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "RC Deportivo", "away": "Real Madrid", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "Getafe CF", "away": "Levante UD", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "CA Osasuna", "away": "Villarreal CF", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "Rayo Vallecano", "away": "Málaga CF", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "Sevilla FC", "away": "R. Racing Club", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 17, "home": "Valencia CF", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2026-12-20T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Celta", "away": "RC Deportivo", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "RCD Espanyol de Barcelona", "away": "FC Barcelona", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Levante UD", "away": "Valencia CF", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Málaga CF", "away": "Elche CF", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "R. Racing Club", "away": "Athletic Club", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Rayo Vallecano", "away": "Atlético de Madrid", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Real Betis", "away": "Deportivo Alavés", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Real Madrid", "away": "Getafe CF", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Real Sociedad", "away": "CA Osasuna", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 18, "home": "Villarreal CF", "away": "Sevilla FC", "new_kickoff": "2027-01-03T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "Deportivo Alavés", "away": "Real Sociedad", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "Athletic Club", "away": "Villarreal CF", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "Atlético de Madrid", "away": "R. Racing Club", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "RC Deportivo", "away": "Rayo Vallecano", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "Elche CF", "away": "Getafe CF", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "RCD Espanyol de Barcelona", "away": "Real Betis", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "CA Osasuna", "away": "FC Barcelona", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "Real Madrid", "away": "Levante UD", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "Sevilla FC", "away": "Celta", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 19, "home": "Valencia CF", "away": "Málaga CF", "new_kickoff": "2027-01-10T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Atlético de Madrid", "away": "Real Sociedad", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "FC Barcelona", "away": "Elche CF", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Celta", "away": "Valencia CF", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Getafe CF", "away": "Athletic Club", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Levante UD", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Málaga CF", "away": "Real Madrid", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "R. Racing Club", "away": "CA Osasuna", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Rayo Vallecano", "away": "Sevilla FC", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Real Betis", "away": "RC Deportivo", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 20, "home": "Villarreal CF", "away": "Deportivo Alavés", "new_kickoff": "2027-01-17T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "Deportivo Alavés", "away": "FC Barcelona", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "Athletic Club", "away": "Levante UD", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "RC Deportivo", "away": "Atlético de Madrid", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "Elche CF", "away": "Rayo Vallecano", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "RCD Espanyol de Barcelona", "away": "Villarreal CF", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "Getafe CF", "away": "CA Osasuna", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "R. Racing Club", "away": "Celta", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "Real Madrid", "away": "Real Betis", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "Real Sociedad", "away": "Málaga CF", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 21, "home": "Valencia CF", "away": "Sevilla FC", "new_kickoff": "2027-01-24T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Atlético de Madrid", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "FC Barcelona", "away": "Valencia CF", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Celta", "away": "Getafe CF", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Levante UD", "away": "Real Sociedad", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Málaga CF", "away": "Deportivo Alavés", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "CA Osasuna", "away": "RC Deportivo", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Rayo Vallecano", "away": "Real Madrid", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Real Betis", "away": "Elche CF", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Sevilla FC", "away": "Athletic Club", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 22, "home": "Villarreal CF", "away": "R. Racing Club", "new_kickoff": "2027-01-31T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "Deportivo Alavés", "away": "Celta", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "Athletic Club", "away": "CA Osasuna", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "FC Barcelona", "away": "Atlético de Madrid", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "RC Deportivo", "away": "Málaga CF", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "Elche CF", "away": "Levante UD", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "RCD Espanyol de Barcelona", "away": "Rayo Vallecano", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "Getafe CF", "away": "Villarreal CF", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "Real Betis", "away": "Sevilla FC", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "Real Sociedad", "away": "Real Madrid", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 23, "home": "Valencia CF", "away": "R. Racing Club", "new_kickoff": "2027-02-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Celta", "away": "Rayo Vallecano", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Elche CF", "away": "RC Deportivo", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Levante UD", "away": "Málaga CF", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "CA Osasuna", "away": "Atlético de Madrid", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "R. Racing Club", "away": "Getafe CF", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Real Madrid", "away": "Athletic Club", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Real Sociedad", "away": "Real Betis", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Sevilla FC", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Valencia CF", "away": "Deportivo Alavés", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 24, "home": "Villarreal CF", "away": "FC Barcelona", "new_kickoff": "2027-02-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "Deportivo Alavés", "away": "R. Racing Club", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "Athletic Club", "away": "Celta", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "Atlético de Madrid", "away": "Elche CF", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "FC Barcelona", "away": "Levante UD", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "RC Deportivo", "away": "Real Sociedad", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "RCD Espanyol de Barcelona", "away": "CA Osasuna", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "Málaga CF", "away": "Real Betis", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "Rayo Vallecano", "away": "Getafe CF", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "Sevilla FC", "away": "Real Madrid", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 25, "home": "Villarreal CF", "away": "Valencia CF", "new_kickoff": "2027-02-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Athletic Club", "away": "FC Barcelona", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Celta", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Getafe CF", "away": "Deportivo Alavés", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Levante UD", "away": "RC Deportivo", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Málaga CF", "away": "Atlético de Madrid", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "CA Osasuna", "away": "Sevilla FC", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "R. Racing Club", "away": "Rayo Vallecano", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Real Betis", "away": "Villarreal CF", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Real Madrid", "away": "Valencia CF", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 26, "home": "Real Sociedad", "away": "Elche CF", "new_kickoff": "2027-02-28T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "Deportivo Alavés", "away": "Athletic Club", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "Atlético de Madrid", "away": "Celta", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "FC Barcelona", "away": "Real Betis", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "RC Deportivo", "away": "Getafe CF", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "Elche CF", "away": "Málaga CF", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "RCD Espanyol de Barcelona", "away": "R. Racing Club", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "Rayo Vallecano", "away": "CA Osasuna", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "Sevilla FC", "away": "Real Sociedad", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "Valencia CF", "away": "Levante UD", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 27, "home": "Villarreal CF", "away": "Real Madrid", "new_kickoff": "2027-03-07T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "Deportivo Alavés", "away": "Sevilla FC", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "Athletic Club", "away": "Valencia CF", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "FC Barcelona", "away": "RC Deportivo", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "Elche CF", "away": "Villarreal CF", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "Getafe CF", "away": "Real Sociedad", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "Málaga CF", "away": "Rayo Vallecano", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "CA Osasuna", "away": "Celta", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "R. Racing Club", "away": "Atlético de Madrid", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "Real Betis", "away": "Levante UD", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 28, "home": "Real Madrid", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-03-14T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Atlético de Madrid", "away": "Getafe CF", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Celta", "away": "Real Madrid", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "RCD Espanyol de Barcelona", "away": "Athletic Club", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Levante UD", "away": "CA Osasuna", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "R. Racing Club", "away": "Real Betis", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Rayo Vallecano", "away": "FC Barcelona", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Real Sociedad", "away": "Deportivo Alavés", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Sevilla FC", "away": "Elche CF", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Valencia CF", "away": "RC Deportivo", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 29, "home": "Villarreal CF", "away": "Málaga CF", "new_kickoff": "2027-03-21T17:00:00+01:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Athletic Club", "away": "R. Racing Club", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "FC Barcelona", "away": "Sevilla FC", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "RC Deportivo", "away": "Villarreal CF", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Elche CF", "away": "Deportivo Alavés", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Getafe CF", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Levante UD", "away": "Rayo Vallecano", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Málaga CF", "away": "CA Osasuna", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Real Betis", "away": "Celta", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Real Madrid", "away": "Atlético de Madrid", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 30, "home": "Real Sociedad", "away": "Valencia CF", "new_kickoff": "2027-04-04T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "Deportivo Alavés", "away": "Real Betis", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "Atlético de Madrid", "away": "Levante UD", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "Celta", "away": "Elche CF", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "RCD Espanyol de Barcelona", "away": "Málaga CF", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "CA Osasuna", "away": "Real Madrid", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "R. Racing Club", "away": "FC Barcelona", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "Rayo Vallecano", "away": "Real Sociedad", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "Sevilla FC", "away": "RC Deportivo", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "Valencia CF", "away": "Getafe CF", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 31, "home": "Villarreal CF", "away": "Athletic Club", "new_kickoff": "2027-04-11T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Deportivo Alavés", "away": "Rayo Vallecano", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Atlético de Madrid", "away": "Sevilla FC", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "FC Barcelona", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "RC Deportivo", "away": "Celta", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Elche CF", "away": "CA Osasuna", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Getafe CF", "away": "Real Madrid", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Levante UD", "away": "Villarreal CF", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Málaga CF", "away": "Valencia CF", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Real Betis", "away": "Athletic Club", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 32, "home": "Real Sociedad", "away": "R. Racing Club", "new_kickoff": "2027-04-18T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "Athletic Club", "away": "RC Deportivo", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "Celta", "away": "FC Barcelona", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "RCD Espanyol de Barcelona", "away": "Real Sociedad", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "Getafe CF", "away": "Real Betis", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "CA Osasuna", "away": "Deportivo Alavés", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "R. Racing Club", "away": "Málaga CF", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "Real Madrid", "away": "Elche CF", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "Sevilla FC", "away": "Levante UD", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "Valencia CF", "away": "Rayo Vallecano", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 33, "home": "Villarreal CF", "away": "Atlético de Madrid", "new_kickoff": "2027-04-21T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Atlético de Madrid", "away": "Deportivo Alavés", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "FC Barcelona", "away": "CA Osasuna", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Celta", "away": "Sevilla FC", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "RC Deportivo", "away": "R. Racing Club", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Elche CF", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Levante UD", "away": "Real Madrid", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Málaga CF", "away": "Getafe CF", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Rayo Vallecano", "away": "Villarreal CF", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Real Betis", "away": "Valencia CF", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 34, "home": "Real Sociedad", "away": "Athletic Club", "new_kickoff": "2027-05-02T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Deportivo Alavés", "away": "Levante UD", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Athletic Club", "away": "Málaga CF", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Getafe CF", "away": "Elche CF", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "CA Osasuna", "away": "Real Sociedad", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "R. Racing Club", "away": "Sevilla FC", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Rayo Vallecano", "away": "RC Deportivo", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Real Betis", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Real Madrid", "away": "FC Barcelona", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Valencia CF", "away": "Atlético de Madrid", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 35, "home": "Villarreal CF", "away": "Celta", "new_kickoff": "2027-05-09T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "Atlético de Madrid", "away": "Rayo Vallecano", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "RC Deportivo", "away": "Deportivo Alavés", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "Elche CF", "away": "Athletic Club", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "RCD Espanyol de Barcelona", "away": "Valencia CF", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "Levante UD", "away": "Getafe CF", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "Málaga CF", "away": "Celta", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "CA Osasuna", "away": "Real Betis", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "Real Madrid", "away": "R. Racing Club", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "Real Sociedad", "away": "FC Barcelona", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 36, "home": "Sevilla FC", "away": "Villarreal CF", "new_kickoff": "2027-05-16T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "Deportivo Alavés", "away": "Real Madrid", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "Atlético de Madrid", "away": "Athletic Club", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "FC Barcelona", "away": "Málaga CF", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "Celta", "away": "Real Sociedad", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "RC Deportivo", "away": "RCD Espanyol de Barcelona", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "R. Racing Club", "away": "Levante UD", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "Rayo Vallecano", "away": "Real Betis", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "Sevilla FC", "away": "Getafe CF", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "Valencia CF", "away": "Elche CF", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 37, "home": "Villarreal CF", "away": "CA Osasuna", "new_kickoff": "2027-05-23T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Athletic Club", "away": "Rayo Vallecano", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Elche CF", "away": "R. Racing Club", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "RCD Espanyol de Barcelona", "away": "Deportivo Alavés", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Getafe CF", "away": "FC Barcelona", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Levante UD", "away": "Celta", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Málaga CF", "away": "Sevilla FC", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "CA Osasuna", "away": "Valencia CF", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Real Betis", "away": "Atlético de Madrid", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Real Madrid", "away": "RC Deportivo", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-13T23:57:03.691849+02:00", "type": "MATCH_ADDED", "matchday": 38, "home": "Real Sociedad", "away": "Villarreal CF", "new_kickoff": "2027-05-30T17:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Sevilla FC", "away": "Valencia CF", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-11T21:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "R. Racing Club", "away": "Deportivo Alavés", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-12T14:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "CA Osasuna", "away": "RCD Espanyol de Barcelona", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-12T16:15:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Athletic Club", "away": "Elche CF", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-12T18:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Real Madrid", "away": "Rayo Vallecano", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-12T21:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Celta", "away": "Málaga CF", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-13T14:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Levante UD", "away": "FC Barcelona", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-13T16:15:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Getafe CF", "away": "RC Deportivo", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-13T18:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Real Sociedad", "away": "Atlético de Madrid", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-13T21:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 5, "home": "Villarreal CF", "away": "Real Betis", "old_kickoff": "2026-09-13T17:00:00+02:00", "new_kickoff": "2026-09-14T21:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Rayo Vallecano", "away": "RCD Espanyol de Barcelona", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-15T19:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Deportivo Alavés", "away": "Valencia CF", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-15T20:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Elche CF", "away": "Real Madrid", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-15T21:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Atlético de Madrid", "away": "CA Osasuna", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-16T19:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "RC Deportivo", "away": "Sevilla FC", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-16T19:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "FC Barcelona", "away": "R. Racing Club", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-16T21:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Levante UD", "away": "Athletic Club", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-16T21:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Real Betis", "away": "Getafe CF", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-17T19:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Málaga CF", "away": "Villarreal CF", "old_kickoff": "2026-09-16T17:00:00+02:00", "new_kickoff": "2026-09-17T21:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "RCD Espanyol de Barcelona", "away": "Elche CF", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-18T21:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "CA Osasuna", "away": "Rayo Vallecano", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-19T14:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "Athletic Club", "away": "Deportivo Alavés", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-19T16:15:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "Celta", "away": "R. Racing Club", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-19T18:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "Sevilla FC", "away": "FC Barcelona", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-19T21:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "Getafe CF", "away": "Málaga CF", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-20T14:00:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "Atlético de Madrid", "away": "Real Madrid", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-20T16:15:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "RC Deportivo", "away": "Real Betis", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-20T18:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "Villarreal CF", "away": "Levante UD", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-20T18:30:00+02:00"}
+{"detected_at": "2026-08-30T20:31:47.239996+02:00", "type": "KICKOFF_CHANGED", "matchday": 7, "home": "Valencia CF", "away": "Real Sociedad", "old_kickoff": "2026-09-20T17:00:00+02:00", "new_kickoff": "2026-09-20T21:00:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Málaga CF", "away": "RCD Espanyol de Barcelona", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-09T21:00:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Rayo Vallecano", "away": "Athletic Club", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-10T14:00:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Deportivo Alavés", "away": "Atlético de Madrid", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-10T16:15:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "FC Barcelona", "away": "Getafe CF", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-10T18:30:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Real Madrid", "away": "Villarreal CF", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-10T21:00:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Elche CF", "away": "Celta", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-11T14:00:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Real Sociedad", "away": "RC Deportivo", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-11T16:15:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Real Betis", "away": "CA Osasuna", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-11T18:30:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "R. Racing Club", "away": "Valencia CF", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-11T21:00:00+02:00"}
+{"detected_at": "2026-09-10T14:13:20.213273+02:00", "type": "KICKOFF_CHANGED", "matchday": 8, "home": "Levante UD", "away": "Sevilla FC", "old_kickoff": "2026-10-11T17:00:00+02:00", "new_kickoff": "2026-10-12T21:00:00+02:00"}
