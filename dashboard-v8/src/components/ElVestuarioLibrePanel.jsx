@@ -70,7 +70,23 @@ export default function ElVestuarioLibrePanel({ data }) {
       <p className="reparto">
         <b className="libre">{v.libres} libres</b> de{" "}
         {v.total_catalogo} del catálogo · {v.con_dueno} con dueño ·{" "}
-        <b>{r.nos_mejoran || 0}</b> nos mejorarían el once ·{" "}
+        {/* LA ETIQUETA DICE LO QUE MIDE (15/09/2026)
+
+            Decía «nos mejorarían el once» y NO es eso lo que
+            mide: `nos_suma` es la resta pelada de puntos contra
+            el peor titular del puesto. No mira el pronóstico de
+            titularidad ni aplica ninguna vara más.
+
+            Caso vivo: Álvaro Carreras salía aquí como «nos
+            mejora +9 sobre Trent», y en OBJETIVOS como
+            «sustituiría a un titular confirmado (100 %) por
+            alguien que está a 0 %: el once empeora». Las dos
+            frases eran verdad. El dueño lo leyó como que Pepe se
+            contradice, y no se contradice: la pantalla usaba una
+            etiqueta que el motor no usa para decidir.
+
+            Se cambia la ETIQUETA, no el motor. */}
+        <b>{r.nos_mejoran || 0}</b> tienen más puntos en la hoja ·{" "}
         <b>{v.candidatos}</b> pasan el corte
         {r.en_el_mercado_hoy ? (
           <>
@@ -95,7 +111,7 @@ export default function ElVestuarioLibrePanel({ data }) {
             {/* LA VARA DE ESTE PUESTO, EN LA CABECERA. Sin ella
                 «nos suma» es un número sin contra qué. */}
             <p className="reparto">
-              <b className={POS[puesto] || ""}>{puesto}</b> — mejoran a{" "}
+              <b className={POS[puesto] || ""}>{puesto}</b> — más puntos que{" "}
               <b>
                 {vara.vara_nombre} ({vara.vara_puntos} pts)
               </b>
@@ -155,7 +171,20 @@ export default function ElVestuarioLibrePanel({ data }) {
         );
       })}
 
+      {/* EL PIE EXPLICA QUE «MÁS PUNTOS» NO ES «MEJORA EL ONCE».
+          Lo exige `test_la_etiqueta_dice_lo_que_mide`. */}
       <p className="note" style={{ textAlign: "left" }}>
+        <b>
+          «Más puntos en la hoja» no es «mejora el once».
+        </b>{" "}
+        Esta columna es la resta de puntos contra el peor titular
+        nuestro de su posición, y nada más:{" "}
+        <b>no mira el pronóstico de titularidad</b> ni aplica la
+        vara con la que decide el motor. Un jugador puede tener más
+        puntos y aun así empeorar el once —si el que sale es
+        titular confirmado y el que entra no va a jugar—. Quien
+        decide eso es OBJETIVOS, con su <code>xi_decision</code>;
+        esta lista es para mirar.{" "}
         <b>Esta lista no puja.</b> Entran los que nos suman{" "}
         {cortes.nos_suma_minimo}+ contra el peor titular nuestro de
         su posición y han jugado {cortes.partidos_para_juzgar}+
