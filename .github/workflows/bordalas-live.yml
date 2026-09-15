@@ -35,7 +35,7 @@ on:
  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 concurrency:
@@ -179,6 +179,14 @@ jobs:
         shell: bash
         run: |
           python scripts/prune_github_state.py
+
+      - name: Guardar los libros
+        if: always()
+        shell: bash
+        run: |
+          git config user.name  "bordalas-ciclo"
+          git config user.email "ciclo@bordalas.local"
+          python scripts/guardar_los_libros.py --empujar
 
       - name: Upload diagnostic log
         if: always()
