@@ -466,6 +466,37 @@ def publicar_estado(fila: dict) -> None:
         print(f"  (no se pudo publicar el estado: {error})")
 
 
+def _por_que_no(salida: str) -> str:
+    """
+    La linea de git que DICE ALGO, no la ultima.
+
+    Git termina el rechazo con "error: failed to push some refs",
+    que es la menos util de todas. La que explica el motivo es la
+    del `!`:
+
+        ! [rejected] main -> main (fetch first)
+        ! [remote rejected] main -> main (pre-receive declined)
+
+    Con la ultima linea, tres intentos imprimian tres veces la
+    misma frase vacia.
+    """
+
+    lineas = [
+        linea.strip()
+        for linea in (salida or "").splitlines()
+        if linea.strip()
+    ]
+
+    if not lineas:
+        return "git no dijo nada"
+
+    for linea in lineas:
+        if linea.startswith("!"):
+            return linea
+
+    return lineas[-1]
+
+
 def empujar_con_reintentos(
     rama: str,
     libros: list,
@@ -495,7 +526,7 @@ def empujar_con_reintentos(
 
         print(
             f"  El empujon {intento} de {INTENTOS} no salio: "
-            f"{salida.splitlines()[-1] if salida else 'sin salida'}"
+            f"{_por_que_no(salida)}"
         )
 
         if intento == INTENTOS:
