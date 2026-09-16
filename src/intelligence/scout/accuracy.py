@@ -374,7 +374,10 @@ def summary(ledger: dict | None = None, path: Path | None = None) -> dict:
                 "misses": 0,
                 "flat": 0,
                 "unknown": 0,
-                "_errores": [],
+                "_errores_decididas": [],
+                "_errores_todos": [],
+                "_reales_decididas": [],
+                "_por_horizonte": {},
                 "_confianzas": [],
             },
         )
@@ -396,10 +399,106 @@ def summary(ledger: dict | None = None, path: Path | None = None) -> dict:
         else:
             datos["unknown"] += 1
 
+        # ==============================================
+        # EL DENOMINADOR DEL ERROR DE TAMAÑO (16/09/2026)
+        # ==============================================
+        #
+        # DOCTRINA 54: un ratio solo vale si numerador y
+        # denominador cubren el mismo periodo -y aqui, la misma
+        # muestra-.
+        #
+        #     `hit_rate` sale de hits+misses. El error de tamaño
+        #     se acumulaba ADEMAS sobre los FLAT, asi que los dos
+        #     numeros se publicaban uno al lado del otro con
+        #     denominadores distintos: 7.579 contra 10.339 en
+        #     FUTBOLFANTASY.
+        #
+        #     Y no es un detalle de presentacion. Un FLAT real
+        #     -el precio no se movio- tiene
+        #     `actual_percent = 0`, asi que su error es |lo que
+        #     dijo la fuente| ENTERO. Son los errores mas grandes
+        #     del libro por construccion, y estaban inflando la
+        #     media que despues recorta la estimacion en
+        #     `peso_de_la_fuente`.
+        #
+        #     Se publican LOS DOS, cada uno con su nombre y su
+        #     `n`. El que comparte muestra con `hit_rate` se
+        #     queda con el nombre de siempre, porque es el que se
+        #     usa para recortar y es el que tenia que haber sido
+        #     desde el principio.
         error = entrada.get("magnitude_error_percent")
 
         if error is not None:
-            datos["_errores"].append(float(error))
+
+            datos["_errores_todos"].append(float(error))
+
+            if resultado in ("HIT", "MISS"):
+                datos["_errores_decididas"].append(float(error))
+
+        # ==============================================
+        # EL NULO: CUANTO SE EQUIVOCA NO DECIR NADA
+        # ==============================================
+        #
+        #     El recorte viejo comparaba el error de la fuente
+        #     con la magnitud que esa fuente publicaba ESE DIA, y
+        #     dejaba en cero cualquier movimiento menor que el
+        #     error medio. Pero el error medio de un buen
+        #     estimador no es un umbral por debajo del cual no
+        #     sabe nada: es su dispersion.
+        #
+        #     La pregunta correcta es si saber lo que dice la
+        #     fuente ACERCA mas que no saberlo. El "no saberlo"
+        #     es estimar cero, y su error es |lo que paso de
+        #     verdad|. Eso es lo que se acumula aqui, sobre LA
+        #     MISMA muestra que el acierto y que el error.
+        #
+        #     Medido sobre nuestra serie (16/09/2026):
+        #
+        #         plazo   error   nulo    ¿bate al nulo?
+        #           1     0,748   2,405        SI
+        #           3     3,832   6,750        SI
+        #           7    12,050  14,233        SI
+        #
+        #     y COMUNIATE_PULSO, con 35,71 de error, no lo bate:
+        #     su tamaño no es informacion, y eso se decide UNA
+        #     vez por fuente, no señal a señal.
+        real = entrada.get("actual_percent")
+
+        if real is not None and resultado in ("HIT", "MISS"):
+            datos["_reales_decididas"].append(abs(float(real)))
+
+        # ==============================================
+        # Y CADA HORIZONTE, EL SUYO (doctrina 53)
+        # ==============================================
+        #
+        #     Un error a siete dias y uno a un dia no son el
+        #     mismo numero: 12,050 contra 0,748. Agrupados dan
+        #     3,244, que no describe ningun plazo.
+        #
+        #     La estimacion a un dia se recortaba con el error
+        #     agrupado, o sea con un error medido sobre todo a
+        #     tres y siete dias. Un porcentaje sin su plazo no es
+        #     un rendimiento, y un error sin su plazo tampoco es
+        #     un error.
+        horizonte = entrada.get("horizon_days")
+
+        if horizonte is not None and resultado in ("HIT", "MISS"):
+
+            tramo = datos["_por_horizonte"].setdefault(
+                str(horizonte),
+                {"hits": 0, "misses": 0, "_errores": [], "_reales": []},
+            )
+
+            if resultado == "HIT":
+                tramo["hits"] += 1
+            else:
+                tramo["misses"] += 1
+
+            if error is not None:
+                tramo["_errores"].append(float(error))
+
+            if real is not None:
+                tramo["_reales"].append(abs(float(real)))
 
         confianza = entrada.get("confidence")
         acierto = entrada.get("direction_hit")
@@ -415,7 +514,10 @@ def summary(ledger: dict | None = None, path: Path | None = None) -> dict:
 
         decididas = datos["hits"] + datos["misses"]
 
-        errores = datos.pop("_errores")
+        errores = datos.pop("_errores_decididas")
+        errores_todos = datos.pop("_errores_todos")
+        reales = datos.pop("_reales_decididas")
+        por_horizonte = datos.pop("_por_horizonte")
         confianzas = datos.pop("_confianzas")
 
         datos["decided"] = decididas
@@ -426,11 +528,88 @@ def summary(ledger: dict | None = None, path: Path | None = None) -> dict:
             else None
         )
 
+        # EL QUE COMPARTE MUESTRA CON `hit_rate`. Es el que se
+        # usa para recortar, y lleva su `n` al lado para que no
+        # se pueda volver a mezclar sin que se vea.
         datos["mean_magnitude_error_percent"] = (
             round(sum(errores) / len(errores), 3)
             if errores
             else None
         )
+
+        datos["magnitude_error_n"] = len(errores)
+
+        # EL DE ANTES, con su nombre de verdad: incluye los FLAT
+        # y los UNKNOWN. Se sigue publicando para poder comparar
+        # -y porque describe algo real: cuanto se equivoca la
+        # fuente contando los dias en que no pasa nada-, pero ya
+        # no se confunde con el otro.
+        datos["mean_magnitude_error_percent_all_outcomes"] = (
+            round(sum(errores_todos) / len(errores_todos), 3)
+            if errores_todos
+            else None
+        )
+
+        datos["magnitude_error_all_outcomes_n"] = len(errores_todos)
+
+        datos["magnitude_error_shares_sample"] = (
+            len(errores) == decididas
+        )
+
+        # EL NULO, sobre la misma muestra.
+        datos["mean_abs_actual_percent"] = (
+            round(sum(reales) / len(reales), 3) if reales else None
+        )
+
+        datos["abs_actual_n"] = len(reales)
+
+        # ¿SABER LO QUE DICE ACERCA MAS QUE NO SABERLO?
+        #
+        #     Es un veredicto POR FUENTE y se calcula una vez. Lo
+        #     que no puede hacerse es preguntarlo señal a señal
+        #     contra la magnitud de esa señal: eso deja mudo a
+        #     quien se mueve poco, que no es lo mismo que no
+        #     saber.
+        datos["size_beats_null"] = (
+            bool(
+                datos["mean_magnitude_error_percent"]
+                < datos["mean_abs_actual_percent"]
+            )
+            if (
+                datos["mean_magnitude_error_percent"] is not None
+                and datos["mean_abs_actual_percent"] is not None
+            )
+            else None
+        )
+
+        # CADA PLAZO, CON SU `n` (doctrina 53 + 55).
+        tramos = {}
+
+        for plazo, tramo in sorted(por_horizonte.items()):
+
+            errs = tramo["_errores"]
+            reals = tramo["_reales"]
+            dec_h = tramo["hits"] + tramo["misses"]
+
+            tramos[plazo] = {
+                "horizon_days": int(plazo),
+                "decided": dec_h,
+                "hit_rate": (
+                    round(tramo["hits"] / dec_h, 4) if dec_h else None
+                ),
+                "mean_magnitude_error_percent": (
+                    round(sum(errs) / len(errs), 3) if errs else None
+                ),
+                "magnitude_error_n": len(errs),
+                "mean_abs_actual_percent": (
+                    round(sum(reals) / len(reals), 3)
+                    if reals
+                    else None
+                ),
+                "abs_actual_n": len(reals),
+            }
+
+        datos["by_horizon"] = tramos
 
         # CALIBRACION: cuando dice mucho, ¿acierta mas?
         #

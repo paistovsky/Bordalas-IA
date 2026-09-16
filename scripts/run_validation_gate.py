@@ -331,6 +331,11 @@ TESTS = [
     # planos en el denominador y la masa de verdad de la curva.
     "src.analysis.test_los_tres_denominadores_v1",
 
+    # El `intent` prestado, el denominador del libro de acierto y
+    # los pesos de la curva: los tres arreglos que no tocan
+    # ningun umbral.
+    "src.analysis.test_los_tres_arreglos_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 

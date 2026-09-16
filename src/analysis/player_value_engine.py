@@ -1811,6 +1811,28 @@ def speculation_value(
         "horizon_days": int(horizon_days),
         "confidence": confidence,
         "intent": "SPECULATION",
+
+        # LA VIA, CON NOMBRE (16/09/2026)
+        #
+        #     Hasta hoy esta funcion no declaraba `route` y
+        #     `computer_resale_value` si —"COMPUTER_RESALE"—,
+        #     asi que las dos vias que compiten por el mismo
+        #     `intent: SPECULATION` no se distinguian: una tenia
+        #     etiqueta y la otra no.
+        #
+        #     Cuando ganaba la del Computer, el rechazo publicaba
+        #     "Como especulacion rinde un 0,14 %" sobre un valor
+        #     que era `precio x 1,015075` —la prima mediana del
+        #     Computer, la misma para todo el tablero—. Nueve
+        #     rechazos con el mismo numero y ritmos distintos, y
+        #     un dia de diagnostico a cada lado.
+        #
+        #     NO CAMBIA NINGUNA DECISION: donde se leia `route`
+        #     habia un `or "PRICE_TREND"` de respaldo que daba
+        #     exactamente esta misma cadena. Lo que cambia es que
+        #     ahora la via se declara en el sitio donde se sabe.
+        "route": "PRICE_TREND",
+
         "reason": (
             f"Reventa estimada {objetivo:,} EUR en "
             f"{horizon_days} dias. Exigiendo un {margin*100:.0f} % "

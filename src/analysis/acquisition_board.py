@@ -1106,6 +1106,14 @@ def build_acquisition_board(
                     # decision que toma produccion, no una
                     # parecida.
                     intent=valoracion.get("intent"),
+
+                    # LA VIA QUE PUSO EL `value` (16/09/2026)
+                    #
+                    #     Solo para el motivo. Sin esto el
+                    #     rechazo decia "como especulacion" con
+                    #     un numero de la via de reventa al
+                    #     Computer.
+                    route=valoracion.get("route"),
                 )
 
                 # LO QUE SE OFRECIA ANTES, AL LADO (11/09/2026)
@@ -1131,6 +1139,7 @@ def build_acquisition_board(
                     available_budget=presupuesto,
                     intent=valoracion.get("intent"),
                     prima_maxima=None,
+                    route=valoracion.get("route"),
                 )
 
                 fila["bid_sin_tope"] = safe_int(
