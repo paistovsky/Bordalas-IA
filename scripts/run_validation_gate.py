@@ -336,6 +336,10 @@ TESTS = [
     # ningun umbral.
     "src.analysis.test_los_tres_arreglos_v1",
 
+    # Comprar un jugador y vendérselo al Computer: una sola
+    # definicion, y las dos primas sobre los mismos viajes.
+    "src.analysis.test_el_viaje_al_computer_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
