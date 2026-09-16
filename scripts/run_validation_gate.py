@@ -325,6 +325,12 @@ TESTS = [
     "src.analysis.test_interruptor_tener_v1",
     "src.analysis.test_vara_v1",
     "src.analysis.test_forma_estable_v1",
+
+    # El dia que el 0,1443 % resulto ser el valor de reventa al
+    # Computer con otro nombre: el plazo de cada par, los dias
+    # planos en el denominador y la masa de verdad de la curva.
+    "src.analysis.test_los_tres_denominadores_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
