@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-09-16T05:11:23.326620",
+  "updated_at": "2026-09-16T07:37:48.573168",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -988,9 +988,9 @@
     },
     "4903": {
       "round_id": 4903,
-      "visto": "2026-09-16T05:11:23.326620",
+      "visto": "2026-09-16T07:19:10.039326",
       "datos_de": "2026-09-16T05:04:17.598233+00:00",
-      "escrito_en": "2026-09-16T05:11:23.326620",
+      "escrito_en": "2026-09-16T07:19:10.039326",
       "clasificacion": [
         {
           "user_id": 14145555,
@@ -1200,6 +1200,284 @@
         "29661": "Olasagasti",
         "30334": "Fortuño",
         "30507": "Benavidez",
+        "37499": "Trent",
+        "37726": "Oriol Rey",
+        "39736": "Paco Cortés",
+        "41560": "Selu Diallo",
+        "41606": "Mangala"
+      },
+      "onces_por_vara": {
+        "base": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            9983,
+            1599,
+            1721,
+            19862,
+            14800,
+            29661,
+            37726,
+            41606,
+            26271,
+            3159
+          ]
+        },
+        "factores": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            9983,
+            1599,
+            1721,
+            19862,
+            14800,
+            29661,
+            37726,
+            41606,
+            26271,
+            3159
+          ]
+        },
+        "actual": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            1599,
+            9983,
+            1721,
+            19862,
+            29661,
+            14800,
+            41606,
+            1602,
+            26271,
+            3159
+          ]
+        }
+      }
+    },
+    "5125": {
+      "round_id": 5125,
+      "visto": "2026-09-16T07:37:48.573168",
+      "datos_de": "2026-09-16T07:26:43.785311+00:00",
+      "escrito_en": "2026-09-16T07:37:48.573168",
+      "clasificacion": [
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 253
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 247
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 226
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 212
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 178
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 170
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 145
+        },
+        {
+          "user_id": 14456960,
+          "name": "Alvaro Retamosa Sanguino",
+          "points": 145
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "3-5-2",
+        "players": [
+          17482,
+          1599,
+          9983,
+          1721,
+          19862,
+          29661,
+          14800,
+          41606,
+          37726,
+          26271,
+          3159
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny",
+          "position": 2
+        },
+        {
+          "id": 1602,
+          "name": "Rubén García",
+          "position": 3
+        },
+        {
+          "id": 1721,
+          "name": "Manu Sánchez",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 10040,
+          "name": "Balde",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 19862,
+          "name": "Expósito",
+          "position": 3
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29185,
+          "name": "Pablo Durán",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 30334,
+          "name": "Fortuño",
+          "position": 1
+        },
+        {
+          "id": 30507,
+          "name": "Benavidez",
+          "position": 3
+        },
+        {
+          "id": 31707,
+          "name": "Álvaro Carreras",
+          "position": 2
+        },
+        {
+          "id": 37499,
+          "name": "Trent",
+          "position": 2
+        },
+        {
+          "id": 37726,
+          "name": "Oriol Rey",
+          "position": 3
+        },
+        {
+          "id": 39736,
+          "name": "Paco Cortés",
+          "position": 4
+        },
+        {
+          "id": 41560,
+          "name": "Selu Diallo",
+          "position": 3
+        },
+        {
+          "id": 41606,
+          "name": "Mangala",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1599": 18,
+        "1602": 17,
+        "1721": 17,
+        "3159": 25,
+        "9983": 13,
+        "10040": 0,
+        "14800": 26,
+        "17482": 6,
+        "19862": 29,
+        "26271": 62,
+        "29185": 9,
+        "29661": 32,
+        "30334": 0,
+        "30507": 5,
+        "31707": 21,
+        "37499": 16,
+        "37726": 19,
+        "39736": 4,
+        "41560": 0,
+        "41606": 16
+      },
+      "once_alternativo": {
+        "formation": "3-5-2",
+        "players": [
+          17482,
+          9983,
+          1599,
+          1721,
+          19862,
+          14800,
+          29661,
+          37726,
+          41606,
+          26271,
+          3159
+        ],
+        "vara": "base"
+      },
+      "nombres": {
+        "1599": "Jonny",
+        "1602": "Rubén García",
+        "1721": "Manu Sánchez",
+        "3159": "Jutglà",
+        "9983": "Djené",
+        "10040": "Balde",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "19862": "Expósito",
+        "26271": "Yamal",
+        "29185": "Pablo Durán",
+        "29661": "Olasagasti",
+        "30334": "Fortuño",
+        "30507": "Benavidez",
+        "31707": "Álvaro Carreras",
         "37499": "Trent",
         "37726": "Oriol Rey",
         "39736": "Paco Cortés",
