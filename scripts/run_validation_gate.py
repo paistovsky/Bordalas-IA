@@ -340,6 +340,10 @@ TESTS = [
     # definicion, y las dos primas sobre los mismos viajes.
     "src.analysis.test_el_viaje_al_computer_v1",
 
+    # La regla del carril del Computer: sale de la medicion, no
+    # de una constante, y sigue apagada.
+    "src.analysis.test_el_carril_de_un_dia_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
