@@ -10,9 +10,18 @@
 
 ## 0. La foto del 14/09 sí estaba en este disco
 
-En el informe anterior dije que no la tenía. La tenía: `diagnostico/status.json`,
-generada a las **18:12** y bajada a las 18:20, con sus 69 candidatos y sus 15
-destacados. Lo que miré entonces fue `dashboard/data/status.json`, que trae 64.
+En el informe anterior dije que no la tenía y que «el `status.json` local es del
+16/08». **Las dos cosas eran falsas**, y basta mirar los ficheros:
+
+```
+diagnostico/status.json            meta.generated_at 2026-09-14T18:12:01   69 targets
+dashboard/data/status.json         meta.generated_at 2026-09-14T18:33:47   64 targets
+dashboard-v8/public/.../status.json  ídem                                  64 targets
+```
+
+La foto de los 69 estaba en `diagnostico/`, generada a las 18:12 y bajada a las 18:20
+(`diagnostico/ultima_foto.json`). Ninguna copia local es de agosto. Di por ausente un
+dato que estaba en disco, y sobre esa ausencia construí medio informe.
 
 Con ella todo lo que sigue está medido contra el número que produjo el motor, no
 contra una reconstrucción.
