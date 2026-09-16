@@ -23,6 +23,19 @@ LO QUE SE PRUEBA AQUI
     4. Que el interruptor sigue APAGADO: el enchufe se pone, la
        luz la da el dueño.
 
+UNA GUARDIA CAMBIO LO QUE EXIGE (16/09/2026)
+
+    `test_un_movimiento_pequeno_no_sobrevive_a_su_error` exigia
+    que un +0,30 % saliera SIN PRONOSTICO. Ahora se llama
+    `test_un_movimiento_pequeno_sale_pequeno_no_mudo` y exige que
+    salga +0,28 %.
+
+    El motivo entero esta en su docstring, con la medicion: el
+    recorte por tamaño empeoraba la estimacion un 24 % y dejaba
+    mudo al 36 % de los casos, incluidos los que MAS se movian.
+    Se cambia lo que una guardia exige muy pocas veces y nunca en
+    silencio.
+
 DOS COSAS QUE ESTA GUARDIA NO PRUEBA, Y HAY QUE SABERLO
 
     No prueba que el motor use esto —no lo usa, esta apagado— ni
@@ -56,28 +69,72 @@ from src.analysis.el_pronostico_del_ojeador import (
 
 # EL LIBRO DE ACIERTO, con los numeros medidos en produccion el
 # 15/09/2026. Cada uno con su `n`.
+#
+# EL NULO: CUANTO SE EQUIVOCA NO DECIR NADA (16/09/2026)
+#
+#     `mean_abs_actual_percent` es el error de estimar cero, sobre
+#     la MISMA muestra. Es una propiedad del movimiento de los
+#     precios, no de la fuente, asi que es casi igual para todas;
+#     medido sobre nuestra serie de 31 dias:
+#
+#         plazo 1   2,405        plazo 3   6,750
+#         plazo 7  14,233
+#
+#     Una fuente aporta su TAMAÑO solo si se equivoca menos que
+#     eso. Las tres buenas lo baten de sobra; COMUNIATE_PULSO,
+#     con 35,71 puntos, no lo bate ni de lejos.
 LIBRO = {
     "FUTBOLFANTASY": {
         "decided": 7579,
         "hit_rate": 89.1,
         "mean_magnitude_error_percent": 3.98,
+        "mean_abs_actual_percent": 6.90,
+        "size_beats_null": True,
+        "by_horizon": {
+            "1": {
+                "decided": 4000,
+                "hit_rate": 97.8,
+                "mean_magnitude_error_percent": 0.748,
+                "mean_abs_actual_percent": 2.405,
+            },
+            "3": {
+                "decided": 2500,
+                "hit_rate": 90.6,
+                "mean_magnitude_error_percent": 3.832,
+                "mean_abs_actual_percent": 6.750,
+            },
+        },
     },
     "ANALITICA": {
         "decided": 3295,
         "hit_rate": 95.5,
         "mean_magnitude_error_percent": 1.12,
+        "mean_abs_actual_percent": 6.90,
+        "size_beats_null": True,
     },
     "COMUNIATE": {
         "decided": 2982,
         "hit_rate": 97.1,
         "mean_magnitude_error_percent": 0.93,
+        "mean_abs_actual_percent": 6.90,
+        "size_beats_null": True,
     },
     # LA MALA: acierta el 72,9 % y se equivoca 35,71 puntos en el
-    # tamaño sobre magnitudes que rondan el 1 %.
+    # tamaño. No bate al nulo: su magnitud NO entra.
     "COMUNIATE_PULSO": {
         "decided": 1031,
         "hit_rate": 72.9,
         "mean_magnitude_error_percent": 35.71,
+        "mean_abs_actual_percent": 6.90,
+        "size_beats_null": False,
+    },
+    # SIN MEDIR EL NULO: no se sabe si su tamaño acerca o aleja,
+    # asi que no se usa. Esta aqui para que la guardia pueda
+    # comprobar que "no se sabe" NO es "adelante" (regla 24).
+    "FUENTE_SIN_NULO": {
+        "decided": 500,
+        "hit_rate": 95.0,
+        "mean_magnitude_error_percent": 1.00,
     },
 }
 
@@ -326,10 +383,39 @@ def test_una_fuente_mala_pesa_menos() -> None:
         f"97,1 % pesa {buena['peso']}"
     )
 
-    # Y LOS DOS RECORTES TIRAN EN EL MISMO SENTIDO.
+    # LA DIRECCION SE RECORTA POR ACIERTO, y la buena acierta mas.
     assert buena["direccion"] > mala["direccion"], (buena, mala)
 
-    assert buena["tamano"] > mala["tamano"], (buena, mala)
+    # EL TAMAÑO YA NO SE RECORTA: SE ADMITE O NO (16/09/2026)
+    #
+    #     Antes esta linea era `buena["tamano"] > mala["tamano"]`
+    #     con los dos recortados por `1 - error/|magnitud|`. Ese
+    #     recorte se quito porque, medido contra lo que paso de
+    #     verdad, empeoraba la estimacion un 24 % a un dia y
+    #     dejaba mudo al 36 % de los casos. Ver
+    #     `peso_de_la_fuente`.
+    #
+    #     Lo que el recorte SI hacia bien —tapar a PULSO— lo hace
+    #     ahora la puerta, y la guardia sigue exigiendo lo mismo
+    #     que exigia: que la mala no empuje.
+    assert mala["usable"] is False, (
+        f"la fuente que se equivoca 35,71 puntos contra un nulo "
+        f"de 6,90 esta aportando su tamaño: {mala}"
+    )
+
+    assert buena["usable"] is True, (
+        f"la fuente del 97,1 % no aporta nada: {buena}"
+    )
+
+    # Y UNA FUENTE SIN EL NULO MEDIDO TAMPOCO PASA: no saber si
+    # acerca no es lo mismo que saber que acerca (regla 24).
+    sin_nulo = peso_de_la_fuente(
+        LIBRO["FUENTE_SIN_NULO"], magnitud
+    )
+
+    assert sin_nulo["usable"] is False, (
+        f"una fuente sin el nulo medido esta pesando: {sin_nulo}"
+    )
 
     # LA MALA, SOLA, NO PUEDE MOVER LA ESTIMACION COMO LA BUENA.
     solo_buena = estimacion(_ficha(COMUNIATE=magnitud), LIBRO)
@@ -369,36 +455,88 @@ def test_una_fuente_mala_pesa_menos() -> None:
     )
 
 
-def test_un_movimiento_pequeno_no_sobrevive_a_su_error() -> None:
+def test_un_movimiento_pequeno_sale_pequeno_no_mudo() -> None:
     """
-    El detalle que hace que esto no sea una imprudencia.
+    ESTA GUARDIA AFIRMABA LO CONTRARIO HASTA EL 16/09/2026, y hay
+    que decirlo entero porque cambiar lo que una guardia exige es
+    lo mas peligroso que se hace en este repo.
 
-    FutbolFantasy se equivoca 3,98 puntos en el tamaño. Sobre un
-    movimiento de +0,30 % eso no es un pronostico: es ruido con
-    decimales. Tiene que salir SIN PRONOSTICO, no +0,28 %.
+    LO QUE EXIGIA
+
+        Que un movimiento de +0,30 % saliera SIN PRONOSTICO,
+        porque el error de tamaño de la fuente (3,98) se lo comia.
+        Se llamaba `test_un_movimiento_pequeno_no_sobrevive_a_su_error`.
+
+    POR QUE ERA FALSO
+
+        Aquel 3,98 agrupaba horizontes de 1, 3 y 7 dias. El error
+        a UN dia es 0,748. Y aun con el numero correcto, el
+        recorte `1 - error/|magnitud|` deja mudo a todo el que se
+        mueva menos que la dispersion de la fuente, que son los
+        movimientos normales.
+
+        Medido contra lo que paso de verdad, sobre 12.615 pares a
+        un dia (error medio absoluto, menos es mejor):
+
+            no pronosticar nunca            1,8942
+            con recorte (lo que exigia)     0,8922   mudo 36 %
+            con recorte y error corregido   0,9220   mudo 39 %
+            sin recorte (lo de ahora)       0,6805   mudo  0 %
+
+        El silencio no describia al jugador: describia a la
+        fuente. Y dejaba fuera a 86 de los 171 mudos, entre ellos
+        los que MAS se movian.
+
+    LO QUE EXIGE AHORA
+
+        Que un movimiento pequeño salga PEQUEÑO —no mudo, y no
+        inflado—, y que siga siendo mucho menor que uno grande.
+        La prudencia no esta en callarse: esta en que el numero
+        sea proporcional a lo que se observo.
     """
 
-    r = estimacion(MARC_ROCA, LIBRO)
+    pequeno = estimacion(MARC_ROCA, LIBRO)
 
-    assert r["available"] is False, (
-        f"un movimiento de +0,30 % con fuentes que se equivocan "
-        f"entre 0,93 y 3,98 puntos ha producido "
-        f"{r['percent_per_day']}"
-    )
-
-    assert r["decision"] == "SIN_PRONOSTICO", r
-
-    # Y EL GRANDE SI SOBREVIVE: si no, esto solo probaria que
-    # nunca hay pronostico.
     grande = estimacion(PEDRO_DIAZ, LIBRO)
 
     assert grande["available"], (
-        "ningun movimiento sobrevive al recorte: entonces el "
+        "ningun movimiento produce pronostico: entonces el "
         "enchufe no sirve para nada"
     )
 
+    assert pequeno["available"], (
+        f"un +0,30 % de tres fuentes que baten al nulo sigue "
+        f"saliendo mudo: {pequeno['reason']}"
+    )
+
+    # PEQUEÑO DE VERDAD, y no por poco.
+    assert 0 < pequeno["percent_per_day"] < 0.5, (
+        f"un +0,30 % observado ha salido como "
+        f"{pequeno['percent_per_day']}"
+    )
+
+    assert (
+        pequeno["percent_per_day"] < grande["percent_per_day"] / 5
+    ), (
+        f"el pequeño ({pequeno['percent_per_day']}) no queda muy "
+        f"por debajo del grande ({grande['percent_per_day']}): "
+        f"la estimacion no es proporcional a lo observado"
+    )
+
+    # Y NUNCA POR ENCIMA DE LO OBSERVADO: la persistencia encoge.
+    for nombre, r in (("pequeño", pequeno), ("grande", grande)):
+        assert abs(r["percent_per_day"]) <= abs(
+            r["observed_percent"]
+        ), (
+            f"el {nombre} estima {r['percent_per_day']} sobre un "
+            f"observado de {r['observed_percent']}: el recorte "
+            f"infla en vez de encoger"
+        )
+
     print(
-        "  OK  +0,30 % no sobrevive a su propio error y +4,55 % si"
+        f"  OK  +0,30 % sale {pequeno['percent_per_day']:+.3f} % "
+        f"y +4,55 % sale {grande['percent_per_day']:+.3f} %: "
+        f"pequeño, no mudo"
     )
 
 
@@ -508,7 +646,7 @@ TESTS = [
     test_la_estimacion_no_supera_a_lo_observado,
     test_sin_ojeador_no_hay_numero,
     test_una_fuente_mala_pesa_menos,
-    test_un_movimiento_pequeno_no_sobrevive_a_su_error,
+    test_un_movimiento_pequeno_sale_pequeno_no_mudo,
     test_la_persistencia_se_mide_no_se_escribe,
     test_el_enchufe_esta_puesto_y_la_luz_apagada,
 ]

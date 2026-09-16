@@ -85,6 +85,19 @@ DEFAULT_PREMIUM_CURVE = (
 
 # Por debajo de esto no hay muestra para calibrar nada.
 MIN_PREMIUM_SAMPLES = 12
+
+# Los siete cuantiles con los que se describe la forma de las
+# pujas. El ultimo esta muy arriba a proposito, para que la cola
+# quede dentro del modelo y ninguna puja parezca ganar con
+# certeza.
+CORTES_DE_LA_CURVA = (0.05, 0.20, 0.40, 0.60, 0.80, 0.95, 0.995)
+
+# Pujas minimas en UN peldaño para que su peso sea una medida y
+# no una anecdota. Con N=72 el intervalo de Wilson al 95 % pasa
+# de 30,4x de ancho con n=1 a 5,1x con n=5; por debajo de cinco
+# el numero no sostiene una probabilidad.
+# Ver `calibrate_premium_curve`.
+MIN_SAMPLES_PER_RUNG = 5
 MIN_AUCTIONS_FOR_PARTICIPATION = 8
 
 # Con pocos datos, a un rival con dinero se le supone esta
@@ -321,7 +334,12 @@ def calibrate_premium_curve(
 
     if price_lookup is not None:
 
-        for manager in managers:
+        # `managers` puede llegar a None desde un informe a
+        # medias. Antes reventaba con TypeError y se llevaba por
+        # delante toda la valoracion; ahora se queda sin muestras
+        # y devuelve la curva por defecto diciendo por que, que
+        # es el mismo camino que "no hay suficientes pujas".
+        for manager in (managers or []):
 
             if not isinstance(manager, dict):
                 continue
@@ -377,33 +395,190 @@ def calibrate_premium_curve(
 
     muestras.sort()
 
-    # Siete tramos por cuantiles: describe la forma real de las
-    # pujas sin asumir ninguna distribucion. El ultimo corte esta
-    # muy arriba a proposito, para que la cola quede dentro del
-    # modelo y ninguna puja parezca ganar con certeza.
-    cortes = [0.05, 0.20, 0.40, 0.60, 0.80, 0.95, 0.995]
+    cortes = list(CORTES_DE_LA_CURVA)
+
+    total = len(muestras)
+
+    indices = [min(int(corte * total), total - 1) for corte in cortes]
+
+    # ==================================================
+    # LOS PESOS SALEN DE LA MASA, NO DE 1/7 (16/09/2026)
+    # ==================================================
+    #
+    # LO QUE HABIA, Y POR QUE PARECIA BIEN
+    #
+    #     Cada peldaño llevaba `1/len(cortes)` = 0,1429. Y eso es
+    #     correcto COMO CUANTIL: cada corte marca una posicion de
+    #     la lista ordenada, y hay siete.
+    #
+    # POR QUE ESTABA MAL COMO PROBABILIDAD
+    #
+    #     `win_probability` no lee esos pesos como posiciones:
+    #     los lee como "con que frecuencia un rival puja AQUI". Y
+    #     los cortes no estan repartidos por igual:
+    #
+    #         0,05  0,20  0,40  0,60  0,80  0,95  0,995
+    #            saltos: 0,15 0,20 0,20 0,20 0,15 0,045
+    #
+    #     El ultimo peldaño cubre el 0,5 % de arriba y se llevaba
+    #     el 14,29 % de la masa. Medido sobre las 72 pujas de la
+    #     foto del 14/09 le corresponde 0,0139 —UNA puja—: estaba
+    #     diez veces sobrevalorado.
+    #
+    # QUE CAMBIA EN DINERO
+    #
+    #     Creer que un rival paga +24,5 % una de cada siete veces
+    #     hunde la probabilidad de ganar, y quien apunta a una
+    #     probabilidad objetivo sube la puja para comprar una
+    #     certeza que ya tenia. Con Ruben Garcia la probabilidad
+    #     real a lo que se pago era 0,8953 y el motor creia
+    #     0,5435.
+    #
+    #     El cambio va en direccion CONSERVADORA: con la masa
+    #     real se puja igual o menos, nunca mas.
+    #
+    # LOS PELDAÑOS NO SE MUEVEN: solo sus pesos.
+    #
+    # SE CUENTAN LAS PUJAS, NO LOS INDICES
+    #
+    #     La primera version de este arreglo repartia la masa por
+    #     la distancia entre indices de corte. Una guardia
+    #     —`test_una_masa_uniforme_si_da_pesos_iguales`— lo
+    #     destapo: esa distancia la fija la rejilla de cuantiles
+    #     y `N`, no los datos, asi que los pesos salian IGUALES
+    #     dieran lo que dieran las pujas. Habria sido cambiar una
+    #     constante por otra.
+    #
+    #     Aqui se cuenta cuantas pujas caen de verdad en cada
+    #     banda [factor_k, factor_k+1). Con primas repetidas dos
+    #     cortes pueden caer en el mismo factor; entonces la
+    #     banda de en medio queda vacia y su peso es cero, que es
+    #     correcto: no hay ninguna puja entre un factor y el
+    #     mismo factor, y la masa la recoge el peldaño gemelo.
+    factores = [round(muestras[indice], 4) for indice in indices]
+
+    pesos = []
+
+    for k, factor in enumerate(factores):
+
+        siguiente = (
+            factores[k + 1] if k + 1 < len(factores) else None
+        )
+
+        if k == 0:
+            # El primero se lleva tambien lo que queda por debajo
+            # del primer corte: esas pujas existieron y tienen
+            # que caer en algun sitio.
+            cuantas = sum(
+                1
+                for prima in muestras
+                if siguiente is None or prima < siguiente
+            )
+
+        elif siguiente is None:
+            cuantas = sum(
+                1 for prima in muestras if prima >= factor
+            )
+
+        else:
+            cuantas = sum(
+                1
+                for prima in muestras
+                if factor <= prima < siguiente
+            )
+
+        pesos.append(cuantas)
+
+    # ==================================================
+    # LO QUE NO TIENE MUESTRA, SE DICE (doctrina 55)
+    # ==================================================
+    #
+    #     72 pujas para siete peldaños es poco. Con N=72 el
+    #     intervalo de Wilson al 95 % sobre el peso mide:
+    #
+    #         n=1  ->  [0,0025 , 0,0746]   30,4x de ancho
+    #         n=3  ->  [0,0143 , 0,1155]    8,1x
+    #         n=5  ->  [0,0300 , 0,1525]    5,1x
+    #         n=11 ->  [0,0875 , 0,2532]    2,9x
+    #
+    #     Por debajo de cinco el intervalo se pasa del factor
+    #     cinco y el numero deja de ser una medida.
+    #
+    #     QUE SE HACE CON UN PELDAÑO FLOJO: se marca, y se deja
+    #     su masa observada. NO se borra ni se funde con el de al
+    #     lado, porque las dos cosas afirmarian algo MAS fuerte
+    #     que el propio dato — borrar el de arriba seria decir
+    #     "ningun rival paga tanto", y de estas mismas 72 pujas
+    #     hubo cuatro que si. Un peso flojo con su aviso es mas
+    #     honesto que un cero inventado.
+    flojos = [
+        k
+        for k, cuantas in enumerate(pesos)
+        if cuantas < MIN_SAMPLES_PER_RUNG
+    ]
 
     curva = []
+    peldanos = []
 
-    for corte in cortes:
-        indice = min(
-            int(corte * len(muestras)),
-            len(muestras) - 1,
+    acumulado = 0.0
+
+    for k, (factor, cuantas) in enumerate(zip(factores, pesos)):
+
+        # El ultimo absorbe el redondeo para que los pesos sumen
+        # exactamente uno: una curva que suma 0,9998 mete un
+        # sesgo silencioso en cada probabilidad.
+        if k == len(pesos) - 1:
+            peso = round(1.0 - acumulado, 4)
+        else:
+            peso = round(cuantas / total, 4)
+            acumulado += peso
+
+        curva.append((factor, peso))
+
+        peldanos.append(
+            {
+                "factor": factor,
+                "quantile": cortes[k],
+                "weight": peso,
+                "n": cuantas,
+                "calibrated": cuantas >= MIN_SAMPLES_PER_RUNG,
+            }
         )
-        curva.append(
-            (round(muestras[indice], 4), round(1.0 / len(cortes), 4))
+
+    aviso = (
+        (
+            f" AVISO: {len(flojos)} peldaño(s) con menos de "
+            f"{MIN_SAMPLES_PER_RUNG} pujas ("
+            + ", ".join(
+                f"{peldanos[k]['factor']:.4f}x n={peldanos[k]['n']}"
+                for k in flojos
+            )
+            + "): su peso es lo observado, pero con esa muestra no "
+            "es una medida firme."
         )
+        if flojos
+        else ""
+    )
 
     return {
         "curve": curva,
         "calibrated": True,
-        "samples": len(muestras),
+        "samples": total,
         "discarded_no_price": descartadas_sin_precio,
         "discarded_impossible": descartadas_imposibles,
+
+        # CADA PELDAÑO CON SU `n` Y SU VEREDICTO.
+        "rungs": peldanos,
+        "min_samples_per_rung": MIN_SAMPLES_PER_RUNG,
+        "rungs_below_minimum": len(flojos),
+        "fully_calibrated": not flojos,
+        "weights_from_observed_mass": True,
+
         "reason": (
-            f"Calibrada con {len(muestras)} pujas medidas contra "
-            f"el precio de aquel momento. Prima mediana "
-            f"{muestras[len(muestras) // 2]:.2f}x."
+            f"Calibrada con {total} pujas medidas contra el precio "
+            f"de aquel momento. Prima mediana "
+            f"{muestras[total // 2]:.2f}x. Los pesos salen de la "
+            f"masa observada, no de 1/{len(cortes)}." + aviso
         ),
     }
 
@@ -791,6 +966,61 @@ def candidate_bids(
     )
 
 
+# ============================================================
+# LA VIA QUE GANO, CON SU NOMBRE (16/09/2026)
+# ============================================================
+#
+# DOS VIAS COMPARTEN `intent: "SPECULATION"`:
+#
+#     PRICE_TREND       proyecta el ritmo DE ESTE jugador.
+#     COMPUTER_RESALE   apuesta a que el Computer recompra por
+#                       encima del mercado. Su valor es
+#                       `precio x (1 + prima x 0,75)`, la MISMA
+#                       constante para todo el tablero.
+#
+# Compiten en un `max(...)` por valor y la que gana presta su
+# `value`. Hasta hoy el rechazo decia "Como especulacion rinde
+# un X %" en los dos casos, y cuando ganaba la del Computer eso
+# era una frase falsa: el numero no tenia nada de ese jugador.
+#
+# Esto NO cambia ninguna decision —ni un umbral, ni una puja—.
+# Cambia la frase, que es lo que se lee para decidir si hay que
+# ir a mirar.
+NOMBRE_DE_LA_VIA = {
+    "PRICE_TREND": "especulacion sobre el ritmo del jugador",
+    "COMPUTER_RESALE": "reventa al Computer",
+    "ROSTER_FILL": "relleno de plantilla",
+    "XI_UPGRADE": "mejora del once",
+    "HOLD": "tenerlo mientras sube",
+}
+
+
+def nombre_de_la_via(route, intent=None) -> str:
+    """
+    Como se llama la via que puso el `value`, para el motivo.
+
+    Sin `route` NO se inventa un nombre: se dice que no se sabe.
+    Un motivo que nombra la via equivocada es peor que uno que
+    dice "no consta" — ese fue justo el fallo del 14/09.
+    """
+
+    via = str(route or "").upper()
+
+    if via in NOMBRE_DE_LA_VIA:
+        return NOMBRE_DE_LA_VIA[via]
+
+    if via:
+        return f"la via {via}"
+
+    etiqueta = str(intent or "").upper()
+
+    return (
+        f"una via no declarada (intent {etiqueta})"
+        if etiqueta
+        else "una via no declarada"
+    )
+
+
 def optimal_bid(
     price: int,
     value: int,
@@ -802,6 +1032,10 @@ def optimal_bid(
     # comportamiento de antes del 11/09. Lo usa el tablero para
     # enseñar, al lado, lo que se habria ofrecido antes.
     prima_maxima=PRIMA_MAXIMA_DE_PUJA,
+
+    # LA VIA DE LA QUE SALIO `value`. Solo para el motivo: no
+    # entra en ninguna cuenta ni abre ni cierra ninguna puerta.
+    route: str | None = None,
 ) -> dict:
     """
     El importe que maximiza el valor esperado.
@@ -950,11 +1184,13 @@ def optimal_bid(
                 / max(mejor["bid"], 1)
             )
 
+            via = nombre_de_la_via(route, intent)
+
             if rendimiento < RENDIMIENTO_MINIMO_DEL_CAPITAL:
                 return _no_bid(
                     "RENDIMIENTO_INSUFICIENTE",
                     (
-                        f"Como especulacion rinde un "
+                        f"Por {via} rinde un "
                         f"{rendimiento * 100:.2f} % "
                         f"({mejor['expected_value']:,} EUR sobre "
                         f"{mejor['bid']:,} inmovilizados) y se "
@@ -965,6 +1201,7 @@ def optimal_bid(
                         f"dinero rinde mas en otra operacion."
                     ).replace(",", "."),
                     options=opciones,
+                    route=route,
                 )
 
             if (
@@ -974,7 +1211,7 @@ def optimal_bid(
                 return _no_bid(
                     "GANANCIA_INSUFICIENTE",
                     (
-                        f"Como especulacion deja "
+                        f"Por {via} deja "
                         f"{mejor['expected_value']:,} EUR y el "
                         f"ciclo solo ejecuta una accion por "
                         f"vuelta: por debajo de "
@@ -982,6 +1219,7 @@ def optimal_bid(
                         f"no merece el turno."
                     ).replace(",", "."),
                     options=opciones,
+                    route=route,
                 )
 
         if mejor["win_probability"] < MIN_WIN_PROBABILITY:
@@ -1053,6 +1291,11 @@ def optimal_bid(
             ],
             "options": opciones,
             "premium_model": model.get("premium"),
+
+            # LA VIA QUE PUSO EL `value`, con nombre.
+            "value_route": route,
+            "value_route_label": nombre_de_la_via(route, intent),
+
             "reasons": razones,
         }
 
@@ -1067,6 +1310,13 @@ def _no_bid(
     decision: str,
     reason: str,
     options: list | None = None,
+
+    # LA VIA DE LA QUE SALIO EL `value` QUE SE JUZGO.
+    #
+    #     Viaja tambien en los rechazos: el 14/09 el motivo
+    #     nombraba una via y el numero venia de otra, y eso no se
+    #     ve desde fuera si el rechazo no la publica.
+    route: str | None = None,
 ) -> dict:
     return {
         "bid": 0,
@@ -1076,4 +1326,5 @@ def _no_bid(
         "expected_value": 0,
         "options": options or [],
         "reasons": [reason],
+        "value_route": route,
     }
