@@ -369,6 +369,7 @@ TESTS = [
     # Lo que cuesta de verdad tener a un jugador, y que la verja
     # deje de escribir en los libros.
     "src.analysis.test_el_carry_v1",
+    "src.analysis.test_la_direccion_v1",
 
     "src.analysis.test_doctrina_v1",
 ]

@@ -39,6 +39,7 @@ data/
 !/data/autopilot/
 /data/autopilot/*
 !/data/autopilot/price_history.json
+!/data/autopilot/computer_offer_history.json
 
 !/data/calendar/
 /data/calendar/*
@@ -51,6 +52,9 @@ data/
 !/data/intelligence/libro_de_publicacion.jsonl
 !/data/intelligence/libro_en_la_sombra.jsonl
 !/data/intelligence/divergence_ledger.json
+!/data/intelligence/scout_accuracy_ledger.json
+!/data/intelligence/source_accuracy_ledger.json
+!/data/intelligence/rejection_ledger.json
 
 !/data/rival_intelligence/
 /data/rival_intelligence/*
@@ -67,8 +71,12 @@ data/
 !/data/trading/bid_outcome_ledger.json
 !/data/trading/libro_de_renovaciones.jsonl
 !/data/trading/libro_del_carril.jsonl
-!/data/trading/libro_del_escaparate.jsonl
 !/data/trading/position_ledger.json
+!/data/trading/libro_del_escaparate.jsonl
+!/data/trading/libro_de_viajes.jsonl
+!/data/trading/libro_de_escaparate.jsonl
+!/data/trading/libro_de_salidas.jsonl
+!/data/trading/libro_de_la_ventana.jsonl
 
 *.db
 *.sqlite
