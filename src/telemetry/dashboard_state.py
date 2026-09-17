@@ -4152,27 +4152,18 @@ def build_dashboard_state() -> dict:
             build_roster_expansion_shadow,
         )
 
-        # LA PLANTILLA MAS GRANDE JAMAS VISTA (17/09/2026)
-        #
-        # La de HOY daba 0 huecos con 20 fichas contra las 20 del
-        # mayor, y nosotros mismos llegamos a tener 21 el 15/09.
-        # Sale del mismo sitio que en produccion —una sola
-        # respuesta a la misma pregunta— y se ignora sola si su
-        # cuadre no pasa.
-        from src.analysis.el_cable import (
-            maximo_historico_de_fichas,
-        )
-
         auditoria_compacta = compact_ledger_audit(ledger_audit)
 
+        # EL BLOQUE 4 NO ENTRA, y la pantalla tiene que decir lo
+        # mismo que el motor. Si aqui se pasara `historical_max` y
+        # en `acquisition_valuation` no, la pantalla pintaria
+        # cuatro plazas que el motor no ve — que es exactamente el
+        # descuadre que el cable vino a quitar.
         roster_expansion = build_roster_expansion_shadow(
             season_horizon,
             auditoria_compacta,
             (exposure or {}).get("acquisition"),
             current_user_id=board.get("current_user_id"),
-            historical_max=maximo_historico_de_fichas(
-                auditoria_compacta
-            ),
         )
 
     except Exception as error:                      # noqa: BLE001

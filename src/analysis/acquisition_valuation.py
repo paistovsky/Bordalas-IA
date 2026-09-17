@@ -194,10 +194,6 @@ def build_valuation_context(
                 audit_rival_ledger,
             )
 
-            from src.analysis.el_cable import (
-                maximo_historico_de_fichas,
-            )
-
             auditoria = {
                 "by_manager": [
                     {**datos, "is_us": datos.get("is_us")}
@@ -213,17 +209,24 @@ def build_valuation_context(
                 ]
             }
 
-            # EL MISMO NUMERO QUE EL DASHBOARD (17/09/2026)
+            # EL BLOQUE 4 NO ENTRA (17/09/2026)
             #
-            # La mayor plantilla de HOY no es la mayor que ha
-            # habido. Sale del mismo sitio en los dos lados: dos
-            # respuestas distintas a "cuantas fichas caben" es como
-            # se acaba pintando una plaza que el motor no ve.
+            #     `count_free_slots` acepta un `historical_max`
+            #     desde el encargo del cable, y pasandoselo esta
+            #     misma foto da 4 huecos en vez de 0.
+            #
+            #     CUATRO HUECOS ABREN `ROSTER_FILL`. Cinco lineas
+            #     mas abajo hay un `if huecos > 0` que abre la via
+            #     de ficha vacia, y esa via NO TIENE TOPE DE PRIMA.
+            #     Mientras no lo tenga, la plaza se queda cerrada:
+            #     es decision del dueño, no un olvido.
+            #
+            #     Asi que aqui NO se le pasa. La medicion de cual
+            #     seria el numero bueno esta hecha y publicada en
+            #     `mayor_plantilla_jamas_vista`; lo que falta es el
+            #     freno, no el dato.
             free_roster_slots = safe_int(
-                count_free_slots(
-                    auditoria,
-                    maximo_historico_de_fichas(auditoria),
-                ).get("free_slots")
+                count_free_slots(auditoria).get("free_slots")
             )
 
         except Exception:                           # noqa: BLE001

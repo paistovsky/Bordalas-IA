@@ -136,7 +136,7 @@ def test_todo_libro_escrito_esta_en_la_lista() -> None:
     )
 
 
-def test_la_lista_y_el_gitignore_no_se_separan() -> None:
+def test_el_gitignore_no_tapa_un_libro() -> None:
     """
     Un libro de la lista que el `.gitignore` siga tapando no
     existe: se guardaria en un sitio y se borraria en otro.
@@ -572,6 +572,164 @@ def test_esto_sigue_apagado() -> None:
 
     assert D.esta_encendido() is False, (
         "`esta_encendido()` no dice lo mismo que `ENCENDIDO`."
+    )
+
+
+# ============================================================
+# EL ORDEN NO QUITA PUJAS
+# ============================================================
+
+def test_el_orden_no_quita_pujas() -> None:
+    """
+    Reordenar por direccion devuelve LOS MISMOS candidatos.
+
+    POR QUE ES ESTA LA PROPIEDAD Y NO OTRA (doctrina 51)
+
+        Ayer se midio que el filtro por direccion habria bajado
+        nuestras pujas de 37 a 18, y el problema medido es que
+        aparecemos poco. Asi que lo unico que hace falta demostrar
+        de este reorden es que NO ES UN FILTRO DISFRAZADO.
+
+        No se cuenta la sintaxis —«llama a `sorted`»—: se mide la
+        propiedad. Entran N, salen N, y son los mismos N.
+
+    SE PRUEBA ENCENDIDO A PROPOSITO. Apagado devuelve la entrada
+    tal cual y cualquier cosa pasaria; lo que hay que atar es el
+    comportamiento del dia que se encienda.
+    """
+
+    candidatos = [
+        {"id": 1, "decision": "BID", "vispera": "UP", "cambio": 0.4},
+        {"id": 2, "decision": "BID", "vispera": "DOWN", "cambio": -2.0},
+        {"id": 3, "decision": "BID", "vispera": "UP", "cambio": 5.1},
+        {"id": 4, "decision": "NO_BID", "vispera": None, "cambio": None},
+        {"id": 5, "decision": "BID", "vispera": "FLAT", "cambio": 0.0},
+        {"id": 6, "decision": "BID", "vispera": "UP", "cambio": 2.2},
+    ]
+
+    # CON LAS MANOS VACIAS NO SE PASA.
+    assert candidatos, (
+        "La lista de candidatos llega vacia: reordenar cero "
+        "elementos no prueba que no se pierda ninguno."
+    )
+
+    # Y TIENE QUE HABER DE LOS DOS LADOS, o un reorden que
+    # mandara a todo el mundo al mismo sitio pasaria igual.
+    direcciones = {c["vispera"] for c in candidatos}
+
+    assert "UP" in direcciones and "DOWN" in direcciones, (
+        "El montaje no tiene a la vez uno que sube y uno que baja: "
+        "asi no se distingue un reorden de una lista que ya venia "
+        "ordenada."
+    )
+
+    pronosticos = {
+        c["id"]: ({"direction": c["vispera"]} if c["vispera"] else None)
+        for c in candidatos
+    }
+
+    cambios = {c["id"]: c["cambio"] for c in candidatos}
+
+    encendido_antes = D.ORDEN_ENCENDIDO
+
+    try:
+        D.ORDEN_ENCENDIDO = True
+
+        resultado = D.ordenar(
+            candidatos, pronosticos, cambios, clave=lambda f: f["id"]
+        )
+
+        assert resultado["available"], (
+            f"El reorden no se ha aplicado: {resultado['reason']}"
+        )
+
+        salida = resultado["filas"]
+
+        # 1. EL MISMO NUMERO.
+        assert len(salida) == len(candidatos), (
+            f"Entraron {len(candidatos)} candidatos y salieron "
+            f"{len(salida)}. Un orden que cambia la cuenta es un "
+            f"filtro disfrazado, y eso no entra."
+        )
+
+        # 2. LOS MISMOS, uno a uno.
+        assert sorted(f["id"] for f in salida) == sorted(
+            c["id"] for c in candidatos
+        ), (
+            "La lista de salida no lleva los mismos candidatos que "
+            "la de entrada."
+        )
+
+        # 3. Y LAS MISMAS PUJAS. Es el numero del encargo: si
+        #    salen menos BID de los que entraron, se ha caido una.
+        pujas_antes = sum(
+            1 for c in candidatos if c["decision"] == "BID"
+        )
+
+        pujas_despues = sum(
+            1 for f in salida if f["decision"] == "BID"
+        )
+
+        assert pujas_despues == pujas_antes, (
+            f"Entraron {pujas_antes} pujas y salieron "
+            f"{pujas_despues}. El orden no puede tocar ni una."
+        )
+
+        # 4. Y ORDENA DE VERDAD: el que subio mas fuerte va
+        #    delante, o esto no sirve para nada.
+        suben = [
+            f["id"] for f in salida if f["vispera"] == "UP"
+        ]
+
+        assert suben == [3, 6, 1], (
+            f"Los que suben salen en el orden {suben} y tenian que "
+            f"salir [3, 6, 1] —de mas fuerte a mas flojo: +5,1 %, "
+            f"+2,2 %, +0,4 %—."
+        )
+
+        assert salida[0]["id"] == 3, (
+            "Delante del todo tiene que ir el que mas subio la "
+            "vispera."
+        )
+
+        # 5. EL QUE NO TIENE PRONOSTICO NO SE CASTIGA MAS QUE EL
+        #    QUE BAJA: los dos van al mismo escalon. Castigar al
+        #    que no tiene dato es el primer paso para quitarlo.
+        assert D.clave_de_orden(None, None)[0] == D.clave_de_orden(
+            {"direction": "DOWN"}, None
+        )[0], (
+            "El que no tiene pronostico y el que baja tienen que "
+            "ir al mismo escalon. No saber no es una falta."
+        )
+
+    finally:
+        D.ORDEN_ENCENDIDO = encendido_antes
+
+
+def test_el_orden_sigue_apagado() -> None:
+    """
+    `ORDEN_ENCENDIDO = False`, y apagado devuelve la entrada tal
+    cual — no una copia reordenada «por si acaso».
+    """
+
+    assert D.ORDEN_ENCENDIDO is False, (
+        "`la_direccion.ORDEN_ENCENDIDO` ya no es False. El orden "
+        "se construyo apagado: lo enciende el dueño cuando vea la "
+        "tabla."
+    )
+
+    filas = [{"id": 1}, {"id": 2}, {"id": 3}]
+
+    resultado = D.ordenar(
+        filas,
+        {1: {"direction": "DOWN"}, 3: {"direction": "UP"}},
+        {3: 9.0},
+        clave=lambda f: f["id"],
+    )
+
+    assert [f["id"] for f in resultado["filas"]] == [1, 2, 3], (
+        "Apagado, el orden ha movido las filas. Un interruptor "
+        "apagado que cambia algo no es un interruptor."
     )
 
 

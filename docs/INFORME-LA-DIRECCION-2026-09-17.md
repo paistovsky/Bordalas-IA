@@ -392,7 +392,7 @@ buenas en las que no estábamos.**
 
 ```
 test_todo_libro_escrito_esta_en_la_lista
-test_la_lista_y_el_gitignore_no_se_separan
+test_el_gitignore_no_tapa_un_libro
 test_ningun_libro_se_clasifico_dos_veces
 test_el_rendimiento_lleva_direccion_y_plazo
 test_los_diecinueve_puntos_aguantan_la_prima_del_computer

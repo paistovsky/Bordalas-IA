@@ -574,3 +574,199 @@ def que_cambia(subastas, nuestro_id) -> dict:
         # menos pujas de las que hubo, es una resta.
         "pujariamos_menos": len(quedan) < len(pujadas),
     }
+
+
+# ============================================================
+# EL ORDEN, QUE NO ES UNA PUERTA
+# ============================================================
+#
+# LO QUE SE APRENDIO AYER, y es la unica razon de que esto sea un
+# orden y no un filtro:
+#
+#     UN FILTRO NO HACE APARECER A NADIE. SOLO QUITA.
+#
+#     Medido sobre las 182 subastas: filtrando por direccion se
+#     pujaba en 18 en vez de en 37, y se caian 19 de las 26 que
+#     ganamos. El problema medido es que aparecemos poco -20 %
+#     contra el 60 % de Pollo-, asi que cualquier cosa que reste
+#     pujas va contra el problema.
+#
+#     Ordenar no resta. Con el mismo dinero y el mismo cupo, se
+#     mira primero al que sube — y entre los que suben, al que
+#     subio mas fuerte la vispera, que es donde estan los +44 %.
+#
+# DONDE VA CUANDO SE ENCIENDA
+#
+#     `acquisition_board.py`, en el `filas.sort(...)` de la linea
+#     1330. Entra como un DESEMPATE mas, detras de los que ya
+#     mandan —la decision, la puja viva y el escalon de
+#     `deployment`— y delante del valor. Asi no cambia quien
+#     entra ni cuanto se paga: cambia a quien se mira primero.
+#
+# POR QUE NO PUEDE CAER NINGUNA PUJA
+#
+#     Porque es un `sort`, no un `filter`: una ordenacion es una
+#     permutacion y devuelve exactamente los mismos elementos.
+#     Eso no es una opinion, es la propiedad que mide
+#     `test_el_orden_no_quita_pujas` — misma cuenta, mismo
+#     conjunto de identificadores, mismas decisiones BID.
+
+# El interruptor del orden, aparte del interruptor del filtro:
+# son dos cosas distintas y se encienden por separado.
+ORDEN_ENCENDIDO = False
+
+
+def esta_encendido_el_orden() -> bool:
+    return bool(ORDEN_ENCENDIDO)
+
+
+# Los tramos de fuerza de la vispera, de mas fuerte a mas flojo,
+# con lo que rinde cada uno a `PLAZO_DE_SALIDA` dias.
+TRAMOS_DE_FUERZA = (
+    ("mas de 4 %", 4.0),
+    ("2-4 %", 2.0),
+    ("1-2 %", 1.0),
+    ("0-1 %", 0.0),
+)
+
+
+def tramo_de_fuerza(cambio_percent):
+    """En que tramo cae una subida de la vispera. None si no sube."""
+
+    if cambio_percent is None:
+        return None
+
+    try:
+        cuanto = float(cambio_percent)
+
+    except (TypeError, ValueError):
+        return None
+
+    if cuanto <= 0:
+        return None
+
+    for nombre, suelo in TRAMOS_DE_FUERZA:
+        if cuanto >= suelo:
+            return nombre
+
+    return "0-1 %"
+
+
+def clave_de_orden(pronostico, cambio_de_la_vispera=None) -> tuple:
+    """
+    El desempate por direccion. Mas pequeño va antes.
+
+    `(escalon, -fuerza)`:
+
+        escalon 0   el ojeador dice que SUBE
+        escalon 1   todos los demas, sin distinguir
+
+    Y dentro de los que suben ordena por lo que subio la vispera,
+    de mas a menos, porque eso es lo que separa un +0,889 % de un
+    +44,444 % a diez dias (n=1175 y n=759).
+
+    NO SE PARTE EL ESCALON 1. Al que baja y al que no tiene
+    pronostico se les trata igual a efectos de orden: distinguirlos
+    seria empezar a castigar por no tener dato, y de ahi a quitarlo
+    de la lista hay un paso. El que no tiene pronostico sigue
+    pujando exactamente igual que hoy.
+
+    Nunca lanza.
+    """
+
+    sube = direccion_de(pronostico) == COMPRAMOS_SI
+
+    if not sube:
+        return (1, 0.0)
+
+    try:
+        fuerza = float(cambio_de_la_vispera or 0.0)
+
+    except (TypeError, ValueError):
+        fuerza = 0.0
+
+    return (0, -fuerza)
+
+
+def ordenar(filas, pronosticos=None, cambios=None, clave=None) -> dict:
+    """
+    Reordena los candidatos por direccion. NO quita ninguno.
+
+    `filas` son los candidatos; `pronosticos` y `cambios` son
+    diccionarios por identificador. `clave` dice como sacar el
+    identificador de una fila.
+
+    Devuelve `{available, filas, movidos, reason}` — y `filas` es
+    SIEMPRE una permutacion de la entrada, tambien cuando el
+    interruptor esta apagado (entonces es la entrada tal cual).
+
+    ORDENACION ESTABLE: `sorted` lo es, asi que dos candidatos con
+    la misma direccion y la misma fuerza conservan el orden que
+    traian. Lo que este desempate no decide, lo sigue decidiendo
+    quien lo decidia antes.
+
+    Nunca lanza.
+    """
+
+    entrada = list(filas or [])
+
+    if not entrada:
+        return {
+            "available": False,
+            "filas": [],
+            "movidos": 0,
+            "reason": (
+                "No hay candidatos que ordenar. Ordenar una lista "
+                "vacia no prueba nada."
+            ),
+        }
+
+    if not ORDEN_ENCENDIDO:
+        return {
+            "available": False,
+            "filas": entrada,
+            "movidos": 0,
+            "reason": (
+                "El orden por direccion esta apagado "
+                "(`ORDEN_ENCENDIDO = False`): las filas salen "
+                "exactamente como entraron."
+            ),
+        }
+
+    pronosticos = pronosticos or {}
+
+    cambios = cambios or {}
+
+    def identificador(fila):
+        if clave is not None:
+            return clave(fila)
+
+        if isinstance(fila, dict):
+            return fila.get("player_id", fila.get("id"))
+
+        return None
+
+    salida = sorted(
+        entrada,
+        key=lambda fila: clave_de_orden(
+            pronosticos.get(identificador(fila)),
+            cambios.get(identificador(fila)),
+        ),
+    )
+
+    movidos = sum(
+        1
+        for antes, despues in zip(entrada, salida)
+        if antes is not despues
+    )
+
+    return {
+        "available": True,
+        "filas": salida,
+        "movidos": movidos,
+        "reason": (
+            f"Reordenados {len(salida)} candidatos por la direccion "
+            f"de la vispera. No se ha quitado ninguno: "
+            f"{len(entrada)} entraron y {len(salida)} salen."
+        ),
+    }

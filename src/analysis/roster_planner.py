@@ -5,6 +5,7 @@ from src.analysis.portfolio_optimizer import (
 from src.analysis.position_guardrail import (
     build_position_guardrail,
     validate_sale_set,
+    validate_sale_set_con_titularidad,
 )
 
 from src.analysis.sales_analyzer import (
@@ -99,7 +100,24 @@ def build_roster_plan(
             item["id"] for item in current
         ] + [candidate["id"]]
 
-        verdict = validate_sale_set(
+        # EL FRENO DE TITULARIDAD, ENCENDIDO (17/09/2026)
+        #
+        #     `validate_sale_set` cuenta CUERPOS contra el suelo de
+        #     la posicion. Medido el 17/09: los once titulares
+        #     pasaban de uno en uno, y nueve estaban en `locked_ids`
+        #     con el motivo escrito al lado. Dituro es el caso
+        #     entero: portero titular, venderlo deja dos porteros de
+        #     0 puntos en 0 partidos, y el suelo de cuerpos se
+        #     cumple igual.
+        #
+        #     AQUI SE PROPONE A QUIEN VENDER, asi que este freno
+        #     solo cambia a quien se elige. NO se ha encendido en
+        #     `liquidity_manager` ni en
+        #     `accept_before_expiry_execution_planner`, que son la
+        #     salida de emergencia cuando falta dinero: alli un
+        #     freno del once puede quitar la unica forma de pagar.
+        #     Decision del dueño, 17/09.
+        verdict = validate_sale_set_con_titularidad(
             guardrail,
             tentative,
         )

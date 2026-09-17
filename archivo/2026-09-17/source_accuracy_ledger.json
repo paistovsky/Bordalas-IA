@@ -1,0 +1,650 @@
+{
+  "version": "V1.0",
+  "matchdays": {
+    "1": {
+      "matchday": 1,
+      "predictions": {
+        "1599": {
+          "player_name": "Jonny Castro",
+          "team": "Alavés",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 50.0,
+            "ANALITICA_FANTASY": 25.0
+          },
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 50.0,
+          "appearances_at_prediction": 0
+        },
+        "3159": {
+          "player_name": "Jutglà",
+          "team": "Celta",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 80.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 86.1,
+          "appearances_at_prediction": 0
+        },
+        "5771": {
+          "player_name": "Yeray",
+          "team": "Athletic",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 70.0,
+            "ANALITICA_FANTASY": 50.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 70.0,
+          "appearances_at_prediction": 0
+        },
+        "9065": {
+          "player_name": "Ximo Navarro",
+          "team": "Deportivo",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 70.0,
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 70.0,
+          "appearances_at_prediction": 0
+        },
+        "17482": {
+          "player_name": "Dituro",
+          "team": "Elche",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 90.0,
+            "ANALITICA_FANTASY": 90.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 90.0,
+          "appearances_at_prediction": 0
+        },
+        "18178": {
+          "player_name": "Rodrygo",
+          "team": "Real Madrid",
+          "sources": {
+            "JORNADA_PERFECTA": 31.3,
+            "FUTBOLFANTASY": 0.0,
+            "ANALITICA_FANTASY": 25.0
+          },
+          "consensus": "BENCH",
+          "consensus_probability": 25.0,
+          "appearances_at_prediction": 0
+        },
+        "25322": {
+          "player_name": "Javi Hernández",
+          "team": "Espanyol",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 50.0,
+            "ANALITICA_FANTASY": 50.0
+          },
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 50.0,
+          "appearances_at_prediction": 0
+        },
+        "26271": {
+          "player_name": "Yamal",
+          "team": "Barcelona",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 60.0,
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 70.0,
+          "appearances_at_prediction": 0
+        },
+        "29661": {
+          "player_name": "Olasagasti",
+          "team": "Levante",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 90.0,
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 90.0,
+          "appearances_at_prediction": 0
+        },
+        "32435": {
+          "player_name": "Etta Eyong",
+          "team": "Levante",
+          "sources": {
+            "JORNADA_PERFECTA": 31.3,
+            "FUTBOLFANTASY": 50.0,
+            "ANALITICA_FANTASY": 50.0
+          },
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 50.0,
+          "appearances_at_prediction": 0
+        },
+        "37898": {
+          "player_name": "Hugo Rincón",
+          "team": "Athletic",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 50.0,
+            "ANALITICA_FANTASY": 25.0
+          },
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 50.0,
+          "appearances_at_prediction": 0
+        },
+        "38194": {
+          "player_name": "Gabriel Suazo",
+          "team": "Sevilla",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 70.0,
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 70.0,
+          "appearances_at_prediction": 0
+        },
+        "38318": {
+          "player_name": "Valentín Gómez",
+          "team": "Betis",
+          "sources": {
+            "JORNADA_PERFECTA": 31.3,
+            "FUTBOLFANTASY": 20.0
+          },
+          "consensus": "BENCH",
+          "consensus_probability": 25.6,
+          "appearances_at_prediction": 0
+        },
+        "39966": {
+          "player_name": "Álvaro Fidalgo",
+          "team": "Betis",
+          "sources": {
+            "JORNADA_PERFECTA": 31.3,
+            "FUTBOLFANTASY": 30.0
+          },
+          "consensus": "BENCH",
+          "consensus_probability": 30.6,
+          "appearances_at_prediction": 0
+        },
+        "41271": {
+          "player_name": "Gustavo Puerta",
+          "team": "Racing",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 80.0,
+            "ANALITICA_FANTASY": 80.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 80.0,
+          "appearances_at_prediction": 0
+        },
+        "41605": {
+          "player_name": "Bayindir",
+          "team": "Celta",
+          "sources": {
+            "JORNADA_PERFECTA": 31.3,
+            "FUTBOLFANTASY": 10.0
+          },
+          "consensus": "BENCH",
+          "consensus_probability": 20.6,
+          "appearances_at_prediction": 0
+        },
+        "41606": {
+          "player_name": "Mangala",
+          "team": "Getafe",
+          "sources": {
+            "JORNADA_PERFECTA": 92.2,
+            "FUTBOLFANTASY": 50.0,
+            "ANALITICA_FANTASY": 50.0
+          },
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 50.0,
+          "appearances_at_prediction": 0
+        }
+      },
+      "scored": true,
+      "baseline_note": "Jornada 1: linea base 0 para todos, es la primera del curso.",
+      "outcomes": {
+        "1599": {
+          "played": 1,
+          "appearances_before": 0,
+          "appearances_after": 1,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "3159": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "5771": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "9065": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "17482": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "18178": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "25322": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "26271": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "29661": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "32435": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "37898": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "38194": {
+          "played": 1,
+          "appearances_before": 0,
+          "appearances_after": 1,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "38318": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "39966": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "41271": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "41605": {
+          "played": 0,
+          "appearances_before": 0,
+          "appearances_after": 0,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        },
+        "41606": {
+          "played": 1,
+          "appearances_before": 0,
+          "appearances_after": 1,
+          "ground_truth_method": "APPEARANCE_DELTA"
+        }
+      },
+      "only_contested": false,
+      "per_source": {
+        "JORNADA_PERFECTA": {
+          "n": 17,
+          "sum_brier": 8.158853,
+          "mean_brier": 0.4799
+        },
+        "FUTBOLFANTASY": {
+          "n": 17,
+          "sum_brier": 5.719999999999999,
+          "mean_brier": 0.3365
+        },
+        "ANALITICA_FANTASY": {
+          "n": 13,
+          "sum_brier": 4.6975,
+          "mean_brier": 0.3613
+        }
+      },
+      "detail": {
+        "1599": {
+          "player_name": "Jonny Castro",
+          "played": 1,
+          "brier": {
+            "JORNADA_PERFECTA": 0.0061,
+            "FUTBOLFANTASY": 0.25,
+            "ANALITICA_FANTASY": 0.5625
+          }
+        },
+        "3159": {
+          "player_name": "Jutglà",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.64
+          }
+        },
+        "5771": {
+          "player_name": "Yeray",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.49,
+            "ANALITICA_FANTASY": 0.25
+          }
+        },
+        "9065": {
+          "player_name": "Ximo Navarro",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.49,
+            "ANALITICA_FANTASY": 0.49
+          }
+        },
+        "17482": {
+          "player_name": "Dituro",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.81,
+            "ANALITICA_FANTASY": 0.81
+          }
+        },
+        "18178": {
+          "player_name": "Rodrygo",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.098,
+            "FUTBOLFANTASY": 0.0,
+            "ANALITICA_FANTASY": 0.0625
+          }
+        },
+        "25322": {
+          "player_name": "Javi Hernández",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.25,
+            "ANALITICA_FANTASY": 0.25
+          }
+        },
+        "26271": {
+          "player_name": "Yamal",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.36,
+            "ANALITICA_FANTASY": 0.49
+          }
+        },
+        "29661": {
+          "player_name": "Olasagasti",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.81,
+            "ANALITICA_FANTASY": 0.49
+          }
+        },
+        "32435": {
+          "player_name": "Etta Eyong",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.098,
+            "FUTBOLFANTASY": 0.25,
+            "ANALITICA_FANTASY": 0.25
+          }
+        },
+        "37898": {
+          "player_name": "Hugo Rincón",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.25,
+            "ANALITICA_FANTASY": 0.0625
+          }
+        },
+        "38194": {
+          "player_name": "Gabriel Suazo",
+          "played": 1,
+          "brier": {
+            "JORNADA_PERFECTA": 0.0061,
+            "FUTBOLFANTASY": 0.09,
+            "ANALITICA_FANTASY": 0.09
+          }
+        },
+        "38318": {
+          "player_name": "Valentín Gómez",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.098,
+            "FUTBOLFANTASY": 0.04
+          }
+        },
+        "39966": {
+          "player_name": "Álvaro Fidalgo",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.098,
+            "FUTBOLFANTASY": 0.09
+          }
+        },
+        "41271": {
+          "player_name": "Gustavo Puerta",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.8501,
+            "FUTBOLFANTASY": 0.64,
+            "ANALITICA_FANTASY": 0.64
+          }
+        },
+        "41605": {
+          "player_name": "Bayindir",
+          "played": 0,
+          "brier": {
+            "JORNADA_PERFECTA": 0.098,
+            "FUTBOLFANTASY": 0.01
+          }
+        },
+        "41606": {
+          "player_name": "Mangala",
+          "played": 1,
+          "brier": {
+            "JORNADA_PERFECTA": 0.0061,
+            "FUTBOLFANTASY": 0.25,
+            "ANALITICA_FANTASY": 0.25
+          }
+        }
+      }
+    },
+    "2": {
+      "matchday": 2,
+      "predictions": {
+        "1599": {
+          "player_name": "Jonny Castro",
+          "team": "Alavés",
+          "appearances_at_prediction": 1,
+          "sources": {
+            "ANALITICA_FANTASY": 25.0
+          },
+          "consensus": "BENCH_LEAN",
+          "consensus_probability": 26.0
+        },
+        "3159": {
+          "player_name": "Jutglà",
+          "team": "Celta",
+          "appearances_at_prediction": 0,
+          "sources": {
+            "FUTBOLFANTASY": 80.0
+          },
+          "consensus": "STARTER_LEAN",
+          "consensus_probability": 74.0
+        },
+        "5771": {
+          "player_name": "Yeray",
+          "team": "Athletic",
+          "appearances_at_prediction": 0,
+          "sources": {
+            "FUTBOLFANTASY": 70.0,
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER",
+          "consensus_probability": 70.0
+        },
+        "9065": {
+          "player_name": "Ximo Navarro",
+          "team": "Deportivo",
+          "appearances_at_prediction": 0,
+          "sources": {},
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 50.0
+        },
+        "17482": {
+          "player_name": "Dituro",
+          "team": "Elche",
+          "appearances_at_prediction": 0,
+          "sources": {},
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 50.0
+        },
+        "25322": {
+          "player_name": "Javi Hernández",
+          "team": "Espanyol",
+          "appearances_at_prediction": 1,
+          "sources": {
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER_LEAN",
+          "consensus_probability": 70.0
+        },
+        "26271": {
+          "player_name": "Yamal",
+          "team": "Barcelona",
+          "appearances_at_prediction": 0,
+          "sources": {
+            "FUTBOLFANTASY": 60.0,
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 59.0
+        },
+        "29661": {
+          "player_name": "Olasagasti",
+          "team": "Levante",
+          "appearances_at_prediction": 1,
+          "sources": {
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER_LEAN",
+          "consensus_probability": 70.0
+        },
+        "37525": {
+          "player_name": "Yusi Enríquez",
+          "team": "Alavés",
+          "appearances_at_prediction": 1,
+          "sources": {
+            "ANALITICA_FANTASY": 25.0
+          },
+          "consensus": "BENCH_LEAN",
+          "consensus_probability": 26.0
+        },
+        "37898": {
+          "player_name": "Hugo Rincón",
+          "team": "Athletic",
+          "appearances_at_prediction": 0,
+          "sources": {
+            "FUTBOLFANTASY": 50.0,
+            "ANALITICA_FANTASY": 25.0
+          },
+          "consensus": "UNCERTAIN",
+          "consensus_probability": 41.0
+        },
+        "38194": {
+          "player_name": "Gabriel Suazo",
+          "team": "Sevilla",
+          "appearances_at_prediction": 1,
+          "sources": {
+            "ANALITICA_FANTASY": 80.0
+          },
+          "consensus": "STARTER_LEAN",
+          "consensus_probability": 74.0
+        },
+        "38318": {
+          "player_name": "Valentín Gómez",
+          "team": "Betis",
+          "appearances_at_prediction": 0,
+          "sources": {
+            "FUTBOLFANTASY": 20.0
+          },
+          "consensus": "BENCH_LEAN",
+          "consensus_probability": 26.0
+        },
+        "39966": {
+          "player_name": "Álvaro Fidalgo",
+          "team": "Betis",
+          "appearances_at_prediction": 0,
+          "sources": {
+            "FUTBOLFANTASY": 30.0
+          },
+          "consensus": "BENCH_LEAN",
+          "consensus_probability": 30.0
+        },
+        "41271": {
+          "player_name": "Gustavo Puerta",
+          "team": "Racing",
+          "appearances_at_prediction": 1,
+          "sources": {
+            "ANALITICA_FANTASY": 80.0
+          },
+          "consensus": "STARTER_LEAN",
+          "consensus_probability": 74.0
+        },
+        "41605": {
+          "player_name": "Bayindir",
+          "team": "Celta",
+          "appearances_at_prediction": 0,
+          "sources": {
+            "FUTBOLFANTASY": 10.0
+          },
+          "consensus": "BENCH_LEAN",
+          "consensus_probability": 26.0
+        },
+        "41606": {
+          "player_name": "Mangala",
+          "team": "Getafe",
+          "appearances_at_prediction": 1,
+          "sources": {
+            "ANALITICA_FANTASY": 70.0
+          },
+          "consensus": "STARTER_LEAN",
+          "consensus_probability": 70.0
+        }
+      },
+      "scored": false
+    }
+  }
+}
