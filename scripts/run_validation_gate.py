@@ -344,6 +344,11 @@ TESTS = [
     # de una constante, y sigue apagada.
     "src.analysis.test_el_carril_de_un_dia_v1",
 
+    # El cable entre la cola de venta y el presupuesto de fichar,
+    # el techo de Biwenger medido, el motivo que no se corta y la
+    # prima del Computer partida por tramo.
+    "src.analysis.test_la_plaza_y_el_cable_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
