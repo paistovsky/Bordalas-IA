@@ -17,6 +17,6 @@
 {"player_id": 37499, "player_name": "Trent", "first_listed_at": "2026-09-15T05:17:26.998873+00:00", "last_seen": "2026-09-17T08:12:40.327560+00:00", "price_at_listing": 2650000, "listed_price": 3139500}
 {"player_id": 1602, "player_name": "Rubén García", "first_listed_at": "2026-09-16T06:38:49.872166+00:00", "last_seen": "2026-09-16T15:14:09.098748+00:00", "price_at_listing": 2610000, "listed_price": 3170000}
 {"player_id": 10040, "player_name": "Balde", "first_listed_at": "2026-09-17T05:17:33.846356+00:00", "last_seen": "2026-09-17T09:11:22.191096+00:00", "price_at_listing": 1550000, "listed_price": 1720312}
-{"player_id": 30507, "player_name": "Benavidez", "first_listed_at": "2026-09-17T05:17:33.846356+00:00", "last_seen": "2026-09-17T09:24:53.747238+00:00", "price_at_listing": 150000, "listed_price": 160176}
-{"player_id": 37726, "player_name": "Oriol Rey", "first_listed_at": "2026-09-17T05:17:33.846356+00:00", "last_seen": "2026-09-17T09:24:53.747238+00:00", "price_at_listing": 1170000, "listed_price": 1380000}
-{"player_id": 39736, "player_name": "Paco Cortés", "first_listed_at": "2026-09-17T05:17:33.846356+00:00", "last_seen": "2026-09-17T09:24:53.747238+00:00", "price_at_listing": 150000, "listed_price": 170289}
+{"player_id": 30507, "player_name": "Benavidez", "first_listed_at": "2026-09-17T05:17:33.846356+00:00", "last_seen": "2026-09-17T10:12:33.386448+00:00", "price_at_listing": 150000, "listed_price": 160176}
+{"player_id": 37726, "player_name": "Oriol Rey", "first_listed_at": "2026-09-17T05:17:33.846356+00:00", "last_seen": "2026-09-17T10:29:59.791109+00:00", "price_at_listing": 1170000, "listed_price": 1380000}
+{"player_id": 39736, "player_name": "Paco Cortés", "first_listed_at": "2026-09-17T05:17:33.846356+00:00", "last_seen": "2026-09-17T10:29:59.791109+00:00", "price_at_listing": 150000, "listed_price": 170289}
