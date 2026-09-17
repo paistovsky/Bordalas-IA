@@ -366,6 +366,10 @@ TESTS = [
     # y el mapa de que freno cuelga de cada `intent`.
     "src.analysis.test_el_proposito_v1",
 
+    # Lo que cuesta de verdad tener a un jugador, y que la verja
+    # deje de escribir en los libros.
+    "src.analysis.test_el_carry_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 

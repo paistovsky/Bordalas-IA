@@ -4996,7 +4996,19 @@ def build_dashboard_state() -> dict:
                 fila
                 for fila in ((acquisition or {}).get("targets") or [])
                 if fila.get("seller_kind") == "COMPUTER"
-            ]
+            ],
+
+            # DE CUANDO ES LA FOTO (17/09/2026)
+            #
+            #     Sin esto el libro se lleno de basura el mismo dia
+            #     que nacio: la verja corre `test_el_ciclo_publica_v1`
+            #     con la foto del 13/09 de fixture, y el libro
+            #     apuntaba esos veinte con la fecha de hoy. Medido:
+            #     CERO de los veinte coincidian con los de hoy.
+            #
+            #     Con el sello, una foto que no sea de este reset no
+            #     se apunta. Y sin sello, tampoco.
+            foto_at=_momento_de_la_foto(snapshot),
         )
 
     except Exception as error:                      # noqa: BLE001

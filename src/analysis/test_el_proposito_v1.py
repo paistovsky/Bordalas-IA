@@ -154,7 +154,10 @@ def test_el_libro_no_duplica_el_reset():
 
         # 07:30 — después del reset de las 05:00.
         primera = apuntar_el_escaparate(
-            ESCAPARATE, at="2026-09-17T07:30:55", ruta=libro
+            ESCAPARATE,
+            at="2026-09-17T07:30:55",
+            foto_at="2026-09-17T07:23:08",
+            ruta=libro,
         )
 
         assert primera["written"] is True
@@ -162,7 +165,10 @@ def test_el_libro_no_duplica_el_reset():
 
         # Otra vuelta el mismo reset: NO se duplica.
         segunda = apuntar_el_escaparate(
-            ESCAPARATE, at="2026-09-17T09:15:00", ruta=libro
+            ESCAPARATE,
+            at="2026-09-17T09:15:00",
+            foto_at="2026-09-17T09:14:00",
+            ruta=libro,
         )
 
         assert segunda["written"] is False, (
@@ -180,7 +186,10 @@ def test_el_libro_no_duplica_el_reset():
         #     el corte fuera a medianoche, esto escribiría una
         #     segunda línea del mismo escaparate.
         madrugada = apuntar_el_escaparate(
-            ESCAPARATE, at="2026-09-18T03:00:00", ruta=libro
+            ESCAPARATE,
+            at="2026-09-18T03:00:00",
+            foto_at="2026-09-18T02:59:00",
+            ruta=libro,
         )
 
         assert madrugada["written"] is False, (
@@ -192,7 +201,10 @@ def test_el_libro_no_duplica_el_reset():
 
         # Pasado el reset, sí.
         siguiente = apuntar_el_escaparate(
-            ESCAPARATE, at="2026-09-18T06:00:00", ruta=libro
+            ESCAPARATE,
+            at="2026-09-18T06:00:00",
+            foto_at="2026-09-18T05:55:00",
+            ruta=libro,
         )
 
         assert siguiente["written"] is True
@@ -243,7 +255,9 @@ def test_el_libro_no_duplica_el_reset():
         # ------------------------------------------------
         # EL ESCAPARATE VACIO: MUERDE AQUI
         # ------------------------------------------------
-        vacio = apuntar_el_escaparate([], ruta=libro)
+        vacio = apuntar_el_escaparate(
+            [], foto_at="2026-09-18T05:55:00", ruta=libro
+        )
 
         assert vacio["written"] is False, (
             "un reset que no se pudo leer no puede escribirse como "

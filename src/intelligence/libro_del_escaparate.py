@@ -273,12 +273,37 @@ def apuntar_el_escaparate(
     escaparate: list | None,
     *,
     at: str | None = None,
+    foto_at=None,
     ruta: Path | None = None,
     hora_del_reset: int = HORA_DEL_RESET,
 ) -> dict:
     """
     Una linea por reset. Si la vuelta se repite dentro del mismo
     reset, NO se duplica.
+
+    SOLO SE ESCRIBE SI LA FOTO ES DE ESTE RESET (17/09/2026)
+
+        El libro nacio el 17/09 y el MISMO DIA se ensucio. La
+        verja corre `test_el_ciclo_publica_v1`, que ejercita
+        `build_state` con la foto del 13/09 de fixture, y el
+        libro apuntaba esos veinte con la fecha de HOY.
+
+        Medido: la unica linea que habia decia
+        `dia_de_mercado: 2026-09-17` y traia el escaparate del
+        13/09. CERO de sus veinte coincidian con los veinte de
+        hoy. No es una linea con ruido: es otra cosa entera con
+        la etiqueta cambiada.
+
+        Asi que `foto_at` —cuando se tomo la foto— es obligatorio
+        para escribir. Si el dia de mercado de la foto no es el
+        de ahora, NO SE ESCRIBE y se dice por que.
+
+        SIN `foto_at` TAMPOCO SE ESCRIBE. Es la parte que importa:
+        la primera version se comportaba como antes cuando no le
+        llegaba el dato, y "sin el dato me porto como antes" es
+        exactamente como se cuela una foto vieja. Ante la duda,
+        no se apunta: perder un reset es barato, meter un
+        escaparate falso en el libro no.
 
     Nunca lanza: esto es un cuaderno, no puede tumbar un ciclo.
     """
@@ -290,6 +315,35 @@ def apuntar_el_escaparate(
 
         if not fila.get("available"):
             return {**fila, "written": False}
+
+        # LA FOTO TIENE QUE SER DE ESTE RESET.
+        if foto_at is None:
+            return {
+                **fila,
+                "written": False,
+                "foto_dia_de_mercado": None,
+                "reason": (
+                    "No se sabe de cuando es la foto, asi que no se "
+                    "apunta: una foto vieja con la fecha de hoy "
+                    "ensucia el libro entero."
+                ),
+            }
+
+        dia_de_la_foto = dia_de_mercado(foto_at, hora_del_reset)
+
+        if dia_de_la_foto != fila["dia_de_mercado"]:
+            return {
+                **fila,
+                "written": False,
+                "foto_dia_de_mercado": dia_de_la_foto,
+                "reason": (
+                    f"La foto es del escaparate del "
+                    f"{dia_de_la_foto} y ahora es el del "
+                    f"{fila['dia_de_mercado']}: no se apunta. "
+                    f"Apuntarla escribiria veinte jugadores de otro "
+                    f"reset con la fecha de este."
+                ),
+            }
 
         destino = ruta or LIBRO
 
@@ -320,6 +374,11 @@ def apuntar_el_escaparate(
             {
                 "at": fila["at"],
                 "dia_de_mercado": fila["dia_de_mercado"],
+
+                # DE CUANDO ES LA FOTO, en la propia linea. Si
+                # algun dia vuelve a colarse una vieja, se vera
+                # sin tener que deducirlo.
+                "foto_at": str(foto_at),
                 "n": fila["n"],
                 "with_forecast": fila["with_forecast"],
                 "players": fila["players"],
