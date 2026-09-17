@@ -1,0 +1,164 @@
+{
+  "players": {
+    "29661": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "last_rerolled_offer_id": 2726532382,
+      "last_rerolled_at": "2026-08-22T11:53:27.917147+00:00",
+      "best_offer_rejected": 2612600
+    },
+    "38194": {
+      "reroll_count": 1,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 1665100,
+      "last_rerolled_offer_id": 105480289,
+      "last_rerolled_at": "2026-08-15T19:51:34.946373+00:00"
+    },
+    "41271": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 3454900,
+      "last_rerolled_offer_id": 2661537462,
+      "last_rerolled_at": "2026-08-18T10:42:52.158821+00:00"
+    },
+    "9065": {
+      "reroll_count": 2,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 1270000,
+      "last_rerolled_offer_id": 4281679526,
+      "last_rerolled_at": "2026-08-16T07:39:59.183096+00:00"
+    },
+    "37898": {
+      "reroll_count": 2,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 638300,
+      "last_rerolled_offer_id": 562347841,
+      "last_rerolled_at": "2026-08-17T06:04:26.774363+00:00"
+    },
+    "25322": {
+      "reroll_count": 2,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 515900,
+      "last_rerolled_offer_id": 693132385,
+      "last_rerolled_at": "2026-08-18T09:46:34.191964+00:00"
+    },
+    "1599": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 2352000,
+      "last_rerolled_offer_id": 1220412837,
+      "last_rerolled_at": "2026-09-14T06:10:06.026204+00:00"
+    },
+    "2169": {
+      "reroll_count": 1,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 1818400,
+      "last_rerolled_offer_id": 2016523061,
+      "last_rerolled_at": "2026-08-21T06:02:52.427439+00:00"
+    },
+    "41606": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 2876500,
+      "last_rerolled_offer_id": 3173088650,
+      "last_rerolled_at": "2026-09-06T06:02:14.737543+00:00"
+    },
+    "37525": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 711400,
+      "last_rerolled_offer_id": 1884239037,
+      "last_rerolled_at": "2026-08-26T16:56:44.087731+00:00"
+    },
+    "17482": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 3255700,
+      "last_rerolled_offer_id": 1893267385,
+      "last_rerolled_at": "2026-08-31T07:02:32.348611+00:00"
+    },
+    "3159": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 3883500,
+      "last_rerolled_offer_id": 393908713,
+      "last_rerolled_at": "2026-08-31T06:31:59.903880+00:00"
+    },
+    "8376": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 1634600,
+      "last_rerolled_offer_id": 192598505,
+      "last_rerolled_at": "2026-09-04T22:02:19.377505+00:00"
+    },
+    "39874": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 523400,
+      "last_rerolled_offer_id": 1380881977,
+      "last_rerolled_at": "2026-09-10T10:50:52.978590+00:00"
+    },
+    "29185": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 315300,
+      "last_rerolled_offer_id": 746096025,
+      "last_rerolled_at": "2026-09-03T10:02:33.022780+00:00"
+    },
+    "14800": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 2007700,
+      "last_rerolled_offer_id": 4227017634,
+      "last_rerolled_at": "2026-09-04T23:01:52.522964+00:00"
+    },
+    "1721": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 1602100,
+      "last_rerolled_offer_id": 2436708658,
+      "last_rerolled_at": "2026-09-14T07:10:08.246928+00:00"
+    },
+    "9983": {
+      "reroll_count": 3,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 2126600,
+      "last_rerolled_offer_id": 375452409,
+      "last_rerolled_at": "2026-09-02T06:32:19.717577+00:00"
+    },
+    "30334": {
+      "reroll_count": 2,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 145400,
+      "last_rerolled_offer_id": 3478497010,
+      "last_rerolled_at": "2026-09-14T08:11:06.241874+00:00"
+    },
+    "10040": {
+      "reroll_count": 1,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 1487600,
+      "last_rerolled_offer_id": 587608637,
+      "last_rerolled_at": "2026-09-16T09:20:15.886237+00:00"
+    }
+  }
+}
