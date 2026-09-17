@@ -194,22 +194,35 @@ def build_valuation_context(
                 audit_rival_ledger,
             )
 
+            from src.analysis.el_cable import (
+                maximo_historico_de_fichas,
+            )
+
+            auditoria = {
+                "by_manager": [
+                    {**datos, "is_us": datos.get("is_us")}
+                    for datos in (
+                        (
+                            audit_rival_ledger(
+                                rival_intelligence,
+                                own_user_id=current_user_id,
+                            ).get("by_manager")
+                            or {}
+                        ).values()
+                    )
+                ]
+            }
+
+            # EL MISMO NUMERO QUE EL DASHBOARD (17/09/2026)
+            #
+            # La mayor plantilla de HOY no es la mayor que ha
+            # habido. Sale del mismo sitio en los dos lados: dos
+            # respuestas distintas a "cuantas fichas caben" es como
+            # se acaba pintando una plaza que el motor no ve.
             free_roster_slots = safe_int(
                 count_free_slots(
-                    {
-                        "by_manager": [
-                            {**datos, "is_us": datos.get("is_us")}
-                            for datos in (
-                                (
-                                    audit_rival_ledger(
-                                        rival_intelligence,
-                                        own_user_id=current_user_id,
-                                    ).get("by_manager")
-                                    or {}
-                                ).values()
-                            )
-                        ]
-                    }
+                    auditoria,
+                    maximo_historico_de_fichas(auditoria),
                 ).get("free_slots")
             )
 

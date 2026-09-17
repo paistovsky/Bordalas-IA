@@ -349,6 +349,11 @@ TESTS = [
     # prima del Computer partida por tramo.
     "src.analysis.test_la_plaza_y_el_cable_v1",
 
+    # El cable tendido: las dos cajas separadas, ninguna puja
+    # contra dinero no cobrado, la cola por consecuencia y las
+    # fichas libres contra el maximo historico.
+    "src.analysis.test_el_cable_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
