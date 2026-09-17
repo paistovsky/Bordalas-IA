@@ -3669,6 +3669,11 @@ def build_dashboard_state() -> dict:
             # que usa el resto de la pantalla, y no el reloj del
             # proceso que la genera.
             ahora=_momento_de_la_foto(snapshot),
+
+            # Y LA JORNADA DE LALIGA, la misma de la que salen
+            # `primer_partido` y la ventana. El `round_id` de
+            # Biwenger puede ir retrasado; esta no.
+            matchday=_jornada_laliga,
         )
 
     except Exception as error:                      # noqa: BLE001

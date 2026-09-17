@@ -205,6 +205,12 @@ QUE_DECIDE_CADA_UNO = {
     "src/v10_full_autonomous_live.py": (
         "LO APUNTA al registrar una puja de la via vieja."
     ),
+    "src/analysis/la_escala.py": (
+        "LO TRADUCE: convierte la via o el motivo de una decision "
+        "en el peldaño de la escala al que responde —`XI_UPGRADE` "
+        "al 3, `SPECULATION` al 4—. No decide ninguna operacion "
+        "ni toca ningun importe: solo pone nombre al orden."
+    ),
     "src/analysis/el_proposito.py": "este mapa.",
 }
 

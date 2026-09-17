@@ -411,6 +411,7 @@ def anotar_el_once(
     ahora,
     desde=None,
     ruta=None,
+    matchday=None,
 ) -> dict:
     """
     Escribe una linea con el once de esta jornada. Forma fija.
@@ -418,6 +419,30 @@ def anotar_el_once(
     Nunca lanza. Si no toca, lo dice y no escribe: este libro es
     la unica prueba de que el once se fijo antes del partido, y
     una linea de mas lo convierte en otra memoria mas.
+
+    LAS DOS NUMERACIONES, Y POR QUE SE GUARDAN LAS DOS
+    (18/09/2026)
+
+        `round_id` es el round de BIWENGER —4899, 4903, 5125— y
+        sale de `rounds.data.round.id`, que es el que Biwenger
+        dice que esta en curso AHORA.
+
+        `matchday` es la jornada de LALIGA —1..38— y es de donde
+        salen `primer_partido` y `desde`.
+
+        SON DOS FUENTES DISTINTAS Y NADIE LAS CRUZABA. El 17/09
+        la foto traia `round_id: 5125` -la jornada 6 aplazada, ya
+        jugada- mientras la ventana abierta era la de la jornada
+        7. Si el round de Biwenger va retrasado cuando se cruza
+        la ventana, el once se anotaba bajo la jornada
+        EQUIVOCADA y la linea no tenia forma de decirlo.
+
+        NO SE ARREGLA NEGANDOSE A ANOTAR: perder la jornada es
+        peor que una etiqueta dudosa, y la jornada no vuelve. Se
+        arregla GUARDANDO LAS DOS. La ventana sabe de que jornada
+        es —viene del calendario de LaLiga— asi que `matchday` es
+        la etiqueta buena, y `round_id` se conserva tal cual para
+        poder cruzarlo con el libro del marcador.
     """
 
     salida = {
@@ -445,6 +470,11 @@ def anotar_el_once(
 
         fila = {
             "round_id": safe_int(round_id),
+
+            # LA JORNADA DE LALIGA, que es de donde sale la
+            # ventana. Es la etiqueta que no depende de que el
+            # round de Biwenger vaya al dia.
+            "matchday": safe_int(matchday) or None,
             # BIWENGER LA LLAMA `type`. `formation` es como la
             # llamamos nosotros: se aceptan las dos o la fila
             # sale con la formacion en blanco y nadie se entera.
@@ -502,7 +532,10 @@ def anotar_el_once(
             "formation": fila["formation"],
             "minutos_de_margen": fila["minutos_de_margen"],
             "reason": (
-                f"Once de la jornada {fila['round_id']} anotado a "
+                f"Once de la jornada "
+                f"{fila['matchday'] or fila['round_id']}"
+                f"{'' if fila['matchday'] else ' (round de Biwenger)'}"
+                f" anotado a "
                 f"{fila['minutos_de_margen']} min del primer "
                 f"partido."
             ),
