@@ -371,6 +371,7 @@ TESTS = [
     "src.analysis.test_el_carry_v1",
     "src.analysis.test_la_direccion_v1",
     "src.analysis.test_empezar_a_anotar_v1",
+    "src.analysis.test_la_escala_v1",
 
     "src.analysis.test_doctrina_v1",
 ]
