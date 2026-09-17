@@ -145302,5 +145302,24 @@
     "title": "¡Consigue unas zapatillas Munich!",
     "author": null,
     "content": "<p><a href=\"https://x.com/biwenger/status/2100556348215763324\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/sorteo-munich-27/tablon.jpg\" alt=\"\" /></a></p>\r\n<p>[followButtons instagram=\"https://www.instagram.com/p/DdY1BLeutDJ/?stkn=MTMwN2ZhZ2JtMDd5ZQ==\" facebook=\"https://www.facebook.com/share/p/1F1kEAF3qe/\" twitter=\"https://x.com/biwenger/status/2100556348215763324\" tiktok=\"\" telegram=\"\"]</p>"
+  },
+  {
+    "event_id": "8c54e66eb54f9f1f1f1cc4d2",
+    "date": 1789651171,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 10040,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1578500
+      }
+    ]
   }
 ]
