@@ -265,6 +265,8 @@ TESTS = [
     "src.analysis.test_la_caja_de_la_liga_v1",
     "src.analysis.test_el_dinero_cuadra_v1",
     "src.analysis.test_la_prima_de_compra_v1",
+    "src.analysis.test_el_ojeador_conectado_v1",
+    "src.analysis.test_la_etiqueta_dice_lo_que_mide_v1",
     "src.analysis.test_la_rendija_v1",
     "src.analysis.test_esta_enchufado_v1",
     "src.analysis.test_el_escaparate_publica_v1",
@@ -323,6 +325,52 @@ TESTS = [
     "src.analysis.test_interruptor_tener_v1",
     "src.analysis.test_vara_v1",
     "src.analysis.test_forma_estable_v1",
+
+    # El dia que el 0,1443 % resulto ser el valor de reventa al
+    # Computer con otro nombre: el plazo de cada par, los dias
+    # planos en el denominador y la masa de verdad de la curva.
+    "src.analysis.test_los_tres_denominadores_v1",
+
+    # El `intent` prestado, el denominador del libro de acierto y
+    # los pesos de la curva: los tres arreglos que no tocan
+    # ningun umbral.
+    "src.analysis.test_los_tres_arreglos_v1",
+
+    # Comprar un jugador y vendérselo al Computer: una sola
+    # definicion, y las dos primas sobre los mismos viajes.
+    "src.analysis.test_el_viaje_al_computer_v1",
+
+    # La regla del carril del Computer: sale de la medicion, no
+    # de una constante, y sigue apagada.
+    "src.analysis.test_el_carril_de_un_dia_v1",
+
+    # El cable entre la cola de venta y el presupuesto de fichar,
+    # el techo de Biwenger medido, el motivo que no se corta y la
+    # prima del Computer partida por tramo.
+    "src.analysis.test_la_plaza_y_el_cable_v1",
+
+    # El cable tendido: las dos cajas separadas, ninguna puja
+    # contra dinero no cobrado, la cola por consecuencia y las
+    # fichas libres contra el maximo historico.
+    "src.analysis.test_el_cable_v1",
+
+    # De quien es cada jugador de la lista, el orden de las
+    # operaciones y el guardarrail mirando titularidad.
+    "src.analysis.test_la_lista_de_la_compra_v1",
+
+    # Como rota el escaparate y si estabamos alli: la rotacion
+    # sale de censos guardados, no de la foto de hoy.
+    "src.analysis.test_el_escaparate_v1",
+
+    # El libro del escaparate -una linea por reset, sin duplicar-
+    # y el mapa de que freno cuelga de cada `intent`.
+    "src.analysis.test_el_proposito_v1",
+
+    # Lo que cuesta de verdad tener a un jugador, y que la verja
+    # deje de escribir en los libros.
+    "src.analysis.test_el_carry_v1",
+    "src.analysis.test_la_direccion_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 

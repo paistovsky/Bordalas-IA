@@ -194,12 +194,43 @@ def blocked_reason(fila: dict) -> tuple[str, str] | None:
     return None
 
 
-def count_free_slots(ledger_audit: dict | None) -> dict:
+def count_free_slots(
+    ledger_audit: dict | None,
+    historical_max: dict | None = None,
+) -> dict:
     """
     Cuantas fichas libres hay, con la honestidad por delante.
 
     Se mide contra la plantilla mas grande de la liga porque el
     tope real de Biwenger no esta en el codigo ni comprobado.
+
+    LA MAS GRANDE DE HOY NO ES LA MAS GRANDE (17/09/2026)
+
+        Hasta hoy esto comparaba contra la plantilla mas grande
+        que hubiera EN ESTE MOMENTO. En la foto del 17/09 eso da:
+
+            nuestras 20, la mayor de hoy 20  ->  0 huecos
+
+        Y nosotros mismos llegamos a tener 21 el 15/09. Una plaza
+        que creemos que no existe es una plaza que no usamos: con
+        `free_slots = 0` la via de ficha vacia no se abre, el
+        `roster_fill` no compite y la lista de ampliar plantilla
+        se lee como imposible.
+
+        `historical_max` -lo que devuelve
+        `el_cable.mayor_plantilla_jamas_vista`- trae el mayor
+        tamaño que se ha llegado a ver, reconstruido desde el
+        tablon y con su propio cuadre.
+
+        SOLO SE USA SI VIENE `trusted`. Ese cuadre es que NUESTRA
+        linea reconstruida coincide con la de hoy: es la unica que
+        podemos comprobar, y si falla no hay razon para creerse
+        las demas. Sin el, o sin `historical_max`, el
+        comportamiento es exactamente el de antes.
+
+        Y EL RESULTADO SIGUE SIENDO UNA COTA INFERIOR en los dos
+        casos. Cambiar el numero no cambia lo que es: nadie ha
+        comprobado el tope de Biwenger, y esto no lo comprueba.
     """
 
     managers = [
@@ -238,24 +269,58 @@ def count_free_slots(ledger_audit: dict | None) -> dict:
         }
 
     nuestras = safe_int(nosotros.get("roster_size"))
-    mayor = max(safe_int(m.get("roster_size")) for m in managers)
+    hoy = max(safe_int(m.get("roster_size")) for m in managers)
+
+    historico = historical_max or {}
+
+    jamas_vista = (
+        safe_int(historico.get("largest_ever"))
+        if historico.get("trusted")
+        else 0
+    )
+
+    # El maximo de los dos. Nunca por debajo del de hoy: si
+    # alguien tiene 20 ahora mismo, 20 caben, y eso no lo
+    # desmiente ninguna reconstruccion.
+    mayor = max(hoy, jamas_vista)
+
+    usa_historico = mayor > hoy
 
     return {
         "known": True,
         "our_roster_size": nuestras,
+
+        # LOS DOS NUMEROS, CON SU NOMBRE. El de hoy se sigue
+        # publicando aunque no sea el que manda: si un dia el
+        # historico se descuadra, se ve al lado contra que.
         "largest_roster_in_league": mayor,
+        "largest_roster_today": hoy,
+        "largest_roster_ever": (
+            historico.get("largest_ever")
+            if historico.get("available")
+            else None
+        ),
+        "historical_max_trusted": bool(historico.get("trusted")),
+        "historical_max_reason": historico.get("reason"),
+        "source": "MAXIMO_HISTORICO" if usa_historico else "MAYOR_DE_HOY",
+
         "free_slots": max(mayor - nuestras, 0),
 
         # Que quede escrito en el propio JSON: esto es un suelo,
-        # no el tope de Biwenger.
+        # no el tope de Biwenger. Se use el numero que se use.
         "is_lower_bound": True,
         "reason": (
-            f"Tenemos {nuestras} fichas y la plantilla mas grande de "
-            f"la liga tiene {mayor}. El tope real de Biwenger no "
-            f"esta en el codigo ni comprobado, asi que "
-            f"{max(mayor - nuestras, 0)} es una cota INFERIOR: si "
-            f"Biwenger permite mas, hay mas sitio del que dice esto, "
-            f"nunca menos."
+            f"Tenemos {nuestras} fichas y "
+            + (
+                f"la plantilla mas grande que se ha llegado a ver en "
+                f"la liga tiene {mayor} (hoy la mayor son {hoy})"
+                if usa_historico
+                else f"la plantilla mas grande de la liga tiene {mayor}"
+            )
+            + f". El tope real de Biwenger no esta en el codigo ni "
+            f"comprobado, asi que {max(mayor - nuestras, 0)} es una "
+            f"cota INFERIOR: si Biwenger permite mas, hay mas sitio "
+            f"del que dice esto, nunca menos."
         ),
     }
 
@@ -265,15 +330,19 @@ def build_roster_expansion_shadow(
     ledger_audit: dict | None,
     acquisition_budget: dict | None = None,
     current_user_id=None,
+    historical_max: dict | None = None,
 ) -> dict:
     """
     La lista de "si hubiera hueco". Nunca lanza.
 
     FASE OBSERVADOR: se calcula, se pinta, y no manda.
+
+    `historical_max` viaja hasta `count_free_slots` sin tocarse.
+    Sin el, el comportamiento es el de antes del 17/09.
     """
 
     try:
-        huecos = count_free_slots(ledger_audit)
+        huecos = count_free_slots(ledger_audit, historical_max)
 
         filas = (season_horizon or {}).get("rows") or []
 

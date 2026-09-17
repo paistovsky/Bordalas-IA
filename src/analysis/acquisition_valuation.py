@@ -194,23 +194,39 @@ def build_valuation_context(
                 audit_rival_ledger,
             )
 
+            auditoria = {
+                "by_manager": [
+                    {**datos, "is_us": datos.get("is_us")}
+                    for datos in (
+                        (
+                            audit_rival_ledger(
+                                rival_intelligence,
+                                own_user_id=current_user_id,
+                            ).get("by_manager")
+                            or {}
+                        ).values()
+                    )
+                ]
+            }
+
+            # EL BLOQUE 4 NO ENTRA (17/09/2026)
+            #
+            #     `count_free_slots` acepta un `historical_max`
+            #     desde el encargo del cable, y pasandoselo esta
+            #     misma foto da 4 huecos en vez de 0.
+            #
+            #     CUATRO HUECOS ABREN `ROSTER_FILL`. Cinco lineas
+            #     mas abajo hay un `if huecos > 0` que abre la via
+            #     de ficha vacia, y esa via NO TIENE TOPE DE PRIMA.
+            #     Mientras no lo tenga, la plaza se queda cerrada:
+            #     es decision del dueño, no un olvido.
+            #
+            #     Asi que aqui NO se le pasa. La medicion de cual
+            #     seria el numero bueno esta hecha y publicada en
+            #     `mayor_plantilla_jamas_vista`; lo que falta es el
+            #     freno, no el dato.
             free_roster_slots = safe_int(
-                count_free_slots(
-                    {
-                        "by_manager": [
-                            {**datos, "is_us": datos.get("is_us")}
-                            for datos in (
-                                (
-                                    audit_rival_ledger(
-                                        rival_intelligence,
-                                        own_user_id=current_user_id,
-                                    ).get("by_manager")
-                                    or {}
-                                ).values()
-                            )
-                        ]
-                    }
-                ).get("free_slots")
+                count_free_slots(auditoria).get("free_slots")
             )
 
         except Exception:                           # noqa: BLE001

@@ -4152,9 +4152,16 @@ def build_dashboard_state() -> dict:
             build_roster_expansion_shadow,
         )
 
+        auditoria_compacta = compact_ledger_audit(ledger_audit)
+
+        # EL BLOQUE 4 NO ENTRA, y la pantalla tiene que decir lo
+        # mismo que el motor. Si aqui se pasara `historical_max` y
+        # en `acquisition_valuation` no, la pantalla pintaria
+        # cuatro plazas que el motor no ve — que es exactamente el
+        # descuadre que el cable vino a quitar.
         roster_expansion = build_roster_expansion_shadow(
             season_horizon,
-            compact_ledger_audit(ledger_audit),
+            auditoria_compacta,
             (exposure or {}).get("acquisition"),
             current_user_id=board.get("current_user_id"),
         )
@@ -4952,6 +4959,55 @@ def build_dashboard_state() -> dict:
             "available": False,
             "reason": (
                 f"No se pudo censar el reset: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+    # EL LIBRO DEL ESCAPARATE (17/09/2026)
+    #
+    #     Los veinte del Computer de cada reset, con precio,
+    #     puntos, partidos y pronostico de titularidad.
+    #
+    #     Existe porque al medir como rota el escaparate resulto
+    #     que NO HAY HISTORICO: solo nueve dias sueltos sacables
+    #     de `market.sales` dentro de los snapshots, con un
+    #     agujero de tres semanas. Cada dia sin libro es un dia de
+    #     datos que no vuelve.
+    #
+    #     CERO PETICIONES NUEVAS: los veinte ya estan en el
+    #     tablero de objetivos, con su pronostico puesto. Se
+    #     escribe una linea y se sigue.
+    try:
+        from src.intelligence.libro_del_escaparate import (
+            apuntar_el_escaparate,
+        )
+
+        libro_escaparate = apuntar_el_escaparate(
+            [
+                fila
+                for fila in ((acquisition or {}).get("targets") or [])
+                if fila.get("seller_kind") == "COMPUTER"
+            ],
+
+            # DE CUANDO ES LA FOTO (17/09/2026)
+            #
+            #     Sin esto el libro se lleno de basura el mismo dia
+            #     que nacio: la verja corre `test_el_ciclo_publica_v1`
+            #     con la foto del 13/09 de fixture, y el libro
+            #     apuntaba esos veinte con la fecha de hoy. Medido:
+            #     CERO de los veinte coincidian con los de hoy.
+            #
+            #     Con el sello, una foto que no sea de este reset no
+            #     se apunta. Y sin sello, tampoco.
+            foto_at=_momento_de_la_foto(snapshot),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        libro_escaparate = {
+            "available": False,
+            "written": False,
+            "reason": (
+                f"No se pudo apuntar el escaparate: "
                 f"{type(error).__name__}: {error}"
             ),
         }
@@ -6078,6 +6134,12 @@ def build_dashboard_state() -> dict:
         # Observador puro: una linea al dia que dentro de un mes
         # contesta si hace falta vender a ciegas o no.
         "censo_del_reset": censo,
+
+        # Los veinte del escaparate de cada reset, apuntados con
+        # precio, puntos, partidos y pronostico. Una linea al dia
+        # que dentro de un mes contesta si nos mejoraba alguno de
+        # los que dejamos pasar. Observador puro.
+        "libro_del_escaparate": libro_escaparate,
 
         # EL LIBRO EN LA SOMBRA. Lo que se compraria con la
         # compuerta de ritmo apagada del todo. SIN DINERO:

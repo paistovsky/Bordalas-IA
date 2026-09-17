@@ -259,6 +259,14 @@ export function normalizeStatus(raw = {}) {
     // Que trae la tanda nueva del Computer en cada reset.
     censoDelReset: raw.censo_del_reset || { available: false },
 
+    // Los veinte del escaparate de cada reset, apuntados con
+    // precio, puntos, partidos y pronostico. Una linea al dia que
+    // dentro de un mes contesta si nos mejoraba alguno de los que
+    // dejamos pasar.
+    libroDelEscaparate: raw.libro_del_escaparate || {
+      available: false
+    },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] },

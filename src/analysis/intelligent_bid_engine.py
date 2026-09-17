@@ -798,6 +798,10 @@ def calculate_intelligent_bids(
                         # inmoviliza, la mejora del once se paga
                         # en puntos.
                         intent=valuation.get("intent"),
+
+                        # LA VIA QUE PUSO EL `value` (16/09/2026).
+                        # Solo para el motivo publicado.
+                        route=valuation.get("route"),
                     )
 
                     if bid_plan.get("decision") == "BID":

@@ -562,6 +562,183 @@ def validate_sale_set(
     }
 
 
+def validate_sale_set_con_titularidad(
+    guardrail: dict,
+    player_ids,
+) -> dict:
+    """
+    Lo mismo que `validate_sale_set`, y ADEMAS mirando quien juega.
+
+    DOCTRINA 71 — UN GUARDARRAIL QUE CUENTA CUERPOS NO PROTEGE EL
+    ONCE (17/09/2026)
+
+        `build_position_guardrail` YA sabe quien es intocable: lo
+        escribe en `locked_ids` y hasta deja el motivo —"sin el no
+        quedan 1 porteros titulares"—.
+
+        `validate_sale_set` nunca se lo pregunta. Solo cuenta
+        cuerpos contra `floor`. Medido sobre la foto del 17/09:
+
+            los 11 titulares, de uno en uno   ->  ok los 11
+            9 de ellos estan en `locked_ids`  ->  ok igual
+
+        Dituro es el caso que lo enseña entero: portero titular,
+        6 puntos en 6 partidos, en `locked_ids`, con
+        `at_starter_floor: true`. Venderlo deja DOS porteros
+        —Lunin y Fortuño, 0 puntos en 0 partidos— y el suelo de
+        cuerpos (1) se cumple. La regla pasa y el once empeora.
+
+        Es la tercera vez esta semana del mismo patron: el dato
+        estaba puesto y quien decidia no lo leia.
+
+    QUE BLOQUEA DE VERDAD, MEDIDO ANTES DE DECIRLO
+
+        Sobre la foto del 17/09, de uno en uno:
+
+            Dituro   BLOQUEA   1 portero titular, suelo 1
+            Yamal    BLOQUEA   2 delanteros titulares, suelo 2
+            Jutgla   BLOQUEA   idem
+            los otros ocho titulares   pasan
+
+        No bloquea a los ocho porque no hace falta: con 3
+        defensas y 5 medios en el once contra suelos de 2, soltar
+        uno deja once alineable. El freno muerde DONDE toca.
+
+        Y protege a Yamal por la razon buena. El docstring de
+        `sale_intent` avisaba de que "hoy Yamal solo esta a salvo
+        por accidente: el guardarrail bloquea la venta porque hay
+        exactamente dos delanteros". Con esto deja de ser un
+        accidente del recuento.
+
+    POR QUE ES UNA FUNCION NUEVA Y NO UN ARREGLO DE LA DE AL LADO
+
+        `validate_sale_set` la usan `sale_order`, `sale_intent` y
+        el cable, y este encargo se construye APAGADO.
+
+        MEDIDO: sobre la foto del 17/09 meterlo dentro NO habria
+        cambiado nada. La cola de venta sigue teniendo los mismos
+        once y la caja sobre la mesa los mismos 14.447.000 EUR,
+        porque la cola pone los sobrantes delante y nunca llega a
+        tocar el suelo de titulares.
+
+        Que hoy no cambie nada no es razon para encenderlo sin
+        avisar: el dia que la caja este en rojo y el motor busque
+        a quien vender, este freno puede quitarle la unica salida.
+        Eso es una decision del dueño. La capacidad vive aqui —un
+        solo sitio se hace esta pregunta— y encenderla en
+        produccion es cambiar el nombre de la funcion en una
+        linea.
+
+    Nunca lanza.
+    """
+
+    base = validate_sale_set(guardrail, player_ids)
+
+    if not guardrail or not guardrail.get("available"):
+        return {
+            **base,
+            "starters_checked": False,
+            "starter_violations": [],
+        }
+
+    a_vender = {safe_int(pid) for pid in (player_ids or [])}
+
+    if not a_vender:
+        return {
+            **base,
+            "starters_checked": True,
+            "starter_violations": [],
+        }
+
+    violaciones = []
+
+    for posicion, datos in (
+        guardrail.get("by_position") or {}
+    ).items():
+
+        # Sin once conocido no se inventa uno: manda el suelo de
+        # cuerpos, igual que en `validate_sale_set`.
+        if not datos.get("counted_on_starters"):
+            continue
+
+        bloqueados = set(datos.get("locked_ids") or [])
+
+        vendiendo_bloqueados = a_vender.intersection(bloqueados)
+
+        if not vendiendo_bloqueados:
+            continue
+
+        quedan_titulares = safe_int(datos.get("starters")) - len(
+            vendiendo_bloqueados
+        )
+
+        if quedan_titulares >= safe_int(datos.get("starter_floor")):
+            continue
+
+        violaciones.append(
+            {
+                "position": posicion,
+                "position_name": datos.get("position_name"),
+                "starters": datos.get("starters"),
+                "selling_starters": len(vendiendo_bloqueados),
+                "would_remain_starters": quedan_titulares,
+                "starter_floor": datos.get("starter_floor"),
+                "owned": datos.get("owned"),
+                "would_remain": (
+                    safe_int(datos.get("owned"))
+                    - len(a_vender.intersection(
+                        bloqueados
+                        | set(datos.get("disposable_ids") or [])
+                    ))
+                ),
+                "player_ids": sorted(vendiendo_bloqueados),
+
+                # CON ESAS PALABRAS, que es lo que pedia el
+                # encargo: quedan los cuerpos y no queda quien
+                # juegue.
+                #
+                # Y SE DISTINGUE NINGUNO DE POCOS. "Ninguno es
+                # titular" con uno vivo seria falso, y un motivo
+                # falso es peor que no tener motivo porque se deja
+                # de discutir.
+                "reason": (
+                    "Quedarian los cuerpos pero "
+                    + (
+                        "ninguno es titular"
+                        if quedan_titulares == 0
+                        else "no los suficientes titulares"
+                    )
+                    + ": "
+                    f"{safe_int(datos.get('owned')) - len(vendiendo_bloqueados)} "
+                    f"{str(datos.get('position_name')).lower()}s en "
+                    f"plantilla y {quedan_titulares} en el once, y "
+                    f"hacen falta {datos.get('starter_floor')}."
+                ),
+            }
+        )
+
+    if not violaciones:
+        return {
+            **base,
+            "starters_checked": True,
+            "starter_violations": [],
+        }
+
+    return {
+        **base,
+        "ok": False,
+        "starters_checked": True,
+        "starter_violations": violaciones,
+        "status": (
+            base.get("status") or "BLOCK_STARTER_FLOOR"
+        ),
+        "reason": "; ".join(
+            [v["reason"] for v in violaciones]
+            + ([base["reason"]] if not base.get("ok") else [])
+        ),
+    }
+
+
 def print_position_guardrail(
     guardrail: dict,
 ) -> None:
