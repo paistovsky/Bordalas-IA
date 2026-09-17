@@ -354,6 +354,10 @@ TESTS = [
     # fichas libres contra el maximo historico.
     "src.analysis.test_el_cable_v1",
 
+    # De quien es cada jugador de la lista, el orden de las
+    # operaciones y el guardarrail mirando titularidad.
+    "src.analysis.test_la_lista_de_la_compra_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
