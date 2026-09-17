@@ -214,6 +214,27 @@ LIBROS = (
         ),
     },
     {
+        "ruta": "data/trading/libro_del_escaparate.jsonl",
+        "que_es": (
+            "Los veinte del escaparate del Computer en cada "
+            "reset, con precio, puntos, partidos jugados y "
+            "pronostico de titularidad."
+        ),
+        "por_que_no_se_reconstruye": (
+            "El escaparate de ayer no existe en ningun endpoint: "
+            "se renueva entero cada reset y el anterior no deja "
+            "rastro. Medido el 17/09: lo unico reconstruible eran "
+            "NUEVE dias sueltos sacados de `market.sales` dentro "
+            "de los snapshots, con un agujero de tres semanas "
+            "—del 18/08 al 09/09— porque las fotos no se guardan.\n"
+            "            Y el PRONOSTICO no se reconstruye ni con "
+            "las fotos: la titularidad de un jugador un martes de "
+            "agosto no esta en ninguna parte. Sin ella no se "
+            "puede saber si nos mejoraba alguno de los que "
+            "dejamos pasar."
+        ),
+    },
+    {
         "ruta": "data/rival_intelligence/board_events.json",
         "que_es": (
             "El tablon de la liga acumulado: 303 eventos desde "

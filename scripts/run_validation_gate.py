@@ -362,6 +362,10 @@ TESTS = [
     # sale de censos guardados, no de la foto de hoy.
     "src.analysis.test_el_escaparate_v1",
 
+    # El libro del escaparate -una linea por reset, sin duplicar-
+    # y el mapa de que freno cuelga de cada `intent`.
+    "src.analysis.test_el_proposito_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 

@@ -67,6 +67,7 @@ data/
 !/data/trading/bid_outcome_ledger.json
 !/data/trading/libro_de_renovaciones.jsonl
 !/data/trading/libro_del_carril.jsonl
+!/data/trading/libro_del_escaparate.jsonl
 !/data/trading/position_ledger.json
 
 *.db
