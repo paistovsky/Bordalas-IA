@@ -358,6 +358,10 @@ TESTS = [
     # operaciones y el guardarrail mirando titularidad.
     "src.analysis.test_la_lista_de_la_compra_v1",
 
+    # Como rota el escaparate y si estabamos alli: la rotacion
+    # sale de censos guardados, no de la foto de hoy.
+    "src.analysis.test_el_escaparate_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
