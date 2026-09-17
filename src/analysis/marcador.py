@@ -1653,6 +1653,22 @@ def marcador(calendario: dict | None = None) -> dict:
             else None
         )
 
+        # ¿MIDIO ALGO LA COMPARACION CON LA LIGA?
+        #
+        #     `oficiales` es el reparto de puntos de la
+        #     clasificacion entre esta jornada y su referencia.
+        #     Si sale entero a cero —nosotros y los ocho
+        #     rivales—, la resta no encontro nada: no es que la
+        #     liga puntuara cero, es que no se pudo medir.
+        #
+        #     Se publica al lado para que la pantalla pueda
+        #     decirlo, y para que la media no lo cuente como un
+        #     cero de verdad.
+        liga_medida = bool(rivales) and any(
+            safe_int(p) != 0
+            for p in list(rivales) + [mios if mios is not None else 0]
+        )
+
         eficiencia = (
             round(100 * puntos_alineados / techo["points"], 1)
             if techo.get("points")
@@ -1664,6 +1680,7 @@ def marcador(calendario: dict | None = None) -> dict:
         filas.append({
             "round_id": safe_int(actual.get("round_id")),
             "medible": True,
+            "liga_medida": liga_medida,
             **_fechas_de(actual),
 
             # UN NUMERO COJO NO ES UNA NOTA (17/09/2026)
@@ -1833,6 +1850,7 @@ def marcador(calendario: dict | None = None) -> dict:
         "jornadas_descartadas": len(medibles) - len(fiables),
         "eficiencia_media": None,
         "diferencia_media": None,
+        "diferencia_media_n": 0,
         "cuadra_todo": all(
             f.get("cuadra") for f in medibles
         ) if medibles else None,
@@ -1852,11 +1870,45 @@ def marcador(calendario: dict | None = None) -> dict:
                 sum(eficiencias) / len(eficiencias), 1
             )
 
+        # UNA JORNADA EN LA QUE NADIE PUNTUO NO MIDIO NADA
+        # (doctrina 82, 17/09/2026)
+        #
+        #     MEDIDO EN LA FOTO DEL 17/09: se publicaba
+        #     `diferencia_media: 1.5` con `jornadas_fiables: 0`.
+        #     El 1,5 era la media de 0,0, 0,0 y 4,5.
+        #
+        #     EL 4,5 ES UN HECHO y se queda: Biwenger nos dio 29
+        #     y la media de rivales fue 24,5. El comentario de
+        #     arriba tiene razon en eso, y la guardia
+        #     `test_contra_la_liga_manda_el_dato_oficial` lo
+        #     lleva atado desde el 21/08.
+        #
+        #     LOS DOS CEROS NO LO SON. 4903 y 4904 entraban con
+        #     `media_rivales: 0,0` — y 4903 tiene DIEZ partidos y
+        #     nuestro once sumo 60 puntos. Que los ocho managers
+        #     de la liga puntuen exactamente cero no pasa: eso no
+        #     es una jornada mala, es una resta que no midio
+        #     nada.
+        #
+        #     Asi que lo que se excluye no son las jornadas que
+        #     no cuadran —esas siguen aportando su hecho— sino
+        #     las que NO MIDIERON LA LIGA. El discriminante es
+        #     que el reparto oficial entero salga a cero.
+        #
+        #     El 1,5 era un 4,5 hundido por dos ceros que no
+        #     median nada.
         diferencias = [
             f["diferencia_liga"]
             for f in medibles
             if f.get("diferencia_liga") is not None
+            and f.get("liga_medida")
         ]
+
+        # Y CON SU `n` AL LADO (doctrina 55). Un promedio sobre
+        # una sola jornada no es lo mismo que sobre diez, y la
+        # pantalla no puede distinguirlos si solo recibe el
+        # numero.
+        resumen["diferencia_media_n"] = len(diferencias)
 
         if diferencias:
             resumen["diferencia_media"] = round(
@@ -1874,7 +1926,10 @@ def marcador(calendario: dict | None = None) -> dict:
                 f"{resumen['jornadas_descartadas']} jornada(s) "
                 f"cerrada(s), pero ninguna cuadra con Biwenger: "
                 f"el once que anotamos no es el que jugo. Sin "
-                f"nota hasta que coincidan."
+                f"nota hasta que coincidan — ni eficiencia media "
+                f"ni diferencia con la liga: las dos se quedan "
+                f"sin valor a proposito, porque una media de "
+                f"jornadas descartadas no mide nada."
             )
 
     return {
