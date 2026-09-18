@@ -151972,5 +151972,178 @@
         "amount": 151100
       }
     ]
+  },
+  {
+    "event_id": "abdb606ab6e7db3694408340",
+    "date": 1789701846,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 42748,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 6284200
+      }
+    ]
+  },
+  {
+    "event_id": "fcf98288f1b3643228990bb3",
+    "date": 1789706568,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
+  },
+  {
+    "event_id": "da7823c450ffba9123a6d5d1",
+    "date": 1789707906,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 3259,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 3960009,
+        "bids": [
+          {
+            "user": {
+              "id": 14456960,
+              "name": "Alvaro Retamosa Sanguino",
+              "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+            },
+            "amount": 3780020
+          }
+        ]
+      },
+      {
+        "player": 37416,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 1777000,
+        "bids": [
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 1471000
+          },
+          {
+            "user": {
+              "id": 14151726,
+              "name": "DiosMande a Rodri al Palancas",
+              "icon": "i/u/14151726.png"
+            },
+            "amount": 1279099
+          }
+        ]
+      },
+      {
+        "player": 37526,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 150376
+      },
+      {
+        "player": 26813,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 150376
+      },
+      {
+        "player": 33694,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1817297
+      },
+      {
+        "player": 26566,
+        "to": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 4900000
+      },
+      {
+        "player": 18398,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 12661000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 12407000
+          }
+        ]
+      },
+      {
+        "player": 43281,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 150376
+      },
+      {
+        "player": 23080,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 547000
+      },
+      {
+        "player": 27575,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 150376
+      }
+    ]
   }
 ]

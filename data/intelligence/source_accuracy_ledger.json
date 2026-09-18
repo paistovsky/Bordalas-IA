@@ -2058,7 +2058,7 @@
         "38318": {
           "player_name": "Valentín Gómez",
           "team": "Betis",
-          "appearances_at_prediction": 1,
+          "appearances_at_prediction": 2,
           "sources": {
             "FUTBOLFANTASY": 20.0
           },
@@ -2068,7 +2068,7 @@
         "39966": {
           "player_name": "Álvaro Fidalgo",
           "team": "Betis",
-          "appearances_at_prediction": 1,
+          "appearances_at_prediction": 2,
           "sources": {
             "FUTBOLFANTASY": 30.0
           },
@@ -2098,7 +2098,7 @@
         "41606": {
           "player_name": "Mangala",
           "team": "Getafe",
-          "appearances_at_prediction": 5,
+          "appearances_at_prediction": 6,
           "sources": {
             "ANALITICA_FANTASY": 70.0
           },
