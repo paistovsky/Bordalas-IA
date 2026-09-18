@@ -941,6 +941,27 @@
    "winning_amount": null,
    "margin": null,
    "event_id": null
+  },
+  "10030:2026-09-18T12:16:07.714290+00:00": {
+   "player_id": 10030,
+   "player_name": "Maffeo",
+   "amount": 1664350,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 1660000,
+   "recommended_bid": 1660000,
+   "intent": "REVENDER",
+   "target_source": "RENDIJA",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-09-18T12:16:07.714290+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null
   }
  }
 }
