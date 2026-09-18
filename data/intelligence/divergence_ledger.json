@@ -113900,9 +113900,9 @@
       "divergent": false,
       "divergence_kind": null,
       "outcome": "PENDING",
-      "price_after_3d": null,
+      "price_after_3d": 390000,
       "price_after_7d": null,
-      "return_3d_percent": null,
+      "return_3d_percent": -7.143,
       "return_7d_percent": null,
       "resolved_at": null
     },
