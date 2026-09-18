@@ -152183,5 +152183,33 @@
         "amount": 420200
       }
     ]
+  },
+  {
+    "event_id": "62a54356d435e072ddccf042",
+    "date": 1789714990,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 15289,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 420200
+      },
+      {
+        "player": 41418,
+        "from": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 2815700
+      }
+    ]
   }
 ]
