@@ -1067,6 +1067,27 @@ def compact_lineup(
         "starter_expected_matchday": tablero.get(
             "expected_matchday"
         ),
+
+        # PARA QUIEN FALTA, NO SOLO CUANTOS (18/09/2026)
+        #
+        #     `starter_data_players` decia "10 de 11" y ahi se
+        #     acababa. El 18/09, con el tercer portero del
+        #     Atletico en el once, saber si su nombre estaba en
+        #     `unmatched` era la diferencia entre "FutbolFantasy
+        #     no lo publica" y "no emparejo con su ficha", y hubo
+        #     que deducirlo a mano cruzando equipos.
+        #
+        #     `low_confidence` va al lado porque el riesgo
+        #     contrario tambien existe: un emparejamiento flojo
+        #     mete el pronostico de OTRO en una ficha, y eso es
+        #     peor que no tener pronostico.
+        "starter_unmatched": tablero.get("unmatched") or [],
+        "starter_targets": tablero.get("targets"),
+        "starter_matched": tablero.get("matched"),
+        "starter_low_confidence": tablero.get(
+            "low_confidence"
+        ) or [],
+
         "players": players,
     }
 
@@ -6192,6 +6213,30 @@ def build_dashboard_state() -> dict:
                 "cash_reconstruction"
             ),
             "cash_check": rival_intelligence.get("cash_check"),
+
+            # POR QUE `REVIEW_REQUIRED` (18/09/2026)
+            #
+            #     `ledger_status` sale de un O con dos causas:
+            #
+            #         validation["exact"] es False
+            #         unknown_types no esta vacio
+            #
+            #     Las dos se calculaban desde el 15/09 y NINGUNA
+            #     subia aqui. La bandera llevaba tres dias
+            #     encendida y desde la foto era imposible saber
+            #     cual de las dos se habia disparado: el dueño
+            #     pregunto el 15/09 y no se pudo contestar hasta
+            #     que alguien leyo el codigo.
+            #
+            #     Un estado que no dice por que es una alarma que
+            #     no sirve (doctrina 77: cuando la misma lista
+            #     guarda y esconde, lo que falta es invisible).
+            "validation": rival_intelligence.get("validation"),
+
+            "unknown_types": rival_intelligence.get(
+                "unknown_types"
+            ),
+
             "maximum_bid_calibration": rival_intelligence.get(
                 "maximum_bid_calibration"
             ),

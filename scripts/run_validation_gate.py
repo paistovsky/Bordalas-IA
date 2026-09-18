@@ -383,6 +383,15 @@ TESTS = [
     # 420.200 EUR era una venta nuestra contada dos veces.
     "src.analysis.test_la_caja_cuadra_o_dice_por_que_v1",
 
+    # La reja de duplicados sin la fecha dentro: colapsa la
+    # reemision del tablon y NO se come dos operaciones reales.
+    "src.analysis.test_la_reja_no_se_come_dos_operaciones_reales_v1",
+    "src.analysis.test_la_caja_cuadra_con_la_real_v1",
+
+    # Doctrina 85: el suelo del que no tiene pronostico se deriva
+    # de los pesos que lo sostienen, no se escribe a mano.
+    "src.analysis.test_el_suelo_sigue_a_su_escalera_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 
