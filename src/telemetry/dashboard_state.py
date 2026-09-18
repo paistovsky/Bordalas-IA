@@ -757,11 +757,24 @@ def compact_lineup(
                 # dashboard porque el dia que Yamal se cayo del
                 # XI no habia forma de ver contra quien habia
                 # perdido ni por cuanto.
-                "weekly_expected_value": round(
-                    safe_float(
-                        player.get("weekly_expected_value")
-                    ),
-                    3,
+                # SIN DATO VIAJA COMO None, NO COMO 0,0
+                #
+                # `safe_float` convierte None en 0,0, y un 0,0 en
+                # esta casilla se lee como "no se espera nada de
+                # el", que es justo lo contrario de "no se sabe".
+                # La ficha de plantilla ya lo publica a None
+                # -`squads._valor_semanal`- y las dos pantallas
+                # tienen que decir lo mismo del mismo jugador.
+                "weekly_expected_value": (
+                    round(
+                        safe_float(
+                            player.get("weekly_expected_value")
+                        ),
+                        3,
+                    )
+                    if player.get("weekly_expected_value")
+                    is not None
+                    else None
                 ),
                 "availability": player.get("availability_label"),
 
