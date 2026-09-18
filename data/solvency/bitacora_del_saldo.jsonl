@@ -124,3 +124,5 @@
 {"at": "2026-09-18T08:16:15.036103+00:00", "balance": 3454615, "maximum_bid": 15000265, "roster_value": 52840000, "hours_to_reset": 20.73, "committed": 1664350, "source": "TABLON"}
 {"at": "2026-09-18T09:08:56.124130+00:00", "balance": 3454615, "maximum_bid": 15000265, "roster_value": 52840000, "hours_to_reset": 19.85, "committed": 1664350, "source": "TABLON"}
 {"at": "2026-09-18T09:13:01.687542+00:00", "balance": 4324615, "maximum_bid": 15870265, "roster_value": 52840000, "hours_to_reset": 19.78, "committed": 1664350, "source": "TABLON"}
+{"at": "2026-09-18T10:09:37.053736+00:00", "balance": 4324615, "maximum_bid": 15870265, "roster_value": 52840000, "hours_to_reset": 18.84, "committed": 1664350, "source": "TABLON"}
+{"at": "2026-09-18T10:16:30.587947+00:00", "balance": 4324615, "maximum_bid": 15870265, "roster_value": 52840000, "hours_to_reset": 18.73, "committed": 1664350, "source": "TABLON"}
