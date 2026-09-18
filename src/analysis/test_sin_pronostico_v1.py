@@ -76,7 +76,7 @@ import sys
 sys.path.insert(0, ".")
 
 from src.analysis.lineup_engine import (  # noqa: E402
-    SIN_PRONOSTICO_SCORE,
+    suelo_sin_pronostico,
     banquillo_con_motivo,
     prepare_players,
     search_best_lineup_for_formation,
@@ -319,7 +319,7 @@ for nombre in ("Dituro", "Iturbe"):
 # no ha cambiado con el arreglo: solo el suelo. Asi se recupera el
 # numero de la foto sin tener que conservar el codigo viejo.
 base_esquivel = (
-    fichas["Esquivel"]["lineup_score"] - SIN_PRONOSTICO_SCORE
+    fichas["Esquivel"]["lineup_score"] - suelo_sin_pronostico()
 )
 
 esquivel_con_suelo_viejo = SUELO_VIEJO + base_esquivel
@@ -427,9 +427,9 @@ check(
 check(
     "el suelo viejo de 250.000 ya no existe",
     esquivel["lineup_score"] < 250_000.0
-    and SIN_PRONOSTICO_SCORE < 0,
+    and suelo_sin_pronostico() < 0,
     f"(score={esquivel['lineup_score']:.2f}, "
-    f"constante={SIN_PRONOSTICO_SCORE})",
+    f"suelo={suelo_sin_pronostico()})",
 )
 
 # El peor con pronostico posible: cobertura 1 y nada mas. Si
@@ -505,6 +505,112 @@ check(
     suplentes["Iturbe"]["reason"] == "PUNTUA_MENOS",
     f"(motivo={suplentes['Iturbe']['reason']})",
 )
+
+
+# ================================================================
+# 6. Y LA COLA DE VENTA SE DA LA VUELTA
+# ================================================================
+#
+# EL PAR INVERTIDO (18/09/2026)
+#
+#     El fallo no solo sentaba a Dituro. Como `untouchable_reason`
+#     protege al portero TITULAR -y el titular era Esquivel-, la
+#     foto de las 16:16 tenia esto:
+#
+#         Dituro     segundo de la cola de venta
+#                    motivo: "cae de precio y ademas no juega"
+#
+#         Esquivel   el UNICO apartado de la venta
+#                    motivo: "sin escalon conocido"
+#
+#     El portero con 123 puntos la temporada pasada, en venta. El
+#     que no tiene ni una fuente, protegido. Perder puntos era lo
+#     de menos: se estaba ofreciendo al portero bueno.
+#
+#     Con el arreglo, Dituro vuelve al once, `is_starter` se le
+#     pone a el y la proteccion de portero titular le sigue.
+
+print()
+print("6. El par invertido se endereza")
+
+from src.analysis.sale_order import build_sale_order  # noqa: E402
+
+
+def ficha_de_venta(player, titular):
+    """La ficha como la publica el roster, con el XI de turno."""
+
+    starter = TABLERO_REAL["players"]
+
+    escalon = next(
+        (
+            (f.get("hierarchy") or {}).get("value")
+            for f in starter
+            if f["player_id"] == player["id"]
+        ),
+        None,
+    )
+
+    return {
+        "id": player["id"],
+        "name": player["name"],
+        "position": player["position"],
+        "price": player["price"],
+        "points": player["points"],
+        "price_increment": -20_000,
+        "hierarchy_value": escalon,
+        "is_starter": titular,
+    }
+
+
+def cola_con_portero(portero_id):
+
+    roster = [
+        ficha_de_venta(p, p["id"] == portero_id)
+        for p in (ESQUIVEL, DITURO, ITURBE)
+    ]
+
+    return build_sale_order(roster, lineup_ids=[portero_id])
+
+
+antes = cola_con_portero(ESQUIVEL["id"])
+
+despues = cola_con_portero(DITURO["id"])
+
+check(
+    "el banco reproduce el par invertido de aquel dia",
+    "Dituro" in [q["name"] for q in antes["queue"]]
+    and "Esquivel" in [e["name"] for e in antes["excluded"]],
+    f"(cola={[q['name'] for q in antes['queue']]}, "
+    f"apartados={[e['name'] for e in antes['excluded']]})",
+)
+
+check(
+    "con el arreglo, Dituro SALE de la cola de venta",
+    "Dituro" not in [q["name"] for q in despues["queue"]],
+    f"(cola={[q['name'] for q in despues['queue']]})",
+)
+
+check(
+    "y queda apartado por ser el portero titular",
+    any(
+        e["name"] == "Dituro" and "portero" in e["reason"].lower()
+        for e in despues["excluded"]
+    ),
+    f"(apartados={[(e['name'], e['reason']) for e in despues['excluded']]})",
+)
+
+# Esquivel sigue sin venderse, y esta bien: no se vende a ciegas a
+# quien no se puede valorar. Lo que cambia es que ya no es por
+# ser el portero titular.
+check(
+    "Esquivel sigue sin venderse, pero ya no por ser el titular",
+    any(
+        e["name"] == "Esquivel" and "escalon" in e["reason"].lower()
+        for e in despues["excluded"]
+    ),
+    f"(apartados={[(e['name'], e['reason']) for e in despues['excluded']]})",
+)
+
 
 
 # ================================================================

@@ -137,6 +137,18 @@ def board_from_single_source() -> dict:
         "rejection_reason": sellos.get("rejection_reason"),
         "expected_matchday": sellos.get("expected_matchday"),
 
+        # QUIEN SE QUEDO SIN PRONOSTICO Y POR QUE (18/09/2026)
+        #
+        #     Contar cabezas -"10 de 11"- no dice para quien
+        #     falta. Estos tres vienen de `metadata` del tablero y
+        #     viajan hasta la pantalla para que la pregunta
+        #     "¿por que este no tiene pronostico?" se conteste
+        #     mirando, y no cruzando equipos a mano.
+        "unmatched": sellos.get("unmatched") or [],
+        "targets": sellos.get("targets"),
+        "matched": sellos.get("matched"),
+        "low_confidence": sellos.get("low_confidence") or [],
+
         "players": jugadores,
     }
 
@@ -612,6 +624,60 @@ MANDATORY_HIERARCHY_BONUS = 10_000_000.0
 
 
 # ============================================================
+# LOS PESOS DEL SCORE, CON NOMBRE
+# ============================================================
+#
+#     Estaban escritos a pelo dentro de `prepare_players`. Se
+#     sacan aqui porque el suelo del que no tiene pronostico se
+#     DERIVA de ellos, y un suelo que se deriva de numeros
+#     sueltos dentro de una funcion es exactamente el fallo del
+#     18/09/2026 esperando a repetirse (doctrina 85).
+
+# La vara va de 0 a 1 y manda sobre todo lo demas.
+ESCALA_DE_LA_VARA = 1_000_000.0
+
+# Un dato con fuente vale mas que uno sin ella. Desempate.
+COBERTURA_POR_FUENTE = 3_000.0
+
+# Y el porcentaje crudo debajo, para no empatar dentro del mismo
+# escalon.
+PESO_DE_LA_PROBABILIDAD = 100.0
+
+# Lo que vale quien Biwenger no deja alinear. No es un score: es
+# una marca.
+NO_ALINEABLE = -1_000_000.0
+
+# El aviso de `calculate_lineup_score` cuando el jugador entra en
+# duda. Es la base mas baja que puede tener alguien alineable.
+AVISO_NO_AUTOMATICO = -500.0
+
+
+def peor_con_pronostico() -> float:
+    """
+    El score MAS BAJO que puede sacar alguien con pronostico.
+
+    No es una estimacion: es la suma de los minimos de cada
+    sumando, y cada minimo esta razonado.
+
+        vara            >= 0     participacion y calidad son >= 0
+        cobertura       >= 1     esa rama exige `coverage > 0`
+        probabilidad    >= 0     un porcentaje no es negativo
+        base            >= -500  el aviso de no automatico
+        casa/penaltis   >= 0     los bonos no restan
+
+    Si manana alguien cambia uno de esos pesos, este numero se
+    mueve solo y el suelo de abajo con el.
+    """
+
+    return (
+        0.0 * ESCALA_DE_LA_VARA
+        + 1.0 * COBERTURA_POR_FUENTE
+        + 0.0 * PESO_DE_LA_PROBABILIDAD
+        + AVISO_NO_AUTOMATICO
+    )
+
+
+# ============================================================
 # SIN PRONOSTICO NO SE ENTRA SI HAY CON PRONOSTICO
 # ============================================================
 #
@@ -673,11 +739,32 @@ MANDATORY_HIERARCHY_BONUS = 10_000_000.0
 #     aviso de `automatic_lineup`. El peor con pronostico ronda
 #     +2.500.
 #
-#     -500.000 deja medio millon de margen por debajo de esa
-#     banda y medio millon por encima del -1.000.000 con el que
-#     se marca al que NO se puede alinear. Ni se cuela por
-#     arriba ni se confunde por abajo.
-SIN_PRONOSTICO_SCORE = -500_000.0
+#     Y NO SE ESCRIBE A MANO (18/09/2026, doctrina 85)
+#
+#     Aqui hubo, durante un dia, un `-500_000.0` escrito a pelo.
+#     Funcionaba, y era la misma clase de numero que el 0,25 que
+#     acabamos de quitar: uno que vale mientras otra cosa no se
+#     mueva, y que no se entera cuando se mueve.
+#
+#     Ahora sale del PUNTO MEDIO de la banda que tiene que
+#     respetar:
+#
+#         arriba   `peor_con_pronostico()`   el peor con dato
+#         abajo    `NO_ALINEABLE`            el que no puede jugar
+#
+#     El punto medio es el sitio con mas margen por los dos
+#     lados, y se mueve solo si cualquiera de los dos extremos se
+#     mueve. Con los pesos de hoy da -498.750, que es donde
+#     estaba el numero escrito a mano: la diferencia no es el
+#     valor, es que ya no hay que acordarse de el.
+def suelo_sin_pronostico() -> float:
+    """
+    El score del que no tiene ni una fuente que hable de el.
+
+    Derivado, nunca escrito. Ver el bloque de arriba.
+    """
+
+    return (peor_con_pronostico() + NO_ALINEABLE) / 2.0
 
 
 def god_is_ruled_out(starter: dict) -> tuple[bool, str | None]:
@@ -1070,13 +1157,13 @@ def prepare_players(
 
                 final_score = (
                     expected_value
-                    * 1_000_000.0
+                    * ESCALA_DE_LA_VARA
 
                     + starter_coverage
-                    * 3_000.0
+                    * COBERTURA_POR_FUENTE
 
                     + starter_probability
-                    * 100.0
+                    * PESO_DE_LA_PROBABILIDAD
 
                     + base_score
 
@@ -1107,7 +1194,7 @@ def prepare_players(
                 expected_value = None
 
                 final_score = (
-                    SIN_PRONOSTICO_SCORE
+                    suelo_sin_pronostico()
                     + base_score
                     + external_adjustment
                     + home_away_adjustment
