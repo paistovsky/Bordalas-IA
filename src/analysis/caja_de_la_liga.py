@@ -60,6 +60,7 @@ SI NO SE PUEDE, SE DICE
 from __future__ import annotations
 
 import collections
+import os
 
 
 # ============================================================
@@ -264,9 +265,71 @@ def reconstruir(
         #
         #     Asi que se deduplica TODO lo que suma o resta, por
         #     su identidad logica y no por el id del evento.
-        vistos = set()
+        #
+        # LA FECHA SALE DE LA CLAVE (18/09/2026)
+        #
+        #     Aquella clave era
+        #
+        #         (tipo, FECHA, jugador, de, a, importe)
+        #
+        #     y funciono ocho dias porque la reemision que se vio
+        #     el 10/09 cambiaba el PAYLOAD y conservaba el `date`:
+        #     una puja mas en `bids`, unos puntos corregidos. Con
+        #     la fecha igual, las dos copias colapsaban.
+        #
+        #     Lo que no se habia visto es la reemision que ademas
+        #     mueve la fecha. El 18/09 nuestra venta de Lunin
+        #     -jugador 15289, 420.200 EUR- se conto dos veces, y
+        #     con ella habia cinco grupos mas de rivales, todos
+        #     `transfer`, separados entre 2m34s y 4m45s:
+        #     15.558.800 EUR de sobrecuenta desde el 17/08.
+        #
+        #     POR QUE NO SE QUITA LA FECHA A SECAS
+        #
+        #     Porque la fecha esta haciendo un trabajo: es lo
+        #     unico que separa dos operaciones LEGITIMAS que por
+        #     lo demas son identicas. Comprar a un jugador por
+        #     150.376 EUR en el reset de hoy y volver a comprarlo
+        #     por lo mismo dentro de dos semanas son dos hechos y
+        #     dos pagos, y sin fecha se fundirian en uno: la caja
+        #     saldria de MAS, que es el fallo contrario y peor,
+        #     porque nadie lo estaria buscando.
+        #
+        #     Asi que la fecha no se quita: se le pone tolerancia.
+        #     Misma operacion dentro de `VENTANA_REEMISION` es una
+        #     copia; fuera, son dos hechos.
+        vistos: dict[tuple, int] = {}
 
         repetidos = 0
+
+        # Se resuelve UNA vez por reconstruccion: si se leyera el
+        # entorno dentro del bucle, un cambio a media vuelta
+        # partiria la caja en dos mitades con reglas distintas.
+        tolerancia = ventana_activa()
+
+        def es_copia(clave, fecha: int) -> bool:
+            """
+            ¿Es este movimiento una reemision del anterior igual?
+
+            Se ancla en la PRIMERA aparicion y no se reancla al
+            descartar: tres copias a 16:29, 16:34 y 16:38 -el caso
+            real del jugador 31069- colapsan las tres contra la de
+            las 16:29. Si se reanclara en cada copia, una cadena
+            larga de reemisiones podria arrastrar la ventana hasta
+            tragarse una operacion de verdad.
+            """
+
+            primera = vistos.get(clave)
+
+            if (
+                primera is not None
+                and fecha - primera <= tolerancia
+            ):
+                return True
+
+            vistos[clave] = fecha
+
+            return False
 
         # Las jornadas, aparte: de cada `round.id` se queda la
         # ultima version que llegue. Asi una correccion de puntos
@@ -298,18 +361,18 @@ def reconstruir(
 
                     clave = (
                         tipo,
-                        safe_int(evento.get("date")),
                         op.get("player"),
                         de,
                         a,
                         importe,
                     )
 
-                    if clave in vistos:
+                    if es_copia(
+                        clave,
+                        safe_int(evento.get("date")),
+                    ):
                         repetidos += 1
                         continue
-
-                    vistos.add(clave)
 
                     # `market` = compra al mercado: paga `to`.
                     # `transfer` sin `to` = venta al Computer.
@@ -366,19 +429,24 @@ def reconstruir(
 
                     importe = safe_int(op.get("amount"))
 
+                    # La racha diaria es el caso que MAS depende
+                    # de la tolerancia y no de la fecha exacta:
+                    # 250.000 EUR al mismo manager el lunes y el
+                    # martes tienen la clave identica y son dos
+                    # cobros. Los separa la ventana, no la clave.
                     clave = (
                         "bonus",
-                        safe_int(evento.get("date")),
                         quien,
                         importe,
                         op.get("reason"),
                     )
 
-                    if clave in vistos:
+                    if es_copia(
+                        clave,
+                        safe_int(evento.get("date")),
+                    ):
                         repetidos += 1
                         continue
-
-                    vistos.add(clave)
 
                     libro[quien]["streak"] += importe
 
@@ -528,6 +596,77 @@ TIPOS_ECONOMICOS = ("market", "transfer", "bonus")
 #     copia. Una hora separa las dos cosas con holgura de sobra
 #     por los dos lados.
 VENTANA_REEMISION = 3_600
+
+
+# ============================================================
+# EL INTERRUPTOR, Y POR QUE ESTE SI LO LLEVA
+# ============================================================
+#
+# LO QUE MIDE (18/09/2026, n=627 eventos, 09/08-18/09)
+#
+#     Con la tolerancia puesta, la caja de DOS rivales se mueve:
+#
+#         Luismi_Haz    -1.720.709  ->  -15.066.109   (13.345.400)
+#         Prinzipote     5.848.172  ->    3.634.772   ( 2.213.400)
+#
+#     Y con ella su tope de puja -`balance + 0,25 x plantilla`-:
+#     el de Luismi cae de 21,9 M a 8,5 M. Cuatro managers cambian
+#     de nivel de AMENAZA, porque la amenaza es relativa dentro de
+#     la liga y al bajar dos suben los demas.
+#
+#     Eso NO son numeros de pantalla: el `balance` de un rival
+#     entra en `calculate_liquidity_help_score`, que entra en
+#     `calculate_strategic_max_purchase_price`. O sea, en lo que
+#     pagariamos por comprarle un jugador a un rival.
+#
+# LO QUE MIDE TAMBIEN, Y TIRA PARA EL OTRO LADO
+#
+#     De las 27 pujas del libro (`bid_outcome_ledger`, 10/08 al
+#     17/09, los 30 dias completos), **ninguna** lleva
+#     `seller_user_id`: las 27 fueron al mercado o al Computer, y
+#     ni una fue una compra a un rival. La via que esto mueve no
+#     se ha disparado ni una vez.
+#
+#     Y ningun manager cruza `DIRECT_RIVAL_THREAT_THRESHOLD`
+#     (60): Luismi baja de 79,9 a 65,6 y sigue arriba; el resto
+#     sigue abajo. La clasificacion de rival directo no cambia
+#     para ninguno de los siete.
+#
+# POR QUE APAGADO POR DEFECTO
+#
+#     Porque "no se ha disparado en 30 dias" no es "no se
+#     dispara", y el encargo lo dice: lo mide Claude, lo enciende
+#     el dueño.
+#
+#     LO QUE CUESTA TENERLO APAGADO, que tambien hay que decirlo:
+#     mientras esté apagado, NUESTRA caja sigue saliendo 420.200
+#     EUR de mas y `cash_check` sigue en rojo. El numero contra el
+#     que se audita todo lo demas sigue torcido.
+#
+#         BORDALAS_REJA_CON_TOLERANCIA=1
+#
+#     `sospechosos()` NO depende de esto: con el interruptor
+#     apagado la pantalla sigue diciendo que evento descuadra la
+#     caja. Diagnosticar no es corregir.
+TOLERANCIA_ENV = "BORDALAS_REJA_CON_TOLERANCIA"
+
+
+def ventana_activa() -> int:
+    """
+    Los segundos de tolerancia que se aplican de verdad.
+
+    0 = la reja de siempre: solo colapsa lo que comparte fecha al
+    segundo.
+    """
+
+    valor = str(
+        os.environ.get(TOLERANCIA_ENV, "")
+    ).strip().lower()
+
+    if valor in ("1", "true", "si", "yes", "on"):
+        return VENTANA_REEMISION
+
+    return 0
 
 
 def _operaciones(eventos: list) -> list[dict]:
