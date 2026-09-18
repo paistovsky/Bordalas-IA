@@ -151331,5 +151331,24 @@
         "amount": 153800
       }
     ]
+  },
+  {
+    "event_id": "8b994eed4f594c6a05179528",
+    "date": 1789690322,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 39736,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 151200
+      }
+    ]
   }
 ]
