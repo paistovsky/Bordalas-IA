@@ -373,6 +373,16 @@ TESTS = [
     "src.analysis.test_empezar_a_anotar_v1",
     "src.analysis.test_la_escala_v1",
 
+    # Un jugador sin pronostico no desplaza del XI a uno con
+    # pronostico en su puesto. El 18/09/2026 el tercer portero del
+    # Atletico, sin una sola fuente, sentaba a Dituro.
+    "src.analysis.test_sin_pronostico_v1",
+
+    # Si la caja no cuadra, se publica el evento sospechoso y su
+    # tipo, no solo el numero. El 18/09/2026 el descuadre de
+    # 420.200 EUR era una venta nuestra contada dos veces.
+    "src.analysis.test_la_caja_cuadra_o_dice_por_que_v1",
+
     "src.analysis.test_doctrina_v1",
 ]
 

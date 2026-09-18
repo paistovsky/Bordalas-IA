@@ -479,11 +479,252 @@ def reconstruir(
 
 
 # ============================================================
+# QUIEN SE HA LLEVADO EL DESCUADRE
+# ============================================================
+#
+# UNA FOTO DICE QUE ALGO ESTA MAL, NUNCA POR QUE (doctrina 48)
+#
+#     El 18/09/2026 la caja se separo 420.200 EUR y la pantalla
+#     publico eso: 420.200. Nada mas. Con ese numero no se puede
+#     hacer nada: no dice si sobra un cobro o falta un pago, ni
+#     de que dia, ni de quien.
+#
+#     Lo buscamos a mano y estaba en un minuto: una venta al
+#     Computer de Lunin -jugador 15289- por 420.200 EUR, el mismo
+#     18/09 a las 07:03. El importe cuadraba al euro.
+#
+#     Si se encuentra a mano en un minuto, lo encuentra el
+#     programa. Esto no decide nada: solo deja dicho a que mirar.
+#
+# LA RENDIJA CONOCIDA: LA REEMISION CON OTRA FECHA
+#
+#     La reja de duplicados es la clave
+#     `(tipo, fecha, jugador, de, a, importe)`, y lleva la FECHA
+#     dentro. Biwenger reemite la misma operacion minutos despues
+#     con otro `event_id` y otro `date`, asi que la copia entra
+#     como un hecho nuevo y el dinero se cuenta dos veces.
+#
+#     No es una hipotesis: en el tablon del 18/09 ya habia seis
+#     grupos asi, con separaciones de dos a nueve minutos —el
+#     jugador 31069 aparece TRES veces—. Lo que cambio ese dia es
+#     que por primera vez le toco a una venta NUESTRA, que es la
+#     unica caja contra la que se puede comprobar.
+#
+#     Por eso se buscan las dos cosas: el importe exacto, y los
+#     grupos que la reja no puede ver.
+
+
+TIPOS_ECONOMICOS = ("market", "transfer", "bonus")
+
+
+# CUANTO TARDA BIWENGER EN REEMITIR
+#
+#     Los seis grupos medidos en el tablon del 18/09 se separan
+#     entre 2m34s y 4m45s. Ninguno pasa de cinco minutos.
+#
+#     La ventana existe porque sin ella la racha diaria sale
+#     marcada: 250.000 EUR al mismo manager el lunes y el martes
+#     tienen la misma clave y son dos cobros de verdad, no una
+#     copia. Una hora separa las dos cosas con holgura de sobra
+#     por los dos lados.
+VENTANA_REEMISION = 3_600
+
+
+def _operaciones(eventos: list) -> list[dict]:
+    """Cada movimiento de dinero del tablon, aplanado."""
+
+    filas = []
+
+    for evento in eventos or []:
+
+        if not isinstance(evento, dict):
+            continue
+
+        tipo = evento.get("type")
+
+        if tipo not in TIPOS_ECONOMICOS:
+            continue
+
+        for op in _lista(evento.get("content")):
+
+            if not isinstance(op, dict) or "amount" not in op:
+                continue
+
+            filas.append(
+                {
+                    "type": tipo,
+                    "date": safe_int(evento.get("date")),
+                    "event_id": evento.get("event_id"),
+                    "player": op.get("player"),
+                    "from": (op.get("from") or {}).get("id"),
+                    "from_name": (op.get("from") or {}).get("name"),
+                    "to": (op.get("to") or {}).get("id"),
+                    "to_name": (op.get("to") or {}).get("name"),
+                    "user": (op.get("user") or {}).get("id"),
+                    "amount": safe_int(op.get("amount")),
+                }
+            )
+
+    return filas
+
+
+def sospechosos(
+    eventos: list,
+    diferencia,
+    *,
+    manager=None,
+    limite: int = 6,
+) -> list[dict]:
+    """
+    Que evento explica el descuadre. El concreto, con su importe.
+
+    Devuelve una lista ordenada de mas a menos sospechoso. Vacia
+    significa "no se ha encontrado", que tambien es una respuesta
+    y se publica como tal. Nunca lanza: esto informa, no decide.
+    """
+
+    salida = []
+
+    try:
+        objetivo = abs(safe_int(diferencia))
+
+        if not objetivo:
+            return []
+
+        filas = _operaciones(eventos)
+
+        if not filas:
+            return []
+
+        # ----------------------------------------------------
+        # 1. EL IMPORTE, CLAVADO
+        # ----------------------------------------------------
+        for fila in filas:
+
+            if fila["amount"] != objetivo:
+                continue
+
+            nuestro = manager is None or manager in (
+                fila["from"],
+                fila["to"],
+                fila["user"],
+            )
+
+            salida.append(
+                {
+                    **fila,
+                    "match": "IMPORTE_EXACTO",
+                    "ours": nuestro,
+                }
+            )
+
+        # ----------------------------------------------------
+        # 2. LA MISMA OPERACION CON DOS FECHAS
+        # ----------------------------------------------------
+        #
+        # La reja no las ve porque lleva la fecha dentro. Se
+        # publican aunque su importe no cuadre con la diferencia:
+        # son la averia conocida y hay que poder contarlas.
+        grupos = collections.defaultdict(list)
+
+        for fila in filas:
+
+            grupos[
+                (
+                    fila["type"],
+                    fila["player"],
+                    fila["from"],
+                    fila["to"],
+                    fila["user"],
+                    fila["amount"],
+                )
+            ].append(fila)
+
+        for clave, repetidas in grupos.items():
+
+            fechas = sorted({fila["date"] for fila in repetidas})
+
+            if len(fechas) < 2:
+                continue
+
+            # Se parte en rachas: solo cuenta como reemision lo
+            # que llega PEGADO. Dos cobros iguales con dias por
+            # medio son dos cobros, no una copia.
+            racha = [fechas[0]]
+
+            rachas = [racha]
+
+            for anterior, siguiente in zip(fechas, fechas[1:]):
+
+                if siguiente - anterior <= VENTANA_REEMISION:
+                    racha.append(siguiente)
+
+                else:
+                    racha = [siguiente]
+                    rachas.append(racha)
+
+            copias = max(len(r) for r in rachas)
+
+            if copias < 2:
+                continue
+
+            pegadas = [r for r in rachas if len(r) > 1]
+
+            primera = repetidas[0]
+
+            nuestro = manager is None or manager in (
+                primera["from"],
+                primera["to"],
+                primera["user"],
+            )
+
+            salida.append(
+                {
+                    **primera,
+                    "match": "REEMITIDA_CON_OTRA_FECHA",
+                    "ours": nuestro,
+                    "copies": copias,
+                    "dates": sorted(
+                        fecha
+                        for grupo in pegadas
+                        for fecha in grupo
+                    ),
+
+                    # Lo que se cuenta de mas si las copias no se
+                    # colapsan: el importe por cada copia extra.
+                    "overcount": primera["amount"]
+                    * sum(len(r) - 1 for r in pegadas),
+                }
+            )
+
+        # Primero lo nuestro -es la unica caja comprobable-,
+        # despues el importe clavado, y dentro de eso lo reciente.
+        salida.sort(
+            key=lambda fila: (
+                not fila["ours"],
+                fila["match"] != "IMPORTE_EXACTO",
+                -fila["date"],
+            )
+        )
+
+        return salida[:limite]
+
+    except Exception:                               # noqa: BLE001
+        return []
+
+
+# ============================================================
 # LA COMPROBACION PERMANENTE
 # ============================================================
 
 
-def cuadra(caja_reconstruida, saldo_real) -> dict:
+def cuadra(
+    caja_reconstruida,
+    saldo_real,
+    *,
+    eventos: list | None = None,
+    manager=None,
+) -> dict:
     """
     Nuestra caja reconstruida contra el saldo real de la API.
 
@@ -526,22 +767,90 @@ def cuadra(caja_reconstruida, saldo_real) -> dict:
     def _euros(valor) -> str:
         return f"{int(valor):,}".replace(",", ".")
 
+    if diferencia == 0:
+
+        return {
+            "available": True,
+            "ok": True,
+            "reconstructed": mia,
+            "real": real,
+            "difference": 0,
+            "suspects": [],
+            "suspect_types": [],
+            "reason": (
+                f"La caja reconstruida cuadra con el saldo real "
+                f"({_euros(real)} EUR)."
+            ),
+        }
+
+    # NO CUADRA: HAY QUE DECIR A QUE MIRAR
+    #
+    #     El numero solo no sirve para nada. Se busca el evento
+    #     concreto y su tipo, y si no aparece se dice que no
+    #     aparece —que tambien es una respuesta, y ademas es una
+    #     pista: significa que no es un importe suelto.
+    pistas = sospechosos(eventos, diferencia, manager=manager)
+
+    tipos = sorted({pista["type"] for pista in pistas})
+
+    clavado = next(
+        (
+            pista
+            for pista in pistas
+            if pista["match"] == "IMPORTE_EXACTO"
+        ),
+        None,
+    )
+
+    if clavado is not None:
+
+        sobra = (
+            "sobra un cobro"
+            if diferencia > 0
+            else "falta un pago"
+        )
+
+        detalle = (
+            f" Cuadra al euro con un evento `{clavado['type']}` "
+            f"del jugador {clavado['player']} por "
+            f"{_euros(clavado['amount'])} EUR: {sobra}."
+        )
+
+    elif pistas:
+
+        detalle = (
+            f" Sin un importe que cuadre al euro. Lo que si hay: "
+            f"{len(pistas)} operacion(es) reemitidas con otra "
+            f"fecha, del tipo {', '.join(tipos)}, que la reja de "
+            f"duplicados no puede ver porque lleva la fecha "
+            f"dentro."
+        )
+
+    else:
+
+        detalle = (
+            " Ningun evento suelto cuadra con la diferencia, ni "
+            "hay reemisiones con otra fecha: no es un importe "
+            "perdido, hay que mirar el metodo."
+        )
+
     return {
         "available": True,
-        "ok": diferencia == 0,
+        "ok": False,
         "reconstructed": mia,
         "real": real,
         "difference": diferencia,
+
+        # EL TIPO DE EVENTO SOSPECHOSO, NO SOLO EL NUMERO.
+        "suspects": pistas,
+        "suspect_types": tipos,
+
         "reason": (
-            f"La caja reconstruida cuadra con el saldo real "
-            f"({_euros(real)} EUR)."
-            if diferencia == 0
-            else (
-                f"LA CAJA NO CUADRA: reconstruida "
-                f"{_euros(mia)} EUR contra {_euros(real)} EUR "
-                f"reales. Se separan {_euros(abs(diferencia))} "
-                f"EUR. Si el metodo falla con el nuestro, la caja "
-                f"de los seis rivales tampoco vale."
-            )
+            f"LA CAJA NO CUADRA: reconstruida "
+            f"{_euros(mia)} EUR contra {_euros(real)} EUR "
+            f"reales. Se separan {_euros(abs(diferencia))} "
+            f"EUR. Si el metodo falla con el nuestro, la caja "
+            f"de los seis rivales tampoco vale."
+            + detalle
         ),
     }
