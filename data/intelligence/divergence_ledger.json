@@ -155211,6 +155211,25 @@
       "return_3d_percent": null,
       "return_7d_percent": null,
       "resolved_at": null
+    },
+    "41713|2026-09-19": {
+      "player_id": "41713",
+      "player_name": "José Ángel",
+      "seen_at": "2026-09-19T05:26:03.206025+00:00",
+      "price": 270000,
+      "price_change_eur": 0,
+      "price_change_percent": 0.0,
+      "demand_net": null,
+      "demand_source": null,
+      "trend_days": null,
+      "divergent": false,
+      "divergence_kind": null,
+      "outcome": "PENDING",
+      "price_after_3d": null,
+      "price_after_7d": null,
+      "return_3d_percent": null,
+      "return_7d_percent": null,
+      "resolved_at": null
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-09-19T05:04:55.107033",
+  "updated_at": "2026-09-19T07:37:32.987174",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -1259,9 +1259,9 @@
     },
     "5125": {
       "round_id": 5125,
-      "visto": "2026-09-19T05:04:55.107033",
+      "visto": "2026-09-19T07:17:46.585365",
       "datos_de": "2026-09-19T05:01:32.863217+00:00",
-      "escrito_en": "2026-09-19T05:04:55.107033",
+      "escrito_en": "2026-09-19T07:17:46.585365",
       "clasificacion": [
         {
           "user_id": 14145555,
@@ -1510,6 +1510,284 @@
             1721,
             1599,
             9983,
+            19862,
+            29661,
+            14800,
+            1602,
+            37726,
+            26271,
+            3159
+          ]
+        }
+      }
+    },
+    "4905": {
+      "round_id": 4905,
+      "visto": "2026-09-19T07:37:32.987174",
+      "datos_de": "2026-09-19T07:26:04.470358+00:00",
+      "escrito_en": "2026-09-19T07:37:32.987174",
+      "clasificacion": [
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 276
+        },
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 270
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 230
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 226
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 225
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 205
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 194
+        },
+        {
+          "user_id": 14456960,
+          "name": "Alvaro Retamosa Sanguino",
+          "points": 171
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "3-5-2",
+        "players": [
+          17482,
+          11800,
+          1721,
+          1599,
+          19862,
+          29661,
+          14800,
+          1602,
+          37726,
+          26271,
+          3159
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny",
+          "position": 2
+        },
+        {
+          "id": 1602,
+          "name": "Rubén García",
+          "position": 3
+        },
+        {
+          "id": 1721,
+          "name": "Manu Sánchez",
+          "position": 2
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 9983,
+          "name": "Djené",
+          "position": 2
+        },
+        {
+          "id": 10030,
+          "name": "Maffeo",
+          "position": 2
+        },
+        {
+          "id": 11800,
+          "name": "Cabrera",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 17482,
+          "name": "Dituro",
+          "position": 1
+        },
+        {
+          "id": 19862,
+          "name": "Expósito",
+          "position": 3
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 26813,
+          "name": "Marcão",
+          "position": 2
+        },
+        {
+          "id": 27575,
+          "name": "Barzic",
+          "position": 2
+        },
+        {
+          "id": 29185,
+          "name": "Pablo Durán",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 31707,
+          "name": "Álvaro Carreras",
+          "position": 2
+        },
+        {
+          "id": 33694,
+          "name": "Boyomo",
+          "position": 2
+        },
+        {
+          "id": 37526,
+          "name": "Iturbe",
+          "position": 1
+        },
+        {
+          "id": 37726,
+          "name": "Oriol Rey",
+          "position": 3
+        },
+        {
+          "id": 43281,
+          "name": "Esquivel",
+          "position": 1
+        }
+      ],
+      "totales": {
+        "1599": 18,
+        "1602": 19,
+        "1721": 17,
+        "3159": 25,
+        "9983": 16,
+        "10030": 7,
+        "11800": 9,
+        "14800": 26,
+        "17482": 11,
+        "19862": 35,
+        "26271": 76,
+        "26813": 0,
+        "27575": 5,
+        "29185": 9,
+        "29661": 32,
+        "31707": 21,
+        "33694": 4,
+        "37526": 0,
+        "37726": 19,
+        "43281": 0
+      },
+      "once_alternativo": {
+        "formation": "4-5-1",
+        "players": [
+          17482,
+          11800,
+          9983,
+          1721,
+          1599,
+          19862,
+          29661,
+          14800,
+          1602,
+          37726,
+          26271
+        ],
+        "vara": "base"
+      },
+      "nombres": {
+        "1599": "Jonny",
+        "1602": "Rubén García",
+        "1721": "Manu Sánchez",
+        "3159": "Jutglà",
+        "9983": "Djené",
+        "10030": "Maffeo",
+        "11800": "Cabrera",
+        "14800": "Pablo Ibáñez",
+        "17482": "Dituro",
+        "19862": "Expósito",
+        "26271": "Yamal",
+        "26813": "Marcão",
+        "27575": "Barzic",
+        "29185": "Pablo Durán",
+        "29661": "Olasagasti",
+        "31707": "Álvaro Carreras",
+        "33694": "Boyomo",
+        "37526": "Iturbe",
+        "37726": "Oriol Rey",
+        "43281": "Esquivel"
+      },
+      "onces_por_vara": {
+        "base": {
+          "formation": "4-5-1",
+          "players": [
+            17482,
+            11800,
+            9983,
+            1721,
+            1599,
+            19862,
+            29661,
+            14800,
+            1602,
+            37726,
+            26271
+          ]
+        },
+        "factores": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            11800,
+            9983,
+            1721,
+            19862,
+            29661,
+            14800,
+            1602,
+            37726,
+            26271,
+            3159
+          ]
+        },
+        "actual": {
+          "formation": "3-5-2",
+          "players": [
+            17482,
+            11800,
+            1721,
+            1599,
             19862,
             29661,
             14800,
