@@ -1,6 +1,6 @@
 {
   "version": "V10.5",
-  "updated_at": "2026-09-18T14:14:41.918870+00:00",
+  "updated_at": "2026-09-19T02:53:38.116598+00:00",
   "positions": [
     {
       "position_id": "BID-4138078754",
@@ -199,7 +199,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-16T18:44:52.454534+00:00",
-      "updated_at": "2026-09-18T14:14:32.202587+00:00",
+      "updated_at": "2026-09-19T02:53:28.328114+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -444,7 +444,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-17T19:57:28.828214+00:00",
-      "updated_at": "2026-09-18T14:14:32.202600+00:00",
+      "updated_at": "2026-09-19T02:53:28.328119+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -579,7 +579,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-18T11:40:21.466744+00:00",
-      "updated_at": "2026-09-18T14:14:32.202604+00:00",
+      "updated_at": "2026-09-19T02:53:28.328122+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -767,7 +767,7 @@
       "realized_roi_percent": null,
       "thesis_source": "LIVE_DECISION_EXACT",
       "created_at": "2026-08-18T12:01:03.975162+00:00",
-      "updated_at": "2026-09-18T14:14:32.202606+00:00",
+      "updated_at": "2026-09-19T02:53:28.328124+00:00",
       "events": [
         {
           "type": "BID_SENT",
@@ -1126,7 +1126,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T10:49:10.880549+00:00",
-      "updated_at": "2026-09-18T14:14:32.202609+00:00",
+      "updated_at": "2026-09-19T02:53:28.328126+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1251,7 +1251,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T13:11:38.127443+00:00",
-      "updated_at": "2026-09-18T14:14:32.202617+00:00",
+      "updated_at": "2026-09-19T02:53:28.328132+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1443,7 +1443,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916242+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.113961+00:00",
         "action": "CUT_LOSS",
         "priority": 90,
         "decision_basis": "LOSS_AND_DETERIORATION",
@@ -1455,13 +1455,13 @@
         "scores": {
           "hold": 29.2,
           "take_profit": 0.0,
-          "cut_loss": 77.5,
-          "rotate_capital": 20.5
+          "cut_loss": 70.0,
+          "rotate_capital": 14.5
         },
         "reasons": [
           "La pérdida y el deterioro superan el valor de seguir esperando.",
           "Jugador en XI; protección deportiva 35.0/100.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -1671,7 +1671,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-21T23:12:10.013730+00:00",
-      "updated_at": "2026-09-18T14:14:32.202621+00:00",
+      "updated_at": "2026-09-19T02:53:28.328137+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1827,7 +1827,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916271+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.113974+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -1838,14 +1838,14 @@
         "sporting_protection_score": 70.0,
         "scores": {
           "hold": 48.5,
-          "take_profit": 41.0,
+          "take_profit": 32.0,
           "cut_loss": 0.0,
           "rotate_capital": 0.0
         },
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 70.0/100.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -1932,7 +1932,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-22T12:58:05.170012+00:00",
-      "updated_at": "2026-09-18T14:14:32.202625+00:00",
+      "updated_at": "2026-09-19T02:53:28.328141+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2043,7 +2043,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916277+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.113981+00:00",
         "action": "TAKE_PROFIT",
         "priority": 85,
         "decision_basis": "PROFIT_HARVEST",
@@ -2054,7 +2054,7 @@
         "sporting_protection_score": 35.0,
         "scores": {
           "hold": 19.2,
-          "take_profit": 89.0,
+          "take_profit": 80.0,
           "cut_loss": 0.0,
           "rotate_capital": 0.0
         },
@@ -2062,7 +2062,7 @@
           "La plusvalía/avance de tesis compensa más que el upside restante.",
           "La tesis de precio original ya ha alcanzado su objetivo.",
           "Jugador en XI; protección deportiva 35.0/100.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -2253,7 +2253,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-26T22:28:55.623930+00:00",
-      "updated_at": "2026-09-18T14:14:32.202629+00:00",
+      "updated_at": "2026-09-19T02:53:28.328149+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2373,7 +2373,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916282+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.113986+00:00",
         "action": "TAKE_PROFIT",
         "priority": 85,
         "decision_basis": "PROFIT_HARVEST",
@@ -2384,14 +2384,14 @@
         "sporting_protection_score": 20.0,
         "scores": {
           "hold": 11.0,
-          "take_profit": 100.0,
+          "take_profit": 95.0,
           "cut_loss": 0.0,
-          "rotate_capital": 6.0
+          "rotate_capital": 0.0
         },
         "reasons": [
           "La plusvalía/avance de tesis compensa más que el upside restante.",
           "La tesis de precio original ya ha alcanzado su objetivo.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -2653,7 +2653,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-29T00:02:10.740691+00:00",
-      "updated_at": "2026-09-18T14:14:32.202632+00:00",
+      "updated_at": "2026-09-19T02:53:28.328156+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2737,7 +2737,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916286+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.113990+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -2748,14 +2748,14 @@
         "sporting_protection_score": 55.0,
         "scores": {
           "hold": 40.2,
-          "take_profit": 24.0,
+          "take_profit": 15.0,
           "cut_loss": 0.0,
           "rotate_capital": 0.0
         },
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 55.0/100.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -3369,7 +3369,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764569+00:00",
-      "updated_at": "2026-09-18T14:14:32.202636+00:00",
+      "updated_at": "2026-09-19T02:53:28.328161+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3458,7 +3458,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764612+00:00",
-      "updated_at": "2026-09-18T14:14:32.202638+00:00",
+      "updated_at": "2026-09-19T02:53:28.328163+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3547,7 +3547,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T14:50:32.666545+00:00",
-      "updated_at": "2026-09-18T14:14:32.202640+00:00",
+      "updated_at": "2026-09-19T02:53:28.328165+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3636,7 +3636,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T20:09:49.948144+00:00",
-      "updated_at": "2026-09-18T14:14:32.202643+00:00",
+      "updated_at": "2026-09-19T02:53:28.328169+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3666,7 +3666,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916291+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.113995+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -3678,13 +3678,13 @@
         "scores": {
           "hold": 48.5,
           "take_profit": 0.0,
-          "cut_loss": 42.5,
+          "cut_loss": 35.0,
           "rotate_capital": 0.0
         },
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 70.0/100.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -3828,7 +3828,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-14T20:11:05.102108+00:00",
-      "updated_at": "2026-09-18T14:14:32.202647+00:00",
+      "updated_at": "2026-09-19T02:53:28.328173+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3858,7 +3858,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916294+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.113999+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -3869,14 +3869,14 @@
         "sporting_protection_score": 70.0,
         "scores": {
           "hold": 48.5,
-          "take_profit": 9.0,
+          "take_profit": 0.0,
           "cut_loss": 0.0,
           "rotate_capital": 0.0
         },
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 70.0/100.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -3912,7 +3912,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T02:54:37.362776+00:00",
-      "updated_at": "2026-09-18T14:14:32.202649+00:00",
+      "updated_at": "2026-09-19T02:53:28.328175+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4001,7 +4001,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T12:02:13.172318+00:00",
-      "updated_at": "2026-09-18T14:14:32.202653+00:00",
+      "updated_at": "2026-09-19T02:53:28.328178+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4031,7 +4031,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916298+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.114003+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
@@ -4043,12 +4043,12 @@
         "scores": {
           "hold": 10.0,
           "take_profit": 0.0,
-          "cut_loss": 22.5,
-          "rotate_capital": 24.0
+          "cut_loss": 15.0,
+          "rotate_capital": 18.0
         },
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -4135,7 +4135,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-17T03:03:05.858859+00:00",
-      "updated_at": "2026-09-18T14:14:32.202655+00:00",
+      "updated_at": "2026-09-19T02:53:28.328181+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4224,7 +4224,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T00:12:39.103782+00:00",
-      "updated_at": "2026-09-18T14:14:32.202658+00:00",
+      "updated_at": "2026-09-19T02:53:28.328184+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4254,7 +4254,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916301+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.114006+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
@@ -4266,12 +4266,12 @@
         "scores": {
           "hold": 10.0,
           "take_profit": 0.0,
-          "cut_loss": 22.5,
-          "rotate_capital": 16.0
+          "cut_loss": 15.0,
+          "rotate_capital": 10.0
         },
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -4307,7 +4307,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510843+00:00",
-      "updated_at": "2026-09-18T14:14:32.202661+00:00",
+      "updated_at": "2026-09-19T02:53:28.328187+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4337,7 +4337,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916305+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.114010+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
@@ -4349,12 +4349,12 @@
         "scores": {
           "hold": 14.4,
           "take_profit": 0.0,
-          "cut_loss": 22.5,
-          "rotate_capital": 12.0
+          "cut_loss": 15.0,
+          "rotate_capital": 6.0
         },
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -4390,7 +4390,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510907+00:00",
-      "updated_at": "2026-09-18T14:14:32.202664+00:00",
+      "updated_at": "2026-09-19T02:53:28.328190+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4420,7 +4420,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916308+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.114013+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
@@ -4432,12 +4432,12 @@
         "scores": {
           "hold": 10.0,
           "take_profit": 0.0,
-          "cut_loss": 22.5,
-          "rotate_capital": 16.0
+          "cut_loss": 15.0,
+          "rotate_capital": 10.0
         },
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
@@ -4473,7 +4473,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510947+00:00",
-      "updated_at": "2026-09-18T14:14:32.202667+00:00",
+      "updated_at": "2026-09-19T02:53:28.328193+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4503,7 +4503,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-18T14:14:41.916312+00:00",
+        "last_evaluated_at": "2026-09-19T02:53:38.114016+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
@@ -4515,23 +4515,23 @@
         "scores": {
           "hold": 10.0,
           "take_profit": 0.0,
-          "cut_loss": 22.5,
-          "rotate_capital": 16.0
+          "cut_loss": 15.0,
+          "rotate_capital": 10.0
         },
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
-          "Fase HIGH_ATTENTION | T-15 tras buffer 11045515 EUR."
+          "Fase NORMAL | T-15 tras buffer 9751612 EUR."
         ]
       }
     },
     {
-      "position_id": "BID-2474779758",
+      "position_id": "BID-2012049621",
       "player_id": 10030,
       "player_name": "Jugador 10030",
       "strategy": "ACTIVE_BID",
       "origin": "BOOTSTRAP_ACTIVE_BID",
       "status": "BID_PENDING",
-      "offer_id": 2474779758,
+      "offer_id": 2012049621,
       "seller_id": null,
       "seller": null,
       "bid_amount": 1664350,
@@ -4556,7 +4556,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T06:18:56.178648+00:00",
-      "updated_at": "2026-09-18T14:14:32.202671+00:00",
+      "updated_at": "2026-09-19T02:53:28.328198+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4565,6 +4565,51 @@
           "data": {
             "offer_id": 3127508531,
             "bid_amount": 1664350
+          }
+        }
+      ]
+    },
+    {
+      "position_id": "BID-1742756258",
+      "player_id": 11800,
+      "player_name": "Jugador 11800",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "BID_PENDING",
+      "offer_id": 1742756258,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 3116031,
+      "entry_price": null,
+      "bid_created_epoch": 1789744710,
+      "bid_until_epoch": 1789794000,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 3040000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-19T02:53:28.328041+00:00",
+      "updated_at": "2026-09-19T02:53:28.328202+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-19T02:53:28.328057+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 1742756258,
+            "bid_amount": 3116031
           }
         }
       ]

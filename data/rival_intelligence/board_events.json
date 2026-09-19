@@ -130059,6 +130059,274 @@
     }
   },
   {
+    "event_id": "60ed6e2102f242851fad5146",
+    "date": 1789318816,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 633807,
+        "until": 1789491600,
+        "expired": true,
+        "mode": "1x2",
+        "games": [
+          {
+            "id": 50767,
+            "date": 1789491600,
+            "status": "finished",
+            "home": {
+              "id": 70,
+              "name": "Rayo Vallecano",
+              "slug": "rayo-vallecano",
+              "score": 2
+            },
+            "away": {
+              "id": 7,
+              "name": "Espanyol",
+              "slug": "espanyol",
+              "score": 1
+            }
+          },
+          {
+            "id": 50763,
+            "date": 1789495200,
+            "status": "finished",
+            "home": {
+              "id": 91,
+              "name": "Alavés",
+              "slug": "alaves",
+              "score": 0
+            },
+            "away": {
+              "id": 18,
+              "name": "Valencia",
+              "slug": "valencia",
+              "score": 1
+            }
+          },
+          {
+            "id": 50764,
+            "date": 1789500600,
+            "status": "finished",
+            "home": {
+              "id": 75,
+              "name": "Elche",
+              "slug": "elche",
+              "score": 2
+            },
+            "away": {
+              "id": 15,
+              "name": "Real Madrid",
+              "slug": "real-madrid",
+              "score": 3
+            }
+          },
+          {
+            "id": 50760,
+            "date": 1789578000,
+            "status": "finished",
+            "home": {
+              "id": 2,
+              "name": "Atlético",
+              "slug": "atletico",
+              "score": 4
+            },
+            "away": {
+              "id": 93,
+              "name": "Osasuna",
+              "slug": "osasuna",
+              "score": 0
+            }
+          },
+          {
+            "id": 50761,
+            "date": 1789578000,
+            "status": "finished",
+            "home": {
+              "id": 6,
+              "name": "Deportivo",
+              "slug": "deportivo",
+              "score": 0
+            },
+            "away": {
+              "id": 17,
+              "name": "Sevilla",
+              "slug": "sevilla",
+              "score": 1
+            }
+          },
+          {
+            "id": 50762,
+            "date": 1789587000,
+            "status": "finished",
+            "home": {
+              "id": 3,
+              "name": "Barcelona",
+              "slug": "barcelona",
+              "score": 7
+            },
+            "away": {
+              "id": 812,
+              "name": "Racing",
+              "slug": "racing",
+              "score": 2
+            }
+          },
+          {
+            "id": 50765,
+            "date": 1792605600,
+            "status": "pending",
+            "home": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": null,
+              "difficulty": {
+                "rating": 54,
+                "standings": [
+                  65,
+                  35
+                ],
+                "homeAway": [
+                  50,
+                  20
+                ],
+                "form": [
+                  53,
+                  25
+                ],
+                "goalDiff": [
+                  42,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": null,
+              "difficulty": {
+                "rating": 45,
+                "standings": [
+                  28,
+                  35
+                ],
+                "homeAway": [
+                  100,
+                  20
+                ],
+                "form": [
+                  38,
+                  25
+                ],
+                "goalDiff": [
+                  28,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50759,
+            "date": 1789664400,
+            "status": "finished",
+            "home": {
+              "id": 87,
+              "name": "Betis",
+              "slug": "betis",
+              "score": 1
+            },
+            "away": {
+              "id": 8,
+              "name": "Getafe",
+              "slug": "getafe",
+              "score": 0
+            }
+          },
+          {
+            "id": 50766,
+            "date": 1789673400,
+            "status": "finished",
+            "home": {
+              "id": 65,
+              "name": "Málaga",
+              "slug": "malaga",
+              "score": 1
+            },
+            "away": {
+              "id": 19,
+              "name": "Villarreal",
+              "slug": "villarreal",
+              "score": 3
+            }
+          }
+        ],
+        "prizes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          6,
+          11,
+          0
+        ],
+        "competition": "la-liga",
+        "round": {
+          "id": 5125,
+          "name": "Jornada 6 (aplazada)",
+          "short": "J6",
+          "part": 2,
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "responses": [],
+        "global": true,
+        "winners": [
+          "-",
+          24,
+          139,
+          709,
+          2781,
+          5014,
+          2886,
+          602,
+          73,
+          0
+        ],
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": {
+          "es": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
+          "en": "<p style='text-align: center'>Send us your <strong>predictions</strong> for the round's matches and you could <strong>win credits</strong></p>",
+          "ca": "<p style='text-align: center'>Envia'ns el teu <strong>pronòstic</strong> per als partits de la jornada i podràs <strong>guanyar crèdits</strong></p>",
+          "gl": "<p style='text-align: center'>Envíanos o teu <strong>prognóstico</strong> para os partidos da xornada e poderás <strong>gañar créditos</strong></p>",
+          "eu": "<p style='text-align: center'>Bidal iezaguzu jardunaldiko partidetarako zure <strong>iragarpena</strong> eta <strong>kredituak irabazi</strong> ahal izango dituzu</p>",
+          "hr": "<p style='text-align: center'>Pošalji nam svoju <strong>prognozu</strong> za utakmice kola i možeš <strong>osvojiti kredite</strong></p>",
+          "de": "<p style='text-align: center'>Sende uns deine <strong>Vorhersage</strong> für die Spiele des Spieltags und du kannst <strong>Credits gewinnen</strong></p>",
+          "it": "<p style='text-align: center'>Inviaci il tuo <strong>pronostico</strong> per le partite della giornata e potrai <strong>vincere crediti</strong></p>",
+          "fr": "<p style='text-align: center'>Envoie-nous ton <strong>pronostic</strong> pour les matchs de la journée et tu pourras <strong>gagner des crédits</strong></p>",
+          "pt": "<p style='text-align: center'>Envia-nos o teu <strong>prognóstico</strong> para os jogos da jornada e poderás <strong>ganhar créditos</strong></p>",
+          "ru": "<p style='text-align: center'>Отправьте нам свой <strong>прогноз</strong> на матчи тура, и вы сможете <strong>выиграть кредиты</strong></p>",
+          "tr": "<p style='text-align: center'>Turun maçları için bize <strong>tahminini</strong> gönder ve <strong>kredi kazan</strong></p>",
+          "he": "<p style='text-align: center'>שלח לנו את ה<strong>תחזית</strong> שלך למשחקי המחזור ותוכל <strong>לזכות בקרדיטים</strong></p>",
+          "el": "<p style='text-align: center'>Στείλε μας την <strong>πρόβλεψή</strong> σου για τους αγώνες της αγωνιστικής και θα μπορείς να <strong>κερδίσεις πιστώσεις</strong></p>",
+          "ar": "<p style='text-align: center'>أرسل لنا <strong>توقعك</strong> لمباريات الجولة وستتمكن من <strong>ربح أرصدة</strong></p>"
+        }
+      }
+    }
+  },
+  {
     "event_id": "60f9ee42983e9c729a4cfeb2",
     "date": 1789318816,
     "type": "bettingPool",
@@ -148315,6 +148583,571 @@
     }
   },
   {
+    "event_id": "6a962496bc4f8f9cfa043fc3",
+    "date": 1789578015,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 634802,
+        "until": 1789758000,
+        "expired": true,
+        "mode": "1x2",
+        "games": [
+          {
+            "id": 50774,
+            "date": 1789758000,
+            "status": "finished",
+            "home": {
+              "id": 7,
+              "name": "Espanyol",
+              "slug": "espanyol",
+              "score": 1
+            },
+            "away": {
+              "id": 75,
+              "name": "Elche",
+              "slug": "elche",
+              "score": 3
+            }
+          },
+          {
+            "id": 50775,
+            "date": 1789819200,
+            "status": "preview",
+            "home": {
+              "id": 93,
+              "name": "Osasuna",
+              "slug": "osasuna",
+              "score": null,
+              "difficulty": {
+                "rating": 39,
+                "standings": [
+                  51,
+                  35
+                ],
+                "homeAway": [
+                  14,
+                  20
+                ],
+                "form": [
+                  50,
+                  25
+                ],
+                "goalDiff": [
+                  29,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 70,
+              "name": "Rayo Vallecano",
+              "slug": "rayo-vallecano",
+              "score": null,
+              "difficulty": {
+                "rating": 32,
+                "standings": [
+                  40,
+                  35
+                ],
+                "homeAway": [
+                  18,
+                  20
+                ],
+                "form": [
+                  43,
+                  25
+                ],
+                "goalDiff": [
+                  19,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50769,
+            "date": 1789827300,
+            "status": "preview",
+            "home": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": null,
+              "difficulty": {
+                "rating": 52,
+                "standings": [
+                  66,
+                  35
+                ],
+                "homeAway": [
+                  34,
+                  20
+                ],
+                "form": [
+                  48,
+                  25
+                ],
+                "goalDiff": [
+                  51,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 91,
+              "name": "Alavés",
+              "slug": "alaves",
+              "score": null,
+              "difficulty": {
+                "rating": 44,
+                "standings": [
+                  56,
+                  35
+                ],
+                "homeAway": [
+                  30,
+                  20
+                ],
+                "form": [
+                  48,
+                  25
+                ],
+                "goalDiff": [
+                  33,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50770,
+            "date": 1789835400,
+            "status": "preview",
+            "home": {
+              "id": 5,
+              "name": "Celta",
+              "slug": "celta",
+              "score": null,
+              "difficulty": {
+                "rating": 40,
+                "standings": [
+                  60,
+                  35
+                ],
+                "homeAway": [
+                  5,
+                  20
+                ],
+                "form": [
+                  53,
+                  25
+                ],
+                "goalDiff": [
+                  23,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 812,
+              "name": "Racing",
+              "slug": "racing",
+              "score": null,
+              "difficulty": {
+                "rating": 20,
+                "standings": [
+                  18,
+                  35
+                ],
+                "homeAway": [
+                  3,
+                  20
+                ],
+                "form": [
+                  27,
+                  25
+                ],
+                "goalDiff": [
+                  33,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50777,
+            "date": 1789844400,
+            "status": "preview",
+            "home": {
+              "id": 17,
+              "name": "Sevilla",
+              "slug": "sevilla",
+              "score": null,
+              "difficulty": {
+                "rating": 89,
+                "standings": [
+                  84,
+                  35
+                ],
+                "homeAway": [
+                  100,
+                  20
+                ],
+                "form": [
+                  80,
+                  25
+                ],
+                "goalDiff": [
+                  100,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 3,
+              "name": "Barcelona",
+              "slug": "barcelona",
+              "score": null,
+              "difficulty": {
+                "rating": 45,
+                "standings": [
+                  63,
+                  35
+                ],
+                "homeAway": [
+                  26,
+                  20
+                ],
+                "form": [
+                  53,
+                  25
+                ],
+                "goalDiff": [
+                  22,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50771,
+            "date": 1789905600,
+            "status": "preview",
+            "home": {
+              "id": 8,
+              "name": "Getafe",
+              "slug": "getafe",
+              "score": null,
+              "difficulty": {
+                "rating": 16,
+                "standings": [
+                  16,
+                  35
+                ],
+                "homeAway": [
+                  0,
+                  20
+                ],
+                "form": [
+                  29,
+                  25
+                ],
+                "goalDiff": [
+                  15,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 65,
+              "name": "Málaga",
+              "slug": "malaga",
+              "score": null,
+              "difficulty": {
+                "rating": 36,
+                "standings": [
+                  37,
+                  35
+                ],
+                "homeAway": [
+                  21,
+                  20
+                ],
+                "form": [
+                  48,
+                  25
+                ],
+                "goalDiff": [
+                  33,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50773,
+            "date": 1789913700,
+            "status": "preview",
+            "home": {
+              "id": 2,
+              "name": "Atlético",
+              "slug": "atletico",
+              "score": null,
+              "difficulty": {
+                "rating": 63,
+                "standings": [
+                  79,
+                  35
+                ],
+                "homeAway": [
+                  32,
+                  20
+                ],
+                "form": [
+                  67,
+                  25
+                ],
+                "goalDiff": [
+                  62,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 15,
+              "name": "Real Madrid",
+              "slug": "real-madrid",
+              "score": null,
+              "difficulty": {
+                "rating": 58,
+                "standings": [
+                  68,
+                  35
+                ],
+                "homeAway": [
+                  55,
+                  20
+                ],
+                "form": [
+                  56,
+                  25
+                ],
+                "goalDiff": [
+                  48,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50772,
+            "date": 1789921800,
+            "status": "preview",
+            "home": {
+              "id": 6,
+              "name": "Deportivo",
+              "slug": "deportivo",
+              "score": null,
+              "difficulty": {
+                "rating": 60,
+                "standings": [
+                  78,
+                  35
+                ],
+                "homeAway": [
+                  35,
+                  20
+                ],
+                "form": [
+                  70,
+                  25
+                ],
+                "goalDiff": [
+                  40,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 87,
+              "name": "Betis",
+              "slug": "betis",
+              "score": null,
+              "difficulty": {
+                "rating": 47,
+                "standings": [
+                  57,
+                  35
+                ],
+                "homeAway": [
+                  34,
+                  20
+                ],
+                "form": [
+                  47,
+                  25
+                ],
+                "goalDiff": [
+                  40,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50776,
+            "date": 1789921800,
+            "status": "preview",
+            "home": {
+              "id": 19,
+              "name": "Villarreal",
+              "slug": "villarreal",
+              "score": null,
+              "difficulty": {
+                "rating": 31,
+                "standings": [
+                  35,
+                  35
+                ],
+                "homeAway": [
+                  9,
+                  20
+                ],
+                "form": [
+                  44,
+                  25
+                ],
+                "goalDiff": [
+                  31,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": null,
+              "difficulty": {
+                "rating": 30,
+                "standings": [
+                  40,
+                  35
+                ],
+                "homeAway": [
+                  2,
+                  20
+                ],
+                "form": [
+                  36,
+                  25
+                ],
+                "goalDiff": [
+                  35,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": 50778,
+            "date": 1789930800,
+            "status": "preview",
+            "home": {
+              "id": 18,
+              "name": "Valencia",
+              "slug": "valencia",
+              "score": null,
+              "difficulty": {
+                "rating": 42,
+                "standings": [
+                  53,
+                  35
+                ],
+                "homeAway": [
+                  13,
+                  20
+                ],
+                "form": [
+                  58,
+                  25
+                ],
+                "goalDiff": [
+                  30,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 13,
+              "name": "Real Sociedad",
+              "slug": "real-sociedad",
+              "score": null,
+              "difficulty": {
+                "rating": 15,
+                "standings": [
+                  16,
+                  35
+                ],
+                "homeAway": [
+                  0,
+                  20
+                ],
+                "form": [
+                  25,
+                  25
+                ],
+                "goalDiff": [
+                  16,
+                  20
+                ]
+              }
+            }
+          }
+        ],
+        "prizes": [],
+        "competition": "la-liga",
+        "round": {
+          "id": 4905,
+          "name": "Jornada 7",
+          "short": "J7",
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "responses": [],
+        "global": true,
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": {
+          "es": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
+          "en": "<p style='text-align: center'>Send us your <strong>predictions</strong> for the round's matches and you could <strong>win credits</strong></p>",
+          "ca": "<p style='text-align: center'>Envia'ns el teu <strong>pronòstic</strong> per als partits de la jornada i podràs <strong>guanyar crèdits</strong></p>",
+          "gl": "<p style='text-align: center'>Envíanos o teu <strong>prognóstico</strong> para os partidos da xornada e poderás <strong>gañar créditos</strong></p>",
+          "eu": "<p style='text-align: center'>Bidal iezaguzu jardunaldiko partidetarako zure <strong>iragarpena</strong> eta <strong>kredituak irabazi</strong> ahal izango dituzu</p>",
+          "hr": "<p style='text-align: center'>Pošalji nam svoju <strong>prognozu</strong> za utakmice kola i možeš <strong>osvojiti kredite</strong></p>",
+          "de": "<p style='text-align: center'>Sende uns deine <strong>Vorhersage</strong> für die Spiele des Spieltags und du kannst <strong>Credits gewinnen</strong></p>",
+          "it": "<p style='text-align: center'>Inviaci il tuo <strong>pronostico</strong> per le partite della giornata e potrai <strong>vincere crediti</strong></p>",
+          "fr": "<p style='text-align: center'>Envoie-nous ton <strong>pronostic</strong> pour les matchs de la journée et tu pourras <strong>gagner des crédits</strong></p>",
+          "pt": "<p style='text-align: center'>Envia-nos o teu <strong>prognóstico</strong> para os jogos da jornada e poderás <strong>ganhar créditos</strong></p>",
+          "ru": "<p style='text-align: center'>Отправьте нам свой <strong>прогноз</strong> на матчи тура, и вы сможете <strong>выиграть кредиты</strong></p>",
+          "tr": "<p style='text-align: center'>Turun maçları için bize <strong>tahminini</strong> gönder ve <strong>kredi kazan</strong></p>",
+          "he": "<p style='text-align: center'>שלח לנו את ה<strong>תחזית</strong> שלך למשחקי המחזור ותוכל <strong>לזכות בקרדיטים</strong></p>",
+          "el": "<p style='text-align: center'>Στείλε μας την <strong>πρόβλεψή</strong> σου για τους αγώνες της αγωνιστικής και θα μπορείς να <strong>κερδίσεις πιστώσεις</strong></p>",
+          "ar": "<p style='text-align: center'>أرسل لنا <strong>توقعك</strong> لمباريات الجولة وستتمكن من <strong>ربح أرصدة</strong></p>"
+        }
+      }
+    }
+  },
+  {
     "event_id": "9d804908cf261aaa256c0f4e",
     "date": 1789578015,
     "type": "bettingPool",
@@ -152582,6 +153415,174 @@
           "name": "Manzagool"
         },
         "amount": 876700
+      }
+    ]
+  },
+  {
+    "event_id": "ccc5cd3af36854609c83a5b4",
+    "date": 1789749301,
+    "type": "poll",
+    "fixed": true,
+    "title": "",
+    "author": {
+      "id": 14156489,
+      "name": "Luismi_Haz",
+      "icon": "icons/11.png"
+    },
+    "content": {
+      "poll": {
+        "id": 635864,
+        "until": 1789922101,
+        "expired": false,
+        "questions": [
+          {
+            "title": "Devolverías los puntos de esta jornada a Luismi y le dejarías puntuar  esta jornada pasada?",
+            "choices": [
+              {
+                "title": "Si, aunque sea un cono",
+                "votes": 3
+              },
+              {
+                "title": "No, es un rival muy duro",
+                "votes": 0
+              }
+            ]
+          }
+        ],
+        "multiResponse": false,
+        "responsePrivacy": "public",
+        "responses": [
+          {
+            "id": 14145555,
+            "name": "Pollo17",
+            "icon": "icons/13.png",
+            "response": [
+              0
+            ]
+          },
+          {
+            "id": 14151726,
+            "name": "DiosMande a Rodri al Palancas",
+            "icon": "i/u/14151726.png",
+            "response": [
+              0
+            ]
+          },
+          {
+            "id": 14154203,
+            "name": "Prinzipote",
+            "response": [
+              0
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "event_id": "8b723ac39c0f4af542f057e7",
+    "date": 1789749665,
+    "type": "text",
+    "fixed": false,
+    "title": "Encuesta devolución puntos",
+    "author": {
+      "id": 14156489,
+      "name": "Luismi_Haz",
+      "icon": "icons/11.png"
+    },
+    "content": "<p>Hola admirados comuniers, tras varias negociaciones con la FIFA Y la UEFA, he creado una encuesta para saber si estáis de de acuerdo en que la administración me devuelva mis puntos de la jornada pasada por estar en negativo. Vendo al tío que tenía que vender tarde, y no puntúe (el puto Tebas pone los horarios cada vez más pronto). Se ruega vuestra contestación, Grazie Mille</p>"
+  },
+  {
+    "event_id": "d6cddc1e992f358c19e76013",
+    "date": 1789750046,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 43263,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 8400000
+      },
+      {
+        "player": 41083,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2763400
+      }
+    ]
+  },
+  {
+    "event_id": "35cdcd68e5228aa6dedc21d8",
+    "date": 1789751857,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 1676,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3386800
+      },
+      {
+        "player": 41566,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3252100
+      }
+    ]
+  },
+  {
+    "event_id": "8f636147c1a6641fc4343375",
+    "date": 1789758000,
+    "type": "roundStarted",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "round": {
+        "id": 4905,
+        "name": "Jornada 7"
+      }
+    }
+  },
+  {
+    "event_id": "7d3cc38eb5a8f85b259fabcc",
+    "date": 1789765525,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 25322,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 3918400
       }
     ]
   }
