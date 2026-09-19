@@ -443,10 +443,27 @@ console.log(JSON.stringify({
     assert visto["minutos"] > 12, visto
 
     # Las horas que enseña son las declaradas, sin compensar.
+    #
+    # Y EL LATIDO TAMBIEN ESTA (19/09/2026)
+    #
+    #     Esta lista llevaba solo los tres `puntuales`, asi que el
+    #     aviso imprimia "Configurados: 04:45 · 04:50 · 07:15" y a
+    #     la vez decia que el disparo mas cercano era el de las
+    #     12:07. Un disparo que no salia en su propia lista.
+    #
+    #     Parecia que al cron horario le faltaba declaracion. No:
+    #     esta en `config/disparos.json` desde el 12/09 y
+    #     `que_disparo_toca` ya lo metia entre los candidatos. El
+    #     unico sitio que lo omitia era `relojes.js:78`.
+    #
+    #     No lleva hora concreta porque son veinte al dia: poner
+    #     "00:07" seria cambiar una lista incompleta por una lista
+    #     falsa.
     assert visto["configurados"] == [
         "04:45",
         "04:50",
         "07:15",
+        ":07 cada hora",
     ], visto
 
     # Y CAZA UN DISPARO DENTRO DE LA VENTANA DEL RESET.

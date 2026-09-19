@@ -75,7 +75,39 @@ const LATIDO_HORAS = DISPAROS.latido.horas;
 const LATIDO_MINUTO = DISPAROS.latido.minuto;
 
 // Lo que hay puesto, tal cual, para poder enseñarlo.
-export const DISPAROS_ESPERADOS = DISPAROS.puntuales;
+//
+// EL LATIDO TAMBIEN ESTA CONFIGURADO (19/09/2026)
+//
+//     Esto publicaba SOLO los tres `puntuales`, asi que el aviso
+//     "el ciclo no ha entrado a su hora" imprimia
+//
+//         Configurados: 04:45 · 04:50 · 07:15
+//
+//     y a la vez decia que el disparo mas cercano era el de las
+//     12:07 — un disparo que no salia en su propia lista. Parecia
+//     que al cron horario le faltaba declaracion, y no: esta en
+//     `config/disparos.json` desde el 12/09, con su minuto y sus
+//     veinte horas, y `que_disparo_toca` ya lo mete entre los
+//     candidatos. El unico sitio que se lo dejaba fuera era esta
+//     linea.
+//
+//     Un aviso que nombra como "no configurado" algo que SI esta
+//     configurado es la doctrina 87: el motivo senala un campo
+//     que no decidio.
+export const DISPAROS_ESPERADOS = [
+  ...DISPAROS.puntuales,
+  {
+    // No lleva una hora concreta A PROPOSITO: el latido son
+    // veinte disparos al dia, no uno. Poner "00:07" seria
+    // cambiar una lista incompleta por una lista falsa.
+    madrid: `:${String(DISPAROS.latido.minuto).padStart(2, "0")} cada hora`,
+    cron: DISPAROS.latido.cron ||
+      `${DISPAROS.latido.minuto} ${DISPAROS.latido.horas.join(",")} * * *`,
+    que: "latido",
+    para: `el latido, ${DISPAROS.latido.horas.length} vueltas al dia ` +
+      `(salta la ventana del reset)`
+  }
+];
 
 /* ============================================================
  * LOS DISPAROS EXTERNOS

@@ -45,6 +45,21 @@ data/
 /data/calendar/*
 !/data/calendar/calendar_changes.jsonl
 
+# LA FOTO DIARIA (19/09/2026)
+#
+#     `diagnostico/` esta ignorado y no habia ni una foto
+#     guardada, asi que las tablas "antes / despues" que se
+#     venian pidiendo no se podian hacer: `git log` sobre
+#     `diagnostico/status.json` daba CERO revisiones.
+#
+#     Una al dia, entera y compacta. Medido: 1.054 KB por foto,
+#     ~113 KB como blob de git, 40,4 MB al ano. La escribe
+#     `scripts/guardar_la_foto.py`, que es un paso aparte del
+#     ciclo a proposito.
+!/data/fotos/
+/data/fotos/*
+!/data/fotos/*.json
+
 !/data/intelligence/
 /data/intelligence/*
 !/data/intelligence/marcador.json
