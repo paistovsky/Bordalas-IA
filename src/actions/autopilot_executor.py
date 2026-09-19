@@ -719,6 +719,29 @@ def execute_autopilot_decision(
             )
         )
 
+        # CADA ESCRITURA DEJA RASTRO (19/09/2026)
+        #
+        #     Aceptar ofertas era una de las tres familias que no
+        #     escribian libro, asi que al desglosar el
+        #     desperdicio salia una raya en vez de un numero. Y
+        #     es justo la que la regla del deficit va a usar en
+        #     cuanto se encienda.
+        #
+        #     Blindado: una oferta ya aceptada por Biwenger no
+        #     puede caerse por un fallo apuntandola.
+        try:
+            from src.actions.el_rastro import apuntar_escritura
+
+            apuntar_escritura(
+                "aceptar",
+                resultado=result,
+                contenido={"offer_id": int(offer_id)},
+                extra={"offer_id": int(offer_id)},
+            )
+
+        except Exception:                           # noqa: BLE001
+            pass
+
         return {
             "action":
                 action,
@@ -1188,6 +1211,27 @@ def execute_autopilot_decision(
                     True,
             )
         )
+
+        # CADA ESCRITURA DEJA RASTRO (19/09/2026)
+        #
+        #     `record_reroll` solo se llama si `success`, y anota
+        #     en el HISTORIAL del motor, no en un libro de
+        #     escrituras: un reroll fallido no dejaba ni una
+        #     linea. Esto anota el envio, salga como salga.
+        try:
+            from src.actions.el_rastro import apuntar_escritura
+
+            apuntar_escritura(
+                "reroll",
+                resultado=result,
+                player_id=player_id,
+                amount=fresh_offer.get("amount"),
+                contenido={"offer_id": int(offer_id)},
+                extra={"offer_id": int(offer_id)},
+            )
+
+        except Exception:                           # noqa: BLE001
+            pass
 
         success = bool(
             result.get(
@@ -2554,6 +2598,34 @@ def execute_autopilot_decision(
                     True,
             )
         )
+
+        # CADA ESCRITURA DEJA RASTRO (19/09/2026)
+        #
+        #     Biwenger no devuelve id al guardar una alineacion,
+        #     asi que la identidad es la HUELLA de lo que se
+        #     envio —los once y la formacion—, no la hora. Dos
+        #     guardados identicos son el mismo hecho; uno con
+        #     otra formacion es otro.
+        try:
+            from src.actions.el_rastro import apuntar_escritura
+
+            apuntar_escritura(
+                "alineacion",
+                resultado=result,
+                contenido={
+                    "player_ids": sorted(
+                        int(x) for x in (player_ids or [])
+                    ),
+                    "formation": formation,
+                },
+                extra={
+                    "formation": formation,
+                    "player_ids": list(player_ids or []),
+                },
+            )
+
+        except Exception:                           # noqa: BLE001
+            pass
 
         success = bool(
             result.get(
