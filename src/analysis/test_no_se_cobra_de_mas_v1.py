@@ -224,7 +224,9 @@ plan3 = el_cobro_que_cierra(IMPOSIBLE, CON_TITULAR)
 
 check(
     "no cubre, y lo dice",
-    plan3["cubre"] is False and "NO llegan" in plan3["reason"],
+    plan3["cubre"] is False
+    and "NO llegan" in plan3["reason"]
+    and "no se sale del rojo" in plan3["reason"],
     f"({plan3['reason'][:80]})",
 )
 

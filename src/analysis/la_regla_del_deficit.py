@@ -267,9 +267,11 @@ def el_cobro_que_cierra(
                     else
                     f"Las {len(seleccionadas)} oferta(s) de fuera "
                     f"del once suman {total:,} EUR y NO llegan a "
-                    f"los {falta:,} del deficit. Se aceptan igual: "
-                    f"acercarse es mejor que quedarse quieto, y el "
-                    f"once no se toca."
+                    f"los {falta:,} del deficit: faltarian "
+                    f"{falta - total:,}. Se aceptan igual porque "
+                    f"acercarse es mejor que quedarse quieto, "
+                    f"pero el once no se toca y con esto no se "
+                    f"sale del rojo."
                 ).replace(",", ".")
             ),
         }
