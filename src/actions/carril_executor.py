@@ -154,6 +154,10 @@ def correr(
         filtrar_los_repetidos,
         guardia_activa,
     )
+    from src.analysis.el_cupo_de_las_escrituras import (
+        cupo_por_envios_activo,
+        escrituras_enviadas,
+    )
 
     # EL HECHO, NO LA INTENCION.
     #
@@ -197,10 +201,49 @@ def correr(
         #     en vez de pasarse —antes fue la hora de la puja— y
         #     la leccion es la misma: lo que decide tiene que
         #     entrar por la puerta, no buscarse la vida.
+        desde = _epoch_del_ultimo_reset(momento)
+
         ya_van = cuantos_en_este_reset(
-            desde_epoch=_epoch_del_ultimo_reset(momento),
+            desde_epoch=desde,
             ruta=ruta_de_viajes,
         )
+
+        # EL CUPO CONTABA LO QUE SE GANA (19/09/2026)
+        #
+        #     `cuantos_en_este_reset` cuenta filas de
+        #     `libro_de_viajes.jsonl` con `state == ABIERTO`, y un
+        #     viaje solo se abre cuando la puja se GANA. Asi que
+        #     repujar no incrementaba nada y `quedan_en_el_reset`
+        #     no bajaba nunca: nueve escrituras de Maffeo el
+        #     18/09 contra un cupo de 1.
+        #
+        #     Un cupo que cuenta lo que ganas no es un cupo: es
+        #     un marcador.
+        #
+        #     Con el interruptor puesto se cuentan las
+        #     ESCRITURAS ENVIADAS del libro del carril. Y si no
+        #     se puede leer ese libro, NO SE ESCRIBE: no saber
+        #     cuantas van no es que vayan cero (doctrina 24).
+        cupo_por_envios = None
+
+        if cupo_por_envios_activo():
+
+            cupo_por_envios = escrituras_enviadas(
+                "puja",
+                desde_epoch=desde,
+                ruta=ruta_del_libro,
+            )
+
+            if not cupo_por_envios["available"]:
+                return {
+                    **salida,
+                    "available": True,
+                    "blocked_by": "CUPO_SIN_SABER",
+                    "reason": cupo_por_envios["reason"],
+                    "cupo_por_envios": cupo_por_envios,
+                }
+
+            ya_van = cupo_por_envios["cuantas"]
 
         puerta = permiso(
             cierres=cierres,
@@ -209,6 +252,16 @@ def correr(
             operaciones_en_este_reset=ya_van,
             disparo=disparo,
         )
+
+        if cupo_por_envios is not None:
+            puerta = {
+                **puerta,
+                "cupo_por_envios": cupo_por_envios,
+                "reason": (
+                    f"{puerta.get('reason') or ''} "
+                    f"({cupo_por_envios['reason']})"
+                ).strip(),
+            }
 
         if not puerta.get("puede"):
             return {
