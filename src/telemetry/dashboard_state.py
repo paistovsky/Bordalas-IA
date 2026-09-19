@@ -1674,6 +1674,33 @@ def _momento_de_la_foto(snapshot) -> datetime | None:
         return None
 
 
+def _revision_del_cupo(generado_en) -> dict:
+    """
+    Si toca volver a medir los cupos por familia.
+
+    La fecha de hoy se RECIBE —del `generated_at` de la foto—,
+    nunca se deduce del reloj del sistema. Forma fija, nunca
+    lanza.
+    """
+
+    try:
+        from src.analysis.el_cupo_de_las_escrituras import (
+            la_revision_del_cupo,
+        )
+
+        return la_revision_del_cupo(generado_en)
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "fecha": None,
+            "toca": None,
+            "reason": (
+                f"No se pudo mirar la revision del cupo: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def compact_listings(state: dict) -> dict:
     """
     Lo que tenemos publicado. Forma fija.
@@ -6377,6 +6404,19 @@ def build_dashboard_state() -> dict:
         # los recien ascendidos, el embudo del mercado y el
         # activo que pesa demasiado. No decide nada.
         "doctrina": doctrina,
+
+        # LOS CUPOS CADUCAN, Y LA FECHA SE VE (19/09/2026)
+        #
+        #     Se pusieron con n=5 resets, que es poco para un
+        #     tope, y se aceptaron sabiendolo. El recordatorio no
+        #     puede vivir solo en un informe: uno que hay que
+        #     acordarse de leer no es un recordatorio.
+        #
+        #     La fecha de hoy se le PASA -del `generated_at` de
+        #     esta misma foto-, no la deduce del reloj.
+        "revisionDelCupo": _revision_del_cupo(
+            dashboard["meta"]["generated_at"]
+        ),
 
         # La vara del once: los factores por posicion, su
         # muestra, el once que sale con ellos y el que salia sin

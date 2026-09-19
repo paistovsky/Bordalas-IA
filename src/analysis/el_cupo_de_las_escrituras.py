@@ -74,6 +74,146 @@ from pathlib import Path
 CUPO_POR_ENVIOS_ENV = "BORDALAS_CUPO_POR_ENVIOS"
 
 
+# ============================================================
+# LOS CUPOS, POR FAMILIA (19/09/2026)
+# ============================================================
+#
+#     Decididos por el dueno sobre el pico LEGITIMO medido, ya
+#     sin repeticiones, en n=5 resets con actividad del 10/09 al
+#     18/09:
+#
+#         familia    pico medido    cupo
+#         renovar         9          12
+#         puja            2           3
+#         publicar        1           4
+#
+#     POR QUE UNO POR FAMILIA Y NO UNO SOLO. Las unidades no son
+#     comparables: renovar es mantenimiento y no compromete un
+#     euro; pujar si. Un cupo compartido dimensionado para la
+#     puja estrangula a renovar —el 10/09 hubo NUEVE
+#     renovaciones legitimas de nueve jugadores distintos— y
+#     dimensionado para renovar deja pujar nueve veces.
+#
+#     POR QUE GENEROSOS. Con `filtrar_los_repetidos` puesto
+#     delante, el cupo ya solo limita VOLUMEN: la repeticion la
+#     para la identidad, que es otra pieza (doctrina 93). En esa
+#     situacion pasarse de generoso cuesta poco y quedarse corto
+#     mata trabajo legitimo. Con el cupo de 1 se habrian frenado
+#     37 de las 43 escrituras de la ventana, diez de ellas
+#     renovaciones buenas.
+#
+#     LAS QUE NO LLEVAN NUMERO. `vender`, `aceptar`, `reroll` y
+#     `alineacion` no tienen cupo porque no hay una sola
+#     escritura suya medida: sus libros se crearon el 19/09. No
+#     se pone un tope a lo que no se ha visto.
+CUPOS_POR_FAMILIA = {
+    "renovar": 12,
+    "puja": 3,
+    "publicar": 4,
+}
+
+
+# ============================================================
+# ESTOS NUMEROS CADUCAN. FECHA PUESTA.
+# ============================================================
+#
+#     n = 5 resets es poco para fijar un tope y quedo dicho al
+#     proponerlos. Se aceptaron sabiendolo.
+#
+#     El 26/09/2026 hay que volver a medir, y para entonces
+#     habra con que: los tres libros nuevos -aceptar, reroll,
+#     alineacion- llevaran una semana escribiendo, y la foto
+#     diaria en `data/fotos/` otra semana acumulada.
+#
+#     `la_revision_del_cupo()` lo publica para que salga en el
+#     panel. No vive solo en un informe: un recordatorio que hay
+#     que acordarse de leer no es un recordatorio.
+REVISION_DE_LOS_CUPOS = "2026-09-26"
+
+REVISION_MOTIVO = (
+    "Los cupos por familia se pusieron con n=5 resets "
+    "(10/09-18/09), que es poco para un tope. Toca volver a "
+    "medirlos con los tres libros nuevos escribiendo y una "
+    "semana de fotos diarias."
+)
+
+
+def cupo_de(familia: str) -> int | None:
+    """
+    El cupo de esta familia, o None si no tiene numero.
+
+    `None` NO es cero: es que no se ha medido. Quien lo reciba
+    no debe convertirlo en un freno.
+    """
+
+    return CUPOS_POR_FAMILIA.get(familia)
+
+
+def la_revision_del_cupo(hoy: str | None = None) -> dict:
+    """
+    Si toca volver a medir los cupos. Forma fija, nunca lanza.
+
+    `hoy` se RECIBE, no se deduce del reloj: una guardia que
+    mira la hora del sistema cambia de color sin que cambie el
+    codigo, y eso ya nos costo una verja roja el 13/09.
+    """
+
+    salida = {
+        "fecha": REVISION_DE_LOS_CUPOS,
+        "toca": None,
+        "dias": None,
+        "cupos": dict(CUPOS_POR_FAMILIA),
+        "n_resets": 5,
+        "ventana": "10/09-18/09",
+        "reason": REVISION_MOTIVO,
+    }
+
+    if not hoy:
+        return {
+            **salida,
+            "reason": (
+                f"{REVISION_MOTIVO} Sin saber que dia es hoy no "
+                f"se puede decir si toca: la revision es el "
+                f"{REVISION_DE_LOS_CUPOS}."
+            ),
+        }
+
+    try:
+        from datetime import date
+
+        dia = date.fromisoformat(str(hoy)[:10])
+
+        limite = date.fromisoformat(REVISION_DE_LOS_CUPOS)
+
+        dias = (limite - dia).days
+
+        return {
+            **salida,
+            "toca": dias <= 0,
+            "dias": dias,
+            "reason": (
+                f"{REVISION_MOTIVO} "
+                + (
+                    f"TOCA: la fecha era el "
+                    f"{REVISION_DE_LOS_CUPOS} y han pasado "
+                    f"{-dias} dia(s)."
+                    if dias <= 0
+                    else f"Quedan {dias} dia(s), hasta el "
+                    f"{REVISION_DE_LOS_CUPOS}."
+                )
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **salida,
+            "reason": (
+                f"{REVISION_MOTIVO} No se pudo leer la fecha: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def cupo_por_envios_activo() -> bool:
     """
     Si el cupo cuenta envios en vez de viajes ganados.

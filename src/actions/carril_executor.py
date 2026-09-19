@@ -155,8 +155,9 @@ def correr(
         guardia_activa,
     )
     from src.analysis.el_cupo_de_las_escrituras import (
+        cupo_de,
         cupo_por_envios_activo,
-        escrituras_enviadas,
+        puerta_del_cupo,
     )
 
     # EL HECHO, NO LA INTENCION.
@@ -228,8 +229,9 @@ def correr(
 
         if cupo_por_envios_activo():
 
-            cupo_por_envios = escrituras_enviadas(
+            cupo_por_envios = puerta_del_cupo(
                 "puja",
+                cupo_de("puja"),
                 desde_epoch=desde,
                 ruta=ruta_del_libro,
             )
@@ -243,7 +245,16 @@ def correr(
                     "cupo_por_envios": cupo_por_envios,
                 }
 
-            ya_van = cupo_por_envios["cuantas"]
+            if not cupo_por_envios["puede"]:
+                return {
+                    **salida,
+                    "available": True,
+                    "blocked_by": cupo_por_envios["blocked_by"],
+                    "reason": cupo_por_envios["reason"],
+                    "cupo_por_envios": cupo_por_envios,
+                }
+
+            ya_van = cupo_por_envios["llevadas"]
 
         puerta = permiso(
             cierres=cierres,
