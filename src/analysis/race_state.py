@@ -287,7 +287,33 @@ def _headline(datos: dict) -> str:
             + " por jornada"
         )
 
-    brecha = datos.get("value_gap_to_leader")
+    # CUANDO SOMOS LIDERES, EL LIDER SOMOS NOSOTROS (19/09/2026)
+    #
+    #     `value_gap_to_leader = valor_lider - nuestro_valor`. El
+    #     dia que vamos primeros esa resta da CERO por
+    #     construccion, y la frase salia "Tu plantilla vale lo
+    #     mismo que la del lider": nos comparaba con nosotros
+    #     mismos y tapaba que el segundo tenia 93,06 M contra
+    #     nuestros 57,35 M.
+    #
+    #     La cabeza de esta misma frase ya usaba `is_leader` dos
+    #     lineas mas arriba. El dato estaba; la cola no lo miraba.
+    #
+    #     Siendo lideres, la comparacion util es contra EL
+    #     SEGUNDO. Y se dice contra quien, porque el segundo por
+    #     puntos no tiene por que ser el segundo por dinero.
+    if datos.get("is_leader"):
+        brecha = datos.get("value_gap_to_runner_up")
+        nombre_del_otro = datos.get("runner_up_name")
+        contra = (
+            f"de {nombre_del_otro}"
+            if nombre_del_otro
+            else "del segundo"
+        )
+
+    else:
+        brecha = datos.get("value_gap_to_leader")
+        contra = "del lider"
 
     if brecha is None:
         cola = "."
@@ -296,18 +322,18 @@ def _headline(datos: dict) -> str:
         cola = (
             ". Tu plantilla vale "
             + f"{brecha / 1_000_000:.1f}".replace(".", ",")
-            + " M menos que la del lider."
+            + f" M menos que la {contra}."
         )
 
     elif brecha < 0:
         cola = (
             ". Tu plantilla vale "
             + f"{abs(brecha) / 1_000_000:.1f}".replace(".", ",")
-            + " M mas que la del lider."
+            + f" M mas que la {contra}."
         )
 
     else:
-        cola = ". Tu plantilla vale lo mismo que la del lider."
+        cola = f". Tu plantilla vale lo mismo que la {contra}."
 
     return cabeza + medio + cola
 
@@ -463,6 +489,30 @@ def build_race_state(
         nuestro_valor = safe_int(nosotros.get("team_value"))
         valor_lider = safe_int(lider.get("team_value"))
 
+        # EL SEGUNDO, PARA CUANDO EL LIDER SEAMOS NOSOTROS
+        #
+        #     Siendo lideres, compararse con el lider es
+        #     compararse con uno mismo y da cero siempre. El
+        #     segundo por PUNTOS, que es la carrera que se
+        #     cuenta; su valor puede no ser el segundo mayor de
+        #     la liga, y por eso la frase dice contra quien.
+        detras = [m for m in managers if m is not lider]
+
+        segundo = (
+            max(
+                detras,
+                key=lambda m: safe_int(m.get("points")),
+            )
+            if detras
+            else None
+        )
+
+        valor_segundo = (
+            safe_int(segundo.get("team_value"))
+            if segundo
+            else 0
+        )
+
         valores = [safe_int(m.get("team_value")) for m in managers]
         valores_reales = [v for v in valores if v > 0]
 
@@ -509,6 +559,23 @@ def build_race_state(
             "value_gap_to_leader": (
                 valor_lider - nuestro_valor
                 if valor_lider and nuestro_valor
+                else None
+            ),
+
+            # Contra el segundo: lo que se compara cuando el
+            # lider somos nosotros.
+            "runner_up_name": (
+                segundo.get("name") if segundo else None
+            ),
+            "runner_up_points": (
+                safe_int(segundo.get("points"))
+                if segundo
+                else None
+            ),
+            "runner_up_team_value": valor_segundo,
+            "value_gap_to_runner_up": (
+                valor_segundo - nuestro_valor
+                if valor_segundo and nuestro_valor
                 else None
             ),
             "league_average_value": media_liga,

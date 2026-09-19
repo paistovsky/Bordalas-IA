@@ -130,6 +130,9 @@ AHORA = datetime(2026, 9, 18, 16, 16, 38, tzinfo=timezone.utc)
 
 FICHAS_LIBRES = 2
 
+# Los 18 por id. Trent (37499) no esta: se vendio el 17/09 22:12.
+PLANTILLA_IDS = [1000 + i for i in range(18)]
+
 
 # ================================================================
 # 0. EL BANCO NO LLEGA VACIO
@@ -165,7 +168,9 @@ check(
 print()
 print("1. Ninguna frase nombra a un jugador que no tenemos")
 
-aviso = viajes_sin_listar(VIAJES, LISTADOS, ahora=AHORA)
+aviso = viajes_sin_listar(
+    VIAJES, LISTADOS, ahora=AHORA, plantilla=PLANTILLA_IDS
+)
 
 frase = aviso["reason"] or ""
 
@@ -216,6 +221,7 @@ prioridad = signing_priority(
     operacion,
     as_xi={"is_upgrade": True},
     price_increment=1,
+    free_roster_slots=FICHAS_LIBRES,
 )
 
 razon = prioridad["priority_reason"] or ""
@@ -246,6 +252,9 @@ print("3. Siendo lideres, la comparacion no es contra nosotros")
 
 # El 19/09: primeros con 276, Pollo segundo con 270.
 LIDERES = {
+    "runner_up_name": "Pollo17",
+    "runner_up_team_value": 93_060_000,
+    "value_gap_to_runner_up": 93_060_000 - 57_350_000,
     "position": 1,
     "points": 276,
     "is_leader": True,

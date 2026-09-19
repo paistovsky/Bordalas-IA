@@ -1012,6 +1012,12 @@ def value_candidate(
                     player.get("price_increment")
                     or player.get("priceIncrement")
                 ),
+
+                # El recuento de verdad, que ya esta aqui al
+                # lado. Sin el, el motivo decia "ocho fichas
+                # vacias" con la palabra escrita a mano mientras
+                # el campo de abajo publicaba 2.
+                free_roster_slots=huecos,
             ),
 
             "free_roster_slots": huecos,

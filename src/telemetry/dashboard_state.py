@@ -5488,6 +5488,19 @@ def build_dashboard_state() -> dict:
             ),
             listados=(compact_listings(state) or {}).get("rows") or [],
 
+            # LA PLANTILLA, QUE FALTABA (19/09/2026)
+            #
+            #     Esto solo cruzaba contra los LISTADOS, asi que
+            #     un viaje de alguien que ya vendimos salia como
+            #     "comprado y sin publicar" para siempre. Trent,
+            #     tres fotos seguidas: comprado el 13/09 y
+            #     VENDIDO el 17/09 22:12.
+            plantilla=[
+                {"player_id": safe_int(p.get("id"))}
+                for p in (state.get("my_team") or [])
+                if isinstance(p, dict)
+            ],
+
             # «HOY» ES RESPECTO A LA FOTO (14/09/2026, madrugada)
             #
             #     El cartel dice "lo compramos HOY a las 10:08 y

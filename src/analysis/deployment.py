@@ -330,6 +330,17 @@ def signing_priority(
     *,
     as_xi: dict | None = None,
     price_increment=None,
+
+    # CUANTAS FICHAS VACIAS HAY DE VERDAD (19/09/2026)
+    #
+    #     El motivo decia "Con ocho fichas vacias" con la palabra
+    #     OCHO escrita a mano, y esta funcion no recibia el
+    #     recuento: no podia saberlo. El 19/09 habia DOS, y el
+    #     mismo objeto `deployment` publicaba las dos cosas a la
+    #     vez -`free_roster_slots: 2`- sin que chocaran.
+    #
+    #     `None` = no se sabe, y entonces no se dice un numero.
+    free_roster_slots=None,
 ) -> dict:
     """
     En que escalon entra esta operacion.
@@ -361,9 +372,17 @@ def signing_priority(
         "priority": escalon,
         "priority_label": PRIORITY_LABEL[escalon],
         "priority_reason": (
-            "Con ocho fichas vacias, llenar una vale mas que una "
-            "especulacion: el dinero parado no se revaloriza y una "
-            "ficha vacia es capital al 0 %."
+            (
+                (
+                    f"Con {safe_int(free_roster_slots)} ficha(s) "
+                    f"vacia(s), llenar una"
+                    if free_roster_slots is not None
+                    else "Llenar una ficha vacia"
+                )
+                + " vale mas que una especulacion: el dinero "
+                "parado no se revaloriza y una ficha vacia es "
+                "capital al 0 %."
+            )
             if escalon < PURE_SPECULATION
             else "No entra a la plantilla: va detras de los fichajes."
         ),

@@ -562,6 +562,28 @@ def viajes_sin_listar(
     viajes: list | None,
     listados: list | None,
     ahora=None,
+
+    # LA PLANTILLA, QUE FALTABA (19/09/2026)
+    #
+    #     Esto cruzaba los viajes contra LISTADOS y nunca contra
+    #     la PLANTILLA, asi que un viaje de alguien que ya no es
+    #     nuestro salia como "comprado y sin publicar" para
+    #     siempre: efectivamente no esta listado.
+    #
+    #     Trent, tres fotos seguidas. Lo que paso de verdad:
+    #
+    #         12/09 14:45  puja 2.760.000, via RENDIJA
+    #         13/09 05:06  GANADA   (tablon: 37499 -> Pepe)
+    #         13/09 08:08  se abre el viaje, ABIERTO
+    #         17/09 22:12  VENDIDO  (tablon: 37499 from Pepe)
+    #
+    #     El viaje se abrio y no se cerro al venderlo. Y la otra
+    #     frase del panel -"la puja no se ha resuelto a nuestro
+    #     favor"- tambien era falsa: si se resolvio.
+    #
+    #     `None` = no se sabe quien esta en plantilla, y entonces
+    #     no se filtra: el comportamiento de antes. No se adivina.
+    plantilla: list | None = None,
 ) -> dict:
     """
     Un jugador marcado VIAJE que termina el ciclo SIN LISTAR.
@@ -570,6 +592,10 @@ def viajes_sin_listar(
     en el escaparate no esta. Sale en ROJO en la portada con
     nombre y hora, porque cada vuelta asi es escaparate tirado y
     nadie lo notaria de otro modo.
+
+    Un viaje de alguien que YA NO ESTA EN LA PLANTILLA no es eso:
+    es un viaje que se quedo abierto. No se avisa de que hay que
+    publicarlo, porque no se puede publicar lo que no se tiene.
     """
 
     try:
@@ -578,6 +604,28 @@ def viajes_sin_listar(
             for x in (listados or [])
             if isinstance(x, dict)
         }
+
+        nuestros = None
+
+        if plantilla is not None:
+            nuestros = {
+                safe_int(
+                    p.get("player_id") or p.get("id")
+                )
+                if isinstance(p, dict)
+                else safe_int(p)
+                for p in plantilla
+            }
+
+        viajes = [
+            v
+            for v in (viajes or [])
+            if isinstance(v, dict)
+            and (
+                nuestros is None
+                or safe_int(v.get("player_id")) in nuestros
+            )
+        ]
 
         huerfanos = [
             {
