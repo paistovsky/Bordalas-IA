@@ -331,9 +331,34 @@ arreglo — sería un commit de 66 ficheros que nadie puede revisar.
    de una línea sobre el árbol de ficheros, y la escribo cuando digas.
 3. Las 66 restantes, según se vayan tocando. No de golpe.
 
-Estaba midiendo cuántas de las 69 están en rojo ahora mismo y **el barrido sigue
-corriendo** cuando cierro esto; lo único que puedo afirmar es que al menos una lo
-está (`test_accept_offer_live_v1`, comprobado que ya fallaba antes de tocar yo nada).
+### Y el recuento, que terminó después de escribir esto
+
+```
+69 leen produccion   ·   52 verdes   ·   17 ROJAS
+```
+
+**Pero el 17 no es un número fiable, y eso es justamente el hallazgo.** El barrido
+corrió mientras yo editaba ficheros, así que volví a comprobar las que me tocaban:
+
+| guardia | veredicto |
+|---|---|
+| `test_listing_lifecycle_orchestrator` | **verde** al repetirla — el rojo era contaminación de mis ediciones |
+| `test_offer_decision_engine_v2` | roja, y **ya fallaba** antes de mi cambio (comprobado poniendo el motor anterior) |
+| `mirar_..._simulated_safety_v1` | **inestable**: roja una vez, verde tres seguidas con mis mismos ficheros |
+| `test_offer_decision_orchestrator_v2`, `test_offer_authority_separation_v1` | rojas, sin atribuir |
+
+La tercera es la que más dice. Con el árbol idéntico y los mismos ficheros, la misma
+guardia da rojo y verde. Sospecho por qué: `computer_offer_reroll_engine` escribe
+`data/autopilot/computer_offer_history.json`, así que correrla **cambia el estado que
+la siguiente va a leer**. No sólo leen producción: la mueven.
+
+Así que el número honesto no es «17 de 69 están rotas». Es: **de 69 guardias, no se
+puede saber cuántas están rotas**, porque su resultado depende del mercado, del orden
+en que se corran y de lo que haya escrito la anterior. Una guardia así no protege
+nada, y ése es el argumento para la política de arriba mejor que cualquier recuento.
+
+Lo único que puedo afirmar con una comprobación detrás: `test_offer_decision_engine_v2`
+y `test_accept_offer_live_v1` estaban rojas **antes** de que yo tocara nada.
 
 ---
 
