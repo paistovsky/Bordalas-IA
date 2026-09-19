@@ -472,6 +472,18 @@ def build_acquisition_board(
             own_user_id=current_user_id,
         )
 
+        # ¿SE PUDO MIRAR? (19/09/2026)
+        #
+        #     Sin esto, una exposicion NO DISPONIBLE dejaba
+        #     `puja_viva` vacio y TODAS las filas salian
+        #     `has_live_bid: False`. O sea: "no hay puja viva" y
+        #     "no he podido mirar" se escribian igual, y el
+        #     camino de escritura leia la segunda como via libre.
+        #
+        #     Es la doctrina 24 rota en el sitio mas caro: de
+        #     aqui salieron las nueve pujas de Maffeo.
+        puja_viva_se_sabe = bool(exposicion.get("available"))
+
         puja_viva = {}
         contraparte = {}
 
@@ -924,6 +936,15 @@ def build_acquisition_board(
                 "has_live_bid": (
                     safe_int(player_id) in puja_viva
                 ),
+
+                # Y SI ESE `False` ES UN HECHO O UN SILENCIO.
+                #
+                #     `has_live_bid: False` con
+                #     `live_bid_known: False` no significa "no
+                #     hay puja viva": significa "no se ha podido
+                #     mirar". Quien escriba tiene que poder
+                #     distinguirlo.
+                "live_bid_known": puja_viva_se_sabe,
 
                 # Lo que le PEDIMOS a un rival por este jugador,
                 # que es nuestro. Nada que ver con pujar.
@@ -1543,6 +1564,11 @@ def build_acquisition_board(
 
             # Lo que YA tenemos puesto, frente a lo que se podria
             # pujar. Son dos cosas y la pantalla las confundia.
+            # Si este recuento se puede creer. Con `False`,
+            # `with_live_bid: 0` no dice que no tengamos nada
+            # puesto: dice que no se ha podido mirar.
+            "live_bid_known": puja_viva_se_sabe,
+
             "with_live_bid": len(con_puja_viva),
             "live_bid_total": sum(
                 safe_int(f.get("live_bid")) for f in con_puja_viva
