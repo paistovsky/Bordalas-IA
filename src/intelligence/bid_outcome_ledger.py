@@ -104,6 +104,151 @@ def _clave(player_id: int, puesta_en: str) -> str:
     return f"{int(player_id)}:{puesta_en}"
 
 
+def clave_de_la_puja(
+    libro: dict,
+    player_id: int,
+    amount: int,
+    puesta_en: str,
+) -> str:
+    """
+    La clave de ESTA puja: la que ya existe si sigue viva, o una
+    nueva si no la hay.
+
+    POR QUE LA FECHA NO PUEDE MANDAR EN LA CLAVE (19/09/2026)
+
+        La clave era `player_id:placed_at`, asi que la misma puja
+        entraba una vez por vuelta horaria. Medido sobre el libro
+        del 19/09: 47 entradas para 9 `event_id` distintos.
+        Maffeo, diez veces; Boyomo, nueve; Oriol Rey, cinco.
+
+        Es la misma familia que la reja del tablon: la fecha
+        dentro de la clave, y la misma operacion contada muchas
+        veces. Alli descuadraba la caja; aqui descuadra CUANTAS
+        PUJAS PONEMOS Y CUANTAS GANAMOS, que es de donde salen
+        las estadisticas que veniamos citando.
+
+    POR QUE NO SE PUEDE USAR `event_id` DIRECTAMENTE
+
+        Cuando se anota la puja, `event_id` es None: no se sabe
+        hasta que el tablon la resuelve. Lo que SI identifica a
+        una puja viva es el par (jugador, importe) mientras siga
+        PENDIENTE — que es exactamente lo que el propio libro ya
+        usa en `ya_estan` para no recoger dos veces la misma del
+        tablon.
+
+    LA FECHA NO SE PIERDE, SE CONSERVA LA PRIMERA
+
+        Quien reusa la clave conserva el `placed_at` original.
+        Importa: de ahi sale cuanto tiempo estuvo viva una puja,
+        y la primera marca es la buena.
+
+    Forma fija. Nunca lanza.
+    """
+
+    try:
+        for clave, fila in (libro.get("bids") or {}).items():
+
+            if not isinstance(fila, dict):
+                continue
+
+            if fila.get("outcome") != "PENDING":
+                continue
+
+            if safe_int(fila.get("player_id")) != int(player_id):
+                continue
+
+            if safe_int(fila.get("amount")) != int(amount):
+                continue
+
+            return clave
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+    return _clave(player_id, puesta_en)
+
+
+def deduplicar(libro: dict) -> dict:
+    """
+    Colapsa las entradas que son la MISMA puja.
+
+    Para lo ya escrito con la clave vieja. Manda el `event_id`
+    cuando lo hay; cuando no, el par (jugador, importe) dentro de
+    la misma resolucion.
+
+    De cada grupo se conserva UNA entrada: el `placed_at` mas
+    temprano -la primera vez que se vio la puja- y el resto de
+    campos de la mas completa.
+
+    Forma fija: devuelve un libro nuevo, no toca el que recibe.
+    Nunca lanza.
+    """
+
+    salida = {"bids": {}}
+
+    try:
+        grupos = {}
+
+        for clave, fila in (libro.get("bids") or {}).items():
+
+            if not isinstance(fila, dict):
+                continue
+
+            evento = fila.get("event_id")
+
+            if evento:
+                firma = ("EV", str(evento))
+
+            else:
+                firma = (
+                    "PA",
+                    safe_int(fila.get("player_id")),
+                    safe_int(fila.get("amount")),
+                    str(fila.get("resolved_at") or ""),
+                )
+
+            grupos.setdefault(firma, []).append((clave, fila))
+
+        for _firma, filas in grupos.items():
+
+            # La primera marca es la buena: de ella sale cuanto
+            # tiempo estuvo viva la puja.
+            clave, mejor = min(
+                filas,
+                key=lambda par: str(
+                    par[1].get("placed_at") or ""
+                ),
+            )
+
+            # Y de la mas completa, los campos que la primera
+            # pudiera no traer todavia.
+            completa = max(
+                filas,
+                key=lambda par: sum(
+                    1
+                    for v in par[1].values()
+                    if v is not None
+                ),
+            )[1]
+
+            fundida = {**completa, **{
+                k: v for k, v in mejor.items() if v is not None
+            }}
+
+            fundida["placed_at"] = mejor.get("placed_at")
+
+            salida["bids"][clave] = fundida
+
+        for k, v in (libro or {}).items():
+            if k != "bids":
+                salida[k] = v
+
+    except Exception:                               # noqa: BLE001
+        return libro if isinstance(libro, dict) else salida
+
+    return salida
+
+
 def record_bid(
     player_id: int,
     amount: int,
@@ -144,7 +289,22 @@ def record_bid(
     libro = ledger if ledger is not None else load_ledger(path)
     puesta_en = placed_at or _ahora()
 
-    libro["bids"][_clave(player_id, puesta_en)] = {
+    # LA MISMA PUJA NO ENTRA DOS VECES (19/09/2026)
+    #
+    #     Si ya hay una viva por este jugador y este importe, se
+    #     reusa su clave y se conserva su `placed_at`: la primera
+    #     marca es la buena, porque de ella sale cuanto tiempo
+    #     estuvo viva.
+    clave = clave_de_la_puja(
+        libro, player_id, amount, puesta_en
+    )
+
+    anterior = (libro.get("bids") or {}).get(clave) or {}
+
+    if anterior.get("placed_at"):
+        puesta_en = anterior["placed_at"]
+
+    libro["bids"][clave] = {
         "player_id": int(player_id),
         "player_name": player_name,
         "amount": int(amount),
@@ -790,7 +950,9 @@ def recoger_compras_de_la_plantilla(
                 save=False,
             )
 
-            entrada = ledger["bids"][_clave(pid, puesta)]
+            entrada = ledger["bids"][
+                clave_de_la_puja(ledger, pid, importe, puesta)
+            ]
 
             # LO TENEMOS: la puja se gano. Eso no es una
             # deduccion, es la plantilla.
@@ -992,9 +1154,11 @@ def recoger_pujas_vivas(
 
                 # Queda dicho que NO la vimos pujar: se anoto al
                 # verla puesta.
-                ledger["bids"][_clave(pid, puesta)][
-                    "recorded_by"
-                ] = "TABLON"
+                ledger["bids"][
+                    clave_de_la_puja(
+                        ledger, pid, importe, puesta
+                    )
+                ]["recorded_by"] = "TABLON"
 
                 ya_estan.add(pid)
 
