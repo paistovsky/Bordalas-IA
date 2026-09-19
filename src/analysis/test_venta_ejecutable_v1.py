@@ -161,17 +161,48 @@ def _con_writer_falso(funcion):
     """
     Suplanta `BiwengerWriteClient` DENTRO del executor y lo deja
     como estaba, pase lo que pase.
+
+    Y DESVIA EL RASTRO (19/09/2026)
+
+        Con el escritor falso no sale nada contra Biwenger, pero
+        el executor SI anotaba la escritura, y la anotaba en el
+        libro de verdad: esta guardia creo
+        `data/trading/libro_de_aceptadas.jsonl` con dos filas
+        inventadas (oferta 987654, jugador 0).
+
+        Doctrina 92: una guardia que escribe donde mira deja de
+        ser una guardia. Si el escritor es de mentira, el rastro
+        tambien tiene que serlo.
+
+        Se desvia el mapa de libros entero a una carpeta
+        temporal. `apuntar_escritura` lo consulta en cada
+        llamada, asi que basta con cambiarlo aqui.
     """
+
+    import tempfile
+    from pathlib import Path
+
+    from src.actions import el_rastro
 
     original = autopilot_executor.BiwengerWriteClient
 
+    rutas_originales = el_rastro.LIBROS_POR_FAMILIA
+
     autopilot_executor.BiwengerWriteClient = WriterFalso
 
-    try:
-        return funcion()
+    with tempfile.TemporaryDirectory() as carpeta:
 
-    finally:
-        autopilot_executor.BiwengerWriteClient = original
+        el_rastro.LIBROS_POR_FAMILIA = {
+            familia: Path(carpeta) / ruta.name
+            for familia, ruta in rutas_originales.items()
+        }
+
+        try:
+            return funcion()
+
+        finally:
+            autopilot_executor.BiwengerWriteClient = original
+            el_rastro.LIBROS_POR_FAMILIA = rutas_originales
 
 
 # ============================================================
