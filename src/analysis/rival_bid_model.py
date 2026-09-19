@@ -527,8 +527,39 @@ def calibrate_premium_curve(
         # El ultimo absorbe el redondeo para que los pesos sumen
         # exactamente uno: una curva que suma 0,9998 mete un
         # sesgo silencioso en cada probabilidad.
+        #
+        # PERO EL RESIDUO NO ES UNA OBSERVACION (19/09/2026)
+        #
+        #     Dos formas de que ese `1.0 - acumulado` mienta:
+        #
+        #     1. NEGATIVO. Si los seis pesos de arriba redondean
+        #        hacia arriba, el ultimo sale por debajo de cero.
+        #        Medido en la foto del 18/09 16:16:38, el peldano
+        #        1.2449x publicaba -0.0001.
+        #
+        #        Una probabilidad negativa no es un detalle de
+        #        coma: en `win_probability` RESTA de la
+        #        probabilidad de que un rival nos supere, asi que
+        #        nos creemos mas ganadores de lo que somos y
+        #        pujamos menos. El sesgo va en la direccion cara.
+        #
+        #     2. INVENTADO. Con `n = 0` ese residuo no es masa
+        #        observada de nada: es el sobrante del redondeo
+        #        colocado en un peldano donde no cayo ni una
+        #        puja. Un peldano vacio pesa cero.
+        #
+        #     Lo que SI se mantiene es el peldano flojo con
+        #     n >= 1: ahi el peso es lo observado y se marca, que
+        #     es mas honesto que un cero inventado. Lo de abajo
+        #     solo toca el vacio y el negativo.
         if k == len(pesos) - 1:
-            peso = round(1.0 - acumulado, 4)
+
+            peso = (
+                0.0
+                if cuantas == 0
+                else max(round(1.0 - acumulado, 4), 0.0)
+            )
+
         else:
             peso = round(cuantas / total, 4)
             acumulado += peso
