@@ -72,6 +72,9 @@ from src.analysis.computer_offer_reroll_engine import (  # noqa: E402
     ACCEPT_BEFORE_EXPIRY_HOURS,
     analyze_computer_offer,
 )
+from src.analysis.la_regla_del_deficit import (  # noqa: E402
+    el_cobro_que_cierra,
+)
 from src.analysis.solvency_engine import (  # noqa: E402
     calculate_offer_reservations,
 )
@@ -105,12 +108,17 @@ def oferta(offer_id, nombre, importe, premium, franquicia=0.0):
         "offer_id": offer_id,
         "amount": importe,
         "premium_percent": premium,
+        # Ninguno de los cuatro estaba en el once el 19/09. Sin
+        # esta marca la regla del deficit los trata a todos como
+        # titulares -el lado seguro- y no cobraria nada.
+        "in_lineup": False,
         "expires_at": LEJOS,
         "until": LEJOS,
         "player_ids": [offer_id],
         "players": [
             {
                 "name": nombre,
+                "in_lineup": False,
                 "franchise_score": franquicia,
                 "strategic_score": 0.0,
             }
@@ -295,32 +303,79 @@ check(
 
 
 # ================================================================
-# 4. LO QUE SE PIDE, Y HOY NO SE CUMPLE
+# 4. EL CANDADO, Y LA LLAVE QUE SE LE PUSO EL 19/09
 # ================================================================
+#
+#     Esta seccion estuvo EN ROJO a proposito hasta que el dueno
+#     decidio la regla del cobro en deficit. Ahora comprueba las
+#     dos mitades: que el candado sigue cerrado sin la regla, y
+#     que la regla lo abre.
 
 print()
 print("4. Con deficit vivo y todo reservado, alguna se debe poder cobrar")
 
 TODAS = {o["offer_id"] for o in OFERTAS}
 
-decisiones_todas = {
+sin_la_regla = {
     o["offer_id"]: decidir(o, SIN_PRISA, TODAS)["action"]
     for o in OFERTAS
 }
 
-print(f"       todas: {decisiones_todas}")
+print(f"       sin la regla: {sin_la_regla}")
 
 reservado_total = sum(o["amount"] for o in OFERTAS)
 
 check(
-    "al menos una se puede aceptar para tapar el deficit",
-    any(
-        accion == "ACCEPT_BEFORE_EXPIRY"
-        for accion in decisiones_todas.values()
+    "sin la regla, el candado sigue cerrado",
+    all(
+        accion == "KEEP_SOLVENCY_RESERVED"
+        for accion in sin_la_regla.values()
     ),
     f"<- EL CANDADO. Con {DEFICIT:,} de deficit y "
     f"{reservado_total:,} EUR reservados para taparlo, el motor "
     f"no suelta ni un euro mientras no aprieta el reloj.",
+)
+
+# Y con la regla: el plan elige, y la reserva cede.
+plan = el_cobro_que_cierra(DEFICIT, OFERTAS)
+
+con_la_regla = {
+    o["offer_id"]: analyze_computer_offer(
+        offer=o,
+        solvency=SOLVENCIA,
+        reserved_offer_ids=TODAS,
+        history=HISTORIAL,
+        hours_to_deadline=SIN_PRISA,
+        cobro_por_deficit=plan["offer_ids"],
+    )["action"]
+    for o in OFERTAS
+}
+
+print(f"       con la regla: {con_la_regla}")
+
+check(
+    "con la regla, al menos una se acepta para tapar el deficit",
+    any(
+        accion == "ACCEPT_BEFORE_EXPIRY"
+        for accion in con_la_regla.values()
+    ),
+    f"({con_la_regla})",
+)
+
+check(
+    "y solo una: no se cobra de mas",
+    sum(
+        1
+        for accion in con_la_regla.values()
+        if accion == "ACCEPT_BEFORE_EXPIRY"
+    )
+    == 1,
+    f"({con_la_regla})",
+)
+
+check(
+    "sin que el reloj se haya movido",
+    SIN_PRISA == 480.0,
 )
 
 

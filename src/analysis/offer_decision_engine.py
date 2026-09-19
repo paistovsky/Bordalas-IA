@@ -424,6 +424,16 @@ def decide_incoming_offer(
     rival_intelligence: dict | None = None,
     competitive_context: dict | None = None,
     viaje: dict | None = None,
+
+    # LA REGLA DEL COBRO EN DEFICIT (19/09/2026)
+    #
+    #     Los `offer_id` que el plan de solvencia ha elegido para
+    #     volver a positivo. Pasa por delante de KEEP_GOOD_OFFER,
+    #     que es el segundo freno y ni siquiera mira la
+    #     solvencia.
+    #
+    #     `None` = regla apagada, comportamiento de siempre.
+    cobro_por_deficit: set | None = None,
 ) -> dict:
 
     offer_id = offer.get("offer_id")
@@ -773,6 +783,29 @@ def decide_incoming_offer(
 
         reasons.append(
             "Jugador Franchise/NEVER_AUTO_SELL."
+        )
+
+    # ========================================================
+    # EL COBRO EN DEFICIT (19/09/2026)
+    # ========================================================
+    #
+    #     Detras de NEVER_SELL, que es mas fuerte, y delante de
+    #     todo lo demas: asi hace ceder a KEEP_GOOD_OFFER, que es
+    #     el segundo freno y ni siquiera mira la solvencia.
+    #
+    #     Para las ofertas del Computer esto casi nunca se
+    #     dispara, porque `analyze_computer_offer` ya devuelve
+    #     ACCEPT_BEFORE_EXPIRY y la rama de abajo lo convierte en
+    #     ACCEPT_FOR_SOLVENCY. Esta aqui para las de los
+    #     MANAGERS, que no pasan por el motor de reroll.
+    elif cobro_por_deficit and offer_id in cobro_por_deficit:
+
+        action = "ACCEPT_FOR_SOLVENCY"
+        confidence = 99
+
+        reasons.append(
+            "El plan de solvencia ha elegido esta oferta para "
+            "volver a positivo, y el jugador no esta en el once."
         )
 
     # ========================================================

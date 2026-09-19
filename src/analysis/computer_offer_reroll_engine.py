@@ -873,6 +873,17 @@ def analyze_computer_offer(
     reserved_offer_ids: set,
     history: dict,
     hours_to_deadline: float | None = None,
+
+    # LA REGLA DEL COBRO EN DEFICIT (19/09/2026)
+    #
+    #     Los `offer_id` que el plan de solvencia ha elegido para
+    #     volver a positivo. Pasa por delante de la reserva: una
+    #     reserva que no se puede gastar para tapar el deficit
+    #     que la motivo no es una garantia (doctrina 86).
+    #
+    #     `None` = la regla esta apagada y manda el reloj, que es
+    #     el comportamiento de siempre.
+    cobro_por_deficit: set | None = None,
 ) -> dict:
 
     offer_id = (
@@ -977,6 +988,36 @@ def analyze_computer_offer(
         reason = (
             "Jugador protegido/Franchise. "
             "El motor de reroll no autoriza tocar la oferta."
+        )
+
+    # LA REGLA DEL COBRO EN DEFICIT (19/09/2026)
+    #
+    #     Va por delante de la reserva Y de las ramas de calidad,
+    #     asi que hace ceder a los DOS frenos de un golpe:
+    #     HOLD_SOLVENCY_RESERVED y KEEP_GOOD_OFFER. Levantar solo
+    #     el primero no desbloqueaba nada — medido el 19/09.
+    #
+    #     Detras de Franchise a proposito: esa proteccion es mas
+    #     fuerte y el plan ya excluye a los del once, asi que en
+    #     la practica no se cruzan.
+    #
+    #     El deficit no espera a que caduque nada: mientras dura,
+    #     la compra entera esta apagada
+    #     (`acquisition_budget -> SIN_CAPACIDAD`).
+    elif cobro_por_deficit and offer_id in cobro_por_deficit:
+
+        action = (
+            "ACCEPT_BEFORE_EXPIRY"
+        )
+
+        can_reroll = (
+            False
+        )
+
+        reason = (
+            "El plan de solvencia ha elegido esta oferta para "
+            "volver a positivo. Ni la reserva ni la calidad la "
+            "retienen: el deficit apaga la compra entera."
         )
 
     elif reserved:
