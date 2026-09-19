@@ -466,12 +466,125 @@ def merge_board_events(
     )
 
 
+class ElTablonPerderiaHistoria(RuntimeError):
+    """
+    El tablon iba a guardarse con menos historia de la que ya
+    tenia. Se aborta el guardado: mejor la vuelta en rojo que el
+    libro mutilado.
+    """
+
+
+def historia_que_se_perderia(
+    guardados: list[dict],
+    nuevos: list[dict],
+    reset_ts: int | None = None,
+) -> list[dict]:
+    """
+    Que eventos YA GUARDADOS desapareceran si escribimos `nuevos`.
+
+    DOCTRINA 88: ESTO NO ES UN AVISO, ES UN FRENO
+
+        `board_events.json` no se reconstruye. El tablon se pide
+        de 1000 en 1000 y una sola peticion NO alcanza a cubrir
+        la temporada: por eso existe `merge_board_events`. Lo que
+        se pierde del fichero no vuelve de la API.
+
+        Medido el 19/09/2026: la copia local llevaba parada desde
+        el 18/09 11:11 mientras CI acumulaba hasta el 19/09
+        05:05. Guardar la local encima habria borrado 22 eventos
+        reales -entre ellos una de las dos reemisiones de Lunin,
+        que es la prueba del descuadre de 420.200, y la
+        resolucion de mercado de Maffeo-. Nadie lo habria notado:
+        el fichero esta ordenado y con `indent=2`, asi que el
+        diff parece una reescritura y no una amputacion.
+
+    LO QUE SI PUEDE DESAPARECER LEGITIMAMENTE
+
+        Los eventos anteriores al `leagueReset` vigente. El
+        recolector los poda a proposito para no mezclar eras.
+        Por eso `reset_ts` entra aqui: lo de antes del reset no
+        cuenta como perdida.
+
+    Forma fija: devuelve la lista de perdidos, vacia si no hay.
+    Nunca lanza.
+    """
+
+    def _ids(filas):
+        return {
+            str(f.get("event_id")): f
+            for f in (filas or [])
+            if isinstance(f, dict) and f.get("event_id")
+        }
+
+    antes = _ids(guardados)
+    ahora = _ids(nuevos)
+
+    perdidos = [
+        fila
+        for clave, fila in antes.items()
+        if clave not in ahora
+    ]
+
+    if reset_ts is not None:
+        perdidos = [
+            fila
+            for fila in perdidos
+            if int(fila.get("date", 0) or 0) >= int(reset_ts)
+        ]
+
+    perdidos.sort(
+        key=lambda f: int(f.get("date", 0) or 0)
+    )
+
+    return perdidos
+
+
 def save_board_history(
     events: list[dict],
     raw_events: list[dict],
+    reset_ts: int | None = None,
 ) -> None:
 
     ensure_data_dir()
+
+    # EL FRENO, ANTES DE ESCRIBIR (doctrina 88)
+    #
+    #     Un fichero que se puede reescribir entero desde otra
+    #     maquina no es un libro: es una cache con nombre de
+    #     libro. Esto lo convierte en libro.
+    if BOARD_FILE.exists():
+
+        try:
+            guardados = json.loads(
+                BOARD_FILE.read_text(encoding="utf-8")
+            )
+
+        except Exception:                           # noqa: BLE001
+            # Un fichero ilegible no puede defenderse, y tampoco
+            # puede usarse como prueba de nada. Se deja pasar.
+            guardados = []
+
+        perdidos = historia_que_se_perderia(
+            guardados if isinstance(guardados, list) else [],
+            events,
+            reset_ts=reset_ts,
+        )
+
+        if perdidos:
+
+            muestra = ", ".join(
+                f"{f.get('event_id')} ({f.get('type')})"
+                for f in perdidos[:5]
+            )
+
+            raise ElTablonPerderiaHistoria(
+                f"El tablon guardado tiene {len(perdidos)} "
+                f"evento(s) que el nuevo no trae, y el tablon no "
+                f"se reconstruye: una peticion no alcanza a "
+                f"cubrir la temporada. No se escribe. "
+                f"Perdidos: {muestra}"
+                + (" ..." if len(perdidos) > 5 else "")
+            )
 
     BOARD_FILE.write_text(
         json.dumps(
@@ -591,6 +704,12 @@ def collect_board_history(
 
         raw_events=
             raw_events,
+
+        # Lo anterior al reset vigente se poda a proposito
+        # (arriba). El freno de la doctrina 88 tiene que saberlo
+        # para no confundir una poda con una amputacion.
+        reset_ts=
+            reset_ts,
     )
 
     # LA LISTA DE MANAGERS: NO CAMBIA EN MESES (07/09/2026)
