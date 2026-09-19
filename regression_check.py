@@ -55,7 +55,16 @@ IGNORAR = shutil.ignore_patterns(
 # Los que fallaron en el chequeo de salud del 15/08.
 SOSPECHOSOS = [
     "src.analysis.test_accept_before_expiry_execution_planner_v1",
-    "src.analysis.test_accept_before_expiry_orchestrator_v1",
+
+    # `test_accept_before_expiry_orchestrator_v1` estaba aqui y
+    # ya no existe: leia `get_latest_snapshot()` y se ponia roja
+    # segun como estuviera el mercado, no segun el codigo.
+    #
+    # Se movio a `scripts/mirar_accept_before_expiry.py`, que es
+    # lo que de verdad era: una herramienta de mano. Lo que si
+    # cubre con datos FIJOS esta en
+    # `test_la_reserva_no_bloquea_el_deficit_que_cubre_v1` y en
+    # `test_el_deficit_vence_a_la_reserva_v1`.
     "src.analysis.test_bid_engine",
     "src.analysis.test_competitive_transactions_real",
     "src.analysis.test_deadline_engine",

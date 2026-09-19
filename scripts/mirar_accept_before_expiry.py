@@ -1,3 +1,57 @@
+"""
+MIRAR el camino de ACCEPT_BEFORE_EXPIRY contra la foto de ahora.
+
+ESTO NO ES UNA GUARDIA, Y POR ESO YA NO VIVE ENTRE ELLAS
+
+    Nacio como `test_accept_before_expiry_orchestrator_v1.py` en
+    `src/analysis/`, y llevaba dias en rojo. No por un fallo del
+    codigo: porque lee `get_latest_snapshot()` y hoy no hay
+    ofertas sobre la mesa.
+
+    Una guardia que falla por el estado del mundo no protege
+    nada — ensena a ignorar el rojo. Y rompia la regla de la casa
+    desde el primer dia: ninguna guardia lee estado de
+    produccion.
+
+POR QUE NO SE BORRO
+
+    Lo unico que hace y no hace ninguna otra es comprobar el
+    CABLEADO entero: que `build_global_decision` llegue a emitir
+    los candidatos WATCH y SAFETY. Las tres hermanas
+    -`test_accept_before_expiry_safety_v2`, `_v21` y
+    `_simulated_safety_v1`- miran el tablero, no el orquestador.
+
+    Hacerlo con datos fijos pedia una foto de 285 KB escrita a
+    mano Y un calendario de mentira, porque `build_deadline_state`
+    baja a leer `data/calendar/`. Eso es montar un segundo banco
+    de pruebas para un camino que ya esta cubierto por unidades.
+
+    Asi que se queda lo que de verdad era: una herramienta que se
+    corre A MANO cuando hay ofertas vivas y se quiere ver el
+    camino de punta a punta.
+
+LO QUE SI ESTA CUBIERTO CON DATOS FIJOS
+
+    - la puerta del reloj (<= 6 h) y que la reserva ceda:
+      `test_la_reserva_no_bloquea_el_deficit_que_cubre_v1`
+    - que el deficit venza a los dos frenos:
+      `test_el_deficit_vence_a_la_reserva_v1`
+
+USO
+
+    python scripts/mirar_accept_before_expiry.py
+
+    Solo lectura. No escribe en Biwenger ni en ningun libro.
+
+AVISO SOBRE LAS TRES HERMANAS
+
+    `test_accept_before_expiry_safety_v2`, `_v21` y
+    `_simulated_safety_v1` TAMBIEN leen
+    `get_latest_snapshot()`. Hoy pasan, pero por la misma razon
+    por la que esta fallaba: por como esta el mundo, no por el
+    codigo. Quedan senaladas.
+"""
+
 from __future__ import annotations
 
 import copy
