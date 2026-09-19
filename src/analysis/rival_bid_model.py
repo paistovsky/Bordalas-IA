@@ -875,6 +875,68 @@ def win_probability(
 PRIMA_MAXIMA_DE_PUJA = 0.0025
 
 
+# ============================================================
+# EL TOPE DE LA VIA DEL ONCE (19/09/2026)
+# ============================================================
+#
+#     DECIDIDO POR EL DUENO. Es el mismo 1,2525 % que ya eligio
+#     el 18/09 para el carril: el producto del suelo de cobro
+#     (+1 %) y del tope de puja (+0,25 %).
+#
+#         (1 + 0,01) x (1 + 0,0025) - 1 = 0,012525
+#
+#     LA DIRECCION DE ESTE ARREGLO ES LA CONTRARIA DE LA QUE
+#     PARECE (doctrina 59)
+#
+#         El encargo lo pedia como una SUBIDA, de 0,25 % a
+#         1,2525 %, porque el dueno tuvo que pujar a mano a
+#         +1,14 % y +0,89 %. Medido, la via del once no tenia
+#         tope NINGUNO: `tope_aplicable` salia None para todo lo
+#         que no fuera SPECULATION.
+#
+#         Lo que ofrecia Pepe por Chust con su valor real
+#         (2.278.096) era 1.942.501, un +5,00 %: cuatro veces lo
+#         que pago el dueno. Y no es un techo, es donde cae el
+#         optimo de EV — con mas valor sube a +20 % y +100 %.
+#
+#         Asi que esto BAJA el techo del once, no lo sube. Las
+#         dos pujas del dueno siguen cabiendo (+1,14 y +0,89), y
+#         la de Cabrera (+6,71 %) deja de caber, que es
+#         exactamente el "no" que se pidio ver escrito.
+#
+#     LA VIA DE REVENTA NO SE TOCA: sigue en
+#     `PRIMA_MAXIMA_DE_PUJA`, 0,25 % exacto. Ahi el margen es el
+#     negocio.
+TOPE_DE_PRIMA_DEL_ONCE = (1 + 0.01) * (1 + 0.0025) - 1
+
+
+# Los `intent` que son un fichaje para jugar, no una reventa.
+INTENTS_DEL_ONCE = frozenset({"XI_UPGRADE", "ROSTER_FILL"})
+
+
+# EL INTERRUPTOR. Apagado reproduce produccion al detalle: la
+# via del once sigue sin tope. Se enciende con:
+#
+#     BORDALAS_TOPE_DEL_ONCE=1
+TOPE_DEL_ONCE_ENV = "BORDALAS_TOPE_DEL_ONCE"
+
+
+def tope_del_once_activo() -> float | None:
+    """
+    El tope de prima de la via del once, o None si esta apagado.
+
+    Forma fija. Nunca lanza.
+    """
+
+    import os
+
+    encendido = str(
+        os.environ.get(TOPE_DEL_ONCE_ENV, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
+
+    return TOPE_DE_PRIMA_DEL_ONCE if encendido else None
+
+
 # La prima que paga el Computer al recomprar, medida por
 # produccion sobre 107 ventas. Es el punto de equilibrio: pujar
 # por encima de esto es comprar con perdida garantizada.
@@ -1123,11 +1185,27 @@ def optimal_bid(
         #     pedia el encargo del 10/09: "no borres
         #     `optimal_bid`, sigue siendo el calculo correcto
         #     cuando de verdad solo se puede tirar una vez".
-        tope_aplicable = (
-            prima_maxima
-            if str(intent or "").upper() == SPECULATION_INTENT
-            else None
-        )
+        #     Y DESDE EL 19/09, LA VIA DEL ONCE TIENE EL SUYO
+        #
+        #         No es el mismo numero ni tiene por que serlo:
+        #         en reventa el margen es el negocio, y una
+        #         mejora del once se paga en puntos. Van por
+        #         separado a proposito, asi que mover uno no
+        #         mueve el otro.
+        #
+        #         Detras de `BORDALAS_TOPE_DEL_ONCE`. Apagado,
+        #         la via del once sigue sin tope, que es el
+        #         comportamiento de siempre.
+        etiqueta = str(intent or "").upper()
+
+        if etiqueta == SPECULATION_INTENT:
+            tope_aplicable = prima_maxima
+
+        elif etiqueta in INTENTS_DEL_ONCE:
+            tope_aplicable = tope_del_once_activo()
+
+        else:
+            tope_aplicable = None
 
         for importe in candidate_bids(
             precio, techo, model, prima_maxima=tope_aplicable
