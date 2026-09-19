@@ -219,6 +219,7 @@ TYPE_LABELS = {
     "SOLVENCY_GUARANTEE": "Solvencia",
     "SPECULATION_WATCH": "Especulación",
     "SPECULATION_BUY": "Especulación",
+    "PUJA_BLOQUEADA": "Puja bloqueada",
     "MARKET_LISTING_RENEW": "Publicaciones en venta",
     "MARKET_LISTING_RENEW_URGENT": "Publicación a punto de caducar",
     "COMPUTER_OFFER_REROLL_WATCH": "Ofertas Computer",

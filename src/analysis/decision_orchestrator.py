@@ -108,6 +108,22 @@ PRIORITY = {
 
     "SPECULATION_WATCH": 300,
     "IDLE": 0,
+
+    # UN AVISO, NO UNA ACCION (19/09/2026)
+    #
+    #     Por DEBAJO de IDLE, y a proposito. `IDLE` se anade
+    #     siempre, y `decision = candidates[0]` sale de una lista
+    #     ordenada por prioridad descendente: con -1 esto no
+    #     puede presidir el panel NUNCA, por construccion y no
+    #     por suerte.
+    #
+    #     Es la condicion que se pidio: un candidato bloqueado
+    #     tiene que VERSE, no tiene que MANDAR. Las vueltas
+    #     tranquilas seguiran diciendo IDLE.
+    #
+    #     No es "menos urgente que no hacer nada": es que no es
+    #     una accion. Es la explicacion de por que falta una.
+    "PUJA_BLOQUEADA": -1,
 }
 
 
@@ -2921,6 +2937,94 @@ def build_global_decision_uncached(
                         ][
                             :5
                         ],
+                },
+            }
+        )
+
+    # ========================================================
+    # UNA PUJA BLOQUEADA TIENE QUE VERSE (19/09/2026)
+    # ========================================================
+    #
+    #     El 19/09 la cola salia con cinco entradas y ninguna era
+    #     una puja, teniendo `biddable: 1` y a Chust valorado en
+    #     2.278.096. Costo media manana entender por que.
+    #
+    #     El motivo era que TODO el bloque de compra cuelga de
+    #     `acquisition_budget.enabled`, y con el saldo en rojo
+    #     sale `SIN_CAPACIDAD`. Dentro hay dos salidas
+    #     —SPECULATION_BUY y SPECULATION_WATCH— y no se ejecuta
+    #     ninguna: no se anade NADA.
+    #
+    #     `SOLVENCY_GUARANTEE` sale con `executable: false` y su
+    #     motivo, y nadie se pregunta por que no esta. Esto hace
+    #     lo mismo con la puja.
+    #
+    #     NO ES EJECUTABLE Y NO PUEDE PRESIDIR: `build_action_queue`
+    #     filtra `executable=True`, asi que no entra en la cola
+    #     ejecutable; y su prioridad esta por debajo de IDLE, que
+    #     se anade siempre, asi que no puede ser `candidates[0]`.
+    hay_pujable = (
+        safe_int(
+            (acquisition_board or {}).get("biddable")
+        )
+        > 0
+    )
+
+    ya_hay_puja = any(
+        item.get("type")
+        in ("SPECULATION_BUY", "SPECULATION_WATCH")
+        for item in candidates
+    )
+
+    if hay_pujable and not ya_hay_puja:
+
+        motivo_presupuesto = (
+            acquisition_budget.get("blocked_by")
+            or (
+                "PRESUPUESTO_APAGADO"
+                if not acquisition_budget.get("enabled")
+                else "FASE"
+            )
+        )
+
+        candidates.append(
+            {
+                "type":
+                    "PUJA_BLOQUEADA",
+
+                "priority":
+                    PRIORITY[
+                        "PUJA_BLOQUEADA"
+                    ],
+
+                "action":
+                    "NONE",
+
+                "executable":
+                    False,
+
+                "executor":
+                    None,
+
+                "blocked_by":
+                    motivo_presupuesto,
+
+                "reason": (
+                    f"Hay "
+                    f"{safe_int((acquisition_board or {}).get('biddable'))}"
+                    f" candidato(s) pujable(s) y no se genera "
+                    f"ninguna puja: "
+                    f"{acquisition_budget.get('reason') or motivo_presupuesto}"
+                ),
+
+                "data": {
+                    "biddable": safe_int(
+                        (acquisition_board or {}).get("biddable")
+                    ),
+                    "actionable": safe_int(
+                        (acquisition_board or {}).get("actionable")
+                    ),
+                    "acquisition_budget": acquisition_budget,
                 },
             }
         )

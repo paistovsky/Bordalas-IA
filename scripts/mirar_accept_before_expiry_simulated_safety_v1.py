@@ -1,3 +1,40 @@
+"""
+MIRAR la simulacion de seguridad de ACCEPT_BEFORE_EXPIRY contra la foto de ahora.
+
+ESTO NO ES UNA GUARDIA (19/09/2026)
+
+    Nacio como `test_accept_before_expiry_simulated_safety_v1.py` en `src/analysis/` y lee
+    `get_latest_snapshot()`. Hoy pasa, pero por como esta el
+    mundo, no por el codigo: el dia que no haya ofertas sobre la
+    mesa se pondra roja sin que nada se haya roto.
+
+    Es la misma conversion que `mirar_accept_before_expiry.py`, y
+    por el mismo motivo: ninguna guardia lee estado de
+    produccion, y una que falla por el estado del mundo ensena a
+    ignorar el rojo.
+
+LO QUE SI ESTA CUBIERTO CON DATOS FIJOS
+
+    - la puerta del reloj y que la reserva ceda:
+      `test_la_reserva_no_bloquea_el_deficit_que_cubre_v1`
+    - que el deficit venza a los dos frenos:
+      `test_el_deficit_vence_a_la_reserva_v1`
+
+USO
+
+    python scripts/mirar_accept_before_expiry_simulated_safety_v1.py
+
+    Solo lectura. No escribe en Biwenger ni en ningun libro.
+
+Y NO SON TRES: SON SESENTA Y NUEVE
+
+    Al convertir estas salio el recuento real de ficheros
+    `test_*` que leen `get_latest_snapshot()`. No es un descuido
+    suelto: es una era entera del repositorio. Convertirlas a
+    mano de una en una no es el arreglo — va en el informe como
+    politica.
+"""
+
 from __future__ import annotations
 
 import copy

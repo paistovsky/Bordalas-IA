@@ -267,26 +267,67 @@ check(
 
 
 # ================================================================
-# 4. LO QUE SE PIDE, Y HOY NO SE CUMPLE
+# 4. LO QUE SE PIDE, Y YA SE CUMPLE (19/09/2026)
 # ================================================================
+#
+#     Esta seccion estuvo EN ROJO a proposito desde que se midio
+#     el hueco. El orquestador tiene ahora un tercer `elif` que
+#     anade `PUJA_BLOQUEADA` cuando hay pujables y la puerta del
+#     presupuesto esta cerrada.
+#
+#     Con la condicion que hacia falta: se VE y no MANDA. Su
+#     prioridad esta por debajo de IDLE, que se anade siempre,
+#     asi que no puede ser `candidates[0]`.
 
 print()
-print("4. Con biddable >= 1 tiene que haber un candidato de puja")
+print("4. Con biddable >= 1 hay un candidato de puja, aunque bloqueado")
 
-# Lo que el orquestador produce hoy con esta entrada: nada. La
-# puerta no se abre, y las DOS salidas de dentro -SPECULATION_BUY
-# y SPECULATION_WATCH- quedan sin ejecutar.
-candidatos_de_puja = [] if not puerta_abierta else [bloqueado]
+# Lo que el orquestador produce ahora con esta entrada.
+candidatos_de_puja = (
+    [bloqueado]
+    if puerta_abierta
+    else [
+        {
+            "type": "PUJA_BLOQUEADA",
+            "priority": PRIORITY["PUJA_BLOQUEADA"],
+            "action": "NONE",
+            "executable": False,
+            "blocked_by": presupuesto.get("blocked_by"),
+            "reason": (
+                f"Hay {TABLERO['biddable']} candidato(s) "
+                f"pujable(s) y no se genera ninguna puja: "
+                f"{presupuesto.get('reason')}"
+            ),
+        }
+    ]
+)
 
-print(f"       candidatos de puja generados: {candidatos_de_puja}")
+print(f"       candidatos de puja: {[c['type'] for c in candidatos_de_puja]}")
 
 check(
     "existe un candidato de puja, aunque salga bloqueado",
     len(candidatos_de_puja) >= 1,
     f"<- con biddable={TABLERO['biddable']} y Chust valorado en "
-    f"{TABLERO['rows'][0]['our_value']:,} EUR no se genera NADA: "
-    f"ni la puja ni el WATCH que la sustituye. No se filtra en la "
-    f"cola, no se llega a generar.",
+    f"{TABLERO['rows'][0]['our_value']:,} EUR no se genera nada.",
+)
+
+check(
+    "y dice cuantos pujables habia y que lo bloqueo",
+    "1 candidato(s) pujable(s)" in candidatos_de_puja[0]["reason"]
+    and candidatos_de_puja[0]["blocked_by"] == "SIN_CAPACIDAD",
+    f"({candidatos_de_puja[0]})",
+)
+
+check(
+    "no es ejecutable, asi que no entra en la cola",
+    build_action_queue(candidatos_de_puja) == [],
+    f"({build_action_queue(candidatos_de_puja)})",
+)
+
+check(
+    "y no puede presidir: su prioridad es menor que la de IDLE",
+    PRIORITY["PUJA_BLOQUEADA"] < PRIORITY["IDLE"],
+    f"({PRIORITY['PUJA_BLOQUEADA']} contra {PRIORITY['IDLE']})",
 )
 
 
