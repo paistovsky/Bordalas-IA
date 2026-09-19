@@ -137,6 +137,18 @@ def board_from_single_source() -> dict:
         "rejection_reason": sellos.get("rejection_reason"),
         "expected_matchday": sellos.get("expected_matchday"),
 
+        # QUIEN SE QUEDO SIN PRONOSTICO Y POR QUE (18/09/2026)
+        #
+        #     Contar cabezas -"10 de 11"- no dice para quien
+        #     falta. Estos tres vienen de `metadata` del tablero y
+        #     viajan hasta la pantalla para que la pregunta
+        #     "¿por que este no tiene pronostico?" se conteste
+        #     mirando, y no cruzando equipos a mano.
+        "unmatched": sellos.get("unmatched") or [],
+        "targets": sellos.get("targets"),
+        "matched": sellos.get("matched"),
+        "low_confidence": sellos.get("low_confidence") or [],
+
         "players": jugadores,
     }
 
@@ -611,6 +623,150 @@ MANDATORY_HIERARCHY_VALUE = 60
 MANDATORY_HIERARCHY_BONUS = 10_000_000.0
 
 
+# ============================================================
+# LOS PESOS DEL SCORE, CON NOMBRE
+# ============================================================
+#
+#     Estaban escritos a pelo dentro de `prepare_players`. Se
+#     sacan aqui porque el suelo del que no tiene pronostico se
+#     DERIVA de ellos, y un suelo que se deriva de numeros
+#     sueltos dentro de una funcion es exactamente el fallo del
+#     18/09/2026 esperando a repetirse (doctrina 85).
+
+# La vara va de 0 a 1 y manda sobre todo lo demas.
+ESCALA_DE_LA_VARA = 1_000_000.0
+
+# Un dato con fuente vale mas que uno sin ella. Desempate.
+COBERTURA_POR_FUENTE = 3_000.0
+
+# Y el porcentaje crudo debajo, para no empatar dentro del mismo
+# escalon.
+PESO_DE_LA_PROBABILIDAD = 100.0
+
+# Lo que vale quien Biwenger no deja alinear. No es un score: es
+# una marca.
+NO_ALINEABLE = -1_000_000.0
+
+# El aviso de `calculate_lineup_score` cuando el jugador entra en
+# duda. Es la base mas baja que puede tener alguien alineable.
+AVISO_NO_AUTOMATICO = -500.0
+
+
+def peor_con_pronostico() -> float:
+    """
+    El score MAS BAJO que puede sacar alguien con pronostico.
+
+    No es una estimacion: es la suma de los minimos de cada
+    sumando, y cada minimo esta razonado.
+
+        vara            >= 0     participacion y calidad son >= 0
+        cobertura       >= 1     esa rama exige `coverage > 0`
+        probabilidad    >= 0     un porcentaje no es negativo
+        base            >= -500  el aviso de no automatico
+        casa/penaltis   >= 0     los bonos no restan
+
+    Si manana alguien cambia uno de esos pesos, este numero se
+    mueve solo y el suelo de abajo con el.
+    """
+
+    return (
+        0.0 * ESCALA_DE_LA_VARA
+        + 1.0 * COBERTURA_POR_FUENTE
+        + 0.0 * PESO_DE_LA_PROBABILIDAD
+        + AVISO_NO_AUTOMATICO
+    )
+
+
+# ============================================================
+# SIN PRONOSTICO NO SE ENTRA SI HAY CON PRONOSTICO
+# ============================================================
+#
+# EL CASO QUE LO DESTAPO (18/09/2026, jornada 7)
+#
+#     El once salia con Esquivel de portero: 150.000 EUR, 0
+#     puntos, 0 partidos, tercer portero del Atletico, y sin una
+#     sola fuente que diga si juega. En el banquillo, Dituro:
+#     2,18 M, 123 puntos la temporada pasada, Importante en el
+#     Elche y con pronostico de FutbolFantasy.
+#
+#     Los numeros, medidos ese dia:
+#
+#         Esquivel   250.030,15   <- 250.000 de suelo + 30,15
+#         Dituro     235.067,68   <- vara 0,2269 x 1.000.000
+#         Iturbe     213.230,15   <- vara 0,2052 x 1.000.000
+#
+#     Ganaba por el suelo, no por merito.
+#
+# POR QUE SE ROMPIO EL SUELO DE 0,25
+#
+#     El suelo se calibro contra la ESCALERA DE ETIQUETAS
+#     -`HIERARCHY_MATCH_QUALITY`, cuyo peldano mas bajo es 0,25
+#     "Descarte"-. Con esa escalera, 0,25 era de verdad el ultimo
+#     puesto, y el comentario de entonces era correcto.
+#
+#     Cuando `calidad_para_la_vara` sustituyo la etiqueta por los
+#     puntos por partido REALES, la vara dejo de tener suelo:
+#     Dituro, que es Importante, sale a 0,336 de calidad medida en
+#     vez de 0,80 de etiqueta, y su vara cae de 0,54 a 0,227. Por
+#     debajo del suelo. El suelo no se movio con la escalera que
+#     lo sostenia, y desde ese momento "no saber" gana a "saber".
+#
+# LA DECISION DEL DUEÑO (18/09/2026)
+#
+#     "Hay que traerlo. Si es fallo de las fuentes, tenemos a
+#     Dituro y ya esta."
+#
+#     O sea: un jugador sin pronostico NO entra en el XI si hay
+#     uno con pronostico en su puesto. Sin dato no es cero -no se
+#     le trata como un 0 % ni se le declara inalineable- pero
+#     tampoco es una apuesta: es el ULTIMO RECURSO.
+#
+# POR QUE UN NUMERO Y NO UN FILTRO
+#
+#     Porque el ultimo recurso tiene que seguir existiendo. Si
+#     faltan porteros con pronostico, el que no lo tiene juega:
+#     `search_best_lineup_for_formation` maximiza primero cuantos
+#     huecos llena y solo despues el score, asi que un score bajo
+#     lo manda al banquillo cuando hay alternativa y lo alinea
+#     cuando no la hay. Un filtro dejaria la porteria vacia.
+#
+# EL NUMERO, Y POR QUE ESE
+#
+#     La banda de los que SI tienen pronostico esta acotada por
+#     abajo: `starter_coverage` es >= 1 en esa rama, asi que
+#     suma al menos 3.000, y lo demas -vara, porcentaje, precio,
+#     puntos, casa/fuera, penaltis- no resta mas de los 500 del
+#     aviso de `automatic_lineup`. El peor con pronostico ronda
+#     +2.500.
+#
+#     Y NO SE ESCRIBE A MANO (18/09/2026, doctrina 85)
+#
+#     Aqui hubo, durante un dia, un `-500_000.0` escrito a pelo.
+#     Funcionaba, y era la misma clase de numero que el 0,25 que
+#     acabamos de quitar: uno que vale mientras otra cosa no se
+#     mueva, y que no se entera cuando se mueve.
+#
+#     Ahora sale del PUNTO MEDIO de la banda que tiene que
+#     respetar:
+#
+#         arriba   `peor_con_pronostico()`   el peor con dato
+#         abajo    `NO_ALINEABLE`            el que no puede jugar
+#
+#     El punto medio es el sitio con mas margen por los dos
+#     lados, y se mueve solo si cualquiera de los dos extremos se
+#     mueve. Con los pesos de hoy da -498.750, que es donde
+#     estaba el numero escrito a mano: la diferencia no es el
+#     valor, es que ya no hay que acordarse de el.
+def suelo_sin_pronostico() -> float:
+    """
+    El score del que no tiene ni una fuente que hable de el.
+
+    Derivado, nunca escrito. Ver el bloque de arriba.
+    """
+
+    return (peor_con_pronostico() + NO_ALINEABLE) / 2.0
+
+
 def god_is_ruled_out(starter: dict) -> tuple[bool, str | None]:
     """
     Un Dios solo se sienta con el 0 % MOTIVADO.
@@ -899,6 +1055,12 @@ def prepare_players(
 
         expected_value = 0.0
 
+        # Se enciende solo en la rama de abajo: eligible y sin una
+        # sola fuente que diga si juega. Un no alineable NO es un
+        # "sin pronostico" -su motivo es otro y ya se cuenta
+        # aparte-, asi que arranca apagado y se queda apagado.
+        sin_pronostico = False
+
         # UN DIOS JUEGA SIEMPRE.
         #
         # Se resuelve aqui, con el jugador delante, y no dentro
@@ -995,13 +1157,13 @@ def prepare_players(
 
                 final_score = (
                     expected_value
-                    * 1_000_000.0
+                    * ESCALA_DE_LA_VARA
 
                     + starter_coverage
-                    * 3_000.0
+                    * COBERTURA_POR_FUENTE
 
                     + starter_probability
-                    * 100.0
+                    * PESO_DE_LA_PROBABILIDAD
 
                     + base_score
 
@@ -1012,18 +1174,27 @@ def prepare_players(
 
             else:
 
-                # Sin pronostico de FF. No se inventa un escalon ni
-                # un porcentaje: se le da un valor de 0,25 en la
-                # misma escala, que lo deja por encima de un
-                # suplente conocido -un Reserva al 40 % vale 0,17-
-                # y por debajo de cualquier titular conocido.
+                # SIN PRONOSTICO: EL ULTIMO RECURSO.
                 #
-                # Dicho de otro modo: no saber es peor que saber
-                # que si, y mejor que saber que no.
-                expected_value = 0.25
+                # Aqui habia un suelo de 250.000 que valia como
+                # "0,25 en la misma escala". Dejo de valer cuando
+                # la vara paso a medirse con puntos reales, y el
+                # 18/09/2026 saco a Dituro del once para meter al
+                # tercer portero del Atletico. El porque entero
+                # esta en `SIN_PRONOSTICO_SCORE`.
+                #
+                # No se inventa nada: ni escalon, ni porcentaje,
+                # ni vara. `weekly_expected_value` viaja a None
+                # -"sin dato" es una respuesta- y el score lo
+                # coloca por debajo de cualquiera que si tenga
+                # pronostico en su puesto, sin declararlo
+                # inalineable.
+                sin_pronostico = True
+
+                expected_value = None
 
                 final_score = (
-                    250_000.0
+                    suelo_sin_pronostico()
                     + base_score
                     + external_adjustment
                     + home_away_adjustment
@@ -1175,6 +1346,17 @@ def prepare_players(
                 # entra tiene que verse.
                 "weekly_expected_value":
                     expected_value,
+
+                # NI UNA FUENTE DICE SI JUEGA.
+                #
+                # Viaja como bandera propia y no deducida de
+                # `weekly_expected_value is None`, porque ese
+                # campo tambien es None por otros motivos -un no
+                # alineable nunca llega a calcularlo- y mezclar
+                # los dos casos en la pantalla diria "sin dato"
+                # de un lesionado.
+                "sin_pronostico":
+                    sin_pronostico,
 
                 "hierarchy":
                     starter.get("hierarchy"),
@@ -1692,6 +1874,23 @@ def banquillo_con_motivo(
         elif rival is None:
             motivo = "POSICION_CUBIERTA"
             frase = "su posición ya está cubierta"
+
+        # SIN DATO, Y EL QUE ESTÁ SÍ LO TIENE.
+        #
+        # No es que puntúe menos: es que de él no se sabe nada, y
+        # el titular de su puesto sí tiene pronóstico. Decir
+        # "puntúa menos" aquí sería mentir sobre el motivo, y el
+        # dueño se quedaría buscando unos puntos que nadie ha
+        # comparado.
+        elif (
+            player.get("sin_pronostico")
+            and rival.get("starter_probability") is not None
+        ):
+            motivo = "SIN_PRONOSTICO"
+            frase = (
+                "no hay pronóstico de titularidad suyo, y "
+                f"{rival.get('name') or 'el que está'} sí lo tiene"
+            )
 
         else:
             motivo = "PUNTUA_MENOS"

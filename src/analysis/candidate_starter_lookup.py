@@ -409,6 +409,8 @@ def board_stamps() -> dict:
         cache["status"] = "REJECTED_WRONG_MATCHDAY"
         cache["error"] = rechazo["reason"]
 
+    metadata = dict(board.get("metadata") or {})
+
     return {
         "cache": cache,
         "matchday": board.get("matchday"),
@@ -419,6 +421,34 @@ def board_stamps() -> dict:
         "rejected": bool(rechazo),
         "rejection_reason": (rechazo or {}).get("reason"),
         "expected_matchday": _EXPECTED_MATCHDAY,
+
+        # QUIEN SE QUEDO SIN PAREJA (18/09/2026)
+        #
+        #     `refresh_board` ya escribia `metadata.unmatched` -la
+        #     lista de objetivos que no encontraron ficha en
+        #     FutbolFantasy, por nombre- y se quedaba en el
+        #     fichero.
+        #
+        #     El 18/09 el panel decia "probabilidad de ser titular
+        #     disponible solo para 10 de 11" y no podia decir para
+        #     QUIEN faltaba. Con Esquivel de portero, saber si su
+        #     nombre estaba en esta lista era la diferencia entre
+        #     "FutbolFantasy no lo publica" y "no emparejo", y
+        #     hubo que deducirlo cruzando equipos a mano.
+        #
+        #     Contar cabezas no es saber quien falta (doctrina
+        #     84: no asumas que falta porque no lo has visto).
+        "unmatched": list(metadata.get("unmatched") or []),
+        "targets": metadata.get("targets"),
+        "matched": metadata.get("matched"),
+
+        # Emparejados con dudas: la identidad esta cerrada por los
+        # pelos. Viajan porque un emparejamiento flojo mete el
+        # pronostico de OTRO jugador en una ficha, que es peor que
+        # no tener pronostico.
+        "low_confidence": list(
+            metadata.get("low_confidence") or []
+        ),
     }
 
 

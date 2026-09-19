@@ -2201,11 +2201,18 @@ def build_rival_intelligence(
     #
     #     Y ya demostro que funciona: fue esta comparacion la que
     #     encontro el `splitRound`, con 870.000 clavados.
+    #     Y SI NO CUADRA, QUE DIGA A QUE MIRAR (18/09/2026)
+    #
+    #     Se le pasan los eventos y quienes somos para que pueda
+    #     nombrar el evento sospechoso y su tipo. Solo informa:
+    #     no cambia ni un euro de la reconstruccion.
     cuadre_de_la_caja = _cuadra_la_caja(
         (caja.get("managers") or {})
         .get(current_user_id, {})
         .get("cash"),
         own_balance,
+        eventos=events,
+        manager=current_user_id,
     )
 
     # --------------------------------------------------------
