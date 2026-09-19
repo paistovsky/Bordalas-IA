@@ -344,18 +344,33 @@ corrió mientras yo editaba ficheros, así que volví a comprobar las que me toc
 |---|---|
 | `test_listing_lifecycle_orchestrator` | **verde** al repetirla — el rojo era contaminación de mis ediciones |
 | `test_offer_decision_engine_v2` | roja, y **ya fallaba** antes de mi cambio (comprobado poniendo el motor anterior) |
-| `mirar_..._simulated_safety_v1` | **inestable**: roja una vez, verde tres seguidas con mis mismos ficheros |
+| `mirar_..._simulated_safety_v1` | **2 rojas y luego 6 verdes**, con el árbol idéntico |
 | `test_offer_decision_orchestrator_v2`, `test_offer_authority_separation_v1` | rojas, sin atribuir |
 
-La tercera es la que más dice. Con el árbol idéntico y los mismos ficheros, la misma
-guardia da rojo y verde. Sospecho por qué: `computer_offer_reroll_engine` escribe
-`data/autopilot/computer_offer_history.json`, así que correrla **cambia el estado que
-la siguiente va a leer**. No sólo leen producción: la mueven.
+La tercera es la que más dice, y me obligó a corregirme dos veces. Cuando salió roja
+asumí regresión mía, restauré mis dos motores y pasó — parecía confirmado. Al volver
+a poner mis ficheros uno a uno, pasó igual. Con el árbol idéntico: **2 rojas, luego 6
+verdes.**
+
+Las dos rojas son las dos primeras, y caen dentro de la ventana en la que yo estaba
+editando `escaparate_executor`, `dashboard_state` y `acquisition_board`. **La
+explicación más simple es que las rompí yo al editarlas mientras corrían**, no que
+sean aleatorias. Lo digo así porque es lo que sostiene la evidencia.
+
+Lo que sí queda **confirmado como hecho**, y no como sospecha: `computer_offer_history.json`
+cambió de fecha a las 18:23:54, en mitad del barrido. Una de estas guardias **escribió
+en estado de producción**. El contenido acabó igual que en git, así que no puedo
+atribuirle el rojo — pero que lo escriben ya no es una hipótesis.
 
 Así que el número honesto no es «17 de 69 están rotas». Es: **de 69 guardias, no se
-puede saber cuántas están rotas**, porque su resultado depende del mercado, del orden
-en que se corran y de lo que haya escrito la anterior. Una guardia así no protege
-nada, y ése es el argumento para la política de arriba mejor que cualquier recuento.
+puede saber cuántas están rotas**, porque su resultado depende del mercado, de lo que
+esté editando quien las corre, y de lo que escribió la anterior. Una guardia así no
+protege nada.
+
+Y eso deja corta la política que propuse arriba: «convertirlas según se vayan
+tocando» asume que mientras tanto el rojo significa algo. No significa nada. Mientras
+sigan ahí, **cualquier rojo del repositorio es ruido**, incluidos los de las guardias
+buenas, porque nadie sabe distinguirlos de un vistazo.
 
 Lo único que puedo afirmar con una comprobación detrás: `test_offer_decision_engine_v2`
 y `test_accept_offer_live_v1` estaban rojas **antes** de que yo tocara nada.
