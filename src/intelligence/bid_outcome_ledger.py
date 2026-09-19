@@ -1104,6 +1104,34 @@ def recoger_pujas_vivas(
             snapshot, own_user_id=our_user_id
         )
 
+        # SIN EXPOSICION NO SE RECOGE NADA, Y SE DICE (19/09/2026)
+        #
+        #     Aqui se entraba al bucle con `operations` vacio sin
+        #     mirar `available`, asi que una exposicion caida se
+        #     anotaba como "no habia ninguna puja que recoger".
+        #
+        #     No cuesta dinero —esto no escribe en Biwenger— pero
+        #     miente en la medicion de CONVERSION, que es el
+        #     numero con el que decidimos si el problema es
+        #     elegir o aparecer. Un cero por no haber mirado baja
+        #     el denominador y nos hace parecer mejores.
+        if not exposicion.get("available"):
+            return {
+                **salida,
+                "available": False,
+                "recogidas": [],
+                "reason": (
+                    "No se pudo leer la exposicion de pujas"
+                    + (
+                        f" ({exposicion.get('reason')})"
+                        if exposicion.get("reason")
+                        else ""
+                    )
+                    + ": no se recoge ninguna. No haber mirado no "
+                    "es que no hubiera."
+                ),
+            }
+
         ya_estan = {
             int(e.get("player_id") or 0)
             for e in (ledger.get("bids") or {}).values()

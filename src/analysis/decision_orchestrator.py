@@ -477,11 +477,50 @@ def build_temporal_gate(
 
 
 
+def se_sabe_que_hay_puesto(speculation: dict | None) -> bool:
+    """
+    Si la exposicion de pujas se ha podido leer.
+
+    DOCTRINA 24, EN EL SITIO QUE NOS COSTO NUEVE PUJAS
+
+        `players_with_live_bid` devuelve un conjunto, y un
+        conjunto vacio significaba DOS cosas: "no tenemos nada
+        puesto" y "no he podido mirar". El que lo recibia leia la
+        segunda como via libre.
+
+        De ahi salieron las nueve escrituras de Maffeo del 18/09:
+        la exposicion caida daba `set()` y el camino de escritura
+        entendia "ninguna puja viva, adelante".
+
+        Esto se pregunta APARTE porque el contrato de la funcion
+        —devolver un conjunto— lo usan dos sitios y no se rompe
+        por esto. Quien necesite distinguir, pregunta.
+
+    Forma fija. Nunca lanza.
+    """
+
+    exposicion = (
+        (speculation or {}).get("bid_exposure")
+        or {}
+    )
+
+    return bool(
+        isinstance(exposicion, dict)
+        and exposicion.get("available")
+    )
+
+
 def players_with_live_bid(
     speculation: dict | None,
 ) -> set:
     """
     Jugadores por los que YA tenemos una puja viva.
+
+    OJO: UN CONJUNTO VACIO NO DICE QUE NO HAYA NINGUNA. Puede ser
+    que la exposicion no se haya podido leer. Antes de usar esto
+    para DECIDIR UNA ESCRITURA hay que preguntar
+    `se_sabe_que_hay_puesto()`; para ordenar o filtrar una lista
+    que luego no escribe, el conjunto basta.
 
     Una puja no se resuelve hasta el reset, asi que el jugador
     sigue en el mercado y sigue siendo el mejor objetivo del
@@ -2718,23 +2757,42 @@ def build_global_decision_uncached(
         # `executable_buys` es la lista del scoring antiguo. Solo
         # se usa si el tablero no esta disponible, para no dejar
         # a Pepe sin operar por un fallo de telemetria.
-        pendientes_legacy = [
-            player
-            for player in executable_buys
-            if int(player.get("id") or 0)
-            not in players_with_live_bid(speculation)
-        ]
+        #
+        # Y SI NO SE PUDO MIRAR LO PUESTO, LA LISTA SE VACIA:
+        # un conjunto vacio de pujas vivas no autoriza a repetir
+        # (doctrina 24). El respaldo prefiere no operar a operar
+        # a ciegas.
+        pendientes_legacy = (
+            [
+                player
+                for player in executable_buys
+                if int(player.get("id") or 0)
+                not in players_with_live_bid(speculation)
+            ]
+            if se_sabe_que_hay_puesto(speculation)
+            else []
+        )
 
         # Sin lista antigua no hay respaldo, y ahora se puede
         # llegar aqui sin ella: la via de fichajes no la necesita.
         # `executable_buys[0]` sobre una lista vacia reventaba el
         # ciclo entero.
+        #
+        # EL RESPALDO TAMBIEN SE ABSTIENE A CIEGAS (19/09/2026)
+        #
+        #     Sin esta condicion el arreglo de arriba no servia de
+        #     nada: con `pendientes_legacy` vacia se caia a
+        #     `executable_buys[0]` sin filtrar, que es
+        #     exactamente el camino que repite una puja ya
+        #     puesta. Vaciar la lista y luego coger el primero de
+        #     la lista sin vaciar es no haber hecho nada.
         objetivo = (
             pendientes_legacy[0]
             if pendientes_legacy
             else (
                 executable_buys[0]
                 if executable_buys
+                and se_sabe_que_hay_puesto(speculation)
                 else None
             )
         )
@@ -2745,13 +2803,26 @@ def build_global_decision_uncached(
 
         # Los que ya tienen puja nuestra viva no se repiten: el
         # ciclo baja al siguiente de la lista.
+        #
+        # Y SI NO SE HA PODIDO MIRAR, NO SE ELIGE (19/09/2026)
+        #
+        #     Un conjunto vacio significaba "no tenemos nada
+        #     puesto" y "no he podido mirar" a la vez, y este
+        #     sitio leia la segunda como via libre. De ahi
+        #     salieron las nueve escrituras de Maffeo del 18/09.
+        lo_puesto_se_sabe = se_sabe_que_hay_puesto(speculation)
+
         ya_pujados = players_with_live_bid(
             speculation
         )
 
-        mejor = best_acquisition_target(
-            acquisition_board,
-            exclude_ids=ya_pujados,
+        mejor = (
+            best_acquisition_target(
+                acquisition_board,
+                exclude_ids=ya_pujados,
+            )
+            if lo_puesto_se_sabe
+            else None
         )
 
         # ----------------------------------------------------

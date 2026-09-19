@@ -52,6 +52,86 @@ IGNORAR = shutil.ignore_patterns(
     "backups",
 )
 
+# ============================================================
+# LAS DOS POBLACIONES (19/09/2026)
+# ============================================================
+#
+#     La regla de la casa siempre dijo que ninguna guardia lee
+#     estado de produccion. Sesenta y nueve lo hacen: llaman a
+#     `get_latest_snapshot()` y su color depende de como este el
+#     mercado, no de como este el codigo.
+#
+#     Eso no las hace inutiles —sirven para mirar el sistema con
+#     datos de verdad— pero NO son guardias, y mezclarlas con las
+#     que si lo son destruye a las dos poblaciones a la vez:
+#
+#     DOCTRINA 91. Un rojo que puede significar cualquier cosa
+#     vale lo mismo que un verde. Mientras estas esten en la
+#     cuenta, un rojo del repositorio no se puede leer: nadie
+#     distingue de un vistazo si es un fallo o es que hoy no hay
+#     ofertas sobre la mesa.
+#
+#     Medido el 19/09: de 69 que leen produccion, 17 salieron
+#     rojas en un barrido —y al repetir una a una, algunas eran
+#     verdes: el barrido corrio mientras se editaban ficheros. El
+#     numero no se pudo fijar, que es exactamente el problema.
+#
+#     Asi que se separan. Las puras cuentan para el rojo; las del
+#     mundo salen de la cuenta y se corren a mano cuando
+#     interesan, como `scripts/mirar_*.py`.
+LEE_PRODUCCION = "get_latest_snapshot("
+
+# Las dos guardias que vigilan esto nombran la llamada para poder
+# buscarla. Son puras: no la ejecutan.
+LAS_QUE_VIGILAN = {
+    "test_ninguna_guardia_nueva_lee_produccion_v1",
+    "test_ninguna_guardia_escribe_en_los_libros_v1",
+}
+
+
+def las_dos_poblaciones() -> tuple[list, list]:
+    """
+    (puras, las_que_miran_el_mundo). Forma fija, nunca lanza.
+
+    Pura = no llama a `get_latest_snapshot()`. Se decide leyendo
+    el fichero, no con una lista escrita a mano: una lista se
+    queda vieja el dia que alguien anade la numero 70.
+    """
+
+    puras = []
+    del_mundo = []
+
+    for fichero in sorted(RAIZ.rglob("src/**/test_*.py")):
+
+        if "__pycache__" in fichero.parts:
+            continue
+
+        modulo = ".".join(
+            fichero.relative_to(RAIZ).with_suffix("").parts
+        )
+
+        try:
+            fuente = fichero.read_text(
+                encoding="utf-8", errors="replace"
+            )
+
+        except OSError:
+            # No poder leerla no la hace pura (doctrina 24).
+            del_mundo.append(modulo)
+            continue
+
+        if (
+            LEE_PRODUCCION in fuente
+            and fichero.stem not in LAS_QUE_VIGILAN
+        ):
+            del_mundo.append(modulo)
+
+        else:
+            puras.append(modulo)
+
+    return (puras, del_mundo)
+
+
 # Los que fallaron en el chequeo de salud del 15/08.
 SOSPECHOSOS = [
     "src.analysis.test_accept_before_expiry_execution_planner_v1",
@@ -167,6 +247,19 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--todos", action="store_true")
     parser.add_argument("--lista", default="")
+
+    # Las que leen produccion salen de la cuenta por defecto
+    # (doctrina 91). Esto las devuelve, para quien quiera verlas
+    # sabiendo lo que valen.
+    parser.add_argument(
+        "--con-las-del-mundo",
+        dest="con_las_del_mundo",
+        action="store_true",
+        help=(
+            "Incluye las guardias que leen estado de produccion. "
+            "Su color depende del mercado, no del codigo."
+        ),
+    )
     args = parser.parse_args()
 
     backups = localizar_backups()
@@ -196,15 +289,23 @@ def main() -> None:
         ]
 
     elif args.todos:
-        modulos = sorted(
-            ".".join(
-                fichero.relative_to(RAIZ)
-                .with_suffix("")
-                .parts
+        puras, del_mundo = las_dos_poblaciones()
+
+        if args.con_las_del_mundo:
+            modulos = sorted(puras + del_mundo)
+
+        else:
+            modulos = sorted(puras)
+
+            print()
+            print(
+                f"Fuera de la cuenta: {len(del_mundo)} que leen "
+                f"estado de produccion. Ver `las_dos_poblaciones`."
             )
-            for fichero in RAIZ.rglob("src/**/test_*.py")
-            if "__pycache__" not in fichero.parts
-        )
+            print(
+                "  (--con-las-del-mundo las incluye, sabiendo lo "
+                "que valen)"
+            )
 
     else:
         modulos = SOSPECHOSOS
