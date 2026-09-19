@@ -120,6 +120,14 @@ def correr(
     ahora: datetime | None = None,
     ruta_del_libro: Path | None = None,
     ruta_de_viajes: Path | None = None,
+
+    # LO QUE YA TENEMOS PUESTO (19/09/2026)
+    #
+    #     Trae `bid_exposure`, que es de donde sale si ya hay una
+    #     puja viva por este jugador. Sin el, la guardia no puede
+    #     mirar y NO deja escribir: un fallo de lectura no es via
+    #     libre.
+    speculation: dict | None = None,
 ) -> dict:
     """
     Una vuelta del carril. Forma fija, nunca lanza.
@@ -142,6 +150,10 @@ def correr(
         cuantos_en_este_reset,
     )
     from src.analysis.bid_jitter import apply_bid_jitter
+    from src.analysis.la_puja_que_ya_esta import (
+        filtrar_los_repetidos,
+        guardia_activa,
+    )
 
     # EL HECHO, NO LA INTENCION.
     #
@@ -278,8 +290,54 @@ def correr(
             puerta["quedan_en_el_reset"],
         )
 
+        # LOS QUE YA TIENEN PUJA VIVA, FUERA (19/09/2026)
+        #
+        #     Medido sobre `libro_del_carril.jsonl`: 16
+        #     escrituras reales contra Biwenger para 4
+        #     operaciones distintas. Maffeo nueve veces en 8,9 h,
+        #     cada una con su id de Biwenger.
+        #
+        #     El dato estaba en la propia fila. `acquisition_board`
+        #     calcula `has_live_bid`, lo publica en `targets` y lo
+        #     descuenta de `actionable` — y aqui se filtraba por
+        #     precio, por `status` y por `outside_computer_market`
+        #     y por nada mas. Viajaba hasta la linea de la
+        #     escritura sin que nadie lo mirara.
+        #
+        #     Va DESPUES de `los_que_se_pueden_pagar` y ANTES de
+        #     `a_quien_pujar` a proposito: asi el hueco que libera
+        #     un repetido se lo queda el siguiente de la lista en
+        #     la MISMA vuelta, en vez de perderse.
+        frenados_por_repetir = []
+
+        if guardia_activa():
+
+            filtrado = filtrar_los_repetidos(
+                pagables.get("caben") or [],
+                speculation,
+            )
+
+            frenados_por_repetir = filtrado["frenados"]
+
+            if not filtrado["available"]:
+                # No se ha podido mirar que tenemos puesto. El
+                # lado seguro de no saber es no escribir.
+                return {
+                    **salida,
+                    "available": True,
+                    "blocked_by": "SIN_SABER_LO_PUESTO",
+                    "reason": filtrado["reason"],
+                    "permiso": puerta,
+                    "frenados": frenados_por_repetir,
+                }
+
+            candidatos_finales = filtrado["escribibles"]
+
+        else:
+            candidatos_finales = pagables.get("caben") or []
+
         elegidos = a_quien_pujar(
-            pagables.get("caben") or [],
+            candidatos_finales,
             cuantos=caben,
         )["elegidos"]
 
@@ -290,12 +348,22 @@ def correr(
                 "reason": (
                     f"El carril podia pujar y no hay a quien: "
                     f"{margen.get('reason')} "
-                    f"{pagables.get('reason') or ''}".strip()
-                ),
+                    f"{pagables.get('reason') or ''}"
+                    + (
+                        " "
+                        + " · ".join(
+                            f["reason"]
+                            for f in frenados_por_repetir
+                        )
+                        if frenados_por_repetir
+                        else ""
+                    )
+                ).strip(),
                 "permiso": puerta,
                 "margen": margen,
                 "pagables": pagables,
                 "bolsillo": bolsillo,
+                "frenados": frenados_por_repetir,
             }
 
         if escritor is None:

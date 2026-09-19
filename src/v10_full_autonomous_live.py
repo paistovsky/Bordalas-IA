@@ -775,6 +775,15 @@ def _correr_el_carril(cycle: dict, accion_principal):
                 )
             ),
             disparo=_disparo_de_este_ciclo(),
+
+            # LO QUE YA TENEMOS PUESTO (19/09/2026)
+            #
+            #     Es el MISMO `bid_exposure` que ya se usa dos
+            #     lineas arriba para `comprometido`. De ahi sale
+            #     si ya hay una puja viva por este jugador —y de
+            #     no mirarlo salieron 16 escrituras reales contra
+            #     Biwenger para 4 operaciones distintas.
+            speculation=especulacion,
         )
 
     except Exception as error:                      # noqa: BLE001
