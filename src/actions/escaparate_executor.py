@@ -109,6 +109,17 @@ def que_publicar(
     plantilla: list | None = None,
     ya_listados: list | None = None,
     titulares=None,
+
+    # ¿SE PUDO MIRAR LO PUBLICADO? (19/09/2026)
+    #
+    #     `ya_listados = []` tapaba dos cosas: "mire y no hay
+    #     nada publicado" y "no pude mirar". La segunda no es via
+    #     libre (doctrina 24): si no se sabe que hay puesto, se
+    #     publica encima de lo que ya esta.
+    #
+    #     `None` mantiene el comportamiento de antes para quien
+    #     no lo pase; `False` frena.
+    lo_publicado_se_sabe: bool | None = None,
 ) -> dict:
     """
     Que viajes del carril hay que publicar. Forma fija.
@@ -141,6 +152,25 @@ def que_publicar(
     }
 
     try:
+        # SIN SABER QUE HAY PUBLICADO, NO SE PUBLICA.
+        #
+        #     Es la misma barandilla que la de los titulares, y
+        #     por el mismo motivo: a ciegas esto vuelve a
+        #     publicar lo que ya esta puesto. Medido: Trent,
+        #     dieciseis veces al mismo precio el 13/09, porque
+        #     `compact_listings` no traia `rows` y la lista
+        #     llegaba vacia SIEMPRE.
+        if lo_publicado_se_sabe is False:
+            return {
+                **vacio,
+                "available": True,
+                "reason": (
+                    "No se ha podido leer lo que hay publicado. "
+                    "No se publica a ciegas: no saberlo no es que "
+                    "no haya nada."
+                ),
+            }
+
         filas = [
             g for g in (ganadas or []) if isinstance(g, dict)
         ]
@@ -185,11 +215,37 @@ def que_publicar(
             if isinstance(f, dict)
         }
 
-        en_venta = {
-            safe_int(x.get("player_id") or x.get("id"))
-            for x in (ya_listados or [])
-            if isinstance(x, dict)
-        }
+        # LO PUBLICADO, CON SU PRECIO (19/09/2026)
+        #
+        #     Esto era un conjunto de `player_id` a secas, asi
+        #     que «ya esta publicado» tapaba DOS casos distintos:
+        #
+        #       - publicado al MISMO precio -> no hay que tocarlo
+        #       - publicado a OTRO precio   -> hay que republicar
+        #
+        #     Con el conjunto pelado, bajar o subir el precio de
+        #     una publicacion era imposible por este camino: el
+        #     jugador ya estaba en el conjunto y se saltaba
+        #     siempre.
+        #
+        #     Y lo mismo con una publicacion CADUCADA: sigue
+        #     figurando y hay que volver a ponerla.
+        en_venta = {}
+
+        for x in (ya_listados or []):
+
+            if not isinstance(x, dict):
+                continue
+
+            clave = safe_int(x.get("player_id") or x.get("id"))
+
+            if clave <= 0:
+                continue
+
+            en_venta[clave] = {
+                "listed_price": safe_int(x.get("listed_price")),
+                "expired": bool(x.get("expired")),
+            }
 
         publicar = []
 
@@ -243,16 +299,6 @@ def que_publicar(
                 )
                 continue
 
-            # IDEMPOTENTE, Y CONTRA LA FOTO. `en_venta` sale de
-            # lo que Biwenger dice que esta publicado ahora
-            # mismo, no de lo que creemos recordar haber hecho.
-            if pid in en_venta:
-                _saltar(
-                    fila,
-                    f"{nombre} ya esta publicado.",
-                )
-                continue
-
             precio = precio_de_escaparate(ficha.get("price"))
 
             if precio <= 0:
@@ -264,6 +310,49 @@ def que_publicar(
                     ),
                 )
                 continue
+
+            # IDEMPOTENTE, Y CONTRA LA FOTO. `en_venta` sale de
+            # lo que Biwenger dice que esta publicado ahora
+            # mismo, no de lo que creemos recordar haber hecho.
+            #
+            # PERO SOLO SI ES LA MISMA PUBLICACION (19/09/2026)
+            #
+            #     Antes bastaba con que el jugador estuviera en
+            #     el conjunto. Eso frenaba las repeticiones —bien—
+            #     y tambien las republicaciones LEGITIMAS: cambiar
+            #     el precio de una publicacion era imposible por
+            #     este camino, y una publicacion caducada no se
+            #     volvia a poner nunca.
+            ya = en_venta.get(pid)
+
+            if ya is not None:
+
+                if ya["expired"]:
+                    pass
+
+                elif ya["listed_price"] == precio:
+                    _saltar(
+                        fila,
+                        (
+                            f"{nombre} ya esta publicado a "
+                            f"{precio:,} EUR.".replace(",", ".")
+                        ),
+                    )
+                    continue
+
+                elif ya["listed_price"] <= 0:
+                    # Esta publicado y no sabemos a cuanto. No se
+                    # republica a ciegas: tocar una publicacion
+                    # viva sin saber su precio puede bajarla.
+                    _saltar(
+                        fila,
+                        (
+                            f"{nombre} ya esta publicado y no "
+                            f"consta a que precio: no se toca a "
+                            f"ciegas."
+                        ),
+                    )
+                    continue
 
             publicar.append(
                 {
@@ -584,6 +673,21 @@ def viajes_sin_listar(
     #     `None` = no se sabe quien esta en plantilla, y entonces
     #     no se filtra: el comportamiento de antes. No se adivina.
     plantilla: list | None = None,
+
+    # ¿SE PUDO LEER LO PUBLICADO? (19/09/2026)
+    #
+    #     Es la MISMA raiz que las dieciseis publicaciones de
+    #     Trent: `compact_listings` no traia `rows`, los dos
+    #     consumidores recibian `[]` siempre, y con la lista
+    #     vacia TODO viaje parece huerfano.
+    #
+    #     Por eso el panel llevaba tres fotos diciendo que Trent
+    #     estaba "comprado y sin publicar" mientras lo publicaba
+    #     dieciseis veces: las dos frases salian del mismo hueco.
+    #
+    #     `None` mantiene el comportamiento de antes; `False`
+    #     hace que no se acuse a nadie de estar sin publicar.
+    lo_publicado_se_sabe: bool | None = None,
 ) -> dict:
     """
     Un jugador marcado VIAJE que termina el ciclo SIN LISTAR.
@@ -599,6 +703,23 @@ def viajes_sin_listar(
     """
 
     try:
+        # SIN SABER QUE HAY PUBLICADO, NO SE ACUSA A NADIE.
+        if lo_publicado_se_sabe is False:
+            return {
+                "available": False,
+                "ok": None,
+                "hay_viajes": bool(viajes),
+                "abiertos": len(
+                    [v for v in (viajes or []) if isinstance(v, dict)]
+                ),
+                "players": [],
+                "reason": (
+                    "No se ha podido leer lo que hay publicado, "
+                    "asi que no se sabe si falta alguno por "
+                    "publicar. No saberlo no es que falten todos."
+                ),
+            }
+
         en_venta = {
             safe_int(x.get("player_id") or x.get("id"))
             for x in (listados or [])

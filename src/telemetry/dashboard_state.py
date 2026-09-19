@@ -1691,7 +1691,23 @@ def compact_listings(state: dict) -> dict:
     """
 
     lifecycle = state.get("listing_lifecycle", {}) or {}
+
     return {
+        # SE MIRO O NO SE MIRO (19/09/2026)
+        #
+        #     Sin esto, "no hay nada publicado" y "no he podido
+        #     leer lo publicado" salian los dos como `rows: []`.
+        #     Es la misma familia del fallo de arriba: entonces
+        #     `rows` no existia y la comprobacion de "esto ya
+        #     esta publicado" no podia dar nunca que si; ahora
+        #     existe, pero un `listing_lifecycle` ausente la
+        #     vuelve a dejar muda.
+        #
+        #     Quien publica tiene que poder distinguirlo:
+        #     `available: False` es un freno, no una via libre
+        #     (doctrina 24).
+        "available": bool(lifecycle),
+
         "listing_count": safe_int(lifecycle.get("listing_count")),
 
         # LAS PUBLICACIONES, UNA A UNA. Es el dato que el motor
@@ -5534,6 +5550,16 @@ def build_dashboard_state() -> dict:
                 for p in (state.get("my_team") or [])
                 if isinstance(p, dict)
             ],
+
+            # Y LA MISMA BARANDILLA QUE AL PUBLICAR (19/09/2026)
+            #
+            #     Con la lista de publicaciones vacia por no
+            #     poder leerla, TODO viaje parece huerfano. Es la
+            #     misma raiz que las dieciseis publicaciones de
+            #     Trent.
+            lo_publicado_se_sabe=bool(
+                (compact_listings(state) or {}).get("available")
+            ),
 
             # «HOY» ES RESPECTO A LA FOTO (14/09/2026, madrugada)
             #

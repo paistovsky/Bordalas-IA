@@ -942,6 +942,15 @@ def _llenar_el_escaparate(cycle, accion_principal):
                 "rows"
             )
             or [],
+
+            # Y SI NO SE PUDO MIRAR, QUE NO PUBLIQUE (19/09/2026)
+            #
+            #     `rows: []` valia por "no hay nada publicado" y
+            #     por "no pude leerlo". La segunda es la que
+            #     publico a Trent dieciseis veces.
+            lo_publicado_se_sabe=bool(
+                (compact_listings(estado) or {}).get("available")
+            ),
             titulares=_titulares_del_once(cycle),
         )
 
