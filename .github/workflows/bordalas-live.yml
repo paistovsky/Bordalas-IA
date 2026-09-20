@@ -1,4 +1,4 @@
-﻿name: Bordalas IA Live
+name: Bordalas IA Live
 
 # EL SCHEDULE DE GITHUB SE RETIRO EL 12/09/2026
 #
@@ -62,6 +62,10 @@ jobs:
 
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # Encendido 20/09. Amplia la lista de objetivos de 145 a 547.
+      # Medido: +0,63 s, cero peticiones nuevas, ninguna decision cambia.
+      BORDALAS_OBJETIVOS_EL_CATALOGO: "1"
 
     steps:
       - name: Checkout
