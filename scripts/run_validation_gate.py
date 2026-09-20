@@ -285,6 +285,8 @@ TESTS = [
     "src.analysis.test_la_cesta_solo_el_suelo_v1",
     "src.analysis.test_la_lista_de_objetivos_v1",
     "src.analysis.test_el_liston_del_manager_v1",
+    "src.analysis.test_el_marcador_por_su_fecha_v1",
+    "src.analysis.test_una_jornada_sin_once_no_cuadra_v1",
     "src.analysis.test_ninguna_pasa_con_las_manos_vacias_v1",
     "src.analysis.test_los_sentidos_v1",
     "src.analysis.test_la_alarma_de_los_sentidos_v1",

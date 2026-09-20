@@ -3908,6 +3908,16 @@ def build_dashboard_state() -> dict:
     #     cerrada, y no es teoria: ya la hemos cruzado.
     #
     #     ESTO NO OFRECE NADA A NADIE. Cuenta lo que ya paso.
+    #
+    # Y LOS MISMOS EVENTOS LOS USA EL MARCADOR (20/09/2026)
+    #
+    #     `roundStarted` trae la fecha de cada jornada con su
+    #     `round_id`, que es lo unico que distingue «Jornada 6»
+    #     de «Jornada 6 (aplazada)». Se inicializa aqui para que
+    #     el marcador lo tenga aunque este bloque falle: sin el,
+    #     el calendario es el de ayer y se dice.
+    _eventos_del_tablon = []
+
     try:
         from src.analysis.la_puerta_de_los_managers import (
             traspasos_entre_managers,
@@ -4621,7 +4631,23 @@ def build_dashboard_state() -> dict:
         _calendario_laliga = {}
 
     marcador_estado = build_marcador(
-        calendario_desde_la_foto(snapshot, _calendario_laliga)
+        calendario_desde_la_foto(
+            snapshot,
+            _calendario_laliga,
+
+            # LA FECHA DE VERDAD DE LAS APLAZADAS (20/09/2026)
+            #
+            #     El calendario de LaLiga va por NUMERO de
+            #     jornada, asi que «Jornada 6» y «Jornada 6
+            #     (aplazada)» se llevan la misma hora y las
+            #     fotos se emparejan al reves. El tablon lo
+            #     sabe: `roundStarted` trae el `round_id`.
+            #
+            #     Ya estaban cargados: cero peticiones nuevas.
+            #     Detras de `BORDALAS_JORNADAS_POR_SU_FECHA`,
+            #     apagado.
+            eventos=_eventos_del_tablon,
+        )
     )
 
     try:

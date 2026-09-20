@@ -109,6 +109,130 @@ FORMACIONES = {
 PRIMERA_JORNADA = 4899
 
 
+# ================================================================
+# LA FECHA DE VERDAD DE CADA JORNADA  (20/09/2026) - APAGADO
+# ================================================================
+#
+# LO QUE YA ESTABA BIEN, Y HAY QUE DECIRLO PRIMERO
+#
+#     Este motor NO ordena por `round_id`. Desde el 14/09 ordena
+#     por `primer_partido`, que sale del calendario. Doctrina 88:
+#     lo viejo esta del otro lado del diff.
+#
+# LO QUE FALLA ES DE DONDE SALE ESA FECHA
+#
+#     `calendario_de_jornadas` tiene dos fuentes, y las dos son
+#     ciegas a las jornadas aplazadas:
+#
+#         · los PARTIDOS de la foto traen la fecha exacta por
+#           `round_id` — pero Biwenger solo publica los que
+#           quedan por jugar. De las nueve jornadas observadas,
+#           ocho no tienen ni un partido a la vista.
+#
+#         · el CALENDARIO DE LALIGA es el respaldo, y va por
+#           NUMERO de jornada. «Jornada 1» y «Jornada 1
+#           (aplazada)» son el numero 1 las dos, asi que se
+#           llevan LA MISMA HORA.
+#
+#     Medido contra el tablon: 4937 «Jornada 1 (aplazada)» se
+#     jugo el 25/08 y el calendario le pone el 15/08, que es el
+#     de la Jornada 1. Y 5125 «Jornada 6 (aplazada)» se jugo el
+#     15/09 y le pone el 03/09, que es el de la Jornada 6.
+#
+#     Con el empate, el desempate es el `round_id` — y ahi si
+#     vuelve a mandar el numero. Por eso 4937 queda ANTES de
+#     4900 y 5125 ANTES de 4902: las dos parejas rotas.
+#
+# LA FECHA EXACTA YA LA TENEMOS, Y NO LA ESTABAMOS PIDIENDO
+#
+#     El tablon publica `roundStarted` y `roundFinished` con el
+#     `round_id` dentro y hasta un `part: 2` que marca la mitad
+#     aplazada. Cubre las NUEVE observadas, al segundo, y el
+#     fichero ya se carga cada vuelta para otras cosas: cero
+#     peticiones nuevas.
+#
+#     Doctrina 103: no es que no lo supieramos, es que no lo
+#     habiamos preguntado.
+#
+#     Se usa `roundStarted` y no `roundFinished` porque cubre las
+#     nueve —4904 y 4905 no tienen fin— y porque donde estan las
+#     dos, el orden que dan es el mismo.
+#
+# APAGADO el calendario es exactamente el de ayer.
+
+ENV_POR_SU_FECHA = "BORDALAS_JORNADAS_POR_SU_FECHA"
+
+
+def jornadas_por_su_fecha() -> bool:
+    """Si la fecha de la jornada sale del tablon. Nunca lanza."""
+
+    import os
+
+    return str(
+        os.environ.get(ENV_POR_SU_FECHA, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
+
+
+def fechas_del_tablon(eventos) -> dict:
+    """`{round_id: {"empieza", "nombre", "part"}}` del tablon.
+
+    Forma fija, nunca lanza. Los eventos entran por la puerta
+    (regla 23): esta funcion no abre disco.
+
+    De cada `roundStarted` se queda la MAS TEMPRANA: el tablon
+    repite eventos y un duplicado no puede mover una jornada.
+    """
+
+    salida: dict[int, dict] = {}
+
+    try:
+
+        for evento in (eventos or []):
+
+            if not isinstance(evento, dict):
+                continue
+
+            if evento.get("type") != "roundStarted":
+                continue
+
+            contenido = evento.get("content")
+
+            if isinstance(contenido, list):
+                contenido = contenido[0] if contenido else {}
+
+            if not isinstance(contenido, dict):
+                continue
+
+            ronda = contenido.get("round") or {}
+
+            round_id = safe_int(ronda.get("id"))
+
+            momento = _momento(evento.get("date"))
+
+            if not round_id or momento is None:
+                continue
+
+            fila = salida.get(round_id)
+
+            if fila is None or momento < fila["momento"]:
+
+                salida[round_id] = {
+                    "round_id": round_id,
+                    "momento": momento,
+                    "nombre": ronda.get("name"),
+
+                    # `part: 2` es como el propio Biwenger marca
+                    # la mitad aplazada. Viaja porque explica por
+                    # que esta fila existe.
+                    "part": ronda.get("part"),
+                }
+
+        return salida
+
+    except Exception:                               # noqa: BLE001
+        return salida
+
+
 def safe_int(value, default: int = 0) -> int:
     try:
         return int(value or 0)
@@ -198,6 +322,7 @@ def calendario_de_jornadas(
     rondas,
     partidos=None,
     kickoff_por_jornada=None,
+    eventos=None,
 ) -> dict:
     """Cuando se jugo cada jornada. Forma fija. Nunca lanza.
 
@@ -322,6 +447,47 @@ def calendario_de_jornadas(
             fila["primer_partido"] = momento.isoformat()
             fila["fuente"] = "PARTIDOS_DE_LA_JORNADA"
 
+        # ------------------------------------------------
+        # 3. LA MEJOR: EL TABLON  (20/09/2026) - APAGADA
+        #
+        #     `roundStarted` trae el `round_id` dentro, asi que
+        #     es la unica de las tres que distingue «Jornada 6»
+        #     de «Jornada 6 (aplazada)». Manda sobre las otras
+        #     dos, incluida la de los partidos: esa es exacta
+        #     pero solo cubre lo que queda por jugar.
+        #
+        #     Apagada, no toca nada.
+        # ------------------------------------------------
+
+        if jornadas_por_su_fecha():
+
+            for round_id, fila_tablon in fechas_del_tablon(
+                eventos
+            ).items():
+
+                fila = salida.setdefault(
+                    round_id,
+                    {
+                        "round_id": round_id,
+                        "nombre": fila_tablon.get("nombre") or "",
+                        "numero": None,
+                        "primer_partido": None,
+                        "fuente": None,
+                    },
+                )
+
+                fila["primer_partido"] = (
+                    fila_tablon["momento"].isoformat()
+                )
+
+                fila["fuente"] = "EVENTOS_DEL_TABLON"
+
+                # La mitad aplazada, con el nombre que le da
+                # Biwenger. Es lo que explica por que esta fila
+                # no comparte hora con su hermana.
+                if fila_tablon.get("part") is not None:
+                    fila["part"] = fila_tablon["part"]
+
         return salida
 
     except Exception:                               # noqa: BLE001
@@ -380,6 +546,7 @@ def kickoff_por_jornada(calendario_laliga) -> dict:
 def calendario_desde_la_foto(
     snapshot,
     calendario_laliga=None,
+    eventos=None,
 ) -> dict:
     """El calendario de jornadas que sale de la foto. Nunca lanza.
 
@@ -419,6 +586,11 @@ def calendario_desde_la_foto(
             kickoff_por_jornada=kickoff_por_jornada(
                 calendario_laliga
             ),
+
+            # Los eventos del tablon, que ya se cargan cada
+            # vuelta para contar la puerta de los managers.
+            # Entran por la puerta, como todo lo demas.
+            eventos=eventos,
         )
 
     except Exception:                               # noqa: BLE001
@@ -1178,6 +1350,79 @@ def foto_a_medias(jornada) -> str | None:
         return None
 
 
+# ================================================================
+# DOS ENFERMEDADES CON LA MISMA ETIQUETA  (20/09/2026)
+# ================================================================
+#
+#     Un negativo al restar totales tenia UN solo motivo escrito:
+#     «las dos fotos estan al reves». Es falso para la mitad de
+#     los casos, y doctrina 87: un motivo que nombra una causa
+#     que no decidio es una afirmacion falsa.
+#
+# LO QUE SEPARA LOS DOS GRUPOS, MEDIDO
+#
+#     Las 9 fotos del libro (10/08 -> 20/09) permiten 72 restas
+#     ordenadas. Separadas por si la previa es de verdad
+#     anterior:
+#
+#         orden CORRECTO   36 parejas   25 sin ningun negativo
+#                          las 11 con negativo: UN jugador
+#                          siempre, y -1 o -2 siempre
+#
+#         orden INVERTIDO  36 parejas   las 36 con negativo
+#                          de 2 a 11 jugadores
+#                          de -4 a -88
+#
+#     Los dos grupos NO SE SOLAPAN por ninguno de los dos ejes:
+#     ni por cuantos jugadores (1 contra 2+), ni por el tamaño
+#     (-2 contra -4). El umbral no me lo invento: sale de ahi.
+#
+#     EL `n` HONESTO NO ES 72. Son 9 fotos y 8 parejas
+#     consecutivas reales; las 72 son todas sus combinaciones y
+#     no son independientes. El margen es ancho, la muestra es
+#     corta, y las dos cosas van dichas.
+#
+# ESTO NO CAMBIA NINGUNA DECISION. Las dos siguen sin medirse.
+# Lo unico que cambia es que el motivo deja de mentir.
+
+# Cuantos jugadores hacen falta para que sea un desorden de
+# fotos. Medido: con las fotos en orden nunca fue mas de UNO.
+JUGADORES_DE_UN_DESORDEN = 2
+
+# Y el tamaño. Medido: con las fotos en orden, nunca peor que -2;
+# al reves, nunca mejor que -4.
+CORRECCION_MAS_GRANDE = -2
+
+
+def _es_correccion_retroactiva(negativos) -> bool:
+    """Un negativo suelto y pequeño no es una foto al reves.
+
+    Los dos ejes a la vez, porque los dos estan medidos y
+    ninguno de los dos vale solo.
+    """
+
+    return (
+        len(negativos) < JUGADORES_DE_UN_DESORDEN
+        and negativos
+        and negativos[0][1] >= CORRECCION_MAS_GRANDE
+    )
+
+
+def _sello_del_cuadre(fila: dict) -> str:
+    """Lo que se imprime al lado de la jornada.
+
+    Tres estados, no dos: cuadra, no cuadra, y NO SE PUDO MEDIR
+    el cuadre. El tercero salia antes como «cuadra».
+    """
+
+    cuadre = fila.get("cuadra")
+
+    if cuadre is None:
+        return "  [CUADRE NO MEDIBLE]"
+
+    return "" if cuadre else "  [NO CUADRA]"
+
+
 def _puntos_de_la_jornada(
     actual: dict,
     previa: dict | None,
@@ -1251,14 +1496,34 @@ def _puntos_de_la_jornada(
 
         peor = negativos[0]
 
-        return None, (
+        cabecera = (
             f"{len(negativos)} jugador(es) con puntos negativos "
             f"al restar los totales de la jornada "
             f"{safe_int(previa.get('round_id'))} a los de la "
             f"{safe_int(actual.get('round_id'))} (el mayor, "
-            f"{peor[1]} en el jugador {peor[0]}). Un jugador no "
-            f"pierde puntos de temporada: las dos fotos estan al "
-            f"reves. No se mide esta jornada."
+            f"{peor[1]} en el jugador {peor[0]})."
+        )
+
+        if _es_correccion_retroactiva(negativos):
+
+            return None, (
+                f"{cabecera} Un jugador no pierde puntos de "
+                f"temporada, pero UNO SOLO y de "
+                f"{-peor[1]} punto(s) no es un desorden de "
+                f"fotos: es una correccion retroactiva de "
+                f"Biwenger. Medido sobre las 72 restas que "
+                f"permiten las 9 fotos (10/08 a 20/09): con las "
+                f"fotos en orden, el negativo SIEMPRE fue de un "
+                f"solo jugador y de -1 o -2; con las fotos al "
+                f"reves, SIEMPRE fueron 2 o mas jugadores y "
+                f"nunca menos de -4. Hoy se descarta igual, y "
+                f"esa regla la revisa el dueño."
+            )
+
+        return None, (
+            f"{cabecera} Un jugador no pierde puntos de "
+            f"temporada, y son {len(negativos)} a la vez: las "
+            f"dos fotos estan al reves. No se mide esta jornada."
         )
 
     return puntos, None
@@ -1748,9 +2013,40 @@ def marcador(calendario: dict | None = None) -> dict:
                 ),
                 None,
             ),
+            # CERO CONTRA CERO SIEMPRE CUADRA  (20/09/2026)
+            #
+            #     4904 salia con `cuadra: true` teniendo
+            #     `puntos_once: 0`, `puntos_biwenger: 0` y
+            #     `reconstruccion_completa: false` — motivo:
+            #     «No se anoto que once jugo esa jornada».
+            #
+            #     Un verde que puede darse SIN HABER MEDIDO NADA
+            #     vale lo mismo que un rojo (doctrina 91, del
+            #     otro lado). Si no hubo reconstruccion, el
+            #     cuadre no es falso: es que NO ES MEDIBLE, y
+            #     eso se dice con un `None`, no con un `true`.
+            #
+            #     La fila sigue siendo `medible`: la resta de
+            #     totales SI funciono. Lo que no se puede medir
+            #     es el cuadre.
             "cuadra": (
-                mios is not None
-                and mios == puntos_alineados
+                None
+                if not completa
+                else (
+                    mios is not None
+                    and mios == puntos_alineados
+                )
+            ),
+
+            "cuadra_motivo": (
+                (
+                    f"Cuadre no medible: {motivo_incompleta}"
+                    if motivo_incompleta
+                    else "Cuadre no medible: la reconstruccion "
+                         "del once quedo incompleta."
+                )
+                if not completa
+                else None
             ),
 
             # CUANTO FALTA PARA CUADRAR (17/09/2026)
@@ -1851,9 +2147,20 @@ def marcador(calendario: dict | None = None) -> dict:
         "eficiencia_media": None,
         "diferencia_media": None,
         "diferencia_media_n": 0,
-        "cuadra_todo": all(
-            f.get("cuadra") for f in medibles
-        ) if medibles else None,
+        # Y SOLO SOBRE LAS QUE SE PUDO MEDIR. Un `None` no es
+        # un `False`: contarlo como fallo seria la otra mitad
+        # del mismo error.
+        "cuadra_todo": (
+            all(
+                f["cuadra"]
+                for f in medibles
+                if f.get("cuadra") is not None
+            )
+            if any(
+                f.get("cuadra") is not None for f in medibles
+            )
+            else None
+        ),
         "veredicto": "Sin jornadas cerradas todavia.",
     }
 
@@ -2113,7 +2420,7 @@ def main() -> None:
             f"{fila['eficiencia']} %  |  "
             f"liga {fila['media_rivales']} "
             f"({fila['diferencia_liga']:+})"
-            f"{'' if fila['cuadra'] else '  [NO CUADRA]'}"
+            f"{_sello_del_cuadre(fila)}"
         )
 
     print()
