@@ -24,6 +24,227 @@ CRAZY_OFFER_MIN_MARKET_MULTIPLIER = 1.75
 ROUND_TO = 10_000
 
 
+# ================================================================
+# EL LISTON DEL QUE PAGA MAS  (20/09/2026) - APAGADO
+# ================================================================
+#
+# LO QUE ESTABA DEL REVES
+#
+#     Al Computer le aplicamos la regla flexible del 18/08:
+#     `PREMIUM_GOOD` = +3 % sobre mercado, y +0 % en la ultima
+#     llamada. Al manager le pedimos `strategic_sell_price`, que
+#     es mercado x (1 + hasta 25 %) x (1 + hasta 18 % + primas):
+#     puede pasar del +40 %.
+#
+#     Le exigiamos MAS al comprador que paga MAS. Medido sobre
+#     las 23 operaciones cerradas de la temporada:
+#
+#         al Computer   n=21   +0,55 % de mediana   2,8 dias
+#         a un manager  n= 2   +7,5 % y +143,3 %    6 y 18,6 dias
+#
+#     Y las cinco ofertas de manager que nos llegaron -12 y
+#     13/08- estaban en +2,6 % a +6,4 %.
+#
+# EL LISTON, Y DE DONDE SALE CADA NUMERO
+#
+#     liston = mercado x (1 + VARA_DEL_COMPUTER + margen)
+#
+#     `VARA_DEL_COMPUTER` es +0,55 %: la MEDIANA MEDIDA de lo
+#     que nos ha dado el Computer en 21 ventas cerradas, del
+#     10/08 al 20/09. No es lo que el Computer OFRECE -sus 13
+#     ofertas vivas de hoy tienen +3,1 % de mediana-, es lo que
+#     acabamos cobrando. Doctrina 90.
+#
+#     `margen` NO LO PONE ESTE FICHERO. Lo pone el dueño en
+#     `BORDALAS_MARGEN_DEL_MANAGER`, en puntos porcentuales. Sin
+#     el, el interruptor no hace nada y lo dice: un liston
+#     encendido sin numero aceptaria a +0,55 %, y eso no lo ha
+#     decidido nadie.
+#
+# TRES BARANDILLAS, Y LAS TRES SON DEL DUEÑO
+#
+#     1. EL TECHO ES EL DEL COMPUTER. El liston del manager
+#        nunca puede pasar de `PREMIUM_GOOD`, que es lo que le
+#        pedimos al Computer. Asi la regla «no se le exige mas
+#        al que paga mas» la sostiene el CODIGO y no el numero
+#        que se escriba en el entorno.
+#
+#     2. SOLO BAJA, NUNCA SUBE. El liston se topa tambien con el
+#        `strategic_sell_price` de hoy: el interruptor no puede
+#        hacernos rechazar una oferta que hoy aceptariamos.
+#
+#     3. LA EXCEPCION DEL ONCE NO SE TOCA. Con `in_lineup` el
+#        liston no se aplica: un jugador del once sigue con el
+#        precio estrategico entero, paguen lo que paguen.
+#
+# APAGADO el comportamiento es exactamente el de ayer.
+
+ENV_LISTON_DEL_MANAGER = "BORDALAS_LISTON_DEL_MANAGER"
+
+ENV_MARGEN_DEL_MANAGER = "BORDALAS_MARGEN_DEL_MANAGER"
+
+
+# La mediana medida de las 21 ventas cerradas al Computer
+# (10/08/2026 -> 20/09/2026). Con su `n` y su plazo, regla 18.
+VARA_DEL_COMPUTER_PERCENT = 0.55
+
+
+def liston_del_manager_activo() -> bool:
+    """Si el liston del manager manda. Nunca lanza."""
+
+    import os
+
+    return str(
+        os.environ.get(ENV_LISTON_DEL_MANAGER, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
+
+
+def margen_del_manager():
+    """
+    Los puntos porcentuales por encima de la vara del Computer.
+
+    `None` si el dueño no lo ha puesto. Nunca lanza, y nunca se
+    inventa un valor por defecto: ese numero es una decision.
+    """
+
+    import os
+
+    crudo = str(
+        os.environ.get(ENV_MARGEN_DEL_MANAGER, "")
+    ).strip().replace(",", ".")
+
+    if not crudo:
+        return None
+
+    try:
+        margen = float(crudo)
+    except (TypeError, ValueError):
+        return None
+
+    return margen if margen >= 0 else None
+
+
+def techo_del_liston_del_manager(market_value: int) -> int:
+    """
+    Lo maximo que se le puede pedir a un manager: lo que le
+    pedimos al Computer.
+
+    Doctrina 84: `PREMIUM_GOOD` ya existe y vive en
+    `offer_decision_engine`. No se copia el 3,0 aqui.
+    """
+
+    try:
+        from src.analysis.offer_decision_engine import PREMIUM_GOOD
+
+    except Exception:                               # noqa: BLE001
+        return safe_int(market_value)
+
+    # SE TRUNCA, NO SE REDONDEA. `round_money` va a la decena de
+    # millar mas cercana y podria subir el techo hasta 5.000 por
+    # encima del +3 %: entonces el liston del manager quedaria
+    # un pelo POR ENCIMA del que le pedimos al Computer, que es
+    # justo lo que esto existe para impedir. Un techo se trunca.
+    return int(
+        safe_int(market_value)
+        * (1.0 + float(PREMIUM_GOOD) / 100.0)
+    )
+
+
+def liston_del_manager(
+    *,
+    market_value: int,
+    strategic_sell_price: int,
+    in_lineup: bool,
+) -> tuple[int, str | None]:
+    """
+    El precio a partir del cual se le coge el dinero a un manager.
+
+    Devuelve `(precio, motivo)`. `motivo` es None cuando el
+    liston no cambia nada: asi quien lo publique puede decir por
+    que no ha cambiado en vez de callarse (regla 28).
+    """
+
+    strategic_sell_price = safe_int(strategic_sell_price)
+
+    if not liston_del_manager_activo():
+        return (strategic_sell_price, None)
+
+    if safe_int(market_value) <= 0:
+        return (
+            strategic_sell_price,
+            "Sin valor de mercado no hay vara con la que "
+            "comparar: se queda el precio estrategico.",
+        )
+
+    if in_lineup:
+        return (
+            strategic_sell_price,
+            "El jugador esta en el once: la excepcion del dueño "
+            "manda y el liston del manager no se aplica.",
+        )
+
+    margen = margen_del_manager()
+
+    if margen is None:
+        return (
+            strategic_sell_price,
+            f"El liston del manager esta encendido y SIN MARGEN. "
+            f"El margen sobre el "
+            f"{VARA_DEL_COMPUTER_PERCENT:.2f} % que da el "
+            f"Computer lo pone el dueño en "
+            f"`{ENV_MARGEN_DEL_MANAGER}`; hasta entonces manda "
+            f"el precio estrategico.",
+        )
+
+    # SE TRUNCA, COMO EL TECHO, Y POR EL MISMO MOTIVO.
+    #
+    #     `round_money` va a la decena de millar mas cercana. Un
+    #     liston redondeado deja de responder a los decimales
+    #     del margen: con +2,10 pp el liston de Ximo Navarro
+    #     bajaba de 1.201.005 a 1.200.000 y su oferta de
+    #     1.200.000 pasaba. Eran 185.700 EUR decididos por el
+    #     redondeo, no por el numero que puso el dueño.
+    #
+    #     Un liston es una comparacion, no un precio que se
+    #     escriba en Biwenger: no hay nada que redondear.
+    propuesto = int(
+        safe_int(market_value)
+        * (
+            1.0
+            + (VARA_DEL_COMPUTER_PERCENT + margen) / 100.0
+        )
+    )
+
+    techo = techo_del_liston_del_manager(market_value)
+
+    liston = min(propuesto, techo, strategic_sell_price)
+
+    if liston >= strategic_sell_price:
+        return (
+            strategic_sell_price,
+            "El liston del manager sale por encima del precio "
+            "estrategico: manda el estrategico, que es el mas "
+            "bajo. El liston solo puede bajar.",
+        )
+
+    return (
+        liston,
+        (
+            f"Liston del manager: mercado x "
+            f"(1 + {VARA_DEL_COMPUTER_PERCENT:.2f} % + "
+            f"{margen:.2f} pp)"
+            + (
+                f", topado por lo que le pedimos al Computer"
+                if liston == techo
+                else ""
+            )
+            + f". El Computer nos da "
+            f"{VARA_DEL_COMPUTER_PERCENT:.2f} % de mediana en 21 "
+            f"ventas cerradas; este manager paga mas."
+        ),
+    )
+
+
 def safe_int(value: Any, default: int = 0) -> int:
     try:
         return int(value or 0)
@@ -1424,6 +1645,18 @@ def evaluate_sale_to_rival(
         else 0
     )
 
+    # EL LISTON DEL QUE PAGA MAS (20/09/2026) - APAGADO
+    #
+    #     Lo unico que cambia es el precio contra el que se
+    #     compara la oferta. La contraoferta sigue siendo el
+    #     precio estrategico: se pide alto y se coge lo que
+    #     pasa el suelo, que son dos decisiones distintas.
+    precio_de_aceptar, motivo_del_liston = liston_del_manager(
+        market_value=market_value,
+        strategic_sell_price=strategic_sell_price,
+        in_lineup=in_lineup,
+    )
+
     market_multiplier = (
         amount
         /
@@ -1487,7 +1720,7 @@ def evaluate_sale_to_rival(
         crazy_offer
         and
         amount
-        >= strategic_sell_price
+        >= precio_de_aceptar
     ):
 
         decision = (
@@ -1503,7 +1736,7 @@ def evaluate_sale_to_rival(
 
     elif (
         amount
-        >= strategic_sell_price
+        >= precio_de_aceptar
     ):
 
         decision = "ACCEPT_NOW"
@@ -1511,6 +1744,8 @@ def evaluate_sale_to_rival(
 
         reasons.append(
             "La oferta alcanza el precio estrategico total."
+            if precio_de_aceptar == strategic_sell_price
+            else "La oferta pasa el liston del manager."
         )
 
     else:
@@ -1668,6 +1903,18 @@ def evaluate_sale_to_rival(
 
         "strategic_sell_price":
             strategic_sell_price,
+
+        # EL PRECIO CONTRA EL QUE SE COMPARO DE VERDAD, y por
+        # que. Con el interruptor apagado es el estrategico y el
+        # motivo va vacio: una ausencia que se anuncia.
+        "liston_del_manager":
+            precio_de_aceptar,
+
+        "liston_del_manager_reason":
+            motivo_del_liston,
+
+        "vara_del_computer_percent":
+            VARA_DEL_COMPUTER_PERCENT,
 
         "counter_amount":
             counter_amount,

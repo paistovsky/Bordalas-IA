@@ -263,6 +263,58 @@ def _percent(value) -> float | None:
 # ----------------------------------------------------------------
 # LOS JUGADORES DE BIWENGER QUE HAY QUE CUBRIR
 # ----------------------------------------------------------------
+#
+# LA LISTA DE OBJETIVOS, Y POR QUE ESTABA ACOTADA (20/09/2026)
+#
+#     EL MOTIVO ESCRITO ESTA DOS VECES EN ESTE MODULO, y no es
+#     un descuido:
+#
+#         · el docstring de `build_targets` -"plantilla Y
+#           mercado"-, que es el arreglo del 1.2: antes solo
+#           llegaba `roster` y ningun candidato del mercado tenia
+#           pronostico;
+#
+#         · el comentario del bloque RIVAL (20/08): "cero
+#           decisiones cambiadas -nadie valora a un jugador que
+#           no esta en venta-".
+#
+#     Esa frase es el motivo entero: la lista se hizo con "a
+#     quien puedo comprar hoy", no con "quien hay". Es una
+#     decision, no un olvido, y por eso se amplia detras de un
+#     interruptor.
+#
+#     PERO EL LIMITE YA NO ES EL QUE SE CONTABA. El tablero de
+#     `data/intelligence/futbolfantasy_board.json` dice 64
+#     objetivos y 13 paginas porque es del 17/08, TRES DIAS ANTES
+#     del bloque RIVAL. Medido contra la foto del 19/09, esta
+#     funcion ya devuelve 145 objetivos y pide las 20 paginas.
+#
+#     Doctrina 84: comprueba que no existe antes de construirlo.
+#     La mitad del arreglo ya estaba hecha.
+#
+# QUE AÑADE EL INTERRUPTOR
+#
+#     Los que no son nuestros, ni estan en venta, ni los tiene
+#     un rival: los libres del catalogo. Son los unicos que
+#     quedan fuera, y son la mayoria.
+#
+#     No cuesta una pagina mas -las 20 ya se piden-, cuesta
+#     emparejar. Por eso el coste va medido en
+#     `scripts/de_64_a_513.py` y no estimado aqui.
+#
+#     APAGADO el comportamiento es exactamente el de ayer: los
+#     mismos objetivos, en el mismo orden, con el mismo scope.
+ENV_EL_CATALOGO = "BORDALAS_OBJETIVOS_EL_CATALOGO"
+
+
+def objetivos_el_catalogo() -> bool:
+    """Si la lista de objetivos cubre el catalogo. Nunca lanza."""
+
+    import os
+
+    return str(
+        os.environ.get(ENV_EL_CATALOGO, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
 
 
 def _catalog(snapshot: dict) -> dict:
@@ -452,6 +504,47 @@ def build_targets(snapshot: dict) -> list[dict]:
                 None,
                 None,
                 "RIVAL",
+            )
+
+    # ------------------------------------------------------
+    # EL RESTO DEL CATALOGO (20/09/2026) - APAGADO
+    #
+    # Lo que queda fuera despues de plantilla, mercado y
+    # rivales son los LIBRES: los que no tiene nadie y hoy no
+    # estan en venta. Son la mayoria del catalogo.
+    #
+    # Ninguno se puede comprar hoy -no estan listados-, asi
+    # que esto NO mete un candidato nuevo en el tablero de
+    # fichajes. Lo que hace es que el dia que salgan al
+    # mercado ya tengan pronostico, y que "no lo sabemos"
+    # deje de confundirse con "no lo hemos preguntado"
+    # (doctrina 103).
+    #
+    # No pide ni una pagina mas: los objetivos de arriba ya
+    # cubren los 20 equipos. Lo que cuesta es emparejar.
+    # ------------------------------------------------------
+
+    if objetivos_el_catalogo():
+
+        for player_id, ficha in catalogo.items():
+
+            if not isinstance(ficha, dict):
+                continue
+
+            try:
+                player_id = int(player_id)
+            except (TypeError, ValueError):
+                continue
+
+            if player_id in objetivos:
+                continue
+
+            anota(
+                player_id,
+                ficha.get("name"),
+                ficha.get("teamID"),
+                _price(ficha),
+                "CATALOGO",
             )
 
     return list(objetivos.values())
