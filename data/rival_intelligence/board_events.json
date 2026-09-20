@@ -143348,229 +143348,6 @@
     }
   },
   {
-    "event_id": "070ff19a95af8a3011cf4be8",
-    "date": 1789578015,
-    "type": "bettingPool",
-    "fixed": false,
-    "title": "",
-    "author": null,
-    "content": {
-      "pool": {
-        "id": 634802,
-        "until": 1789758000,
-        "expired": true,
-        "mode": "1x2",
-        "games": [
-          {
-            "id": 50774,
-            "date": 1789758000,
-            "status": "finished",
-            "home": {
-              "id": 7,
-              "name": "Espanyol",
-              "slug": "espanyol",
-              "score": 1
-            },
-            "away": {
-              "id": 75,
-              "name": "Elche",
-              "slug": "elche",
-              "score": 3
-            }
-          },
-          {
-            "id": 50775,
-            "date": 1789819200,
-            "status": "finished",
-            "home": {
-              "id": 93,
-              "name": "Osasuna",
-              "slug": "osasuna",
-              "score": 1
-            },
-            "away": {
-              "id": 70,
-              "name": "Rayo Vallecano",
-              "slug": "rayo-vallecano",
-              "score": 1
-            }
-          },
-          {
-            "id": 50769,
-            "date": 1789827300,
-            "status": "finished",
-            "home": {
-              "id": 1,
-              "name": "Athletic",
-              "slug": "athletic",
-              "score": 0
-            },
-            "away": {
-              "id": 91,
-              "name": "Alavés",
-              "slug": "alaves",
-              "score": 0
-            }
-          },
-          {
-            "id": 50770,
-            "date": 1789835400,
-            "status": "finished",
-            "home": {
-              "id": 5,
-              "name": "Celta",
-              "slug": "celta",
-              "score": 5
-            },
-            "away": {
-              "id": 812,
-              "name": "Racing",
-              "slug": "racing",
-              "score": 0
-            }
-          },
-          {
-            "id": 50777,
-            "date": 1789844400,
-            "status": "finished",
-            "home": {
-              "id": 17,
-              "name": "Sevilla",
-              "slug": "sevilla",
-              "score": 1
-            },
-            "away": {
-              "id": 3,
-              "name": "Barcelona",
-              "slug": "barcelona",
-              "score": 3
-            }
-          },
-          {
-            "id": 50771,
-            "date": 1789905600,
-            "status": "finished",
-            "home": {
-              "id": 8,
-              "name": "Getafe",
-              "slug": "getafe",
-              "score": 1
-            },
-            "away": {
-              "id": 65,
-              "name": "Málaga",
-              "slug": "malaga",
-              "score": 0
-            }
-          },
-          {
-            "id": 50773,
-            "date": 1789913700,
-            "status": "finished",
-            "home": {
-              "id": 2,
-              "name": "Atlético",
-              "slug": "atletico",
-              "score": 2
-            },
-            "away": {
-              "id": 15,
-              "name": "Real Madrid",
-              "slug": "real-madrid",
-              "score": 1
-            }
-          },
-          {
-            "id": 50772,
-            "date": 1789921800,
-            "status": "finished",
-            "home": {
-              "id": 6,
-              "name": "Deportivo",
-              "slug": "deportivo",
-              "score": 1
-            },
-            "away": {
-              "id": 87,
-              "name": "Betis",
-              "slug": "betis",
-              "score": 1
-            }
-          },
-          {
-            "id": 50776,
-            "date": 1789921800,
-            "status": "finished",
-            "home": {
-              "id": 19,
-              "name": "Villarreal",
-              "slug": "villarreal",
-              "score": 3
-            },
-            "away": {
-              "id": 10,
-              "name": "Levante",
-              "slug": "levante",
-              "score": 1
-            }
-          },
-          {
-            "id": 50778,
-            "date": 1789930800,
-            "status": "break",
-            "home": {
-              "id": 18,
-              "name": "Valencia",
-              "slug": "valencia",
-              "score": 0
-            },
-            "away": {
-              "id": 13,
-              "name": "Real Sociedad",
-              "slug": "real-sociedad",
-              "score": 1
-            }
-          }
-        ],
-        "prizes": [],
-        "competition": "la-liga",
-        "round": {
-          "id": 4905,
-          "name": "Jornada 7",
-          "short": "J7",
-          "season": {
-            "id": "2027",
-            "name": "Temporada 2026/2027",
-            "slug": "2026-2027"
-          }
-        },
-        "responses": [],
-        "global": true,
-        "credits": {
-          "required": 1,
-          "prizes": true
-        },
-        "description": {
-          "es": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
-          "en": "<p style='text-align: center'>Send us your <strong>predictions</strong> for the round's matches and you could <strong>win credits</strong></p>",
-          "ca": "<p style='text-align: center'>Envia'ns el teu <strong>pronòstic</strong> per als partits de la jornada i podràs <strong>guanyar crèdits</strong></p>",
-          "gl": "<p style='text-align: center'>Envíanos o teu <strong>prognóstico</strong> para os partidos da xornada e poderás <strong>gañar créditos</strong></p>",
-          "eu": "<p style='text-align: center'>Bidal iezaguzu jardunaldiko partidetarako zure <strong>iragarpena</strong> eta <strong>kredituak irabazi</strong> ahal izango dituzu</p>",
-          "hr": "<p style='text-align: center'>Pošalji nam svoju <strong>prognozu</strong> za utakmice kola i možeš <strong>osvojiti kredite</strong></p>",
-          "de": "<p style='text-align: center'>Sende uns deine <strong>Vorhersage</strong> für die Spiele des Spieltags und du kannst <strong>Credits gewinnen</strong></p>",
-          "it": "<p style='text-align: center'>Inviaci il tuo <strong>pronostico</strong> per le partite della giornata e potrai <strong>vincere crediti</strong></p>",
-          "fr": "<p style='text-align: center'>Envoie-nous ton <strong>pronostic</strong> pour les matchs de la journée et tu pourras <strong>gagner des crédits</strong></p>",
-          "pt": "<p style='text-align: center'>Envia-nos o teu <strong>prognóstico</strong> para os jogos da jornada e poderás <strong>ganhar créditos</strong></p>",
-          "ru": "<p style='text-align: center'>Отправьте нам свой <strong>прогноз</strong> на матчи тура, и вы сможете <strong>выиграть кредиты</strong></p>",
-          "tr": "<p style='text-align: center'>Turun maçları için bize <strong>tahminini</strong> gönder ve <strong>kredi kazan</strong></p>",
-          "he": "<p style='text-align: center'>שלח לנו את ה<strong>תחזית</strong> שלך למשחקי המחזור ותוכל <strong>לזכות בקרדיטים</strong></p>",
-          "el": "<p style='text-align: center'>Στείλε μας την <strong>πρόβλεψή</strong> σου για τους αγώνες της αγωνιστικής και θα μπορείς να <strong>κερδίσεις πιστώσεις</strong></p>",
-          "ar": "<p style='text-align: center'>أرسل لنا <strong>توقعك</strong> لمباريات الجولة وستتمكن من <strong>ربح أرصدة</strong></p>"
-        }
-      }
-    }
-  },
-  {
     "event_id": "07742101e38fc5d8ba1ea613",
     "date": 1789578015,
     "type": "bettingPool",
@@ -154216,6 +153993,229 @@
                   20
                 ]
               }
+            }
+          }
+        ],
+        "prizes": [],
+        "competition": "la-liga",
+        "round": {
+          "id": 4905,
+          "name": "Jornada 7",
+          "short": "J7",
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "responses": [],
+        "global": true,
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": {
+          "es": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
+          "en": "<p style='text-align: center'>Send us your <strong>predictions</strong> for the round's matches and you could <strong>win credits</strong></p>",
+          "ca": "<p style='text-align: center'>Envia'ns el teu <strong>pronòstic</strong> per als partits de la jornada i podràs <strong>guanyar crèdits</strong></p>",
+          "gl": "<p style='text-align: center'>Envíanos o teu <strong>prognóstico</strong> para os partidos da xornada e poderás <strong>gañar créditos</strong></p>",
+          "eu": "<p style='text-align: center'>Bidal iezaguzu jardunaldiko partidetarako zure <strong>iragarpena</strong> eta <strong>kredituak irabazi</strong> ahal izango dituzu</p>",
+          "hr": "<p style='text-align: center'>Pošalji nam svoju <strong>prognozu</strong> za utakmice kola i možeš <strong>osvojiti kredite</strong></p>",
+          "de": "<p style='text-align: center'>Sende uns deine <strong>Vorhersage</strong> für die Spiele des Spieltags und du kannst <strong>Credits gewinnen</strong></p>",
+          "it": "<p style='text-align: center'>Inviaci il tuo <strong>pronostico</strong> per le partite della giornata e potrai <strong>vincere crediti</strong></p>",
+          "fr": "<p style='text-align: center'>Envoie-nous ton <strong>pronostic</strong> pour les matchs de la journée et tu pourras <strong>gagner des crédits</strong></p>",
+          "pt": "<p style='text-align: center'>Envia-nos o teu <strong>prognóstico</strong> para os jogos da jornada e poderás <strong>ganhar créditos</strong></p>",
+          "ru": "<p style='text-align: center'>Отправьте нам свой <strong>прогноз</strong> на матчи тура, и вы сможете <strong>выиграть кредиты</strong></p>",
+          "tr": "<p style='text-align: center'>Turun maçları için bize <strong>tahminini</strong> gönder ve <strong>kredi kazan</strong></p>",
+          "he": "<p style='text-align: center'>שלח לנו את ה<strong>תחזית</strong> שלך למשחקי המחזור ותוכל <strong>לזכות בקרדיטים</strong></p>",
+          "el": "<p style='text-align: center'>Στείλε μας την <strong>πρόβλεψή</strong> σου για τους αγώνες της αγωνιστικής και θα μπορείς να <strong>κερδίσεις πιστώσεις</strong></p>",
+          "ar": "<p style='text-align: center'>أرسل لنا <strong>توقعك</strong> لمباريات الجولة وستتمكن من <strong>ربح أرصدة</strong></p>"
+        }
+      }
+    }
+  },
+  {
+    "event_id": "77d514512c8b976f04bf0d42",
+    "date": 1789578015,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 634802,
+        "until": 1789758000,
+        "expired": true,
+        "mode": "1x2",
+        "games": [
+          {
+            "id": 50774,
+            "date": 1789758000,
+            "status": "finished",
+            "home": {
+              "id": 7,
+              "name": "Espanyol",
+              "slug": "espanyol",
+              "score": 1
+            },
+            "away": {
+              "id": 75,
+              "name": "Elche",
+              "slug": "elche",
+              "score": 3
+            }
+          },
+          {
+            "id": 50775,
+            "date": 1789819200,
+            "status": "finished",
+            "home": {
+              "id": 93,
+              "name": "Osasuna",
+              "slug": "osasuna",
+              "score": 1
+            },
+            "away": {
+              "id": 70,
+              "name": "Rayo Vallecano",
+              "slug": "rayo-vallecano",
+              "score": 1
+            }
+          },
+          {
+            "id": 50769,
+            "date": 1789827300,
+            "status": "finished",
+            "home": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": 0
+            },
+            "away": {
+              "id": 91,
+              "name": "Alavés",
+              "slug": "alaves",
+              "score": 0
+            }
+          },
+          {
+            "id": 50770,
+            "date": 1789835400,
+            "status": "finished",
+            "home": {
+              "id": 5,
+              "name": "Celta",
+              "slug": "celta",
+              "score": 5
+            },
+            "away": {
+              "id": 812,
+              "name": "Racing",
+              "slug": "racing",
+              "score": 0
+            }
+          },
+          {
+            "id": 50777,
+            "date": 1789844400,
+            "status": "finished",
+            "home": {
+              "id": 17,
+              "name": "Sevilla",
+              "slug": "sevilla",
+              "score": 1
+            },
+            "away": {
+              "id": 3,
+              "name": "Barcelona",
+              "slug": "barcelona",
+              "score": 3
+            }
+          },
+          {
+            "id": 50771,
+            "date": 1789905600,
+            "status": "finished",
+            "home": {
+              "id": 8,
+              "name": "Getafe",
+              "slug": "getafe",
+              "score": 1
+            },
+            "away": {
+              "id": 65,
+              "name": "Málaga",
+              "slug": "malaga",
+              "score": 0
+            }
+          },
+          {
+            "id": 50773,
+            "date": 1789913700,
+            "status": "finished",
+            "home": {
+              "id": 2,
+              "name": "Atlético",
+              "slug": "atletico",
+              "score": 2
+            },
+            "away": {
+              "id": 15,
+              "name": "Real Madrid",
+              "slug": "real-madrid",
+              "score": 1
+            }
+          },
+          {
+            "id": 50772,
+            "date": 1789921800,
+            "status": "finished",
+            "home": {
+              "id": 6,
+              "name": "Deportivo",
+              "slug": "deportivo",
+              "score": 1
+            },
+            "away": {
+              "id": 87,
+              "name": "Betis",
+              "slug": "betis",
+              "score": 1
+            }
+          },
+          {
+            "id": 50776,
+            "date": 1789921800,
+            "status": "finished",
+            "home": {
+              "id": 19,
+              "name": "Villarreal",
+              "slug": "villarreal",
+              "score": 3
+            },
+            "away": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": 1
+            }
+          },
+          {
+            "id": 50778,
+            "date": 1789930800,
+            "status": "secondTime",
+            "home": {
+              "id": 18,
+              "name": "Valencia",
+              "slug": "valencia",
+              "score": 0
+            },
+            "away": {
+              "id": 13,
+              "name": "Real Sociedad",
+              "slug": "real-sociedad",
+              "score": 1
             }
           }
         ],
@@ -167613,6 +167613,25 @@
           "icon": "icons/13.png"
         },
         "amount": 4895700
+      }
+    ]
+  },
+  {
+    "event_id": "8ab0b6db1d52ba85548e9551",
+    "date": 1789934350,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 42396,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 1004800
       }
     ]
   }
