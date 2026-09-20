@@ -134,20 +134,62 @@ def _foto(con_catalogo: bool = True) -> dict:
     }
 
 
-def _lista(foto: dict, encendido: bool) -> list:
+# ----------------------------------------------------------------
+# EL INTERRUPTOR LO PONE ESTA GUARDIA, NO EL ENTORNO
+# (20/09/2026, y costo dos vueltas)
+#
+#     `test_apagado_se_comporta_como_ayer` empezaba por
+#     comprobar que el interruptor NO estuviese puesto en el
+#     entorno. La noche que el dueño lo encendio en el `env` del
+#     workflow, la verja se puso roja, el paso «Validate
+#     optimized production cycle» devolvio 1 y NO HUBO CICLO.
+#
+#     Doctrina 104: un interruptor encendido es estado de
+#     produccion, y una guardia no lee estado de produccion. La
+#     que mide el apagado tiene que APAGARLO ELLA.
+#
+#     Y para el caso «apagado» se BORRA la variable, no se pone
+#     a "0": es el estado que de verdad tiene una maquina
+#     limpia. Que "0" y borrada signifiquen lo mismo esta
+#     medido aparte, en
+#     `test_para_el_lector_borrada_y_cero_son_lo_mismo`.
+# ----------------------------------------------------------------
 
-    antes = os.environ.get(ENV_EL_CATALOGO)
 
-    try:
-        os.environ[ENV_EL_CATALOGO] = "1" if encendido else "0"
-        return build_targets(foto)
+class interruptor:
+    """Pone el interruptor y devuelve el entorno como estaba.
 
-    finally:
+    `None` lo BORRA. Sale bien pase lo que pase dentro.
+    """
 
-        if antes is None:
+    def __init__(self, valor):
+        self.valor = valor
+
+    def __enter__(self):
+
+        self.antes = os.environ.get(ENV_EL_CATALOGO)
+
+        if self.valor is None:
             os.environ.pop(ENV_EL_CATALOGO, None)
         else:
-            os.environ[ENV_EL_CATALOGO] = antes
+            os.environ[ENV_EL_CATALOGO] = self.valor
+
+        return self
+
+    def __exit__(self, *_):
+
+        if self.antes is None:
+            os.environ.pop(ENV_EL_CATALOGO, None)
+        else:
+            os.environ[ENV_EL_CATALOGO] = self.antes
+
+        return False
+
+
+def _lista(foto: dict, encendido: bool) -> list:
+
+    with interruptor("1" if encendido else None):
+        return build_targets(foto)
 
 
 def _equipos(lista: list) -> set:
@@ -302,17 +344,88 @@ def test_ampliarla_no_pide_un_equipo_mas() -> None:
 
 
 # ============================================================
-# 4. APAGADO, EXACTAMENTE COMO AYER
+# 4. EL LECTOR: NI CACHEA, NI DISTINGUE BORRADA DE CERO
+# ============================================================
+
+
+def test_el_lector_no_cachea_el_valor() -> None:
+    """
+    Lo que decide si el arreglo de arriba basta.
+
+    Si `objetivos_el_catalogo()` leyese el entorno UNA vez, al
+    importarse el modulo, poner y quitar la variable dentro de
+    la prueba no cambiaria nada: el valor con el que arranco el
+    proceso mandaria hasta el final, y el arreglo seria de
+    mentira.
+
+    Se comprueba moviendola cuatro veces despues de importar.
+    """
+
+    for valor, esperado in (
+        ("1", True),
+        (None, False),
+        ("1", True),
+        ("0", False),
+    ):
+
+        with interruptor(valor):
+
+            assert objetivos_el_catalogo() is esperado, (
+                f"con la variable en {valor!r} el lector dice "
+                f"{objetivos_el_catalogo()}. Si no sigue al "
+                f"entorno despues del import, lo cachea, y "
+                f"apagarlo dentro de la prueba no sirve"
+            )
+
+
+def test_para_el_lector_borrada_y_cero_son_lo_mismo() -> None:
+    """
+    Lo que permite escribir «apagado» con la variable BORRADA.
+
+    Si algun dia "0" dejara de significar apagado -por ejemplo
+    porque alguien mire solo si la variable existe- esta prueba
+    salta antes de que nadie lo descubra en produccion.
+    """
+
+    foto = _foto()
+
+    with interruptor(None):
+        borrada = objetivos_el_catalogo()
+        lista_borrada = build_targets(foto)
+
+    with interruptor("0"):
+        cero = objetivos_el_catalogo()
+        lista_cero = build_targets(foto)
+
+    assert borrada == cero is False, (
+        f"borrada dice {borrada} y \"0\" dice {cero}: no son lo "
+        f"mismo, y entonces escribir una por la otra es una "
+        f"suposicion"
+    )
+
+    assert lista_borrada == lista_cero, (
+        "la lista de objetivos cambia entre tener la variable "
+        "borrada y tenerla a \"0\""
+    )
+
+
+# ============================================================
+# 5. APAGADO, EXACTAMENTE COMO AYER
 # ============================================================
 
 
 def test_apagado_se_comporta_como_ayer() -> None:
 
-    assert not objetivos_el_catalogo(), (
-        "el interruptor esta encendido en el entorno de la "
-        "verja: entonces esto no mide el comportamiento por "
-        "defecto"
-    )
+    # EL INTERRUPTOR LO APAGA ESTA GUARDIA. Antes se comprobaba
+    # que estuviese apagado en el entorno, y por eso la noche
+    # que se encendio en el workflow esta linea paro el ciclo.
+    with interruptor(None):
+
+        assert not objetivos_el_catalogo(), (
+            "con la variable borrada, el lector sigue diciendo "
+            "que el interruptor esta puesto: entonces lo lee de "
+            "otro sitio y esta guardia no controla nada"
+        )
 
     foto = _foto()
 
@@ -351,6 +464,8 @@ def main() -> int:
         test_sin_catalogo_no_se_comprueba_nada,
         test_la_lista_de_objetivos_cubre_el_catalogo,
         test_ampliarla_no_pide_un_equipo_mas,
+        test_el_lector_no_cachea_el_valor,
+        test_para_el_lector_borrada_y_cero_son_lo_mismo,
         test_apagado_se_comporta_como_ayer,
     ]
 

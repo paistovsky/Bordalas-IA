@@ -43,9 +43,28 @@ LO QUE SE PROTEGE AQUI
 
 from __future__ import annotations
 
-from src.biwenger import peticiones
+import os
 
-from src.biwenger.peticiones import (
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA  (doctrina 104, 20/09/2026)
+#
+#     Seis de las 38 comprobaciones de aqui miden la CACHE DEL
+#     RESET, y `BORDALAS_SIN_CACHE` la apaga. Con ese
+#     interruptor puesto en el `env` del workflow, esta guardia
+#     se ponia roja y el paso de validacion paraba el ciclo —
+#     que es exactamente lo que paso la noche del 20/09 con
+#     otro interruptor.
+#
+#     Asi que la cache se fija ENCENDIDA aqui arriba, antes de
+#     medir nada. La unica prueba que la apaga es
+#     `test_sin_cache_se_refresca_todo`, que la pone y la quita
+#     ella misma y sigue igual.
+os.environ.pop("BORDALAS_SIN_CACHE", None)
+
+
+from src.biwenger import peticiones                  # noqa: E402
+
+from src.biwenger.peticiones import (            # noqa: E402
     DEMASIADAS,
     REINTENTOS_429,
     Contador,

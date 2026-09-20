@@ -71,9 +71,17 @@ DE DONDE SALEN LOS NUMEROS
     que dar lo mismo hoy que en enero.
 """
 
+import os
 import sys
 
 sys.path.insert(0, ".")
+
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA  (doctrina 104)
+#
+#     Va aqui arriba, antes de que se calcule un solo score: el
+#     porque esta escrito entero mas abajo, en «0 bis».
+os.environ.pop("BORDALAS_CALIDAD_ETIQUETA", None)
 
 from src.analysis.lineup_engine import (  # noqa: E402
     suelo_sin_pronostico,
@@ -195,11 +203,60 @@ TABLERO_REAL = tablero(
 PORTERIA = {1: 1}
 
 
+# ================================================================
+# EL CASO ENTERO ENTRA POR LA PUERTA  (20/09/2026)
+# ================================================================
+#
+# ESTA GUARDIA DECIA DOS COSAS DISTINTAS SEGUN DONDE CORRIA
+#
+#     en local, con el arbol limpio        ->  ROJA
+#     en local, con el estado de produccion ->  VERDE
+#     en CI                                 ->  VERDE
+#
+#     Doctrina 91: una roja que puede significar cualquier cosa
+#     vale lo mismo que una verde.
+#
+# POR DONDE SE COLABA, Y NO ERA POR DONDE PARECIA
+#
+#     La cabecera de este fichero ya decia «no se lee el estado
+#     de produccion». Y era verdad de lo que se escribe aqui: el
+#     agujero estaba en el TERCER argumento que NO se pasaba.
+#
+#         prepare_players(snapshot, lineup_intelligence, board)
+#
+#     Con `lineup_intelligence=None`, `prepare_players` la
+#     construye el solo — y esa construccion abre TRES ficheros
+#     de `data/`:
+#
+#         data/calendar/laliga_calendar.json
+#         data/intelligence/futbolfantasy_board.json
+#         data/intelligence/jornada_perfecta_lineups.json
+#
+#     De ahi salia un `score_adjustment` de 230,40 para Esquivel
+#     que el 18/09 no existia, y por eso su score no cuadraba
+#     con la foto: 249.799,75 contra 250.030,15.
+#
+# LO QUE SE PASA AHORA, Y QUE SIGNIFICA
+#
+#     `{"lookup": {}}` — la inteligencia de alineacion VACIA. De
+#     ese diccionario el motor solo mira dos campos por jugador,
+#     `external_block` y `score_adjustment`, y vacio valen
+#     `False` y `0.0`, que es exactamente lo que valian el
+#     18/09 para estos tres.
+#
+#     MEDIDO: con el caso fijo, los TRES scores salen clavados a
+#     la foto de las 15:16 de aquel dia. Antes solo salian dos.
+#     Fijar el caso no le quita capacidad de detectar: se la
+#     devuelve.
+
+INTELIGENCIA_VACIA = {"lookup": {}}
+
+
 def preparar(plantilla, board):
 
     return prepare_players(
         {"my_team": list(plantilla)},
-        None,
+        INTELIGENCIA_VACIA,
         board,
     )
 
@@ -299,9 +356,24 @@ check(
 # test no esta probando el fallo del 18/09 sino otro parecido, y
 # entonces no vale.
 #
-# Ojo con `BORDALAS_CALIDAD_ETIQUETA`: apagar la calidad medida
-# devuelve a Dituro a 0,54 de vara, muy por encima del suelo
-# viejo. Aqui se cae, que es lo que tiene que pasar.
+# LA CALIDAD MEDIDA LA FIJA ESTA GUARDIA  (20/09/2026)
+#
+#     `BORDALAS_CALIDAD_ETIQUETA` APAGA la calidad medida y
+#     devuelve a Dituro a 0,54 de vara, muy por encima del suelo
+#     viejo: con ese interruptor puesto en el entorno, esta
+#     guardia se caia.
+#
+#     El comentario que habia aqui decia «se cae, que es lo que
+#     tiene que pasar». Es media verdad: esta bien que se caiga
+#     si alguien APAGA la calidad medida de verdad, y esta mal
+#     que el veredicto de la verja dependa de lo que haya en el
+#     `env` del workflow. Doctrina 104, y la noche del 20/09
+#     costo dos vueltas.
+#
+#     Asi que el caso del 18/09 se reproduce con la calidad
+#     medida ENCENDIDA, la ponga quien la ponga fuera. Si algun
+#     dia se decide apagarla en produccion, lo que tiene que
+#     cambiar es este caso, no el humor de la verja.
 
 print()
 print("0 bis. El banco reproduce la foto del 18/09/2026")
@@ -562,6 +634,54 @@ def ficha_de_venta(player, titular):
     }
 
 
+# EL SEGUNDO AGUJERO, Y NO SE VE DESDE AQUI  (20/09/2026)
+#
+#     `build_sale_order` llama a `build_position_guardrail`, que
+#     llama a `get_starter_lookup()`, que abre
+#     `data/intelligence/futbolfantasy_board.json` EL SOLO. No
+#     hay parametro por el que pasarselo.
+#
+#     Asi que se aparta el fichero: se apunta `BOARD_FILE` a una
+#     ruta que no existe, el lookup sale vacio y la cola se
+#     ordena con lo que trae cada ficha de este mismo test —el
+#     `hierarchy_value` que ya se escribe arriba—.
+#
+#     MEDIDO, las dos formas: con el tablero de produccion y sin
+#     el, la cola y los apartados salen IDENTICOS. Apartarlo no
+#     cambia lo que esta guardia comprueba; solo deja de
+#     depender de lo que haya en el disco esa mañana.
+
+
+class sin_tablero_en_disco:
+    """Aparta el tablero de titularidad mientras dura el bloque."""
+
+    def __enter__(self):
+
+        import tempfile
+
+        from pathlib import Path as _Path
+
+        from src.analysis import candidate_starter_lookup as _csl
+
+        self._csl = _csl
+        self._antes = _csl.BOARD_FILE
+
+        _csl.BOARD_FILE = (
+            _Path(tempfile.mkdtemp()) / "sin_tablero.json"
+        )
+
+        _csl.reset_starter_lookup_cache()
+
+        return self
+
+    def __exit__(self, *_):
+
+        self._csl.BOARD_FILE = self._antes
+        self._csl.reset_starter_lookup_cache()
+
+        return False
+
+
 def cola_con_portero(portero_id):
 
     roster = [
@@ -569,7 +689,8 @@ def cola_con_portero(portero_id):
         for p in (ESQUIVEL, DITURO, ITURBE)
     ]
 
-    return build_sale_order(roster, lineup_ids=[portero_id])
+    with sin_tablero_en_disco():
+        return build_sale_order(roster, lineup_ids=[portero_id])
 
 
 antes = cola_con_portero(ESQUIVEL["id"])

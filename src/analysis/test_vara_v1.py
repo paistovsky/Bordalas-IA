@@ -42,6 +42,20 @@ from __future__ import annotations
 
 import os
 
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA  (doctrina 104, 20/09/2026)
+#
+#     `BORDALAS_VARA_PLANA` APAGA los factores por posicion, que es
+#     justo lo que esta guardia comprueba. Con ese interruptor
+#     puesto en el `env` del workflow, se ponia roja y el paso
+#     de validacion paraba el ciclo — que es lo que paso la
+#     noche del 20/09 con otro interruptor.
+#
+#     Se fija ENCENDIDO aqui arriba, antes de medir nada. Las
+#     pruebas que lo apagan a proposito lo ponen y lo quitan
+#     ellas, y siguen igual.
+os.environ.pop("BORDALAS_VARA_PLANA", None)
+
 from src.analysis.lineup_engine import weekly_expected_value
 from src.analysis.position_factor import (
     DISABLE_ENV,
