@@ -523,6 +523,63 @@ def puja_de_cartera(precio, importe=IMPORTE_DE_CARTERA) -> int:
     return int(valor * (1 + safe_float(importe))) + 1
 
 
+# ============================================================
+# LA CESTA NO OPERA ARRIBA DEL SUELO (20/09/2026)
+# ============================================================
+#
+#     DECISION DEL DUEÑO, con el motivo escrito porque importa
+#     mas que la decision.
+#
+#     Medido sobre las 23 operaciones CERRADAS de la temporada,
+#     por tramo del precio de COMPRA y vendiendo al Computer:
+#
+#         suelo (<300 k)   n= 8   +1,51 %   100 % verde     +28.867
+#         300 k - 1,5 M    n= 4   -1,50 %    25 %          +109.399
+#         1,5 M - 3 M      n= 9   -2,57 %    33 %        -1.038.783
+#         >= 3 M           n= 0        -        -                 -
+#
+#     Nueve operaciones y un millon perdido por encima de
+#     1.500.000, con un tercio en verde. Abajo, ocho de ocho en
+#     verde.
+#
+#     Y el tramo de en medio sale positivo SOLO por las dos
+#     ventas a managers que cayeron ahi. Quitadas, pierde.
+#
+#     EL CORTE NO ES UN NUMERO NUEVO (doctrina 84)
+#
+#         Es `CORTES_DE_PRECIO[0]`, el mismo 1.500.000 que ya
+#         parte la rejilla de la pelea y la de la prima. Tres
+#         cosas del mismo eje con el mismo corte, o seria una
+#         arbitrariedad escondida.
+#
+#     CERRAR NO ES BORRAR
+#
+#         La cesta sigue viva DEBAJO, que es donde gana. Lo que
+#         se cierra es comprar para revender por encima del
+#         corte — no comprar por encima del corte: esa via es el
+#         tablero de fichajes, y no se toca.
+#
+#     NINGUNA CELDA LLEGA A `MIN_SAMPLES` = 12. Por eso el corte
+#     va detras de un interruptor y lo enciende el dueño.
+ENV_SOLO_EL_SUELO = "BORDALAS_CESTA_SOLO_EL_SUELO"
+
+
+def solo_el_suelo() -> bool:
+    """Si la cesta solo opera por debajo del corte. Nunca lanza."""
+
+    import os
+
+    return str(
+        os.environ.get(ENV_SOLO_EL_SUELO, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
+
+
+def _techo_de_la_cesta() -> int:
+    """El corte, del sitio donde ya vivia."""
+
+    return safe_int(CORTES_DE_PRECIO[0])
+
+
 def candidatos_en_modo_cartera(
     candidatos: list | None,
     prima_de_reventa: float,
@@ -591,6 +648,12 @@ def candidatos_en_modo_cartera(
             precio = safe_int(candidato.get("market_price"))
 
             if precio <= 0:
+                continue
+
+            # EL SUELO Y NADA MAS, si el dueño lo ha encendido.
+            # Ver la cabecera: nueve operaciones y un millon
+            # perdido por encima de este corte.
+            if solo_el_suelo() and precio >= _techo_de_la_cesta():
                 continue
 
             suya = reventa
