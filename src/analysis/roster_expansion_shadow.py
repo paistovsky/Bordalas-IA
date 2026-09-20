@@ -68,6 +68,11 @@ XI_VETOES = frozenset(
         "NO_MEJORA_TITULARIDAD",
         "PIERDE_TITULARIDAD",
         "SIN_PRONOSTICO",
+
+        # La mitad de `SIN_PRONOSTICO` que viene de que la VARA
+        # no tenga datos (20/09/2026). Frena igual, asi que la
+        # sombra tiene que verla igual.
+        "SIN_REFERENCIA",
     }
 )
 

@@ -663,11 +663,15 @@ def _cuantos_a_ciegas(lineup, objetivos) -> dict:
         f for f in (objetivos or []) if isinstance(f, dict)
     ]
 
+    # Las DOS mitades de la ceguera: la que viene del candidato
+    # y la que viene de la vara (`SIN_REFERENCIA`, 20/09/2026).
+    # Si solo se contara la primera, el dia que se separen el
+    # aviso se quedaria corto sin que nadie viera menos.
     sin_pronostico = [
         f
         for f in filas
         if str(f.get("xi_decision") or "").upper()
-        == "SIN_PRONOSTICO"
+        in ("SIN_PRONOSTICO", "SIN_REFERENCIA")
     ]
 
     return {

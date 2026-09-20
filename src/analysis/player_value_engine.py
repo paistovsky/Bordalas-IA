@@ -1236,12 +1236,81 @@ def xi_upgrade_value(
     # -que es molesto- en vez de fichar a ciegas -que es caro-.
     # --------------------------------------------------------
 
-    for quien, senal in (
-        ("del que saldria", replaced_starter),
-        ("del que entraria", candidate_starter),
+    # --------------------------------------------------------
+    # LAS DOS CAUSAS NO SON LA MISMA (20/09/2026)
+    # --------------------------------------------------------
+    #
+    #     EL CASO, con nombre y fecha:
+    #
+    #         El 18/09 los CUATRO `SIN_PRONOSTICO` del tablero
+    #         eran porteros, y los cuatro por el MISMO motivo: la
+    #         vara de porteria era Esquivel, comprado por la cesta
+    #         a las 07:05 de esa misma mañana por 150.376 EUR, con
+    #         0 puntos y sin pronostico.
+    #
+    #         Entre ellos estaba DMITROVIC. El 20/09 lo compro el
+    #         dueño a mano por 4.992.001 EUR.
+    #
+    #     POR QUE PASA EN LA PORTERIA Y NO EN OTRO SITIO
+    #
+    #         El sustituido es `min(titulares, key=points)`. Un
+    #         recien comprado en el suelo tiene 0 puntos, asi que
+    #         gana siempre ese concurso — y es, a la vez, el unico
+    #         sin pronostico. Con UN solo titular en la posicion no
+    #         hay segunda opinion.
+    #
+    #     LAS DOS CAUSAS
+    #
+    #         · No hay pronostico DEL CANDIDATO. Ahi callarse es
+    #           correcto: no sabemos nada de quien queremos meter.
+    #
+    #         · No hay pronostico DE LA REFERENCIA. Ahi el
+    #           candidato no es malo: es que no hay con que
+    #           compararlo. Decir "no mejora" es afirmar algo que
+    #           nadie ha comprobado.
+    #
+    #     LAS DOS SIGUEN VALIENDO CERO, y eso no cambia: a ciegas
+    #     no se puja, y el guardarrail del 17/08 se queda entero.
+    #     Lo que cambia es que la segunda SE VE, con el nombre de
+    #     quien falta (doctrina 87), y `escala` marca que hay una
+    #     pregunta abierta en vez de un rechazo.
+    #
+    #     APAGADO -sin `BORDALAS_SIN_REFERENCIA_ESCALA`- el
+    #     comportamiento es EXACTAMENTE el de antes: misma
+    #     decision, mismo motivo, mismo cero.
+    for quien, senal, causa in (
+        ("del que saldria", replaced_starter, "REFERENCIA"),
+        ("del que entraria", candidate_starter, "CANDIDATO"),
     ):
 
         if (senal or {}).get("probability") is None:
+
+            if causa == "REFERENCIA" and _la_referencia_escala():
+
+                nombre = str(
+                    (replaced_starter or {}).get("name")
+                    or (replaced_starter or {}).get("player_name")
+                    or "el que saldria"
+                )
+
+                return {
+                    **_sin_valor(
+                        "SIN_REFERENCIA",
+                        (
+                            f"No puedo compararlo porque {nombre} "
+                            f"no tiene pronostico de titularidad. "
+                            f"El candidato no es peor: es que no "
+                            f"hay con que medirlo. A ciegas no se "
+                            f"puja, pero esto no es un «no»."
+                        ),
+                    ),
+
+                    # NO DESAPARECE. Sube al panel con el nombre
+                    # de quien falta, para que lo vea el dueño.
+                    "escala": True,
+                    "escala_a": "PANEL",
+                    "falta": nombre,
+                }
 
             return _sin_valor(
                 "SIN_PRONOSTICO",
@@ -1840,6 +1909,28 @@ def speculation_value(
             f"{maximo:,} EUR."
         ).replace(",", "."),
     }
+
+
+# EL INTERRUPTOR DE LA CEGUERA (20/09/2026)
+#
+#     Apagado, `SIN_PRONOSTICO` no distingue sus dos causas y el
+#     comportamiento es el de siempre. Encendido, la que viene de
+#     la REFERENCIA sale con su nombre propio y escala al panel.
+#
+#     En los dos casos el valor sigue siendo CERO: esto no abre
+#     ninguna compra, solo deja de llamar "no mejora" a "no lo
+#     se".
+ENV_SIN_REFERENCIA = "BORDALAS_SIN_REFERENCIA_ESCALA"
+
+
+def _la_referencia_escala() -> bool:
+    """Si la falta de referencia se separa y escala. Nunca lanza."""
+
+    import os
+
+    return str(
+        os.environ.get(ENV_SIN_REFERENCIA, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
 
 
 def _sin_valor(decision: str, reason: str) -> dict:

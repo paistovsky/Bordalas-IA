@@ -1374,10 +1374,18 @@ def build_acquisition_board(
         # 17/08/2026, y sin anadirlos aqui el contador volvia a
         # quedarse corto: paso de 12 bloqueados a 5 el dia que el
         # veto empezo a hacer MAS trabajo, no menos.
+        #     `SIN_REFERENCIA` entra el 20/09/2026: es la mitad
+        #     de `SIN_PRONOSTICO` que viene de que la VARA no
+        #     tenga datos. Sigue frenando la compra igual, asi
+        #     que sin ponerla aqui el contador de bloqueados
+        #     bajaria el dia que se encienda el interruptor sin
+        #     que nadie hubiera dejado de bloquear nada — que es
+        #     exactamente el fallo que este comentario cuenta.
         VETOS_DEL_ONCE = (
             "NO_MEJORA_TITULARIDAD",
             "NO_MEJORA_JERARQUIA",
             "SIN_PRONOSTICO",
+            "SIN_REFERENCIA",
         )
 
         bloqueados = sum(
