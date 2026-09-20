@@ -66,6 +66,7 @@ USO
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -410,6 +411,106 @@ def modulos_del_workflow() -> list[str]:
     return list(TESTS)
 
 
+# ============================================================
+# EL VEREDICTO, A FICHERO (20/09/2026)
+# ============================================================
+#
+#     Los tres commits del 19/09 por la noche no dicen si la
+#     verja paso. Dos de ellos la rompieron —cinco rojas a la
+#     mañana siguiente— y la cazamos de casualidad, porque
+#     tocaba mirar otra cosa.
+#
+#     "Acordarse de ponerlo en el mensaje" no es un mecanismo.
+#     Asi que la verja deja aqui lo que hizo, y el hook
+#     `prepare-commit-msg` lo pega en el mensaje solo.
+#
+#     LO QUE SE GUARDA ES LA HUELLA DEL ARBOL, NO LA HORA
+#
+#         Una hora no dice si la verja se corrio sobre ESTE
+#         codigo. Se guarda el SHA-256 de todos los `.py` de
+#         `src/` y `scripts/` mas los ficheros del panel: si
+#         luego se toca una linea, la huella cambia y el hook
+#         escribe "el arbol cambio despues", que es la verdad.
+#
+#     No es un libro y no va a git: vive en `.verja/`, ignorado.
+VEREDICTO = RAIZ / ".verja" / "ultima.json"
+
+
+def huella_del_arbol() -> str:
+    """
+    SHA-256 de lo que la verja vigila. Nunca lanza.
+
+    Si no se puede calcular, devuelve "?" — y el hook lee eso
+    como "no se sabe", que no es "esta bien" (doctrina 24).
+    """
+
+    try:
+        import hashlib
+
+        digest = hashlib.sha256()
+
+        rutas = []
+
+        for patron in ("src/**/*.py", "scripts/**/*.py",
+                       "dashboard-v8/src/**/*.js"):
+            rutas.extend(RAIZ.glob(patron))
+
+        for ruta in sorted(rutas):
+
+            if "__pycache__" in ruta.parts:
+                continue
+
+            digest.update(
+                str(ruta.relative_to(RAIZ)).encode("utf-8")
+            )
+            digest.update(ruta.read_bytes())
+
+        return digest.hexdigest()
+
+    except Exception:                               # noqa: BLE001
+        return "?"
+
+
+def _apuntar_el_veredicto(
+    verdes: int, total: int, fallos: list, parcial: bool
+) -> None:
+    """Lo que hizo la verja, para el mensaje del commit. Nunca lanza."""
+
+    try:
+        from datetime import datetime, timezone
+
+        VEREDICTO.parent.mkdir(parents=True, exist_ok=True)
+
+        VEREDICTO.write_text(
+            json.dumps(
+                {
+                    "cuando": datetime.now(
+                        timezone.utc
+                    ).isoformat(timespec="seconds"),
+                    "verdes": verdes,
+                    "total": total,
+                    "fallos": sorted(fallos),
+                    # Una corrida con `--solo` o `--extra` no es
+                    # la verja: se marca para que el mensaje no
+                    # pueda presumir de un verde que no es.
+                    "parcial": parcial,
+                    "huella": huella_del_arbol(),
+                },
+                ensure_ascii=False,
+                indent=1,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        print(
+            f"AVISO: no se pudo apuntar el veredicto de la verja "
+            f"({type(error).__name__}): el commit dira que no se "
+            f"sabe."
+        )
+
+
 def main() -> int:
 
     parser = argparse.ArgumentParser()
@@ -713,6 +814,13 @@ def main() -> int:
                 print(f"      {ruta}")
 
         print()
+
+    _apuntar_el_veredicto(
+        verdes=len(modulos) - len(fallos),
+        total=len(modulos),
+        fallos=fallos,
+        parcial=bool(args.solo or args.extra),
+    )
 
     if fallos:
         print(f"FALLAN {len(fallos)} de {len(modulos)}:")

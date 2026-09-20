@@ -34,24 +34,37 @@ CONSECUENCIA
     Asi que esta guardia no comprueba que la cola sea lista.
     Comprueba que no pueda hacer daño:
 
-        - que no proponga a un intocable,
-        - que PARARSE EN CUALQUIER PUNTO de la cola deje todas las
-          posiciones por encima de su suelo,
         - que el orden sea el que dijo el dueño y no otro,
-        - y que cada fila diga por que.
+        - que sin escalon conocido no se venda,
+        - que sin puntos no se invente un coste,
+        - y que el modulo no venda ni reimplemente el suelo.
+
+OCHO SE FUERON A UN MIRADOR (20/09/2026)
+
+    Las que leian `diagnostico/status.json` —la foto de
+    PRODUCCION, sin versionar— viven ahora en
+    `scripts/mirar_el_orden_de_venta.py`.
+
+    Una de ellas buscaba a DITURO por su nombre. El 20/09 a las
+    08:55 lo vendimos y a las 09:16 la foto se rehizo sin el:
+    verde a las 09:00, roja a las 09:20, mismo commit. Un nombre
+    propio en una guardia es una fecha de caducidad que nadie
+    apunto.
+
+    Y las ocho empezaban por `if cola is None: return`, asi que
+    en CI —donde `diagnostico/` no existe— PASABAN SIN MIRAR
+    NADA. Rojos que no eran fallos aqui, verdes que no eran nada
+    alli.
+
+    Las once que se quedan no tocan produccion: fallan solo si
+    cambia el codigo.
 """
 
 from __future__ import annotations
 
 import ast
-import json
 
 from pathlib import Path
-
-from src.analysis.position_guardrail import (
-    build_position_guardrail,
-    validate_sale_set,
-)
 
 from src.analysis.sale_order import (
     CAE_SIN_JUGAR,
@@ -63,125 +76,12 @@ from src.analysis.sale_order import (
 )
 
 
-FOTO = Path("diagnostico/status.json")
-
 MODULO = Path("src/analysis/sale_order.py")
 
 
-def _produccion():
-    """
-    La foto de PRODUCCION, no `data/` del repo.
-
-    `data/` es un resto de desarrollo de agosto. Medir contra el
-    ya costo una conclusion falsa el 09/09 -"el tablero de
-    titularidad esta rancio"- que era solo el disco local.
-    """
-
-    if not FOTO.exists():
-        return None
-
-    return json.loads(FOTO.read_text(encoding="utf-8"))
-
-
-def _cola_de_produccion():
-    foto = _produccion()
-
-    if not foto:
-        return None
-
-    return build_sale_order(
-        (foto.get("roster") or {}).get("players") or [],
-        lineup_ids=[
-            p.get("id")
-            for p in ((foto.get("lineup") or {}).get("players") or [])
-        ],
-        offers=foto.get("offers"),
-    )
-
-
 # ============================================================
-# 1. LOS INTOCABLES
+# 1. LA AUSENCIA DE DATO NO VENDE
 # ============================================================
-
-
-def test_el_apartado_no_esta_ademas_en_la_cola() -> None:
-    """
-    Un jugador no puede estar apartado y en la cola a la vez: o
-    se vende o no se vende.
-
-    LO QUE ESTA PRUEBA COMPROBABA ANTES, Y YA NO (21/09/2026)
-
-        Se llamaba `test_ningun_intocable_entra_en_la_cola` y
-        exigia que Yamal, Djene y Olasagasti no aparecieran nunca
-        en la cola, citando "que no me venda a Yamal ni haga
-        locuras" -orden del dueño del 18/08-.
-
-        El dueño derogo esa lista el 21/09. De Clave para arriba
-        ya se puede vender, y por eso los tres nombres salen de
-        aqui: mantenerlos seria conservar la lista por la puerta
-        de atras.
-
-        Lo que los protege ahora no es estar en una cola o fuera
-        de ella, sino la cuenta de `soltar_un_grande`: un activo
-        grande solo se suelta si lo que entra CABE EN EL ONCE. Con
-        Yamal esa cuenta da -0,97 puntos por jornada y dice que no
-        se vende, igual que decia la lista, pero por el motivo
-        correcto y con fecha de caducidad.
-
-    Lo que si se queda es el invariante estructural de abajo, que
-    nunca tuvo nada que ver con la lista.
-    """
-
-    cola = _cola_de_produccion()
-
-    if cola is None:
-        return
-
-    assert cola["available"], cola.get("reason")
-
-    nombres = {f["name"] for f in cola["queue"]}
-
-    for jugador in cola["excluded"]:
-        assert jugador["name"] not in nombres, (
-            f"{jugador['name']} esta apartado y ademas en la cola"
-        )
-
-
-def test_el_portero_titular_no_se_salva_por_accidente() -> None:
-    """
-    `untouchable_reason` protege al portero titular mirando
-    `in_lineup`, y el roster del dashboard trae ese dato como
-    `is_starter`. Sin normalizarlo, Dituro salia de la cola solo
-    porque el suelo posicional lo bloqueaba — que es el accidente
-    contra el que avisa el propio `sale_intent`.
-
-    Tiene que estar APARTADO POR SER PORTERO, no bloqueado por el
-    suelo.
-    """
-
-    cola = _cola_de_produccion()
-
-    if cola is None:
-        return
-
-    apartado = next(
-        (
-            e
-            for e in cola["excluded"]
-            if "Dituro" in str(e["name"])
-        ),
-        None,
-    )
-
-    assert apartado is not None, (
-        "el portero titular no aparece entre los que no se "
-        "proponen"
-    )
-
-    assert "portero" in apartado["reason"].lower(), (
-        f"el portero se aparta por el motivo equivocado: "
-        f"{apartado['reason']}"
-    )
 
 
 def test_sin_escalon_conocido_no_se_vende() -> None:
@@ -210,88 +110,7 @@ def test_sin_escalon_conocido_no_se_vende() -> None:
 
 
 # ============================================================
-# 2. LA COLA AGUANTA PREFIJOS
-# ============================================================
-
-
-def test_pararse_en_cualquier_punto_deja_el_once_en_pie() -> None:
-    """
-    El motivo de que esto sea una COLA y no una lista.
-
-    Preguntar "¿puedo vender a Dituro?" da que si, y "¿puedo
-    vender a Bayindir?" tambien. Preguntar "¿puedo vender a los
-    dos?" tiene que dar que no.
-
-    Aqui la pregunta es mas fuerte: vender a los `k` primeros,
-    para CUALQUIER k, tiene que dejar todas las posiciones por
-    encima del suelo.
-    """
-
-    foto = _produccion()
-
-    if not foto:
-        return
-
-    jugadores = (foto.get("roster") or {}).get("players") or []
-
-    titulares = [
-        p.get("id")
-        for p in ((foto.get("lineup") or {}).get("players") or [])
-    ]
-
-    cola = build_sale_order(
-        jugadores,
-        lineup_ids=titulares,
-        offers=foto.get("offers"),
-    )
-
-    guardarrail = build_position_guardrail(
-        [
-            {**j, "in_lineup": bool(j.get("is_starter"))}
-            for j in jugadores
-        ],
-        lineup_ids=titulares,
-    )
-
-    ids = [f["id"] for f in cola["queue"]]
-
-    for k in range(1, len(ids) + 1):
-
-        comprobacion = validate_sale_set(guardarrail, ids[:k])
-
-        assert comprobacion.get("ok"), (
-            f"vender a los {k} primeros de la cola rompe el suelo: "
-            f"{comprobacion.get('reason')}"
-        )
-
-
-def test_el_bloqueado_no_se_cuela_mas_abajo() -> None:
-    """
-    Si meter al siguiente rompiera un suelo, se APARTA con el
-    motivo. Bajarlo de puesto seria mentir sobre el orden: la
-    cola dejaria de aguantar prefijos sin que nada lo dijera.
-    """
-
-    cola = _cola_de_produccion()
-
-    if cola is None:
-        return
-
-    en_cola = {f["id"] for f in cola["queue"]}
-
-    for bloqueado in cola["blocked"]:
-
-        assert bloqueado["id"] not in en_cola, (
-            f"{bloqueado['name']} esta bloqueado y en la cola"
-        )
-
-        assert bloqueado.get("blocked_reason"), (
-            f"{bloqueado['name']} se bloquea sin decir por que"
-        )
-
-
-# ============================================================
-# 3. EL ORDEN ES EL QUE DIJO EL DUEÑO
+# 2. EL ORDEN ES EL QUE DIJO EL DUEÑO
 # ============================================================
 #
 #     El suelo por posicion aparta a los que sobran, asi que los
@@ -318,7 +137,6 @@ def _relleno(cuantos: int, desde: int = 100) -> list:
         }
         for i in range(cuantos)
     ]
-
 
 
 def test_primero_quien_no_juega() -> None:
@@ -505,46 +323,6 @@ def test_el_suplente_al_noventa_por_ciento_si_juega() -> None:
 # ============================================================
 
 
-def test_toda_fila_lleva_su_motivo() -> None:
-    cola = _cola_de_produccion()
-
-    if cola is None:
-        return
-
-    for fila in cola["queue"]:
-        assert fila.get("reason"), (
-            f"{fila['name']} entra en la cola sin motivo"
-        )
-        assert len(fila["reason"]) > 20, (
-            f"el motivo de {fila['name']} no explica nada: "
-            f"{fila['reason']}"
-        )
-
-    for fila in cola["excluded"]:
-        assert fila.get("reason"), (
-            f"{fila['name']} se aparta sin motivo"
-        )
-
-
-def test_la_coma_de_los_miles_no_se_come_la_de_la_frase() -> None:
-    """
-    `.replace(",", ".")` sobre la frase entera dejaba escrito
-    "si hay que vender. antes que despues". El separador se
-    formatea aparte.
-    """
-
-    cola = _cola_de_produccion()
-
-    if cola is None:
-        return
-
-    for fila in cola["queue"]:
-        assert "vender. antes" not in fila["reason"], (
-            f"la coma de los miles se comio la de la frase: "
-            f"{fila['reason']}"
-        )
-
-
 def test_sin_puntos_no_se_inventa_un_coste() -> None:
     """
     Cero puntos no es coste infinito ni coste cero: es que no se
@@ -567,62 +345,6 @@ def test_sin_puntos_no_se_inventa_un_coste() -> None:
 # ============================================================
 # 5. LA CAJA QUE PROMETE ES LA QUE PUEDE DAR
 # ============================================================
-
-
-def test_la_caja_de_un_ciclo_es_una_venta_no_la_suma() -> None:
-    """
-    Solo se ejecuta una accion por ciclo. Sumar las doce ofertas
-    y llamarlo "caja en un ciclo" seria prometer en media hora lo
-    que tardaria cinco ciclos — y esa promesa es justo la que
-    sostiene una deuda.
-    """
-
-    cola = _cola_de_produccion()
-
-    if cola is None:
-        return
-
-    if not cola["queue"]:
-        return
-
-    con_oferta = [
-        f for f in cola["queue"] if f["cash_kind"] == "OFERTA_VIVA"
-    ]
-
-    if len(con_oferta) < 2:
-        return
-
-    assert cola["cash_one_cycle"] == con_oferta[0]["cash_now"], (
-        "la caja de un ciclo no es la primera venta de la cola"
-    )
-
-    assert cola["cash_one_cycle"] < cola["cash_on_the_table"], (
-        "la caja de un ciclo se esta calculando como la suma de "
-        "todas las ofertas"
-    )
-
-
-def test_se_distingue_la_oferta_viva_del_precio_de_mercado() -> None:
-    """
-    Una oferta sobre la mesa es caja en este ciclo. Sin oferta hay
-    que publicarlo y esperar a que alguien lo compre, que no es lo
-    mismo ni tarda lo mismo.
-    """
-
-    cola = _cola_de_produccion()
-
-    if cola is None:
-        return
-
-    for fila in cola["queue"]:
-
-        assert fila["cash_kind"] in ("OFERTA_VIVA", "A_MERCADO")
-
-        if fila["cash_kind"] == "A_MERCADO":
-            assert fila["cash_now"] == 0, (
-                f"{fila['name']} no tiene oferta y aun asi promete "
-                f"caja inmediata"
-            )
 
 
 # ============================================================
@@ -846,11 +568,7 @@ def test_el_ritmo_neto_de_la_plantilla_se_publica() -> None:
 
 
 TESTS = [
-    test_el_apartado_no_esta_ademas_en_la_cola,
-    test_el_portero_titular_no_se_salva_por_accidente,
     test_sin_escalon_conocido_no_se_vende,
-    test_pararse_en_cualquier_punto_deja_el_once_en_pie,
-    test_el_bloqueado_no_se_cuela_mas_abajo,
     test_el_que_cae_y_no_juega_sale_el_primero,
     test_el_tramo_mira_el_once_y_no_el_pronostico,
     test_el_ritmo_neto_de_la_plantilla_se_publica,
@@ -858,11 +576,7 @@ TESTS = [
     test_dentro_del_escalon_manda_el_coste_por_punto,
     test_el_que_cae_sale_antes_que_el_que_sube,
     test_el_suplente_al_noventa_por_ciento_si_juega,
-    test_toda_fila_lleva_su_motivo,
-    test_la_coma_de_los_miles_no_se_come_la_de_la_frase,
     test_sin_puntos_no_se_inventa_un_coste,
-    test_la_caja_de_un_ciclo_es_una_venta_no_la_suma,
-    test_se_distingue_la_oferta_viva_del_precio_de_mercado,
     test_el_modulo_no_vende,
     test_no_reimplementa_los_intocables_ni_el_suelo,
 ]

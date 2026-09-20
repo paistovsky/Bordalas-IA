@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+"""
+Que el mensaje del commit diga como quedo la verja. Solo.
+
+POR QUE EXISTE (20/09/2026)
+
+    Los tres commits del 19/09 por la noche no dicen si la verja
+    paso. Dos de ellos la rompieron —`c5ca23b` dejo
+    `build_dashboard_state` reventando en cada vuelta, `5274359`
+    puso roja una guardia de AST— y a la mañana siguiente habia
+    cinco rojas.
+
+    Se cazaron de casualidad, porque tocaba mirar otra cosa. La
+    verja hizo su trabajo; el proceso no.
+
+    "Acordarse de escribir el resultado" no es un mecanismo, y
+    este repositorio ya lo tiene escrito en tres sitios.
+
+LO QUE HACE
+
+    Lee `.verja/ultima.json`, que `run_validation_gate.py` deja
+    al terminar, y añade UNA linea al final del mensaje.
+
+    Comprueba que la verja se corrio sobre ESTE arbol comparando
+    la huella SHA-256 de todos los `.py` de `src/` y `scripts/`
+    y los `.js` del panel. Si luego se toco una linea, la huella
+    no cuadra y la linea lo dice.
+
+LO QUE NO HACE
+
+    NO bloquea el commit. Un hook que impide guardar el trabajo
+    se desinstala el primer dia malo, y entonces no queda nada —
+    que es lo que ya paso con el vigilante de `data/`, y por eso
+    aquel avisa y no tumba.
+
+    Aqui la regla es la misma: escribe la verdad, la que sea, y
+    deja decidir a quien firma.
+
+    Y NO TOCA UN MENSAJE QUE YA LA LLEVE: asi se puede rehacer
+    un commit sin que la linea se duplique.
+
+COMO SE INSTALA
+
+    git config core.hooksPath .githooks
+
+    En Windows no hace falta `chmod`. En CI no corre: los hooks
+    no viajan con el checkout y este no se instala solo a
+    proposito —un hook que se instala solo es un hook que nadie
+    decidio.
+"""
+
+import hashlib
+import json
+import subprocess
+import sys
+
+from pathlib import Path
+
+
+MARCA = "Verja:"
+
+
+def raiz() -> Path:
+    try:
+        salida = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, check=True,
+        )
+        return Path(salida.stdout.strip())
+
+    except Exception:                               # noqa: BLE001
+        return Path.cwd()
+
+
+def huella(base: Path) -> str:
+    """La misma cuenta que `run_validation_gate.huella_del_arbol`."""
+
+    try:
+        digest = hashlib.sha256()
+
+        rutas = []
+
+        for patron in ("src/**/*.py", "scripts/**/*.py",
+                       "dashboard-v8/src/**/*.js"):
+            rutas.extend(base.glob(patron))
+
+        for ruta in sorted(rutas):
+
+            if "__pycache__" in ruta.parts:
+                continue
+
+            digest.update(str(ruta.relative_to(base)).encode("utf-8"))
+            digest.update(ruta.read_bytes())
+
+        return digest.hexdigest()
+
+    except Exception:                               # noqa: BLE001
+        return "?"
+
+
+def la_linea(base: Path) -> str:
+    """Una frase. Nunca lanza: si no se sabe, lo dice."""
+
+    fichero = base / ".verja" / "ultima.json"
+
+    if not fichero.exists():
+        return f"{MARCA} NO SE CORRIO sobre este arbol."
+
+    try:
+        v = json.loads(fichero.read_text(encoding="utf-8"))
+
+    except Exception as error:                      # noqa: BLE001
+        return (
+            f"{MARCA} no se pudo leer el veredicto "
+            f"({type(error).__name__}): no se sabe."
+        )
+
+    verdes = v.get("verdes")
+    total = v.get("total")
+    fallos = v.get("fallos") or []
+
+    cuerpo = f"{verdes}/{total} verdes"
+
+    if fallos:
+        cortos = ", ".join(f.rsplit(".", 1)[-1] for f in fallos[:4])
+        cuerpo += f", ROJAS: {cortos}"
+        if len(fallos) > 4:
+            cuerpo += f" y {len(fallos) - 4} mas"
+
+    if v.get("parcial"):
+        cuerpo += " (corrida PARCIAL, con --solo/--extra)"
+
+    # La comprobacion que hace que esto valga algo: que la verja
+    # se corriera sobre ESTE codigo y no sobre el de hace una hora.
+    if v.get("huella") in (None, "?"):
+        cuerpo += " (sin huella: no se sabe sobre que arbol)"
+
+    elif v["huella"] != huella(base):
+        cuerpo += " — PERO EL ARBOL CAMBIO DESPUES: no vale"
+
+    return f"{MARCA} {cuerpo}. Corrida {v.get('cuando')}."
+
+
+def main() -> int:
+
+    if len(sys.argv) < 2:
+        return 0
+
+    destino = Path(sys.argv[1])
+
+    try:
+        mensaje = destino.read_text(encoding="utf-8")
+
+    except Exception:                               # noqa: BLE001
+        return 0
+
+    # Ya la lleva: no se duplica al rehacer un commit.
+    if MARCA in mensaje:
+        return 0
+
+    base = raiz()
+
+    try:
+        destino.write_text(
+            mensaje.rstrip("\n") + "\n\n" + la_linea(base) + "\n",
+            encoding="utf-8",
+        )
+
+    except Exception:                               # noqa: BLE001
+        # Un hook nunca impide guardar el trabajo.
+        return 0
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

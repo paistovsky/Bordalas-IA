@@ -127,3 +127,7 @@ backups/
 
 secrets/
 diagnostico/
+
+# La verja deja aqui su veredicto para el hook del commit.
+# No es un libro: se regenera en cada corrida.
+.verja/

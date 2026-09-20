@@ -544,6 +544,47 @@ def test_el_ciclo_puede_fichar_sin_permiso_para_apostar():
 
     arbol = puerta
 
+    # EL PATRON ACEPTA UN `and`, Y POR QUE (20/09/2026)
+    #
+    #     Aqui se exigia que el test del `IfExp` fuera EXACTAMENTE
+    #     `ast.Name("executable_buys")`. El 19/09 la misma linea
+    #     se endurecio:
+    #
+    #         executable_buys[0]
+    #         if executable_buys
+    #         and se_sabe_que_hay_puesto(speculation)
+    #         else None
+    #
+    #     El codigo quedo ESTRICTAMENTE MAS SEGURO —con la lista
+    #     vacia cortocircuita igual, y ademas se abstiene si no se
+    #     pudo mirar lo puesto— y la guardia se puso roja por no
+    #     reconocer el `and`.
+    #
+    #     Una guardia que se pone roja cuando el codigo mejora
+    #     enseña a ignorar el rojo. Se arregla el patron, no el
+    #     codigo: lo que hay que exigir es que `executable_buys`
+    #     mande en el test, no que mande SOLO.
+    def _manda_la_lista(test) -> bool:
+
+        if (
+            isinstance(test, ast.Name)
+            and test.id == "executable_buys"
+        ):
+            return True
+
+        # `executable_buys and <lo que sea>`: cortocircuita con la
+        # lista vacia igual que el `Name` suelto. Un `or` NO vale:
+        # ahi la lista vacia sigue de largo.
+        if (
+            isinstance(test, ast.BoolOp)
+            and isinstance(test.op, ast.And)
+        ):
+            return any(
+                _manda_la_lista(valor) for valor in test.values
+            )
+
+        return False
+
     protegidos = set()
 
     for nodo in ast.walk(arbol):
@@ -551,10 +592,7 @@ def test_el_ciclo_puede_fichar_sin_permiso_para_apostar():
         if not isinstance(nodo, ast.IfExp):
             continue
 
-        if not (
-            isinstance(nodo.test, ast.Name)
-            and nodo.test.id == "executable_buys"
-        ):
+        if not _manda_la_lista(nodo.test):
             continue
 
         for hijo in ast.walk(nodo.body):
