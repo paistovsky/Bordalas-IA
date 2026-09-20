@@ -70,8 +70,24 @@ def _activar() -> None:
 
     vistos = set()
 
+    # LOS DOS SITIOS DONDE VIVE EL ESTADO DE PRODUCCION
+    #
+    #     `diagnostico/` entro el 20/09/2026. Hasta entonces esta
+    #     red solo miraba `data/`, y CINCO guardias leian
+    #     `diagnostico/status.json` —la foto que rehace cada
+    #     vuelta— sin que nadie las viera:
+    #
+    #         `las_dos_poblaciones()` busca `get_latest_snapshot(`
+    #         la verja determinista busca `data/` ESCRITO
+    #         esto miraba `data/` al abrirse
+    #
+    #     Las tres a la vez, y `diagnostico/` se colaba por las
+    #     tres. Una de ellas —la del orden de venta— se puso roja
+    #     el 20/09 porque habiamos vendido a Dituro esa mañana.
+    CARPETAS = ("data/", "diagnostico/")
+
     def _bajo_data(ruta) -> bool:
-        """¿Esta esa ruta dentro de `data/`?"""
+        """¿Esta esa ruta dentro de `data/` o de `diagnostico/`?"""
 
         try:
             texto = str(ruta).replace(chr(92), "/")
@@ -82,7 +98,10 @@ def _activar() -> None:
         if texto.startswith("./"):
             texto = texto[2:]
 
-        return texto.startswith("data/") or "/data/" in texto
+        return any(
+            texto.startswith(carpeta) or f"/{carpeta}" in texto
+            for carpeta in CARPETAS
+        )
 
     open_real = builtins.open
 

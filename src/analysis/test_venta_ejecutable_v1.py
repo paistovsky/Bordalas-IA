@@ -69,9 +69,6 @@ from src.analysis.computer_offer_reroll_engine import (
 )
 
 
-FOTO = Path("diagnostico/status.json")
-
-
 # ============================================================
 # EL CLIENTE FALSO
 # ============================================================

@@ -81,6 +81,22 @@ IGNORAR = shutil.ignore_patterns(
 #     interesan, como `scripts/mirar_*.py`.
 LEE_PRODUCCION = "get_latest_snapshot("
 
+# Y LA SEGUNDA PUERTA, QUE SE NOS ESCAPO (20/09/2026)
+#
+#     Cinco guardias leian `diagnostico/status.json` —la foto que
+#     rehace cada vuelta de produccion, sin versionar— SIN llamar
+#     a `get_latest_snapshot()`. Asi que entraban como puras.
+#
+#     Una de ellas, la del orden de venta, se puso roja el 20/09
+#     sin que cambiara una linea de codigo: habiamos vendido a
+#     Dituro a las 08:55 y la foto se rehizo a las 09:16. Y las
+#     ocho del grupo empezaban por `if cola is None: return`, asi
+#     que en CI —donde `diagnostico/` no existe— pasaban SIN
+#     MIRAR NADA.
+#
+#     Las tres redes de la casa miran ya los dos sitios.
+OTRAS_PUERTAS = ('"diagnostico/', "'diagnostico/", "diagnostico/status.json")
+
 # Las dos guardias que vigilan esto nombran la llamada para poder
 # buscarla. Son puras: no la ejecutan.
 LAS_QUE_VIGILAN = {
@@ -120,10 +136,11 @@ def las_dos_poblaciones() -> tuple[list, list]:
             del_mundo.append(modulo)
             continue
 
-        if (
-            LEE_PRODUCCION in fuente
-            and fichero.stem not in LAS_QUE_VIGILAN
-        ):
+        mira_el_mundo = LEE_PRODUCCION in fuente or any(
+            puerta in fuente for puerta in OTRAS_PUERTAS
+        )
+
+        if mira_el_mundo and fichero.stem not in LAS_QUE_VIGILAN:
             del_mundo.append(modulo)
 
         else:

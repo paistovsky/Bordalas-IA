@@ -86,9 +86,29 @@ from pathlib import Path
 PUERTA = Path("scripts") / "run_validation_gate.py"
 
 
-# El nombre del directorio de estado, partido para que este mismo
-# fichero no se denuncie a si mismo al buscarse.
+# Los directorios de ESTADO, partidos para que este mismo fichero
+# no se denuncie a si mismo al buscarse.
+#
+# `diagnostico/` ENTRO EL 20/09/2026, Y ESTABA EN LA OTRA LISTA
+#
+#     Estaba en `DEL_REPOSITORIO`, declarado "codigo versionado,
+#     igual en las dos maquinas". No lo es: esta en `.gitignore`
+#     linea 129 y lo rehace cada vuelta de produccion.
+#
+#     Eso daba permiso explicito a leerlo, y CINCO guardias lo
+#     leian. Una de ellas se puso roja el 20/09 sin que cambiara
+#     una linea de codigo: habiamos vendido a Dituro a las 08:55
+#     y la foto se rehizo a las 09:16.
+#
+#     Y era la tercera red que se le escapaba, a la vez que a las
+#     otras dos: `las_dos_poblaciones()` busca
+#     `get_latest_snapshot(` y el vigilante en ejecucion miraba
+#     solo `data/`. Las tres miran ya los dos sitios.
 ESTADO = "dat" + "a"
+
+ESTADO_2 = "diagnostic" + "o"
+
+LOS_ESTADOS = (ESTADO, ESTADO_2)
 
 
 # Directorios del repositorio que un modulo de la verja si puede
@@ -97,7 +117,6 @@ DEL_REPOSITORIO = (
     "src",
     "scripts",
     "dashboard-v8",
-    "diagnostico",
     ".github",
 )
 
@@ -384,7 +403,9 @@ def lecturas_de_estado(modulo: str) -> list[str]:
 
     fuera = _docstrings(arbol)
 
-    barras = (ESTADO + "/", ESTADO + chr(92))
+    barras = tuple(
+        e + s for e in LOS_ESTADOS for s in ("/", chr(92))
+    )
 
     hallazgos = []
 
@@ -409,11 +430,11 @@ def lecturas_de_estado(modulo: str) -> list[str]:
             and nodo.func.id == "Path"
             and nodo.args
             and isinstance(nodo.args[0], ast.Constant)
-            and nodo.args[0].value == ESTADO
+            and nodo.args[0].value in LOS_ESTADOS
         ):
             hallazgos.append(
                 f"linea {getattr(nodo, 'lineno', '?')}: "
-                f"Path({ESTADO!r})"
+                f"Path({nodo.args[0].value!r})"
             )
 
     return sorted(set(hallazgos))
@@ -768,8 +789,9 @@ def _espejo_sin_estado(raiz: Path, destino: Path) -> bool:
             return False
 
     # Lo unico que NO se enlaza: el estado. Vacio y presente, que
-    # es como llega un checkout limpio de Actions.
-    (destino / ESTADO).mkdir(exist_ok=True)
+    # es como llega un checkout limpio de Actions. Los DOS.
+    for nombre in LOS_ESTADOS:
+        (destino / nombre).mkdir(exist_ok=True)
 
     return True
 

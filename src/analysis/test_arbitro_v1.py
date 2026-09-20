@@ -35,7 +35,6 @@ CONSECUENCIA
 from __future__ import annotations
 
 import ast
-import json
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -56,16 +55,6 @@ from src.analysis.rival_scoreboard import (
     manager_scoreboard,
     value_versus_points,
 )
-
-
-FOTO = Path("diagnostico/status.json")
-
-
-def _produccion():
-    if not FOTO.exists():
-        return None
-
-    return json.loads(FOTO.read_text(encoding="utf-8"))
 
 
 # ============================================================
@@ -110,80 +99,6 @@ def test_el_tablon_repetido_no_se_cuenta_dos_veces() -> None:
     assert marcador["sold_total"] == 2_464_100
 
 
-def test_los_dias_viajan_con_cada_operacion() -> None:
-    """
-    Sin los dias, un -0,13 % parece un veredicto. Tres de las
-    siete compras de Pollo son de hace cinco horas.
-    """
-
-    foto = _produccion()
-
-    if not foto:
-        return
-
-    marcador = manager_scoreboard(foto, "Pollo17")
-
-    if not marcador["available"]:
-        return
-
-    for compra in marcador["buys"]:
-        assert "days" in compra and compra["days"] is not None, (
-            f"{compra['player']} no dice cuantos dias han pasado"
-        )
-
-    for clave in ("min_days", "median_days", "max_days"):
-        assert marcador[clave] is not None, (
-            f"el marcador no publica `{clave}`"
-        )
-
-
-def test_las_ventas_se_miran_igual_que_las_compras() -> None:
-    """
-    Mirar solo las compras hace parecer a Pollo un acumulador.
-    El 06/09 solto a Vinicius Jr por 17.633.400 el mismo dia que
-    compraba.
-    """
-
-    foto = _produccion()
-
-    if not foto:
-        return
-
-    marcador = manager_scoreboard(foto, "Pollo17")
-
-    if not marcador["available"]:
-        return
-
-    assert marcador["sells"], (
-        "el marcador de Pollo no trae ninguna venta: se le esta "
-        "mirando media foto"
-    )
-    assert marcador["sold_total"] > 0
-
-
-def test_lo_que_no_se_puede_medir_se_dice() -> None:
-    """
-    Un jugador vendido al Computer desaparece de todas las
-    plantillas, asi que no hay precio de hoy con el que
-    compararlo. `None` no es cero.
-    """
-
-    foto = _produccion()
-
-    if not foto:
-        return
-
-    marcador = manager_scoreboard(foto, "Luismi_Haz")
-
-    for venta in marcador["sells"]:
-
-        if venta.get("avoided") is None:
-            assert venta.get("unmeasurable_reason"), (
-                f"{venta['player']} no se puede medir y no dice "
-                f"por que"
-            )
-
-
 def test_el_marcador_no_lanza_con_basura() -> None:
     for entrada in (None, {}, {"league_center": None}):
         marcador = manager_scoreboard(entrada, "Pollo17")
@@ -195,37 +110,6 @@ def test_el_marcador_no_lanza_con_basura() -> None:
 # ============================================================
 # 2. LA CORRELACION SE PUBLICA CON SU LIMITE
 # ============================================================
-
-
-def test_con_siete_managers_la_correlacion_no_decide() -> None:
-    """
-    r = +0,553 entre valor de plantilla y puntos. Para que eso
-    distinga de casualidad con n=7 hace falta 0,754.
-
-    Publicar el r sin el critico seria dar por demostrado lo que
-    no lo esta.
-    """
-
-    foto = _produccion()
-
-    if not foto:
-        return
-
-    correlacion = value_versus_points(foto)
-
-    if not correlacion["available"]:
-        return
-
-    assert "critical_r" in correlacion
-    assert "significant" in correlacion
-
-    assert correlacion["critical_r"] > 0.5, (
-        "el valor critico parece de otra muestra"
-    )
-
-    if abs(correlacion["r_value_points"]) < correlacion["critical_r"]:
-        assert correlacion["significant"] is False
-        assert "No lo alcanza" in correlacion["reason"]
 
 
 # ============================================================
@@ -377,58 +261,6 @@ def test_sin_precio_al_vencer_se_dice() -> None:
 # ============================================================
 
 
-def test_la_regla_discrimina_de_verdad() -> None:
-    """
-    EL NUMERO QUE CONTESTA AL ENCARGO
-
-        Aplicando la regla de Pepe a las operaciones del almacen,
-        lo que ACEPTA tiene que rendir mas que lo que RECHAZA. Si
-        no, la regla no separa nada y sobra.
-
-        Y hay que decirlo con la trampa delante: los cortes de la
-        regla se calibraron sobre ESTOS MISMOS datos, asi que
-        esto mide coherencia interna, no acierto fuera de
-        muestra. Para eso esta el libro de arriba.
-    """
-
-    resultado = rule_backtest()
-
-    if not resultado.get("available"):
-        return
-
-    aceptado = resultado["accepted"]
-    rechazado = resultado["rejected"]
-
-    if not (aceptado.get("enough") and rechazado.get("enough")):
-        return
-
-    assert resultado["discriminates"] is True, (
-        f"lo aceptado rinde {aceptado['median'] * 100:+.2f} % y lo "
-        f"rechazado {rechazado['median'] * 100:+.2f} %: la regla "
-        f"no separa nada"
-    )
-
-    assert aceptado["loss_rate"] < rechazado["loss_rate"], (
-        "lo aceptado pierde mas a menudo que lo rechazado"
-    )
-
-
-def test_los_dos_grupos_publican_su_muestra() -> None:
-    resultado = rule_backtest()
-
-    if not resultado.get("available"):
-        return
-
-    for grupo in ("accepted", "rejected"):
-        assert "n" in resultado[grupo]
-        assert "enough" in resultado[grupo]
-
-        if not resultado[grupo]["enough"]:
-            assert resultado[grupo].get("reason")
-
-    assert MIN_SAMPLE == 30
-
-
 # ============================================================
 # 5. CUANTO HISTORICO HAY DE VERDAD
 # ============================================================
@@ -565,18 +397,12 @@ def test_el_bloque_entero_no_lanza() -> None:
 
 TESTS = [
     test_el_tablon_repetido_no_se_cuenta_dos_veces,
-    test_los_dias_viajan_con_cada_operacion,
-    test_las_ventas_se_miran_igual_que_las_compras,
-    test_lo_que_no_se_puede_medir_se_dice,
     test_el_marcador_no_lanza_con_basura,
-    test_con_siete_managers_la_correlacion_no_decide,
     test_un_libro_vacio_dice_que_esta_vacio,
     test_una_puja_no_es_un_rechazo,
     test_el_mismo_rechazo_dos_ciclos_no_son_dos,
     test_se_cierra_a_los_tres_dias_con_el_precio_de_entonces,
     test_sin_precio_al_vencer_se_dice,
-    test_la_regla_discrimina_de_verdad,
-    test_los_dos_grupos_publican_su_muestra,
     test_los_dias_de_historico_se_publican,
     test_la_profundidad_tiene_la_misma_forma_sin_almacen,
     test_los_horizontes_medibles_salen_de_los_dias,

@@ -47,7 +47,6 @@ LO QUE ESTAS PRUEBAS NO DEJAN VOLVER
 from __future__ import annotations
 
 import ast
-import json
 
 from pathlib import Path
 
@@ -60,16 +59,6 @@ from src.analysis.sesgo_posicion import (
     MUESTRA_MINIMA,
     sesgo_por_posicion,
 )
-
-
-FOTO = Path("diagnostico/status.json")
-
-
-def _produccion():
-    if not FOTO.exists():
-        return None
-
-    return json.loads(FOTO.read_text(encoding="utf-8"))
 
 
 def _jornada(
@@ -598,30 +587,6 @@ def test_la_franja_del_empate_es_la_del_caso_real() -> None:
     )
 
 
-def test_el_sesgo_sale_de_produccion_y_no_de_una_copia() -> None:
-    """
-    La regla de la casa: se mide contra `diagnostico/status.json`.
-    """
-
-    foto = _produccion()
-
-    if not foto:
-        return
-
-    sesgo = sesgo_por_posicion(foto)
-
-    if not sesgo["available"]:
-        return
-
-    assert sesgo["matchdays"] > 0
-    assert sesgo["sample"] > 20, (
-        "la muestra de la liga se ha quedado en nada"
-    )
-
-    for fila in sesgo["rows"]:
-        assert fila["points_per_expected"] is not None
-
-
 # ============================================================
 # 4. EL EQUIPO QUE HABIA QUE MIRAR
 # ============================================================
@@ -904,7 +869,6 @@ TESTS = [
     test_el_factor_se_propone_y_no_se_aplica,
     test_una_posicion_con_muestra_corta_no_propone_factor,
     test_la_franja_del_empate_es_la_del_caso_real,
-    test_el_sesgo_sale_de_produccion_y_no_de_una_copia,
     test_sin_ver_la_plantilla_no_se_compara_con_huecos,
     test_la_comparacion_cuenta_lo_que_de_verdad_distingue,
     test_no_se_usan_los_campos_que_no_distinguen_a_nadie,

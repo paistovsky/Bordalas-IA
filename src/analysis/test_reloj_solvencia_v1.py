@@ -33,7 +33,6 @@ CONSECUENCIA
 from __future__ import annotations
 
 import ast
-import json
 
 from pathlib import Path
 
@@ -54,8 +53,6 @@ from src.analysis.solvency_clock import (
 )
 
 
-FOTO = Path("diagnostico/status.json")
-
 MODULO = Path("src/analysis/solvency_clock.py")
 
 
@@ -66,13 +63,6 @@ def _oferta(nombre, importe, horas, protection="SELLABLE"):
         "hours_to_expiry": horas,
         "protection": protection,
     }
-
-
-def _produccion():
-    if not FOTO.exists():
-        return None
-
-    return json.loads(FOTO.read_text(encoding="utf-8"))
 
 
 # ============================================================
@@ -450,60 +440,6 @@ def test_nunca_lanza_con_basura() -> None:
 # ============================================================
 
 
-def test_la_foto_de_produccion_no_esta_en_el_plazo() -> None:
-    """
-    LA FOTO CAMBIO, Y ESO ES LA NOTICIA (13/09/2026)
-
-        Este test afirmaba `deficit > 0` sobre la foto del
-        05/09: -421.792 EUR de saldo. Se puso rojo solo, con el
-        mensaje que lleva escrito -"la foto de referencia ya no
-        tiene deficit"- porque el 06/09 el saldo es
-        +1.725.383 EUR.
-
-        El deficit se resolvio. No se tapa el test: se actualiza
-        y se deja dicho, que para eso llevaba ese mensaje.
-
-    LO QUE SIGUE COMPROBANDO
-
-        Que con saldo positivo el reloj no aprieta, y que a mas
-        de seis horas del cierre no fuerza ninguna venta. Las dos
-        cosas se rompen igual de facil que antes.
-    """
-
-    foto = _produccion()
-
-    if not foto:
-        return
-
-    resumen = foto.get("summary") or {}
-
-    reloj = build_solvency_clock(
-        resumen.get("balance"),
-        resumen.get("hours_to_deadline"),
-        offers=foto.get("offers"),
-        market_clock=foto.get("market_clock"),
-    )
-
-    assert reloj["available"]
-
-    horas = resumen.get("hours_to_deadline")
-
-    assert horas is not None and horas > SOLVENCY_DEADLINE_HOURS, (
-        f"la foto de referencia esta DENTRO del plazo "
-        f"({horas} h): revisa los numeros de este fichero antes "
-        f"de fiarte de el"
-    )
-
-    assert reloj["solvency_overrides_hold"] is False, (
-        "el reloj fuerza una venta lejos del plazo"
-    )
-
-    if reloj["deficit"] == 0:
-        assert reloj["state"] == SIN_DEUDA
-    else:
-        assert reloj["state"] != EN_EL_PLAZO
-
-
 def test_la_recomendacion_es_la_misma_regla_que_el_camino_vivo() -> None:
     """
     `offers_to_collect` cobra la oferta mas PEQUEÑA que tape el
@@ -564,7 +500,6 @@ TESTS = [
     test_la_coma_de_los_miles_no_se_come_la_de_la_frase,
     test_el_reloj_no_decide_ni_escribe,
     test_nunca_lanza_con_basura,
-    test_la_foto_de_produccion_no_esta_en_el_plazo,
 ]
 
 
