@@ -90,7 +90,15 @@ def huella(base: Path) -> str:
                 continue
 
             digest.update(str(ruta.relative_to(base)).encode("utf-8"))
-            digest.update(ruta.read_bytes())
+
+            # La misma normalizacion que `run_validation_gate`:
+            # `git checkout` reescribe con CRLF en Windows y los
+            # bytes cambian sin que cambie el codigo.
+            crudo = ruta.read_bytes()
+
+            digest.update(
+                crudo.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+            )
 
         return digest.hexdigest()
 

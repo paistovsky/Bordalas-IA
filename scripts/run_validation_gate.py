@@ -436,6 +436,14 @@ def modulos_del_workflow() -> list[str]:
 VEREDICTO = RAIZ / ".verja" / "ultima.json"
 
 
+def _sin_finales_de_linea(ruta) -> bytes:
+    """El contenido con CRLF y CR pasados a LF."""
+
+    crudo = ruta.read_bytes()
+
+    return crudo.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
 def huella_del_arbol() -> str:
     """
     SHA-256 de lo que la verja vigila. Nunca lanza.
@@ -463,7 +471,19 @@ def huella_del_arbol() -> str:
             digest.update(
                 str(ruta.relative_to(RAIZ)).encode("utf-8")
             )
-            digest.update(ruta.read_bytes())
+
+            # LOS FINALES DE LINEA SE NORMALIZAN (20/09/2026)
+            #
+            #     `git checkout -- fichero` lo reescribe con CRLF
+            #     en Windows. Los bytes cambian, el codigo no, y
+            #     la huella decia "el arbol cambio despues" por
+            #     una restauracion que no movio una instruccion.
+            #     Paso en el primer commit que uso esto.
+            #
+            #     Es la misma falsa alarma que este mismo dia
+            #     hemos quitado de dos guardias. Se compara el
+            #     CONTENIDO, no el fichero.
+            digest.update(_sin_finales_de_linea(ruta))
 
         return digest.hexdigest()
 

@@ -388,8 +388,13 @@ Verja: 160/160 verdes. Corrida 2026-09-20T08:32:01+00:00.
 ```
 
 **La huella es lo que hace que valga algo.** Es el SHA-256 de todos los `.py` de
-`src/` y `scripts/` más los `.js` del panel. Probado tocando un fichero después de
-correr la verja:
+`src/` y `scripts/` más los `.js` del panel, **con los finales de línea
+normalizados** — el primer commit que la usó dijo «el árbol cambió después» porque un
+`git checkout --` había reescrito un fichero con CRLF sin mover una instrucción. Era
+la misma falsa alarma que este informe le reprocha a dos guardias, cometida al
+construir el aviso. Corregida y vuelta a medir.
+
+Probado tocando un fichero después de correr la verja:
 
 ```
 Verja: 160/160 verdes — PERO EL ARBOL CAMBIO DESPUES: no vale. Corrida ...
