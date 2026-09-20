@@ -73,6 +73,20 @@ LA DEUDA SE DECLARA, NO SE ESCONDE
 
 from __future__ import annotations
 
+import os
+
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA  (doctrina 104, 20/09/2026)
+#
+#     Medido: con `BORDALAS_SIN_REFERENCIA_ESCALA` puesto, esta
+#     guardia se caia — y una guardia roja para el paso
+#     «Validate optimized production cycle», o sea EL CICLO.
+#
+#     Este caso mide el comportamiento POR DEFECTO. El del
+#     interruptor puesto lo mide `test_el_bucle_de_la_vara_v1`,
+#     que lo enciende y lo apaga ella.
+os.environ.pop("BORDALAS_SIN_REFERENCIA_ESCALA", None)
+
 import ast
 import os
 import re

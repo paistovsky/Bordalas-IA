@@ -287,6 +287,8 @@ TESTS = [
     "src.analysis.test_el_liston_del_manager_v1",
     "src.analysis.test_el_marcador_por_su_fecha_v1",
     "src.analysis.test_una_jornada_sin_once_no_cuadra_v1",
+    "src.analysis.test_ninguna_guardia_depende_del_entorno_v1",
+    "src.analysis.test_solo_un_interruptor_por_vuelta_v1",
     "src.analysis.test_ninguna_pasa_con_las_manos_vacias_v1",
     "src.analysis.test_los_sentidos_v1",
     "src.analysis.test_la_alarma_de_los_sentidos_v1",
@@ -500,10 +502,27 @@ def huella_del_arbol() -> str:
         return "?"
 
 
+# UNA VERJA DENTRO DE OTRA NO APUNTA EL VEREDICTO (20/09/2026)
+#
+#     `test_ninguna_guardia_depende_del_entorno_v1` corre esta
+#     verja otra vez, con todos los interruptores puestos, para
+#     comprobar que el veredicto no cambia. Si esa corrida de
+#     dentro escribiese `.verja/ultima.json`, el mensaje del
+#     commit contaria la de dentro —parcial y con el entorno
+#     retorcido— en vez de la de verdad.
+#
+#     No es un `BORDALAS_*` a proposito: no es un interruptor de
+#     comportamiento, es como se llama a si misma.
+ANIDADA = "VERJA_ANIDADA"
+
+
 def _apuntar_el_veredicto(
     verdes: int, total: int, fallos: list, parcial: bool
 ) -> None:
     """Lo que hizo la verja, para el mensaje del commit. Nunca lanza."""
+
+    if str(os.environ.get(ANIDADA, "")).strip() == "1":
+        return
 
     try:
         from datetime import datetime, timezone

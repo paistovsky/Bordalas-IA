@@ -109,13 +109,58 @@ def _con(margen, fn):
                 os.environ[clave] = valor
 
 
+# EL INTERRUPTOR LO PONE ESTA GUARDIA, NO EL ENTORNO
+# (20/09/2026, y costo dos vueltas)
+#
+#     `_evalua` heredaba el entorno. Con
+#     `BORDALAS_LISTON_DEL_MANAGER` puesto en el `env` del
+#     workflow, todo lo que esta guardia llama «apagado» habria
+#     corrido ENCENDIDO, y la prueba de abajo habria dado una
+#     roja que nadie sabria leer. Doctrina 104.
+#
+#     Para «apagado» se BORRAN las dos variables, que es el
+#     estado de una maquina limpia, no se ponen a "0".
+
+
+def _sin(fn):
+    """Corre `fn` con los dos interruptores BORRADOS."""
+
+    antes = (
+        os.environ.get(ENV_LISTON_DEL_MANAGER),
+        os.environ.get(ENV_MARGEN_DEL_MANAGER),
+    )
+
+    try:
+
+        for clave in (
+            ENV_LISTON_DEL_MANAGER, ENV_MARGEN_DEL_MANAGER
+        ):
+            os.environ.pop(clave, None)
+
+        return fn()
+
+    finally:
+
+        for clave, valor in zip(
+            (ENV_LISTON_DEL_MANAGER, ENV_MARGEN_DEL_MANAGER), antes
+        ):
+            if valor is None:
+                os.environ.pop(clave, None)
+            else:
+                os.environ[clave] = valor
+
+
 def _evalua(importe, mercado, in_lineup):
-    return evaluate_sale_to_rival(
-        amount=importe,
-        market_value=mercado,
-        rival_user_id=14145555,
-        rival_intelligence={},
-        in_lineup=in_lineup,
+    """La evaluacion de HOY: con el liston apagado del todo."""
+
+    return _sin(
+        lambda: evaluate_sale_to_rival(
+            amount=importe,
+            market_value=mercado,
+            rival_user_id=14145555,
+            rival_intelligence={},
+            in_lineup=in_lineup,
+        )
     )
 
 
@@ -332,10 +377,19 @@ def test_encendido_sin_margen_no_baja_el_suelo() -> None:
 
 def test_apagado_se_comporta_como_ayer() -> None:
 
-    assert not liston_del_manager_activo(), (
-        "el interruptor esta encendido en el entorno de la "
-        "verja: entonces esto no mide el comportamiento por "
-        "defecto"
+    # LO APAGA ESTA GUARDIA, y de paso comprueba que el lector
+    # sigue al entorno despues del import: si lo cacheara,
+    # borrarlo aqui dentro no cambiaria nada.
+    assert _sin(lambda: liston_del_manager_activo()) is False, (
+        "con la variable borrada, el lector sigue diciendo que "
+        "el liston esta puesto: o lo cachea al importarse, o lo "
+        "lee de otro sitio"
+    )
+
+    assert _con(2.45, lambda: liston_del_manager_activo()) is True, (
+        "con la variable puesta a \"1\" el lector sigue diciendo "
+        "que esta apagado: cachea el valor y esta guardia no "
+        "controla nada"
     )
 
     for nombre, importe, mercado, in_lineup in LAS_CINCO:

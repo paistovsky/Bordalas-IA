@@ -49,6 +49,23 @@ REGLA 23
 
 from __future__ import annotations
 
+import os
+
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA  (doctrina 104, 20/09/2026)
+#
+#     Medido: con `BORDALAS_CUPO_POR_ENVIOS` y `BORDALAS_NO_REPETIR_LA_ESCRITURA` puestos en el
+#     entorno, esta guardia se caia — y una guardia roja para el
+#     paso «Validate optimized production cycle», o sea para EL
+#     CICLO. Es lo que paso la noche del 20/09 con
+#     `BORDALAS_OBJETIVOS_EL_CATALOGO`.
+#
+#     Este caso mide el comportamiento POR DEFECTO, asi que el
+#     interruptor se apaga aqui. El comportamiento con el puesto
+#     lo mide su propia guardia, que lo enciende y lo apaga ella.
+os.environ.pop("BORDALAS_CUPO_POR_ENVIOS", None)
+os.environ.pop("BORDALAS_NO_REPETIR_LA_ESCRITURA", None)
+
 from datetime import datetime, timezone
 
 from pathlib import Path

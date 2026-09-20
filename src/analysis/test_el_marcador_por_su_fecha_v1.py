@@ -145,12 +145,23 @@ OBSERVADAS = [
 
 
 def _con(encendido: bool, fn):
-    """Corre `fn` con el interruptor donde toque. Doctrina 104."""
+    """Corre `fn` con el interruptor donde toque. Doctrina 104.
+
+    Para «apagado» se BORRA la variable, no se pone a "0": es
+    el estado que de verdad tiene una maquina limpia. Que las
+    dos signifiquen lo mismo se mide en
+    `test_apagado_el_calendario_es_el_de_ayer`.
+    """
 
     antes = os.environ.get(ENV_POR_SU_FECHA)
 
     try:
-        os.environ[ENV_POR_SU_FECHA] = "1" if encendido else "0"
+
+        if encendido:
+            os.environ[ENV_POR_SU_FECHA] = "1"
+        else:
+            os.environ.pop(ENV_POR_SU_FECHA, None)
+
         return fn()
 
     finally:
@@ -308,11 +319,44 @@ def test_apagado_la_aplazada_se_cuela_donde_no_va() -> None:
 
 def test_apagado_el_calendario_es_el_de_ayer() -> None:
 
-    assert not jornadas_por_su_fecha(), (
-        "el interruptor esta encendido en el entorno de la "
-        "verja: entonces esto no mide el comportamiento por "
-        "defecto"
+    # LO APAGA ESTA GUARDIA, NO EL ENTORNO (doctrina 104).
+    #
+    #     Antes esta linea comprobaba que el interruptor no
+    #     estuviese puesto fuera. La noche que se encendio uno
+    #     en el `env` del workflow, la guardia hermana se puso
+    #     roja y el ciclo no arranco.
+    #
+    #     De paso se mide lo que decide si borrarlo basta: que
+    #     el lector siga al entorno DESPUES del import.
+    assert _con(False, jornadas_por_su_fecha) is False, (
+        "con la variable borrada, el lector sigue diciendo que "
+        "el interruptor esta puesto: o lo cachea al importarse, "
+        "o lo lee de otro sitio"
     )
+
+    assert _con(True, jornadas_por_su_fecha) is True, (
+        "con la variable puesta a \"1\" el lector sigue diciendo "
+        "que esta apagado: cachea el valor y esta guardia no "
+        "controla nada"
+    )
+
+    # Y que "0" signifique lo mismo que borrada, que es lo que
+    # permite escribir una por la otra.
+    antes = os.environ.get(ENV_POR_SU_FECHA)
+
+    try:
+        os.environ[ENV_POR_SU_FECHA] = "0"
+
+        assert not jornadas_por_su_fecha(), (
+            "\"0\" no significa apagado para el lector"
+        )
+
+    finally:
+
+        if antes is None:
+            os.environ.pop(ENV_POR_SU_FECHA, None)
+        else:
+            os.environ[ENV_POR_SU_FECHA] = antes
 
     sin_eventos = _con(
         False,

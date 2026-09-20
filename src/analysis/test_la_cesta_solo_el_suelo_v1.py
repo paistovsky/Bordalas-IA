@@ -67,23 +67,42 @@ def _candidatos(precios=PRECIOS) -> list:
     ]
 
 
-def _con(precios, encendido: bool) -> list:
+# EL INTERRUPTOR LO PONE ESTA GUARDIA, NO EL ENTORNO
+# (20/09/2026, y costo dos vueltas)
+#
+#     La prueba de «apagado» empezaba comprobando que el
+#     interruptor NO estuviese puesto en el entorno. La noche
+#     que se encendio uno en el `env` del workflow, la guardia
+#     hermana se puso roja y el ciclo no arranco.
+#
+#     Doctrina 104. Y para «apagado» se BORRA la variable, que
+#     es el estado de una maquina limpia, no se pone a "0".
+
+
+def _poner(valor):
+    """Pone o BORRA el interruptor. Devuelve lo que habia."""
+
     antes = os.environ.get(ENV_SOLO_EL_SUELO)
 
-    try:
-        os.environ[ENV_SOLO_EL_SUELO] = "1" if encendido else "0"
+    if valor is None:
+        os.environ.pop(ENV_SOLO_EL_SUELO, None)
+    else:
+        os.environ[ENV_SOLO_EL_SUELO] = valor
 
+    return antes
+
+
+def _con(precios, encendido: bool) -> list:
+
+    antes = _poner("1" if encendido else None)
+
+    try:
         return candidatos_en_modo_cartera(
             _candidatos(precios), PRIMA
         )
 
     finally:
-
-        if antes is None:
-            os.environ.pop(ENV_SOLO_EL_SUELO, None)
-
-        else:
-            os.environ[ENV_SOLO_EL_SUELO] = antes
+        _poner(antes)
 
 
 # ============================================================
@@ -181,11 +200,35 @@ def test_el_corte_es_el_que_ya_existia() -> None:
 
 def test_apagado_se_comporta_como_ayer() -> None:
 
-    assert not solo_el_suelo(), (
-        "el interruptor esta encendido en el entorno de la "
-        "verja: entonces esto no mide el comportamiento por "
-        "defecto"
-    )
+    # LO APAGA ESTA GUARDIA, y ademas comprueba que el lector
+    # sigue al entorno despues del import: si lo cacheara,
+    # apagarlo aqui dentro no serviria de nada.
+    antes = _poner(None)
+
+    try:
+        assert not solo_el_suelo(), (
+            "con la variable borrada, el lector sigue diciendo "
+            "que el interruptor esta puesto: o lo cachea al "
+            "importarse, o lo lee de otro sitio"
+        )
+
+        _poner("1")
+
+        assert solo_el_suelo(), (
+            "puesta a \"1\" el lector sigue diciendo que esta "
+            "apagado: cachea el valor y esta guardia no "
+            "controla nada"
+        )
+
+        _poner("0")
+
+        assert not solo_el_suelo(), (
+            "\"0\" no significa apagado para el lector: "
+            "entonces borrarla y ponerla a cero no son lo mismo"
+        )
+
+    finally:
+        _poner(antes)
 
     apagado = _con(PRECIOS, encendido=False)
 

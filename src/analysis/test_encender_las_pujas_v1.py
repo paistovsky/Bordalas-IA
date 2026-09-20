@@ -66,6 +66,20 @@ from __future__ import annotations
 
 import json
 import os
+
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA  (doctrina 104, 20/09/2026)
+#
+#     `BORDALAS_SIN_SUBASTA` APAGA la subasta, que es
+#     justo lo que esta guardia comprueba. Con ese interruptor
+#     puesto en el `env` del workflow, se ponia roja y el paso
+#     de validacion paraba el ciclo — que es lo que paso la
+#     noche del 20/09 con otro interruptor.
+#
+#     Se fija ENCENDIDO aqui arriba, antes de medir nada. Las
+#     pruebas que lo apagan a proposito lo ponen y lo quitan
+#     ellas, y siguen igual.
+os.environ.pop("BORDALAS_SIN_SUBASTA", None)
 import tempfile
 
 from pathlib import Path
