@@ -163975,5 +163975,69 @@
         "amount": 4992001
       }
     ]
+  },
+  {
+    "event_id": "6d8787a6fc91ef6504bafc46",
+    "date": 1789887322,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 17482,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 2188300
+      },
+      {
+        "player": 10030,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1621500
+      },
+      {
+        "player": 9983,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1870100
+      },
+      {
+        "player": 27575,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 156400
+      },
+      {
+        "player": 26813,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 151500
+      },
+      {
+        "player": 43281,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 151200
+      }
+    ]
   }
 ]
