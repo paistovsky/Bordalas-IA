@@ -163883,5 +163883,97 @@
         "amount": 11795200
       }
     ]
+  },
+  {
+    "event_id": "4b5105a6360d1278d7dcad9e",
+    "date": 1789880729,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 2603,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 10120007
+      },
+      {
+        "player": 5220,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 5135070
+      },
+      {
+        "player": 1760,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1887000
+      },
+      {
+        "player": 20969,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 4907000,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 4582000
+          }
+        ]
+      },
+      {
+        "player": 30081,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 8407000,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 8361000
+          }
+        ]
+      },
+      {
+        "player": 32629,
+        "to": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 3630000
+      },
+      {
+        "player": 9090,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 4992001
+      }
+    ]
   }
 ]
