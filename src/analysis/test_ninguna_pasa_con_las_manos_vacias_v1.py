@@ -45,7 +45,10 @@ POR QUE ES UN CENSO Y NO UN CORTE
     Lo que SI se puede cercar sin falsos positivos es la forma
     exacta que fallo: una prueba de un fichero que lee el estado
     y que sale por la puerta de atras cuando el estado no esta.
-    De esas quedan TRECE, y estan censadas abajo una a una.
+    Eran TRECE el 20/09 por la mañana. Siete de ellas vivian en
+    `test_futbolfantasy_source_v12` y se fueron esa tarde a
+    `scripts/mirar_la_fuente_unica.py`. Quedan SEIS, censadas
+    abajo una a una.
 
     El censo SOLO PUEDE ENCOGER. Cualquiera que no este en la
     lista pone esta guardia en rojo con su nombre — que es lo que
@@ -53,15 +56,15 @@ POR QUE ES UN CENSO Y NO UN CORTE
 
 LO QUE COSTARIA BAJARLO A CERO
 
-    `test_futbolfantasy_source_v12`  7   lee el HTML del proveedor y las fotos
     `test_mercado_rivales_v1`        2   lee las fotos
     `test_doctrina_v1`               1
     `test_el_ciclo_publica_v1`       1   comprueba si hay fotos
     `test_la_pantalla_pinta_v1`      1   ya esta retirada de la verja
-    `test_verja_determinista_v1`     1   es el vigilante, y es legitimo
+    `test_verja_determinista_v1`     1   ES el vigilante, y es legitimo
 
-    Siete de las trece son un solo fichero, y la salida es la
-    misma que se uso hoy con las otras ocho: un mirador.
+    De las seis que quedan, UNA es legitima -el vigilante- y otra
+    esta fuera de la verja. Las cuatro de verdad son dos ficheros:
+    `test_mercado_rivales_v1` y los dos sueltos. Media tarde.
 
 REGLA 23
 
@@ -101,20 +104,6 @@ TOCA_EL_ESTADO = re.compile(
 CENSADAS_EL = "2026-09-20"
 
 PUEDEN_SALIR_SIN_AFIRMAR = {
-    "test_futbolfantasy_source_v12::test_parser_sobre_html_real":
-        "sin el HTML guardado del proveedor no hay nada que parsear",
-    "test_futbolfantasy_source_v12::test_identidad_por_equipo":
-        "sin HTML guardado no hay equipos que emparejar",
-    "test_futbolfantasy_source_v12::test_partes_de_baja":
-        "sin HTML guardado no hay partes",
-    "test_futbolfantasy_source_v12::test_la_cache_comprueba_a_quien_cubre":
-        "sin fotos no se sabe a quien cubre la cache",
-    "test_futbolfantasy_source_v12::test_a_quien_se_vende":
-        "necesita una foto con mercado",
-    "test_futbolfantasy_source_v12::test_intencion_de_venta_solo_observa":
-        "necesita una foto con mercado",
-    "test_futbolfantasy_source_v12::test_el_once_usa_la_fuente_unica":
-        "necesita una foto con once",
     "test_mercado_rivales_v1::test_la_forma_no_cambia_con_los_datos":
         "compara dos fotos y sin ellas no hay dos formas",
     "test_mercado_rivales_v1::test_la_pantalla_lo_canta":
@@ -289,7 +278,7 @@ def test_el_censo_solo_puede_encoger() -> None:
         + "\n".join(f"    {clave}" for clave in fantasmas)
     )
 
-    assert len(PUEDEN_SALIR_SIN_AFIRMAR) <= 13, (
+    assert len(PUEDEN_SALIR_SIN_AFIRMAR) <= 6, (
         f"el censo ha crecido a "
         f"{len(PUEDEN_SALIR_SIN_AFIRMAR)}: solo puede encoger"
     )

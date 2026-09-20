@@ -280,6 +280,7 @@ TESTS = [
     "src.analysis.test_la_lista_blanca_v1",
     "src.analysis.test_cada_compra_sabe_de_que_via_vino_v1",
     "src.analysis.test_el_orden_distingue_tamano_v1",
+    "src.analysis.test_la_prima_va_por_tramo_v1",
     "src.analysis.test_ninguna_pasa_con_las_manos_vacias_v1",
     "src.analysis.test_los_sentidos_v1",
     "src.analysis.test_la_alarma_de_los_sentidos_v1",

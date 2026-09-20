@@ -115,10 +115,6 @@ PUEDEN_MIRAR_EL_RELOJ = {
         "`_edad_en_segundos` devuelve ~N. La resta vale igual a "
         "cualquier hora."
     ),
-    "test_futbolfantasy_source_v12.py": (
-        "sella un fixture de cache como recien escrito para que "
-        "el TTL no lo dé por caducado. No afirma sobre la fecha."
-    ),
     "test_jornada_del_tablero_v1.py": (
         "usa `AHORA` como origen para construir tableros de hace "
         "N horas; las aserciones son sobre la jornada, no sobre "

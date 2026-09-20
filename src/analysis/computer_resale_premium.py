@@ -83,6 +83,297 @@ MIN_SAMPLES = 12
 MAX_ABSOLUTE_PREMIUM = 0.50
 
 
+# ============================================================
+# LA PRIMA NO ES UNA CONSTANTE: ES UNA CURVA (20/09/2026)
+# ============================================================
+#
+#     Medido sobre las 194 ventas fechables, la prima SUBE con el
+#     precio. Y el modelo metia UNA sola mediana para todos, asi
+#     que la ganancia esperada de la cesta salia proporcional al
+#     precio y el rendimiento por euro CONSTANTE — doctrina 98:
+#     un ratio constante no delata al ratio, delata a su entrada.
+#
+#     LOS CORTES NO SON NUEVOS, Y ESO ES A PROPOSITO
+#
+#         1.500.000 y 3.000.000 son `CORTES_DE_PRECIO`, la
+#         rejilla que `la_subasta` ya usa para la probabilidad de
+#         pelea. Las dos se multiplican en el mismo sitio
+#         (`_por_euro`), asi que dos rejillas distintas para el
+#         mismo eje serian una arbitrariedad escondida.
+#
+#         El unico corte nuevo es 6.000.000, y sale de donde
+#         estaba el salto: +2,63 % de 3 a 6 M contra +4,26 % por
+#         encima. Parte la celda de arriba de la pelea, que es
+#         abierta, SOLO para la prima.
+#
+#     LO QUE LA CURVA NO DICE, Y HAY QUE DECIRLO
+#
+#         La dispersion DENTRO de cada tramo es mayor que la
+#         separacion ENTRE tramos: el rango intercuartilico va de
+#         2,9 a 4,2 puntos y las medianas se separan 1,8. La
+#         curva describe la mediana, no lo que pasa en una
+#         operacion suelta.
+CORTES_DE_LA_PRIMA = (1_500_000, 3_000_000, 6_000_000)
+
+
+ENV_POR_TRAMO = "BORDALAS_PRIMA_POR_TRAMO"
+
+
+def prima_por_tramo_activa() -> bool:
+    """Si la curva manda sobre la mediana unica. Nunca lanza."""
+
+    import os
+
+    return str(
+        os.environ.get(ENV_POR_TRAMO, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
+
+
+def _primas_fechadas(events, price_at) -> list:
+    """`[(precio_de_entonces, prima)]`. Nunca lanza."""
+
+    salida = []
+
+    for venta in sales_to_computer(events):
+
+        try:
+            precio = safe_int(
+                price_at(venta["player_id"], venta["date"])
+            )
+
+        except Exception:                           # noqa: BLE001
+            continue
+
+        if precio <= 0:
+            continue
+
+        prima = venta["amount"] / precio - 1.0
+
+        if abs(prima) > MAX_ABSOLUTE_PREMIUM:
+            continue
+
+        salida.append((precio, prima))
+
+    return salida
+
+
+def _etiqueta(desde, hasta) -> str:
+
+    if hasta is None:
+        return f"{desde:,}+".replace(",", ".")
+
+    return f"{desde:,}-{hasta:,}".replace(",", ".")
+
+
+def medir_la_prima_por_tramo(
+    events: list[dict] | None = None,
+    price_at=None,
+    cortes=CORTES_DE_LA_PRIMA,
+    min_samples: int = MIN_SAMPLES,
+) -> dict:
+    """
+    La prima y la tasa de acierto, tramo a tramo.
+
+    Forma fija, nunca lanza. Un tramo con menos de `min_samples`
+    sale `calibrado: False` y NO trae numero propio: quien lo use
+    cae a la mediana global, que es lo que hace la curva de pujas
+    con una celda corta.
+    """
+
+    vacio = {
+        "available": False,
+        "calibrated": False,
+        "cortes": list(cortes),
+        "min_samples": int(min_samples),
+        "global_percent": None,
+        "global_positive_ratio": None,
+        "tramos": [],
+        "reason": None,
+    }
+
+    try:
+        if events is None:
+            events = load_board_events()
+
+        if price_at is None:
+            from src.analysis.historical_price_lookup import (
+                build_historical_price_lookup,
+            )
+
+            price_at = build_historical_price_lookup()
+
+        filas = _primas_fechadas(events, price_at)
+
+        if not filas:
+            return {
+                **vacio,
+                "available": True,
+                "reason": (
+                    "Ninguna venta al Computer se puede fechar "
+                    "con el precio de aquel momento. Sin "
+                    "denominador no hay prima."
+                ),
+            }
+
+        todas = [p for _, p in filas]
+
+        global_mediana = statistics.median(todas)
+
+        global_verde = sum(1 for p in todas if p > 0) / len(todas)
+
+        bordes = [0] + list(cortes) + [None]
+
+        tramos = []
+
+        for desde, hasta in zip(bordes, bordes[1:]):
+
+            grupo = [
+                p
+                for precio, p in filas
+                if precio >= desde
+                and (hasta is None or precio < hasta)
+            ]
+
+            calibrado = len(grupo) >= min_samples
+
+            tramos.append({
+                "desde": desde,
+                "hasta": hasta,
+                "etiqueta": _etiqueta(desde, hasta),
+                "n": len(grupo),
+                "calibrado": calibrado,
+
+                # SIN MASA NO HAY NUMERO PROPIO (doctrina 24).
+                # `None` no es cero: es "cae a la global".
+                "median_percent": (
+                    round(statistics.median(grupo) * 100, 2)
+                    if calibrado
+                    else None
+                ),
+                "positive_ratio": (
+                    round(
+                        sum(1 for p in grupo if p > 0)
+                        / len(grupo),
+                        3,
+                    )
+                    if calibrado
+                    else None
+                ),
+                "reason": (
+                    f"{len(grupo)} venta(s) fechadas."
+                    if calibrado
+                    else (
+                        f"Sin calibrar: {len(grupo)} venta(s), "
+                        f"hacen falta {min_samples}. Usa la "
+                        f"mediana global."
+                    )
+                ),
+            })
+
+        calibrados = [t for t in tramos if t["calibrado"]]
+
+        return {
+            **vacio,
+            "available": True,
+            "calibrated": bool(calibrados),
+            "global_percent": round(global_mediana * 100, 2),
+            "global_positive_ratio": round(global_verde, 3),
+            "tramos": tramos,
+            "reason": (
+                f"{len(calibrados)} de {len(tramos)} tramo(s) "
+                f"calibrado(s) sobre {len(filas)} venta(s) "
+                f"fechadas. Mediana global "
+                f"{global_mediana * 100:+.2f} %."
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": f"{type(error).__name__}: {error}",
+        }
+
+
+def prima_del_tramo(curva: dict | None, precio) -> dict:
+    """
+    La prima que le toca a ESE precio. Forma fija, nunca lanza.
+
+    `{percent, calibrado, n, etiqueta, reason}`. Si el tramo no
+    esta calibrado, devuelve la mediana global y lo dice: un
+    numero inventado para un tramo sin masa es peor que no tener
+    tramos.
+    """
+
+    vacio = {
+        "percent": None,
+        "calibrado": False,
+        "n": 0,
+        "etiqueta": None,
+        "reason": "No hay curva de primas.",
+    }
+
+    try:
+        if not curva or not curva.get("available"):
+            return vacio
+
+        valor = safe_int(precio)
+
+        if valor <= 0:
+            return {
+                **vacio,
+                "reason": "Sin precio no hay tramo.",
+            }
+
+        for tramo in (curva.get("tramos") or []):
+
+            desde = safe_int(tramo.get("desde"))
+
+            hasta = tramo.get("hasta")
+
+            if valor < desde:
+                continue
+
+            if hasta is not None and valor >= safe_int(hasta):
+                continue
+
+            if tramo.get("calibrado"):
+                return {
+                    "percent": tramo.get("median_percent"),
+                    "calibrado": True,
+                    "n": safe_int(tramo.get("n")),
+                    "etiqueta": tramo.get("etiqueta"),
+                    "reason": (
+                        f"Tramo {tramo.get('etiqueta')}: "
+                        f"{tramo.get('median_percent'):+.2f} % "
+                        f"sobre {tramo.get('n')} venta(s)."
+                    ),
+                }
+
+            return {
+                "percent": curva.get("global_percent"),
+                "calibrado": False,
+                "n": safe_int(tramo.get("n")),
+                "etiqueta": tramo.get("etiqueta"),
+                "reason": (
+                    f"Tramo {tramo.get('etiqueta')} sin calibrar "
+                    f"({tramo.get('n')} venta(s)): se usa la "
+                    f"mediana global, "
+                    f"{curva.get('global_percent')} %."
+                ),
+            }
+
+        return {
+            **vacio,
+            "reason": f"{valor} no cae en ningun tramo.",
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            **vacio,
+            "reason": f"{type(error).__name__}: {error}",
+        }
+
+
 def safe_int(value, default: int = 0) -> int:
     try:
         return int(value or 0)

@@ -527,6 +527,26 @@ def candidatos_en_modo_cartera(
     candidatos: list | None,
     prima_de_reventa: float,
     importe=IMPORTE_DE_CARTERA,
+
+    # LA CURVA DE PRIMAS, APAGADA (20/09/2026)
+    #
+    #     `prima_de_reventa` es UNA mediana para todos los
+    #     precios, y por eso la ganancia sale proporcional al
+    #     precio y el rendimiento por euro CONSTANTE: 0,0208 para
+    #     un jugador de 150.000 y para uno de 24,9 millones, hasta
+    #     el quinto decimal. Doctrina 98: el ratio no delata al
+    #     ratio, delata a su entrada.
+    #
+    #     Medido sobre 194 ventas al Computer, la prima va de
+    #     +1,36 % abajo a +4,26 % arriba. `curva` la trae tramo a
+    #     tramo.
+    #
+    #     SE RECIBE, NO SE LEE. Este modulo no abre disco.
+    #
+    #     Y NO MANDA HASTA QUE EL DUEÑO LA ENCIENDA:
+    #     `BORDALAS_PRIMA_POR_TRAMO`. Apagado, el comportamiento
+    #     es exactamente el de ayer.
+    curva: dict | None = None,
 ) -> list:
     """
     Los mismos candidatos, con la puja baja y su ganancia.
@@ -547,6 +567,22 @@ def candidatos_en_modo_cartera(
     try:
         reventa = safe_float(prima_de_reventa)
 
+        por_tramo = None
+
+        if curva:
+
+            try:
+                from src.analysis.computer_resale_premium import (
+                    prima_del_tramo,
+                    prima_por_tramo_activa,
+                )
+
+                if prima_por_tramo_activa():
+                    por_tramo = prima_del_tramo
+
+            except Exception:                       # noqa: BLE001
+                por_tramo = None
+
         for candidato in (candidatos or []):
 
             if not isinstance(candidato, dict):
@@ -557,27 +593,49 @@ def candidatos_en_modo_cartera(
             if precio <= 0:
                 continue
 
+            suya = reventa
+
+            tramo = None
+
+            if por_tramo is not None:
+
+                tramo = por_tramo(curva, precio)
+
+                # Sin numero utilizable NO se inventa: se queda la
+                # mediana que llego por la puerta (doctrina 24).
+                if tramo.get("percent") is not None:
+                    suya = safe_float(tramo["percent"]) / 100.0
+
             puja = puja_de_cartera(precio, importe)
 
-            ganancia = int(precio * (1 + reventa)) - puja
+            ganancia = int(precio * (1 + suya)) - puja
 
-            salida.append({
+            fila = {
                 **candidato,
                 "bid": puja,
                 "expected_value": max(0, ganancia),
                 "modo": MODO_CARTERA,
+                "prima_aplicada_percent": round(100 * suya, 4),
+                "prima_del_tramo": tramo,
                 "bid_reason": (
                     f"Modo cartera: se ofrece el precio "
                     f"+{100 * safe_float(importe):.2f} % "
                     f"({_euros(puja)} EUR sobre "
                     f"{_euros(precio)}). El Computer recompra a "
-                    f"+{100 * reventa:.1f} %, asi que la "
-                    f"operacion nace con "
+                    f"+{100 * suya:.1f} %"
+                    + (
+                        f" ({tramo['etiqueta']}, n={tramo['n']})"
+                        if tramo and tramo.get("etiqueta")
+                        else ""
+                    )
+                    + f", asi que la operacion nace con "
                     f"{_euros(ganancia)} EUR de margen. Perder "
                     f"no cuesta nada: solo capacidad hasta el "
                     f"reset."
                 ),
-            })
+            }
+
+            salida.append(fila)
 
         return salida
 
