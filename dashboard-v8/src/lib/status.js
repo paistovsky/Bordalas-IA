@@ -174,6 +174,21 @@ export function normalizeStatus(raw = {}) {
       funnel: { available: false }
     },
 
+    // LOS CUPOS CADUCAN, Y LA FECHA SE VE (19/09/2026)
+    //
+    // Los cupos por familia se pusieron con n=5 resets y hay que
+    // volver a medirlos el 26/09. El recordatorio se publica en
+    // `status.revisionDelCupo` para que salga en la pantalla: uno
+    // que hay que acordarse de leer no es un recordatorio, y si
+    // esta lista no lo nombra, muere en `raw` sin decir por que.
+    revisionDelCupo: raw.revisionDelCupo || {
+      fecha: null,
+      toca: null,
+      dias: null,
+      cupos: {},
+      reason: "La telemetría no publicó `revisionDelCupo` en este ciclo."
+    },
+
     // LA VARA DEL ONCE (18/09/2026)
     //
     // Los factores por posicion, de cuantas fichas sale cada uno,

@@ -6083,9 +6083,22 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # LA HORA DE LA FOTO, EN UNA VARIABLE Y NO DENTRO DEL DICCIONARIO
+    #
+    #     `revisionDelCupo` la necesita, y el 19/09 se la pidio a
+    #     `dashboard["meta"]["generated_at"]` DENTRO del literal
+    #     que construye `dashboard`. El lado derecho se evalua
+    #     ENTERO antes de la asignacion, asi que la variable no
+    #     existia todavia y `build_dashboard_state` reventaba con
+    #     `UnboundLocalError` en cada vuelta.
+    #
+    #     Se calcula una vez y se pasa. Es lo que el comentario de
+    #     `revisionDelCupo` decia que se hacia; ahora se hace.
+    generado_en = datetime.now().isoformat(timespec="seconds")
+
     dashboard = {
         "meta": {
-            "generated_at": datetime.now().isoformat(timespec="seconds"),
+            "generated_at": generado_en,
             "snapshot": snapshot_file,
             "league_id": board.get("league_id"),
             "current_user_id": board.get("current_user_id"),
@@ -6414,9 +6427,7 @@ def build_dashboard_state() -> dict:
         #
         #     La fecha de hoy se le PASA -del `generated_at` de
         #     esta misma foto-, no la deduce del reloj.
-        "revisionDelCupo": _revision_del_cupo(
-            dashboard["meta"]["generated_at"]
-        ),
+        "revisionDelCupo": _revision_del_cupo(generado_en),
 
         # La vara del once: los factores por posicion, su
         # muestra, el once que sale con ellos y el que salia sin

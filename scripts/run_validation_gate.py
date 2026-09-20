@@ -277,6 +277,7 @@ TESTS = [
     "src.analysis.test_la_pantalla_de_mercado_v1",
     "src.analysis.test_la_hoja_de_estilos_v1",
     "src.analysis.test_la_lista_blanca_v1",
+    "src.analysis.test_cada_compra_sabe_de_que_via_vino_v1",
     "src.analysis.test_los_sentidos_v1",
     "src.analysis.test_la_alarma_de_los_sentidos_v1",
     "src.analysis.test_el_calendario_v1",
