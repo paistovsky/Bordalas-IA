@@ -25,8 +25,16 @@ QUE SUSTITUYE, Y CON QUE NUMERO
 
 LO QUE CUESTA, Y LO QUE NO EVITA
 
-    Cuesta lo que cuesta leer dos ficheros pequeños: medido en
-    la verja del 21/09, por debajo de 0,3 s.
+    6,45 s (mediana de 5, portatil del dueño, 21/09). Y NO es lo
+    que cuesta leer dos ficheros pequeños, que es lo que se
+    escribio aqui primero sin medirlo: 4,75 de esos 6,45 son
+    `scripts.los_interruptores.inventario()`, que pasa el AST por
+    todos los `.py` del repositorio para saber que interruptores
+    existen.
+
+    Se deja, con el numero delante: son el 2,8 % de los 229,8 s
+    que esta guardia quita de la verja, y sin ese inventario
+    `probados` seria una palabra que el fichero dice de si mismo.
 
     Y NO EVITA PERDER UNA VUELTA. Si el dueño cambia el YAML sin
     correr el paso 0, la verja se pone roja y el ciclo no
