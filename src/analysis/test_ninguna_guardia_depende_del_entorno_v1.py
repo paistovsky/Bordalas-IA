@@ -64,6 +64,45 @@ QUE FORMA TIENE ESTA GUARDIA, Y POR QUE ESTA, CON SU MEDICION
     la verja es una decision del dueño, no un descuido: costaria
     volver a fiarlo de que alguien se acuerde.
 
+ESTORBO, Y SALIO DE LA VERJA (21/09/2026, dueño)
+
+    ESTA GUARDIA YA NO CORRE EN CADA VUELTA. Es el paso 0:
+
+        python scripts/run_validation_gate.py --paso-0
+
+    LOS NUMEROS DE ARRIBA ERAN DE OTRA MAQUINA. «205-220 s la
+    verja», «275 s esta guardia», «480 s con ella»: todos del
+    portatil del dueño. En el runner de GitHub la verja entera
+    tarda 1.312 s. Aplicar uno al otro es doctrina 90.
+
+    Vuelto a medir el 21/09 en el portatil, n=1, sobre las 171
+    guardias de la lista de ese dia:
+
+        la verja entera                 453,4 s
+        de eso, ESTA guardia sola       229,8 s   (50,7 %)
+
+    Y lo que compraba por hora era menos de lo que parecia: la
+    verja corre DENTRO del job, con el `env` de produccion
+    puesto, asi que un interruptor YA encendido que rompa
+    guardias las rompe en la corrida normal —es lo que paso el
+    20/09—. Lo unico que esto añade es el aviso ANTICIPADO sobre
+    los que TODAVIA NO estan en el YAML: una comprobacion previa
+    al despegue, no una de cada hora.
+
+    LO QUE IMPIDE QUE SE OLVIDE es
+    `test_el_paso_0_no_se_olvida_v1`, que si esta en la verja:
+    lee el `env` del YAML —versionado— y `config/paso_0.json`, y
+    se pone roja si el workflow enciende algo sin constancia.
+
+    Y UN AVISO PARA QUIEN LA CORRA: al poner los 21
+    interruptores, la corrida de dentro deja
+    `test_el_ciclo_publica_v1` construyendo el panel de verdad,
+    que SALE A LA RED Y ESCRIBE en tres libros
+    -`marcador.json`, `libro_de_publicacion.jsonl` y
+    `bitacora_del_saldo.jsonl`-. Medido el 21/09. Correr el paso
+    0 con el arbol sucio y subir sin mirar mete esas escrituras
+    en un commit.
+
 COMO NO SE MUERDE LA COLA
 
     La corrida de dentro va con `--solo`, con la lista de la
@@ -104,7 +143,10 @@ from scripts.los_interruptores import (           # noqa: E402
     lectores,
 )
 
-from scripts.run_validation_gate import TESTS     # noqa: E402
+from scripts.run_validation_gate import (         # noqa: E402
+    EL_PASO_0,
+    TESTS,
+)
 
 
 YO = "src.analysis.test_ninguna_guardia_depende_del_entorno_v1"
@@ -128,10 +170,34 @@ def _entorno(puestos: bool) -> dict:
     return salida
 
 
+# EL GUARDIAN DEL PASO 0 NO ENTRA EN LA CORRIDA DE DENTRO
+# (21/09/2026)
+#
+#     `test_el_paso_0_no_se_olvida_v1` se pone roja mientras el
+#     YAML encienda algo que no conste en `config/paso_0.json`. Y
+#     ese registro lo escribe EL PASO 0 AL PASAR.
+#
+#     Si entrase en la corrida de dentro, el paso 0 no podria
+#     pasar nunca la primera vez: estaria esperando un registro
+#     que solo existe si el paso 0 pasa. La pescadilla completa.
+#
+#     Dejarla fuera no abre ningun agujero: esa guardia NO LEE
+#     `os.environ` —lee el YAML y el registro, los dos
+#     versionados—, asi que ningun interruptor puesto puede
+#     cambiar su veredicto. Lo comprueba ella misma, en
+#     `test_ningun_interruptor_se_lee_al_importarse`, que barre
+#     todos los ficheros que no son guardias.
+EL_GUARDIAN = "src.analysis.test_el_paso_0_no_se_olvida_v1"
+
+
 def _corre_la_verja(entorno: dict) -> tuple[int, str]:
     """La verja entera menos esta guardia. (codigo, ultima linea)."""
 
-    otras = [modulo for modulo in TESTS if modulo != YO]
+    otras = [
+        modulo
+        for modulo in TESTS
+        if modulo not in (YO, EL_GUARDIAN)
+    ]
 
     proceso = subprocess.run(
         [
@@ -181,10 +247,25 @@ def test_sin_interruptores_no_se_comprueba_nada() -> None:
         f"{len(conocidos)} interruptores"
     )
 
-    assert YO in TESTS, (
-        "esta guardia no esta en la lista de la verja: entonces "
-        "la corrida de dentro no se la estaria saltando, y se "
-        "llamaria a si misma sin parar"
+    # DONDE TIENE QUE ESTAR, DESDE EL 21/09/2026
+    #
+    #     Antes se exigia `YO in TESTS`: la corrida de dentro se
+    #     saltaba esta guardia para no llamarse a si misma sin
+    #     parar. Ahora esta fuera de `TESTS` —es el paso 0—, asi
+    #     que la de dentro ya no la incluye y la recursion no
+    #     puede darse.
+    #
+    #     Lo que si hay que seguir comprobando es que este en
+    #     ALGUN sitio. Una guardia que no esta en ninguna lista
+    #     no se corre nunca, y eso no se nota.
+    assert YO in EL_PASO_0, (
+        "esta guardia no esta en `EL_PASO_0`: entonces no la "
+        "corre nadie, ni cada vuelta ni a mano"
+    )
+
+    assert YO not in TESTS, (
+        "esta guardia ha vuelto a la verja: ahi corre la verja "
+        "entera por dentro y se llamaria a si misma sin parar"
     )
 
 
