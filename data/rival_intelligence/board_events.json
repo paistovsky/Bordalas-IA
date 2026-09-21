@@ -168163,5 +168163,51 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "2cf07f6151ef5fb83be2b5c2",
+    "date": 1789962247,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 31321,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 2091600
+      },
+      {
+        "player": 10157,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 739400
+      }
+    ]
+  },
+  {
+    "event_id": "c93ad17942e3ad67f819b39b",
+    "date": 1789962432,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
