@@ -175902,6 +175902,25 @@
       "return_3d_percent": null,
       "return_7d_percent": null,
       "resolved_at": null
+    },
+    "25327|2026-09-21": {
+      "player_id": "25327",
+      "player_name": "Unai Santos",
+      "seen_at": "2026-09-21T07:42:06.558374+00:00",
+      "price": 260000,
+      "price_change_eur": 0,
+      "price_change_percent": 0.0,
+      "demand_net": null,
+      "demand_source": null,
+      "trend_days": 0,
+      "divergent": false,
+      "divergence_kind": null,
+      "outcome": "PENDING",
+      "price_after_3d": null,
+      "price_after_7d": null,
+      "return_3d_percent": null,
+      "return_7d_percent": null,
+      "resolved_at": null
     }
   }
 }
