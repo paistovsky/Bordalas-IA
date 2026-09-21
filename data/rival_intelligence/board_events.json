@@ -168209,5 +168209,198 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "db20bae15c9102893f491b4e",
+    "date": 1789967267,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 34557,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 7161000,
+        "bids": [
+          {
+            "user": {
+              "id": 14456960,
+              "name": "Alvaro Retamosa Sanguino",
+              "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+            },
+            "amount": 7150000
+          },
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 7090007
+          }
+        ]
+      },
+      {
+        "player": 16606,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 656000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 507000
+          },
+          {
+            "user": {
+              "id": 14151726,
+              "name": "DiosMande a Rodri al Palancas",
+              "icon": "i/u/14151726.png"
+            },
+            "amount": 439080
+          }
+        ]
+      },
+      {
+        "player": 37715,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 150376
+      },
+      {
+        "player": 17369,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 160401
+      },
+      {
+        "player": 6837,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 4441000,
+        "bids": [
+          {
+            "user": {
+              "id": 14456960,
+              "name": "Alvaro Retamosa Sanguino",
+              "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+            },
+            "amount": 4390000
+          }
+        ]
+      },
+      {
+        "player": 33447,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3211000,
+        "bids": [
+          {
+            "user": {
+              "id": 14151726,
+              "name": "DiosMande a Rodri al Palancas",
+              "icon": "i/u/14151726.png"
+            },
+            "amount": 3130000
+          }
+        ]
+      },
+      {
+        "player": 1876,
+        "to": {
+          "id": 14456960,
+          "name": "Alvaro Retamosa Sanguino",
+          "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+        },
+        "amount": 1480000
+      },
+      {
+        "player": 17200,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 220551
+      },
+      {
+        "player": 42794,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 230576
+      },
+      {
+        "player": 41261,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 180451
+      },
+      {
+        "player": 5771,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1624051
+      }
+    ]
+  },
+  {
+    "event_id": "a9aae29f277a59c967994feb",
+    "date": 1789967877,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 41385,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2337000
+      },
+      {
+        "player": 2603,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 10271800
+      }
+    ]
   }
 ]
