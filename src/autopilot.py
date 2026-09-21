@@ -3816,37 +3816,54 @@ def run_cycle(
         time.perf_counter()
     )
 
+    # EL REPARTO DE ESOS SEGUNDOS (21/09/2026)
+    #
+    #     "Analisis completado en 546,30 segundos" es una linea
+    #     que no se puede repartir mirandola. El cronometro parte
+    #     el mismo numero por etapas y lo imprime al lado, asi
+    #     que la proxima vez que crezca se sabe cual ha crecido.
+    #
+    #     No decide nada, no escribe en ningun libro y no se
+    #     compara contra ningun tope. Solo imprime.
+    from src.telemetry.el_cronometro import Cronometro
+
+    cronometro = Cronometro("EL ANALISIS")
+
     # Cada ciclo parte de cero: en --loop el proceso no muere
     # entre vueltas y el tablon cambia.
-    reset_rival_intelligence_cache()
+    with cronometro.etapa("reset_rival_intelligence_cache"):
+        reset_rival_intelligence_cache()
 
     # El tablero de adquisicion es el que pinta el dashboard.
     # Pasarselo al orchestrator es lo que hace que lo que se ve
     # sea lo que se ejecuta.
-    acquisition_board = (
-        build_cycle_acquisition_board(
-            snapshot
+    with cronometro.etapa("build_cycle_acquisition_board"):
+        acquisition_board = (
+            build_cycle_acquisition_board(
+                snapshot
+            )
         )
-    )
 
-    print_acquisition_board(
-        acquisition_board,
-        already_bid=players_with_live_bid(
-            {
-                "bid_exposure": build_bid_exposure(
-                    snapshot
-                )
-            }
-        ),
-    )
-
-    result = (
-        build_global_decision(
-            snapshot,
-            acquisition_board=
-                acquisition_board,
+    with cronometro.etapa("print_acquisition_board"):
+        print_acquisition_board(
+            acquisition_board,
+            already_bid=players_with_live_bid(
+                {
+                    "bid_exposure": build_bid_exposure(
+                        snapshot
+                    )
+                }
+            ),
         )
-    )
+
+    with cronometro.etapa("build_global_decision"):
+        result = (
+            build_global_decision(
+                snapshot,
+                acquisition_board=
+                    acquisition_board,
+            )
+        )
 
     # build_global_decision() devuelve temporal_gate y balance
     # DENTRO de result["state"], no en el nivel superior.
@@ -3902,7 +3919,8 @@ def run_cycle(
             describe_sale_intent,
         )
 
-        intencion_venta = build_sale_intent(snapshot)
+        with cronometro.etapa("build_sale_intent"):
+            intencion_venta = build_sale_intent(snapshot)
 
         print()
         print("-" * 70)
@@ -3921,31 +3939,32 @@ def run_cycle(
             f"{type(error).__name__}: {error}"
         )
 
-    competitive_observer = (
-        build_competitive_observer(
-            snapshot,
-            temporal_gate=(
-                cycle_state.get(
-                    "temporal_gate",
-                    {},
-                )
-                or {}
-            ),
-            current_balance=(
-                cycle_state.get(
-                    "balance",
-                    0,
-                )
-            ),
-            liquidity=(
-                cycle_state.get(
-                    "liquidity",
-                    {},
-                )
-                or {}
-            ),
+    with cronometro.etapa("build_competitive_observer"):
+        competitive_observer = (
+            build_competitive_observer(
+                snapshot,
+                temporal_gate=(
+                    cycle_state.get(
+                        "temporal_gate",
+                        {},
+                    )
+                    or {}
+                ),
+                current_balance=(
+                    cycle_state.get(
+                        "balance",
+                        0,
+                    )
+                ),
+                liquidity=(
+                    cycle_state.get(
+                        "liquidity",
+                        {},
+                    )
+                    or {}
+                ),
+            )
         )
-    )
 
     elapsed = (
         time.perf_counter()
@@ -3957,6 +3976,12 @@ def run_cycle(
         f"Analisis completado en "
         f"{elapsed:.2f} segundos."
     )
+
+    # Y el mismo numero, repartido. Va DEBAJO del total a
+    # proposito: el total es el que este proyecto lleva
+    # imprimiendo desde siempre y no se toca; esto lo explica.
+    for linea in cronometro.cuadro():
+        print(linea)
 
     print_cycle_result(
         snapshot_file=

@@ -3,6 +3,8 @@ from src.telemetry.dashboard_state import (
     save_dashboard_state,
 )
 
+from src.telemetry.el_cronometro import Cronometro
+
 
 def main() -> None:
     print()
@@ -10,8 +12,25 @@ def main() -> None:
     print("BORDALAS IA - SALA DE OPERACIONES - TELEMETRIA V2.0")
     print("=" * 78)
 
-    state = build_dashboard_state()
-    path = save_dashboard_state(state)
+    # EL RELOJ DEL PANEL (21/09/2026)
+    #
+    #     La vuelta #1737 gasto 6 m 19 s en este paso y el
+    #     registro no decia en que. Con esto queda partido en las
+    #     dos mitades que hay aqui -montar el estado y
+    #     guardarlo-, que es hasta donde llega este fichero.
+    #
+    #     Lo de dentro de `build_dashboard_state` no se parte
+    #     aqui: medido el 21/09 con perfilador en el portatil,
+    #     montarlo entero son 97,5 s y el reparto esta en el
+    #     informe del encargo. Partirlo por dentro seria tocar
+    #     1.300 lineas para medir, y este bloque mide sin tocar.
+    cronometro = Cronometro("EL PANEL")
+
+    with cronometro.etapa("build_dashboard_state"):
+        state = build_dashboard_state()
+
+    with cronometro.etapa("save_dashboard_state"):
+        path = save_dashboard_state(state)
 
     rivals = (
         state.get("rival_intelligence", {})
@@ -40,6 +59,11 @@ def main() -> None:
         "Verificada:    "
         f"{'SI' if state.get('last_execution', {}).get('verified_post_action') else 'NO'}"
     )
+    print()
+
+    for linea in cronometro.cuadro():
+        print(linea)
+
     print()
     print("# DASHBOARD TELEMETRY V2.0: OK")
     print("=" * 78)

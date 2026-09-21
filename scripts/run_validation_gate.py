@@ -68,6 +68,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import subprocess
 import sys
 
@@ -287,7 +288,48 @@ TESTS = [
     "src.analysis.test_el_liston_del_manager_v1",
     "src.analysis.test_el_marcador_por_su_fecha_v1",
     "src.analysis.test_una_jornada_sin_once_no_cuadra_v1",
-    "src.analysis.test_ninguna_guardia_depende_del_entorno_v1",
+    # LA CARA SALE DE LA VERJA Y SE VUELVE EL PASO 0
+    # (21/09/2026, dueño)
+    #
+    #     Aqui corria
+    #     `test_ninguna_guardia_depende_del_entorno_v1`. No se
+    #     borra: se muda a `EL_PASO_0`, ahi abajo.
+    #
+    #     EL NUMERO QUE LA DEFENDIA ERA DE OTRA MAQUINA
+    #     (doctrina 90)
+    #
+    #         Su cabecera decia "esta guardia, ella sola: 275 s"
+    #         y "la verja CON ella: 480 s". Los dos son del
+    #         portatil del dueño. En el runner de GitHub la
+    #         verja entera tarda 21 m 52 s, y esta guardia
+    #         —que corre la verja OTRA VEZ por dentro— se lleva
+    #         1.312 de esos segundos.
+    #
+    #         Un numero medido en una maquina aplicado a otra es
+    #         un numero que se recibe, no uno que se mide.
+    #
+    #     Y LO QUE COMPRABA POR HORA ERA CERO
+    #
+    #         La verja corre DENTRO del job, con el `env` de
+    #         produccion puesto. Un interruptor que ya esta
+    #         encendido en el YAML y que rompe guardias las
+    #         rompe en la corrida de verdad: eso es exactamente
+    #         lo que paso el 20/09 —«102/167 FALLA
+    #         test_la_lista_de_objetivos_v1»— y lo cazo la verja
+    #         normal, no esta.
+    #
+    #         Lo unico que esta añade es el aviso ANTICIPADO
+    #         sobre los interruptores que TODAVIA NO estan en el
+    #         YAML. Eso es una comprobacion previa al despegue,
+    #         y una comprobacion previa no se corre 24 veces al
+    #         dia para un despegue que hay una vez por semana.
+    #
+    #     LO QUE LA SUSTITUYE, para que no dependa de que
+    #     alguien se acuerde: `test_el_paso_0_no_se_olvida_v1`,
+    #     aqui debajo. Lee el YAML —versionado— y el registro de
+    #     lo que ya paso el paso 0, y se pone roja si el YAML
+    #     enciende algo que nadie probo.
+    "src.analysis.test_el_paso_0_no_se_olvida_v1",
     "src.analysis.test_solo_un_interruptor_por_vuelta_v1",
     "src.analysis.test_ninguna_pasa_con_las_manos_vacias_v1",
     "src.analysis.test_los_sentidos_v1",
@@ -407,6 +449,38 @@ TESTS = [
 
     "src.analysis.test_doctrina_v1",
 ]
+
+
+# ============================================================
+# EL PASO 0: LO QUE SE CORRE A MANO, ANTES DE TOCAR EL YAML
+# ============================================================
+#
+#     NO ES UNA LISTA DE GUARDIAS RETIRADAS. `RETIRADAS` es eso,
+#     y significa "esto NO se comprueba". Esto significa otra
+#     cosa: se comprueba, pero no cada hora — se comprueba antes
+#     de encender un interruptor, que es el unico momento en que
+#     la respuesta puede cambiar.
+#
+#         python scripts/run_validation_gate.py --paso-0
+#
+#     Ese mandato la corre y, si pasa, apunta en
+#     `config/paso_0.json` que interruptores quedan probados. Ese
+#     fichero va a git junto con el cambio del YAML.
+#
+#     LO QUE VIAJA DE UNA MAQUINA A OTRA ES EL VEREDICTO, NO LOS
+#     SEGUNDOS. Que la verja salga verde con un interruptor
+#     puesto no depende del runner —para eso esta
+#     `test_verja_determinista_v1`—; lo que si depende, y mucho,
+#     es lo que tarda.
+EL_PASO_0 = [
+    "src.analysis.test_ninguna_guardia_depende_del_entorno_v1",
+]
+
+
+# Donde el paso 0 apunta lo que ha probado. Versionado a
+# proposito: es lo que `test_el_paso_0_no_se_olvida_v1` lee para
+# saber si el YAML enciende algo sin probar.
+REGISTRO_DEL_PASO_0 = RAIZ / "config" / "paso_0.json"
 
 
 WORKFLOW = None   # ya no se lee de ningun sitio: la lista es esta.
@@ -559,6 +633,200 @@ def _apuntar_el_veredicto(
         )
 
 
+# ============================================================
+# EL PASO 0, A MANO
+# ============================================================
+
+
+def _correr_el_paso_0(parar: bool = False) -> int:
+    """
+    La comprobacion cara, a mano, y su registro.
+
+    Devuelve 0 si pasa. Si pasa, apunta en
+    `config/paso_0.json` QUE interruptores quedan probados: los
+    del inventario entero, porque eso es lo que la guardia pone
+    -todos a la vez- y por tanto lo que prueba.
+    """
+
+    import time
+
+    print("EL PASO 0")
+    print("=" * 66)
+    print(
+        "  La verja entera, otra vez, con TODOS los "
+        "interruptores puestos."
+    )
+    # SIN NOMBRAR EL FICHERO DEL WORKFLOW
+    #
+    #     `test_la_puerta_no_lee_el_workflow` mira los literales
+    #     de este script -no sus docstrings- y se pone roja si
+    #     alguno nombra el YAML: esa es la señal de que la lista
+    #     ha vuelto al sitio equivocado. La frase dice lo mismo
+    #     sin dar pie al falso positivo.
+    print(
+        "  Va antes de tocar el `env` del workflow de CI."
+    )
+    print()
+
+    arranco = time.perf_counter()
+
+    fallos = []
+
+    for indice, modulo in enumerate(EL_PASO_0, start=1):
+
+        proceso = subprocess.run(
+            [sys.executable, "-m", modulo],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=str(RAIZ),
+        )
+
+        corto = modulo.rsplit(".", 1)[-1]
+
+        salida = (
+            (proceso.stdout or "") + (proceso.stderr or "")
+        ).strip().splitlines()
+
+        # LA REGLA DE LA VERJA TAMBIEN AQUI: una que no imprime
+        # nada no ha probado nada (doctrina 24).
+        if proceso.returncode == 0 and not salida:
+            print(f"  {indice}/{len(EL_PASO_0)}  MUDA  {corto}")
+            fallos.append(modulo)
+            continue
+
+        if proceso.returncode == 0:
+            print(f"  {indice}/{len(EL_PASO_0)}  OK    {corto}")
+
+        else:
+            print(f"  {indice}/{len(EL_PASO_0)}  FALLA {corto}")
+
+            for linea in salida:
+                if linea.lstrip().startswith("FALLA"):
+                    # LA CONSOLA DE WINDOWS NO ES UTF-8
+                    #
+                    #     El motivo de una guardia trae guiones
+                    #     largos y tildes. Con `cp1252` de salida,
+                    #     `print` revienta con UnicodeEncodeError
+                    #     y el paso 0 se cae ENSEÑANDO UN
+                    #     TRACEBACK EN VEZ DEL MOTIVO, que es
+                    #     justo lo contrario de lo que hace falta
+                    #     en ese momento. Paso el 21/09/2026.
+                    print(
+                        "        -> "
+                        + linea.strip()[:400].encode(
+                            sys.stdout.encoding or "utf-8",
+                            errors="replace",
+                        ).decode(
+                            sys.stdout.encoding or "utf-8",
+                            errors="replace",
+                        )
+                    )
+
+            fallos.append(modulo)
+
+            if parar:
+                break
+
+    tardo = time.perf_counter() - arranco
+
+    print("=" * 66)
+    print(f"EL PASO 0 HA TARDADO {tardo:.0f} s ({tardo / 60:.1f} min).")
+
+    if fallos:
+        print()
+        print(
+            "NO SE ENCIENDE NADA. Con los interruptores puestos "
+            "la verja no da el mismo verde que sin ellos."
+        )
+        return 1
+
+    probados = _apuntar_el_paso_0(tardo)
+
+    print()
+    print(
+        f"PASADO. Quedan probados {len(probados)} interruptores, "
+        f"apuntados en "
+        f"{REGISTRO_DEL_PASO_0.relative_to(RAIZ).as_posix()}."
+    )
+    print(
+        "  Ese fichero va a git EN EL MISMO COMMIT que el cambio "
+        "del YAML. Si no va, la verja se pondra roja en la "
+        "primera vuelta y el ciclo no correra."
+    )
+
+    return 0
+
+
+def _apuntar_el_paso_0(segundos: float) -> list:
+    """
+    Lo que acaba de quedar probado. Nunca lanza.
+
+    Se apunta el INVENTARIO ENTERO porque eso es lo que la
+    guardia pone: los 21 a la vez. Apuntar solo el que el dueño
+    tenia en la cabeza seria apuntar menos de lo comprobado.
+    """
+
+    try:
+        from datetime import datetime, timezone
+
+        sys.path.insert(0, str(RAIZ))
+
+        from scripts.los_interruptores import inventario
+
+        probados = sorted(inventario())
+
+        REGISTRO_DEL_PASO_0.parent.mkdir(
+            parents=True, exist_ok=True
+        )
+
+        REGISTRO_DEL_PASO_0.write_text(
+            json.dumps(
+                {
+                    "version": 1,
+
+                    # LO QUE VIAJA ES EL VEREDICTO, NO EL RELOJ.
+                    # Los segundos se apuntan para poder verlos,
+                    # y se dice de que maquina salen: un numero
+                    # sin su maquina es un numero que engaña
+                    # (doctrina 90).
+                    "cuando": datetime.now(
+                        timezone.utc
+                    ).isoformat(timespec="seconds"),
+                    "segundos": round(segundos, 1),
+                    "maquina": (
+                        f"{platform.system()} "
+                        f"{platform.machine()}"
+                    ),
+
+                    "probados": probados,
+
+                    # El arbol sobre el que se probo. No decide
+                    # nada -si decidiera, cada linea tocada
+                    # pondria el ciclo en rojo-, pero deja ver
+                    # de cuando es la prueba.
+                    "huella": huella_del_arbol(),
+                },
+                ensure_ascii=False,
+                indent=1,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        return probados
+
+    except Exception as error:                      # noqa: BLE001
+        print(
+            f"AVISO: no se pudo apuntar el paso 0 "
+            f"({type(error).__name__}): el registro no ha "
+            f"cambiado, asi que la guardia seguira diciendo que "
+            f"falta."
+        )
+        return []
+
+
 def main() -> int:
 
     parser = argparse.ArgumentParser()
@@ -586,7 +854,23 @@ def main() -> int:
         ),
     )
 
+    parser.add_argument(
+        "--paso-0",
+        dest="paso_0",
+        action="store_true",
+        help=(
+            "correr EL PASO 0 en vez de la verja: la "
+            "comprobacion cara que se hace ANTES de encender un "
+            "interruptor en el YAML. Si pasa, apunta en "
+            "config/paso_0.json que interruptores quedan "
+            "probados."
+        ),
+    )
+
     args = parser.parse_args()
+
+    if args.paso_0:
+        return _correr_el_paso_0(parar=args.parar)
 
     modulos = list(args.solo) if args.solo else list(TESTS)
 
@@ -603,6 +887,28 @@ def main() -> int:
 
     print(f"Puerta de validacion: {len(modulos)} tests")
     print("=" * 66)
+
+    # EL RELOJ DE LA VERJA SE ENSEÑA, NO DECIDE (21/09/2026)
+    #
+    #     El dueño pregunto por una guardia que fallase al
+    #     pasarse de un tope declarado. No se ha hecho, y el
+    #     motivo esta en el encargo mismo: un tope seria un
+    #     numero medido en una maquina y aplicado a otra
+    #     —doctrina 90—, y aqui la diferencia es de 2,9 veces
+    #     (medido el 21/09: 7 m 30 s en el portatil, 21 m 52 s
+    #     en el runner, las mismas 171 guardias).
+    #
+    #     Ademas una guardia que mide tiempo MIRA EL RELOJ DEL
+    #     SISTEMA, que es justo lo que esta casa le prohibe a una
+    #     guardia.
+    #
+    #     Lo que si hace falta es que el numero ESTE en cada
+    #     registro de CI, para poder verlo crecer. Eso es este
+    #     reloj: lo imprime el corredor, que no es una guardia, y
+    #     no decide nada.
+    import time
+
+    arranco = time.perf_counter()
 
     fallos = []
 
@@ -862,6 +1168,29 @@ def main() -> int:
                 print(f"      {ruta}")
 
         print()
+
+    tardo = time.perf_counter() - arranco
+
+    print(
+        f"LA VERJA HA TARDADO {tardo:.0f} s "
+        f"({tardo / 60:.1f} min) en {len(modulos)} guardias, "
+        f"{tardo / max(1, len(modulos)):.2f} s de media."
+    )
+
+    # Y lo que NO se ha corrido aqui, dicho en voz alta cada
+    # vuelta: si el paso 0 se vuelve invisible, vuelve a
+    # depender de que alguien se acuerde.
+    if not (args.solo or args.extra):
+        print(
+            f"EL PASO 0 NO SE CORRE AQUI: {len(EL_PASO_0)} "
+            f"comprobacion(es) que van ANTES de tocar el `env` "
+            f"del workflow, a mano, con "
+            f"`--paso-0`. Quien vigila que no se olvide es "
+            f"`test_el_paso_0_no_se_olvida_v1`, que si esta "
+            f"arriba."
+        )
+
+    print()
 
     _apuntar_el_veredicto(
         verdes=len(modulos) - len(fallos),
