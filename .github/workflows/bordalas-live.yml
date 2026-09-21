@@ -46,8 +46,29 @@ jobs:
   live:
     name: Bordalas live controlled cycle
     runs-on: ubuntu-latest
-    # Margen de seguridad para un refresco externo lento. El ciclo normal
-    # debe terminar muy por debajo de este limite tras reutilizar snapshots.
+
+    # EL TOPE NO ES PARA QUE QUEPA UNA VUELTA LENTA (21/09/2026)
+    #
+    #   Es para que una vuelta COLGADA no se coma el dia. Con
+    #   `cancel-in-progress: false`, un job atascado bloquea el
+    #   grupo de concurrencia: los disparos siguientes se quedan
+    #   en cola y GitHub solo guarda UNO pendiente. Un tope de 600
+    #   minutos significa que un cuelgue a las 02:00 se lleva por
+    #   delante el reset, la ventana y el dia entero.
+    #
+    #   75 es TEMPORAL. El 21/09 una vuelta tardaba 47-51 min:
+    #       verja      21m 52s   <- la guardia del entorno corre
+    #                                la verja entera otra vez
+    #       ciclo      18m 27s   <- 9m 06s solo de "analisis"
+    #       dashboard   6m 19s
+    #
+    #   Y la causa medida de los dos ultimos NO son los snapshots:
+    #   es el TAMANO DE LA PLANTILLA. `build_lineup` es el 94-95 %
+    #   del analisis y del panel, y va 0,26 s con 15 fichas, 4,78 s
+    #   con 21. Las seis compras del 21/09 lo multiplicaron x11.
+    #
+    #   Cuando la verja vuelva a ~10 min y la plantilla a 16,
+    #   ESTE NUMERO BAJA A 35.
     timeout-minutes: 75
 
     env:
@@ -83,6 +104,35 @@ jobs:
       # negativos grandes 2->0, cero peticiones nuevas, ninguna decision
       # cambia. Solo toca el marcador: no puede cambiar una compra ni una puja.
       BORDALAS_JORNADAS_POR_SU_FECHA: "1"
+
+      # APAGADO 21/09 — LA CESTA DE REVENTA SE CIERRA
+      #
+      #   Lo que gana, medido en mes y medio: +28.867 EUR, 8 de 8 en verde
+      #   en el suelo. UN PUNTO DE LA LIGA VALE 30.000 EUR: el negocio
+      #   entero de la cesta ha ganado menos que un punto.
+      #
+      #   Lo que costo en UN SOLO DIA, el 21/09 a las 07:07:
+      #       6 compras por 2.566.406 EUR, todas SPECULATION/SUBASTA_CARTERA
+      #       la caja de +2.410.033 a -156.373
+      #       la plantilla de 15 a 21 fichas  ->  FICHAS LIBRES: CERO
+      #       la busqueda del once x11,1  ->  la vuelta de 4 a 47 minutos
+      #       carry a 10 dias: 28.245 EUR, el 60 % del margen esperado
+      #
+      #   Cinco de los seis son suplentes de 150.000-230.000 que el propio
+      #   motor etiqueta "Es Reserva en su equipo: no va a puntuar" — pero
+      #   la cesta NO PUEDE SABERLO: `lectura_del_estado` copia seis campos
+      #   y tira `hierarchy_value`, `starter_probability` y `expected_points`
+      #   una funcion antes. Y como en modo cartera todos rinden igual por
+      #   euro, decide el desempate —"gana el que consume menos capacidad"—
+      #   que en el suelo de 150.000 significa comprar lo peor del mercado
+      #   todos los dias. Doctrina 110.
+      #
+      #   NO SE VUELVE A ENCENDER hasta que la cesta vea la jerarquia del
+      #   candidato y el tope de tres sea por VENTANA y no por vuelta
+      #   (hoy caben dos vueltas en los 135 min: 3 + 3 = 6).
+      #
+      #   Paso 0 hecho: verja 171/171, exit 0, con este interruptor puesto.
+      BORDALAS_SIN_SUBASTA: "1"
 
     steps:
       - name: Checkout
