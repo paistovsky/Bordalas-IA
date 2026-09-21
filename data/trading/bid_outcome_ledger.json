@@ -1087,7 +1087,7 @@
    "seller_user_id": null,
    "placed_at": "2026-09-21T03:09:47.146907+00:00",
    "outcome": "WON",
-   "resolved_at": "2026-09-21T07:42:23.836958+00:00",
+   "resolved_at": "2026-09-21T07:59:52.636346+00:00",
    "winning_amount": 1624051,
    "margin": 0,
    "event_id": "db20bae15c9102893f491b4e"
@@ -1108,7 +1108,7 @@
    "seller_user_id": null,
    "placed_at": "2026-09-21T03:09:47.147690+00:00",
    "outcome": "WON",
-   "resolved_at": "2026-09-21T07:42:23.836958+00:00",
+   "resolved_at": "2026-09-21T07:59:52.636346+00:00",
    "winning_amount": 150376,
    "margin": 0,
    "event_id": "db20bae15c9102893f491b4e"
@@ -1129,7 +1129,7 @@
    "seller_user_id": null,
    "placed_at": "2026-09-21T03:09:47.148301+00:00",
    "outcome": "WON",
-   "resolved_at": "2026-09-21T07:42:23.836958+00:00",
+   "resolved_at": "2026-09-21T07:59:52.636346+00:00",
    "winning_amount": 160401,
    "margin": 0,
    "event_id": "db20bae15c9102893f491b4e"
