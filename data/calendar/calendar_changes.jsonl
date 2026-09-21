@@ -428,3 +428,4 @@
 {"detected_at": "2026-09-16T13:16:21.637796+02:00", "type": "KICKOFF_CHANGED", "matchday": 9, "home": "Real Madrid", "away": "Sevilla FC", "old_kickoff": "2026-10-18T17:00:00+02:00", "new_kickoff": "2026-10-18T21:00:00+02:00"}
 {"detected_at": "2026-09-16T13:16:21.637796+02:00", "type": "KICKOFF_CHANGED", "matchday": 9, "home": "Getafe CF", "away": "Rayo Vallecano", "old_kickoff": "2026-10-18T17:00:00+02:00", "new_kickoff": "2026-10-19T21:00:00+02:00"}
 {"detected_at": "2026-09-17T15:07:34.150728+02:00", "type": "KICKOFF_CHANGED", "matchday": 6, "home": "Levante UD", "away": "Athletic Club", "old_kickoff": "2026-09-16T21:30:00+02:00", "new_kickoff": "2026-10-21T20:00:00+02:00"}
+{"detected_at": "2026-09-21T15:50:35.387053+02:00", "type": "KICKOFF_CHANGED", "matchday": 10, "home": "FC Barcelona", "away": "Real Madrid", "old_kickoff": "2026-10-25T17:00:00+01:00", "new_kickoff": "2026-10-25T21:00:00+01:00"}
