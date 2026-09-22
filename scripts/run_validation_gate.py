@@ -204,6 +204,10 @@ TESTS = [
     # El que publica: que salga la cola de venta que ya esta
     # calculada, en su orden, y sin el once. Apagado.
     "src.analysis.test_el_que_publica_v1",
+
+    # La prioridad de pujar por el reloj: dentro de la ventana la
+    # puja no pierde contra un tramite, fuera pierde. Apagada.
+    "src.analysis.test_la_hora_de_pujar_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",

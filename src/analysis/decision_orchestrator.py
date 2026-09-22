@@ -966,6 +966,52 @@ def calculate_franchise_priority(
     return base
 
 
+# ============================================================
+# LA HORA DE PUJAR (22/09/2026)
+# ============================================================
+#
+#     `la_hora_de_pujar` es puro: recibe los segundos al reset y
+#     devuelve el numero. Quien los tiene que buscar es esto, y
+#     SOLO CON EL INTERRUPTOR PUESTO: apagado sale por la primera
+#     linea sin mirar el reloj de mercado.
+#
+#     El reloj se construye del snapshot, que es lo mismo que hace
+#     `autopilot` unas lineas antes. No se le pasa por argumento
+#     para no cambiar la firma de `build_global_decision`, que la
+#     llaman cuatro sitios.
+
+
+def _la_hora_de_pujar(snapshot: dict) -> dict:
+    """Cuanto vale pujar en esta vuelta. Nunca lanza."""
+
+    try:
+        from src.analysis.la_hora_de_pujar import (
+            activa,
+            prioridad_de_la_puja,
+        )
+
+        if not activa():
+            return prioridad_de_la_puja(None)
+
+        from src.analysis.market_clock import build_market_clock
+
+        reloj = build_market_clock(snapshot) or {}
+
+        return prioridad_de_la_puja(reloj.get("seconds_to_reset"))
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "prioridad": PRIORITY["SPECULATION_BUY"],
+            "activa": False,
+            "en_la_ventana": None,
+            "interruptor": "BORDALAS_PUJAR_EN_LA_VENTANA",
+            "reason": (
+                f"No se pudo mirar la hora de pujar: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def calculate_solvency_priority(
     balance: int,
     phase: str,
@@ -2896,15 +2942,33 @@ def build_global_decision_uncached(
             )
 
         else:
+            # LA PRIORIDAD DE PUJAR, POR EL RELOJ (22/09/2026)
+            #
+            #     400 fijo pierde contra cobrar (650), caducidad
+            #     urgente (680) y renovar urgente (690) —y gana a
+            #     renovar sin prisa (350) a las cuatro de la
+            #     tarde, cuando la puja no corre ninguna prisa—.
+            #
+            #     Lo que se pierde por esperar una vuelta NO es lo
+            #     mismo a cada hora: dentro de la ventana del
+            #     reset se pierde EL JUGADOR, porque la subasta se
+            #     resuelve y no vuelve. Fuera, nada.
+            #
+            #     APAGADO de fabrica: sin
+            #     `BORDALAS_PUJAR_EN_LA_VENTANA` esto devuelve el
+            #     mismo 400 de siempre. Ver `la_hora_de_pujar`.
+            hora_de_pujar = _la_hora_de_pujar(snapshot)
+
             candidates.append(
                 {
                     "type":
                         "SPECULATION_BUY",
 
                 "priority":
-                    PRIORITY[
-                        "SPECULATION_BUY"
-                    ],
+                    hora_de_pujar["prioridad"],
+
+                "hora_de_pujar":
+                    hora_de_pujar,
 
                 "action":
                     "BUY_SPECULATION",
