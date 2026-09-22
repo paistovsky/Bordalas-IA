@@ -168,7 +168,7 @@ Los cuatro del 18/09: Maffeo (13.719), Cabrera (15.916), Castrín (19.596) y Dmi
 ### ¿Cuántos pasan ahora? **Cuatro al día. No son cincuenta.**
 
 Y el techo **sigue teniendo función**: el nuevo tope efectivo es 30.000 × 0,9 = **27.000
-€/punto**, y sobre las dos fotos hay **31 de 39 candidatos por encima** de eso. Nico
+€/punto**, y sobre las dos fotos hay **21 de 39 candidatos por encima** de eso. Nico
 Williams pide **60.141 €/punto** y sigue sin pasar — hay guardia de eso, porque si pasara
 querría decir que el techo ya no frena a nadie.
 
