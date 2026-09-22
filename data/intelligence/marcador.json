@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-09-22T05:28:37.444781",
+  "updated_at": "2026-09-22T07:48:08.258730",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -1523,49 +1523,49 @@
     },
     "4905": {
       "round_id": 4905,
-      "visto": "2026-09-22T05:28:37.444781",
-      "datos_de": "2026-09-22T05:19:59.030177+00:00",
-      "escrito_en": "2026-09-22T05:28:37.444781",
+      "visto": "2026-09-22T07:48:08.258730",
+      "datos_de": "2026-09-22T07:31:50.065555+00:00",
+      "escrito_en": "2026-09-22T07:48:08.258730",
       "clasificacion": [
         {
           "user_id": 14175949,
           "name": "Pepe Bordalás",
-          "points": 276
+          "points": 323
         },
         {
           "user_id": 14145555,
           "name": "Pollo17",
-          "points": 270
-        },
-        {
-          "user_id": 14151726,
-          "name": "DiosMande a Rodri al Palancas",
-          "points": 230
+          "points": 320
         },
         {
           "user_id": 14156489,
           "name": "Luismi_Haz",
-          "points": 226
+          "points": 287
         },
         {
-          "user_id": 14178736,
-          "name": "Mex",
-          "points": 225
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 281
         },
         {
           "user_id": 14154203,
           "name": "Prinzipote",
-          "points": 205
+          "points": 258
         },
         {
           "user_id": 14176382,
           "name": "Manzagool",
-          "points": 194
+          "points": 253
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 246
         },
         {
           "user_id": 14456960,
           "name": "Alvaro Retamosa Sanguino",
-          "points": 171
+          "points": 198
         }
       ],
       "mi_user_id": 14175949,
@@ -1620,6 +1620,11 @@
           "id": 9090,
           "name": "Dmitrovic",
           "position": 1
+        },
+        {
+          "id": 10030,
+          "name": "Maffeo",
+          "position": 2
         },
         {
           "id": 11800,
@@ -1695,6 +1700,7 @@
         "3159": 29,
         "5771": 12,
         "9090": 28,
+        "10030": 9,
         "11800": 9,
         "14800": 30,
         "17200": 5,
@@ -1734,6 +1740,7 @@
         "3159": "Jutglà",
         "5771": "Yeray",
         "9090": "Dmitrovic",
+        "10030": "Maffeo",
         "11800": "Cabrera",
         "14800": "Pablo Ibáñez",
         "17200": "Aihen",

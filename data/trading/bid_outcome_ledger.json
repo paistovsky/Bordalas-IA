@@ -1221,11 +1221,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-09-21T10:39:13+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "WON",
+   "resolved_at": "2026-09-22T05:31:49.009952+00:00",
+   "winning_amount": 1670533,
+   "margin": 0,
+   "event_id": "6773368fbc63791f1ca5bf31",
    "recorded_by": "TABLON"
   }
  }
