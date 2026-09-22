@@ -1392,6 +1392,39 @@ def _sin_subasta() -> bool:
     ).strip().lower() in {"1", "true", "si", "yes"}
 
 
+def mira_si_va_a_jugar_de_verdad(candidatos: list | None) -> dict:
+    """
+    La regla de compra, sobre los candidatos de la cesta.
+
+    Se importa aqui dentro como todo lo demas de este fichero: la
+    cabecera no abre nada. Si la regla no se puede cargar pasan
+    todos —que es el comportamiento de antes del 22/09—, porque
+    un modulo que no importa no puede frenar una puja que el
+    resto del sistema ya aprobo.
+
+    Nunca lanza.
+    """
+
+    try:
+        from src.analysis.la_regla_de_compra import (
+            mira_si_va_a_jugar,
+        )
+
+        return mira_si_va_a_jugar(candidatos)
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "activa": False,
+            "siguen": list(candidatos or []),
+            "frenados": [],
+            "reason": (
+                f"No se pudo mirar la regla de compra: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def plan_del_reset(
     candidatos: list | None,
     prima_de_reventa: float,
@@ -1449,6 +1482,7 @@ def plan_del_reset(
         "capped_at": max_pujas,
         "dropped_by_cap": 0,
         "dropped_by_club": 0,
+        "dropped_by_no_juega": 0,
         "all_won": 0,
         "worst_case": None,
         "blocked_by": None,
@@ -1533,6 +1567,40 @@ def plan_del_reset(
             and safe_int(c.get("id")) not in puestos
         ]
 
+        # LA REGLA DE COMPRA: ¿VA A JUGAR? (22/09/2026)
+        #
+        #     Va ANTES del reparto a proposito: si se aplicara
+        #     despues, la cesta habria gastado presupuesto y
+        #     fichas en candidatos que luego se frenan, y
+        #     elegiria peor entre los que quedan.
+        #
+        #     MEDIDO sobre los 115 viajes cerrados del tablon:
+        #     el beneficio de un viaje es el MOVIMIENTO DEL
+        #     MERCADO -+10.690.000 de los 13.072.324 de Pollo17-
+        #     y el mercado se mueve CERO para el que no juega.
+        #     De las seis filas en que se parten sus viajes, la
+        #     unica que pierde dinero es "habia partido y no
+        #     jugo": 33 % en verde, ROI mediano -2,03 %.
+        #
+        #     APAGADA de fabrica. Ver `la_regla_de_compra`.
+        regla = mira_si_va_a_jugar_de_verdad(sin_repetir)
+
+        frenados_por_la_regla = len(regla.get("frenados") or [])
+
+        elegibles = regla.get("siguen") or []
+
+        if frenados_por_la_regla and not elegibles:
+            return {
+                **vacio,
+                "available": True,
+                "window": ventana,
+                "dropped_by_no_juega": frenados_por_la_regla,
+                "blocked_by": "NO_VA_A_JUGAR",
+                "reason": regla.get("reason"),
+            }
+
+        sin_repetir = elegibles
+
         cesta = elegir_la_cesta(
             candidatos_en_modo_cartera(
                 sin_repetir, prima_de_reventa
@@ -1550,6 +1618,7 @@ def plan_del_reset(
                 **vacio,
                 "available": True,
                 "window": ventana,
+                "dropped_by_no_juega": frenados_por_la_regla,
                 "blocked_by": "SIN_CESTA",
                 "reason": cesta.get("reason"),
             }
@@ -1623,6 +1692,7 @@ def plan_del_reset(
                 "window": ventana,
                 "dropped_by_cap": recortados,
                 "dropped_by_club": fuera_por_club,
+                "dropped_by_no_juega": frenados_por_la_regla,
                 "blocked_by": "PEOR_CASO",
                 "reason": (
                     f"Las {fuera_por_club} puja(s) que quedaban "
@@ -1667,6 +1737,7 @@ def plan_del_reset(
             "capped_at": tope,
             "dropped_by_cap": recortados,
             "dropped_by_club": fuera_por_club,
+            "dropped_by_no_juega": frenados_por_la_regla,
             "blocked_by": None if en_vivo else "SIN_LIVE",
             "reason": (
                 f"{len(elegidos)} puja(s) por "
@@ -1770,6 +1841,22 @@ def lectura_del_estado(
                 "rate_percent_per_day": (
                     fila.get("market_gate") or {}
                 ).get("rate_percent_per_day"),
+
+                # ¿VA A JUGAR? (22/09/2026)
+                #
+                #     Estos tres los publica el tablero y esta
+                #     copia los tiraba. Son los que mira
+                #     `la_regla_de_compra`, y sin ellos la regla
+                #     no puede distinguir a un titular de un
+                #     suplente: los frenaria a los dos.
+                #
+                #     Cuesta copiar tres claves de un dict que ya
+                #     esta en memoria. Ni red, ni disco.
+                "starter_probability": fila.get(
+                    "starter_probability"
+                ),
+                "hierarchy_value": fila.get("hierarchy_value"),
+                "availability": fila.get("availability"),
             }
             for fila in (tablero.get("targets") or [])
             if isinstance(fila, dict)

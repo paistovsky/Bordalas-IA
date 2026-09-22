@@ -115,6 +115,31 @@ def _mercado(cuantos: int = 6, club: int = 1) -> list:
     Precios distintos a proposito: si todos valieran lo mismo,
     el orden lo decidiria el desempate y las guardias del
     recorte no probarian nada.
+
+    UN CANDIDATO DE VERDAD, NO UN PRECIO CON NOMBRE
+    (22/09/2026)
+
+        Esta lista llevaba CUATRO campos: id, nombre, precio y
+        club. Y con eso bastaba, porque hasta hoy la cesta solo
+        miraba el precio.
+
+        Desde `la_regla_de_compra` la cesta mira tambien SI EL
+        JUGADOR VA A JUGAR. Con `BORDALAS_REVENTA_SOLO_SI_JUEGA`
+        puesto, un candidato sin `starter_probability` no tiene
+        pronostico, y sin pronostico no se puja: las seis se
+        caian y ocho pruebas de este fichero se ponian rojas
+        diciendo "sin pujas no se prueba nada" —que era verdad, y
+        el problema era el caso, no la puerta—.
+
+        ASI QUE EL CASO SE COMPLETA, NO SE BAJA EL LISTON. Las
+        filas del tablero de verdad traen estos dos campos; las
+        de aqui, ahora tambien. Ninguna afirmacion cambia.
+
+        Y NO ES LO MISMO QUE APAGAR EL INTERRUPTOR. La linea de
+        arriba —`os.environ.pop("BORDALAS_SIN_SUBASTA")`— protege
+        de UN interruptor, por su nombre, y por eso no protegio
+        de este. Un caso completo protege de cualquiera que mire
+        un campo que el candidato de verdad trae.
     """
 
     return [
@@ -123,6 +148,11 @@ def _mercado(cuantos: int = 6, club: int = 1) -> list:
             "name": f"Jugador {i}",
             "market_price": 100_000 + 10_000 * i,
             "team_id": club + i,
+
+            # Titular con holgura, y por encima de Rotacion: los
+            # dos cortes de la casa estan en 40.
+            "starter_probability": 80.0,
+            "hierarchy_value": 60,
         }
         for i in range(cuantos)
     ]
@@ -412,12 +442,16 @@ def test_el_peor_caso_cuenta_la_plantilla_que_ya_hay():
     CINCO si entran las dos. La cesta sola no lo ve.
     """
 
+    # Con pronostico, como `_mercado`: estos tambien pasan por
+    # la cesta, y la cesta ya mira si el jugador va a jugar.
     mismo_club = [
         {
             "id": 200 + i,
             "name": f"Del club 7 numero {i}",
             "market_price": 100_000 + 1_000 * i,
             "team_id": 7,
+            "starter_probability": 80.0,
+            "hierarchy_value": 60,
         }
         for i in range(3)
     ]

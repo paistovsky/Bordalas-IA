@@ -190,6 +190,11 @@ TESTS = [
     # tope de tres del primer dia, el peor caso contando la
     # plantilla, y que la compra a rivales siga cerrada.
     "src.analysis.test_encender_las_pujas_v1",
+
+    # La regla que salio de emparejar las compras con sus ventas
+    # en el tablon de los ocho: no se compra para revender a
+    # quien no consta que vaya a jugar. Apagada.
+    "src.analysis.test_la_regla_de_compra_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",

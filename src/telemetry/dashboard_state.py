@@ -3369,10 +3369,15 @@ def bloque_de_la_subasta(
         "all_won": 0,
         "seconds_to_reset": None,
         "kill_switch": "BORDALAS_SIN_SUBASTA=1",
+        "dropped_by_no_juega": 0,
+        "play_rule_switch": "BORDALAS_REVENTA_SOLO_SI_JUEGA",
         "reason": None,
     }
 
     try:
+        from src.analysis.la_regla_de_compra import (
+            ENV as REGLA_ENV,
+        )
         from src.analysis.la_subasta import (
             DISABLE_ENV,
             MAX_PUJAS_PRIMER_DIA,
@@ -3423,6 +3428,19 @@ def bloque_de_la_subasta(
             "dropped_by_club": safe_int(
                 plan.get("dropped_by_club")
             ),
+
+            # CUANTOS FRENO LA REGLA DE COMPRA (22/09/2026)
+            #
+            #     Sin esto, "0 pujas" se leeria igual si no hay
+            #     mercado que si los freno la regla por no
+            #     constar que vayan a jugar. Doctrina 87: el
+            #     motivo nombra al que decidio.
+            #
+            #     Hoy sale 0 siempre: la regla nace apagada.
+            "dropped_by_no_juega": safe_int(
+                plan.get("dropped_by_no_juega")
+            ),
+            "play_rule_switch": REGLA_ENV,
             "first_day_cap": MAX_PUJAS_PRIMER_DIA,
 
             # Cuanto falta para el cierre.
