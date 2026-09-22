@@ -119,7 +119,24 @@ def _sano() -> dict:
 
 
 def _mercado(cuantos: int = 6, club: int = 1) -> list:
-    """Candidatos de cartera: sin via de fichaje, como hoy."""
+    """
+    Candidatos de cartera: sin via de fichaje, como hoy.
+
+    CON PRONOSTICO, AUNQUE ESTA GUARDIA NO LO MIRE (22/09/2026)
+
+        `la_regla_de_compra` —el otro filtro de `plan_del_reset`,
+        el que mira si el jugador va a jugar— frena a quien no
+        trae `starter_probability`. Sin estos dos campos, con
+        `BORDALAS_REVENTA_SOLO_SI_JUEGA` puesto no quedaba ni un
+        candidato y esta guardia se caia por su propia guarda de
+        doctrina 24, diciendo la verdad sobre un caso incompleto.
+
+        Las filas del tablero de verdad los traen. Las de aqui,
+        ahora tambien. Ninguna afirmacion cambia: lo que esta
+        guardia mide es la VIA, no el pronostico.
+
+        Los dos cortes de la casa estan en 40.
+    """
 
     return [
         {
@@ -127,18 +144,36 @@ def _mercado(cuantos: int = 6, club: int = 1) -> list:
             "name": f"Jugador {i}",
             "market_price": 100_000 + 10_000 * i,
             "team_id": club + i,
+            "starter_probability": 80.0,
+            "hierarchy_value": 60,
         }
         for i in range(cuantos)
     ]
 
 
-def _de_plantilla(id_: int = 900, precio: int = 1_660_000) -> dict:
+def _de_plantilla(id_: int = 900, precio: int = 1_190_000) -> dict:
     """
     Un candidato que el tablero clasifico PARA QUEDARSE.
 
     Es la forma de Maffeo en la foto del 18/09: `intent`
     XI_UPGRADE y `route` XI_UPGRADE, valor de fichaje por encima
     del precio.
+
+    EL PRECIO, POR DEBAJO DEL SUELO DE LA CESTA (22/09/2026)
+
+        Maffeo costaba 1.660.000 y aqui el precio es 1.190.000.
+        No es un capricho: `BORDALAS_CESTA_SOLO_EL_SUELO` hace
+        que la cesta no mire a nadie por encima de
+        `CORTES_DE_PRECIO[0]` = 1.500.000, asi que con ese
+        interruptor puesto el candidato de plantilla desaparecia
+        de la lista y esta guardia se quedaba sin nada que
+        probar.
+
+        LO QUE SE MIDE AQUI ES LA VIA, NO EL PRECIO: que un
+        candidato QUEDARSE sobreviva al corte de la reventa. El
+        precio solo tiene que dejarle llegar hasta el corte, y
+        por debajo del suelo llega con cualquier interruptor
+        puesto. Hay guardia de que el numero sigue por debajo.
     """
 
     return {
@@ -281,6 +316,20 @@ def test_el_corte_no_toca_la_compra_de_plantilla():
         "el caso no trae ningun candidato PARA QUEDARSE: esta "
         "guardia no estaria midiendo nada"
     )
+
+    # Y TIENE QUE LLEGAR HASTA EL CORTE con cualquier interruptor
+    # puesto. `BORDALAS_CESTA_SOLO_EL_SUELO` aparta a los de
+    # 1.500.000 para arriba, y un candidato apartado antes del
+    # corte no prueba que el corte lo respete.
+    from src.analysis.la_subasta import CORTES_DE_PRECIO
+
+    for c in de_plantilla:
+        assert c["market_price"] < CORTES_DE_PRECIO[0], (
+            f"{c['name']} cuesta {c['market_price']} y el suelo "
+            f"de la cesta esta en {CORTES_DE_PRECIO[0]}: con "
+            f"BORDALAS_CESTA_SOLO_EL_SUELO puesto no llegaria al "
+            f"corte y esta guardia pasaria con las manos vacias"
+        )
 
     de_reventa = [
         c

@@ -66,6 +66,24 @@ import os
 os.environ.pop("BORDALAS_CUPO_POR_ENVIOS", None)
 os.environ.pop("BORDALAS_NO_REPETIR_LA_ESCRITURA", None)
 
+# Y LA REVENTA, QUE ES LO QUE ESTA GUARDIA MIDE (22/09/2026)
+#
+#     `BORDALAS_SIN_REVENTA` CIERRA la cesta de reventa, que es
+#     justo el sujeto de este fichero. Con el puesto no hay
+#     subasta que medir y esto se pone rojo sin que nada este
+#     roto: la guardia se cae por su propia guarda de doctrina 24
+#     —"si no, esta guardia no prueba nada"—, que dice la verdad.
+#
+#     Y NO ES UN CASO INCOMPLETO. No hay campo que anadirle a un
+#     candidato de cartera para que sobreviva a un interruptor
+#     que cierra la cartera entera: lo que se compra para
+#     revender ES reventa. El unico arreglo honesto es el de
+#     siempre (doctrina 104): la guardia pone su propio
+#     interruptor. El comportamiento CON el puesto lo mide
+#     `test_el_corte_y_el_cupo_v1`, que lo enciende y lo apaga
+#     ella.
+os.environ.pop("BORDALAS_SIN_REVENTA", None)
+
 from datetime import datetime, timezone
 
 from pathlib import Path
