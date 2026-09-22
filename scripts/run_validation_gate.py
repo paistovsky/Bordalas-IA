@@ -195,6 +195,10 @@ TESTS = [
     # en el tablon de los ocho: no se compra para revender a
     # quien no consta que vaya a jugar. Apagada.
     "src.analysis.test_la_regla_de_compra_v1",
+
+    # La prioridad de pujar por el reloj: dentro de la ventana la
+    # puja no pierde contra un tramite, fuera pierde. Apagada.
+    "src.analysis.test_la_hora_de_pujar_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
