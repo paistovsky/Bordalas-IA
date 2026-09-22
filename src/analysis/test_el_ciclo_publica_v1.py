@@ -345,6 +345,120 @@ def _hay_foto() -> bool:
     return bool(list((RAIZ / "data").glob("snapshot_*.json")))
 
 
+# ============================================================
+# SOBRE COPIAS, NO SOBRE LOS LIBROS (22/09/2026)
+# ============================================================
+#
+#     `build_dashboard_state()` no solo lee: ESCRIBE. Medido el
+#     22/09, corriendo esta guardia sola sobre un arbol limpio,
+#     cinco libros de produccion quedaban sucios:
+#
+#         data/intelligence/libro_de_publicacion.jsonl
+#         data/intelligence/libro_en_la_sombra.jsonl
+#         data/intelligence/marcador.json
+#         data/rival_intelligence/board_events.json
+#         data/solvency/bitacora_del_saldo.jsonl
+#
+#     Cuatro veces hubo que restaurarlos a mano en un solo dia.
+#     Y no es solo incomodo: una verja que escribe en los libros
+#     puede cambiar lo que la SIGUIENTE guardia lee. Eso es
+#     exactamente el fallo del 13/09 que hizo nacer al vigilante
+#     de `data/`, con la verja de verdugo en vez de Pepe.
+#
+#     ARREGLO: la foto se copia a un temporal y se corre ALLI.
+#
+#     Funciona porque todo el camino del panel abre rutas
+#     RELATIVAS -`Path("data") / ...`-, asi que basta con mover
+#     el directorio de trabajo. Se copia entera y no un trozo
+#     elegido a mano: elegir seria adivinar que abre, y lo que
+#     abre cambia cada semana.
+#
+#     Coste medido: 1,8 s por las 165 fotos y libros (138 MB).
+
+
+def _sobre_una_copia():
+    """
+    Un contexto que deja el directorio de trabajo en una copia
+    de `data/`, y lo devuelve pase lo que pase.
+    """
+
+    import contextlib
+    import os
+    import shutil
+
+    @contextlib.contextmanager
+    def _ir():
+
+        antes = os.getcwd()
+
+        carpeta = tempfile.mkdtemp(prefix="ciclo_publica_")
+
+        try:
+            shutil.copytree(RAIZ / "data", Path(carpeta) / "data")
+
+            os.chdir(carpeta)
+
+            yield Path(carpeta)
+
+        finally:
+            os.chdir(antes)
+
+            shutil.rmtree(carpeta, ignore_errors=True)
+
+    return _ir()
+
+
+def _como_estaban() -> dict:
+    """
+    La ficha de cada fichero de `data/`: tamaño y hora.
+
+    No se lee el contenido -seria abrir los libros para
+    comprobar que no se abren-: con el tamaño y la fecha basta
+    para cazar una escritura.
+
+    Nunca lanza: lo que no se pueda mirar, no se compara.
+    """
+
+    fichas = {}
+
+    try:
+        for fichero in (RAIZ / "data").rglob("*"):
+            try:
+                if fichero.is_file():
+                    datos = fichero.stat()
+                    fichas[str(fichero)] = (datos.st_size, datos.st_mtime_ns)
+
+            except Exception:                       # noqa: BLE001
+                continue
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+    return fichas
+
+
+def _lo_que_cambio(antes: dict) -> list:
+    """Que libros han cambiado. Los nuevos tambien cuentan."""
+
+    ahora = _como_estaban()
+
+    cambiados = []
+
+    for ruta, ficha in sorted(ahora.items()):
+
+        if ruta not in antes:
+            cambiados.append(f"{ruta} (nuevo)")
+
+        elif antes[ruta] != ficha:
+            cambiados.append(ruta)
+
+    for ruta in sorted(antes):
+        if ruta not in ahora:
+            cambiados.append(f"{ruta} (borrado)")
+
+    return cambiados
+
+
 def test_el_estado_del_dashboard_se_construye_entero() -> None:
     """
     LA GUARDIA QUE FALTABA.
@@ -372,7 +486,22 @@ def test_el_estado_del_dashboard_se_construye_entero() -> None:
         build_dashboard_state,
     )
 
-    estado = build_dashboard_state()
+    # LOS LIBROS DE PRODUCCION NO SE TOCAN.
+    #
+    #     Se monta el estado sobre una copia y se comprueba
+    #     DESPUES que los de verdad siguen como estaban.
+    libros = _como_estaban()
+
+    with _sobre_una_copia():
+
+        estado = build_dashboard_state()
+
+    cambiados = _lo_que_cambio(libros)
+
+    assert not cambiados, (
+        "esta guardia ha escrito en los libros de produccion:\n  "
+        + "\n  ".join(cambiados)
+    )
 
     assert isinstance(estado, dict), type(estado)
 
