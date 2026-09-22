@@ -200,6 +200,10 @@ TESTS = [
     # reventa sin cerrar la compra para quedarse, y que el tope
     # de tres sea por VENTANA y no por vuelta.
     "src.analysis.test_el_corte_y_el_cupo_v1",
+
+    # El que publica: que salga la cola de venta que ya esta
+    # calculada, en su orden, y sin el once. Apagado.
+    "src.analysis.test_el_que_publica_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
