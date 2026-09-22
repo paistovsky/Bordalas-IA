@@ -203,8 +203,24 @@ def test_una_lista_vacia_no_es_un_exito() -> None:
 
 def test_la_puerta_no_lee_el_workflow() -> None:
     """
-    Si volviera a leerlo, volveriamos a tener la lista en el sitio
-    equivocado.
+    LA LISTA DE GUARDIAS no sale del fichero de CI. Si volviera a
+    salir de alli, volveriamos a tenerla en el sitio equivocado.
+
+    LO QUE ESTA GUARDIA NO PROHIBE, Y DESDE CUANDO (22/09/2026)
+
+        Los INTERRUPTORES DE PRODUCCION si salen de alli, porque
+        es alli donde se encienden: tenerlos escritos en otro
+        sitio seria mantener una copia, y una copia se
+        desincroniza el dia que importa. Eso es lo que costo la
+        corrida #1753.
+
+        Son dos cosas distintas que se leian del mismo fichero.
+        Esta guardia dice cual de las dos prohibe.
+
+        Quien lee el YAML es
+        `src/analysis/los_interruptores_de_produccion.py`, que
+        nombra el fichero; la puerta no lo nombra, y por eso este
+        assert sigue en pie sin ablandarse.
 
     Se mira el CODIGO, no el texto: el docstring del script
     cuenta esta historia y nombra el fichero a proposito. Buscar

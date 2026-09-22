@@ -205,6 +205,11 @@ TESTS = [
     # liga a 30.000 el punto, no el mercado a 18.300. Apagado.
     "src.analysis.test_la_moneda_del_fichaje_v1",
 
+    # Que esta verja corra con los interruptores que enciende CI
+    # y lo diga, y que sin poder leerlos no de verde. Es lo que
+    # separo el verde del portatil del rojo de la corrida #1753.
+    "src.analysis.test_la_verja_corre_como_ci_v1",
+
     # El que publica: que salga la cola de venta que ya esta
     # calculada, en su orden, y sin el once. Apagado.
     "src.analysis.test_el_que_publica_v1",
@@ -895,7 +900,58 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    # ============================================================
+    # CON QUE INTERRUPTORES CORRE CI (22/09/2026)
+    # ============================================================
+    #
+    #     Dos ciclos parados el mismo dia, los dos por lo mismo:
+    #     algo verde en el portatil estaba rojo en CI. La #1753
+    #     murio en `test_el_corte_y_el_cupo_v1`, que aqui pasaba,
+    #     porque produccion la corre con
+    #     `BORDALAS_REVENTA_SOLO_SI_JUEGA` puesto y aqui no.
+    #
+    #     Hasta hoy la unica forma de reproducirlo era abrir el
+    #     fichero de CI, leer que hay encendido y escribirlo a
+    #     mano en la consola. Un paso a mano es un paso que se
+    #     olvida, y el dia que se olvida el verde miente.
+    #     Doctrina 112.
+    #
+    #     QUIEN LEE NO ES ESTE FICHERO, Y ESO IMPORTA
+    #
+    #         `los_interruptores_de_produccion` nombra el fichero
+    #         de CI; esta puerta no. La lista de guardias sigue
+    #         siendo la de aqui y solo la de aqui, que es lo que
+    #         `test_la_puerta_no_lee_el_workflow` protege.
+    #
+    #     Y SI NO SE PUEDE LEER, NO HAY VERDE
+    #
+    #         Una verja que no sabe con que interruptores corre
+    #         no puede afirmar nada sobre produccion. Doctrina 91.
+    from src.analysis.los_interruptores_de_produccion import (
+        el_entorno_de_produccion,
+        la_cabecera,
+        los_de_produccion,
+    )
+
+    de_produccion = los_de_produccion()
+
+    if not de_produccion["ok"]:
+        print("NO SE SABE CON QUE INTERRUPTORES CORRE PRODUCCION")
+        print("=" * 66)
+        print(f"  {de_produccion['reason']}")
+        print()
+        print(
+            "  Esto no es un verde con un aviso: es un rojo. "
+            "Doctrina 91."
+        )
+        return 2
+
     if args.paso_0:
+        # El paso 0 pone TODOS los del inventario, que es un
+        # superconjunto de estos. Se dice igual, para que su
+        # cabecera no mienta por omision.
+        print(f"({la_cabecera(de_produccion['interruptores'])})")
+        print()
         return _correr_el_paso_0(parar=args.parar)
 
     modulos = list(args.solo) if args.solo else list(TESTS)
@@ -912,6 +968,7 @@ def main() -> int:
         return 1
 
     print(f"Puerta de validacion: {len(modulos)} tests")
+    print(la_cabecera(de_produccion["interruptores"]))
     print("=" * 66)
 
     # EL RELOJ DE LA VERJA SE ENSEÑA, NO DECIDE (21/09/2026)
@@ -950,7 +1007,24 @@ def main() -> int:
     #     Una guardia que corriera las otras 119 para vigilarlas
     #     duplicaria la verja entera —medido: no termina en diez
     #     minutos— y una verja lenta se acaba saltando.
-    entorno = dict(os.environ)
+    # LOS INTERRUPTORES DE CI, PUESTOS POR ELLA MISMA
+    #
+    #     No se hereda lo que hubiera en la consola: manda el
+    #     YAML. Si el entorno trae un `BORDALAS_*` que CI no
+    #     enciende, se quita y se avisa —si no, dos corridas del
+    #     mismo arbol podrian dar distinto y ninguna de las dos
+    #     seria la de produccion-.
+    preparado = el_entorno_de_produccion(
+        os.environ, de_produccion["interruptores"]
+    )
+
+    for aviso in preparado["avisos"]:
+        print(f"  {aviso}")
+
+    if preparado["avisos"]:
+        print()
+
+    entorno = preparado["entorno"]
 
     entorno["BORDALAS_VIGILA_DATA"] = "1"
 
