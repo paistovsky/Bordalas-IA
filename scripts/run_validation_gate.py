@@ -190,6 +190,11 @@ TESTS = [
     # tope de tres del primer dia, el peor caso contando la
     # plantilla, y que la compra a rivales siga cerrada.
     "src.analysis.test_encender_las_pujas_v1",
+
+    # El dia despues de las seis compras del 21/09: cerrar la
+    # reventa sin cerrar la compra para quedarse, y que el tope
+    # de tres sea por VENTANA y no por vuelta.
+    "src.analysis.test_el_corte_y_el_cupo_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",

@@ -168,6 +168,22 @@ QUE_DECIDE_CADA_UNO = {
     "src/analysis/los_dos_techos.py": (
         "ENSEÑA: que columna se marca, QUEDARSE o REVENDER."
     ),
+    "src/analysis/el_corte_de_la_reventa.py": (
+        "DECIDE: con `BORDALAS_SIN_REVENTA` puesto, un candidato "
+        "cuyo `intent` no sea de los de quedarse —y cuya `route` "
+        "no sea de fichaje— no puja. No escribe ninguna etiqueta "
+        "nueva: lee las que ya hay."
+    ),
+    "src/analysis/la_subasta.py": (
+        "LO LLEVA desde la fila del tablero hasta la cesta, para "
+        "que el corte de la reventa pueda mirarlo. La subasta no "
+        "decide con el: su puja siempre es de modo cartera."
+    ),
+    "src/actions/carril_executor.py": (
+        "LO LLEVA desde la fila del tablero hasta el corte de la "
+        "reventa, y LO APUNTA como REVENDER en el libro de "
+        "pujas: el carril compra para revender."
+    ),
     "src/analysis/los_tres_denominadores.py": (
         "RECONSTRUYE: que liston se le aplica al recalcular."
     ),

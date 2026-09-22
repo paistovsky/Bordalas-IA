@@ -289,6 +289,15 @@ def correr(
         # ------------------------------------------------
         suelo = suelo_de_precio(cierres)
 
+        # LA VIA VIAJA CON EL CANDIDATO (22/09/2026)
+        #
+        #     Esta copia llevaba CINCO campos y dejaba atras el
+        #     `intent` y la `route` del tablero. Sin ellos, el
+        #     corte de la reventa no puede distinguir al que se
+        #     compra para revender del que se compra para
+        #     quedarselo, y frenaria a los dos.
+        #
+        #     Son dos claves de un dict que ya esta en memoria.
         candidatos = [
             {
                 "player_id": safe_int(t.get("id")),
@@ -296,6 +305,11 @@ def correr(
                 "position": safe_int(t.get("position")),
                 "market_price": safe_int(t.get("market_price")),
                 "bid": safe_int(t.get("bid")),
+                "intent": t.get("intent"),
+                "route": (
+                    t.get("route")
+                    or (t.get("deployment") or {}).get("route")
+                ),
             }
             for t in (objetivos or [])
             if isinstance(t, dict)
@@ -400,6 +414,38 @@ def correr(
         else:
             candidatos_finales = pagables.get("caben") or []
 
+        # ================================================
+        # EL CORTE DE LA REVENTA (22/09/2026)
+        # ================================================
+        #
+        #     Este carril compra para revender: `record_bid` de
+        #     aqui abajo escribe `intent="REVENDER"` a mano. Con
+        #     `BORDALAS_SIN_REVENTA` puesto, eso se cierra.
+        #
+        #     PERO POR CANDIDATO, NO DE GOLPE. Las filas son las
+        #     del tablero de fichajes y traen su `intent` y su
+        #     `route`: si el tablero clasifico al candidato
+        #     QUEDARSE, la puja sigue.
+        #
+        #     Y NO ES TEORICO. El 18/09 este carril puso DIEZ
+        #     pujas por Maffeo, y la foto de ese dia lo clasifica
+        #     `via: "QUEDARSE"` -valor de fichaje 1.992.831 sobre
+        #     1.660.000 de precio-. Un corte de brocha gorda
+        #     habria tumbado una compra de plantilla, que es
+        #     justo lo que este corte no puede hacer.
+        #
+        #     Va DESPUES de los repetidos y ANTES de
+        #     `a_quien_pujar`, por lo mismo que el filtro de
+        #     arriba: el hueco que libera un frenado se lo queda
+        #     el siguiente de la lista en la MISMA vuelta.
+        from src.analysis.el_corte_de_la_reventa import separar
+
+        corte = separar(candidatos_finales)
+
+        frenados_por_reventa = corte.get("frenados") or []
+
+        candidatos_finales = corte.get("siguen") or []
+
         elegidos = a_quien_pujar(
             candidatos_finales,
             cuantos=caben,
@@ -409,6 +455,16 @@ def correr(
             return {
                 **salida,
                 "available": True,
+
+                # EL MOTIVO NOMBRA AL QUE DECIDIO (doctrina 87).
+                #     Si lo que vacio la lista fue el corte, se
+                #     dice con su nombre y no con un "no hay a
+                #     quien" que parece mercado.
+                "blocked_by": (
+                    "SIN_REVENTA"
+                    if frenados_por_reventa and not candidatos_finales
+                    else None
+                ),
                 "reason": (
                     f"El carril podia pujar y no hay a quien: "
                     f"{margen.get('reason')} "
@@ -422,12 +478,19 @@ def correr(
                         if frenados_por_repetir
                         else ""
                     )
+                    + (
+                        f" {corte.get('reason')}"
+                        if frenados_por_reventa
+                        else ""
+                    )
                 ).strip(),
                 "permiso": puerta,
                 "margen": margen,
                 "pagables": pagables,
                 "bolsillo": bolsillo,
                 "frenados": frenados_por_repetir,
+                "frenados_por_reventa": frenados_por_reventa,
+                "corte_de_la_reventa": corte,
             }
 
         if escritor is None:
@@ -664,6 +727,8 @@ def correr(
             "margen": margen,
             "pagables": pagables,
             "bolsillo": bolsillo,
+            "frenados_por_reventa": frenados_por_reventa,
+            "corte_de_la_reventa": corte,
             "reason": (
                 f"{len(puestas)} puja(s) de la rendija"
                 + (
@@ -672,6 +737,11 @@ def correr(
                     else ""
                 )
                 + "."
+                + (
+                    f" {corte.get('reason')}"
+                    if frenados_por_reventa
+                    else ""
+                )
             ),
         }
 
