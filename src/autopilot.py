@@ -628,6 +628,47 @@ def append_log(
             ),
     }
 
+    # ========================================================
+    # LA VUELTA ENTERA, NO SOLO LA GANADORA (22/09/2026)
+    # ========================================================
+    #
+    #     Hasta hoy esta linea guarda la ganadora y nada mas. Para
+    #     contestar "¿cuantas veces la puja perdio la escritura?"
+    #     hubo que RECONSTRUIR nueve vueltas pasando otra vez
+    #     `build_global_decision` por fotos viejas —86 s cada una,
+    #     y con el codigo de hoy sobre datos de entonces—. Habrian
+    #     sido nueve lineas de este fichero.
+    #
+    #     Y lo que costo la vuelta en peticiones: `resumen()` dice
+    #     de si mismo "para publicarlo" y solo se imprime.
+    #
+    #     APAGADO de fabrica: sin `BORDALAS_LA_VUELTA_SE_APUNTA`
+    #     la linea es la de hoy, byte a byte. Ver
+    #     `la_vuelta_se_apunta`.
+    try:
+        from src.analysis.la_vuelta_se_apunta import (
+            la_cola,
+            lo_que_costo,
+        )
+
+        cola = la_cola(
+            result.get("candidates"),
+            decision,
+        )
+
+        if cola:
+            record["decision_candidates"] = cola
+
+        coste = lo_que_costo(resumen_de_peticiones())
+
+        if coste:
+            record["requests"] = coste
+
+    except Exception:                               # noqa: BLE001
+        # Un registro que revienta no puede tumbar la vuelta que
+        # estaba registrando.
+        pass
+
     if execution is not None:
 
         record[
