@@ -133,12 +133,6 @@ jobs:
       #   para que el reset de las 07:00 no comprase otros cinco suplentes
       #   mientras no hubiera filtro. Ya hay filtro: el de arriba.
       #
-      #   Se quita ahora y no despues por una razon de orden: hoy la caja
-      #   esta en -580.106 y `plan_del_reset` exige deficit cero, asi que la
-      #   subasta queda REABIERTA PERO DORMIDA. Se abre la puerta mientras
-      #   otro cerrojo la sujeta, en vez de abrirla el dia que ademas hay
-      #   dinero encima de la mesa.
-      #
       #   Y para que conste, porque su mensaje enganaba: este interruptor
       #   NO cerraba la puerta de fichar. Solo cerraba `plan_del_reset`,
       #   cuyo unico modo es la cesta de reventa. El tablero de fichajes y
@@ -255,12 +249,24 @@ jobs:
           echo "========================================"
           echo " BORDALAS IA - CLOUDFLARE KV UPDATED"
           echo "========================================"
-      - name: Prune persisted state
-        if: always()
-        shell: bash
-        run: |
-          python scripts/prune_github_state.py
 
+      # GUARDAR VA ANTES DE PODAR (22/09/2026)
+      #
+      #   Estos dos pasos estaban al reves, y la consecuencia estaba
+      #   escrita en `src/estado/los_libros.py:451`: como se podaba
+      #   ANTES de guardar, cualquier libro que quisieramos commitear
+      #   se habria guardado YA RECORTADO. Por eso el registro de la
+      #   vuelta (`autopilot_log.jsonl`) nunca pudo ir a git, y por eso
+      #   hemos tenido que RECONSTRUIR vueltas en vez de leerlas.
+      #
+      #   Invertidos, se guarda lo que la vuelta escribio y se poda
+      #   despues. El cache lo guarda el paso `post` al final del job,
+      #   asi que la poda sigue haciendo su trabajo y no se cachea de
+      #   mas: solo cambia QUE se commitea.
+      #
+      #   Esto por si solo no mete el registro en git — hace falta el
+      #   cambio de codigo que lo anada a los libros guardados. Lo que
+      #   hace es QUITAR EL MOTIVO por el que no se podia.
       - name: Guardar los libros
         if: always()
         shell: bash
@@ -268,6 +274,12 @@ jobs:
           git config user.name  "bordalas-ciclo"
           git config user.email "ciclo@bordalas.local"
           python scripts/guardar_los_libros.py --empujar
+
+      - name: Prune persisted state
+        if: always()
+        shell: bash
+        run: |
+          python scripts/prune_github_state.py
 
       - name: Upload diagnostic log
         if: always()
