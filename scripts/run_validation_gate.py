@@ -195,6 +195,10 @@ TESTS = [
     # en el tablon de los ocho: no se compra para revender a
     # quien no consta que vaya a jugar. Apagada.
     "src.analysis.test_la_regla_de_compra_v1",
+
+    # El que publica: que salga la cola de venta que ya esta
+    # calculada, en su orden, y sin el once. Apagado.
+    "src.analysis.test_el_que_publica_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",

@@ -1250,6 +1250,103 @@ def build_recovery_plan(
 # ============================================================
 
 
+# ============================================================
+# LA COLA DE VENTA, ENCHUFADA AL QUE PUBLICA (22/09/2026)
+# ============================================================
+#
+#     Se arma aqui y no en `sale_order` porque aqui ya estan los
+#     dos ingredientes: la plantilla analizada y quien esta en el
+#     once. `analyze_sales` ya se ha llamado una vez para el
+#     tablero; esta segunda cuesta 1,6 s medidos sobre la foto
+#     del 19/09 (n=19 fichas) y SOLO SE PAGA CON EL INTERRUPTOR
+#     PUESTO: apagado, esta funcion sale por la primera linea.
+#
+#     `build_lineup` NO se vuelve a llamar —es el 94-95 % del
+#     coste del ciclo, 4,78 s con 21 fichas—: el once se lee del
+#     tablero que ya esta construido.
+
+
+def _cola_de_venta(snapshot: dict, roster: list) -> dict:
+    """La cola de `sale_order` desde lo que ya hay. Nunca lanza."""
+
+    try:
+        from src.analysis.sale_order import build_sale_order
+
+        filas = analyze_sales(snapshot)
+
+        # Los puntos de la temporada viven en la plantilla, no en
+        # el analisis de venta, y la cola los necesita para el
+        # coste por punto.
+        puntos = {
+            int(p["id"]): p.get("points")
+            for p in (snapshot.get("my_team") or [])
+            if isinstance(p, dict) and p.get("id") is not None
+        }
+
+        for fila in filas:
+            fila["points"] = puntos.get(int(fila["id"]))
+
+        del_once = [
+            int(p["id"])
+            for p in (roster or [])
+            if isinstance(p, dict) and p.get("in_lineup")
+        ]
+
+        return build_sale_order(filas, lineup_ids=del_once)
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "reason": (
+                f"No se pudo montar la cola de venta: "
+                f"{type(error).__name__}: {error}"
+            ),
+            "queue": [],
+            "excluded": [],
+            "blocked": [],
+        }
+
+
+def _ordenar_la_publicacion(
+    to_list: list,
+    snapshot: dict,
+    roster: list,
+) -> dict:
+    """
+    `to_list` en el orden de la cola de venta, sin el once.
+
+    Con el interruptor apagado devuelve `to_list` tal cual y no
+    calcula nada. Nunca lanza.
+    """
+
+    try:
+        from src.analysis.el_que_publica import (
+            activa,
+            ordenar_para_publicar,
+        )
+
+        if not activa():
+            return ordenar_para_publicar(to_list, None)
+
+        return ordenar_para_publicar(
+            to_list,
+            _cola_de_venta(snapshot, roster),
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "activa": False,
+            "to_list": list(to_list or []),
+            "frenados": [],
+            "sin_puesto": [],
+            "reason": (
+                f"No se pudo ordenar la publicacion: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def build_liquidity_state(
     snapshot: dict,
 ) -> dict:
@@ -1312,6 +1409,34 @@ def build_liquidity_state(
         == "LIST_FOR_LIQUIDITY"
     ]
 
+    # ========================================================
+    # EL ORDEN DE PUBLICAR (22/09/2026)
+    # ========================================================
+    #
+    #     `to_list` sale de recorrer la plantilla EN EL ORDEN EN
+    #     QUE LA DEVUELVE BIWENGER y quedarse con los que todavia
+    #     no estan listados. No hay criterio: hay orden de
+    #     llegada. Y `decision_orchestrator` publica `to_list[0]`.
+    #
+    #     De ahi salen los catorce publicados de la foto del
+    #     22/09, diez de ellos del once, con el lastre sin
+    #     publicar.
+    #
+    #     La cola de `sale_order` SI tiene criterio —escalones,
+    #     intocables, suelo por posicion, concentracion— y no la
+    #     lee nadie. Esto la enchufa: mismo orden, y EL ONCE
+    #     FUERA. Ver `el_que_publica`.
+    #
+    #     APAGADO de fabrica: sin `BORDALAS_PUBLICAR_LA_COLA`,
+    #     `to_list` sale exactamente como hoy.
+    publicacion = _ordenar_la_publicacion(
+        to_list,
+        snapshot,
+        roster,
+    )
+
+    to_list = publicacion["to_list"]
+
     listed = [
         player
 
@@ -1353,6 +1478,12 @@ def build_liquidity_state(
 
         "to_list":
             to_list,
+
+        # Como se ha ordenado, y a quien se ha dejado fuera. Un
+        # orden que no se puede mirar es un orden que nadie
+        # revisa (doctrina 87).
+        "publication_order":
+            publicacion,
 
         "protected":
             protected,
