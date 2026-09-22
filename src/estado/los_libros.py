@@ -429,13 +429,36 @@ NO_SON_LIBROS = (
     ("data/ff_html/{}.html", "el HTML crudo de una peticion"),
     ("data/intelligence/archivo/{}.json", "el archivo del dia, derivado de la foto"),
 
-    # SE PODAN A PROPOSITO, asi que guardarlos seria guardar algo
-    # que otro paso borra en la misma vuelta.
+    # SE PODAN A PROPOSITO.
     #
-    #     `prune_github_state.py` los trunca DESPUES del ciclo y
-    #     ANTES del guardado. Si se metieran en la lista se
-    #     commitearia la version podada, que es peor que no
-    #     commitear nada: pareceria un libro y seria un recorte.
+    #     EL MOTIVO DE AQUI ERA ESTE, Y YA NO ES VERDAD
+    #     (22/09/2026):
+    #
+    #         "`prune_github_state.py` los trunca DESPUES del
+    #         ciclo y ANTES del guardado. Si se metieran en la
+    #         lista se commitearia la version podada, que es peor
+    #         que no commitear nada: pareceria un libro y seria
+    #         un recorte."
+    #
+    #     El dueño invirtio los dos pasos del workflow el 22/09:
+    #     `Guardar los libros` va ahora ANTES que `Prune
+    #     persisted state`. Con ese orden se commitearia lo que
+    #     la vuelta escribio, no el recorte, asi que EL MOTIVO
+    #     QUE LOS DEJABA FUERA HA DESAPARECIDO.
+    #
+    #     SE QUEDAN FUERA IGUAL, Y AHORA ES UNA DECISION, NO UNA
+    #     RESTRICCION. Meterlos es del dueño: `autopilot_log.jsonl`
+    #     son 5.088 B por vuelta y 35,1 vueltas al dia —6,4 MB al
+    #     mes con las candidatas perdedoras, 12,1 MB estables
+    #     podado a 2.000 lineas, 57 dias de historia—. El
+    #     repositorio ya versiona `scout_accuracy_ledger.json`
+    #     (31 MB).
+    #
+    #     La guardia de aqui —`test_ningun_libro_se_clasifico_dos_veces`—
+    #     sigue teniendo sentido: comprueba que un fichero no este
+    #     en las dos listas a la vez, y eso vale con cualquier
+    #     orden del workflow. Lo que habia caducado era el MOTIVO,
+    #     no la guardia.
     ("data/autopilot/autopilot_log.jsonl", "lo poda `prune_github_state`"),
     (
         "data/autopilot/competitive_observer_log.jsonl",

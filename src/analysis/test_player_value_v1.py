@@ -91,6 +91,20 @@ def xi_upgrade_value(*args, **kwargs):
 
 
 # Medido en el catalogo real del 16/08/2026.
+import os                                          # noqa: E402
+
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA (doctrina 104, 22/09/2026)
+#
+#     `BORDALAS_LA_MONEDA_DE_LA_LIGA` cambia a que precio se paga
+#     un punto EN LAS VIAS DE PLANTILLA, que es lo que valora
+#     `xi_upgrade_value`. Este fichero mide la aritmetica POR
+#     DEFECTO, asi que el interruptor se quita aqui. Lo que hace
+#     con el puesto lo mide `test_la_moneda_del_fichaje_v1`, que
+#     lo enciende y lo apaga ella.
+os.environ.pop("BORDALAS_LA_MONEDA_DE_LA_LIGA", None)
+
+
 TARIFA_REAL = 22_240
 
 
@@ -293,7 +307,16 @@ def test_el_caso_tenaglia() -> None:
     )
 
     assert resultado["points_delta"] == 103
-    assert resultado["fair_value"] == 103 * TARIFA_REAL
+
+    # CONTRA LA TARIFA QUE SE APLICO, no contra la que se paso.
+    # Son la misma mientras nadie cambie la moneda, y atarlo asi
+    # hace que esto siga midiendo lo que dice medir el dia que
+    # alguien la cambie (22/09/2026).
+    assert resultado["rate_per_point"] == TARIFA_REAL, (
+        f"la tarifa aplicada es {resultado['rate_per_point']} y "
+        f"se paso {TARIFA_REAL}: algo la ha cambiado"
+    )
+    assert resultado["fair_value"] == 103 * resultado["rate_per_point"]
     assert resultado["value"] > 3_250_000, (
         f"Tenaglia cuesta 3,25 M y aporta 103 puntos: sale a "
         f"19.126 EUR/punto neto, por debajo de la mediana de "
@@ -320,7 +343,15 @@ def test_un_fichaje_a_precio_de_mercado_no_aporta_nada() -> None:
         recovered_value=0,
     )
 
-    precio_de_mercado = 100 * TARIFA_REAL
+    # LA TARIFA QUE SE APLICO. "No se paga la tarifa entera" es
+    # una afirmacion sobre el MARGEN, y el margen se mide contra
+    # la tarifa con la que se ha valorado, no contra otra.
+    precio_de_mercado = 100 * caro["rate_per_point"]
+
+    assert caro["rate_per_point"] == TARIFA_REAL, (
+        f"la tarifa aplicada es {caro['rate_per_point']} y se "
+        f"paso {TARIFA_REAL}: algo la ha cambiado"
+    )
 
     assert caro["value"] < precio_de_mercado, (
         "Nunca se paga la tarifa entera: no quedaria ventaja."

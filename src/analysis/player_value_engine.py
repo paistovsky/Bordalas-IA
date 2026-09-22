@@ -1175,6 +1175,43 @@ def estimate_season_points(
 # ============================================================
 
 
+def _la_moneda_del_punto(tarifa_del_mercado) -> dict:
+    """
+    A que precio se paga un punto para quien se queda al jugador.
+
+    Se importa aqui dentro para no atar la cabecera de este
+    fichero a otro modulo. Si no se puede cargar, se queda la
+    tarifa del mercado —el comportamiento de antes del 22/09—,
+    porque una moneda que no se puede leer no puede cambiar un
+    precio.
+
+    Nunca lanza.
+    """
+
+    try:
+        from src.analysis.la_moneda_del_fichaje import (
+            tarifa_del_punto,
+        )
+
+        # Las dos vias que llaman aqui son de plantilla, asi que
+        # la pregunta "¿para que lo compro?" ya esta contestada.
+        return tarifa_del_punto(
+            tarifa_del_mercado,
+            route="XI_UPGRADE",
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "tarifa": tarifa_del_mercado,
+            "activa": False,
+            "moneda": "MERCADO",
+            "reason": (
+                f"No se pudo mirar la moneda: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def xi_upgrade_value(
     candidate_points: int,
     replaced_points: int,
@@ -1216,6 +1253,32 @@ def xi_upgrade_value(
             "SIN_TARIFA",
             "No se ha podido medir cuanto cuesta un punto.",
         )
+
+    # --------------------------------------------------------
+    # LA MONEDA (22/09/2026)
+    # --------------------------------------------------------
+    #
+    #     `tarifa` es la MEDIANA DE `price / pointsLastSeason` del
+    #     catalogo: lo que el MERCADO COBRA por un punto. Para
+    #     REVENDER es la correcta —se lo vendes al mercado—, pero
+    #     ESTA FUNCION NO VALORA REVENTAS: valora quedarselo. Sus
+    #     dos unicos llamadores son la via del once y la de ficha
+    #     vacia, las dos de plantilla.
+    #
+    #     Y a quien te quedas no te paga el mercado: te paga la
+    #     liga, a 30.000 EUR el punto, medido y cuadrado al euro
+    #     sobre 24 dias en `caja_de_la_liga`.
+    #
+    #     Con el 90 % de margen sobre la mediana del propio
+    #     mercado, el techo de un fichaje solo podia caer en la
+    #     mitad barata: que casi nadie pasara no era un hallazgo
+    #     sobre el mercado, era lo que la formula hacia.
+    #
+    #     APAGADO de fabrica: sin `BORDALAS_LA_MONEDA_DE_LA_LIGA`
+    #     la tarifa es la de siempre y no cambia ni un euro.
+    moneda = _la_moneda_del_punto(tarifa)
+
+    tarifa = safe_int(moneda.get("tarifa")) or tarifa
 
     # --------------------------------------------------------
     # SIN PRONOSTICO NO SE PUJA
@@ -1562,6 +1625,10 @@ def xi_upgrade_value(
         "fair_value": justo,
         "points_delta": delta,
         "rate_per_point": tarifa,
+
+        # En que moneda se ha pagado el punto, para que se vea en
+        # la foto sin recalcular nada (doctrina 87).
+        "moneda": moneda,
         "confidence": confidence,
         "recovered_value": safe_int(recovered_value),
 

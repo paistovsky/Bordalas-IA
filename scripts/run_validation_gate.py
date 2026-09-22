@@ -201,6 +201,10 @@ TESTS = [
     # de tres sea por VENTANA y no por vuelta.
     "src.analysis.test_el_corte_y_el_cupo_v1",
 
+    # Cada via cobra en su moneda: al que se queda le paga la
+    # liga a 30.000 el punto, no el mercado a 18.300. Apagado.
+    "src.analysis.test_la_moneda_del_fichaje_v1",
+
     # El que publica: que salga la cola de venta que ya esta
     # calculada, en su orden, y sin el once. Apagado.
     "src.analysis.test_el_que_publica_v1",

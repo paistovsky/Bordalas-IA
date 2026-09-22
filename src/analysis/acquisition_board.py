@@ -36,6 +36,10 @@ from src.analysis.deployment import (
 
 from src.analysis.bid_jitter import apply_bid_jitter
 from src.analysis.los_dos_techos import los_dos_techos
+from src.analysis.player_value_engine import (           # noqa: E402
+    SEASON_MATCHDAYS,
+    remaining_matchdays,
+)
 
 from src.analysis.hold_budget import hold_cap, hold_pocket
 
@@ -354,6 +358,63 @@ def _resumen_de_los_techos(filas) -> dict:
                 f"{type(error).__name__}: {error}"
             ),
         }
+
+
+# ============================================================
+# LOS PUNTOS DE MAS, POR JORNADA (22/09/2026)
+# ============================================================
+#
+#     `techo_del_que_se_queda` pide cuantos puntos DE MAS da el
+#     candidato en cada jornada. Ese numero ya lo calcula el
+#     motor: es `points_delta`, el mismo que multiplica por la
+#     tarifa del mercado para sacar el techo del comerciante.
+#
+#     Aqui solo se reparte entre las jornadas de la temporada. No
+#     es un numero nuevo: es el mismo delta, en la otra moneda.
+#
+#     LA VIA QUE SE TOMARIA, NO LA PRIMERA QUE CONTESTE: de las
+#     dos vias de fichaje se coge la que MAS VALE, que es la que
+#     `classify_operation` elige (`max(fichaje, key=value)`).
+#     Publicar el delta de la otra seria publicar el de una
+#     operacion que no se haria.
+#
+#     Si ninguna trae delta, `None`: sin delta no hay puntos de
+#     mas que valorar, y el techo lo dira (doctrina 103).
+
+
+def _puntos_de_mas_por_jornada(valoracion: dict | None):
+    """Los puntos de mas del candidato, por jornada. Nunca lanza."""
+
+    try:
+        candidatas = []
+
+        for via in ("as_xi", "as_roster_fill"):
+
+            suya = (valoracion or {}).get(via) or {}
+
+            delta = suya.get("points_delta")
+
+            if delta is None:
+                continue
+
+            try:
+                delta = float(delta)
+
+            except (TypeError, ValueError):
+                continue
+
+            if delta > 0:
+                candidatas.append(
+                    (safe_int(suya.get("value")), delta)
+                )
+
+        if not candidatas:
+            return None
+
+        return max(candidatas)[1] / SEASON_MATCHDAYS
+
+    except Exception:                               # noqa: BLE001
+        return None
 
 
 def build_acquisition_board(
@@ -1189,6 +1250,38 @@ def build_acquisition_board(
                 #
                 #     ESTO NO MUEVE NADA. Publica los dos para
                 #     que se vea cual se esta aplicando.
+                #     Y DESDE EL 22/09 SE LE DA DE COMER.
+                #
+                #     `techo_del_que_se_queda` salia
+                #     `available: False` en las 54 filas de la
+                #     foto del 18/09, siempre con el mismo motivo:
+                #     "sin los puntos de mas por jornada y las
+                #     jornadas que quedan no se calcula". Nadie se
+                #     los pasaba. El modulo que dice el numero
+                #     bueno existia, estaba medido y no se
+                #     calculaba nunca (doctrina 99).
+                #
+                #     LOS DOS SALEN DE DONDE YA VIVIAN:
+                #
+                #       las jornadas   `remaining_matchdays`, de
+                #                      `player_value_engine`, con
+                #                      la jornada que ya se lee
+                #                      arriba para la semilla del
+                #                      desvio.
+                #       los puntos     el delta que calcula el
+                #                      PROPIO motor —
+                #                      `points_delta`, el mismo
+                #                      que multiplica por la
+                #                      tarifa— repartido entre las
+                #                      38 de la temporada.
+                #
+                #     No hay un numero nuevo: es el mismo delta,
+                #     en la otra moneda.
+                #
+                #     Y SI NO SE SABE, NO SE INVENTA: sin jornada
+                #     o sin delta van `None` y el techo sigue
+                #     diciendo `available: False` con su motivo,
+                #     que es lo correcto (doctrina 103).
                 fila["los_dos_techos"] = los_dos_techos(
                     safe_int(ficha.get("price")),
                     prima_computer_percent=(
@@ -1199,6 +1292,14 @@ def build_acquisition_board(
                     ),
                     intent=valoracion.get("intent"),
                     tope_aplicado=safe_int(plan.get("bid")),
+                    puntos_de_mas_por_jornada=(
+                        _puntos_de_mas_por_jornada(valoracion)
+                    ),
+                    jornadas_que_quedan=(
+                        remaining_matchdays(jornada_para_el_desvio)
+                        if jornada_para_el_desvio
+                        else None
+                    ),
                 )
 
                 # Que techo se le aplico y de que bolsillo sale.
