@@ -195,6 +195,11 @@ TESTS = [
     # en el tablon de los ocho: no se compra para revender a
     # quien no consta que vaya a jugar. Apagada.
     "src.analysis.test_la_regla_de_compra_v1",
+
+    # El dia despues de las seis compras del 21/09: cerrar la
+    # reventa sin cerrar la compra para quedarse, y que el tope
+    # de tres sea por VENTANA y no por vuelta.
+    "src.analysis.test_el_corte_y_el_cupo_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",

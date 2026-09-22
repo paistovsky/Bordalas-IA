@@ -3371,10 +3371,16 @@ def bloque_de_la_subasta(
         "kill_switch": "BORDALAS_SIN_SUBASTA=1",
         "dropped_by_no_juega": 0,
         "play_rule_switch": "BORDALAS_REVENTA_SOLO_SI_JUEGA",
+        "dropped_by_reventa": 0,
+        "cupo_por_ventana": False,
+        "resale_switch": "BORDALAS_SIN_REVENTA",
         "reason": None,
     }
 
     try:
+        from src.analysis.el_corte_de_la_reventa import (
+            ENV as CORTE_ENV,
+        )
         from src.analysis.la_regla_de_compra import (
             ENV as REGLA_ENV,
         )
@@ -3442,6 +3448,23 @@ def bloque_de_la_subasta(
             ),
             "play_rule_switch": REGLA_ENV,
             "first_day_cap": MAX_PUJAS_PRIMER_DIA,
+
+            # EL CORTE Y EL CUPO, EN LA PANTALLA (22/09/2026)
+            #
+            #     Sin esto, "0 pujas" se leeria igual si no hay
+            #     mercado que si lo cerro un interruptor.
+            #
+            #     `ya_en_la_ventana` sale 0 AQUI a proposito:
+            #     esta llamada no trae el libro de pujas, asi que
+            #     el numero es "no se ha preguntado", no "van
+            #     cero" (doctrina 103). El del ciclo si lo trae.
+            "dropped_by_reventa": safe_int(
+                plan.get("dropped_by_reventa")
+            ),
+            "cupo_por_ventana": bool(
+                plan.get("cupo_por_ventana")
+            ),
+            "resale_switch": CORTE_ENV,
 
             # Cuanto falta para el cierre.
             "seconds_to_reset": ventana.get("seconds_to_reset"),

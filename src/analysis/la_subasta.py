@@ -1373,7 +1373,97 @@ def peor_caso(cesta: dict | None, plantilla: list | None) -> dict:
 #
 #         `BORDALAS_SIN_SUBASTA=1` y no se puja nada, en
 #         cualquier fase y con cualquier cesta.
+#
+#         Y APAGA ESTA FUNCION, NO EL SISTEMA (22/09/2026).
+#         Tiene UN solo lector -`_sin_subasta`, aqui abajo- y
+#         cierra `plan_del_reset`. El carril de la rendija y el
+#         tablero de fichajes siguen pujando: cada uno tiene el
+#         suyo. La frase "no se puja nada" es verdad de esta
+#         funcion y falsa del sistema. Ver
+#         `el_corte_de_la_reventa`.
 MAX_PUJAS_PRIMER_DIA = 3
+
+
+# ============================================================
+# EL TOPE, POR VENTANA Y NO POR VUELTA (22/09/2026)
+# ============================================================
+#
+#     `MAX_PUJAS_PRIMER_DIA` se aplica a CADA llamada, y en los
+#     135 minutos de la ventana entran DOS disparos -04:45 y
+#     04:50 de Madrid, con la cola de concurrencia detras-. Tres
+#     y tres son seis.
+#
+#     MEDIDO SOBRE `libro_de_la_ventana.jsonl`: n=19 vueltas con
+#     la ventana abierta, en 10 ventanas (12/09 a 21/09). NUEVE
+#     de las diez tuvieron dos vueltas dentro, y en TRES la suma
+#     paso de tres:
+#
+#         12/09   3 + 1 = 4
+#         15/09   1 + 3 = 4
+#         18/09   3 + 2 = 5
+#
+#     El 21/09 el libro solo tiene la primera vuelta -3 pujas-
+#     porque la segunda no llego a escribir; el libro de pujas
+#     tiene las SEIS compras de esa ventana, 2.566.406 EUR.
+#
+#     EL NUMERO NO ES NUEVO. El cupo sigue siendo 3; lo que
+#     cambia es contra que se cuenta: contra lo que YA hay
+#     puesto en esta ventana, que llega por `ya_pujados` y sale
+#     del libro de pujas. Ni un numero mas.
+#
+#     QUE SE CUENTA, DICHO ENTERO: `ya_pujados` trae TODAS
+#     nuestras pujas sin resolver de la ventana, vengan de la
+#     cesta o del carril. Es la misma lista que ya se usa para
+#     no repetir jugador, y no hay otra sin preguntarle al libro
+#     una segunda cosa. Cuenta de menos pujas, nunca de mas.
+#
+#     APAGADO de fabrica. Lo enciende el dueno en el YAML.
+CUPO_POR_VENTANA_ENV = "BORDALAS_CUPO_POR_VENTANA"
+
+
+def cupo_por_ventana() -> bool:
+    """Si el tope de pujas es por ventana. Nunca lanza."""
+
+    try:
+        import os
+
+        return str(
+            os.environ.get(CUPO_POR_VENTANA_ENV, "")
+        ).strip().lower() in {"1", "true", "si", "yes"}
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def separar_por_la_via(candidatos: list | None) -> dict:
+    """
+    El corte de la reventa, sobre los candidatos de la cesta.
+
+    Se importa aqui dentro como todo lo demas de este fichero: la
+    cabecera no abre nada. Si el corte no se puede cargar, pasan
+    todos -que es el comportamiento de antes del 22/09-, porque
+    un modulo que no importa no puede frenar una puja que el
+    resto del sistema ya aprobo.
+
+    Nunca lanza.
+    """
+
+    try:
+        from src.analysis.el_corte_de_la_reventa import separar
+
+        return separar(candidatos)
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "cerrada": False,
+            "siguen": list(candidatos or []),
+            "frenados": [],
+            "reason": (
+                f"No se pudo mirar el corte de la reventa: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
 
 
 DISABLE_ENV = "BORDALAS_SIN_SUBASTA"
@@ -1463,9 +1553,10 @@ def plan_del_reset(
         1. el interruptor
         2. el reloj de solvencia manda
         3. la ventana del reset
-        4. las fichas libres
-        5. el reparto -con la pelea contada- y sus barandillas
-        6. el tope del primer dia
+        4. el corte de la reventa, por la via del candidato
+        5. las fichas libres
+        6. el reparto -con la pelea contada- y sus barandillas
+        7. el tope del primer dia, por vuelta o por ventana
 
     Forma fija. Nunca lanza. `execute` sale False salvo que TODO
     este en orden Y `en_vivo`.
@@ -1483,6 +1574,9 @@ def plan_del_reset(
         "dropped_by_cap": 0,
         "dropped_by_club": 0,
         "dropped_by_no_juega": 0,
+        "dropped_by_reventa": 0,
+        "ya_en_la_ventana": 0,
+        "cupo_por_ventana": False,
         "all_won": 0,
         "worst_case": None,
         "blocked_by": None,
@@ -1567,22 +1661,39 @@ def plan_del_reset(
             and safe_int(c.get("id")) not in puestos
         ]
 
-        # LA REGLA DE COMPRA: ¿VA A JUGAR? (22/09/2026)
+        # DOS FILTROS EN FILA, Y NO SON EL MISMO (22/09/2026)
         #
-        #     Va ANTES del reparto a proposito: si se aplicara
-        #     despues, la cesta habria gastado presupuesto y
-        #     fichas en candidatos que luego se frenan, y
-        #     elegiria peor entre los que quedan.
+        #     Los dos nacieron el mismo dia, en dos ramas, y los
+        #     dos se ponen aqui. Se encadenan porque contestan
+        #     preguntas distintas:
         #
-        #     MEDIDO sobre los 115 viajes cerrados del tablon:
-        #     el beneficio de un viaje es el MOVIMIENTO DEL
-        #     MERCADO -+10.690.000 de los 13.072.324 de Pollo17-
-        #     y el mercado se mueve CERO para el que no juega.
-        #     De las seis filas en que se parten sus viajes, la
-        #     unica que pierde dinero es "habia partido y no
-        #     jugo": 33 % en verde, ROI mediano -2,03 %.
+        #         1. ¿VA A JUGAR?   `la_regla_de_compra`, sobre la
+        #            fila del tablero. Lo que no juega no mueve el
+        #            mercado, y el mercado es de donde sale el
+        #            beneficio de un viaje.
+        #         2. ¿ES REVENTA?   `el_corte_de_la_reventa`, sobre
+        #            la fila ya montada en modo cartera. Cierra la
+        #            reventa y deja pasar al que se compra para
+        #            quedarselo.
         #
-        #     APAGADA de fabrica. Ver `la_regla_de_compra`.
+        #     En este orden porque el primero mira al JUGADOR y el
+        #     segundo a la OPERACION: filtrar al jugador antes de
+        #     montarle la puja ahorra montarsela a quien no va a
+        #     pujar.
+        #
+        #     LOS DOS APAGADOS DE FABRICA. Con los dos
+        #     interruptores quitados, esto es la lista entera y el
+        #     comportamiento es el de antes del 22/09.
+
+        # 1. ¿VA A JUGAR?
+        #
+        #     MEDIDO sobre los 115 viajes cerrados del tablon: el
+        #     beneficio de un viaje es el MOVIMIENTO DEL MERCADO
+        #     -+10.690.000 de los 13.072.324 de Pollo17- y el
+        #     mercado se mueve CERO para el que no juega. De las
+        #     seis filas en que se parten sus viajes, la unica que
+        #     pierde dinero es "habia partido y no jugo": 33 % en
+        #     verde, ROI mediano -2,03 %.
         regla = mira_si_va_a_jugar_de_verdad(sin_repetir)
 
         frenados_por_la_regla = len(regla.get("frenados") or [])
@@ -1601,10 +1712,37 @@ def plan_del_reset(
 
         sin_repetir = elegibles
 
+        # 2. ¿ES REVENTA?
+        #
+        #     Mira LA VIA DEL CANDIDATO, no el camino: un
+        #     candidato que el tablero clasifico QUEDARSE sigue
+        #     pujando con el corte puesto. Hoy eso no cambia nada
+        #     -0 fichas libres, 0 candidatos QUEDARSE- y el dia que
+        #     se vendan los rellenos es la puerta que tiene que
+        #     seguir abierta.
+        en_cartera = candidatos_en_modo_cartera(
+            sin_repetir, prima_de_reventa
+        )
+
+        corte = separar_por_la_via(en_cartera)
+
+        frenados_por_reventa = len(corte.get("frenados") or [])
+
+        elegibles = corte.get("siguen") or []
+
+        if frenados_por_reventa and not elegibles:
+            return {
+                **vacio,
+                "available": True,
+                "window": ventana,
+                "dropped_by_no_juega": frenados_por_la_regla,
+                "dropped_by_reventa": frenados_por_reventa,
+                "blocked_by": "SIN_REVENTA",
+                "reason": corte.get("reason"),
+            }
+
         cesta = elegir_la_cesta(
-            candidatos_en_modo_cartera(
-                sin_repetir, prima_de_reventa
-            ),
+            elegibles,
             presupuesto=presupuesto,
             fichas_libres=fichas_libres,
             caja_libre=caja_libre,
@@ -1619,6 +1757,7 @@ def plan_del_reset(
                 "available": True,
                 "window": ventana,
                 "dropped_by_no_juega": frenados_por_la_regla,
+                "dropped_by_reventa": frenados_por_reventa,
                 "blocked_by": "SIN_CESTA",
                 "reason": cesta.get("reason"),
             }
@@ -1630,9 +1769,48 @@ def plan_del_reset(
         #     estaria eligiendo entre tres al azar.
         tope = max(0, safe_int(max_pujas))
 
+        # Y POR VENTANA, SI EL DUENO LO HA ENCENDIDO.
+        #
+        #     Lo que ya hay puesto en esta ventana llega por
+        #     `ya_pujados` -del libro de pujas- y ya se usa aqui
+        #     arriba para no repetir jugador. Contarlo es la
+        #     linea entera del cambio: ni un numero nuevo.
+        #
+        #     `ya_pujados` a `None` es "no se ha preguntado", no
+        #     "van cero" (doctrina 103). La pantalla llama asi, y
+        #     por eso el recuento se publica al lado del plan: si
+        #     sale 0 con la ventana abierta, es que quien
+        #     pregunto no traia el libro.
+        en_la_ventana = len(puestos)
+
+        por_ventana = cupo_por_ventana()
+
+        if por_ventana:
+            tope = max(0, tope - en_la_ventana)
+
         recortados = max(0, len(elegidos) - tope)
 
         elegidos = elegidos[:tope]
+
+        if por_ventana and not elegidos:
+            return {
+                **vacio,
+                "available": True,
+                "window": ventana,
+                "capped_at": tope,
+                "dropped_by_cap": recortados,
+                "dropped_by_reventa": frenados_por_reventa,
+                "ya_en_la_ventana": en_la_ventana,
+                "cupo_por_ventana": True,
+                "blocked_by": "CUPO_DE_LA_VENTANA",
+                "reason": (
+                    f"El cupo es de {safe_int(max_pujas)} por "
+                    f"VENTANA y ya hay {en_la_ventana} puja(s) "
+                    f"nuestra(s) en esta. No quedan huecos: "
+                    f"{recortados} se quedan fuera. "
+                    f"{ventana['reason']}"
+                ),
+            }
 
         # LA BARANDILLA SOBRE EL PEOR CASO: QUE SE GANEN TODAS
         #
@@ -1693,6 +1871,9 @@ def plan_del_reset(
                 "dropped_by_cap": recortados,
                 "dropped_by_club": fuera_por_club,
                 "dropped_by_no_juega": frenados_por_la_regla,
+                "dropped_by_reventa": frenados_por_reventa,
+                "ya_en_la_ventana": en_la_ventana,
+                "cupo_por_ventana": por_ventana,
                 "blocked_by": "PEOR_CASO",
                 "reason": (
                     f"Las {fuera_por_club} puja(s) que quedaban "
@@ -1738,6 +1919,9 @@ def plan_del_reset(
             "dropped_by_cap": recortados,
             "dropped_by_club": fuera_por_club,
             "dropped_by_no_juega": frenados_por_la_regla,
+            "dropped_by_reventa": frenados_por_reventa,
+            "ya_en_la_ventana": en_la_ventana,
+            "cupo_por_ventana": por_ventana,
             "blocked_by": None if en_vivo else "SIN_LIVE",
             "reason": (
                 f"{len(elegidos)} puja(s) por "
@@ -1831,6 +2015,38 @@ def lectura_del_estado(
         #        mismo son dos compromisos por una ficha.
         #
         #     3. Ni los NO_DISPONIBLE, que no se pueden comprar.
+        #
+        #     LOS CAMPOS QUE SE TIRABAN (22/09/2026)
+        #
+        #     Esta copia llevaba SEIS campos y dejaba atras
+        #     `hierarchy_value`, `starter_probability` y
+        #     `expected_points` -que la fila del tablero ya
+        #     trae-. El 21/09 la cesta compro cinco suplentes de
+        #     150.000-230.000 que el propio motor etiqueta "Es
+        #     Reserva en su equipo: no va a puntuar": no es que
+        #     los prefiriera, es que NO PODIA VERLOS. En modo
+        #     cartera todos rinden igual por euro, asi que
+        #     decidia el desempate -"gana el que consume menos
+        #     capacidad"-, que en el suelo significa comprar lo
+        #     peor del mercado. Doctrina 110.
+        #
+        #     Y con ellos van `intent` y `route`, que son lo que
+        #     el corte de la reventa mira para saber si un
+        #     candidato es para quedarselo. Sin ellos el corte
+        #     no puede distinguir, y separar la reventa de la
+        #     compra de plantilla seria imposible aqui.
+        #
+        #     LO QUE CUESTA, MEDIDO. La fila ya esta en memoria:
+        #     esto es copiar cinco claves mas de un dict. Sobre
+        #     la foto del 18/09, n=54 objetivos y 2.000
+        #     repeticiones: 0,014 ms con seis campos, 0,025 ms
+        #     con once. ONCE MICROSEGUNDOS por vuelta, contra
+        #     vueltas de 47 minutos. Ni red, ni disco, ni una
+        #     llamada mas.
+        #
+        #     NO DECIDE NADA TODAVIA. `candidatos_en_modo_cartera`
+        #     no los lee: viajan para que el corte los mire y
+        #     para que se vean en pantalla.
         lectura["candidatos"] = [
             {
                 "id": fila.get("id"),
@@ -1842,21 +2058,41 @@ def lectura_del_estado(
                     fila.get("market_gate") or {}
                 ).get("rate_percent_per_day"),
 
-                # ¿VA A JUGAR? (22/09/2026)
+                # ¿VA A JUGAR? Y ¿POR QUE VIA? (22/09/2026)
                 #
-                #     Estos tres los publica el tablero y esta
-                #     copia los tiraba. Son los que mira
-                #     `la_regla_de_compra`, y sin ellos la regla
-                #     no puede distinguir a un titular de un
-                #     suplente: los frenaria a los dos.
+                #     Estos cinco los publica el tablero y esta
+                #     copia los tiraba. Son los que miran los dos
+                #     filtros de `plan_del_reset`:
                 #
-                #     Cuesta copiar tres claves de un dict que ya
-                #     esta en memoria. Ni red, ni disco.
+                #         `la_regla_de_compra`     el pronostico y
+                #                                  la jerarquia
+                #         `el_corte_de_la_reventa` el intent y la
+                #                                  route
+                #
+                #     Sin ellos la regla no distingue a un titular
+                #     de un suplente y el corte no distingue una
+                #     reventa de un fichaje: los frenarian a
+                #     todos.
+                #
+                #     `expected_points` viaja para que se pueda
+                #     mirar en pantalla: no decide nada.
+                #
+                #     Cuesta copiar cinco claves de un dict que ya
+                #     esta en memoria. Medido sobre la foto del
+                #     18/09, n=54 objetivos y 2.000 repeticiones:
+                #     0,014 ms con seis campos, 0,025 ms con once.
+                #     Ni red, ni disco, ni una llamada mas.
                 "starter_probability": fila.get(
                     "starter_probability"
                 ),
                 "hierarchy_value": fila.get("hierarchy_value"),
                 "availability": fila.get("availability"),
+                "intent": fila.get("intent"),
+                "route": (
+                    fila.get("route")
+                    or (fila.get("deployment") or {}).get("route")
+                ),
+                "expected_points": fila.get("expected_points"),
             }
             for fila in (tablero.get("targets") or [])
             if isinstance(fila, dict)
