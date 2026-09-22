@@ -143,6 +143,12 @@ QUE_DECIDE_CADA_UNO = {
         "LO REPARTE con el interruptor APAGADO: "
         "`max(opciones, key=value)`, por euros."
     ),
+    "src/analysis/la_lista_de_la_noche.py": (
+        "NO DECIDE: mira el `intent` y la `route` de la via que "
+        "ganaria con la moneda de la liga puesta, solo para "
+        "decir si esa puja seria de PLANTILLA o de REVENTA. Es "
+        "una sombra: se publica en la foto y ninguna ruta la lee."
+    ),
     "src/analysis/rival_bid_model.py": (
         "DECIDE: el tope de prima, el liston del 3 % y el minimo "
         "de 25.000 EUR cuelgan de que la etiqueta sea SPECULATION."

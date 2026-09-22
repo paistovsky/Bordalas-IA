@@ -282,6 +282,22 @@ export function normalizeStatus(raw = {}) {
       available: false
     },
 
+    // LA LISTA DE LA NOCHE (22/09/2026)
+    //
+    //   Por quien y cuanto pujaria Pepe si la moneda de la liga
+    //   estuviera puesta -en produccion esta quitada-. De mayor
+    //   a menor puja, "porque es el que mas duele equivocarse".
+    //   La ventana del reset es a las 04:45, y a esa hora el
+    //   dueño esta dormido.
+    //
+    //   No decide nada y no escribe nada: es una sombra.
+    listaDeLaNoche: raw.lista_de_la_noche || {
+      available: false,
+      n: 0,
+      mirados: 0,
+      filas: []
+    },
+
     // La auditoria que el generador hace de si mismo. Si esto
     // dice que no cuadra, no se decide mirando la pantalla.
     consistency: raw.consistency || { available: false, ok: true, checks: [] },
