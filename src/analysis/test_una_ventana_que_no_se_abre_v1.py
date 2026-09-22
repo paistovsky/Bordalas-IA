@@ -334,12 +334,39 @@ def test_el_silencio_cubre_la_ventana_entera():
 # ============================================================
 
 def _candidatos():
+    """
+    Cuatro candidatos que la cesta pueda pujar de verdad.
+
+    UN CANDIDATO DE VERDAD, NO UN PRECIO CON NOMBRE (22/09/2026)
+
+        Llevaban cuatro campos, porque hasta hoy la cesta solo
+        miraba el precio. Desde `la_regla_de_compra` mira tambien
+        si el jugador va a jugar: con
+        `BORDALAS_REVENTA_SOLO_SI_JUEGA` puesto, uno sin
+        `starter_probability` no tiene pronostico, y sin
+        pronostico no se puja. El primer disparo dejaba de pujar
+        y `test_el_segundo_disparo_no_puja_dos_veces` se ponia
+        roja por su propia guarda —"el primer disparo no puja: la
+        guardia no prueba nada"—, que decia la verdad.
+
+        Se completa el caso, no se baja el liston: las filas del
+        tablero traen estos campos. Ninguna afirmacion cambia.
+
+        Y no vale apagar el interruptor: el `pop` de arriba
+        protege de UNO, por su nombre.
+    """
+
     return [
         {
             "id": i,
             "name": f"J{i}",
             "market_price": 100_000 + i * 1_000,
             "team_id": i,
+
+            # Titular y por encima de Rotacion: los dos cortes de
+            # la casa estan en 40.
+            "starter_probability": 80.0,
+            "hierarchy_value": 60,
         }
         for i in range(1, 5)
     ]
