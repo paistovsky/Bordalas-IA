@@ -57,10 +57,10 @@ jobs:
     #   delante el reset, la ventana y el dia entero.
     #
     #   75 es TEMPORAL. El 22/09, tras sacar la guardia cara de la
-    #   verja, una vuelta tarda 31 min:
-    #       verja       7m 27s
-    #       ciclo      17m 14s
-    #       dashboard   5m 46s
+    #   verja, una vuelta tarda 27 min:
+    #       verja       6m 24s
+    #       ciclo      15m 09s
+    #       dashboard   5m 04s
     #
     #   Los dos ultimos son el TAMANO DE LA PLANTILLA: `build_lineup`
     #   es el 94-95 % de los dos, y va 0,26 s con 15 fichas y 4,78 s
@@ -105,25 +105,6 @@ jobs:
       # cambia. Solo toca el marcador: no puede cambiar una compra ni una puja.
       BORDALAS_JORNADAS_POR_SU_FECHA: "1"
 
-      # APAGADO 21/09, PROVISIONAL — LA SUBASTA DEL RESET, CERRADA
-      #
-      #   Cierra `plan_del_reset`, cuyo unico modo es la cesta de reventa.
-      #   NO cierra el tablero de fichajes ni el carril: la puerta de fichar
-      #   nunca estuvo cerrada por este interruptor, aunque su mensaje diga
-      #   "no se puja nada" (la frase esta mal escrita).
-      #
-      #   Se encendio porque el 21/09 a las 07:07 la cesta compro SEIS
-      #   suplentes por 2.566.406 EUR: la caja de +2.410.033 a -156.373, la
-      #   plantilla de 15 a 21 fichas -> FICHAS LIBRES CERO, y la busqueda
-      #   del once x11,1. Al dia siguiente el reloj de solvencia tuvo que
-      #   vender a Oriol Rey, TITULAR, para tapar el agujero.
-      #
-      #   SE QUITA en cuanto la vuelta con REVENTA_SOLO_SI_JUEGA salga
-      #   limpia. El filtro va primero, la puerta se abre despues: al reves
-      #   tendriamos una vuelta con la subasta abierta y sin filtro, que es
-      #   exactamente lo que compro a Diaby.
-      BORDALAS_SIN_SUBASTA: "1"
-
       # Encendido 22/09. NO SE COMPRA PARA REVENDER A QUIEN NO CONSTA QUE
       # VAYA A JUGAR.
       #
@@ -145,6 +126,23 @@ jobs:
       #   Paso 0 hecho: verja 172/172 con el interruptor y sin el, y el
       #   paso 0 con los 22 puestos en verde. Ver `config/paso_0.json`.
       BORDALAS_REVENTA_SOLO_SI_JUEGA: "1"
+
+      # QUITADO 22/09 — BORDALAS_SIN_SUBASTA
+      #
+      #   Estuvo puesto desde la noche del 21/09 como apagado PROVISIONAL,
+      #   para que el reset de las 07:00 no comprase otros cinco suplentes
+      #   mientras no hubiera filtro. Ya hay filtro: el de arriba.
+      #
+      #   Se quita ahora y no despues por una razon de orden: hoy la caja
+      #   esta en -580.106 y `plan_del_reset` exige deficit cero, asi que la
+      #   subasta queda REABIERTA PERO DORMIDA. Se abre la puerta mientras
+      #   otro cerrojo la sujeta, en vez de abrirla el dia que ademas hay
+      #   dinero encima de la mesa.
+      #
+      #   Y para que conste, porque su mensaje enganaba: este interruptor
+      #   NO cerraba la puerta de fichar. Solo cerraba `plan_del_reset`,
+      #   cuyo unico modo es la cesta de reventa. El tablero de fichajes y
+      #   el carril siguieron pujando todo el tiempo.
 
     steps:
       - name: Checkout
