@@ -208,6 +208,10 @@ TESTS = [
     # La prioridad de pujar por el reloj: dentro de la ventana la
     # puja no pierde contra un tramite, fuera pierde. Apagada.
     "src.analysis.test_la_hora_de_pujar_v1",
+
+    # Que la vuelta se apunte entera —las candidatas que pierden y
+    # lo que costo en peticiones— para dejar de reconstruirla.
+    "src.analysis.test_la_vuelta_se_apunta_v1",
     "src.analysis.test_intel_v1",
     "src.analysis.test_calendario_v1",
     "src.analysis.test_cobrar_ofertas_v1",
