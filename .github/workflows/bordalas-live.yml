@@ -56,19 +56,15 @@ jobs:
     #   minutos significa que un cuelgue a las 02:00 se lleva por
     #   delante el reset, la ventana y el dia entero.
     #
-    #   75 es TEMPORAL. El 21/09 una vuelta tardaba 47-51 min:
-    #       verja      21m 52s   <- la guardia del entorno corre
-    #                                la verja entera otra vez
-    #       ciclo      18m 27s   <- 9m 06s solo de "analisis"
-    #       dashboard   6m 19s
+    #   75 es TEMPORAL. El 22/09, tras sacar la guardia cara de la
+    #   verja, una vuelta tarda 31 min:
+    #       verja       7m 27s
+    #       ciclo      17m 14s
+    #       dashboard   5m 46s
     #
-    #   Y la causa medida de los dos ultimos NO son los snapshots:
-    #   es el TAMANO DE LA PLANTILLA. `build_lineup` es el 94-95 %
-    #   del analisis y del panel, y va 0,26 s con 15 fichas, 4,78 s
-    #   con 21. Las seis compras del 21/09 lo multiplicaron x11.
-    #
-    #   Cuando la verja vuelva a ~10 min y la plantilla a 16,
-    #   ESTE NUMERO BAJA A 35.
+    #   Los dos ultimos son el TAMANO DE LA PLANTILLA: `build_lineup`
+    #   es el 94-95 % de los dos, y va 0,26 s con 15 fichas y 4,78 s
+    #   con 21. Cuando la plantilla vuelva a 16, ESTE NUMERO BAJA A 35.
     timeout-minutes: 75
 
     env:
@@ -92,9 +88,13 @@ jobs:
       #   ciclo NO LLEGO A CORRER. Doctrina 104.
       #
       #   ANTES DE ANADIR UNO AQUI, EL PASO 0:
-      #     correr la verja entera CON el interruptor puesto.
-      #     Si no da el mismo verde que sin el, NO SE ENCIENDE.
+      #     python scripts/run_validation_gate.py --paso-0
+      #   Si no da el mismo verde que sin el, NO SE ENCIENDE.
       #   Ver `src/analysis/el_protocolo_de_encendido.py`.
+      #
+      #   El 22/09 el paso 0 evito el segundo ciclo parado de la semana:
+      #   `BORDALAS_REVENTA_SOLO_SI_JUEGA` tumbaba dos guardias y se vio
+      #   ANTES de tocar este fichero.
 
       # Encendido 21/09. El marcador ordena las jornadas por la fecha real
       # del tablon, no por el numero de jornada del calendario: "Jornada 6" y
@@ -105,34 +105,46 @@ jobs:
       # cambia. Solo toca el marcador: no puede cambiar una compra ni una puja.
       BORDALAS_JORNADAS_POR_SU_FECHA: "1"
 
-      # APAGADO 21/09 — LA CESTA DE REVENTA SE CIERRA
+      # APAGADO 21/09, PROVISIONAL — LA SUBASTA DEL RESET, CERRADA
       #
-      #   Lo que gana, medido en mes y medio: +28.867 EUR, 8 de 8 en verde
-      #   en el suelo. UN PUNTO DE LA LIGA VALE 30.000 EUR: el negocio
-      #   entero de la cesta ha ganado menos que un punto.
+      #   Cierra `plan_del_reset`, cuyo unico modo es la cesta de reventa.
+      #   NO cierra el tablero de fichajes ni el carril: la puerta de fichar
+      #   nunca estuvo cerrada por este interruptor, aunque su mensaje diga
+      #   "no se puja nada" (la frase esta mal escrita).
       #
-      #   Lo que costo en UN SOLO DIA, el 21/09 a las 07:07:
-      #       6 compras por 2.566.406 EUR, todas SPECULATION/SUBASTA_CARTERA
-      #       la caja de +2.410.033 a -156.373
-      #       la plantilla de 15 a 21 fichas  ->  FICHAS LIBRES: CERO
-      #       la busqueda del once x11,1  ->  la vuelta de 4 a 47 minutos
-      #       carry a 10 dias: 28.245 EUR, el 60 % del margen esperado
+      #   Se encendio porque el 21/09 a las 07:07 la cesta compro SEIS
+      #   suplentes por 2.566.406 EUR: la caja de +2.410.033 a -156.373, la
+      #   plantilla de 15 a 21 fichas -> FICHAS LIBRES CERO, y la busqueda
+      #   del once x11,1. Al dia siguiente el reloj de solvencia tuvo que
+      #   vender a Oriol Rey, TITULAR, para tapar el agujero.
       #
-      #   Cinco de los seis son suplentes de 150.000-230.000 que el propio
-      #   motor etiqueta "Es Reserva en su equipo: no va a puntuar" — pero
-      #   la cesta NO PUEDE SABERLO: `lectura_del_estado` copia seis campos
-      #   y tira `hierarchy_value`, `starter_probability` y `expected_points`
-      #   una funcion antes. Y como en modo cartera todos rinden igual por
-      #   euro, decide el desempate —"gana el que consume menos capacidad"—
-      #   que en el suelo de 150.000 significa comprar lo peor del mercado
-      #   todos los dias. Doctrina 110.
-      #
-      #   NO SE VUELVE A ENCENDER hasta que la cesta vea la jerarquia del
-      #   candidato y el tope de tres sea por VENTANA y no por vuelta
-      #   (hoy caben dos vueltas en los 135 min: 3 + 3 = 6).
-      #
-      #   Paso 0 hecho: verja 171/171, exit 0, con este interruptor puesto.
+      #   SE QUITA en cuanto la vuelta con REVENTA_SOLO_SI_JUEGA salga
+      #   limpia. El filtro va primero, la puerta se abre despues: al reves
+      #   tendriamos una vuelta con la subasta abierta y sin filtro, que es
+      #   exactamente lo que compro a Diaby.
       BORDALAS_SIN_SUBASTA: "1"
+
+      # Encendido 22/09. NO SE COMPRA PARA REVENDER A QUIEN NO CONSTA QUE
+      # VAYA A JUGAR.
+      #
+      #   No inventa umbral: llama a `roster_fill_veto`, que ya contestaba
+      #   esa pregunta para la via de plantilla y a la reventa nunca se le
+      #   aplico (doctrina 84). Su corte del 40 % tiene medicion: acierta el
+      #   81 %, n=114.
+      #
+      #   POR QUE, medido sobre los 91 viajes cerrados de Pollo17 y Luismi:
+      #       puntuo 2-4 pts/partido   n=25   100 % en verde   ROI + 4,67 %
+      #       puntuo 4-6 pts/partido   n=12   100 % en verde   ROI +12,56 %
+      #       HABIA PARTIDO Y NO JUGO  n= 6    33 % en verde   ROI - 2,03 %
+      #                                       el mercado se movio +0,00 %
+      #
+      #   Contrafactual sobre nuestra temporada: para 12 de nuestros 24
+      #   viajes, que perdieron 475.115 EUR. El resultado pasa de +92.375 a
+      #   +567.490. Y para las seis compras del 21/09 (2.566.406 EUR).
+      #
+      #   Paso 0 hecho: verja 172/172 con el interruptor y sin el, y el
+      #   paso 0 con los 22 puestos en verde. Ver `config/paso_0.json`.
+      BORDALAS_REVENTA_SOLO_SI_JUEGA: "1"
 
     steps:
       - name: Checkout
