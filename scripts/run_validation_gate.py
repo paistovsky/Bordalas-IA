@@ -487,6 +487,10 @@ TESTS = [
     # La sombra de la puja: a quien pujaria Pepe con los candados
     # levantados, sin una sola escritura.
     "src.analysis.test_la_sombra_de_la_puja_v1",
+
+    # El libro de aciertos de la valoracion y la foto de cada
+    # jornada: sin ellos no se toca ninguna formula de valoracion.
+    "src.analysis.test_el_libro_de_la_valoracion_v1",
 ]
 
 

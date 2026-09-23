@@ -5220,6 +5220,52 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # EL LIBRO DE ACIERTOS DE LA VALORACION Y LA FOTO DE CADA
+    # JORNADA (23/09/2026)
+    #
+    #     57 pujas, 51 ganadas: un 89,5 %. Sin un libro que diga que
+    #     valor le dimos a cada jugador y que paso a 7 y a 14 dias no
+    #     se puede saber cuanto se paga de mas. Y sin la foto de cada
+    #     jornada, lo que no se rellene a tiempo no se reconstruye.
+    #
+    #     La misma regla que el escaparate: SOLO con la foto de este
+    #     dia de mercado. La verja pasa por aqui con la del 13/09.
+    #
+    #     CERO PETICIONES NUEVAS: el tablero, el catalogo y el
+    #     calendario ya estan en memoria o en disco.
+    try:
+        from src.analysis.matchday_calendar_engine import (
+            load_calendar_cache,
+        )
+        from src.intelligence.libro_de_la_valoracion import (
+            apuntar_la_foto_de_la_jornada,
+            apuntar_la_valoracion,
+        )
+
+        _foto_at = _momento_de_la_foto(snapshot)
+
+        libro_valoracion = {
+            "valoracion": apuntar_la_valoracion(
+                (acquisition or {}).get("targets"),
+                _del_catalogo,
+                foto_at=_foto_at,
+            ),
+            "foto_de_la_jornada": apuntar_la_foto_de_la_jornada(
+                _del_catalogo,
+                (load_calendar_cache() or {}).get("matchdays"),
+                foto_at=_foto_at,
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        libro_valoracion = {
+            "available": False,
+            "reason": (
+                f"No se pudo apuntar el libro de la valoracion: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     try:
         from src.analysis.solvency_clock import build_solvency_clock
 
@@ -6393,6 +6439,7 @@ def build_dashboard_state() -> dict:
         # que dentro de un mes contesta si nos mejoraba alguno de
         # los que dejamos pasar. Observador puro.
         "libro_del_escaparate": libro_escaparate,
+        "libro_de_la_valoracion": libro_valoracion,
 
         # EL LIBRO EN LA SOMBRA. Lo que se compraria con la
         # compuerta de ritmo apagada del todo. SIN DINERO:

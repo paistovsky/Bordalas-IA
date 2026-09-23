@@ -134,6 +134,10 @@ INTENTS = (XI_UPGRADE, SPECULATION)
 #     Ahora, si un fichero nuevo empieza a nombrarlo y nadie
 #     escribe aqui que decide, la verja se pone roja.
 QUE_DECIDE_CADA_UNO = {
+    "src/intelligence/libro_de_la_valoracion.py": (
+        "NO DECIDE: apunta el `intent` de cada fila del tablero en el "
+        "libro de aciertos de la valoracion (23/09/2026)."
+    ),
     "src/analysis/la_sombra_de_la_puja.py": (
         "NO DECIDE: copia el `intent` de cada puja de la sombra a "
         "la pantalla. Publica, no puja (23/09/2026)."
