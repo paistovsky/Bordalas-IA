@@ -484,6 +484,23 @@ TESTS = [
     "src.analysis.test_el_suelo_sigue_a_su_escalera_v1",
 
     "src.analysis.test_doctrina_v1",
+
+    # El plazo de la solvencia sale del calendario, con su fecha,
+    # o dice "no lo se". El 23/09 frenaba "el viernes" con la
+    # jornada a 16 dias.
+    "src.analysis.test_el_plazo_sale_del_calendario_v1",
+
+    # El que vuelve de lesion no es un malo: la marca de «su pasado
+    # se queda corto», con sus dos frenos, y la lista del dia.
+    "src.analysis.test_el_que_va_a_despegar_v1",
+
+    # La sombra de la puja: a quien pujaria Pepe con los candados
+    # levantados, sin una sola escritura.
+    "src.analysis.test_la_sombra_de_la_puja_v1",
+
+    # El libro de aciertos de la valoracion y la foto de cada
+    # jornada: sin ellos no se toca ninguna formula de valoracion.
+    "src.analysis.test_el_libro_de_la_valoracion_v1",
 ]
 
 

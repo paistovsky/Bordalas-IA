@@ -68,8 +68,18 @@ POSICIONES = {1: "POR", 2: "DEF", 3: "MED", 4: "DEL"}
 #     ordena es cuanto nos añade por cada millon que cuesta:
 #
 #         calidad_precio = nos_suma / (precio / 1.000.000)
+#
+#     «VA A DESPEGAR» (23/09/2026)
+#
+#         El que su pasado se queda corto -vuelve de lesion, llego
+#         tarde, viene de Segunda o la prensa dice que sube- y aun
+#         asi bate a su vara POR PARTIDO. Antes caia en «sin
+#         interés» porque `nos_suma` resta totales y le cobra los
+#         partidos que no jugo. `nos_suma` no cambia: la etiqueta
+#         dice la señal que va encima. Ver `el_que_va_a_despegar`.
 ETIQUETAS = (
     "nos mejora",
+    "va a despegar",
     "chollo · muchos puntos por euro",
     "sin interés",
     "no disponible",
@@ -78,10 +88,11 @@ ETIQUETAS = (
 
 ESCALON = {
     "nos mejora": 0,
-    "chollo · muchos puntos por euro": 1,
-    "sin interés": 2,
-    "no disponible": 3,
-    "ya es nuestro": 4,
+    "va a despegar": 1,
+    "chollo · muchos puntos por euro": 2,
+    "sin interés": 3,
+    "no disponible": 4,
+    "ya es nuestro": 5,
 }
 
 
@@ -137,6 +148,19 @@ def la_vara(once: list | None, catalogo: dict | None) -> dict:
                         jugador.get("name") or ficha.get("name")
                     ),
                     "points": puntos,
+
+                    # SUS PARTIDOS (23/09/2026). Para la tasa por
+                    # partido de la vara: un total no es una tasa.
+                    "played": safe_int(
+                        ficha.get("playedHome")
+                        if ficha
+                        else jugador.get("playedHome")
+                    )
+                    + safe_int(
+                        ficha.get("playedAway")
+                        if ficha
+                        else jugador.get("playedAway")
+                    ),
                 }
 
         return vara
@@ -322,6 +346,12 @@ def _etiqueta(fila) -> str:
     if (fila.get("nos_suma") or 0) > 0:
         return "nos mejora"
 
+    # La señal, encima de `nos_suma`: la marca ya trae sus frenos
+    # -partidos minimos y disponibilidad-, asi que aqui no se
+    # repiten.
+    if fila.get("va_a_despegar"):
+        return "va a despegar"
+
     if (
         fila.get("puntos_por_millon") is not None
         and fila["puntos_por_millon"]
@@ -340,6 +370,10 @@ def toda_la_liga(
     managers: list | None,
     en_el_mercado: set | None = None,
     nuestro_id=None,
+
+    # LAS NOTICIAS DEL INFORME DE PRENSA (23/09/2026). Solo para la
+    # clase 4 de la señal: la que dice que alguien sube.
+    prensa: list | None = None,
 ) -> dict:
     """
     Los 570, con su etiqueta y lo que nos sumarian. Forma fija.
@@ -411,6 +445,17 @@ def toda_la_liga(
         plantillas = _las_ocho_plantillas(
             catalogo, nuestros, managers, nuestro_id
         )
+
+        # LA SEÑAL DEL QUE VA A DESPEGAR (23/09/2026)
+        from src.analysis.el_que_va_a_despegar import (
+            la_senal,
+            partidos_del_equipo,
+            prensa_que_sube,
+        )
+
+        del_equipo = partidos_del_equipo(catalogo)
+
+        suben = prensa_que_sube(prensa)
 
         filas = []
 
@@ -484,6 +529,18 @@ def toda_la_liga(
                 and fila["nos_suma"] > 0
                 and precio > 0
                 else None
+            )
+
+            # LA SEÑAL, ENCIMA. `nos_suma` no se toca: al lado van
+            # la tasa por partido, la de la vara y la marca.
+            fila.update(
+                la_senal(
+                    fila,
+                    ficha,
+                    referencia,
+                    del_equipo.get(ficha.get("teamID")),
+                    suben.get(safe_int(pid)),
+                )
             )
 
             fila["etiqueta"] = _etiqueta(fila)

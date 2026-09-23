@@ -70,6 +70,8 @@ data/
 !/data/intelligence/scout_accuracy_ledger.json
 !/data/intelligence/source_accuracy_ledger.json
 !/data/intelligence/rejection_ledger.json
+!/data/intelligence/libro_de_la_valoracion.jsonl
+!/data/intelligence/puntos_por_jornada.jsonl
 
 !/data/rival_intelligence/
 /data/rival_intelligence/*

@@ -65,6 +65,11 @@ LECTOR = RAIZ / "dashboard-v8" / "src" / "lib" / "status.js"
 #     Si añades una aqui, escribe POR QUE. El dia que alguien
 #     borre el motivo, esta lista vuelve a ser un cajon.
 NO_SE_PINTAN = {
+    # El libro de aciertos de la valoracion y la foto de cada
+    # jornada (23/09/2026). Es un cuaderno: lo que se publica es si
+    # se escribio y por que, para mirarlo en el JSON.
+    "libro_de_la_valoracion": "cuaderno; se mira en el JSON",
+
     # El estado del jugador franquicia. Hoy sale NO_FRANCHISE y
     # no hay ningun cuadro que lo enseñe; se publica para poder
     # mirarlo en el JSON cuando se active.

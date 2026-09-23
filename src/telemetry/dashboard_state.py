@@ -3404,9 +3404,26 @@ def bloque_de_la_subasta(
 
         ventana = plan.get("window") or {}
 
+        # LA SOMBRA DE LA PUJA (23/09/2026)
+        #
+        #     «Hay que ver lo que haria Pepe, porque no me fio.» A
+        #     quien pujaria y cuanto, aunque el interruptor, la
+        #     solvencia o la ventana lo impidan, con el candado que
+        #     le queda. La misma cuenta que puja, con `en_vivo` a
+        #     False: ni una escritura.
+        from src.analysis.la_sombra_de_la_puja import (
+            la_sombra_de_la_puja,
+        )
+        from src.analysis.la_subasta import lectura_del_estado
+
+        sombra_de_la_puja = la_sombra_de_la_puja(
+            lectura_del_estado(state, snapshot)
+        )
+
         return {
             "available": bool(plan.get("available")),
             "would_bid": bool(plan.get("execute")),
+            "sombra": sombra_de_la_puja,
             "bids": [
                 {
                     "id": b.get("id"),
@@ -3637,6 +3654,23 @@ def _con_los_vigilados(acquisition, vestuario) -> dict:
 
     except Exception:                               # noqa: BLE001
         return acquisition
+
+
+def _noticias_de_la_prensa() -> list:
+    """Las noticias del informe de prensa en disco. Nunca lanza."""
+
+    try:
+        from src.intelligence.scout.press import (
+            build_press_block,
+            load_press_report,
+        )
+
+        return build_press_block(load_press_report()).get(
+            "items"
+        ) or []
+
+    except Exception:                               # noqa: BLE001
+        return []
 
 
 def build_dashboard_state() -> dict:
@@ -4159,6 +4193,11 @@ def build_dashboard_state() -> dict:
             ],
             en_el_mercado=_en_el_mercado,
             nuestro_id=board.get("current_user_id"),
+
+            # LA PRENSA, PARA LA SEÑAL DEL QUE VA A DESPEGAR
+            # (23/09/2026). Del disco, como el bloque `press` de
+            # mas abajo: la telemetria nunca raspa.
+            prensa=_noticias_de_la_prensa(),
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -4218,6 +4257,25 @@ def build_dashboard_state() -> dict:
             # que no podemos pagar puede ser justo a quien hay
             # que vender algo para llegar.
             caja_de_fichar=presupuesto_fichajes,
+        )
+
+        # LA LISTA DEL DIA (23/09/2026)
+        #
+        #     El panel de libres decia `en_el_mercado_hoy: 0` con
+        #     veinte en el mercado: la lista del ojeador y el
+        #     mercado del dia no se hablaban. Aqui se cruzan: los
+        #     que se pueden fichar HOY, con su marca y lo que
+        #     pujaria Pepe por cada uno, copiado del tablero.
+        #
+        #     ESTO TAMPOCO PUJA.
+        from src.analysis.el_que_va_a_despegar import (
+            la_lista_del_dia,
+        )
+
+        _el_vestuario["lista_del_dia"] = la_lista_del_dia(
+            _toda_la_liga,
+            _en_el_mercado,
+            (acquisition or {}).get("targets"),
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -5162,6 +5220,52 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # EL LIBRO DE ACIERTOS DE LA VALORACION Y LA FOTO DE CADA
+    # JORNADA (23/09/2026)
+    #
+    #     57 pujas, 51 ganadas: un 89,5 %. Sin un libro que diga que
+    #     valor le dimos a cada jugador y que paso a 7 y a 14 dias no
+    #     se puede saber cuanto se paga de mas. Y sin la foto de cada
+    #     jornada, lo que no se rellene a tiempo no se reconstruye.
+    #
+    #     La misma regla que el escaparate: SOLO con la foto de este
+    #     dia de mercado. La verja pasa por aqui con la del 13/09.
+    #
+    #     CERO PETICIONES NUEVAS: el tablero, el catalogo y el
+    #     calendario ya estan en memoria o en disco.
+    try:
+        from src.analysis.matchday_calendar_engine import (
+            load_calendar_cache,
+        )
+        from src.intelligence.libro_de_la_valoracion import (
+            apuntar_la_foto_de_la_jornada,
+            apuntar_la_valoracion,
+        )
+
+        _foto_at = _momento_de_la_foto(snapshot)
+
+        libro_valoracion = {
+            "valoracion": apuntar_la_valoracion(
+                (acquisition or {}).get("targets"),
+                _del_catalogo,
+                foto_at=_foto_at,
+            ),
+            "foto_de_la_jornada": apuntar_la_foto_de_la_jornada(
+                _del_catalogo,
+                (load_calendar_cache() or {}).get("matchdays"),
+                foto_at=_foto_at,
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        libro_valoracion = {
+            "available": False,
+            "reason": (
+                f"No se pudo apuntar el libro de la valoracion: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     try:
         from src.analysis.solvency_clock import build_solvency_clock
 
@@ -5173,6 +5277,15 @@ def build_dashboard_state() -> dict:
             sale_order=sale_order,
             committed_bids=pujas_del_dueno.get("committed"),
             starters=titulares_ahora,
+
+            # El cierre del calendario, del que salen las horas:
+            # con el, el plazo se publica con su fecha.
+            first_kickoff=(state.get("deadline") or {}).get(
+                "first_kickoff"
+            ),
+            real_deadline=(state.get("deadline") or {}).get(
+                "real_deadline"
+            ),
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -6368,6 +6481,7 @@ def build_dashboard_state() -> dict:
         # que dentro de un mes contesta si nos mejoraba alguno de
         # los que dejamos pasar. Observador puro.
         "libro_del_escaparate": libro_escaparate,
+        "libro_de_la_valoracion": libro_valoracion,
 
         # EL LIBRO EN LA SOMBRA. Lo que se compraria con la
         # compuerta de ritmo apagada del todo. SIN DINERO:

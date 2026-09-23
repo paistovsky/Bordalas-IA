@@ -67,6 +67,31 @@ from pathlib import Path
 #     `.gitignore`.
 LIBROS = (
     {
+        "ruta": "data/intelligence/libro_de_la_valoracion.jsonl",
+        "que_es": (
+            "Una linea por jugador del tablero y dia de mercado: "
+            "el valor que le dimos, el precio, lo que pujariamos, "
+            "y a 7 y a 14 dias su precio, puntos y partidos."
+        ),
+        "por_que_no_se_reconstruye": (
+            "El valor que le dio el motor un dia concreto no esta en "
+            "ninguna parte: se recalcula cada vuelta y se pisa. Sin "
+            "el no se puede saber si ganar el 89,5 % de las subastas "
+            "es punteria o pagar de mas."
+        ),
+    },
+    {
+        "ruta": "data/intelligence/puntos_por_jornada.jsonl",
+        "que_es": (
+            "Los puntos, partidos y precio de todo el catalogo al "
+            "cerrar cada jornada."
+        ),
+        "por_que_no_se_reconstruye": (
+            "El catalogo publica los totales de HOY. Los de la "
+            "jornada pasada desaparecen al jugarse la siguiente."
+        ),
+    },
+    {
         "ruta": "data/intelligence/marcador.json",
         "que_es": (
             "El marcador de la temporada: una entrada por "
