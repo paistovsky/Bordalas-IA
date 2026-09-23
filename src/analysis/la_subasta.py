@@ -101,9 +101,10 @@ VENTANA_MINUTOS = 135
 #
 #     La unica forma real de hacernos daño con esto es tener
 #     varias posiciones en rojo a la vez con una fecha limite
-#     encima: el viernes hay que estar en positivo.
+#     encima: en positivo al plazo del calendario (T-6 h del
+#     cierre de la jornada; ver `el_freno_de_la_solvencia`).
 #
-#     Asi que el tope es lo que se pueda DESHACER el viernes
+#     Asi que el tope es lo que se pueda DESHACER en el plazo
 #     aunque el mercado haya caido un 5 %.
 #
 #     LA CUENTA
@@ -1366,8 +1367,8 @@ def peor_caso(cesta: dict | None, plantilla: list | None) -> dict:
 #     LO QUE MANDA POR ENCIMA DE TODO
 #
 #         El reloj de solvencia. Si hay deficit o el plazo
-#         aprieta, no se puja: el viernes hay que estar en
-#         positivo, y una puja ganada es dinero que sale.
+#         aprieta, no se puja: al plazo del calendario hay que
+#         estar en positivo, y una puja ganada es dinero que sale.
 #
 #     EL INTERRUPTOR
 #
@@ -1472,6 +1473,182 @@ DISABLE_ENV = "BORDALAS_SIN_SUBASTA"
 # Estados del reloj de solvencia en los que SI se puede pujar.
 # Cualquier otro -y cualquier deficit- cierra la ventana.
 SOLVENCIA_QUE_DEJA_PUJAR = frozenset({"SIN_DEUDA", "CUBIERTO"})
+
+
+# ============================================================
+# EL DEFICIT, CONTRA EL PLAZO DEL CALENDARIO (23/09/2026)
+# ============================================================
+#
+#     LO QUE HABIA
+#
+#         Cualquier deficit cerraba la subasta, diciendo "el
+#         viernes hay que estar en positivo". La frase estaba
+#         escrita a mano y la regla no miraba ninguna fecha: el
+#         23/09 frenaba con 1.525.782 EUR de deficit, 19.096.400
+#         EUR en ofertas vivas que lo tapan, y el calendario
+#         diciendo que el plazo es el 09/10 -390 h despues-.
+#
+#     LO QUE HAY
+#
+#         El motivo dice el plazo del calendario, con su fecha, o
+#         "no lo se" si el calendario no la trae. Eso es siempre.
+#
+#         Y con `BORDALAS_SOLVENCIA_POR_SU_PLAZO=1`, el deficit
+#         deja de cerrar por si solo LEJOS DEL PLAZO: la regla del
+#         dueño es "en positivo 6 horas antes", no "en positivo
+#         siempre". Sigue cerrando si:
+#
+#             - el calendario no trae la fecha. Un plazo que no se
+#               conoce puede ser mañana, y con deuda no se puja a
+#               ciegas: dejar de pujar un dia es barato, lo caro
+#               es lo contrario;
+#             - queda menos de un ciclo del Computer
+#               (`COMPUTER_CYCLE_HOURS`, medido) hasta el plazo:
+#               ya no da tiempo a que oferte por lo que se
+#               publique. Es el mismo borde con el que el reloj
+#               pasa de PUBLICAR a CRITICO: no es un numero nuevo;
+#             - el estado del reloj no es uno que el reloj emita
+#               con deficit lejos del plazo.
+#
+#         El dinero lo sigue guardando el tope de la ventana
+#         (caja libre / caida), que no se toca: con la caja a
+#         cero, el tope es cero y no se puja igual.
+#
+#     NACE APAGADO. Encenderlo es del dueño, con su paso 0.
+SOLVENCIA_POR_SU_PLAZO_ENV = "BORDALAS_SOLVENCIA_POR_SU_PLAZO"
+
+# Los estados que el reloj emite CON deficit y LEJOS del plazo.
+# CRITICO y EN_EL_PLAZO no estan: solo salen cerca o sin plazo.
+DEFICIT_QUE_ESPERA_A_SU_PLAZO = frozenset(
+    {
+        "DEUDA_CONTINGENTE",
+        "CUBIERTO",
+        "CUBIERTO_PERO_CADUCA",
+        "PUBLICAR",
+    }
+)
+
+
+def _solvencia_por_su_plazo() -> bool:
+    import os
+
+    return str(
+        os.environ.get(SOLVENCIA_POR_SU_PLAZO_ENV, "")
+    ).strip().lower() in {"1", "true", "si", "yes"}
+
+
+def el_freno_de_la_solvencia(reloj: dict | None) -> dict:
+    """
+    Si el reloj de solvencia cierra la subasta, y por que.
+
+    Devuelve `frena` y un motivo que nombra el plazo del
+    calendario -con su fecha- o dice que no lo sabe. Nunca
+    habla de dias de la semana.
+
+    Nunca lanza.
+    """
+
+    try:
+        from src.analysis.solvency_clock import (
+            COMPUTER_CYCLE_HOURS,
+            el_plazo_en_palabras,
+        )
+
+        reloj = reloj or {}
+
+        estado = str(reloj.get("state") or "")
+
+        deficit = safe_int(reloj.get("deficit"))
+
+        plazo = reloj.get("solvency_deadline")
+
+        if not isinstance(plazo, dict):
+            plazo = el_plazo_en_palabras(
+                reloj.get("real_deadline"),
+                reloj.get("hours_to_solvency_deadline"),
+            )
+
+        horas = reloj.get("hours_to_solvency_deadline")
+
+        horas = None if horas is None else safe_float(horas)
+
+        cabecera = (
+            f"El reloj de solvencia dice «{estado or '?'}»"
+            + (
+                f" con {_euros(deficit)} EUR de deficit"
+                if deficit > 0
+                else ""
+            )
+            + "."
+        )
+
+        if estado in SOLVENCIA_QUE_DEJA_PUJAR and deficit <= 0:
+            return {
+                "frena": False,
+                "plazo": plazo,
+                "por_su_plazo": False,
+                "reason": None,
+            }
+
+        if not plazo.get("known") or horas is None:
+            return {
+                "frena": True,
+                "plazo": plazo,
+                "por_su_plazo": False,
+                "reason": (
+                    f"{cabecera} No se puja: {plazo['text']} Con "
+                    f"deficit y sin plazo conocido no se puja a "
+                    f"ciegas."
+                ),
+            }
+
+        lejos = bool(
+            deficit > 0
+            and estado in DEFICIT_QUE_ESPERA_A_SU_PLAZO
+            and horas > COMPUTER_CYCLE_HOURS
+        )
+
+        if lejos and _solvencia_por_su_plazo():
+            return {
+                "frena": False,
+                "plazo": plazo,
+                "por_su_plazo": True,
+                "reason": (
+                    f"{cabecera} No frena: {plazo['text']}, y el "
+                    f"deficit solo cierra a menos de "
+                    f"{COMPUTER_CYCLE_HOURS:.0f} h del plazo "
+                    f"({SOLVENCIA_POR_SU_PLAZO_ENV})."
+                ),
+            }
+
+        if lejos:
+            cola = (
+                f" Hay tiempo, pero la regla de hoy cierra con "
+                f"cualquier deficit; {SOLVENCIA_POR_SU_PLAZO_ENV} "
+                f"la haria esperar al plazo."
+            )
+        else:
+            cola = ""
+
+        return {
+            "frena": True,
+            "plazo": plazo,
+            "por_su_plazo": False,
+            "reason": (
+                f"{cabecera} No se puja: {plazo['text']}.{cola}"
+            ),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "frena": True,
+            "plazo": None,
+            "por_su_plazo": False,
+            "reason": (
+                f"No se pudo mirar el reloj de solvencia: "
+                f"{type(error).__name__}: {error}. No se puja."
+            ),
+        }
 
 
 def _sin_subasta() -> bool:
@@ -1596,30 +1773,22 @@ def plan_del_reset(
 
         # EL RELOJ DE SOLVENCIA, ANTES QUE LA VENTANA
         #
-        #     Va primero a proposito. Si el viernes no llegamos
-        #     en positivo, da igual lo buena que sea la cesta:
-        #     una puja ganada es dinero que sale.
-        reloj = solvency_clock or {}
+        #     Va primero a proposito. Si no llegamos en positivo
+        #     al plazo, da igual lo buena que sea la cesta: una
+        #     puja ganada es dinero que sale.
+        #
+        #     EL PLAZO ES EL DEL CALENDARIO (23/09/2026). Aqui
+        #     decia "el viernes", escrito a mano. Ver
+        #     `el_freno_de_la_solvencia`.
+        freno = el_freno_de_la_solvencia(solvency_clock)
 
-        estado = str(reloj.get("state") or "")
-
-        deficit = safe_int(reloj.get("deficit"))
-
-        if estado not in SOLVENCIA_QUE_DEJA_PUJAR or deficit > 0:
+        if freno["frena"]:
             return {
                 **vacio,
                 "available": True,
                 "blocked_by": "SOLVENCIA",
-                "reason": (
-                    f"El reloj de solvencia dice «{estado or '?'}»"
-                    + (
-                        f" con {_euros(deficit)} EUR de deficit"
-                        if deficit > 0
-                        else ""
-                    )
-                    + ". No se puja: el viernes hay que estar en "
-                    "positivo."
-                ),
+                "solvency_deadline": freno["plazo"],
+                "reason": freno["reason"],
             }
 
         # EL BLOQUEO TEMPORAL DE LA CASA

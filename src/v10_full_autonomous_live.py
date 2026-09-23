@@ -342,6 +342,15 @@ def _estado_publicado(cycle: dict | None) -> dict:
             estado.get("balance"),
             estado.get("hours_to_deadline"),
             market_clock=publicado["market_clock"],
+
+            # El cierre del calendario, del que salen las horas:
+            # con el, el plazo se publica con su fecha.
+            first_kickoff=(estado.get("deadline") or {}).get(
+                "first_kickoff"
+            ),
+            real_deadline=(estado.get("deadline") or {}).get(
+                "real_deadline"
+            ),
         )
 
         inteligencia = load_rival_intelligence(snapshot)

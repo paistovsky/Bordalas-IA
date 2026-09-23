@@ -5173,6 +5173,15 @@ def build_dashboard_state() -> dict:
             sale_order=sale_order,
             committed_bids=pujas_del_dueno.get("committed"),
             starters=titulares_ahora,
+
+            # El cierre del calendario, del que salen las horas:
+            # con el, el plazo se publica con su fecha.
+            first_kickoff=(state.get("deadline") or {}).get(
+                "first_kickoff"
+            ),
+            real_deadline=(state.get("deadline") or {}).get(
+                "real_deadline"
+            ),
         )
 
     except Exception as error:                      # noqa: BLE001

@@ -474,6 +474,11 @@ TESTS = [
     "src.analysis.test_el_suelo_sigue_a_su_escalera_v1",
 
     "src.analysis.test_doctrina_v1",
+
+    # El plazo de la solvencia sale del calendario, con su fecha,
+    # o dice "no lo se". El 23/09 frenaba "el viernes" con la
+    # jornada a 16 dias.
+    "src.analysis.test_el_plazo_sale_del_calendario_v1",
 ]
 
 

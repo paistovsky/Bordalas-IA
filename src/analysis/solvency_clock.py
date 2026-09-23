@@ -205,6 +205,82 @@ def _sellable_offers(offers) -> list:
     return sorted(filas, key=lambda f: f["amount"])
 
 
+def el_plazo_en_palabras(real_deadline, horas_plazo) -> dict:
+    """
+    El plazo del dueño con fecha, sacado del calendario.
+
+    DE DONDE SALE (23/09/2026)
+
+        La subasta frenaba diciendo "el viernes hay que estar en
+        positivo". No habia ningun viernes: la jornada 8 empieza
+        el 09/10, veintiun dias despues de la 7, por el paron de
+        selecciones. La frase estaba escrita a mano.
+
+        El dato ya existia. El calendario de cada jornada trae
+        `real_deadline` -el primer partido menos
+        `REAL_DEADLINE_MINUTES`-, y este reloj le resta
+        `SOLVENCY_DEADLINE_HOURS`. Una sola fuente: la fecha que
+        se dice es la misma con la que se cuentan las horas.
+
+    SI EL CALENDARIO NO TRAE LA FECHA, SE DICE
+
+        "No lo se" con esas palabras, y `known` a False. Quien
+        decide con esto elige que hacer; lo que no puede es
+        inventarse un dia de la semana.
+
+    Nunca lanza. No mira el reloj del sistema: las horas llegan
+    ya contadas.
+    """
+
+    from datetime import datetime, timedelta
+
+    try:
+        cierre = (
+            datetime.fromisoformat(str(real_deadline))
+            if real_deadline
+            else None
+        )
+    except (TypeError, ValueError):
+        cierre = None
+
+    if cierre is None or horas_plazo is None:
+        return {
+            "known": False,
+            "at": None,
+            "source": None,
+            "text": (
+                "No lo se: el calendario no trae la fecha del "
+                "primer partido de la jornada, asi que no hay "
+                "plazo que contar."
+            ),
+        }
+
+    plazo = cierre - timedelta(hours=SOLVENCY_DEADLINE_HOURS)
+
+    dias = horas_plazo / 24.0
+
+    queda = (
+        f"quedan {horas_plazo:.0f} h ({dias:.1f} dias)".replace(
+            ".", ","
+        )
+        if horas_plazo > 0
+        else "ya estamos dentro"
+    )
+
+    return {
+        "known": True,
+        "at": plazo.isoformat(),
+        "source": "CALENDARIO",
+        "text": (
+            f"el plazo, del calendario, es el "
+            f"{plazo.strftime('%d/%m a las %H:%M')} "
+            f"-{SOLVENCY_DEADLINE_HOURS:g} h antes del cierre de "
+            f"la jornada, {cierre.strftime('%d/%m %H:%M')}-: "
+            f"{queda}"
+        ),
+    }
+
+
 def build_solvency_clock(
     balance,
     hours_to_deadline,
@@ -213,6 +289,13 @@ def build_solvency_clock(
     market_clock=None,
     sale_order=None,
     first_kickoff=None,
+
+    # EL CIERRE DE LA JORNADA, DEL CALENDARIO (23/09/2026)
+    #
+    #     El mismo `real_deadline` del que salen las horas. Con
+    #     el, el plazo se publica con fecha; sin el, el reloj
+    #     dice que no la sabe.
+    real_deadline=None,
 
     # LO QUE YA ESTA GASTADO AUNQUE EL SALDO NO LO DIGA
     #
@@ -616,6 +699,12 @@ def build_solvency_clock(
             ),
 
             "first_kickoff": first_kickoff,
+            "real_deadline": real_deadline,
+
+            # EL PLAZO CON FECHA, O "NO LO SE" (23/09/2026)
+            "solvency_deadline": el_plazo_en_palabras(
+                real_deadline, horas_plazo
+            ),
 
             "covered_now": cubierto_ahora,
             "covered_at_deadline": cubierto_al_plazo,
@@ -685,4 +774,5 @@ def build_solvency_clock(
             ),
             "state": None,
             "recommended_sale": None,
+            "solvency_deadline": el_plazo_en_palabras(None, None),
         }
