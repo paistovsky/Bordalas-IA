@@ -1314,6 +1314,68 @@ def build_acquisition_board(
                     else "ESPECULACION"
                 )
 
+                # ============================================
+                # LA LISTA DE LA NOCHE (22/09/2026)
+                # ============================================
+                #
+                #     «Tengo que saber por quien y cuanto va a
+                #     pujar Pepe. Si lo va a hacer antes del
+                #     reset, cuando yo duermo, no me entero de
+                #     nada.»
+                #
+                #     La moneda de la liga esta construida y
+                #     APAGADA, y no se enciende hasta ver esta
+                #     lista. Asi que se calcula LA SOMBRA: lo que
+                #     se pujaria con ella puesta.
+                #
+                #     ES LA MISMA FUNCION QUE DECIDE
+                #
+                #         `optimal_bid`, con el mismo modelo, el
+                #         mismo presupuesto y el mismo tope. Lo
+                #         unico que cambia es el `value`, que es
+                #         lo unico que cambia la moneda. Una
+                #         sombra calculada con otra cuenta no
+                #         seria la sombra de nada.
+                #
+                #     NO DECIDE Y NO ESCRIBE. Se publica al lado
+                #     y nadie la lee para actuar.
+                try:
+                    from src.analysis.la_lista_de_la_noche import (
+                        la_fila as _fila_de_la_noche,
+                        la_via_que_ganaria as _via_de_la_noche,
+                    )
+
+                    _gana = _via_de_la_noche(valoracion)
+
+                    _plan_noche = (
+                        optimal_bid(
+                            price=safe_int(ficha.get("price")),
+                            value=_gana["value"],
+                            model=modelo,
+                            available_budget=presupuesto,
+                            intent=_gana.get("intent"),
+                            route=_gana.get("route"),
+                        )
+                        if _gana.get("value")
+                        else {}
+                    )
+
+                    fila["la_noche"] = _fila_de_la_noche(
+                        fila, valoracion, _plan_noche
+                    )
+
+                except Exception as error:          # noqa: BLE001
+                    # Una sombra que revienta no puede tumbar el
+                    # tablero: se queda sin fila y lo dice.
+                    fila["la_noche"] = {
+                        "lo_que_pujaria": 0,
+                        "reason": (
+                            f"No se pudo calcular la sombra de la "
+                            f"moneda: {type(error).__name__}: "
+                            f"{error}"
+                        ),
+                    }
+
                 fila["decision"] = plan.get("decision")
                 fila["bid"] = safe_int(plan.get("bid"))
                 fila["win_probability"] = plan.get("win_probability")

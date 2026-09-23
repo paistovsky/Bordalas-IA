@@ -5527,6 +5527,48 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # ------------------------------------------------------
+    # LA LISTA DE LA NOCHE (22/09/2026)
+    # ------------------------------------------------------
+    #
+    #     «Tengo que saber por quien y cuanto va a pujar Pepe.
+    #     Si lo va a hacer antes del reset, cuando yo duermo,
+    #     no me entero de nada.»
+    #
+    #     La ventana del reset son las 04:45. Esto es lo que se
+    #     pujaria CON LA MONEDA DE LA LIGA PUESTA, que en
+    #     produccion esta quitada.
+    #
+    #     VA EN LA FOTO Y NO EN UN `.jsonl`
+    #
+    #         «Si hay que mirar un `.jsonl` a las tres de la
+    #         mañana, no sirve.» Cada fila la calcula el tablero
+    #         con la misma `optimal_bid` que decide; aqui solo se
+    #         recogen y se ordenan de mayor a menor puja.
+    try:
+        from src.analysis.la_lista_de_la_noche import (
+            la_lista as _la_lista_de_la_noche,
+        )
+
+        lista_de_la_noche = _la_lista_de_la_noche(
+            [
+                (objetivo or {}).get("la_noche")
+                for objetivo in ((acquisition or {}).get("targets") or [])
+                if (objetivo or {}).get("la_noche")
+            ]
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        lista_de_la_noche = {
+            "available": False,
+            "n": 0,
+            "filas": [],
+            "reason": (
+                f"No se pudo montar la lista de la noche: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     # Los rivales compactados, UNA vez: los miran el payload y
     # el bloque de la subasta, y tienen que ser la misma lista.
     rivales_compactos = compact_rivals(
@@ -6332,6 +6374,13 @@ def build_dashboard_state() -> dict:
         # ninguna ruta lo lee, es un cuaderno para decidir
         # dentro de dos semanas si la compuerta se retira.
         "sombra": sombra,
+
+        # LA LISTA DE LA NOCHE. Por quien y cuanto pujaria Pepe
+        # si la moneda de la liga estuviera puesta -en
+        # produccion esta quitada-. De mayor a menor puja,
+        # "porque es el que mas duele equivocarse". No decide
+        # nada y no escribe nada.
+        "lista_de_la_noche": lista_de_la_noche,
 
         # CUANDO SE PUBLICO CADA JUGADOR POR PRIMERA VEZ.
         # Renovar reescribe la fecha del listado, asi que sin
