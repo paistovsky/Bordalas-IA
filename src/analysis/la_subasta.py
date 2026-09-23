@@ -1718,6 +1718,14 @@ def plan_del_reset(
     en_vivo: bool = False,
     max_por_club: int | None = None,
     max_pujas: int = MAX_PUJAS_PRIMER_DIA,
+
+    # SOLO PARA LA SOMBRA (23/09/2026). `la_sombra_de_la_puja`
+    # calcula por quien se pujaria con el interruptor puesto, y
+    # para eso no puede apagarlo: el entorno es estado de
+    # produccion (doctrina 104). Con esto a False la puerta del
+    # interruptor no se mira. La sombra lo pasa SIEMPRE con
+    # `en_vivo=False`, asi que no ejecuta nada.
+    mirar_el_interruptor: bool = True,
 ) -> dict:
     """
     Por quien se puja en esta ventana, o por que no se puja.
@@ -1761,7 +1769,7 @@ def plan_del_reset(
     }
 
     try:
-        if _sin_subasta():
+        if mirar_el_interruptor and _sin_subasta():
             return {
                 **vacio,
                 "available": True,

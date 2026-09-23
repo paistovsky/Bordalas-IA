@@ -3404,9 +3404,26 @@ def bloque_de_la_subasta(
 
         ventana = plan.get("window") or {}
 
+        # LA SOMBRA DE LA PUJA (23/09/2026)
+        #
+        #     «Hay que ver lo que haria Pepe, porque no me fio.» A
+        #     quien pujaria y cuanto, aunque el interruptor, la
+        #     solvencia o la ventana lo impidan, con el candado que
+        #     le queda. La misma cuenta que puja, con `en_vivo` a
+        #     False: ni una escritura.
+        from src.analysis.la_sombra_de_la_puja import (
+            la_sombra_de_la_puja,
+        )
+        from src.analysis.la_subasta import lectura_del_estado
+
+        sombra_de_la_puja = la_sombra_de_la_puja(
+            lectura_del_estado(state, snapshot)
+        )
+
         return {
             "available": bool(plan.get("available")),
             "would_bid": bool(plan.get("execute")),
+            "sombra": sombra_de_la_puja,
             "bids": [
                 {
                     "id": b.get("id"),

@@ -134,6 +134,10 @@ INTENTS = (XI_UPGRADE, SPECULATION)
 #     Ahora, si un fichero nuevo empieza a nombrarlo y nadie
 #     escribe aqui que decide, la verja se pone roja.
 QUE_DECIDE_CADA_UNO = {
+    "src/analysis/la_sombra_de_la_puja.py": (
+        "NO DECIDE: copia el `intent` de cada puja de la sombra a "
+        "la pantalla. Publica, no puja (23/09/2026)."
+    ),
     "src/analysis/deployment.py": (
         "LO REPARTE: `classify_operation` por clase de operacion, "
         "y `signing_priority` por prioridad. Es el que manda con "
