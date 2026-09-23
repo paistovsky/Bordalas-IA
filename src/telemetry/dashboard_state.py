@@ -3639,6 +3639,23 @@ def _con_los_vigilados(acquisition, vestuario) -> dict:
         return acquisition
 
 
+def _noticias_de_la_prensa() -> list:
+    """Las noticias del informe de prensa en disco. Nunca lanza."""
+
+    try:
+        from src.intelligence.scout.press import (
+            build_press_block,
+            load_press_report,
+        )
+
+        return build_press_block(load_press_report()).get(
+            "items"
+        ) or []
+
+    except Exception:                               # noqa: BLE001
+        return []
+
+
 def build_dashboard_state() -> dict:
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
@@ -4159,6 +4176,11 @@ def build_dashboard_state() -> dict:
             ],
             en_el_mercado=_en_el_mercado,
             nuestro_id=board.get("current_user_id"),
+
+            # LA PRENSA, PARA LA SEÑAL DEL QUE VA A DESPEGAR
+            # (23/09/2026). Del disco, como el bloque `press` de
+            # mas abajo: la telemetria nunca raspa.
+            prensa=_noticias_de_la_prensa(),
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -4218,6 +4240,25 @@ def build_dashboard_state() -> dict:
             # que no podemos pagar puede ser justo a quien hay
             # que vender algo para llegar.
             caja_de_fichar=presupuesto_fichajes,
+        )
+
+        # LA LISTA DEL DIA (23/09/2026)
+        #
+        #     El panel de libres decia `en_el_mercado_hoy: 0` con
+        #     veinte en el mercado: la lista del ojeador y el
+        #     mercado del dia no se hablaban. Aqui se cruzan: los
+        #     que se pueden fichar HOY, con su marca y lo que
+        #     pujaria Pepe por cada uno, copiado del tablero.
+        #
+        #     ESTO TAMPOCO PUJA.
+        from src.analysis.el_que_va_a_despegar import (
+            la_lista_del_dia,
+        )
+
+        _el_vestuario["lista_del_dia"] = la_lista_del_dia(
+            _toda_la_liga,
+            _en_el_mercado,
+            (acquisition or {}).get("targets"),
         )
 
     except Exception as error:                      # noqa: BLE001

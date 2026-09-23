@@ -479,6 +479,10 @@ TESTS = [
     # o dice "no lo se". El 23/09 frenaba "el viernes" con la
     # jornada a 16 dias.
     "src.analysis.test_el_plazo_sale_del_calendario_v1",
+
+    # El que vuelve de lesion no es un malo: la marca de «su pasado
+    # se queda corto», con sus dos frenos, y la lista del dia.
+    "src.analysis.test_el_que_va_a_despegar_v1",
 ]
 
 
