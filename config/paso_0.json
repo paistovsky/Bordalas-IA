@@ -1,7 +1,7 @@
 {
  "version": 1,
- "cuando": "2026-09-22T17:16:06+00:00",
- "segundos": 214.3,
+ "cuando": "2026-09-23T08:00:40+00:00",
+ "segundos": 225.2,
  "maquina": "Windows AMD64",
  "probados": [
   "BORDALAS_BID_SALT",
@@ -29,9 +29,10 @@
   "BORDALAS_SIN_REFERENCIA_ESCALA",
   "BORDALAS_SIN_REVENTA",
   "BORDALAS_SIN_SUBASTA",
+  "BORDALAS_SOLVENCIA_POR_SU_PLAZO",
   "BORDALAS_TOPE_DEL_ONCE",
   "BORDALAS_VARA_PLANA",
   "BORDALAS_VIGILA_DATA"
  ],
- "huella": "98cdb607cc7332799121b40e61ca0660ae535c3a22e4f35c5e7bad28e45041fd"
+ "huella": "16ede25102f46772f84de69eb23de6e8930440e33cf28b75c4c9c70d7969314f"
 }
