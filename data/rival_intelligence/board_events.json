@@ -169307,5 +169307,42 @@
         ]
       }
     ]
+  },
+  {
+    "event_id": "20f74e85caac4d0673b1422b",
+    "date": 1790233598,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 1927,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 6773300
+      },
+      {
+        "player": 35770,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 10160400
+      },
+      {
+        "player": 25769,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 14846700
+      }
+    ]
   }
 ]
