@@ -1709,11 +1709,17 @@ def evaluate_formation(
     formation: dict[int, int],
 ) -> dict:
 
+    # EL ONCE SE BUSCA UNA VEZ (24/09/2026). Apagado de fabrica:
+    # sin `BORDALAS_EL_ONCE_UNA_VEZ` es la llamada de siempre. Ver
+    # `el_once_se_busca_una_vez`.
+    from src.analysis.el_once_se_busca_una_vez import buscar
+
     normal = (
-        search_best_lineup_for_formation(
+        buscar(
             players,
             formation,
-            allow_warning_players=False,
+            False,
+            search_best_lineup_for_formation,
         )
     )
 
@@ -1735,10 +1741,11 @@ def evaluate_formation(
         }
 
     emergency = (
-        search_best_lineup_for_formation(
+        buscar(
             players,
             formation,
-            allow_warning_players=True,
+            True,
+            search_best_lineup_for_formation,
         )
     )
 
