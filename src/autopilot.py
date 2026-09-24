@@ -4024,6 +4024,15 @@ def run_cycle(
     for linea in cronometro.cuadro():
         print(linea)
 
+    # EL ONCE SE BUSCA UNA VEZ (24/09/2026). Solo con su
+    # interruptor puesto; apagado no imprime nada.
+    from src.analysis.el_once_se_busca_una_vez import (
+        linea as linea_del_once,
+    )
+
+    if linea_del_once():
+        print(linea_del_once())
+
     print_cycle_result(
         snapshot_file=
             snapshot_file,

@@ -501,6 +501,10 @@ TESTS = [
     # El libro de aciertos de la valoracion y la foto de cada
     # jornada: sin ellos no se toca ninguna formula de valoracion.
     "src.analysis.test_el_libro_de_la_valoracion_v1",
+
+    # El once se busca una vez por entrada: con la memoria puesta,
+    # el mismo once, formacion por formacion. Apagada.
+    "src.analysis.test_el_once_se_busca_una_vez_v1",
 ]
 
 
