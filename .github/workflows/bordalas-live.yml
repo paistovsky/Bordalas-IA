@@ -56,15 +56,15 @@ jobs:
     #   minutos significa que un cuelgue a las 02:00 se lleva por
     #   delante el reset, la ventana y el dia entero.
     #
-    #   75 es TEMPORAL. El 22/09, tras sacar la guardia cara de la
-    #   verja, una vuelta tarda 27 min:
-    #       verja       6m 24s
-    #       ciclo      15m 09s
-    #       dashboard   5m 04s
+    #   75 era TEMPORAL y el 24/09 se quedo corto: dos vueltas
+    #   murieron en 75m15s y 75m38s, o sea EN EL TOPE. Se subio a
+    #   180 para desatascar mientras se arreglaba la causa.
     #
-    #   Los dos ultimos son el TAMANO DE LA PLANTILLA: `build_lineup`
-    #   es el 94-95 % de los dos, y va 0,26 s con 15 fichas y 4,78 s
-    #   con 21. Cuando la plantilla vuelva a 16, ESTE NUMERO BAJA A 35.
+    #   LA CAUSA YA ESTA ARREGLADA (ver BORDALAS_EL_ONCE_UNA_VEZ
+    #   mas abajo). CUANDO HAYA TRES VUELTAS SEGUIDAS POR DEBAJO DE
+    #   35 MIN CON EL INTERRUPTOR PUESTO, ESTE NUMERO VUELVE A 75.
+    #   No antes: un tope generoso con la causa viva solo esconde
+    #   el problema.
     timeout-minutes: 180
 
     env:
@@ -92,9 +92,10 @@ jobs:
       #   Si no da el mismo verde que sin el, NO SE ENCIENDE.
       #   Ver `src/analysis/el_protocolo_de_encendido.py`.
       #
-      #   El 22/09 el paso 0 evito el segundo ciclo parado de la semana:
-      #   `BORDALAS_REVENTA_SOLO_SI_JUEGA` tumbaba dos guardias y se vio
-      #   ANTES de tocar este fichero.
+      #   Y LA VERJA SE CORRE CON LOS QUE YA ESTAN ENCENDIDOS. Doctrina
+      #   112, del 22/09: UN VERDE EN EL PORTATIL NO ES UN VERDE DE
+      #   PRODUCCION. Se empujo con la verja verde en local y CI la tiro,
+      #   porque en local no estaba puesto REVENTA_SOLO_SI_JUEGA y aqui si.
 
       # Encendido 21/09. El marcador ordena las jornadas por la fecha real
       # del tablon, no por el numero de jornada del calendario: "Jornada 6" y
@@ -127,6 +128,53 @@ jobs:
       #   paso 0 con los 22 puestos en verde. Ver `config/paso_0.json`.
       BORDALAS_REVENTA_SOLO_SI_JUEGA: "1"
 
+      # Encendido 24/09. EL ONCE SE BUSCA UNA VEZ, NO NOVECIENTAS.
+      #
+      #   NO CAMBIA NINGUNA DECISION. Es memoria, no criterio: recuerda la
+      #   respuesta de la busqueda del once segun el contenido exacto de lo
+      #   que recibe. LA BUSQUEDA EN SI NO SE TOCA.
+      #
+      #   EL PROBLEMA. La vuelta paso de 27 min (22/09) a 78 (24/09), y dos
+      #   murieron en el tope de 75. Medido por el propio ciclo:
+      #       1070,75 s   73,8 %   build_global_decision
+      #        244,75 s   16,9 %   build_competitive_observer
+      #        125,35 s    8,6 %   build_cycle_acquisition_board
+      #   Y ese analisis se hace DOS veces (PRE y POST): 18m38s cada uno.
+      #
+      #   LA CAUSA, medida: `build_lineup` es el 97,8 % de
+      #   `build_global_decision`. Se llama 135 VECES por vuelta, y de 963
+      #   busquedas del once SOLO 48 SON DISTINTAS. Cada motor -plazo,
+      #   solvencia, ventas, liquidez, ofertas- se montaba el once por su
+      #   cuenta sin pasarselo a nadie. Y escala con la plantilla: 0,26 s
+      #   con 15 fichas, 4,78 s con 21.
+      #
+      #   LO QUE COSTABA NO ARREGLARLO: con la vuelta a 78 min y el cron
+      #   cada hora, GitHub solo guarda UN disparo en cola, asi que se
+      #   perdia ~1 latido de cada 4. El 24/09 caducaban 8 publicaciones en
+      #   35 min y Pepe solo llega a renovar UNA por vuelta.
+      #
+      #   MEDIDO EN LABORATORIO (red cortada, foto del 19/09):
+      #       analisis PRE + POST      232,1 s  ->  12,9 s
+      #       POST tras una renovacion  92,0 s  ->   1,8 s
+      #       diferencias campo a campo:  0, salvo los campos de reloj,
+      #       que TAMBIEN cambian entre dos corridas SIN el interruptor.
+      #
+      #   Verja 184/184 en verde con los dos interruptores de arriba
+      #   puestos. Paso 0 PASADO con los 30. La guardia
+      #   `test_el_once_se_busca_una_vez_v1` tiene 10 pruebas y se la vio
+      #   ponerse roja rompiendo el modulo de dos maneras distintas.
+      #
+      #   LO QUE NO SE MIDIO, Y HAY QUE VIGILAR:
+      #     - El laboratorio tenia plantilla de 19 y produccion tiene 22.
+      #       La estimacion de ~21 min es una EXTRAPOLACION (n=1 por lado).
+      #     - La memoria recuerda POR EL CONTENIDO DE LO QUE RECIBE: si dos
+      #       onces distintos dieran la misma clave, la respuesta seria
+      #       erronea EN SILENCIO. En la primera vuelta con esto puesto se
+      #       comprueba que EL XI IMPRESO SON LOS MISMOS ONCE que en la
+      #       vuelta anterior. El log dice `El once, una vez: ...` con lo
+      #       que se ahorro de verdad.
+      BORDALAS_EL_ONCE_UNA_VEZ: "1"
+
       # QUITADO 22/09 — BORDALAS_SIN_SUBASTA
       #
       #   Estuvo puesto desde la noche del 21/09 como apagado PROVISIONAL,
@@ -137,6 +185,9 @@ jobs:
       #   NO cerraba la puerta de fichar. Solo cerraba `plan_del_reset`,
       #   cuyo unico modo es la cesta de reventa. El tablero de fichajes y
       #   el carril siguieron pujando todo el tiempo.
+      #
+      #   EL CODIGO SIGUE VIVO en `la_subasta.py` (1469, 1477, 1587) y ahi
+      #   se queda: es el freno de mano. Lo que se quito fue esta linea.
 
     steps:
       - name: Checkout
