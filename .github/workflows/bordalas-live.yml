@@ -65,7 +65,7 @@ jobs:
     #   Los dos ultimos son el TAMANO DE LA PLANTILLA: `build_lineup`
     #   es el 94-95 % de los dos, y va 0,26 s con 15 fichas y 4,78 s
     #   con 21. Cuando la plantilla vuelva a 16, ESTE NUMERO BAJA A 35.
-    timeout-minutes: 75
+    timeout-minutes: 180
 
     env:
       TZ: Europe/Madrid
