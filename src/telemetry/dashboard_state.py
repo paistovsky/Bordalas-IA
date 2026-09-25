@@ -5640,48 +5640,6 @@ def build_dashboard_state() -> dict:
             ),
         }
 
-    # ------------------------------------------------------
-    # LA LISTA DE LA NOCHE (22/09/2026)
-    # ------------------------------------------------------
-    #
-    #     «Tengo que saber por quien y cuanto va a pujar Pepe.
-    #     Si lo va a hacer antes del reset, cuando yo duermo,
-    #     no me entero de nada.»
-    #
-    #     La ventana del reset son las 04:45. Esto es lo que se
-    #     pujaria CON LA MONEDA DE LA LIGA PUESTA, que en
-    #     produccion esta quitada.
-    #
-    #     VA EN LA FOTO Y NO EN UN `.jsonl`
-    #
-    #         «Si hay que mirar un `.jsonl` a las tres de la
-    #         mañana, no sirve.» Cada fila la calcula el tablero
-    #         con la misma `optimal_bid` que decide; aqui solo se
-    #         recogen y se ordenan de mayor a menor puja.
-    try:
-        from src.analysis.la_lista_de_la_noche import (
-            la_lista as _la_lista_de_la_noche,
-        )
-
-        lista_de_la_noche = _la_lista_de_la_noche(
-            [
-                (objetivo or {}).get("la_noche")
-                for objetivo in ((acquisition or {}).get("targets") or [])
-                if (objetivo or {}).get("la_noche")
-            ]
-        )
-
-    except Exception as error:                      # noqa: BLE001
-        lista_de_la_noche = {
-            "available": False,
-            "n": 0,
-            "filas": [],
-            "reason": (
-                f"No se pudo montar la lista de la noche: "
-                f"{type(error).__name__}: {error}"
-            ),
-        }
-
     # Los rivales compactados, UNA vez: los miran el payload y
     # el bloque de la subasta, y tienen que ser la misma lista.
     rivales_compactos = compact_rivals(
@@ -5969,6 +5927,73 @@ def build_dashboard_state() -> dict:
             "available": False,
             "reason": (
                 f"No se pudo leer el estado de la rendija: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
+    # ==========================================================
+    # LA SUBASTA Y LA LISTA DE LA NOCHE, SOBRE EL MISMO ESTADO
+    # (25/09/2026)
+    # ==========================================================
+    #
+    #     La lista de la noche decia que Pepe pujaria 3.674.989 por
+    #     Lejeune y la decision real era SUPERA_PRESUPUESTO: se
+    #     armaba reconstruyendo la decision por su cuenta. Ahora
+    #     pregunta a quien decide, y las dos -la subasta y la lista-
+    #     leen EL MISMO estado, montado una vez aqui.
+    #
+    #     LA MISMA FORMA QUE VE EL CICLO
+    #
+    #         El tablero, los bolsillos y el reloj no estan en
+    #         `state`: se montan aqui. Si se le pasara `state` a
+    #         secas, esta pantalla diria "no hay candidatos" mientras
+    #         el ciclo puja por tres.
+    #
+    #     EL TABLERO, CON EL ORDEN DEL CARRIL DENTRO: la pantalla
+    #     ordena el bloque "para revender" con el criterio del
+    #     carril, que es el que decide sobre esas filas.
+    estado_de_la_subasta = {
+        "acquisition": {
+            **(acquisition or {}),
+            "orden_del_carril": orden_del_carril,
+        },
+        "exposure": exposure,
+        "market_clock": market_clock,
+        "rival_intelligence": {
+            "managers": rivales_compactos
+        },
+        "solvency_clock": solvency_clock,
+        "operations_locked": state.get("operations_locked"),
+        "phase": state.get("phase"),
+    }
+
+    subasta_payload = bloque_de_la_subasta(estado_de_la_subasta, snapshot)
+
+    try:
+        from src.analysis.la_lista_de_la_noche import (
+            en_la_ventana as _en_la_ventana,
+            la_lista as _la_lista_de_la_noche,
+        )
+        from src.analysis.la_subasta import (
+            lectura_del_estado as _lectura_del_estado,
+        )
+
+        lista_de_la_noche = _la_lista_de_la_noche(
+            estado_de_la_subasta["acquisition"],
+            _en_la_ventana(
+                _lectura_del_estado(estado_de_la_subasta, snapshot)
+            ),
+            rendija_ahora,
+        )
+
+    except Exception as error:                      # noqa: BLE001
+        lista_de_la_noche = {
+            "available": False,
+            "n": 0,
+            "filas": [],
+            "reason": (
+                f"No se pudo montar la lista de la noche: "
                 f"{type(error).__name__}: {error}"
             ),
         }
@@ -6690,37 +6715,9 @@ def build_dashboard_state() -> dict:
         # LA SUBASTA DEL RESET, antes de que ocurra: por quien
         # va a pujar el ciclo, cuanto compromete y cuanto falta
         # para el cierre. Y debajo, lo que gano y perdio.
-        "subasta": bloque_de_la_subasta(
-            {
-                # LA MISMA FORMA QUE VE EL CICLO
-                #
-                #     El tablero, los bolsillos y el reloj no
-                #     estan en `state`: se montan aqui. Si se
-                #     le pasara `state` a secas, esta pantalla
-                #     diria "no hay candidatos" mientras el
-                #     ciclo puja por tres.
-                # EL TABLERO, CON EL ORDEN DEL CARRIL DENTRO.
-        #
-        #     La pantalla ordena el bloque "para revender" con el
-        #     criterio del carril, que es el que decide sobre esas
-        #     filas. Se le da hecho —es la misma llamada del
-        #     motor— para que no reimplemente la tabla de primas
-        #     medidas: un dato, un sitio.
-        "acquisition": {
-            **(acquisition or {}),
-            "orden_del_carril": orden_del_carril,
-        },
-                "exposure": exposure,
-                "market_clock": market_clock,
-                "rival_intelligence": {
-                    "managers": rivales_compactos
-                },
-                "solvency_clock": solvency_clock,
-                "operations_locked": state.get("operations_locked"),
-                "phase": state.get("phase"),
-            },
-            snapshot,
-        ),
+        # El mismo estado que la lista de la noche: ver
+        # `estado_de_la_subasta` mas arriba.
+        "subasta": subasta_payload,
 
         "priorities": candidates,
         "activity": _con_la_alarma_de_sentidos(
