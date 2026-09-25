@@ -221,6 +221,55 @@ jobs:
       #       2.208.580.
       BORDALAS_SOLVENCIA_POR_SU_PLAZO: "1"
 
+      # Encendido 25/09. EL QUE SE QUEDA COBRA EN LA MONEDA DE LA LIGA.
+      #
+      #   NO CAMBIA LA FORMULA: cambia UN factor. En `xi_upgrade_value` el
+      #   punto se pagaba a la tarifa del MERCADO (mediana de precio/puntos
+      #   del catalogo, ~21.500 EUR). Para quien te quedas, un punto vale lo
+      #   que PAGA LA LIGA: 30.000 EUR, de `caja_de_la_liga`, cuadrado al euro
+      #   sobre 24 dias. Margen, confianza, vetos del once y suelo de
+      #   titularidad no se tocan.
+      #
+      #   SOLO LAS DOS VIAS DE PLANTILLA: mejora del once y ficha vacia. La
+      #   reventa al Computer, especular y tener siguen en la del mercado
+      #   (guardia `test_el_que_se_revende_paga_la_del_mercado`).
+      #
+      #   MEDIDO, reconstruyendo las fotos con las funciones de produccion
+      #   (sin la moneda la reconstruccion da la decision publicada en 20/20,
+      #   20/20 y 19/20):
+      #       18/09   pasan 2 -> 3   Dmitrovic pasa; Maffeo y Cabrera siguen
+      #       23/09   pasan 0 -> 2   Thiago Fernandez, Oriol Rey
+      #       25/09   pasan 0 -> 0   Lejeune y Antonio Blanco: SUPERA_PRESUPUESTO
+      #   Entre 0 y 3 al dia, n=60 candidatos en 3 fotos. El liston sigue
+      #   frenando: pasan el precio 7 de 15 con via de plantilla.
+      #   Rescata 3 de los 7 NO_COMPENSA del censo y 0 de los 10
+      #   RENDIMIENTO_INSUFICIENTE (esos van por reventa o tener: no es su via).
+      #
+      #   LO QUE ESTO NO ARREGLA, Y CONVIENE NO CONFUNDIRLO: el censo del
+      #   25/09 midio que la via de reventa al Computer vale ~1,8 % contra un
+      #   liston del 3 %, o sea que NO PUEDE PASAR NUNCA, y es la mejor via de
+      #   47 de 60 candidatos. ESO SIGUE IGUAL. Esta moneda es otra cosa, mas
+      #   pequeña y tambien real.
+      #
+      #   Paso 0 PASADO el 25/09 con los 30, este incluido, y los cuatro de
+      #   produccion puestos.
+      #
+      #   LO QUE NO ESTA MEDIDO Y HAY QUE VIGILAR:
+      #     - Tambien sube CUANTO se paga, no solo quien pasa: Cabrera
+      #       3.133.329 -> 3.214.496 (+81.167) el 18/09.
+      #     - La LISTA DE LA NOCHE del panel usa el bolsillo de la via de HOY,
+      #       no el de la via que gana con la moneda: el 25/09 decia 3.674.989
+      #       por Lejeune y la decision real era SUPERA_PRESUPUESTO. Hasta que
+      #       se arregle, NO DICE LO QUE VA A PASAR.
+      #     - Llega tambien a BUY V10 (build_controlled_run -> market_trader_shadow
+      #       -> calculate_intelligent_bids -> value_candidate), que es un
+      #       camino de ESPECULAR: puede subir su authority_bid, acotado por
+      #       max_rational. Dormido desde el 04/09. Si vuelve a pujar, mirar
+      #       si la puja sale de un suggested_bid de plantilla.
+      #     - Si pasan mas de 3-4 al dia, el liston se ha quedado sin funcion:
+      #       mirar el EUR/punto que piden los que pasan.
+      BORDALAS_LA_MONEDA_DE_LA_LIGA: "1"
+
       # QUITADO 22/09 — BORDALAS_SIN_SUBASTA
       #
       #   Estuvo puesto desde la noche del 21/09 como apagado PROVISIONAL,
