@@ -18,9 +18,10 @@ COMO, SIN VOLVER A VALORAR
 
     Asi que el valor con la moneda sale de reescalar el publicado
     -(valor - recuperado) x 30.000 / tarifa + recuperado-, con el
-    recuperado despejado del texto que publica la fila. Es la misma
-    cuenta que `la_lista_de_la_noche`, y la guarda de que es lineal
-    es `test_la_sombra_de_la_moneda_no_escribe`.
+    recuperado despejado del texto que publica la fila. Es la cuenta
+    que hacia `la_lista_de_la_noche` hasta el 25/09, y la guarda de que es lineal
+    es `test_el_que_se_queda_no_paga_precio_de_comerciante`
+    (el valor sube EXACTAMENTE en la proporcion de la moneda).
 
     Y DESPUES SE VUELVE A CLASIFICAR. Con la moneda, una via de
     plantilla puede pasar a superar el precio, y entonces
@@ -55,8 +56,6 @@ import sys
 
 sys.path.insert(0, os.getcwd())
 
-os.environ.pop("BORDALAS_LA_MONEDA_DE_LA_LIGA", None)
-os.environ.pop("BORDALAS_TOPE_DEL_ONCE", None)
 
 from src.analysis.acquisition_board import build_historical_price_lookup  # noqa: E402
 from src.analysis.acquisition_budget import budget_for_intent             # noqa: E402
@@ -169,6 +168,13 @@ def decide(fila, foto, factor, modelo):
 def main() -> int:
 
     sys.stdout.reconfigure(encoding="utf-8")
+
+    # SIN LA MONEDA Y SIN EL TOPE DEL ONCE, PERO AL CORRER Y NO AL
+    # IMPORTAR (25/09/2026). Estaban a nivel de modulo y el paso 0 lo
+    # caza (`test_ningun_interruptor_se_lee_al_importarse`). Los dos se
+    # leen al llamar, asi que quitarlos aqui es lo mismo.
+    os.environ.pop("BORDALAS_LA_MONEDA_DE_LA_LIGA", None)
+    os.environ.pop("BORDALAS_TOPE_DEL_ONCE", None)
 
     modelo = build_bid_model(
         json.load(open(RIVALES, encoding="utf-8-sig")),

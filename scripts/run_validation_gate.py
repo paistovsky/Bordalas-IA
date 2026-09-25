@@ -208,7 +208,7 @@ TESTS = [
     # Por quien y cuanto pujaria Pepe con la moneda puesta: que
     # se calcule con candidatos, que no escriba y que no deje el
     # interruptor encendido. La ventana es a las 04:45.
-    "src.analysis.test_la_sombra_de_la_moneda_v1",
+    "src.analysis.test_la_sombra_dice_lo_que_pepe_haria_v1",
 
     # Que esta verja corra con los interruptores que enciende CI
     # y lo diga, y que sin poder leerlos no de verde. Es lo que

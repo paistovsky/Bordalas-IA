@@ -388,6 +388,15 @@ def test_el_embudo_señala_la_causa_mayor_no_la_primera() -> None:
 
         El titular apuntaba al sitio equivocado, que es justo lo
         que esta tabla existe para evitar.
+
+    EL NOMBRE CAMBIO EL 25/09/2026, LA REGLA NO
+
+        Esto exigia que `SIN_VALOR` se llamase "NO_MEJORA_EL_ONCE",
+        y ese nombre era mentira: escondia a la regla 2 de la
+        compuerta, que era la puerta decisiva de 31 de 60. Ahora
+        `SIN_VALOR` sin compuerta decisiva se llama `SIN_VALOR`.
+        Lo que se protege -que el titular cite la causa MAYOR-
+        sigue igual.
     """
 
     objetivos = (
@@ -398,9 +407,9 @@ def test_el_embudo_señala_la_causa_mayor_no_la_primera() -> None:
     salida = embudo({"targets": objetivos})
 
     assert salida["available"]
-    assert "NO_MEJORA_EL_ONCE" in salida["reason"]
+    assert "SIN_VALOR" in salida["reason"]
     assert "DISPONIBILIDAD" not in salida["reason"]
-    assert salida["deaths"][0]["cause"] == "NO_MEJORA_EL_ONCE"
+    assert salida["deaths"][0]["cause"] == "SIN_VALOR"
 
 
 def test_el_embudo_separa_no_tener_dinero_de_no_poder_ponerlo() -> None:
@@ -462,6 +471,98 @@ def test_el_embudo_no_toca_ningun_tope() -> None:
         assert prohibido not in fuente, (
             f"el embudo toca `{prohibido}`: solo cuenta cadaveres"
         )
+
+
+def test_el_embudo_no_da_por_vivo_a_quien_no_se_puede_pujar() -> None:
+    """
+    EL FALLO (25/09/2026). Daba por VIVOS 49, 40 y 19 los dias en
+    que se podia pujar por 0, 2 y 0: contaba a los de rivales y
+    trataba como vivo todo lo que no conocia.
+
+    MUERDE SI EL CASO NO TRAE LAS TRES TRAMPAS: un rival, una
+    decision del plan que el embudo viejo no conocia y una que no
+    conoce nadie. Sin ellas esto pasaria con las manos vacias.
+    """
+
+    objetivos = [
+        _objetivo("Pujable", "BID"),
+        _objetivo("Rinde poco", "RENDIMIENTO_INSUFICIENTE"),
+        _objetivo("Gana poco", "PROBABILIDAD_INSUFICIENTE"),
+        _objetivo("Inventada", "UNA_PUERTA_QUE_NO_EXISTE"),
+        _objetivo("Del rival", "MERCADO_DE_RIVAL", seller_id=99, would_pass=True),
+    ]
+
+    assert any(o.get("seller_id") for o in objetivos), "el caso no trae rival"
+    assert any(o["decision"] == "UNA_PUERTA_QUE_NO_EXISTE" for o in objetivos)
+
+    salida = embudo({"targets": objetivos})
+
+    causas = {f["name"]: f["cause"] for f in salida["rows"]}
+
+    assert salida["targets"] == 4, "el rival se cuenta con los del Computer"
+    assert "Del rival" not in causas
+    assert salida["rivales"]["n"] == 1
+    assert salida["rivales"]["pasarian"] == 1
+
+    assert salida["alive"] == 1 and salida["pujables"] == 1
+    assert causas["Rinde poco"] == "RENDIMIENTO_INSUFICIENTE"
+    assert causas["Gana poco"] == "PROBABILIDAD_INSUFICIENTE"
+    assert causas["Inventada"] == "DESCONOCIDA", (
+        "una decision desconocida se esta contando como viva"
+    )
+
+    assert salida["ultima_linea"] == "Hoy se puede pujar por 1."
+
+
+def test_el_embudo_dice_cero_con_un_cero() -> None:
+
+    salida = embudo({"targets": [
+        _objetivo("Uno", "NO_COMPENSA"),
+        _objetivo("Dos", "RENDIMIENTO_INSUFICIENTE"),
+    ]})
+
+    assert salida["pujables"] == 0
+    assert salida["ultima_linea"] == "Hoy se puede pujar por 0."
+    assert salida["reason"].endswith("Hoy se puede pujar por 0.")
+
+
+def test_el_embudo_no_esconde_a_la_compuerta() -> None:
+    """
+    `SIN_VALOR` no es "no mejora el once": si con la compuerta de
+    ritmo abierta habria tenido valor, le mato la compuerta, y se
+    dice cual de sus reglas. Y si ni asi, es `SIN_VALOR`.
+
+    MUERDE SI EL CASO NO TRAE LOS DOS: uno que la compuerta mata y
+    otro que muere igual con ella abierta.
+    """
+
+    cortado = _objetivo(
+        "Cortado", "SIN_VALOR", our_value=0,
+        market_gate={"gate": "PRECIO_CAYENDO", "value_before": 1_020_000},
+    )
+    sin_nada = _objetivo(
+        "Sin nada", "SIN_VALOR", our_value=0,
+        market_gate={"gate": "PRECIO_CAYENDO", "value_before": 0},
+    )
+
+    # Y la cadena del tablero escribio NO_DISPONIBLE encima de un
+    # SIN_VALOR: murio antes, en la valoracion.
+    pisado = _objetivo(
+        "Pisado", "NO_DISPONIBLE", our_value=0,
+        market_gate={"gate": "PRECIO_CAYENDO", "value_before": 900_000},
+    )
+
+    assert cortado["market_gate"]["value_before"] > 0
+    assert sin_nada["market_gate"]["value_before"] == 0
+
+    salida = embudo({"targets": [cortado, sin_nada, pisado]})
+
+    causas = {f["name"]: f["cause"] for f in salida["rows"]}
+
+    assert causas["Cortado"] == "REGLA_2_PRECIO_CAYENDO"
+    assert causas["Sin nada"] == "SIN_VALOR"
+    assert causas["Pisado"] == "REGLA_2_PRECIO_CAYENDO"
+    assert "NO_MEJORA_EL_ONCE" not in {m["cause"] for m in salida["deaths"]}
 
 
 # ============================================================
@@ -704,6 +805,9 @@ TESTS = [
     test_el_embudo_separa_no_tener_dinero_de_no_poder_ponerlo,
     test_cada_objetivo_muere_una_sola_vez,
     test_el_embudo_no_toca_ningun_tope,
+    test_el_embudo_no_da_por_vivo_a_quien_no_se_puede_pujar,
+    test_el_embudo_dice_cero_con_un_cero,
+    test_el_embudo_no_esconde_a_la_compuerta,
     test_no_se_suman_los_puntos_de_cinco_cuando_juegan_once,
     test_las_dos_columnas_estan_y_no_hay_recomendacion,
     test_el_activo_grande_dice_con_cuantas_jornadas_decide,

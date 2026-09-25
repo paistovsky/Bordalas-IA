@@ -94,49 +94,28 @@ def main() -> int:
     print(f"  {lista.get('reason')}")
     print()
 
-    filas = lista.get("filas") or []
-
-    if not filas:
-        cerca = lista.get("el_mas_cerca") or {}
-
-        if cerca:
-            print(
-                f"  El que mas cerca se queda: {cerca.get('jugador')} "
-                f"({cerca.get('posicion')}), "
-                f"{_euros(cerca.get('precio_de_mercado'))} EUR."
-            )
-            print(f"  {cerca.get('decision')}: {cerca.get('reason')}")
-
-        return 0
-
-    for numero, fila in enumerate(filas, start=1):
-
+    # LA FORMA DEL 25/09: fila a fila, con el camino que pujaria.
+    for numero, fila in enumerate(lista.get("filas") or [], start=1):
         print(
-            f"  {numero:2}. {fila.get('jugador')} "
-            f"({fila.get('posicion')})"
-        )
-        print(
-            f"      precio {_euros(fila.get('precio_de_mercado'))}   "
+            f"  {numero:2}. {fila.get('jugador')}   "
+            f"precio {_euros(fila.get('precio_de_mercado'))}   "
             f"PUJARIA {_euros(fila.get('lo_que_pujaria'))}   "
-            f"prima {_euros(fila.get('prima'))} "
-            f"({fila.get('prima_percent')} %)"
-        )
-        print(
-            f"      por {fila.get('por_que')} "
-            f"(via {fila.get('via')}, moneda {fila.get('moneda')})"
+            f"por {fila.get('camino')} (via {fila.get('via')}, "
+            f"bolsillo {_euros(fila.get('bolsillo')) if fila.get('bolsillo') is not None else '-'})"
         )
 
-        techo = fila.get("techo") or {}
+    print()
+    print("  CAMINO A CAMINO")
 
-        print(f"      techo: {techo.get('reason')}")
-
-        if fila.get("mejora_a"):
-            print(
-                f"      mejora a {fila.get('mejora_a')} "
-                f"por {fila.get('puntos_de_mas')} puntos"
-            )
-
-        print()
+    for camino, que in (lista.get("caminos") or {}).items():
+        cubierto = "si" if que.get("cubierto") else "NO"
+        print(f"    {camino:18s} cubierto: {cubierto:2s}  {que.get('reason')}")
+        for viva in que.get("ya_vivas") or []:
+            print(f"    {'':18s} ya tiene puja nuestra viva: {viva.get('jugador')} "
+                  f"({_euros(viva.get('puja_viva'))} EUR), no se repite")
+        if que.get("ultima_decision"):
+            print(f"    {'':18s} ultima vuelta ({que.get('ultima_vuelta')}): "
+                  f"{que.get('ultima_decision')}")
 
     return 0
 
