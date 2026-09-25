@@ -1,7 +1,7 @@
 {
  "version": 1,
- "cuando": "2026-09-24T19:32:12+00:00",
- "segundos": 210.8,
+ "cuando": "2026-09-25T17:23:31+00:00",
+ "segundos": 150.9,
  "maquina": "Windows AMD64",
  "probados": [
   "BORDALAS_BID_SALT",
@@ -35,5 +35,5 @@
   "BORDALAS_VARA_PLANA",
   "BORDALAS_VIGILA_DATA"
  ],
- "huella": "85eaff159cb3d4aa1e7197dc74fe3167707206555ae2bb4ebd8548969f80e4fb"
+ "huella": "e362e61c7ea8eac4c615b6812cc2fb100a06fb5427da0993085b181ae148912f"
 }
