@@ -52,20 +52,25 @@ jobs:
     #   Es para que una vuelta COLGADA no se coma el dia. Con
     #   `cancel-in-progress: false`, un job atascado bloquea el
     #   grupo de concurrencia: los disparos siguientes se quedan
-    #   en cola y GitHub solo guarda UNO pendiente. Un tope de 600
-    #   minutos significa que un cuelgue a las 02:00 se lleva por
-    #   delante el reset, la ventana y el dia entero.
+    #   en cola y GitHub solo guarda UNO pendiente. Cuanto mas alto
+    #   el tope, mas latidos se lleva por delante un cuelgue.
     #
-    #   75 era TEMPORAL y el 24/09 se quedo corto: dos vueltas
-    #   murieron en 75m15s y 75m38s, o sea EN EL TOPE. Se subio a
-    #   180 para desatascar mientras se arreglaba la causa.
+    #   HISTORIA DEL NUMERO:
+    #       75   provisional, con la vuelta en 27 min (22/09)
+    #      180   de emergencia el 24/09: dos vueltas murieron EN el
+    #            tope de 75 (75m15s y 75m38s) porque la vuelta se
+    #            habia ido a 78 min
+    #       30   HOY, 25/09, con la causa arreglada y MEDIDA en
+    #            produccion: las vueltas van a 7m05s - 7m42s.
     #
-    #   LA CAUSA YA ESTA ARREGLADA (ver BORDALAS_EL_ONCE_UNA_VEZ
-    #   mas abajo). CUANDO HAYA TRES VUELTAS SEGUIDAS POR DEBAJO DE
-    #   35 MIN CON EL INTERRUPTOR PUESTO, ESTE NUMERO VUELVE A 75.
-    #   No antes: un tope generoso con la causa viva solo esconde
-    #   el problema.
-    timeout-minutes: 180
+    #   POR QUE 30 Y NO 75. Con vueltas de 7 minutos, un tope de 75
+    #   deja que un cuelgue bloquee DIEZ disparos; 30 deja que
+    #   bloquee cuatro, y sigue siendo 4 veces el tiempo que tarda
+    #   una vuelta normal. Un tope generoso no protege: esconde.
+    #
+    #   SI VUELVE A SUBIR DE 30, NO SUBAS EL TOPE: MIRA POR QUE.
+    #   El reparto por etapa sale impreso en cada vuelta.
+    timeout-minutes: 30
 
     env:
       TZ: Europe/Madrid
@@ -104,6 +109,10 @@ jobs:
       # Medido: medibles 4->5, diferencia_media +20,4 -> +3,6, restas con
       # negativos grandes 2->0, cero peticiones nuevas, ninguna decision
       # cambia. Solo toca el marcador: no puede cambiar una compra ni una puja.
+      #
+      # NO ES TEORICO: el calendario trae Levante-Athletic el 21/10/2026 a
+      # las 20:00 como MATCHDAY 6 (aplazado de septiembre). Ese dia habra
+      # puntos de la jornada 6 con la jornada 9 ya jugada.
       BORDALAS_JORNADAS_POR_SU_FECHA: "1"
 
       # Encendido 22/09. NO SE COMPRA PARA REVENDER A QUIEN NO CONSTA QUE
@@ -153,27 +162,64 @@ jobs:
       #   perdia ~1 latido de cada 4. El 24/09 caducaban 8 publicaciones en
       #   35 min y Pepe solo llega a renovar UNA por vuelta.
       #
-      #   MEDIDO EN LABORATORIO (red cortada, foto del 19/09):
-      #       analisis PRE + POST      232,1 s  ->  12,9 s
-      #       POST tras una renovacion  92,0 s  ->   1,8 s
-      #       diferencias campo a campo:  0, salvo los campos de reloj,
-      #       que TAMBIEN cambian entre dos corridas SIN el interruptor.
+      #   RESULTADO EN PRODUCCION (25/09), que supero a la estimacion:
+      #       el analisis        1451,53 s  ->  90,41 s   (16 veces mas rapido)
+      #       la vuelta entera        78 min  ->  7 min
+      #       El once, una vez: 70 busquedas hechas, 847 recordadas,
+      #                         0 SIN CLAVE
+      #       el XI impreso: LOS MISMOS ONCE que la vuelta anterior, 3-5-2
+      #   (La estimacion previa era ~21 min, hecha en laboratorio con una
+      #   plantilla de 19 y n=1 por lado. Se quedo corta.)
       #
-      #   Verja 184/184 en verde con los dos interruptores de arriba
+      #   Verja 184/184 en verde con los interruptores de produccion
       #   puestos. Paso 0 PASADO con los 30. La guardia
       #   `test_el_once_se_busca_una_vez_v1` tiene 10 pruebas y se la vio
       #   ponerse roja rompiendo el modulo de dos maneras distintas.
       #
-      #   LO QUE NO SE MIDIO, Y HAY QUE VIGILAR:
-      #     - El laboratorio tenia plantilla de 19 y produccion tiene 22.
-      #       La estimacion de ~21 min es una EXTRAPOLACION (n=1 por lado).
-      #     - La memoria recuerda POR EL CONTENIDO DE LO QUE RECIBE: si dos
-      #       onces distintos dieran la misma clave, la respuesta seria
-      #       erronea EN SILENCIO. En la primera vuelta con esto puesto se
-      #       comprueba que EL XI IMPRESO SON LOS MISMOS ONCE que en la
-      #       vuelta anterior. El log dice `El once, una vez: ...` con lo
-      #       que se ahorro de verdad.
+      #   LO QUE HAY QUE SEGUIR VIGILANDO: la memoria recuerda POR EL
+      #   CONTENIDO DE LO QUE RECIBE. Si dos onces distintos dieran la misma
+      #   clave, la respuesta seria erronea EN SILENCIO. El aviso es
+      #   `0 sin clave` y que el XI impreso no cambie sin motivo.
       BORDALAS_EL_ONCE_UNA_VEZ: "1"
+
+      # Encendido 25/09. EL DEFICIT SE MIDE CONTRA EL PLAZO, NO CONTRA HOY.
+      #
+      #   LO QUE PASABA. Desde el arreglo del 23/09 el ciclo SABE la fecha y
+      #   la imprime, pero la regla que decide no la usaba:
+      #
+      #     "El reloj de solvencia dice «PUBLICAR» con 7.005.920 EUR de
+      #      deficit. No se puja: el plazo, del calendario, es el 09/10 a
+      #      las 14:45: quedan 336 h (14,0 dias). Hay tiempo, PERO LA REGLA
+      #      DE HOY CIERRA CON CUALQUIER DEFICIT."
+      #
+      #   O sea: sabia que le quedaban dos semanas y actuaba como si fuera
+      #   esta tarde. Con el interruptor, el deficit solo frena a menos de
+      #   24 h del plazo.
+      #
+      #   POR QUE AHORA. Entre la jornada 7 (18/09) y la 8 (09/10) hay 21
+      #   dias por el paron de selecciones. Comprobado en las DOS fuentes,
+      #   que coinciden al minuto:
+      #       nuestro calendario (MARCA+LALIGA)  J8 -> 09/10/2026 21:00
+      #       el calendario de Biwenger          J8 -> 9 oct 21:00
+      #   El plazo efectivo es el 09/10 a las 14:45 (T-6 h 15 min). El
+      #   margen NO se toca: solo cambia si se mira o no.
+      #
+      #   PASO 0 HECHO: este interruptor ya estaba en los 29 del paso 0 del
+      #   23/09 y en los 30 del 24/09, los dos en verde.
+      #
+      #   LO QUE SE ESPERA, Y LO QUE NO ESTA COMPROBADO:
+      #     - SI: desbloquea la subasta, que hoy dice `blocked_by: SOLVENCIA`
+      #       con 14 dias por delante.
+      #     - NO COMPROBADO: si ademas libera la reserva de solvencia sobre
+      #       jugadores concretos. Hoy Ceballos -comprado como apuesta de
+      #       revalorizacion- sale con `Reserved solvencia: SI`, o sea
+      #       marcado para venderse y tapar el agujero que abrio comprarlo.
+      #       QUE ESO SE ARREGLE ES UNA INFERENCIA, NO UN DATO. Mirarlo en
+      #       la vuelta siguiente.
+      #     - Y ojo: encenderlo NO garantiza que puje. Con el saldo en
+      #       -7.005.920 y dos pujas del dueno vivas, la puja maxima son
+      #       2.208.580.
+      BORDALAS_SOLVENCIA_POR_SU_PLAZO: "1"
 
       # QUITADO 22/09 — BORDALAS_SIN_SUBASTA
       #
