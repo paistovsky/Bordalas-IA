@@ -169344,5 +169344,85 @@
         "amount": 14846700
       }
     ]
+  },
+  {
+    "event_id": "3b5da23f1c28e2d5a40c1860",
+    "date": 1790312677,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 26092,
+        "to": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 4929099,
+        "bids": [
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 4820000
+          },
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 4707000
+          }
+        ]
+      },
+      {
+        "player": 31475,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 150001
+      },
+      {
+        "player": 35308,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 150001
+      },
+      {
+        "player": 30789,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 6107000,
+        "bids": [
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 5888000
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 5821000
+          }
+        ]
+      }
+    ]
   }
 ]
