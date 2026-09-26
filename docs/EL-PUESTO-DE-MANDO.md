@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/09/2026, tarde (punto 1 cerrado con datos; tarea diaria programada).
+Actualizado: 26/09/2026, noche (punto 1 reubicado y construido, apagado; tarea diaria programada).
 
 ## El mandato
 
@@ -89,10 +89,34 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
 
 ## El plan, en orden
 
-1. ~~Abrir la puerta de los managers~~ **CERRADO el 26/09 con datos** (ver
-   la correccion de arriba). El hueco con los rivales esta en como compramos
-   y revendemos AL COMPUTER: eso es lo que hay que medir y atacar.
-2. **El cuaderno.** ES EL SIGUIENTE. Hoy el marcador no cuadra: «el once que anotamos no es el
+1. **La regla «¿va a jugar?» en TODAS las compras para revender.**
+   Reubicado el 26/09: el hueco con Pollo17 (+13.072.324, n=43, contra
+   nuestro -249.393, n=22) esta en el mercado del Computer, donde ya
+   jugamos, y la causa esta medida en la_regla_de_compra.py.
+   - Lo que habia: la regla (MIN_STARTER_PERCENT = 40 via
+     roster_fill_veto) ya se aplicaba a la reventa en la SUBASTA DEL RESET
+     (BORDALAS_REVENTA_SOLO_SI_JUEGA, encendido en produccion). NO en el
+     CARRIL de la rendija, que tambien compra para revender
+     (RENDIJA_APAGADA sin poner = vivo). La puerta de los managers,
+     cerrada con datos (ver la correccion de arriba).
+   - Contrafactual: de los 12 viajes de «no jugo el ultimo» (-475.115),
+     2 entraron por el carril: Trent -223.500 y Drkusic -36.376. Con la
+     regla en el carril: +259.876 sobre sus 4 viajes (Boyomo +28.503 y
+     Maffeo -42.850 pasan: jugaron). n=4: pequeno, pero en la direccion
+     de la medicion de temporada. En la foto del 18/09 deja pasar 14 de
+     20 candidatos del Computer: no ahoga el carril.
+   - HECHO (commit bc82a23): BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL,
+     APAGADO. Guardia test_el_carril_mira_si_juega_v1. Verja 190/190 con
+     los de produccion y con --con el nuevo; paso 0 PASADO con los 33
+     (config/paso_0.json). La guardia cazo un fallo que habria dejado la
+     puerta cerrada en la practica: el carril tiraba la titularidad del
+     candidato y la regla habria frenado a TODOS.
+   - **LO QUE FALTA PARA QUE ESTE HECHO DE VERDAD: encenderlo.** Poner
+     `BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL: "1"` en el env de
+     .github/workflows/bordalas-live.yml, junto a REVENTA_SOLO_SI_JUEGA, y
+     vigilar la vuelta siguiente (canario). Si sale roja, se quita. Hasta
+     entonces NO frena ni una puja. Es lo primero de manana.
+2. **El cuaderno.** EL SIGUIENTE, en cuanto el 1 este encendido y verde. Hoy el marcador no cuadra: «el once que anotamos no es el
    que jugo». Sin esto no se puede saber si un cambio mejora o empeora, y sin
    eso no hay gestion, hay fe.
 3. **Aislar la verja de la red.** La regla «ninguna guardia sale a internet»
@@ -171,6 +195,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   403). Lo que no este en el repo no se puede medir desde aqui.
 - El repositorio es paistovsky/Bordalas-IA (la carpeta del dueno se llama
   Bordalas-IA-clean; no es lo mismo).
+
+## Bitacora de despertares
+
+- **26/09 (sesion con el dueno).** GitHub: escribo en main (7989423,
+  b6d754b, bc82a23). Ciclos: los 30 de 25/09 10:07 a 26/09 15:07 UTC,
+  verdes. Sombra: revisandose al cerrar esta sesion; si aqui no hay
+  resultado, repetir el punto 3 manana. Plan: punto 1 reubicado y
+  construido, APAGADO (ver arriba).
 
 ## Lo primero al despertarse
 
