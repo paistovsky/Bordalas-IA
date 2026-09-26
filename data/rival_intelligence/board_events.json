@@ -169618,5 +169618,24 @@
         "amount": 978600
       }
     ]
+  },
+  {
+    "event_id": "2c05b05042d124776a70f711",
+    "date": 1790459826,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
