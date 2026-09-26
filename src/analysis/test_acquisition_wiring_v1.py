@@ -28,9 +28,26 @@ LO QUE APARECIO AL ABRIRLA
 
 Ejecutar:
     python -m src.analysis.test_acquisition_wiring_v1
+
+LA CUENTA DEL VALOR LA PONE ELLA (26/09/2026)
+    Esta guardia prueba el CABLEADO de la puja -que salga del modelo,
+    que sin rivales se puje el minimo, a quien sustituye- sobre la
+    cuenta de valor clasica. Su Tenaglia se puja porque esa cuenta
+    cuenta los puntos de toda la temporada de golpe.
+
+    Con `BORDALAS_EL_PRECIO_NO_SE_PIERDE` puesto, ese mismo Tenaglia
+    -sin tasa de precio, tramo "sin tramo", -9,7 % en 14 dias- no se
+    puja, y dos de sus pruebas caian. Lo cazo la verja con los cinco de
+    produccion mas ese: la guardia dependia del entorno sin ponerlo.
+    Ahora lo apaga ella. La cuenta nueva tiene su propia guardia,
+    `test_el_precio_no_se_pierde_v1`.
 """
 
-import src.analysis.intelligent_bid_engine as motor
+import os
+
+os.environ["BORDALAS_EL_PRECIO_NO_SE_PIERDE"] = ""
+
+import src.analysis.intelligent_bid_engine as motor  # noqa: E402
 
 from src.analysis.intelligent_bid_engine import (
     calculate_intelligent_bids,

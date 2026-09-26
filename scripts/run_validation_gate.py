@@ -505,6 +505,10 @@ TESTS = [
     # El once se busca una vez por entrada: con la memoria puesta,
     # el mismo once, formacion por formacion. Apagada.
     "src.analysis.test_el_once_se_busca_una_vez_v1",
+
+    # El precio no se pierde: un fichaje para jugar cuesta lo que se
+    # deprecia, no su precio entero. Apagado.
+    "src.analysis.test_el_precio_no_se_pierde_v1",
 ]
 
 
@@ -924,6 +928,25 @@ def main() -> int:
         ),
     )
 
+    # LA VERJA CON UNO MAS (26/09/2026)
+    #
+    #     Antes de pegar un interruptor en el YAML hay que ver la
+    #     verja con los de produccion MAS ese. No se podia: la lista
+    #     sale del fichero de CI y lo que sobra se quita. El 26/09 se
+    #     hizo con un envoltorio fuera del repo. Ahora es una opcion:
+    #     suma a la lista de produccion SOLO para esta corrida, y la
+    #     cabecera lo dice. El fichero de CI no se toca.
+    parser.add_argument(
+        "--con",
+        nargs="*",
+        default=[],
+        help=(
+            "interruptores BORDALAS_* que se suman a los de "
+            "produccion en esta corrida, para probarlos antes "
+            "de encenderlos"
+        ),
+    )
+
     args = parser.parse_args()
 
     # ============================================================
@@ -971,6 +994,25 @@ def main() -> int:
             "Doctrina 91."
         )
         return 2
+
+    con_uno_mas = [
+        str(nombre).strip()
+        for nombre in (args.con or [])
+        if str(nombre).strip().startswith("BORDALAS_")
+    ]
+
+    if con_uno_mas:
+        de_produccion = {
+            **de_produccion,
+            "interruptores": sorted(
+                set(de_produccion.get("interruptores") or [])
+                | set(con_uno_mas)
+            ),
+        }
+        print(
+            f"  CON {', '.join(con_uno_mas)} ADEMAS DE LOS DE "
+            f"PRODUCCION: esta corrida no es la de CI."
+        )
 
     if args.paso_0:
         # El paso 0 pone TODOS los del inventario, que es un

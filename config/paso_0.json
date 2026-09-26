@@ -1,7 +1,7 @@
 {
  "version": 1,
- "cuando": "2026-09-25T18:26:32+00:00",
- "segundos": 142.7,
+ "cuando": "2026-09-26T13:21:17+00:00",
+ "segundos": 157.7,
  "maquina": "Windows AMD64",
  "probados": [
   "BORDALAS_BID_SALT",
@@ -11,6 +11,7 @@
   "BORDALAS_CUPO_POR_ENVIOS",
   "BORDALAS_CUPO_POR_VENTANA",
   "BORDALAS_EL_ONCE_UNA_VEZ",
+  "BORDALAS_EL_PRECIO_NO_SE_PIERDE",
   "BORDALAS_HORIZONTE_FIJO",
   "BORDALAS_JORNADAS_POR_SU_FECHA",
   "BORDALAS_LA_MONEDA_DE_LA_LIGA",
@@ -35,5 +36,5 @@
   "BORDALAS_VARA_PLANA",
   "BORDALAS_VIGILA_DATA"
  ],
- "huella": "1def87f92ad30eba55d0d66afa0b2c787eb83f0e721e3b38773dcebb27c501ef"
+ "huella": "dd0d14e14ba70dbc95218688b36a1a8f33e30f6da959a27eb25886015902ee91"
 }

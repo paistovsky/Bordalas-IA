@@ -56,6 +56,8 @@ LOS JUGADORES SIN HISTORICO
 
 from __future__ import annotations
 
+from src.analysis import el_precio_no_se_pierde
+
 
 # Confianza segun de donde salen los puntos estimados.
 CONFIDENCE_HISTORICAL = 1.00
@@ -1230,9 +1232,19 @@ def xi_upgrade_value(
     # por lo mismo: quien no lo pase se comporta como antes de
     # existir esta regla.
     replaced_in_lineup: bool = False,
+
+    # Para la cuenta de `el_precio_no_se_pierde`. Opcionales: sin
+    # precio, o con el interruptor apagado, la cuenta de siempre.
+    candidate_price=None,
+    price_rate=None,
+    precio_no_se_pierde: bool | None = None,
 ) -> dict:
     """
     Lo maximo que pagariamos por un fichaje que mejora el once.
+
+    Con BORDALAS_EL_PRECIO_NO_SE_PIERDE (o `precio_no_se_pierde`) y
+    `candidate_price`, el precio no se da por perdido: se conserva y
+    solo cuesta lo que se deprecia. Ver `el_precio_no_se_pierde`.
 
     `recovered_value` es lo que recuperamos vendiendo al que
     sustituye. Por defecto cero: lo prudente es suponer que se
@@ -1620,8 +1632,36 @@ def xi_upgrade_value(
         justo * (1.0 - margin) * max(min(confidence, 1.0), 0.0)
     ) + safe_int(recovered_value)
 
+    # EL PRECIO NO SE PIERDE (26/09/2026)
+    #
+    #     La de arriba compara los puntos que añade contra el precio
+    #     ENTERO, como si pagar fuera perder. Con el interruptor, el
+    #     precio se conserva y solo cuesta lo que se deprecia en el
+    #     horizonte. Una sola cuenta, en `el_precio_no_se_pierde`.
+    #
+    #     Lo que se recupera vendiendo al que sale NO se suma aqui:
+    #     vender es cambiar un activo por su dinero, ni gana ni pierde.
+    #     En la cuenta vieja se sumaba porque el precio entero estaba
+    #     restando; en la nueva ya no resta.
+    cuenta = None
+
+    if precio_no_se_pierde is None:
+        precio_no_se_pierde = el_precio_no_se_pierde.encendido()
+
+    if precio_no_se_pierde and safe_int(candidate_price) > 0:
+        cuenta = el_precio_no_se_pierde.valor_para_jugar(
+            precio=safe_int(candidate_price),
+            delta_puntos_temporada=delta,
+            tarifa=tarifa,
+            margen=margin,
+            confianza=confidence,
+            tasa_por_dia=price_rate,
+        )
+        maximo = safe_int(cuenta.get("valor"))
+
     return {
         "value": maximo,
+        "el_precio_no_se_pierde": cuenta,
         "fair_value": justo,
         "points_delta": delta,
         "rate_per_point": tarifa,
