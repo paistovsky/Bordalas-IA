@@ -114,14 +114,29 @@ from src.analysis.deployment import (                        # noqa: E402
 ENV = "BORDALAS_REVENTA_SOLO_SI_JUEGA"
 
 
-def activa() -> bool:
+# LA MISMA REGLA, EN EL CARRIL (26/09/2026)
+#
+#     `ENV` solo la pone en la subasta del reset. El carril de la
+#     rendija tambien compra para revender -escribe
+#     `intent="REVENDER"`- y no la miraba: Trent (-223.500) y
+#     Drkusic (-36.376) entraron por ahi sin pronostico de
+#     titularidad, y son dos de los doce viajes de "no jugo el
+#     ultimo" que suman -475.115 en la temporada.
+#
+#     No es una regla nueva (doctrina 84): es esta, con su propio
+#     interruptor, porque `ENV` ya esta encendido en produccion y
+#     reutilizarlo cambiaria el carril sin paso 0. Nace APAGADO.
+ENV_CARRIL = "BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL"
+
+
+def activa(interruptor: str = ENV) -> bool:
     """Si la regla manda. Nunca lanza."""
 
     try:
         import os
 
         return str(
-            os.environ.get(ENV, "")
+            os.environ.get(interruptor, "")
         ).strip().lower() in {"1", "true", "si", "yes"}
 
     except Exception:                               # noqa: BLE001
@@ -172,13 +187,19 @@ def por_que_no(fila: dict) -> str | None:
         return None
 
 
-def mira_si_va_a_jugar(candidatos: list | None) -> dict:
+def mira_si_va_a_jugar(
+    candidatos: list | None,
+    interruptor: str = ENV,
+) -> dict:
     """
     Parte la lista en los que siguen y los que frena la regla.
 
     Forma fija. Nunca lanza. Con el interruptor apagado devuelve
     la lista entera en `siguen` y `frenados` vacio: el
     comportamiento de antes del 22/09, al detalle.
+
+    `interruptor` dice cual la enciende: `ENV` en la subasta,
+    `ENV_CARRIL` en el carril.
     """
 
     salida = {
@@ -186,21 +207,21 @@ def mira_si_va_a_jugar(candidatos: list | None) -> dict:
         "activa": False,
         "siguen": list(candidatos or []),
         "frenados": [],
-        "interruptor": ENV,
+        "interruptor": interruptor,
         "min_starter_percent": MIN_STARTER_PERCENT,
         "min_hierarchy_value": MIN_HIERARCHY_VALUE,
         "reason": None,
     }
 
     try:
-        manda = activa()
+        manda = activa(interruptor)
 
         if not manda:
             return {
                 **salida,
                 "available": True,
                 "reason": (
-                    f"La regla esta apagada ({ENV} sin poner): "
+                    f"La regla esta apagada ({interruptor} sin poner): "
                     f"pasan los {len(candidatos or [])}."
                 ),
             }
@@ -243,7 +264,7 @@ def mira_si_va_a_jugar(candidatos: list | None) -> dict:
             "siguen": siguen,
             "frenados": frenados,
             "reason": (
-                f"{ENV} puesto: {len(frenados)} frenada(s) por no "
+                f"{interruptor} puesto: {len(frenados)} frenada(s) por no "
                 f"constar que vayan a jugar, {len(siguen)} siguen. "
                 f"El mercado no se mueve para quien no juega, y el "
                 f"movimiento del mercado es de donde sale el "

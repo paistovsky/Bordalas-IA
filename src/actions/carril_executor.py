@@ -310,6 +310,16 @@ def correr(
                     t.get("route")
                     or (t.get("deployment") or {}).get("route")
                 ),
+
+                # LO QUE MIRA `la_regla_de_compra` (26/09/2026).
+                #     Sin estas tres, la regla veria a todos "sin
+                #     pronostico" y el carril no pujaria nunca:
+                #     frenado por un dato perdido aqui, no por el
+                #     jugador. La disponibilidad no hace falta: ya
+                #     se exige `status == "ok"` aqui abajo.
+                "starter_probability": t.get("starter_probability"),
+                "hierarchy_value": t.get("hierarchy_value"),
+                "hierarchy_label": t.get("hierarchy_label"),
             }
             for t in (objetivos or [])
             if isinstance(t, dict)
@@ -446,6 +456,33 @@ def correr(
 
         candidatos_finales = corte.get("siguen") or []
 
+        # ================================================
+        # ¿VA A JUGAR? (26/09/2026)
+        # ================================================
+        #
+        #     La regla de la subasta, aqui tambien: sin pronostico
+        #     de titularidad, o por debajo del 40 %, no se compra
+        #     para revender. Trent y Drkusic entraron por este
+        #     carril sin pronostico y perdieron 259.876 EUR.
+        #
+        #     Su propio interruptor, `ENV_CARRIL`, APAGADO de
+        #     fabrica: sin el, esto no frena ni una puja. Mismo
+        #     sitio que el corte, y por lo mismo: el hueco del
+        #     frenado se lo queda el siguiente en la MISMA vuelta.
+        from src.analysis.la_regla_de_compra import (
+            ENV_CARRIL,
+            mira_si_va_a_jugar,
+        )
+
+        regla = mira_si_va_a_jugar(
+            candidatos_finales,
+            interruptor=ENV_CARRIL,
+        )
+
+        frenados_por_no_jugar = regla.get("frenados") or []
+
+        candidatos_finales = regla.get("siguen") or []
+
         elegidos = a_quien_pujar(
             candidatos_finales,
             cuantos=caben,
@@ -461,7 +498,9 @@ def correr(
                 #     dice con su nombre y no con un "no hay a
                 #     quien" que parece mercado.
                 "blocked_by": (
-                    "SIN_REVENTA"
+                    "NO_VA_A_JUGAR"
+                    if frenados_por_no_jugar and not candidatos_finales
+                    else "SIN_REVENTA"
                     if frenados_por_reventa and not candidatos_finales
                     else None
                 ),
@@ -483,6 +522,11 @@ def correr(
                         if frenados_por_reventa
                         else ""
                     )
+                    + (
+                        f" {regla.get('reason')}"
+                        if frenados_por_no_jugar
+                        else ""
+                    )
                 ).strip(),
                 "permiso": puerta,
                 "margen": margen,
@@ -491,6 +535,8 @@ def correr(
                 "frenados": frenados_por_repetir,
                 "frenados_por_reventa": frenados_por_reventa,
                 "corte_de_la_reventa": corte,
+                "frenados_por_no_jugar": frenados_por_no_jugar,
+                "regla_de_compra": regla,
             }
 
         if escritor is None:
@@ -729,6 +775,8 @@ def correr(
             "bolsillo": bolsillo,
             "frenados_por_reventa": frenados_por_reventa,
             "corte_de_la_reventa": corte,
+            "frenados_por_no_jugar": frenados_por_no_jugar,
+            "regla_de_compra": regla,
             "reason": (
                 f"{len(puestas)} puja(s) de la rendija"
                 + (
@@ -740,6 +788,11 @@ def correr(
                 + (
                     f" {corte.get('reason')}"
                     if frenados_por_reventa
+                    else ""
+                )
+                + (
+                    f" {regla.get('reason')}"
+                    if frenados_por_no_jugar
                     else ""
                 )
             ),

@@ -84,6 +84,12 @@ os.environ.pop("BORDALAS_NO_REPETIR_LA_ESCRITURA", None)
 #     ella.
 os.environ.pop("BORDALAS_SIN_REVENTA", None)
 
+# Y LA REGLA DEL CARRIL (26/09/2026), por lo mismo: el Trent de
+# este caso no trae pronostico de titularidad -el de verdad
+# tampoco lo traia-, y con la regla puesta no se puja. Eso lo
+# mide `test_el_carril_mira_si_juega_v1`, que la pone y la quita.
+os.environ.pop("BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL", None)
+
 from datetime import datetime, timezone
 
 from pathlib import Path
