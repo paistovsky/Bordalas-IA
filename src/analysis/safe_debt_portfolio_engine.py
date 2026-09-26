@@ -168,6 +168,15 @@ def _prepare_fast_roster(snapshot: dict) -> list[dict]:
             "name": str(player.get("name") or player_id),
             "position": positions[0],
             "lineup_score": float(player.get("lineup_score", 0.0) or 0.0),
+            # Sin el bono del Dios: para VALORAR, no para elegir.
+            # Lo usa `la_reserva_mira_el_once`; aqui no cambia nada.
+            "lineup_score_sporting": float(
+                player.get(
+                    "lineup_score_sporting",
+                    player.get("lineup_score", 0.0),
+                )
+                or 0.0
+            ),
         })
 
     return roster
@@ -581,6 +590,24 @@ def build_safe_liquidity_portfolio(
         "current_formation": current_lineup.get("formation"),
         "current_lineup_score": round(current_score, 2),
         "current_starter_ids": sorted(current_starter_ids),
+        # CON QUE NUMEROS SE PROYECTO EL ONCE (26/09/2026)
+        #
+        #     La reserva y el aviso de venta de titular
+        #     (`la_reserva_mira_el_once`) rehacen el once con ESTOS
+        #     mismos puntos y ESTOS mismos intocables, no con otros.
+        #     Si leyeran su propia plantilla, podrian llamar titular
+        #     a quien aqui no lo es.
+        "plantilla_del_once": [
+            {
+                "id": player["id"],
+                "name": player["name"],
+                "position": player["position"],
+                "lineup_score": player["lineup_score"],
+                "lineup_score_sporting": player["lineup_score_sporting"],
+            }
+            for player in roster
+        ],
+        "intocables": sorted(intocables),
         "source_count": len(sources),
         "sources": sources,
         "gross_source_total": sum(safe_int(item["amount"]) for item in sources),

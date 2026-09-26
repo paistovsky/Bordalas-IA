@@ -505,6 +505,10 @@ TESTS = [
     # El once se busca una vez por entrada: con la memoria puesta,
     # el mismo once, formacion por formacion. Apagada.
     "src.analysis.test_el_once_se_busca_una_vez_v1",
+
+    # La reserva de solvencia guarda primero al que no juega, y
+    # avisa con alternativa cuando guarda a un titular. Apagada.
+    "src.analysis.test_la_reserva_prefiere_al_que_no_juega_v1",
 ]
 
 

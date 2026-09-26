@@ -2963,6 +2963,29 @@ def print_cycle_result(
             f"{offer.get('action')}"
         )
 
+    # VENTAS DE TITULAR RESERVADAS (26/09/2026)
+    #
+    #     La noche del 25/09 se vendio a Ruben Garcia, titular, y el
+    #     dueño se entero doce horas tarde. Esto lo dice en cuanto
+    #     queda reservado, con la alternativa. Ver
+    #     `la_reserva_mira_el_once`.
+    ventas_de_titular = (
+        (state.get("solvency") or {}).get("ventas_de_titular")
+        or []
+    )
+
+    print()
+
+    print(
+        f"VENTAS DE TITULAR RESERVADAS: {len(ventas_de_titular)}"
+    )
+
+    for aviso in ventas_de_titular:
+
+        print(
+            f"  {aviso.get('texto')}"
+        )
+
     print()
 
     print(
