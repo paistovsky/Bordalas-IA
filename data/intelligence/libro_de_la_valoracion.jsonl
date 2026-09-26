@@ -213,3 +213,5 @@
 {"dia":"2026-09-26","id":5697,"name":"Mariano","value":0,"price":5050000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-09-26","id":5807,"name":"Marc Roca","value":0,"price":3510000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-09-26","id":10155,"name":"Unai Núñez","value":0,"price":1890000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-09-26","id":43262,"name":"Félix Correia","value":2458003,"price":2360000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-09-26","id":37719,"name":"Álvaro Núñez","value":758795,"price":700000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
