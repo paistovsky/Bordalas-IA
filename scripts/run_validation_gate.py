@@ -505,6 +505,11 @@ TESTS = [
     # El once se busca una vez por entrada: con la memoria puesta,
     # el mismo once, formacion por formacion. Apagada.
     "src.analysis.test_el_once_se_busca_una_vez_v1",
+
+    # El once objetivo, en papel: el calendario se mide en desviacion
+    # sobre la media propia, el once sale de las siete formaciones y
+    # el plan no vende a perdida. No decide nada.
+    "src.analysis.test_el_calendario_se_mide_con_desviacion_v1",
 ]
 
 
