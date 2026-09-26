@@ -218,6 +218,14 @@ Koski y Laporte.
 
 ### El plan, con la caja y las fichas de hoy
 
+> **NO SE EJECUTA, Y SU SUPUESTO ERA FALSO (corregido el mismo 26/09).** Con el saldo en rojo,
+> lo cobrado por una venta **no llega** a la caja de fichar si la oferta ya estaba en la
+> garantía. Medido: anoche entraron 3.670.800 y la caja bajó 2.218.802. Con eso, el plan real es
+> **una sola compra, Balliu, +0,12**, y vender a Jonny no cabe. Además, B y C llevaban a
+> Aubameyang, que está lesionado. Todo está en `INFORME-LAS-CUATRO-CORTAS-2026-09-26.md`. Lo de
+> abajo se queda como lo que es: **la mejor jugada posible con 1.356.676 € captura el 2,4 % de
+> la distancia a C, y ese es el argumento.**
+
 Supuestos, dichos: caja 1.356.676, 2 fichas libres (23 − 21), solo se vende **con oferta en
 firme del Computer**, **sin pérdida** (oferta ≥ lo que costó; con coste desconocido no se
 vende: 10 de 17 lo tienen), nunca a Yamal, y **lo que entra por una venta vuelve entero a la

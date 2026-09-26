@@ -193,10 +193,47 @@ def encoger(puntos, jugados, media_posicion, k) -> float:
 
 
 # ============================================================
+# QUIEN ESTA DISPONIBLE (26/09/2026)
+# ============================================================
+#
+#     Aubameyang, `injured`, entraba en el once B: un once ideal con
+#     un lesionado dentro no es un once ideal.
+#
+#     FUERA de todo once: `injured`, `sanctioned`, `discarded` y
+#     `unknown`. Medido: de los que estaban asi antes de su
+#     siguiente partido (fotos del 14/08 y del 10/09), jugaron
+#     injured 2 de 78 (3 %), sanctioned 0 de 6, discarded 0 de 1.
+#     `unknown` no tiene medicion (n = 0): lo que no se sabe no se
+#     alinea. Son dos libres.
+#
+#     `doubt` NO sale del once de la temporada: dura un partido, y el
+#     once de la temporada no es el de la jornada. En el de la
+#     JORNADA juega con lo medido: 4 de 17 jugaron (24 %), contra el
+#     69 % de los `ok` (n = 850). Esta mucho mas cerca de un
+#     lesionado que de uno sano. Si FutbolFantasy trae probabilidad,
+#     manda la suya, que es de ese partido.
+#
+#     `warned` (apercibido) juega: es un aviso de sancion, no una.
+
+FUERA = frozenset({"injured", "sanctioned", "discarded", "unknown"})
+
+JUEGA_SI_DUDA = 0.24
+
+
+def disponible(jugador) -> bool:
+    """Si puede entrar en un once. Sin estado, si. Nunca lanza."""
+
+    try:
+        return str((jugador or {}).get("status") or "ok") not in FUERA
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+# ============================================================
 # EL MEJOR ONCE
 # ============================================================
 
-def el_mejor_once(jugadores, valor: str = "valor") -> dict:
+def el_mejor_once(jugadores, valor: str = "valor", fuera=FUERA) -> dict:
     """
     El mejor once por `valor` entre las siete formaciones de
     `lineup_engine` (1 portero, 3-5 defensas, 3-5 medios, 1-3
@@ -207,13 +244,19 @@ def el_mejor_once(jugadores, valor: str = "valor") -> dict:
     aproximacion. Empate de formaciones: la de menos coste, y
     despues el nombre (doctrina 110: el desempate tambien elige).
 
-    `jugadores`: `[{id, posicion, <valor>, precio?}]`. Nunca lanza.
+    Nadie con `status` en `fuera` entra, tenga los puntos que tenga.
+    `fuera=frozenset()` solo para MEDIR a quien se deja fuera.
+
+    `jugadores`: `[{id, posicion, <valor>, precio?, status?}]`.
+    Nunca lanza.
     """
 
     try:
         por_puesto: dict = {1: [], 2: [], 3: [], 4: []}
         for j in jugadores or []:
             pos = int(j.get("posicion") or 0)
+            if str(j.get("status") or "ok") in fuera:
+                continue
             if pos in por_puesto and safe_float(j.get(valor)) is not None:
                 por_puesto[pos].append(j)
         for pos in por_puesto:
@@ -267,6 +310,7 @@ def el_plan(
     no_se_vende=(),
     valor: str = "valor",
     maximo_pasos: int = 20,
+    llega_a_la_caja=None,
 ) -> dict:
     """
     La secuencia mas barata de compras y ventas que acerca el once.
@@ -285,16 +329,36 @@ def el_plan(
 
     Solo se vende con oferta en firme, sin perdida (importe >= coste,
     y con coste desconocido no se vende) y fuera del once que queda.
-    El importe de una venta vuelve a la caja entero: es un SUPUESTO,
-    se dice en el informe. Cada compra y cada venta es una escritura,
-    y va una por ciclo: el plan cuenta escrituras.
+    Cada compra y cada venta es una escritura, y va una por ciclo:
+    el plan cuenta escrituras.
 
-    Nunca lanza.
+    LO QUE LLEGA A LA CAJA POR UNA VENTA (26/09/2026)
+
+        `llega_a_la_caja`: `{id: euros}`, lo que suma a la caja de
+        fichar vender a ese jugador. Sin dato, el importe entero.
+
+        CON EL SALDO EN ROJO NO LLEGA NADA si su oferta ya estaba
+        en la garantia de solvencia: la caja es el margen de deuda,
+        `garantia - 500.000 - deuda`, y vender baja la deuda y la
+        garantia lo mismo. Medido la noche del 25/09: entraron
+        3.670.800 por dos ventas y la caja paso de 3.575.478 a
+        1.356.676. Quien llama tiene que decirlo.
+
+    No compra a nadie que no este disponible (`FUERA`). Nunca lanza.
     """
 
     try:
         tengo = {j["id"]: dict(j) for j in plantilla or []}
-        mercado = {j["id"]: dict(j) for j in comprables or [] if j["id"] not in tengo}
+        mercado = {
+            j["id"]: dict(j) for j in comprables or []
+            if j["id"] not in tengo and disponible(j)
+        }
+        llega = dict(llega_a_la_caja or {})
+
+        def cobra(y):
+            if y in llega:
+                return int(llega[y] or 0)
+            return int(ofertas[y].get("importe") or 0)
         ofertas = dict(ofertas or {})
         bloqueados = set(no_se_vende or ())
         caja = int(caja or 0)
@@ -332,7 +396,9 @@ def el_plan(
                     if y not in ofertas:
                         continue
                     importe = int(ofertas[y].get("importe") or 0)
-                    if precio > caja + importe:
+                    # Cabe con lo que LLEGA a la caja; cuesta, en
+                    # dinero de verdad, precio menos importe.
+                    if precio > caja + cobra(y):
                         continue
                     ids = [i for i in tengo if i != y] + [x]
                     nuevo = once(ids)
@@ -351,7 +417,7 @@ def el_plan(
 
             _, tipo, x, y, nuevo, gana, precio, neto = mejor
             if y is not None:
-                caja += int(ofertas[y].get("importe") or 0)
+                caja += cobra(y)
                 del tengo[y]
                 fichas += 1
                 escrituras += 1

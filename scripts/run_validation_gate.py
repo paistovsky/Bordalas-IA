@@ -510,6 +510,10 @@ TESTS = [
     # sobre la media propia, el once sale de las siete formaciones y
     # el plan no vende a perdida. No decide nada.
     "src.analysis.test_el_calendario_se_mide_con_desviacion_v1",
+
+    # Y ningun once en papel alinea a un lesionado, un sancionado,
+    # un descartado o uno de estado desconocido.
+    "src.analysis.test_el_once_no_alinea_lesionados_v1",
 ]
 
 
