@@ -25,6 +25,8 @@ from src.analysis.safe_debt_portfolio_engine import (
     build_safe_liquidity_portfolio,
 )
 
+from src.analysis import la_reserva_mira_el_once
+
 
 SAFE_LIQUIDITY_BUFFER = 500_000
 
@@ -428,6 +430,8 @@ def calculate_offer_reservations(
     balance: int,
     incoming: dict,
     guarantee: dict,
+    portfolio: dict | None = None,
+    mira_el_once: bool | None = None,
 ) -> dict:
     """
     Reserva solo la parte de SECURED_LIQUIDITY que no podemos
@@ -435,6 +439,13 @@ def calculate_offer_reservations(
 
     EXPECTED_LIQUIDITY ya esta descontada una vez y se utiliza
     directamente: no existe un segundo haircut.
+
+    `portfolio` es la cartera de `build_safe_liquidity_portfolio`:
+    trae la plantilla con la que se proyecto el once. Con
+    `mira_el_once` (None = el interruptor
+    BORDALAS_LA_RESERVA_MIRA_EL_ONCE) se guarda primero lo que
+    menos once cuesta por euro. Sin cartera, o apagado, el orden de
+    siempre. Ver `la_reserva_mira_el_once`.
     """
     if balance >= 0:
         return {
@@ -516,6 +527,41 @@ def calculate_offer_reservations(
 
     offers.sort(key=reservation_key)
 
+    # LA RESERVA MIRA EL ONCE (26/09/2026)
+    #
+    #     El orden de arriba no pregunta quien juega: la franquicia
+    #     y la estrategica son del jugador, no del once. El 25/09
+    #     guardo a Ruben Garcia, titular, y se vendio solo a la
+    #     01:13. Medido sobre las fotos: en 4 de 5 episodios con
+    #     deficit la reserva metio a un titular teniendo suplentes
+    #     que tapaban la deuda.
+    #
+    #     Con el interruptor, primero lo que menos once rehecho
+    #     pierde por euro; a igual perdida, el orden de arriba.
+    #     NACE APAGADO.
+    orden = "FRANQUICIA"
+
+    if mira_el_once is None:
+        mira_el_once = la_reserva_mira_el_once.mira_el_once()
+
+    plantilla = (portfolio or {}).get("plantilla_del_once")
+
+    if mira_el_once and plantilla:
+        filas = la_reserva_mira_el_once.ordenar_por_puntos_por_euro(
+            offers, plantilla
+        )
+        puesto = {
+            fila["offer_id"]: indice
+            for indice, fila in enumerate(filas)
+        }
+        if filas:
+            offers.sort(
+                key=lambda offer: puesto.get(
+                    offer.get("offer_id"), len(puesto)
+                )
+            )
+            orden = "PUNTOS_DEL_ONCE_POR_EURO"
+
     reserved = []
     reserved_total = 0
 
@@ -557,6 +603,7 @@ def calculate_offer_reservations(
         "expected_credit": expected_credit,
         "covered": covered,
         "guarantee_state": guarantee.get("state"),
+        "orden": orden,
         "reason": (
             "Las ofertas SOLVENCY_RESERVED no deben rechazarse "
             "sin recalcular SOLVENCY_GUARANTEE."
@@ -1406,6 +1453,7 @@ def build_solvency_state(snapshot: dict) -> dict:
         balance=balance,
         incoming=incoming,
         guarantee=guarantee,
+        portfolio=safe_liquidity_portfolio,
     )
 
     recoverable_cash = int(
@@ -1414,6 +1462,26 @@ def build_solvency_state(snapshot: dict) -> dict:
 
     seconds_to_deadline = deadline.get(
         "seconds_to_deadline"
+    )
+
+    # EL AVISO DE VENTA DE TITULAR (26/09/2026)
+    #
+    #     Siempre, con o sin el interruptor: no decide nada, solo
+    #     dice. Salta cuando una oferta de un titular esta
+    #     RESERVADA -no cuando se cobra, que es el mismo ciclo en
+    #     que entra en la ventana- y trae quien, por cuanto,
+    #     cuantos puntos del once cuesta y la alternativa.
+    ventas_de_titular = la_reserva_mira_el_once.las_ventas_de_titular(
+        reservadas=reservations.get("reserved"),
+        ofertas=incoming.get("offers"),
+        plantilla=safe_liquidity_portfolio.get("plantilla_del_once"),
+        titulares=safe_liquidity_portfolio.get("current_starter_ids"),
+        intocables=safe_liquidity_portfolio.get("intocables"),
+        horas_al_plazo=(
+            float(seconds_to_deadline) / 3600.0
+            if seconds_to_deadline is not None
+            else None
+        ),
     )
     lineup_risk = deadline["lineup_risk"]
     phase = str(
@@ -1459,6 +1527,7 @@ def build_solvency_state(snapshot: dict) -> dict:
         "computer_cycles": cycle_state,
         "solvency_guarantee": guarantee,
         "solvency_reservations": reservations,
+        "ventas_de_titular": ventas_de_titular,
         "max_safe_debt": max_safe_debt,
         "risk": risk,
         "temporary_debt": debt_permission,

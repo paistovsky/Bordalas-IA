@@ -509,6 +509,10 @@ TESTS = [
     # El precio no se pierde: un fichaje para jugar cuesta lo que se
     # deprecia, no su precio entero. Apagado.
     "src.analysis.test_el_precio_no_se_pierde_v1",
+
+    # La reserva de solvencia guarda primero al que no juega, y
+    # avisa con alternativa cuando guarda a un titular. Apagada.
+    "src.analysis.test_la_reserva_prefiere_al_que_no_juega_v1",
 ]
 
 
