@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/09/2026.
+Actualizado: 26/09/2026, tarde (punto 1 cerrado con datos; tarea diaria programada).
 
 ## El mandato
 
@@ -33,7 +33,36 @@ Dos instrucciones suyas de siempre:
 lo puso el dueno fichando a mano (Yamal solo, 88 puntos) y el 31 % la
 plantilla inicial.
 
-## EL HALLAZGO QUE MANDA SOBRE TODO LO DEMAS
+## CORRECCION 26/09/2026 (tarde): EL HALLAZGO DE ABAJO ESTABA MAL ETIQUETADO
+
+Medido sobre data/rival_intelligence/board_events.json (tablon entero,
+09/08 a 26/09) y data/fotos/2026-09-18.json:
+
+- **Los rivales NO ganan en el mercado entre managers.** Las 262 compras del
+  tablon son TODAS al mercado del Computer (Pollo17 78, Luismi_Haz 66,
+  nosotros 48). Traspasos de manager a manager en toda la temporada: **10**,
+  y 4 son nuestros. La tabla de abajo («compraventa ENTRE MANAGERS») son
+  viajes comprados al Computer y revendidos. El hueco con Pollo17 esta en el
+  mercado donde YA jugamos, no en una puerta cerrada.
+- **Con la puerta abierta, el 18/09 Pepe habria fichado a nadie.** 34
+  jugadores de managers en el tablero; los 34 con `would_pass: False`
+  (16 SUPERA_PRESUPUESTO, 8 SIN_VALOR, 6 NO_COMPENSA, 3 RENDIMIENTO, 1 NO
+  DISPONIBLE). Abrir la puerta con el liston de hoy = puerta cerrada en la
+  practica. Con el filtro «juega» (titularidad >= 40 %) y sin liston:
+  n=28, prima media +14,5 % sobre mercado, **-16.876.000 (-13,2 %) a precio
+  de hoy, 4 de 28 en verde**. Peor que no fichar. Solo los que piden a
+  precio de mercado (+-3 %): n=10, +790.000 (+2,6 %), 4 de 10 en verde, y
+  casi todo es un jugador (Jonathan David, +1,18 M). Una foto, 8 dias: sin
+  senal.
+- Puntos hechos desde el 18/09: **no se han podido medir** (el repo no guarda
+  puntos por jugador y jornada despues de la foto; la red de la nube no
+  deja bajar los artefactos del ciclo).
+
+**Decision: el punto 1 del plan se CIERRA sin tocar codigo.** No se reabre
+sin dato nuevo (por ejemplo, varias fotos donde algun jugador de manager
+pase el liston a precio de mercado).
+
+## EL HALLAZGO ORIGINAL (ver la correccion de arriba)
 
 Medido en src/analysis/la_regla_de_compra.py, 115 viajes cerrados del 09/08
 al 21/09:
@@ -60,9 +89,10 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
 
 ## El plan, en orden
 
-1. **Abrir la puerta de los managers**, con el filtro del «jugo el ultimo
-   partido». Detras de interruptor, apagado, y encender con canario.
-2. **El cuaderno.** Hoy el marcador no cuadra: «el once que anotamos no es el
+1. ~~Abrir la puerta de los managers~~ **CERRADO el 26/09 con datos** (ver
+   la correccion de arriba). El hueco con los rivales esta en como compramos
+   y revendemos AL COMPUTER: eso es lo que hay que medir y atacar.
+2. **El cuaderno.** ES EL SIGUIENTE. Hoy el marcador no cuadra: «el once que anotamos no es el
    que jugo». Sin esto no se puede saber si un cambio mejora o empeora, y sin
    eso no hay gestion, hay fe.
 3. **Aislar la verja de la red.** La regla «ninguna guardia sale a internet»
@@ -132,6 +162,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   **Esos cron jobs no se tocan: son su latido.**
 - No estoy despierto de continuo. Me despierto con una tarea programada, leo
   esto, trabajo y lo dejo actualizado. **Este documento es mi memoria.**
+- **La tarea programada existe desde el 26/09/2026:** rutina «Pepe: despertar
+  diario del gestor» (trig_012SxTn5vFzBmsmBabtbe7RM), todos los dias a las
+  08:47 hora de Madrid, abre una sesion nueva en la nube que empieza leyendo
+  este documento. Avisa al dueno por el movil y por email. Sin conectores:
+  si la sesion no puede clonar o empujar, lo primero es decirlo.
+- La red de la nube NO deja bajar los artefactos del ciclo (blob de Azure,
+  403). Lo que no este en el repo no se puede medir desde aqui.
 - El repositorio es paistovsky/Bordalas-IA (la carpeta del dueno se llama
   Bordalas-IA-clean; no es lo mismo).
 
