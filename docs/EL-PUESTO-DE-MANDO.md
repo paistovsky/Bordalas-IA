@@ -203,6 +203,9 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   verdes. Sombra: revisandose al cerrar esta sesion; si aqui no hay
   resultado, repetir el punto 3 manana. Plan: punto 1 reubicado y
   construido, APAGADO (ver arriba).
+- **26/09 16:20 UTC (comprobacion programada).** El ciclo #1817 de las
+  16:07, el primero con el carril nuevo (825f6a6), salio VERDE. La
+  revision de la sombra (punto 3) sigue sin resultado: repetirla manana.
 
 ## Lo primero al despertarse
 
