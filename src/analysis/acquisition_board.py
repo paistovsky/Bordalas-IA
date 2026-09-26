@@ -29,6 +29,8 @@ NO CAMBIA NADA POR SI SOLO
     escribe en Biwenger.
 """
 
+from src.analysis import el_precio_no_se_pierde
+
 from src.analysis.deployment import (
     DEPLOYMENT_ENABLED,
     PURE_SPECULATION,
@@ -847,6 +849,17 @@ def build_acquisition_board(
                     )
                 ),
 
+                # LA CUENTA DEL PRECIO QUE NO SE PIERDE (26/09/2026)
+                #
+                #     Ganancia, coste real y puntos por millon, para
+                #     verla en pantalla y para ordenar la cola. None
+                #     con el interruptor apagado.
+                "el_precio_no_se_pierde": (
+                    (valoracion.get("as_xi") or {}).get(
+                        "el_precio_no_se_pierde"
+                    )
+                ),
+
                 # ============================================
                 # LO QUE EL FICHAJE DEVUELVE EN CAJA
                 # ============================================
@@ -1458,11 +1471,31 @@ def build_acquisition_board(
                 default=PURE_SPECULATION,
             )
 
+        # LA COLA ES UNA COLA (26/09/2026)
+        #
+        #     Con el precio que no se pierde, entre las pujables se
+        #     coge primero la que mas puntos gana por millon. Que
+        #     pasen muchos no es fichar a muchos: una escritura por
+        #     vuelta, y la primera es esta. Apagado, el orden de
+        #     siempre (vale 0 para todos).
+        def _puntos_por_millon(item) -> float:
+
+            if not el_precio_no_se_pierde.encendido():
+                return 0.0
+
+            cuenta = item.get("el_precio_no_se_pierde") or {}
+
+            try:
+                return float(cuenta.get("puntos_por_millon") or 0.0)
+            except (TypeError, ValueError):
+                return 0.0
+
         filas.sort(
             key=lambda item: (
                 item["decision"] != "BID",
                 bool(item.get("has_live_bid")),
                 _escalon(item),
+                -_puntos_por_millon(item),
                 -(item.get("expected_value") or 0),
                 -item["our_value"],
             )

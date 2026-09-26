@@ -62,6 +62,8 @@ from src.analysis.deployment import (
 
 from src.analysis.hold_value import hold_value
 
+from src.analysis import el_precio_no_se_pierde
+
 from src.analysis.route_confidence import (
     premium_confidence,
     streak_confidence,
@@ -394,6 +396,20 @@ def value_candidate(
             player, mercado, equipos, starter=titularidad
         )
 
+        # LA COMPUERTA DEL PRECIO, ANTES DE TODO (26/09/2026)
+        #
+        #     Se calculaba en la especulacion. La cuenta de
+        #     `el_precio_no_se_pierde` tambien la necesita -su tramo
+        #     de depreciacion sale de esta tasa-, asi que sube aqui y
+        #     abajo se reutiliza la misma. Es pura: calcularla antes
+        #     no cambia nada.
+        compuerta = evaluate_market_rate(
+            player.get("id"),
+            (context or {}).get("market_rates"),
+        )
+
+        precio_no_se_pierde = el_precio_no_se_pierde.encendido()
+
         # --------------------------------------------------
         # COMO MEJORA DEL ONCE
         # --------------------------------------------------
@@ -565,6 +581,12 @@ def value_candidate(
                 matchday=(titularidad or {}).get("matchday"),
 
                 replaced_in_lineup=titular,
+
+                # El precio no se pierde: se conserva y cuesta lo que
+                # se deprecia, segun la tasa de la compuerta.
+                candidate_price=precio,
+                price_rate=compuerta.get("rate_percent_per_day"),
+                precio_no_se_pierde=precio_no_se_pierde,
             )
 
             intento["replaces"] = sustituido
@@ -635,6 +657,24 @@ def value_candidate(
             if veto:
                 como_relleno = _sin_valor("FICHA_NO_APTA", veto)
 
+            # SOLO PUNTUAN ONCE (26/09/2026)
+            #
+            #     Con el precio que no se pierde, la ficha vacia no se
+            #     paga con puntos: un suplente que no entra en el once
+            #     suma cero en esta liga (`lineupReserves: false`). Si
+            #     entra en el once ya lo cuenta la mejora del once.
+            #     Contra el hueco vale lo que conserve, que es menos
+            #     que su precio: no pasa.
+            elif precio_no_se_pierde:
+                como_relleno = _sin_valor(
+                    "SOLO_PUNTUAN_ONCE",
+                    (
+                        "Una ficha que no entra en el once no suma "
+                        "puntos en esta liga: vale lo que conserve, "
+                        "que es menos que su precio."
+                    ),
+                )
+
             else:
                 como_relleno = xi_upgrade_value(
                     candidate_points=estimacion["points"],
@@ -700,10 +740,8 @@ def value_candidate(
         # gaste un euro. Las dos son aritmetica pura: no cuesta
         # nada tenerlas.
 
-        compuerta = evaluate_market_rate(
-            player.get("id"),
-            (context or {}).get("market_rates"),
-        )
+        # `compuerta` ya esta calculada arriba, antes de la mejora
+        # del once.
 
         # LO QUE SE HACIA ANTES, para poder compararlo.
         antes_trading = speculation_value(

@@ -199,10 +199,29 @@ def _corre_la_verja(entorno: dict) -> tuple[int, str]:
         if modulo not in (YO, EL_GUARDIAN)
     ]
 
+    # EL PASO 0 ESTABA VACIO (26/09/2026)
+    #
+    #     Desde que la verja pone ella el entorno de produccion
+    #     (22/09), QUITA todo `BORDALAS_*` que el YAML no enciende:
+    #     "gana el YAML, se quita". Asi que "todos puestos" llegaba a
+    #     las guardias como "solo los de produccion", y el paso 0
+    #     decia PASADO sin haber probado ninguno de los demas.
+    #
+    #     Se vio el 26/09: `test_acquisition_wiring_v1` caia con
+    #     `BORDALAS_EL_PRECIO_NO_SE_PIERDE` puesto a mano y el paso 0
+    #     salia verde. Ahora los encendidos se le pasan a la verja por
+    #     `--con`, que es la forma de decirle "estos tambien".
+    encendidos = [
+        nombre
+        for nombre in inventario()
+        if str(entorno.get(nombre, "")).strip() == "1"
+    ]
+
     proceso = subprocess.run(
         [
             sys.executable,
             "scripts/run_validation_gate.py",
+            *(["--con", *encendidos] if encendidos else []),
             "--solo",
             *otras,
         ],
