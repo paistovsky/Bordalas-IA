@@ -513,6 +513,15 @@ TESTS = [
     # La reserva de solvencia guarda primero al que no juega, y
     # avisa con alternativa cuando guarda a un titular. Apagada.
     "src.analysis.test_la_reserva_prefiere_al_que_no_juega_v1",
+
+    # El once objetivo, en papel: el calendario se mide en desviacion
+    # sobre la media propia, el once sale de las siete formaciones y
+    # el plan no vende a perdida. No decide nada.
+    "src.analysis.test_el_calendario_se_mide_con_desviacion_v1",
+
+    # Y ningun once en papel alinea a un lesionado, un sancionado,
+    # un descartado o uno de estado desconocido.
+    "src.analysis.test_el_once_no_alinea_lesionados_v1",
 ]
 
 
