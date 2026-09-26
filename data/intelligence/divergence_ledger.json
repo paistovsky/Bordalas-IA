@@ -155224,12 +155224,12 @@
       "trend_days": null,
       "divergent": false,
       "divergence_kind": null,
-      "outcome": "PENDING",
+      "outcome": "CLOSED",
       "price_after_3d": 270000,
-      "price_after_7d": null,
+      "price_after_7d": 250000,
       "return_3d_percent": 0.0,
-      "return_7d_percent": null,
-      "resolved_at": null
+      "return_7d_percent": -7.407,
+      "resolved_at": "2026-09-26T06:10:16.974315+00:00"
     },
     "742|2026-09-20": {
       "player_id": "742",
