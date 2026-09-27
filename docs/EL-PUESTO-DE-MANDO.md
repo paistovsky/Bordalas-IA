@@ -186,11 +186,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   **Esos cron jobs no se tocan: son su latido.**
 - No estoy despierto de continuo. Me despierto con una tarea programada, leo
   esto, trabajo y lo dejo actualizado. **Este documento es mi memoria.**
-- **La tarea programada existe desde el 26/09/2026:** rutina «Pepe: despertar
-  diario del gestor» (trig_012SxTn5vFzBmsmBabtbe7RM), todos los dias a las
-  08:47 hora de Madrid, abre una sesion nueva en la nube que empieza leyendo
-  este documento. Avisa al dueno por el movil y por email. Sin conectores:
-  si la sesion no puede clonar o empujar, lo primero es decirlo.
+- **La tarea programada (rehecha el 27/09/2026):** rutina «Pepe: el gestor,
+  tres veces al dia» (trig_01DFt84bqG6j7gBLPoiBuHfc), 07:15, 14:15 y 21:15
+  de Madrid. Despierta SIEMPRE la misma sesion fija,
+  session_01RhosWkjkXxsvTsHTntFJnG, que tiene el repositorio dentro y
+  empuja a main. La de antes abria una sesion nueva SIN repositorio y moria
+  en tres minutos: una rutina no puede llevar repositorio, una sesion si.
+  Probado el 27/09 a las 09:21 UTC por el camino programado: desperto la
+  sesion fija y vio el repo y este documento.
+  **OJO: el boton «disparar ahora» NO sirve para probarla**: ignora la
+  sesion fija y abre otra vacia (paso el 27/09 09:17). Para probar, una
+  rutina de un solo disparo con hora (run_once_at) a la sesion fija.
+  La sesion fija no puede mandar avisos al movil: su resumen queda en la
+  sesion y en este documento.
+- **Pendiente:** la rutina «Pepe: el cierre de la jornada 8»
+  (trig_01WyhvSS11Y2FBH8FZdgLEVG, 09/10 16:00 UTC) tiene el MISMO fallo:
+  abre sesion nueva sin repositorio. Hay que apuntarla a la sesion fija
+  antes del 09/10.
 - La red de la nube NO deja bajar los artefactos del ciclo (blob de Azure,
   403). Lo que no este en el repo no se puede medir desde aqui.
 - El repositorio es paistovsky/Bordalas-IA (la carpeta del dueno se llama
