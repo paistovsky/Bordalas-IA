@@ -257,6 +257,13 @@ no hace de nineria.
   dueno abre para leer. SOLO lee este documento y los commits del dia. Por
   eso ESTE DOCUMENTO tiene que quedar al dia al final de cada rafaga: si no
   esta aqui, el dueno no se entera.
+- **Informe del mercado de la manana:** rutina «Pepe: el mercado de la
+  manana» (trig_01XJHpXKFR3TJsSJ2b1tjKGU), 07:47 de Madrid, mismo chat.
+  Lee libro_de_la_valoracion.jsonl (lo escribe el primer ciclo tras el reset
+  de las 07:00), bid_outcome_ledger.json y bitacora_del_saldo.jsonl: a por
+  quien va Pepe, a que precio y con que puja. Si cambia la forma de esos
+  libros, hay que actualizar el prompt de esa rutina (desde su chat, o
+  borrarla y crearla de nuevo).
 - Las instrucciones de una rutina solo se cambian desde SU sesion; desde
   otra hay que borrarla y crearla de nuevo.
 
