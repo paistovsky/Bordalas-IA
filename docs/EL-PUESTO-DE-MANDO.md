@@ -127,8 +127,9 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
      `BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL: "1"` en el env de
      .github/workflows/bordalas-live.yml, junto a REVENTA_SOLO_SI_JUEGA, y
      vigilar la vuelta siguiente (canario). Si sale roja, se quita. Hasta
-     entonces NO frena ni una puja. INTENTADO el 27/09: bloqueado por el
-     filtro de seguridad del entorno (ver «Como trabajo»). Espera permiso.
+     entonces NO frena ni una puja.
+   - **ENCENDIDO el 27/09 a las 12:06 de Madrid (2164cfe), a peticion del
+     dueno. Canario: el ciclo #1834 de las 12:07, VERDE.** Punto 1 hecho.
 2. **El cuaderno.** EL SIGUIENTE, en cuanto el 1 este encendido y verde. Hoy el marcador no cuadra: «el once que anotamos no es el
    que jugo». Sin esto no se puede saber si un cambio mejora o empeora, y sin
    eso no hay gestion, hay fe.
@@ -215,13 +216,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 - La rutina «Pepe: el cierre de la jornada 8» (trig_01CfayJLzFpkTZrGi8CsrWpJ,
   09/10 16:00 UTC) tambien despierta la sesion fija desde el 27/09. La vieja
   (sin repositorio) esta borrada.
-- **Encender un interruptor desde la nube esta BLOQUEADO por el filtro de
-  seguridad del entorno** (27/09 ~10:00 UTC): correr la verja con el
-  interruptor del carril puesto en el YAML fue denegado. No se rodea. Hasta
-  que el dueno de el permiso (regla de Bash en los ajustes, ver abajo), el
-  encendido lo hace el dueno a mano o se pide en el chat principal.
-- La red de la nube NO deja bajar los artefactos del ciclo (blob de Azure,
-  403). Lo que no este en el repo no se puede medir desde aqui.
+- **Permisos (27/09):** el dueno creo `.claude/settings.json` con permiso
+  para correr la verja y los scripts de `scripts/` y `src/analysis/`, y para
+  editar. Sin eso el filtro de seguridad bloqueaba la verja con un
+  interruptor puesto. Claude NO puede tocar ese fichero (el filtro lo trata
+  como automodificacion): si hace falta otro permiso, se le pide al dueno.
+- **Horas: al dueno se le habla SIEMPRE en hora de Madrid.**
+- Red: desde el 27/09 el dueno dio acceso sin restricciones. Ya se pueden
+  bajar los artefactos de cada ciclo de GitHub Actions (diagnostico con lo
+  que Pepe vio en esa vuelta): usarlos para medir, no solo la foto del 18/09.
 - El repositorio es paistovsky/Bordalas-IA (la carpeta del dueno se llama
   Bordalas-IA-clean; no es lo mismo).
 
