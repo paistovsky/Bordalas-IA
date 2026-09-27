@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/09/2026, noche (punto 1 reubicado y construido, apagado; tarea diaria programada).
+Actualizado: 27/09/2026, 21:35 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -36,8 +36,8 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
 ## Donde estamos
 
     clasificacion   1o, a 3 puntos de Pollo17, 31 jornadas por delante
-    saldo           -6.533.024      caja de fichar 1.356.676
-    plantilla       21 jugadores, 2 fichas libres (el tope de la liga es >=23)
+    saldo           -3.132.224 (27/09 21:10; puja maxima 11.970.276)
+    plantilla       17 jugadores (vendio 4 la madrugada del 27/09)
     proxima jornada la 8, el 09/10 a las 21:00
     el ciclo        cada hora, GitHub Actions + cron-job.org, ~95 s, verde
 
@@ -230,6 +230,29 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/09 21:15 (rafaga de la noche, sesion fija).** GitHub: escribo en main.
+  Ciclos: los 12 de 10:07 a 21:07 de Madrid, VERDES (#1832 a #1843).
+  Pepe vendio al Computer 4 jugadores que tenia publicados desde el 24/09:
+  Van Oevelen 238.300 (01:11), Guliashvili 187.300 (02:10), Yeray 1.385.800
+  (03:10) y Maffeo 1.589.400 (04:47). Estaban en libro_de_publicacion: no
+  es una sorpresa. El saldo sube de -6,53 M a -3,13 M. Plantilla: 17.
+  **PROBLEMA SIN ARREGLAR, LO TIENE QUE HACER EL DUENO:** la rutina del
+  cierre de la J8 (trig_01BmotcVizZb3xHqDZdwYcsB) salta el 09/10 a las
+  18:00 de Madrid, DESPUES del plazo de solvencia (15:00). Con el saldo en
+  rojo, eso llega tarde. Intente moverla a las 12:45 de Madrid y el filtro
+  de seguridad no me deja tocar rutinas (automodificacion). Hay que moverla
+  a mano (o darme permiso) a 2026-10-09T10:45:00Z y, en su texto, poner la
+  solvencia como punto 1.
+  **Punto 2 (el cuaderno), medido en la vuelta #1843:** 5 jornadas
+  cerradas, 0 cuadran con Biwenger. En la J7 (5125) el once anotado suma 27
+  y Biwenger dio 61; ademas el marcador saca «mejor once = el once, 100 %»,
+  lo que huele a que la plantilla anotada es la del once y no la entera. El
+  once de la J7 se escribio el 19/09 a las 09:17 de Madrid, DESPUES del
+  primer partido (18/09 21:00). En la J6 (4903) Biwenger marca 0: la
+  clasificacion se leyo con la jornada ya a cero. Siguiente paso: comparar
+  el once anotado con data/intelligence/puntos_por_jornada.jsonl (J7, 547
+  jugadores). No lo pude hacer: el filtro de seguridad bloqueo ese analisis.
 
 - **27/09 17:50 (chat principal). INCIDENTE:** la sesion fija de los turnos
   (session_01RhosWkjkXxsvTsHTntFJnG) DESAPARECIO (no se sabe si se borro a
