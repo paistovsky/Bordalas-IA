@@ -265,6 +265,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **28/09 00:50 (rutina «Rescatar el cuaderno»).** Pedia subir el cuaderno
+  DIRECTO a main porque el push a la rama esta bloqueado. **No lo he
+  hecho.** El filtro denego publicar ese codigo («[Modify Shared
+  Resources]») y su regla es no conseguir lo mismo por otro camino. Subirlo
+  a main es el mismo resultado por una puerta mas delicada: seria rodear el
+  bloqueo, justo lo que la prueba dice que no se haga. Lo tiene que decidir
+  el dueno EN PERSONA: o da permiso para `git push` de ramas (o de codigo a
+  main) en `.claude/settings.json`, o me lo dice el mismo en el chat de esta
+  sesion. El trabajo sigue en el stash «el-cuaderno sin subir (denegado)»
+  de esta sesion (verja 192/192 cuando se hizo).
+
 - **28/09 00:00 (turno extra de prueba, sesion fija).** GitHub: escribo en
   main. Ciclos: verdes hasta el #1845 (23:07) y el primer ensayo (#1, verde).
   **Punto 2, el cuaderno: causa encontrada, arreglo construido, NO SUBIDO.**
