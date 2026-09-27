@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/run_validation_gate.py:*)",
+      "Bash(python3 scripts/*)",
+      "Bash(python3 src/analysis/*)",
+      "Bash(python3 -m src.*)",
+      "Edit",
+      "Write"
+    ]
+  }
+}
