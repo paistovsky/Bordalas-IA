@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/09/2026, 21:35 de Madrid (rafaga de las 21:15).
+Actualizado: 28/09/2026, 00:55 de Madrid (turno extra de prueba).
 
 ## El mandato
 
@@ -264,6 +264,54 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/09 00:00 (turno extra de prueba, sesion fija).** GitHub: escribo en
+  main. Ciclos: verdes hasta el #1845 (23:07) y el primer ensayo (#1, verde).
+  **Punto 2, el cuaderno: causa encontrada, arreglo construido, NO SUBIDO.**
+  - La causa, medida en el historial de marcador.json en git (tres fallos):
+    (1) el round de Biwenger salto de 5125 (J7) a 4905 (J8) el 19/09 entre
+    las 07:17 y las 11:48 de Madrid, con la J7 a medio jugar: la J7 se
+    quedo congelada con los totales del viernes (27) y el resto se suma a
+    la J8. (2) `observar()` solo guarda totales de la plantilla del dia:
+    Dituro y Djene jugaron la J7 y se vendieron, y desaparecen de la resta
+    (con los totales del 21/09 el once da 54, no 27). (3) la clasificacion
+    de Biwenger parece ir con retraso: Pepe 186 (16/09), 247 (19/09, J7 casi
+    sin jugar), 276 (21/09). Esto ultimo sigue sin explicar.
+  - Ademas: `onces_de_la_jornada.jsonl` (el once congelado antes del primer
+    partido) NUNCA se ha escrito. En la J7 no hubo ciclos del 18/09 16:16 al
+    19/09 05:05 y se perdio la ventana. La de la J8 se abre el 09/10 a las
+    19:30 de Madrid; solo el ciclo de las 20:07 cae dentro. Si falla, la J8
+    tampoco tendra nota.
+  - El arreglo: `src/analysis/el_cuaderno.py` + guardia
+    `test_el_cuaderno_v1` (4/4) + publicado en el panel dentro del marcador
+    (`marcador.cuaderno`) + registrado en la verja. Cruza
+    puntos_por_jornada.jsonl (una foto de los 547 por jornada cerrada de
+    LaLiga, vendidos incluidos) con el once congelado. Dice tambien que
+    titulares no jugaron. Primera nota posible: la J8, cuando cierre.
+    **Verja 192/192 con los 6 interruptores de produccion.**
+  - **BLOQUEO (lo pide la prueba: el comando y el mensaje exactos).** En la
+    rama `el-cuaderno`, este comando:
+    `git add src/analysis/el_cuaderno.py src/analysis/test_el_cuaderno_v1.py
+    src/telemetry/dashboard_state.py scripts/run_validation_gate.py &&
+    git commit -m "el cuaderno: ..." && git push -u origin el-cuaderno`
+    fue DENEGADO: «Permission for this action was denied by the Claude Code
+    auto mode classifier. Reason: [Modify Shared Resources]». No se rodeo.
+    Por eso NO hay ensayo ni fusion. El trabajo esta en un `git stash` de
+    esta sesion («el-cuaderno sin subir (denegado)»): se pierde si el
+    contenedor se recicla. Para seguir: dar permiso para `git push` a ramas
+    que no sean main (o para crear ramas), y el proximo turno hace
+    `git stash pop`, commit, push, ensayo y fusion.
+  - Otros dos bloqueos de esta sesion, 27/09 21:15: (a) mover la rutina del
+    cierre de la J8 (update_trigger): «[Self-Modification]»; (b) un analisis
+    en python de solo lectura que cruzaba el once de la J7 con
+    puntos_por_jornada.jsonl: «[Unauthorized Persistence]».
+  - Encontrado de paso (punto 3 del plan): una ejecucion local (la verja o
+    importar dashboard_state) ESCRIBIO 311 lineas en
+    data/calendar/calendar_changes.jsonl a las 00:06, bajando el calendario
+    de LaLiga de internet. Se deshizo con git checkout. Es la prueba de que
+    la verja sale a la red y toca los libros.
+  - Rutina del cierre de la J8: ahora es trig_01ANZwEgrZL4o5Fh84KEjZQj. No
+    he comprobado a que hora salta.
 
 - **27/09 21:15 (rafaga de la noche, sesion fija).** GitHub: escribo en main.
   Ciclos: los 12 de 10:07 a 21:07 de Madrid, VERDES (#1832 a #1843).
