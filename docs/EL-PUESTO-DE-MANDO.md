@@ -251,6 +251,12 @@ no hace de nineria.
 - Turno especial en CADA cierre de jornada: cada rafaga comprueba que existe
   el del cierre siguiente y, si no, lo crea (paso 4 de su prompt).
 - Una mejora comprobada cada vez.
+- **Informe diario al dueno:** rutina «Pepe: tu informe del dia»
+  (trig_01WqagcKrnjLvAReHd4rF68H), 22:43 de Madrid, sesion nueva que SOLO
+  lee este documento y los commits del dia por internet (repo publico) y le
+  escribe el resumen para «dummies», con aviso al movil y al email. Por eso
+  ESTE DOCUMENTO tiene que quedar al dia al final de cada rafaga: si no esta
+  aqui, el dueno no se entera.
 - Las instrucciones de una rutina solo se cambian desde SU sesion; desde
   otra hay que borrarla y crearla de nuevo.
 
