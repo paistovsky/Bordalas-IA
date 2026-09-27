@@ -310,8 +310,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
     data/calendar/calendar_changes.jsonl a las 00:06, bajando el calendario
     de LaLiga de internet. Se deshizo con git checkout. Es la prueba de que
     la verja sale a la red y toca los libros.
-  - Rutina del cierre de la J8: ahora es trig_01ANZwEgrZL4o5Fh84KEjZQj. No
-    he comprobado a que hora salta.
+  - Rutina del cierre de la J8: trig_01ANZwEgrZL4o5Fh84KEjZQj, comprobada:
+    09/10 a las 12:45 de Madrid, antes del plazo de solvencia. Resuelto.
 
 - **27/09 21:15 (rafaga de la noche, sesion fija).** GitHub: escribo en main.
   Ciclos: los 12 de 10:07 a 21:07 de Madrid, VERDES (#1832 a #1843).
