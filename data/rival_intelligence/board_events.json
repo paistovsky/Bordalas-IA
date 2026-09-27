@@ -169713,5 +169713,53 @@
         "amount": 1589400
       }
     ]
+  },
+  {
+    "event_id": "2f71d3ba3c29517a2439116c",
+    "date": 1790484082,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 31228,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 362000
+      }
+    ]
+  },
+  {
+    "event_id": "ab0b13f3bb9f15a437633cd3",
+    "date": 1790485467,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 40552,
+        "to": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 840009,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 772000
+          }
+        ]
+      }
+    ]
   }
 ]
