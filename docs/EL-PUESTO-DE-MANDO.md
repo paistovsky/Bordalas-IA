@@ -214,7 +214,7 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   rutina de un solo disparo con hora (run_once_at) a la sesion fija.
   La sesion fija no puede mandar avisos al movil: su resumen queda en la
   sesion y en este documento.
-- La rutina «Pepe: el cierre de la jornada 8» (trig_01BmotcVizZb3xHqDZdwYcsB,
+- La rutina «Pepe: el cierre de la jornada 8» (trig_01ANZwEgrZL4o5Fh84KEjZQj,
   09/10 16:00 UTC) tambien despierta la sesion fija desde el 27/09. La vieja
   (sin repositorio) esta borrada.
 - **Permisos (27/09):** el dueno creo `.claude/settings.json` con permiso
@@ -244,6 +244,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   de seguridad no me deja tocar rutinas (automodificacion). Hay que moverla
   a mano (o darme permiso) a 2026-10-09T10:45:00Z y, en su texto, poner la
   solvencia como punto 1.
+  **ARREGLADO el 27/09 22:56 desde el chat principal:** la rutina de la J8
+  es ahora trig_01ANZwEgrZL4o5Fh84KEjZQj, 09/10 a las 12:45 de Madrid, con
+  la solvencia como punto 1 y una segunda mirada a las 20:15. Las rutinas
+  solo se pueden tocar desde el chat principal: desde la sesion de turnos
+  el filtro lo trata como automodificacion. Si un turno necesita cambiar
+  una rutina, que lo apunte aqui como PENDIENTE PARA EL CHAT PRINCIPAL.
   **Punto 2 (el cuaderno), medido en la vuelta #1843:** 5 jornadas
   cerradas, 0 cuadran con Biwenger. En la J7 (5125) el once anotado suma 27
   y Biwenger dio 61; ademas el marcador saca «mejor once = el once, 100 %»,
