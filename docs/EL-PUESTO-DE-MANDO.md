@@ -21,6 +21,18 @@ Dos instrucciones suyas de siempre:
 - *«No quiero que me des la razon. Quiero que seas inamovible y me debatas
   las cosas.»*
 
+### El mandato, ampliado el 27/09/2026
+
+El dueno lo repite y lo amplia: administracion TOTAL para crear, borrar y
+modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
+- **Mision unica:** ganar la liga. Pepe tiene que ser lo mas inteligente,
+  eficiente, competitivo y autonomo posible.
+- **Mision secundaria:** un panel para ver en tiempo real que pasa. Hoy
+  existe https://bordalas-ia-dashboard.bordalas.workers.dev/ (usuario y
+  contrasena: los tiene el dueno; NO se escriben en el repo, que es publico).
+- **Informe:** uno pequeno al dia, para "dummies".
+- Si hace falta un permiso o una herramienta, se le pide.
+
 ## Donde estamos
 
     clasificacion   1o, a 3 puntos de Pollo17, 31 jornadas por delante
