@@ -161,6 +161,24 @@ deuda (frena el 1,8 % de los candidatos: nunca fue el freno).
 - **La temporada pasada contra la forma de ahora:** el metodo nuevo ya no usa
   el ano pasado.
 
+## EL ENSAYO: el entorno de pruebas (desde el 27/09/2026)
+
+Un Pepe ENTERO que lee Biwenger de verdad y no escribe nada. Para probar
+cualquier cambio grande ANTES de fusionarlo a main:
+1. Sube el cambio a una rama (no a main).
+2. Lanza el workflow «Bordalas IA Ensayo» (`bordalas-ensayo.yml`) sobre esa
+   rama (actions_run_trigger, ref = la rama). Si pruebas un interruptor, pasalo
+   en el input `interruptores`.
+3. Mira el log y el artefacto `bordalas-ensayo-<run>`: en
+   `data/ensayo/escrituras_no_enviadas.jsonl` esta lo que Pepe HABRIA hecho
+   (pujas, ventas, once). Si es sensato, a main; si no, se arregla en la rama.
+- Como funciona: `BORDALAS_ENSAYO=1` cierra las siete escrituras de
+  `BiwengerWriteClient` (guardia `test_el_ensayo_no_escribe_v1`). Restaura el
+  estado de produccion sin guardarlo, no guarda libros, no empuja, no toca el
+  panel. Usa los mismos interruptores que produccion (los lee de su YAML).
+- CUIDADO: cada ensayo hace las mismas peticiones a Biwenger que una vuelta
+  real (ya hubo un 429). A mano y con cabeza, no en bucle.
+
 ## Reglas de la casa. No negociables.
 
 - **Verja a fichero, con el arbol quieto y TERMINADO, y con los interruptores
