@@ -161,6 +161,18 @@ deuda (frena el 1,8 % de los candidatos: nunca fue el freno).
 - **La temporada pasada contra la forma de ahora:** el metodo nuevo ya no usa
   el ano pasado.
 
+## EL LABORATORIO (desde el 27/09/2026)
+
+Pedido por el dueno: «no pares de crear y mirar cual es la mejor manera de
+crear un bot autosuficiente para ganar Biwenger». Tiene su propia sesion
+(«PEPE — El laboratorio (NO BORRAR)», session_01X9AAPm6vKDRe4K5jJjhMwk) y su
+rutina (trig_01Q8poVQ2BZtW31YPgKG68TL, 11:13 y 17:13 de Madrid). Sus reglas,
+su agenda y sus experimentos estan en **docs/LABORATORIO.md**. No toca
+produccion: cuando algo gana con datos, lo deja en «Listo para el plan» y lo
+mete un turno del gestor. **Los turnos del gestor deben mirar esa seccion al
+empezar.** El informe diario del dueno cuenta tambien lo que aprendio el
+laboratorio.
+
 ## EL ENSAYO: el entorno de pruebas (desde el 27/09/2026)
 
 Un Pepe ENTERO que lee Biwenger de verdad y no escribe nada. Para probar
