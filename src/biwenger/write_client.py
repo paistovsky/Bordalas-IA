@@ -7,6 +7,38 @@ from src.biwenger.client import BiwengerClient
 _UNSET = object()
 
 
+# EL ENSAYO (27/09/2026)
+#
+#     Un Pepe entero que lee Biwenger de verdad y no escribe NADA.
+#     Todas las escrituras del proyecto pasan por los siete metodos de
+#     esta clase (auditoria del 26/09, seccion C), y los siete salen
+#     por la misma puerta: `if not execute`. Con `BORDALAS_ENSAYO=1`
+#     esa puerta se cierra tambien con execute=True, y lo que se habria
+#     enviado se apunta en `ESCRITURAS_DEL_ENSAYO` para revisarlo.
+#
+#     Lo usa `.github/workflows/bordalas-ensayo.yml`, el entorno de
+#     pruebas. En produccion no esta puesto: sin el, nada cambia.
+ENSAYO_ENV = "BORDALAS_ENSAYO"
+
+ESCRITURAS_DEL_ENSAYO = "data/ensayo/escrituras_no_enviadas.jsonl"
+
+
+def en_ensayo() -> bool:
+    """Si esta vuelta es un ensayo. Nunca lanza."""
+
+    try:
+        import os
+
+        return str(
+            os.environ.get(ENSAYO_ENV, "")
+        ).strip().lower() in {"1", "true", "si", "yes"}
+
+    except Exception:                               # noqa: BLE001
+        # Si no se puede leer, se trata como ensayo: el lado seguro de
+        # no saber es no escribir.
+        return True
+
+
 class BiwengerWriteClient:
     """
     Cliente de escritura de Bordalás IA.
@@ -46,6 +78,50 @@ class BiwengerWriteClient:
                     ),
                 }
             )
+
+    def _en_ensayo(self, request: dict) -> bool:
+        """
+        En ensayo, apunta la escritura que se habria hecho y dice que
+        no se envie. Fuera de ensayo, no hace nada. Nunca lanza: si no
+        puede apuntar, igualmente no se envia.
+        """
+
+        if not en_ensayo():
+            return False
+
+        try:
+            import json
+            import os
+
+            from datetime import datetime, timezone
+
+            os.makedirs(
+                os.path.dirname(ESCRITURAS_DEL_ENSAYO),
+                exist_ok=True,
+            )
+
+            with open(
+                ESCRITURAS_DEL_ENSAYO, "a", encoding="utf-8"
+            ) as fichero:
+                fichero.write(
+                    json.dumps(
+                        {
+                            "at": datetime.now(timezone.utc).isoformat(),
+                            "operation": request.get("operation"),
+                            "method": request.get("method"),
+                            "url": request.get("url"),
+                            "json": request.get("json"),
+                        },
+                        ensure_ascii=False,
+                        default=str,
+                    )
+                    + "\n"
+                )
+
+        except Exception:                           # noqa: BLE001
+            pass
+
+        return True
 
     # ==================================================
     # HEADERS / RESPUESTAS
@@ -284,7 +360,7 @@ class BiwengerWriteClient:
             )
         )
 
-        if not execute:
+        if not execute or self._en_ensayo(request):
             return {
                 **request,
                 "sent": False,
@@ -437,7 +513,7 @@ class BiwengerWriteClient:
             )
         )
 
-        if not execute:
+        if not execute or self._en_ensayo(request):
 
             return {
                 **request,
@@ -544,7 +620,7 @@ class BiwengerWriteClient:
             )
         )
 
-        if not execute:
+        if not execute or self._en_ensayo(request):
             return {
                 **request,
 
@@ -697,7 +773,7 @@ class BiwengerWriteClient:
             )
         )
 
-        if not execute:
+        if not execute or self._en_ensayo(request):
             return {
                 **request,
 
@@ -828,7 +904,7 @@ class BiwengerWriteClient:
             )
         )
 
-        if not execute:
+        if not execute or self._en_ensayo(request):
             return {
                 **request,
 
@@ -944,7 +1020,7 @@ class BiwengerWriteClient:
             )
         )
 
-        if not execute:
+        if not execute or self._en_ensayo(request):
             return {
                 **request,
                 "sent": False,
@@ -1077,7 +1153,7 @@ class BiwengerWriteClient:
             )
         )
 
-        if not execute:
+        if not execute or self._en_ensayo(request):
             return {
                 **request,
                 "sent": False,

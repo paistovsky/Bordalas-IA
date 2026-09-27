@@ -428,6 +428,11 @@ NO_SON_LIBROS = (
     ("data/league_center/laliga_standings.json", "cache de LaLiga"),
     ("data/lineup_monitor/state.json", "estado del vigilante"),
     (
+        "data/ensayo/escrituras_no_enviadas.jsonl",
+        "solo existe en el ensayo (bordalas-ensayo.yml) y viaja en su "
+        "artefacto; en produccion no se escribe",
+    ),
+    (
         "data/rival_intelligence/board_latest_raw.json",
         "el crudo de la ultima peticion; lo que se acumula es "
         "`board_events.json`, que si es libro",
