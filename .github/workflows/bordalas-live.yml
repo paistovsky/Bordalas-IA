@@ -137,6 +137,17 @@ jobs:
       #   paso 0 con los 22 puestos en verde. Ver `config/paso_0.json`.
       BORDALAS_REVENTA_SOLO_SI_JUEGA: "1"
 
+      # Encendido 27/09 (lo pidio el dueno). LA MISMA REGLA, EN EL CARRIL.
+      #
+      #   La de arriba solo la mira la subasta del reset. El carril compra
+      #   para revender y no la miraba: Trent (-223.500) y Drkusic (-36.376)
+      #   entraron por ahi sin pronostico. Con ella, sus 4 viajes salen
+      #   +259.876 EUR mejor. En la foto del 18/09 deja pasar 14 de 20.
+      #
+      #   Paso 0 hecho: verja 190/190 con el y sin el, paso 0 con los 33.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL: "1"
+
       # Encendido 24/09. EL ONCE SE BUSCA UNA VEZ, NO NOVECIENTAS.
       #
       #   NO CAMBIA NINGUNA DECISION. Es memoria, no criterio: recuerda la
