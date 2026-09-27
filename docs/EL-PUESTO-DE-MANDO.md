@@ -127,7 +127,8 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
      `BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL: "1"` en el env de
      .github/workflows/bordalas-live.yml, junto a REVENTA_SOLO_SI_JUEGA, y
      vigilar la vuelta siguiente (canario). Si sale roja, se quita. Hasta
-     entonces NO frena ni una puja. Es lo primero de manana.
+     entonces NO frena ni una puja. INTENTADO el 27/09: bloqueado por el
+     filtro de seguridad del entorno (ver «Como trabajo»). Espera permiso.
 2. **El cuaderno.** EL SIGUIENTE, en cuanto el 1 este encendido y verde. Hoy el marcador no cuadra: «el once que anotamos no es el
    que jugo». Sin esto no se puede saber si un cambio mejora o empeora, y sin
    eso no hay gestion, hay fe.
@@ -211,10 +212,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   rutina de un solo disparo con hora (run_once_at) a la sesion fija.
   La sesion fija no puede mandar avisos al movil: su resumen queda en la
   sesion y en este documento.
-- **Pendiente:** la rutina «Pepe: el cierre de la jornada 8»
-  (trig_01WyhvSS11Y2FBH8FZdgLEVG, 09/10 16:00 UTC) tiene el MISMO fallo:
-  abre sesion nueva sin repositorio. Hay que apuntarla a la sesion fija
-  antes del 09/10.
+- La rutina «Pepe: el cierre de la jornada 8» (trig_01CfayJLzFpkTZrGi8CsrWpJ,
+  09/10 16:00 UTC) tambien despierta la sesion fija desde el 27/09. La vieja
+  (sin repositorio) esta borrada.
+- **Encender un interruptor desde la nube esta BLOQUEADO por el filtro de
+  seguridad del entorno** (27/09 ~10:00 UTC): correr la verja con el
+  interruptor del carril puesto en el YAML fue denegado. No se rodea. Hasta
+  que el dueno de el permiso (regla de Bash en los ajustes, ver abajo), el
+  encendido lo hace el dueno a mano o se pide en el chat principal.
 - La red de la nube NO deja bajar los artefactos del ciclo (blob de Azure,
   403). Lo que no este en el repo no se puede medir desde aqui.
 - El repositorio es paistovsky/Bordalas-IA (la carpeta del dueno se llama
