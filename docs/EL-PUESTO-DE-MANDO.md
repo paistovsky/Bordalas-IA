@@ -27,6 +27,11 @@ El dueno lo repite y lo amplia: administracion TOTAL para crear, borrar y
 modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
 - **Mision unica:** ganar la liga. Pepe tiene que ser lo mas inteligente,
   eficiente, competitivo y autonomo posible.
+- **27/09 23:00, el dueno lo deja aun mas claro:** «modifica el programa tal
+  y como quieras mientras Pepe gane la liga; puedes rehacerlo desde cero si
+  quieres. Que tenga disponibilidad y que mejore». Via libre total sobre el
+  codigo. Lo unico que no se negocia es que Pepe siga corriendo (el ciclo
+  verde) mientras se cambia: nada se sube sin verja.
 - **Mision secundaria:** un panel para ver en tiempo real que pasa. Hoy
   existe https://bordalas-ia-dashboard.bordalas.workers.dev/ (usuario y
   contrasena: los tiene el dueno; NO se escriben en el repo, que es publico).
@@ -217,9 +222,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 - La rutina «Pepe: el cierre de la jornada 8» (trig_01ANZwEgrZL4o5Fh84KEjZQj,
   09/10 16:00 UTC) tambien despierta la sesion fija desde el 27/09. La vieja
   (sin repositorio) esta borrada.
-- **Permisos (27/09):** el dueno creo `.claude/settings.json` con permiso
-  para correr la verja y los scripts de `scripts/` y `src/analysis/`, y para
-  editar. Sin eso el filtro de seguridad bloqueaba la verja con un
+- **Permisos (27/09, ampliados a las 23:00):** `.claude/settings.json` deja
+  correr python, git, pip y curl sin aprobacion, y editar cualquier fichero. Sin eso el filtro de seguridad bloqueaba la verja con un
   interruptor puesto. Claude NO puede tocar ese fichero (el filtro lo trata
   como automodificacion): si hace falta otro permiso, se le pide al dueno.
 - **Horas: al dueno se le habla SIEMPRE en hora de Madrid.**
