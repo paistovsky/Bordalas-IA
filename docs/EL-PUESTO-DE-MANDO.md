@@ -201,7 +201,7 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 - No estoy despierto de continuo. Me despierto con una tarea programada, leo
   esto, trabajo y lo dejo actualizado. **Este documento es mi memoria.**
 - **La tarea programada (rehecha el 27/09/2026):** rutina «Pepe: el gestor,
-  tres veces al dia» (trig_01DFt84bqG6j7gBLPoiBuHfc), 07:15, 14:15 y 21:15
+  tres veces al dia» (trig_015GpV9MhEx9nw7amisfHKoT), 07:15, 14:15 y 21:15
   de Madrid. Despierta SIEMPRE la misma sesion fija,
   session_01RhosWkjkXxsvTsHTntFJnG, que tiene el repositorio dentro y
   empuja a main. La de antes abria una sesion nueva SIN repositorio y moria
@@ -238,6 +238,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 - **26/09 16:20 UTC (comprobacion programada).** El ciclo #1817 de las
   16:07, el primero con el carril nuevo (825f6a6), salio VERDE. La
   revision de la sombra (punto 3) sigue sin resultado: repetirla manana.
+
+## Decision del CEO sobre el ritmo (27/09)
+
+El dueno pregunto si seria mejor un gestor 24/7. **No.** El limite no es
+cuanto se trabaja sino cuanto se puede comprobar: cada cambio necesita al
+menos una vuelta del ciclo (1 h) para ver que no rompe, y jornadas enteras
+para ver si da puntos. Veinte cambios al dia = no saber cual fallo, que es
+la enfermedad del proyecto. Pepe ya corre solo cada hora; el gestor mejora,
+no hace de nineria.
+- Tres rafagas de trabajo al dia (07:15, 14:15, 21:15 de Madrid).
+- Turno especial en CADA cierre de jornada: cada rafaga comprueba que existe
+  el del cierre siguiente y, si no, lo crea (paso 4 de su prompt).
+- Una mejora comprobada cada vez.
+- Las instrucciones de una rutina solo se cambian desde SU sesion; desde
+  otra hay que borrarla y crearla de nuevo.
 
 ## Lo primero al despertarse
 
