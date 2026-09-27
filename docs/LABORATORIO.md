@@ -55,7 +55,72 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E1 · 28/09/2026 01:10 de Madrid · Como ganan Pollo17 y Luismi_Haz
+
+**Codigo:** `lab/rivales/viajes.py` (reconstruye los viajes) y
+`lab/rivales/regla_simple.py` (prueba la regla). Solo leen
+`board_events.json` y `price_history.json` (precios del 16/08 al 27/09).
+
+**Hipotesis:** su regla es «compra al Computer lo que esta subiendo de
+precio y vendeselo al Computer cuando empieza a bajar», y Pepe no la sigue.
+
+**Lo que hacen (viajes cerrados al Computer, tablon del 09/08 al 27/09):**
+
+                                  Pollo17     Luismi_Haz        Pepe
+    compras / viajes cerrados       78 / 56       66 / 43      48 / 30
+    P&L cerrado                 +11.970.510   +13.136.092     -812.038
+    verde                             48/56         28/43        17/30
+    SU PRECIO SUBIO EL DIA ANTES      50/60         35/49     **9/41**
+    prima sobre el precio            +2,6 %        +2,6 %       +0,3 %
+    pujas en la subasta (mediana)         2             2            1
+    dias aguantado (mediana)              5             6            4
+    vende al Computer                 54/56         40/43        28/30
+    dias entre el pico y la venta         1             2            2
+
+**Por que funciona (626 jugadores, todos los dias):** el precio de
+Biwenger tiene inercia brutal. Si subio hoy, manana sube el **92 %** de
+las veces (+3 % de media; n=5.338). Si bajo hoy, manana baja el 80-94 %.
+Si no se movio, manana casi nunca se mueve. Los costes del viaje se anulan:
+la puja ganadora paga +2,2 % sobre el precio (mediana, n=196) y el
+Computer compra a +2,4 % (mediana, n=204).
+
+**La regla simple lo imita.** Todas las compras reales al Computer de los
+8 managers (n=191 con precio), al precio que pagaron y saliendo el primer
+dia que el precio baja:
+
+    su precio subio el dia antes    n=109  verde 57/73  ROI med +3,5 %  P&L +25.701.957
+    su precio NO subio              n= 82  verde 24/58  ROI med -0,4 %  P&L    -567.940
+
+Con presupuesto (10 M a la vez, solo jugadores que el Computer subasto,
+pagando +1 % sobre el ganador real): +3,29 M en 14 viajes cerrados (10
+verdes) + 7,79 M latentes en 8 abiertos. Aguanta en las dos mitades
+(hasta el 06/09: 9/10 verdes; desde el 07/09: 3/3 cerrados, el resto
+sigue subiendo). La misma regla AL REVES (solo lo que no subio, lo que
+hace Pepe): 5/16 verdes, -259.661.
+
+**Limites (honestos):** solo vemos a los jugadores que alguien compro (los
+que el Computer saco y nadie quiso no salen en el tablon); se supone que se
+gana la puja con +1 % sobre el ganador; 6 semanas de datos. La senal es
+tan grande (92 % contra 5 %) que estos limites no la tumban, pero el P&L
+con presupuesto es una estimacion, no una promesa.
+
+**Veredicto: SE AGUANTA.** Pepe compra, sobre todo, jugadores cuyo precio
+no se mueve (32 de 41), y ahi no hay nada que ganar. Pasa a «Listo para
+el plan».
+
 ## Listo para el plan
 
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
+
+- **(E1, 28/09) «Solo se compra para revender lo que SUBIO en el ultimo
+  cambio de precio; se vende al Computer el primer dia que BAJA».** Medido
+  en 191 compras reales: los que subian, 57/73 verdes y +25,7 M; los que
+  no, 24/58 y -0,57 M. Pepe hoy compra 32 de 41 del segundo grupo. Para
+  meterlo: en las compras de especulacion (subasta del reset y carril),
+  exigir precio(ayer) > precio(anteayer); y en la salida, publicar/aceptar
+  la oferta del Computer en cuanto el precio baja un dia. Un interruptor
+  para cada mitad, apagados, ensayo y de uno en uno. Antes, comprobar
+  (doctrina 84) si la compuerta PRECIO_CAYENDO de la sombra ya hace parte
+  de esto: frena lo que BAJA, pero deja pasar lo PLANO, que es donde Pepe
+  pierde.
