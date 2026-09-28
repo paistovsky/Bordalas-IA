@@ -283,8 +283,9 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   **BORDALAS_COMPRA_SOLO_SI_SUBE, ENCENDIDO a las 21:30 (c5f6183).** Antes:
   verja 194/194 con el interruptor puesto sobre el arbol de ahora (con la
   racha dentro) y 194/194 con los 7 de produccion ya en el YAML; paso 0
-  de las 21:06 con 35, que lo incluye. Canario: el ciclo de las 22:07, con
-  comprobacion programada a las 22:15; si sale rojo, se quita la linea.
+  de las 21:06 con 35, que lo incluye. **Canario: el ciclo #1867 de las
+  22:07, VERDE (comprobado a las 22:16). La rampa queda encendida.**
+  Ya se puede encender la racha (`BORDALAS_COBRA_LA_RACHA`) en otra vuelta.
   **Primer efecto real: la subasta del reset del 29/09 a las 07:00.** La
   rafaga de las 07:15 tiene que mirar a quien freno (`dropped_by_no_sube`)
   y a quien pujo. La puja viva por Zubeldia NO la toca la regla (ya esta
