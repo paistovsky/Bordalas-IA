@@ -118,6 +118,7 @@ def _titular(i=0) -> dict:
         "id": 100 + i,
         "name": f"Titular {i}",
         "market_price": 1_000_000 + 10_000 * i,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 50 + i,
         "starter_probability": 80.0,
         "hierarchy_value": 60,
@@ -131,6 +132,7 @@ def _sin_pronostico(i=0) -> dict:
         "id": 200 + i,
         "name": f"Sin pronostico {i}",
         "market_price": 1_000_000 + 10_000 * i,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 70 + i,
         "starter_probability": None,
         "hierarchy_value": None,
@@ -143,6 +145,7 @@ def _suplente(i=0) -> dict:
         "id": 300 + i,
         "name": f"Suplente {i}",
         "market_price": 1_000_000 + 10_000 * i,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 80 + i,
         "starter_probability": 20.0,
         "hierarchy_value": 20,
@@ -377,6 +380,7 @@ def test_la_lectura_lleva_lo_que_la_regla_mira():
         "id": 900,
         "name": "El titular",
         "market_price": 1_660_000,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 42,
         "seller_id": None,
         "decision": "BID",

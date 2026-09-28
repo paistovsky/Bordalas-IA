@@ -165,6 +165,7 @@ def _mercado(cuantos: int = 6, club: int = 1) -> list:
             "id": 100 + i,
             "name": f"Jugador {i}",
             "market_price": 100_000 + 10_000 * i,
+            "price_increment": 10_000,   # sube: pasa la rampa (E1)
             "team_id": club + i,
 
             # Titular con holgura, y por encima de Rotacion: los
@@ -467,6 +468,7 @@ def test_el_peor_caso_cuenta_la_plantilla_que_ya_hay():
             "id": 200 + i,
             "name": f"Del club 7 numero {i}",
             "market_price": 100_000 + 1_000 * i,
+            "price_increment": 10_000,   # sube: pasa la rampa (E1)
             "team_id": 7,
             "starter_probability": 80.0,
             "hierarchy_value": 60,
@@ -594,6 +596,7 @@ def test_la_compra_a_rivales_sigue_cerrada():
         "id": 1,
         "name": "Del Computer",
         "market_price": 150_000,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 1,
         "decision": "SIN_VALOR",
     }
@@ -602,6 +605,7 @@ def test_la_compra_a_rivales_sigue_cerrada():
         "id": 2,
         "name": "De un rival",
         "market_price": 150_000,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 2,
         "decision": "MERCADO_DE_RIVAL",
         "outside_computer_market": True,
@@ -633,12 +637,14 @@ def test_un_jugador_con_puja_viva_no_se_puja_otra_vez():
                     "id": 1,
                     "name": "Libre",
                     "market_price": 150_000,
+                    "price_increment": 10_000,   # sube: pasa la rampa (E1)
                     "team_id": 1,
                 },
                 {
                     "id": 2,
                     "name": "Ya pujado",
                     "market_price": 150_000,
+                    "price_increment": 10_000,   # sube: pasa la rampa (E1)
                     "team_id": 2,
                     "has_live_bid": True,
                 },
@@ -824,6 +830,7 @@ def test_lo_pujado_llega_al_libro_con_su_origen():
                         "name": "Yeray",
                         "amount": 1_533_826,
                         "market_price": 1_530_000,
+                        "price_increment": 10_000,   # sube: pasa la rampa (E1)
                         "win_odds": 0.61,
                         "seller_id": None,
                         "rate_percent_per_day": 0.4,

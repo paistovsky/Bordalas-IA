@@ -379,6 +379,7 @@ def _candidatos():
             "id": i,
             "name": f"J{i}",
             "market_price": 100_000 + i * 1_000,
+            "price_increment": 10_000,   # sube: pasa la rampa (E1)
             "team_id": i,
 
             # Titular y por encima de Rotacion: los dos cortes de

@@ -143,6 +143,7 @@ def _mercado(cuantos: int = 6, club: int = 1) -> list:
             "id": 100 + i,
             "name": f"Jugador {i}",
             "market_price": 100_000 + 10_000 * i,
+            "price_increment": 10_000,   # sube: pasa la rampa (E1)
             "team_id": club + i,
             "starter_probability": 80.0,
             "hierarchy_value": 60,
@@ -180,6 +181,7 @@ def _de_plantilla(id_: int = 900, precio: int = 1_190_000) -> dict:
         "id": id_,
         "name": "El que se queda",
         "market_price": precio,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 42,
         "intent": "XI_UPGRADE",
         "route": "XI_UPGRADE",
@@ -599,6 +601,7 @@ def test_la_lectura_lleva_la_via_y_la_jerarquia():
         "id": 900,
         "name": "El que se queda",
         "market_price": 1_660_000,
+        "price_increment": 10_000,   # sube: pasa la rampa (E1)
         "team_id": 42,
         "seller_id": None,
         "decision": "BID",
