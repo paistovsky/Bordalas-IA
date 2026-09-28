@@ -10,9 +10,10 @@ _UNSET = object()
 # EL ENSAYO (27/09/2026)
 #
 #     Un Pepe entero que lee Biwenger de verdad y no escribe NADA.
-#     Todas las escrituras del proyecto pasan por los siete metodos de
-#     esta clase (auditoria del 26/09, seccion C), y los siete salen
-#     por la misma puerta: `if not execute`. Con `BORDALAS_ENSAYO=1`
+#     Todas las escrituras del proyecto pasan por los metodos de esta
+#     clase (auditoria del 26/09, seccion C; eran siete, la racha del
+#     28/09 es la octava), y todos salen por la misma puerta:
+#     `if not execute`. Con `BORDALAS_ENSAYO=1`
 #     esa puerta se cierra tambien con execute=True, y lo que se habria
 #     enviado se apunta en `ESCRITURAS_DEL_ENSAYO` para revisarlo.
 #
@@ -1163,6 +1164,109 @@ class BiwengerWriteClient:
             self.client.session.put(
                 request["url"],
                 params=request["params"],
+                json=request["json"],
+                timeout=30,
+            )
+        )
+
+        body = (
+            self._safe_response(
+                response
+            )
+        )
+
+        (
+            success,
+            success_detail,
+        ) = self._evaluate_success(
+            response.status_code,
+            body,
+        )
+
+        return {
+            **request,
+
+            "sent":
+                True,
+
+            "http_status":
+                response.status_code,
+
+            "response":
+                body,
+
+            "success":
+                success,
+
+            "success_detail":
+                success_detail,
+        }
+
+    # ==================================================
+    # COBRAR LA RACHA DIARIA (28/09/2026)
+    # ==================================================
+    #
+    #     La octava escritura. 250.000 EUR al llegar a cinco dias
+    #     seguidos. Es la misma llamada que hace el boton «Canjear»
+    #     de la app de Biwenger (modulo de usuario, v631):
+    #     POST /account/dailyStreak/redeem con {"league": <id>}.
+
+    def build_redeem_streak_request(
+        self,
+        league_id: int,
+    ) -> dict[str, Any]:
+
+        if not league_id or int(league_id) <= 0:
+            raise ValueError(
+                "El league_id debe ser mayor que 0."
+            )
+
+        endpoint = (
+            f"{self.client.BASE_URL}"
+            f"/account/dailyStreak/redeem"
+        )
+
+        return {
+            "operation":
+                "REDEEM_DAILY_STREAK",
+
+            "method":
+                "POST",
+
+            "url":
+                endpoint,
+
+            "headers":
+                self.get_headers_preview(),
+
+            "json":
+                {"league": int(league_id)},
+
+            "execute":
+                False,
+        }
+
+    def redeem_daily_streak(
+        self,
+        league_id: int,
+        execute: bool = False,
+    ) -> dict:
+
+        request = (
+            self.build_redeem_streak_request(
+                league_id=league_id,
+            )
+        )
+
+        if not execute or self._en_ensayo(request):
+            return {
+                **request,
+                "sent": False,
+            }
+
+        response = (
+            self.client.session.post(
+                request["url"],
                 json=request["json"],
                 timeout=30,
             )
