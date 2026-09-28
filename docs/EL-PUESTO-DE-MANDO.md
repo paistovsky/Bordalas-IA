@@ -300,6 +300,7 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   produccion; paso 0 de 8c74a8a sigue valiendo (desde entonces solo han
   cambiado el YAML y docs). Canario: el ciclo de las 23:07. Si sale rojo, se
   quita la linea. Primer cobro esperado hacia el 01/10 (racha hoy 2).
+  **Canario de la racha VERDE (#1868, 23:07): «Racha diaria: 2 -> AUN_NO_TOCA».**
 
 - **28/09 21:06 (el gestor, en el chat del dueno).** El dueno: «no
   necesitas mi autorizacion para subir codigo. Eres totalmente
