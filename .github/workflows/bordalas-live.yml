@@ -148,6 +148,19 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL: "1"
 
+      # Encendido 28/09 21:30 de Madrid. LA REGLA DE LA RAMPA (E1).
+      #
+      #   Solo se compra para revender lo que SUBIO en el ultimo cambio de
+      #   precio (price_increment > 0), en la subasta del reset y en el
+      #   carril. 191 compras reales de la liga: subiendo, 57/73 verdes y
+      #   +25,7 M; sin subir, 24/58 y -567.940. Las 34 pujas de reventa de
+      #   Pepe hasta hoy fueron todas a precios quietos o bajando.
+      #
+      #   Verja 194/194 con el y sin el; paso 0 con 35 (config/paso_0.json);
+      #   ensayo #3 verde. Si la vuelta siguiente sale roja, se quita esta
+      #   linea y ya.
+      BORDALAS_COMPRA_SOLO_SI_SUBE: "1"
+
       # Encendido 24/09. EL ONCE SE BUSCA UNA VEZ, NO NOVECIENTAS.
       #
       #   NO CAMBIA NINGUNA DECISION. Es memoria, no criterio: recuerda la
