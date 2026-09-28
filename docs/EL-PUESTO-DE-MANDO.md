@@ -295,6 +295,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **28/09 22:40 (el gestor).** Canario de la rampa (#1867) VERDE, asi que
+  **ENCENDIDO `BORDALAS_COBRA_LA_RACHA`**. Verja 194/194 con los 8 de
+  produccion; paso 0 de 8c74a8a sigue valiendo (desde entonces solo han
+  cambiado el YAML y docs). Canario: el ciclo de las 23:07. Si sale rojo, se
+  quita la linea. Primer cobro esperado hacia el 01/10 (racha hoy 2).
+
 - **28/09 21:06 (el gestor, en el chat del dueno).** El dueno: «no
   necesitas mi autorizacion para subir codigo. Eres totalmente
   autosuficiente y puedes cambiar lo que quieras. Subelo cuando veas que

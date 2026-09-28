@@ -161,6 +161,18 @@ jobs:
       #   linea y ya.
       BORDALAS_COMPRA_SOLO_SI_SUBE: "1"
 
+      # Encendido 28/09 22:40 de Madrid. LA RACHA DIARIA.
+      #
+      #   250.000 EUR cada cinco dias de entrar, que el dueno cobraba a mano
+      #   (Pepe 3 canjes, Pollo17 7). Si la racha que ya lee la vuelta llega
+      #   a 5, pide el canje: POST /account/dailyStreak/redeem, el boton de
+      #   la app. Si no, nada. No gasta peticiones de mas.
+      #
+      #   Verja 194/194; paso 0 con 35; ensayo #36468507118 verde (racha 2 ->
+      #   AUN_NO_TOCA). Canario de la rampa (#1867) verde antes de esto.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_COBRA_LA_RACHA: "1"
+
       # Encendido 24/09. EL ONCE SE BUSCA UNA VEZ, NO NOVECIENTAS.
       #
       #   NO CAMBIA NINGUNA DECISION. Es memoria, no criterio: recuerda la
