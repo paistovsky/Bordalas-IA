@@ -275,6 +275,30 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **28/09 21:06 (el gestor, en el chat del dueno).** El dueno: «no
+  necesitas mi autorizacion para subir codigo. Eres totalmente
+  autosuficiente y puedes cambiar lo que quieras. Subelo cuando veas que
+  es lo mejor». **Queda como regla: tambien encender interruptores, siempre
+  por verja, paso 0, ensayo y canario, de uno en uno.**
+  - **LA RACHA DIARIA, FUSIONADA Y APAGADA** (65c1f24, paso 0 en 8c74a8a
+    con 35, incluidos COBRA_LA_RACHA y COMPRA_SOLO_SI_SUBE). Los tres
+    canjes de Pepe (16/09, 21/09, 26/09) los hizo el dueno a mano; Pollo17
+    lleva 7. Octava escritura en BiwengerWriteClient:
+    `redeem_daily_streak` = POST /account/dailyStreak/redeem {"league": id},
+    la del boton «Canjear» de la app (modulo de usuario v631).
+    `src/actions/la_racha.py` lee `daily_streak` de la foto (sin peticion
+    de mas) y cobra solo si es >= 5. Interruptor `BORDALAS_COBRA_LA_RACHA`.
+    Guardia `test_la_racha_v1` (5/5); el ensayo vigila ahora 8 escrituras.
+    Verja 194/194 (produccion y --con). Ensayo #36468507118 VERDE:
+    «Racha diaria: 2 -> AUN_NO_TOCA». La racha sube sola con las vueltas
+    de Pepe: llega a 5 hacia el 01/10.
+  - **EL ORDEN:** la rafaga de las 21:15 enciende PRIMERO la rampa
+    (COMPRA_SOLO_SI_SUBE), como estaba previsto; el arbol ha cambiado, asi
+    que repite el paso 0 si hace falta. Cuando el canario de la rampa salga
+    verde, se enciende `BORDALAS_COBRA_LA_RACHA: "1"` (el gestor o la
+    rafaga siguiente), con su propio canario. Nunca los dos en la misma
+    vuelta. Hay margen: hasta el 01/10 no hay nada que cobrar.
+
 - **28/09 14:15 (rafaga de la tarde).** GitHub: escribo en main y en
   ramas. Ciclos: verdes (#1856 a #1859). Pepe: nada nuevo desde las 07:15
   salvo UNA puja viva del carril: **Zubeldia, 1.363.592** (07:19, para
