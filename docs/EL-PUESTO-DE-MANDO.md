@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/09/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 28/09/2026, 11:30 de Madrid (el cuaderno, fusionado).
 
 ## El mandato
 
@@ -135,7 +135,7 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
      entonces NO frena ni una puja.
    - **ENCENDIDO el 27/09 a las 12:06 de Madrid (2164cfe), a peticion del
      dueno. Canario: el ciclo #1834 de las 12:07, VERDE.** Punto 1 hecho.
-2. **El cuaderno.** EL SIGUIENTE, en cuanto el 1 este encendido y verde. Hoy el marcador no cuadra: «el once que anotamos no es el
+2. **El cuaderno.** HECHO el 28/09 (9183e9c, ver bitacora). Antes: Hoy el marcador no cuadra: «el once que anotamos no es el
    que jugo». Sin esto no se puede saber si un cambio mejora o empeora, y sin
    eso no hay gestion, hay fe.
 3. **Aislar la verja de la red.** La regla «ninguna guardia sale a internet»
@@ -264,6 +264,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/09 11:30 (el dueno, en persona).** El dueno AUTORIZA: «subir el
+  cuaderno a GitHub, y a partir de ahora subir ramas y codigo al
+  repositorio sin preguntarme, pasando siempre por la verja y el ensayo».
+  **Queda como regla: rama -> verja -> ensayo -> fusion a main.**
+  Hecho: stash recuperado sobre main de hoy, rama `el-cuaderno` (14399d6),
+  verja 192/192 con los 6 de produccion (la verja volvio a escribir en un
+  libro, divergence_ledger.json; deshecho), ensayo #2 VERDE (panel:
+  `marcador.cuaderno` = «0 de 1 jornada(s) con nota», motivo: no se congelo
+  el once de la J7; correcto). Fusionado a main (9183e9c). Canario: el ciclo
+  de las 12:07 de Madrid, con comprobacion programada a las 12:15.
+  **Punto 2 del plan: hecho, pendiente del canario.** La primera nota real
+  llegara cuando cierre la J8 (hacia el 12/10), si el once se congela el
+  09/10 (ciclo de las 20:07). Lo que el cuaderno NO arregla: la
+  clasificacion de Biwenger con retraso (fallo 3).
 
 - **28/09 07:15 (rafaga de la manana).** GitHub: escribo en main. Ciclos:
   todos verdes (#1844 a #1851; el #1852 en marcha). **OJO: faltan dos
