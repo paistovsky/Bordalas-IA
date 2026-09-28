@@ -310,8 +310,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
     puesto: VERDE, la regla corrio (`activa: true`) sin fallos; esta
     vuelta no tuvo a quien frenar (la caja libre, 206.284, no llega a
     ningun candidato del carril, y la subasta solo actua en el reset).
-  - **LO QUE FALTA: ENCENDERLO.** Canario del codigo apagado: el ciclo de
-    las 16:07 (comprobacion programada a las 16:15). Si sale verde, la
+  - **LO QUE FALTA: ENCENDERLO.** Canario del codigo apagado: el ciclo
+    #1861 de las 16:07, VERDE (comprobado a las 16:16). Si sale verde, la
     rafaga de las 21:15 pone `BORDALAS_COMPRA_SOLO_SI_SUBE: "1"` en el env
     de bordalas-live.yml (paso_0.json ya lo tiene probado; si el arbol
     cambia antes, repetir el paso 0) y vigila la vuelta siguiente. Su
