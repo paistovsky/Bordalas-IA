@@ -151,6 +151,26 @@ from scripts.run_validation_gate import (         # noqa: E402
 
 YO = "src.analysis.test_ninguna_guardia_depende_del_entorno_v1"
 
+# LOS QUE NO SON INTERRUPTORES (28/09/2026)
+#
+#     `BORDALAS_ENSAYO` no enciende nada en Pepe: es el MODO del
+#     ensayo, que cierra las siete escrituras de Biwenger. Nunca
+#     va en el `env` de produccion. Desde que existe (27/09), el
+#     paso 0 lo ponia a "1" con todos los demas y la verja caia en
+#     `test_venta_ejecutable_v1` —la venta no sale, como debe en un
+#     ensayo—: el paso 0 no dejaba encender NINGUN interruptor por
+#     culpa de algo que no es un interruptor. Medido: en main, con
+#     todos puestos, rojo; con todos menos este, verde.
+NO_SON_INTERRUPTORES = frozenset({"BORDALAS_ENSAYO"})
+
+
+def _interruptores() -> list:
+    """Los que el paso 0 enciende: todos, menos los modos."""
+
+    return [
+        n for n in inventario() if n not in NO_SON_INTERRUPTORES
+    ]
+
 
 def _entorno(puestos: bool) -> dict:
     """Una copia del entorno con TODOS los interruptores puestos o fuera."""
@@ -159,7 +179,7 @@ def _entorno(puestos: bool) -> dict:
 
     for nombre in inventario():
 
-        if puestos:
+        if puestos and nombre not in NO_SON_INTERRUPTORES:
             salida[nombre] = "1"
         else:
             salida.pop(nombre, None)
@@ -249,7 +269,7 @@ def _corre_la_verja(entorno: dict) -> tuple[int, str]:
 
 def test_sin_interruptores_no_se_comprueba_nada() -> None:
 
-    conocidos = inventario()
+    conocidos = _interruptores()
 
     assert conocidos, (
         "no se ha encontrado ni un BORDALAS_* en todo el "

@@ -320,6 +320,12 @@ def correr(
                 "starter_probability": t.get("starter_probability"),
                 "hierarchy_value": t.get("hierarchy_value"),
                 "hierarchy_label": t.get("hierarchy_label"),
+
+                # LO QUE MIRA `la_regla_de_la_rampa` (28/09/2026).
+                #     Mismo fallo, misma leccion: sin esta clave la
+                #     rampa veria a todos "sin dato" y frenaria al
+                #     que sube. Lo cazo su guardia.
+                "price_increment": t.get("price_increment"),
             }
             for t in (objetivos or [])
             if isinstance(t, dict)
@@ -483,6 +489,24 @@ def correr(
 
         candidatos_finales = regla.get("siguen") or []
 
+        # ================================================
+        # ¿SUBE? (28/09/2026, E1 del laboratorio)
+        # ================================================
+        #
+        #     14 de las 17 pujas del carril fueron a jugadores con
+        #     el precio BAJANDO, y 3 quieto. El carril quito la
+        #     compuerta de ritmo porque «el negocio es el
+        #     spread»; E1 mide que no: sin subida, 24/58 verdes
+        #     y -567.940. Mismo interruptor que en la subasta,
+        #     `BORDALAS_COMPRA_SOLO_SI_SUBE`, APAGADO de fabrica.
+        from src.analysis.la_regla_de_la_rampa import mira_si_sube
+
+        rampa = mira_si_sube(candidatos_finales)
+
+        frenados_por_no_subir = rampa.get("frenados") or []
+
+        candidatos_finales = rampa.get("siguen") or []
+
         elegidos = a_quien_pujar(
             candidatos_finales,
             cuantos=caben,
@@ -498,7 +522,9 @@ def correr(
                 #     dice con su nombre y no con un "no hay a
                 #     quien" que parece mercado.
                 "blocked_by": (
-                    "NO_VA_A_JUGAR"
+                    "NO_SUBE"
+                    if frenados_por_no_subir and not candidatos_finales
+                    else "NO_VA_A_JUGAR"
                     if frenados_por_no_jugar and not candidatos_finales
                     else "SIN_REVENTA"
                     if frenados_por_reventa and not candidatos_finales
@@ -527,6 +553,11 @@ def correr(
                         if frenados_por_no_jugar
                         else ""
                     )
+                    + (
+                        f" {rampa.get('reason')}"
+                        if frenados_por_no_subir
+                        else ""
+                    )
                 ).strip(),
                 "permiso": puerta,
                 "margen": margen,
@@ -537,6 +568,8 @@ def correr(
                 "corte_de_la_reventa": corte,
                 "frenados_por_no_jugar": frenados_por_no_jugar,
                 "regla_de_compra": regla,
+                "frenados_por_no_subir": frenados_por_no_subir,
+                "regla_de_la_rampa": rampa,
             }
 
         if escritor is None:
@@ -777,6 +810,8 @@ def correr(
             "corte_de_la_reventa": corte,
             "frenados_por_no_jugar": frenados_por_no_jugar,
             "regla_de_compra": regla,
+            "frenados_por_no_subir": frenados_por_no_subir,
+            "regla_de_la_rampa": rampa,
             "reason": (
                 f"{len(puestas)} puja(s) de la rendija"
                 + (
@@ -793,6 +828,11 @@ def correr(
                 + (
                     f" {regla.get('reason')}"
                     if frenados_por_no_jugar
+                    else ""
+                )
+                + (
+                    f" {rampa.get('reason')}"
+                    if frenados_por_no_subir
                     else ""
                 )
             ),

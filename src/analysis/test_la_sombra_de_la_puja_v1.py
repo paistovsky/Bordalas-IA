@@ -75,6 +75,7 @@ def _candidatos() -> list:
             "id": 100 + i,
             "name": f"Jugador {i}",
             "market_price": 400_000 + 100_000 * i,
+            "price_increment": 10_000,   # sube: pasa la rampa (E1)
             "team_id": 1 + i,
             "starter_probability": 80.0,
             "hierarchy_value": 60,

@@ -379,6 +379,7 @@ TESTS = [
     "src.analysis.test_el_reloj_de_las_guardias_v1",
     "src.analysis.test_el_once_que_jugo_v1",
     "src.analysis.test_el_cuaderno_v1",
+    "src.analysis.test_la_regla_de_la_rampa_v1",
     "src.analysis.test_el_orden_del_tiempo_v1",
     "src.analysis.test_el_vestuario_libre_v1",
     "src.analysis.test_los_libros_v1",
@@ -852,8 +853,15 @@ def _apuntar_el_paso_0(segundos: float) -> list:
         sys.path.insert(0, str(RAIZ))
 
         from scripts.los_interruptores import inventario
+        from src.analysis.test_ninguna_guardia_depende_del_entorno_v1 import (
+            NO_SON_INTERRUPTORES,
+        )
 
-        probados = sorted(inventario())
+        # Los modos (BORDALAS_ENSAYO) no se encienden en el paso 0,
+        # asi que tampoco quedan "probados".
+        probados = sorted(
+            n for n in inventario() if n not in NO_SON_INTERRUPTORES
+        )
 
         REGISTRO_DEL_PASO_0.parent.mkdir(
             parents=True, exist_ok=True

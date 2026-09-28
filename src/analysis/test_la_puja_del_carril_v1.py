@@ -104,6 +104,7 @@ TRENT = {
     "name": "Trent",
     "position": 2,
     "market_price": 2_760_000,
+    "price_increment": 10_000,   # sube: pasa la rampa (E1)
     "status": "ok",
     "outside_computer_market": False,
 }

@@ -1692,6 +1692,32 @@ def mira_si_va_a_jugar_de_verdad(candidatos: list | None) -> dict:
         }
 
 
+def mira_si_sube_de_verdad(candidatos: list | None) -> dict:
+    """
+    La regla de la rampa (E1), sobre los candidatos de la cesta.
+
+    Como `mira_si_va_a_jugar_de_verdad`: si no se puede cargar,
+    pasan todos. Nunca lanza.
+    """
+
+    try:
+        from src.analysis.la_regla_de_la_rampa import mira_si_sube
+
+        return mira_si_sube(candidatos)
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "activa": False,
+            "siguen": list(candidatos or []),
+            "frenados": [],
+            "reason": (
+                f"No se pudo mirar la regla de la rampa: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def plan_del_reset(
     candidatos: list | None,
     prima_de_reventa: float,
@@ -1759,6 +1785,7 @@ def plan_del_reset(
         "dropped_by_cap": 0,
         "dropped_by_club": 0,
         "dropped_by_no_juega": 0,
+        "dropped_by_no_sube": 0,
         "dropped_by_reventa": 0,
         "ya_en_la_ventana": 0,
         "cupo_por_ventana": False,
@@ -1889,6 +1916,32 @@ def plan_del_reset(
 
         sin_repetir = elegibles
 
+        # 1b. ¿SUBE? (28/09/2026, E1 del laboratorio)
+        #
+        #     Las 17 pujas de esta via hasta hoy fueron a jugadores
+        #     con el precio QUIETO. De las compras de los ocho
+        #     managers sin que el precio subiera: 24/58 verdes y
+        #     -567.940; subiendo, 57/73 y +25,7 M. Interruptor
+        #     `BORDALAS_COMPRA_SOLO_SI_SUBE`, APAGADO de fabrica.
+        rampa = mira_si_sube_de_verdad(sin_repetir)
+
+        frenados_por_la_rampa = len(rampa.get("frenados") or [])
+
+        elegibles = rampa.get("siguen") or []
+
+        if frenados_por_la_rampa and not elegibles:
+            return {
+                **vacio,
+                "available": True,
+                "window": ventana,
+                "dropped_by_no_juega": frenados_por_la_regla,
+                "dropped_by_no_sube": frenados_por_la_rampa,
+                "blocked_by": "NO_SUBE",
+                "reason": rampa.get("reason"),
+            }
+
+        sin_repetir = elegibles
+
         # 2. ¿ES REVENTA?
         #
         #     Mira LA VIA DEL CANDIDATO, no el camino: un
@@ -1913,6 +1966,7 @@ def plan_del_reset(
                 "available": True,
                 "window": ventana,
                 "dropped_by_no_juega": frenados_por_la_regla,
+                "dropped_by_no_sube": frenados_por_la_rampa,
                 "dropped_by_reventa": frenados_por_reventa,
                 "blocked_by": "SIN_REVENTA",
                 "reason": corte.get("reason"),
@@ -1934,6 +1988,7 @@ def plan_del_reset(
                 "available": True,
                 "window": ventana,
                 "dropped_by_no_juega": frenados_por_la_regla,
+                "dropped_by_no_sube": frenados_por_la_rampa,
                 "dropped_by_reventa": frenados_por_reventa,
                 "blocked_by": "SIN_CESTA",
                 "reason": cesta.get("reason"),
@@ -2048,6 +2103,7 @@ def plan_del_reset(
                 "dropped_by_cap": recortados,
                 "dropped_by_club": fuera_por_club,
                 "dropped_by_no_juega": frenados_por_la_regla,
+                "dropped_by_no_sube": frenados_por_la_rampa,
                 "dropped_by_reventa": frenados_por_reventa,
                 "ya_en_la_ventana": en_la_ventana,
                 "cupo_por_ventana": por_ventana,
@@ -2096,6 +2152,7 @@ def plan_del_reset(
             "dropped_by_cap": recortados,
             "dropped_by_club": fuera_por_club,
             "dropped_by_no_juega": frenados_por_la_regla,
+            "dropped_by_no_sube": frenados_por_la_rampa,
             "dropped_by_reventa": frenados_por_reventa,
             "ya_en_la_ventana": en_la_ventana,
             "cupo_por_ventana": por_ventana,
@@ -2263,6 +2320,10 @@ def lectura_del_estado(
                     "starter_probability"
                 ),
                 "hierarchy_value": fila.get("hierarchy_value"),
+
+                # ¿SUBE? (28/09/2026). El ultimo cambio de precio de
+                #     Biwenger, para la regla de la rampa (E1).
+                "price_increment": fila.get("price_increment"),
                 "availability": fila.get("availability"),
                 "intent": fila.get("intent"),
                 "route": (
