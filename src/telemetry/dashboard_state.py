@@ -3260,6 +3260,27 @@ def compact_acquisition_budget(budget: dict) -> dict:
     }
 
 
+def _el_cuaderno_del_once() -> dict:
+    """El cuaderno para el panel. Observador puro. Nunca lanza."""
+
+    try:
+        from src.analysis.el_cuaderno import (
+            cargar_libros,
+            el_cuaderno,
+        )
+
+        return el_cuaderno(*cargar_libros())
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "available": False,
+            "reason": (
+                f"No se pudo leer el cuaderno: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
+
 def compact_ledger_audit(audit: dict) -> dict:
     """
     ¿Sabemos explicar la plantilla de cada rival?
@@ -6662,6 +6683,11 @@ def build_dashboard_state() -> dict:
             **(marcador_estado or {}),
             "el_once_anotado": _lo_que_se_perdio,
             "congelado_este_ciclo": _once_congelado,
+
+            # EL CUADERNO (27/09/2026). La nota del once por la
+            # jornada de LaLiga, no por el round de Biwenger, que
+            # salta a mitad de jornada. Ver `el_cuaderno.py`.
+            "cuaderno": _el_cuaderno_del_once(),
         },
 
         # El once: los puntos sentados, el sesgo por posicion y
