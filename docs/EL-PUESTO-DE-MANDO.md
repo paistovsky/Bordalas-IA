@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/09/2026, 15:25 de Madrid (rafaga de las 14:15: la regla de la rampa, fusionada y apagada).
+Actualizado: 28/09/2026, 21:35 de Madrid (rafaga de las 21:15: la rampa, ENCENDIDA).
 
 ## El mandato
 
@@ -274,6 +274,25 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/09 21:15 (rafaga de la noche).** GitHub: escribo en main. Ciclos:
+  verdes (#1861 a #1866, este ultimo ya con el codigo de la racha). Pepe:
+  nada nuevo desde las 14:15 salvo un bonus de 250.000 (18:43); sigue viva
+  la puja por Zubeldia (1.363.592). Rutina del cierre de la J8: comprobada
+  hoy (09/10 12:45).
+  **BORDALAS_COMPRA_SOLO_SI_SUBE, ENCENDIDO a las 21:30 (c5f6183).** Antes:
+  verja 194/194 con el interruptor puesto sobre el arbol de ahora (con la
+  racha dentro) y 194/194 con los 7 de produccion ya en el YAML; paso 0
+  de las 21:06 con 35, que lo incluye. Canario: el ciclo de las 22:07, con
+  comprobacion programada a las 22:15; si sale rojo, se quita la linea.
+  **Primer efecto real: la subasta del reset del 29/09 a las 07:00.** La
+  rafaga de las 07:15 tiene que mirar a quien freno (`dropped_by_no_sube`)
+  y a quien pujo. La puja viva por Zubeldia NO la toca la regla (ya esta
+  puesta); se resuelve en ese mismo reset.
+  Siguiente, por orden: la racha (`BORDALAS_COBRA_LA_RACHA`), en otra
+  vuelta, cuando este canario salga verde; despues, la mitad de VENTA de
+  E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
+  bajada).
 
 - **28/09 21:06 (el gestor, en el chat del dueno).** El dueno: «no
   necesitas mi autorizacion para subir codigo. Eres totalmente
