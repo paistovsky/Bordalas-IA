@@ -275,7 +275,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   `marcador.cuaderno` = «0 de 1 jornada(s) con nota», motivo: no se congelo
   el once de la J7; correcto). Fusionado a main (9183e9c). Canario: el ciclo
   de las 12:07 de Madrid, con comprobacion programada a las 12:15.
-  **Punto 2 del plan: hecho, pendiente del canario.** La primera nota real
+  **Canario: el ciclo #1857 de las 12:07, VERDE; el panel trae
+  `marcador.cuaderno` sin error. Punto 2 del plan: HECHO.** La primera nota real
   llegara cuando cierre la J8 (hacia el 12/10), si el once se congela el
   09/10 (ciclo de las 20:07). Lo que el cuaderno NO arregla: la
   clasificacion de Biwenger con retraso (fallo 3).
