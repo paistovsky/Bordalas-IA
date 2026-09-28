@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/09/2026, 11:30 de Madrid (el cuaderno, fusionado).
+Actualizado: 28/09/2026, 15:25 de Madrid (rafaga de las 14:15: la regla de la rampa, fusionada y apagada).
 
 ## El mandato
 
@@ -41,7 +41,7 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
 ## Donde estamos
 
     clasificacion   1o, a 3 puntos de Pollo17, 31 jornadas por delante
-    saldo           +1.569.876 (28/09 04:52; puja maxima 15.522.376)
+    saldo           +1.569.876 (28/09; 1.363.592 apartados en la puja por Zubeldia)
     plantilla       14 jugadores: 1 POR, 4 DEF, 6 MED, 3 DEL
     proxima jornada la 8, el 09/10 a las 21:00
     el ciclo        cada hora, GitHub Actions + cron-job.org, ~95 s, verde
@@ -274,6 +274,50 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/09 14:15 (rafaga de la tarde).** GitHub: escribo en main y en
+  ramas. Ciclos: verdes (#1856 a #1859). Pepe: nada nuevo desde las 07:15
+  salvo UNA puja viva del carril: **Zubeldia, 1.363.592** (07:19, para
+  revender), con el precio bajando OCHO dias seguidos (1,45 M -> 1,36 M).
+  Es justo el caso de E1. Se resuelve en el reset de manana; si la gana,
+  la caja libre baja a ~0,2 M. Rutina del cierre de la J8: comprobada.
+  **Punto 3 del plan (la regla de los rivales, E1), MITAD DE COMPRA:
+  CONSTRUIDA, FUSIONADA Y APAGADA** (d8674fe).
+  - Doctrina 84, comprobado antes: la compuerta PRECIO_CAYENDO frena lo
+    plano y lo que baja, pero la subasta no la usa, el carril la quito a
+    proposito («el negocio es el spread»), y lee el ritmo del ojeador, no
+    el precio de Biwenger. Medido en bid_outcome_ledger: de las 34 pujas
+    de reventa, subasta 17/17 con el precio QUIETO y carril 14/17 BAJANDO
+    (3 quietos). Cero a un jugador que subiera.
+  - Lo hecho: `src/analysis/la_regla_de_la_rampa.py`, interruptor
+    `BORDALAS_COMPRA_SOLO_SI_SUBE` (nace APAGADO). En la subasta del reset
+    y en el carril, detras de «¿va a jugar?», frena al candidato cuyo
+    `price_increment` (el ultimo cambio de precio de Biwenger, que ya
+    viaja en cada fila del tablero) no es una subida. Ni disco ni red.
+    Del tablero de hoy suben 34 de 67: no deja sin candidatos.
+  - La guardia `test_la_regla_de_la_rampa_v1` (4/4) cazo que el carril
+    tiraba `price_increment` al rehacer las filas (habria frenado a
+    TODOS, como paso el 26/09 con la titularidad). Arreglado.
+  - Las guardias de la subasta y el carril (7 ficheros) llevan ahora un
+    candidato que sube, para aguantar con el interruptor puesto.
+  - **Encontrado y arreglado: el paso 0 estaba roto desde el 27/09.**
+    Encendia tambien `BORDALAS_ENSAYO` (el modo del ensayo, que no es un
+    interruptor) y `test_venta_ejecutable_v1` caia: NINGUN interruptor se
+    podia encender. Medido en main: con todos, rojo; sin ese, verde.
+    Ahora queda fuera (`NO_SON_INTERRUPTORES`, commit 6d25c63).
+  - Verja 193/193 con los 6 de produccion Y con --con el nuevo. Paso 0
+    PASADO con 34 (config/paso_0.json). Ensayo #3 con el interruptor
+    puesto: VERDE, la regla corrio (`activa: true`) sin fallos; esta
+    vuelta no tuvo a quien frenar (la caja libre, 206.284, no llega a
+    ningun candidato del carril, y la subasta solo actua en el reset).
+  - **LO QUE FALTA: ENCENDERLO.** Canario del codigo apagado: el ciclo de
+    las 16:07 (comprobacion programada a las 16:15). Si sale verde, la
+    rafaga de las 21:15 pone `BORDALAS_COMPRA_SOLO_SI_SUBE: "1"` en el env
+    de bordalas-live.yml (paso_0.json ya lo tiene probado; si el arbol
+    cambia antes, repetir el paso 0) y vigila la vuelta siguiente. Su
+    primer efecto real: la subasta del reset del 29/09 a las 07:00.
+  - La mitad de VENTA (vender el primer dia que baja) va despues, con su
+    propio interruptor, en otra rafaga.
 
 - **28/09 11:30 (el dueno, en persona).** El dueno AUTORIZA: «subir el
   cuaderno a GitHub, y a partir de ahora subir ramas y codigo al
