@@ -4,9 +4,9 @@ El ensayo no escribe en Biwenger. Ni una vez, por ninguna puerta.
 QUE SE PRUEBA (27/09/2026)
 
     `BORDALAS_ENSAYO=1` convierte a Pepe en un ensayo: lee Biwenger de
-    verdad y no escribe nada. Todas las escrituras pasan por los siete
-    metodos de `BiwengerWriteClient`, asi que esta guardia llama a LOS
-    SIETE con execute=True y comprueba:
+    verdad y no escribe nada. Todas las escrituras pasan por los metodos de
+    `BiwengerWriteClient` (siete, y la racha desde el 28/09), asi que
+    esta guardia llama a LOS OCHO con execute=True y comprueba:
 
         1. Con el ensayo puesto, la sesion HTTP no recibe NI UNA
            escritura (post, put, delete, patch), y las siete quedan
@@ -86,7 +86,7 @@ def _escritor():
 
 
 def _las_siete(cliente):
-    """Llama a las siete escrituras con execute=True."""
+    """Llama a las ocho escrituras con execute=True."""
 
     return [
         cliente.place_bid(player_id=10, amount=1_000_000, execute=True),
@@ -102,6 +102,8 @@ def _las_siete(cliente):
             formation="4-4-2",
             execute=True,
         ),
+        # La octava (28/09): cobrar la racha diaria.
+        cliente.redeem_daily_streak(league_id=1, execute=True),
     ]
 
 
@@ -150,8 +152,8 @@ def test_en_ensayo_no_sale_ni_una_escritura() -> None:
             for linea in libro.read_text(encoding="utf-8").splitlines()
         ]
 
-        assert len(apuntadas) == 7, (
-            f"el ensayo tenia que apuntar las 7 escrituras y apunto "
+        assert len(apuntadas) == 8, (
+            f"el ensayo tenia que apuntar las 8 escrituras y apunto "
             f"{len(apuntadas)}"
         )
 

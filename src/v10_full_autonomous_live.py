@@ -1267,6 +1267,19 @@ def run_full_autonomous_cycle() -> dict:
     renovacion = _renovar_en_la_ventana(cycle)
 
     # ==========================================================
+    # 1-quater) LA RACHA DIARIA (28/09/2026)
+    # ==========================================================
+    #
+    #     250.000 EUR cada cinco dias que el dueno cobraba a mano.
+    #     Solo escribe si la racha que ya leyo la vuelta llega a 5.
+    #     No consume `write_used`. APAGADA: `BORDALAS_COBRA_LA_RACHA`.
+    #     Nunca lanza.
+    from src.actions.la_racha import cobrar as _cobrar_la_racha
+
+    racha = _cobrar_la_racha(cycle)
+    print(f"Racha diaria: {racha.get('racha')} -> {racha.get('motivo')}")
+
+    # ==========================================================
     # 2) If no prior write, allow BUY V10.
     if not write_used:
         buy = build_controlled_run(
@@ -1422,6 +1435,7 @@ def run_full_autonomous_cycle() -> dict:
         "v10_write_verification": v10_verification,
         "carril": carril,
         "escaparate": escaparate,
+        "racha": racha,
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
