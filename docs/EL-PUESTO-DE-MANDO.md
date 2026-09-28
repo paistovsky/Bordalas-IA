@@ -138,14 +138,24 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
 2. **El cuaderno.** HECHO el 28/09 (9183e9c, ver bitacora). Antes: Hoy el marcador no cuadra: «el once que anotamos no es el
    que jugo». Sin esto no se puede saber si un cambio mejora o empeora, y sin
    eso no hay gestion, hay fe.
-3. **Aislar la verja de la red.** La regla «ninguna guardia sale a internet»
+3. **LO SIGUIENTE (decidido 28/09 12:30): la regla de los rivales (E1 del
+   laboratorio).** «Solo se compra para revender lo que SUBIO en el ultimo
+   cambio de precio; se vende al Computer el primer dia que BAJA». Medido en
+   191 compras reales de la liga: los que subian, +25,7 M; los que no, -0,6 M.
+   Pepe compra hoy 32 de 41 del grupo malo. Es lo de mas dinero del plan.
+   Como: dos interruptores nuevos, apagados (COMPRA y VENTA por separado),
+   en la subasta del reset y en el carril; antes, mirar si PRECIO_CAYENDO
+   ya hace parte (doctrina 84: frena lo que baja, deja pasar lo plano). Rama,
+   verja, paso 0 con --con, ENSAYO con cada uno, y se enciende primero la
+   COMPRA; la VENTA en otra rafaga. Detalle en docs/LABORATORIO.md (E1).
+4. **Aislar la verja de la red.** La regla «ninguna guardia sale a internet»
    existe y nada la hace cumplir. Veinte lineas: bloquear sockets.
-4. **Las 17 vias que escriben en Biwenger.** Creiamos cuatro. Cuatro se saltan
+5. **Las 17 vias que escriben en Biwenger.** Creiamos cuatro. Cuatro se saltan
    la cuota de una escritura por vuelta y la sombra solo cubre tres. La peor
    sin sombra: aceptar sola una oferta de un manager aunque cueste un titular.
-5. **BORDALAS_EL_PRECIO_NO_SE_PIERDE** y **BORDALAS_OBJETIVOS_EL_CATALOGO**,
+6. **BORDALAS_EL_PRECIO_NO_SE_PIERDE** y **BORDALAS_OBJETIVOS_EL_CATALOGO**,
    los dos construidos y apagados. El segundo pasa la titularidad de 142 a 504.
-6. **El once objetivo en el panel**, todos los dias.
+7. **El once objetivo en el panel**, todos los dias.
 
 Parado a proposito: los 31 interruptores y las 75 guardias que no protegen
 nada (ruido, no puntos), el calendario (medido: no decide), la varianza, y la
