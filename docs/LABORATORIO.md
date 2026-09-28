@@ -55,6 +55,59 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E3 · 28/09/2026 17:20 de Madrid · Cuando vender lo que se compro subiendo
+
+**Codigo:** `lab/precio/cuando_vender.py`. Lee el tablon y
+`price_history.json` (16/08 a 28/09, 626 jugadores; falta el 07/09 entero
+y se salta como un dia).
+
+**Hipotesis:** la mitad de VENTA de E1 («al Computer el primer dia que
+baja») es la mejor salida; esperar a confirmar la bajada, vender por
+tiempo o vender en cuanto la subida frena, rinden menos.
+
+**1) Como paga el Computer (202 ventas reales de la liga):**
+
+    dia en que el precio...   n    oferta sobre el precio   precio al dia siguiente
+    subio                    39           +2,1 %                    +0,4 %
+    quedo quieto             55           +1,0 %                     0,0 %
+    BAJO                    108           +3,2 %                    -1,8 %
+
+El dia que baja, el Computer aun paga +3,2 % sobre el precio nuevo (casi
+el de antes de bajar). Al dia siguiente se pierde otro 1,8 %. **Se vende
+el MISMO dia de la bajada, no al siguiente.** Y los managers lo saben:
+108 de sus 202 ventas son en dia de bajada.
+
+**2) Salidas (6.126 entradas: cada jugador-dia en que el precio subio;
+se paga +2,2 %; lo que sigue abierto, a precio de hoy):**
+
+    salida                        verde   ROI mediano   dias   ROI por dia*
+    tras 1 bajada (E1)            91,1 %     +6,6 %       8      +2,70 %
+    cuando la subida frena        86,8 %     +2,8 %       3      +2,56 %
+    tras 2 bajadas                78,4 %     +5,8 %       9      +2,34 %
+    si cae 3 % desde el pico      69,9 %     +5,1 %      10      +2,10 %
+    a los 5 dias                  79,5 %     +4,1 %       5      +2,00 %
+    a los 3 dias / a los 7        85,5 / 74,1 %  +2,9 / +4,7 %  3 / 7   +1,95 / +1,93 %
+    (*) contando un dia muerto por viaje: se cobra hoy y se puja para manana
+
+Por mitades: hasta el 06/09 gana la de E1 (3,07 %/dia contra 3,02 % de
+«cuando frena»); desde el 07/09 empatan (1,95 % contra 2,02 %, y la de E1
+tiene aun el 56 % de viajes abiertos y subiendo). Esperar a una segunda
+bajada pierde siempre (13 puntos menos de verdes).
+
+**Contra Pepe hoy (E1):** vendio en dia de bajada 13 de 30 viajes y, de
+mediana, 2 dias despues del pico. Publica con precio pedido alto (Ceballos
+a 6,8 M valiendo 4,22 M), pero el Computer le pago 4.320.600 = precio
++2,4 %: **el precio pedido no cambia lo que paga el Computer.**
+
+**Limites:** todos los jugadores, no solo los que se pueden comprar; sin
+tope de caja; la prima de compra es la mediana (+2,2 %). Es la comparacion
+entre salidas lo que vale, no los porcentajes absolutos.
+
+**Veredicto: SE AGUANTA.** La salida de E1 es la mejor o empata con la
+mejor en todo lo medido, y el detalle que faltaba es de horas: aceptar la
+oferta del Computer el mismo dia de la bajada. Actualizado en «Listo para
+el plan».
+
 ### E2 · 28/09/2026 11:30 de Madrid · Que hace que un jugador EMPIECE a subir
 
 **Codigo:** `lab/precio/que_predice.py`. Lee `price_history.json` (16/08 a
@@ -177,3 +230,13 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
   (doctrina 84) si la compuerta PRECIO_CAYENDO de la sombra ya hace parte
   de esto: frena lo que BAJA, pero deja pasar lo PLANO, que es donde Pepe
   pierde.
+  - **La mitad de VENTA, afinada con E3 (28/09 17:20):** (1) todo lo
+    comprado para revender se publica EN CUANTO se compra (sin oferta del
+    Computer no hay venta el dia de la bajada); el precio pedido da igual,
+    el Computer paga precio +1 a +3 %. (2) En la primera vuelta despues
+    del reset en que `price_increment` < 0, se acepta la oferta del
+    Computer. Ese mismo dia, no al siguiente: esperar cuesta un 1,8 % mas
+    (mediana, n=108) y esperar a una segunda bajada baja los verdes del
+    91 % al 78 %. (3) No vender por tiempo ni «cuando frena»: rinden
+    menos o empatan. Excepciones que no mide esto: Yamal y los titulares
+    del once (no son reventa).
