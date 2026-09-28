@@ -169874,5 +169874,24 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "84ff20e6dc7622ffbaabb75a",
+    "date": 1790613813,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
