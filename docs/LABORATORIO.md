@@ -55,6 +55,59 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E2 · 28/09/2026 11:30 de Madrid · Que hace que un jugador EMPIECE a subir
+
+**Codigo:** `lab/precio/que_predice.py`. Lee `price_history.json` (16/08 a
+28/09, 626 jugadores), el tablon (finales de jornada), la foto del 18/09 y
+`puntos_por_jornada.jsonl` (totales del 23/09). Puntos de la J7 = totales
+del 23/09 menos los del 18/09.
+
+**Hipotesis:** E1 dice que lo que sube sigue subiendo. Lo que falta es
+saber que ARRANCA una subida, para entrar antes que Pollo17. Idea: los
+puntos de la jornada que acaba de terminar.
+
+**A) Cuando arrancan (42 dias, 16.875 casos de jugador quieto o bajando):**
+
+    dias desde el final de la jornada    0      1      2      3      4      5     6+
+    empiezan a subir                   7,6 %  2,3 %  4,3 %  2,3 %  1,2 %  2,7 %  1,0 %
+
+Las subidas nacen con el resultado de la jornada: el mismo dia y dos dias
+despues. El resto de la semana casi nadie arranca.
+
+**B) Quien arranca tras la J7 (398 que NO venian subiendo el 21/09):**
+
+    no jugo la J7        n=204   arrancan en 2 dias  0,5 %   semana: -3,7 % (mediana)
+    jugo, < 2 puntos     n= 47                       0,0 %           -9,4 %
+    jugo, 2-5 puntos     n=137                       2,9 %           -6,8 %
+    jugo, 6+ puntos      n= 10                      50,0 %    -1,7 % (6-9) / +3,0 % (10+)
+    (ya venian subiendo  n=147                                        +7,1 %; media +18,1 %)
+
+Fuera de muestra (mitades de jugadores al azar, umbral elegido en una y
+medido en la otra): con 4-5 puntos o mas, arrancan el **17-25 %** (n=23 y
+n=8) contra el **1 %** del resto (n=176 y 191).
+
+**C) Que dia compra cada uno (dias desde el final de la jornada):** Pepe
+compra el 46 % el mismo dia del final (0d); Pollo17 reparte (29 % al dia
+siguiente) y Luismi_Haz tambien. Descriptivo: no dice por si solo quien
+acierta.
+
+**Lo que se aprende:**
+1. La inercia de E1 sigue siendo la senal grande: los que ya subian
+   ganaron +7,1 % en la semana; los que no, perdieron entre 3,7 y 9,4 %.
+   **Comprar a un jugador que no sube es perder dinero aunque no pagues
+   prima**: la semana despues de la J7 bajo casi todo el mercado.
+2. El que no jugo cae (-3,7 %) y casi nunca arranca (1 de 204). Confirma la
+   regla «¿va a jugar?», que ya esta encendida.
+3. Los puntos de la jornada si anticipan el arranque (1 de cada 4-5 con 5+
+   puntos, contra 1 de cada 100), pero **con una sola jornada y n=8/23 no
+   es una regla**: es una pista.
+
+**Veredicto: PROMETEDOR, NO LISTO.** No pasa al plan. Para cerrarlo hacen
+falta mas jornadas con puntos por jugador: `puntos_por_jornada.jsonl`
+guardara la J8 (cierra el 12-13/10). Siguiente paso: bajar las fotos de
+jornadas anteriores de los artefactos de Actions, si las hay, y repetir
+B con 3-4 jornadas.
+
 ### E1 · 28/09/2026 01:10 de Madrid · Como ganan Pollo17 y Luismi_Haz
 
 **Codigo:** `lab/rivales/viajes.py` (reconstruye los viajes) y
