@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/09/2026, 00:55 de Madrid (turno extra de prueba).
+Actualizado: 28/09/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -41,8 +41,8 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
 ## Donde estamos
 
     clasificacion   1o, a 3 puntos de Pollo17, 31 jornadas por delante
-    saldo           -3.132.224 (27/09 21:10; puja maxima 11.970.276)
-    plantilla       17 jugadores (vendio 4 la madrugada del 27/09)
+    saldo           +1.569.876 (28/09 04:52; puja maxima 15.522.376)
+    plantilla       14 jugadores: 1 POR, 4 DEF, 6 MED, 3 DEL
     proxima jornada la 8, el 09/10 a las 21:00
     el ciclo        cada hora, GitHub Actions + cron-job.org, ~95 s, verde
 
@@ -264,6 +264,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/09 07:15 (rafaga de la manana).** GitHub: escribo en main. Ciclos:
+  todos verdes (#1844 a #1851; el #1852 en marcha). **OJO: faltan dos
+  vueltas**, no hubo ciclo entre las 04:50 y las 07:15 de Madrid (el latido
+  de cron-job.org salto dos horas; ademas hubo dos casi seguidos a las 04:45
+  y 04:50). No se toca (el latido no se toca): si se repite, avisar al dueno.
+  Pepe vendio al Computer otros 3 jugadores publicados: Ceballos 4.320.600
+  (01:09; publicado a 6,8 M, valia 4,22 M), Iturbe 157.400 (02:10) y Aihen
+  224.100 (03:09). **El saldo pasa a positivo: +1.569.876.** Plantilla: 14
+  (1 portero, 4 defensas, 6 medios, 3 delanteros). **Riesgo para la J8:
+  un solo portero.** Si se lesiona, cero seguro en esa plaza. Que lo mire el
+  turno del cierre (09/10 12:45) y, antes, que Pepe fiche portero si puede.
+  Rutina del cierre: comprobada anoche (09/10 12:45 de Madrid).
+  **Plan: NO he avanzado.** El punto 2 (el cuaderno) sigue esperando al
+  dueno: `.claude/settings.json` no ha cambiado desde el 27/09 22:56 (antes
+  del bloqueo), asi que el push de la rama seguiria denegado. El stash sigue
+  en esta sesion. No empiezo el punto 3 (tocar la verja) por el mismo motivo:
+  es codigo, y sin ramas no se puede ensayar antes de main.
 
 - **28/09 00:50 (rutina «Rescatar el cuaderno»).** Pedia subir el cuaderno
   DIRECTO a main porque el push a la rama esta bloqueado. **No lo he
