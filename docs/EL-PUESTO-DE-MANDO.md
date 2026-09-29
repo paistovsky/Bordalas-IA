@@ -434,6 +434,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **30/09 00:20 (el gestor). PUJA SUBIDA, CONFIRMADA.** La orden pujo
+  9.650.000 en el ciclo #1891 (23:07) y retiro la de 8.950.000: en la foto
+  de las 00:09 Biwenger marca committed 9.650.000 (una sola puja) y
+  maximumBid 4.871.584. Se resuelve el 30/09 a las 07:00. Comprobacion
+  programada: 07:20.
+
 - **30/09 00:10 (el gestor). EL PANEL, MENU A MENU, PUBLICADO** (247cc8b,
   85fed7f, 8aa5271; despliegue 8aa5271 verde). Cada pagina responde una
   pregunta y lo tecnico va plegado: MERCADO (caja, pujas en juego, lo
