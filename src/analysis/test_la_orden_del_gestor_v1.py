@@ -213,7 +213,54 @@ def test_no_se_publica_a_un_protegido() -> None:
                 os.environ[orden_mod.ENV] = antes
 
 
+def test_el_ultimo_recurso() -> None:
+    orden = {**ORDEN, "vender_si_ficha": {"si_esta": ROBERTO, "jugadores": [
+        {"player_id": JUTGLA, "nombre": "Jutgla", "suelo": 2_900_000,
+         "desde": "2026-10-08T07:00:00+02:00", "si_saldo_negativo": True},
+    ]}}
+    base = dict(
+        mercado={}, nuestras_pujas={}, plantilla={ROBERTO, JUTGLA},
+        ofertas_del_computer={JUTGLA: {"offer_id": 7, "amount": 2_950_000}},
+        en_venta={JUTGLA}, precios={JUTGLA: 3_170_000},
+        maximo_de_puja=14_000_000,
+    )
+    antes = datetime(2026, 10, 7, 12, tzinfo=timezone.utc)
+    despues = datetime(2026, 10, 8, 12, tzinfo=timezone.utc)
+
+    assert orden_mod.decidir(orden, **base, saldo=-500_000, ahora=antes) == []
+    assert orden_mod.decidir(orden, **base, saldo=100_000, ahora=despues) == []
+    assert orden_mod.decidir(orden, **base, saldo=None, ahora=despues) == []
+    a = orden_mod.decidir(orden, **base, saldo=-500_000, ahora=despues)
+    assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", JUTGLA)], a
+
+
+def test_conservar_cierra_la_venta_de_pepe() -> None:
+    antes = os.environ.get(orden_mod.ENV)
+    with tempfile.TemporaryDirectory() as tmp:
+        ruta = Path(tmp) / "orden.json"
+        ruta.write_text(__import__("json").dumps(
+            {**ORDEN, "conservar": [{"player_id": JUTGLA, "nombre": "Jutgla"}]}
+        ), encoding="utf-8")
+        try:
+            os.environ[orden_mod.ENV] = "1"
+            assert orden_mod.conservados(ruta, AHORA) == {JUTGLA, ROBERTO}
+            os.environ.pop(orden_mod.ENV, None)
+            assert orden_mod.conservados(ruta, AHORA) == set()
+        finally:
+            if antes is not None:
+                os.environ[orden_mod.ENV] = antes
+
+    fuente = (RAIZ / "src" / "actions" / "autopilot_executor.py").read_text(
+        encoding="utf-8")
+    assert fuente.count("_conservados()") >= 2, (
+        "las dos ventas de Pepe (cobrar y antes de caducar) deben mirar "
+        "`conservar`"
+    )
+
+
 TESTS = [
+    test_conservar_cierra_la_venta_de_pepe,
+    test_el_ultimo_recurso,
     test_no_se_publica_a_un_protegido,
     test_lee_la_foto_de_la_vuelta,
     test_la_orden_del_repo_vale,

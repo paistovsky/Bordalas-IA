@@ -640,11 +640,17 @@ def execute_autopilot_decision(
                     None,
             }
 
+        # LA ORDEN DEL GESTOR (29/09/2026): los de `conservar` no los
+        # vende Pepe por su cuenta. Solo la propia orden los vende.
+        from src.actions.la_orden_del_gestor import conservados as _conservados
+
         if (
             offer.get(
                 "protection"
             )
             == "NEVER_AUTO_SELL"
+            or (offer.get("player_id") is not None
+                and int(offer.get("player_id")) in _conservados())
         ):
 
             return {
@@ -947,10 +953,15 @@ def execute_autopilot_decision(
             )
         )
 
+        # LA ORDEN DEL GESTOR (29/09/2026): `conservar`.
+        from src.actions.la_orden_del_gestor import conservados as _conservados
+
         if (
             offer_id is None
             or
             player_id is None
+            or
+            int(player_id) in _conservados()
         ):
 
             return {

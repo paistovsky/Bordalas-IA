@@ -125,6 +125,8 @@ def decidir(
     en_venta: set,
     precios: dict,
     maximo_de_puja: int | None,
+    saldo: int | None = None,
+    ahora: datetime | None = None,
 ) -> list:
     """
     Las escrituras que tocan en esta vuelta. Pura: ni red ni disco.
@@ -189,6 +191,15 @@ def decidir(
             nombre = str(j.get("nombre", ""))
 
             if pid not in plantilla or nombre.strip().lower() in INTOCABLES:
+                continue
+
+            # EL ULTIMO RECURSO (29/09): `desde` + `si_saldo_negativo`.
+            # No se toca hasta esa fecha, y solo si el saldo sigue en
+            # rojo. Sin saber el saldo o la hora, no se vende.
+            desde = _cuando(j.get("desde")) if j.get("desde") else None
+            if desde is not None and (ahora is None or ahora < desde):
+                continue
+            if j.get("si_saldo_negativo") and (saldo is None or saldo >= 0):
                 continue
 
             suelo = _int(j.get("suelo"), 0)
@@ -326,6 +337,7 @@ def leer_la_foto(snapshot: dict | None, yo: int | None) -> dict:
         "en_venta": en_venta,
         "precios": precios,
         "maximo_de_puja": _int((market.get("status") or {}).get("maximumBid")),
+        "saldo": _int((market.get("status") or {}).get("balance")),
     }
 
 
@@ -360,7 +372,7 @@ def correr(
             return salida
 
         foto = leer_la_foto(snapshot, yo)
-        acciones = decidir(orden, **foto)
+        acciones = decidir(orden, **foto, ahora=ahora)
         salida["acciones"] = acciones
 
         if not [a for a in acciones if a["accion"] != "NADA"]:
@@ -417,6 +429,33 @@ def protegidos(ruta: Path | str | None = None, ahora: datetime | None = None) ->
         ids = [
             _int(x.get("player_id"))
             for x in (orden.get("proteger") or []) + (orden.get("fichar") or [])
+        ]
+        return {i for i in ids if i}
+    except Exception:                               # noqa: BLE001
+        return set()
+
+
+def conservados(ruta: Path | str | None = None, ahora: datetime | None = None) -> set:
+    """
+    Los que Pepe NO puede vender por su cuenta (aceptar ofertas en la
+    liquidez o antes de caducar) mientras la orden viva: `conservar`,
+    `proteger` y `fichar`. La orden si puede vender a los de `conservar`
+    que tambien esten en `vender_si_ficha` (el ultimo recurso), porque
+    llama al escritor directamente. Vacio si esta apagada, caducada o no
+    vale. Nunca lanza.
+    """
+
+    try:
+        if not activa():
+            return set()
+        orden = leer_la_orden(ruta)
+        if validar(orden, ahora or datetime.now(timezone.utc)):
+            return set()
+        ids = [
+            _int(x.get("player_id"))
+            for x in (orden.get("conservar") or [])
+            + (orden.get("proteger") or [])
+            + (orden.get("fichar") or [])
         ]
         return {i for i in ids if i}
     except Exception:                               # noqa: BLE001
