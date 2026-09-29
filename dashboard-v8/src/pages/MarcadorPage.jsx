@@ -1,3 +1,5 @@
+import ResumenMarcador from "../components/ResumenMarcador";
+import Plegado from "../components/Plegado";
 /**
  * EL MARCADOR: LA NOTA DEL ONCE.
  *
@@ -72,6 +74,14 @@ export default function MarcadorPage({ data }) {
 
   return (
     <>
+      {/* ¿ACIERTA PEPE CON EL ONCE? (30/09/2026)
+
+          Arriba, la respuesta en frases y números grandes.
+          Todo lo que había en esta página sigue aquí debajo,
+          plegado: mismo dato, fuera de en medio. */}
+      <ResumenMarcador data={data} />
+
+      <Plegado titulo="Cómo se calcula la nota: techo, puntos perdidos y el detalle por jornada">
       <section className="pan">
         <div className="pan-head">
           <div>
@@ -328,6 +338,7 @@ export default function MarcadorPage({ data }) {
           casa.
         </p>
       </section>
+      </Plegado>
     </>
   );
 }

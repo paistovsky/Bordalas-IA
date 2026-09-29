@@ -1,3 +1,5 @@
+import ResumenPlantilla from "../components/ResumenPlantilla";
+import Plegado from "../components/Plegado";
 import VaraPanel from "../components/VaraPanel";
 import SaleOrderPanel from "../components/SaleOrderPanel";
 import { useState } from "react";
@@ -80,6 +82,14 @@ export default function SquadPage({ data }) {
 
   return (
     <>
+      {/* ¿QUIÉN JUEGA Y CÓMO ESTÁ CADA UNO? (30/09/2026)
+
+          Arriba, la respuesta en frases y números grandes.
+          Todo lo que había en esta página sigue aquí debajo,
+          plegado: mismo dato, fuera de en medio. */}
+      <ResumenPlantilla data={data} />
+
+      <Plegado titulo="El campo, la tabla completa, las plantillas de los rivales, la vara y el orden de venta">
       {/* LAS PESTAÑAS, ENCIMA DE TODO */}
       {rivalSquads.available && rivales.length > 0 && (
         <section className="pan" style={{ marginBottom: 11 }}>
@@ -235,6 +245,7 @@ export default function SquadPage({ data }) {
           ))}
         </div>
       </section>
+      </Plegado>
     </>
   );
 }
