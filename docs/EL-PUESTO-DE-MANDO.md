@@ -434,6 +434,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **30/09 00:10 (el gestor). EL PANEL, MENU A MENU, PUBLICADO** (247cc8b,
+  85fed7f, 8aa5271; despliegue 8aa5271 verde). Cada pagina responde una
+  pregunta y lo tecnico va plegado: MERCADO (caja, pujas en juego, lo
+  nuestro a la venta, lo ultimo hecho, lo que mas sube), PLANTILLA (quien
+  juega y como esta), ESTRATEGIA («Lo que Pepe tiene encendido», clave
+  `reglas`; guardia: todo interruptor encendido necesita su frase en
+  QUE_HACE de src/telemetry/el_tablon.py, o la verja se pone roja), LIGA
+  (clasificacion y «lo que ha movido cada rival esta semana», clave
+  `tablon_semana`), MARCADOR (la nota por jornada). Canario de la reja
+  (#1891, 23:07) VERDE; en esa vuelta la orden subio la puja por Roberto.
+  Faltan en status.json: lo ganado/perdido por operacion, numero de
+  jornada en el marcador, tendencia de precio de varios dias.
+
 - **29/09 23:10 (el gestor).** (1) **Puja por Roberto SUBIDA a 9.650.000**
   (+15,2 % sobre 8,38 M; 94e2372). En peleas por jugadores caros se paga
   +7 a +16,5 % (Pollo17 +9,8 % hoy por Moleiro, +16,5 % el 11/09). Caja
