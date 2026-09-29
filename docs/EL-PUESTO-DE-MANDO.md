@@ -370,6 +370,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **29/09 12:20 (el gestor). LA PUJA POR ROBERTO FERNANDEZ, CONFIRMADA.**
+  La orden del gestor (BORDALAS_LA_ORDEN_DEL_GESTOR, encendida 10:31) pujo
+  en el ciclo #1879 (11:07); en el #1880 (12:07) Biwenger marca
+  committed 8.950.000 y maximumBid baja de 14,4 M a 5,46 M. Se resuelve el
+  30/09 a las 07:00. Si se gana: la orden publica y cobra (con suelo) a
+  Antonio Blanco, Cabrera, Maffeo, Pablo Duran y Guevara; Jutgla solo desde
+  el 08/10 07:00 y si el saldo sigue en rojo; conservar el once. Estudio de
+  noticias (E4) hecho: guardia de compra para la rafaga de las 14:15.
+
 - **28/09 22:40 (el gestor).** Canario de la rampa (#1867) VERDE, asi que
   **ENCENDIDO `BORDALAS_COBRA_LA_RACHA`**. Verja 194/194 con los 8 de
   produccion; paso 0 de 8c74a8a sigue valiendo (desde entonces solo han
