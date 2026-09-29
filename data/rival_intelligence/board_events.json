@@ -170012,5 +170012,14 @@
         "amount": 150300
       }
     ]
+  },
+  {
+    "event_id": "dad846ac6ca00773554b2391",
+    "date": 1790704800,
+    "type": "adminText",
+    "fixed": false,
+    "title": "¡Disfruta del Basket Americano!",
+    "author": null,
+    "content": "<p><a href=\"https://biwenger.as.com/join/basket-a?utm_source=tablon&amp;utm_medium=app&amp;utm_campaign=basket-americano-26-27\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/basketball/basket-americano-26-27/tablon.jpg\" alt=\"\" /></a></p>\r\n<p style=\"text-align: center;\">[button url=\"https://biwenger.as.com/join/basket-a?utm_source=tablon&amp;utm_medium=app&amp;utm_campaign=basket-americano-26-27\"]&iexcl;AP&Uacute;NTATE! [/button]</p>"
   }
 ]
