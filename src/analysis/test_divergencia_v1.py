@@ -479,10 +479,17 @@ def test_nunca_se_llama_prediccion() -> None:
 
 
 def test_el_enganche_nunca_lanza() -> None:
-    for basura in (None, {}, {"players": None}, {"players": "no"}):
-        r = sync_divergence(basura, None)
-        assert isinstance(r, dict)
-        assert "available" in r
+    # EN UN TEMPORAL (29/09/2026). Sin `path`, esto escribia en el
+    # libro de produccion cada vez que pasaba la verja: lo cazo el
+    # vigilante de escrituras.
+    with tempfile.TemporaryDirectory() as carpeta:
+
+        for basura in (None, {}, {"players": None}, {"players": "no"}):
+            r = sync_divergence(
+                basura, None, path=Path(carpeta) / "libro.json"
+            )
+            assert isinstance(r, dict)
+            assert "available" in r
 
 
 MOTORES = [

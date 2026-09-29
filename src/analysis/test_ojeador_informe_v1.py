@@ -576,10 +576,17 @@ def test_el_libro_mide_la_calibracion_de_la_confianza() -> None:
 
 
 def test_el_enganche_del_libro_nunca_lanza() -> None:
-    for basura in (None, {}, {"players": None}, {"players": "no"}):
-        r = sync_scout_accuracy(basura, None)
-        assert isinstance(r, dict)
-        assert "available" in r
+    # EN UN TEMPORAL (29/09/2026). Sin `path`, esto escribia en el
+    # libro de produccion cada vez que pasaba la verja: lo cazo el
+    # vigilante de escrituras.
+    with tempfile.TemporaryDirectory() as carpeta:
+
+        for basura in (None, {}, {"players": None}, {"players": "no"}):
+            r = sync_scout_accuracy(
+                basura, None, path=Path(carpeta) / "libro.json"
+            )
+            assert isinstance(r, dict)
+            assert "available" in r
 
 
 # ============================================================
