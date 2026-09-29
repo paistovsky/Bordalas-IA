@@ -305,8 +305,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   el estado con el tablon de disco. De paso, la verja ensena ahora la
   traza de la guardia que falla (antes la tapaban sus propios OK).
   Verja 195/195; paso 0 pasado con 35; ensayos #5 y #6 rojos (lo que se
-  buscaba), #7 verde. Canario: el ciclo de las 08:07, comprobacion a las
-  08:15.
+  buscaba), #7 verde. **Canario: el ciclo #1876 de las 08:07, VERDE
+  (comprobado a las 08:16). Punto 4, mitad de la red: HECHO.**
   **Deuda que queda (no hecha):** varias guardias siguen ESCRIBIENDO en los
   libros de produccion al correr en local (divergence_ledger.json,
   scout_accuracy_ledger.json). Es la otra mitad del punto 4.
