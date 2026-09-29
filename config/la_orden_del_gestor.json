@@ -1,13 +1,13 @@
 {
   "escrita": "2026-09-29T10:30:00+02:00",
   "por": "el gestor, a peticion del dueno («alguien se los va a llevar»)",
-  "motivo": "Roberto Fernandez: 59 puntos en 7 jornadas (8.o de 547), sube diez dias seguidos. Jutgla, nuestro segundo delantero, 29. Se paga vendiendo al Computer a cuatro que no mueven el once; el saldo vuelve a positivo antes de la J8 (09/10 21:00). 29/09 11:00: el dueno no quiere vender a Jutgla; se vende a Pablo Duran (Celta), Cabrera y Guevara, y Jutgla queda como ultimo recurso (solo desde el 08/10 07:00 y si el saldo sigue en rojo). 29/09 19:00: Zubeldia sigue al margen (FF 21/09, 28/09 y 29/09; Biwenger «doubt» desde el 29/09): pasa a la venta y Maffeo se queda como tercer defensa.",
+  "motivo": "Roberto Fernandez: 59 puntos en 7 jornadas (8.o de 547), sube diez dias seguidos. Jutgla, nuestro segundo delantero, 29. Se paga vendiendo al Computer a cuatro que no mueven el once; el saldo vuelve a positivo antes de la J8 (09/10 21:00). 29/09 11:00: el dueno no quiere vender a Jutgla; se vende a Pablo Duran (Celta), Cabrera y Guevara, y Jutgla queda como ultimo recurso (solo desde el 08/10 07:00 y si el saldo sigue en rojo). 29/09 19:00: Zubeldia sigue al margen (FF 21/09, 28/09 y 29/09; Biwenger «doubt» desde el 29/09): pasa a la venta y Maffeo se queda como tercer defensa. 29/09 22:50: puja subida de 8.950.000 a 9.650.000 (+15,2 % sobre 8,38 M). En las peleas por jugadores caros se paga +7 a +16,5 % (Pollo17: Moleiro +9,8 % hoy, +16,5 % el 11/09); Pollo17 tiene ~7,5 M en caja y puja maxima >25 M; el dueno avisa de que Pollo y Luismi van a ir a por el.",
   "caduca": "2026-10-09T15:00:00+02:00",
   "fichar": [
     {
       "player_id": 35678,
       "nombre": "Roberto Fernández",
-      "puja": 8950000
+      "puja": 9650000
     }
   ],
   "no_pujar": [

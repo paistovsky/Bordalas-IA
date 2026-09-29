@@ -150,17 +150,24 @@ def decidir(
         if pid in plantilla or pid not in mercado:
             continue
 
-        if maximo_de_puja is not None and puja > maximo_de_puja:
-            acciones.append({
-                "accion": "NADA", "player_id": pid,
-                "nombre": f.get("nombre"),
-                "motivo": f"la puja {puja} supera maximumBid {maximo_de_puja}",
-            })
-            continue
-
         ya = nuestras_pujas.get(pid)
 
         if ya and _int(ya.get("amount"), 0) >= puja:
+            continue
+
+        # SUBIR UNA PUJA (29/09): `maximumBid` ya descuenta nuestra puja
+        # viva por este jugador; al sustituirla, ese dinero vuelve.
+        tope = (
+            None if maximo_de_puja is None
+            else maximo_de_puja + (_int((ya or {}).get("amount"), 0) or 0)
+        )
+
+        if tope is not None and puja > tope:
+            acciones.append({
+                "accion": "NADA", "player_id": pid,
+                "nombre": f.get("nombre"),
+                "motivo": f"la puja {puja} supera el tope {tope}",
+            })
             continue
 
         acciones.append({
@@ -240,6 +247,20 @@ def ejecutar(acciones: list, escritor) -> list:
                     player_id=a["player_id"], amount=a["importe"],
                     execute=True,
                 )
+                vieja = _int((a.get("sustituye") or {}).get("offer_id"))
+                if vieja and r.get("sent"):
+                    if r.get("success"):
+                        # La nueva entro: se retira la vieja.
+                        escritor.cancel_bid(offer_id=vieja, execute=True)
+                    else:
+                        # Biwenger no admite dos pujas por el mismo: se
+                        # retira la vieja y se vuelve a pujar. Si esto
+                        # falla, la vuelta siguiente la pone de nuevo.
+                        escritor.cancel_bid(offer_id=vieja, execute=True)
+                        r = escritor.place_bid(
+                            player_id=a["player_id"], amount=a["importe"],
+                            execute=True,
+                        )
             elif a["accion"] == "CANCELAR_PUJA":
                 r = escritor.cancel_bid(offer_id=a["offer_id"], execute=True)
             elif a["accion"] == "ACEPTAR_OFERTA_DEL_COMPUTER":
