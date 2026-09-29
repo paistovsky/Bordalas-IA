@@ -11,9 +11,11 @@ import path from "node:path";
  * una foto de Biwenger y credenciales.
  *
  * `npm run dev:muestra` (vite --mode muestra) lee en cambio
- * dev/status.muestra.json: una copia EXACTA de la foto diaria
- * versionada data/fotos/2026-09-18.json. Sin red, sin
- * credenciales, y siempre la misma, para las capturas. */
+ * dev/status.muestra.json: la foto diaria versionada
+ * data/fotos/2026-09-18.json, mas una clave `tablon` con lineas
+ * reales del tablon del 28-29/09 (la foto es anterior a que se
+ * publicara). Sin red, sin credenciales, y siempre la misma, para
+ * las capturas. */
 const RUTA_DE_LA_FOTO = {
   muestra: "dev/status.muestra.json"
 };

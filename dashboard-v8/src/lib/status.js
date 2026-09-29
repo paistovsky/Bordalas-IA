@@ -271,6 +271,12 @@ export function normalizeStatus(raw = {}) {
       bench: []
     },
 
+    // EL TABLON DE HOY (29/09/2026). Lo que ha pasado en la liga
+    // en las ultimas 24 h, en frases. Sin la clave se queda en
+    // `null` y INICIO no pinta la seccion: no es "no ha pasado
+    // nada", es que no se publico.
+    tablon: raw.tablon ?? null,
+
     // Que trae la tanda nueva del Computer en cada reset.
     censoDelReset: raw.censo_del_reset || { available: false },
 
