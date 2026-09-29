@@ -116,10 +116,72 @@ def test_la_verja_enciende_el_corte_y_quita_el_proxy() -> None:
     )
 
 
+def test_una_escritura_en_data_deja_marca() -> None:
+    """
+    Las guardias tampoco escriben en los libros (29/09/2026). El
+    vigilante apunta cada escritura bajo `data/` con su ruta
+    absoluta, y la verja tumba a la guardia si cae en el `data/` del
+    repositorio. Aqui se escribe en una carpeta temporal: marca si,
+    libro de verdad no.
+    """
+
+    import tempfile
+
+    # La carpeta llega por argumento: el hijo corre en un temporal y
+    # no lee ni escribe el estado de nadie.
+    carpeta_de_libros = "data"
+
+    hijo = (
+        "import sys\n"
+        "from pathlib import Path\n"
+        "d = Path(sys.argv[1]); d.mkdir()\n"
+        "(d / 'libro.json').write_text('{}')\n"
+        "print('ESCRITO')\n"
+    )
+
+    with tempfile.TemporaryDirectory() as carpeta:
+
+        entorno = dict(os.environ)
+        entorno["BORDALAS_VIGILA_DATA"] = "1"
+        entorno["PYTHONPATH"] = str(VIGILANTE)
+
+        proceso = subprocess.run(
+            [sys.executable, "-c", hijo, carpeta_de_libros],
+            capture_output=True,
+            text=True,
+            env=entorno,
+            cwd=carpeta,
+            timeout=60,
+        )
+
+        esperado = os.path.join(
+            os.path.realpath(carpeta), carpeta_de_libros, "libro.json"
+        )
+
+    assert "ESCRITO" in proceso.stdout, (proceso.stdout, proceso.stderr)
+
+    marcas = [
+        os.path.realpath(l.split("VIGILANTE-ESCRIBE:", 1)[1].strip())
+        for l in proceso.stderr.splitlines()
+        if "VIGILANTE-ESCRIBE:" in l
+    ]
+
+    assert esperado in marcas, (esperado, proceso.stderr)
+
+    texto = (RAIZ / "scripts" / "run_validation_gate.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "escribe en los libros de Pepe" in texto, (
+        "la verja ya no tumba a la guardia que escribe en los libros"
+    )
+
+
 TESTS = [
     test_fuera_se_corta_y_deja_marca,
     test_la_propia_maquina_sigue_abierta,
     test_la_verja_enciende_el_corte_y_quita_el_proxy,
+    test_una_escritura_en_data_deja_marca,
 ]
 
 

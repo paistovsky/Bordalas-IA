@@ -3572,6 +3572,32 @@ def _saldo_fresco(market_status: dict | None):
     return None
 
 
+def _el_tablon_del_dia(snapshot) -> dict:
+    """
+    El tablon de la liga de las ultimas 24 h, en frases (29/09/2026).
+    Lo pidio el dueno: «lo que pone en el tablon del dia en Biwenger».
+    Lee el tablon que la vuelta ya guarda; ni red ni escritura. Nunca
+    lanza.
+    """
+
+    try:
+        import json as _json
+
+        from src.telemetry.el_tablon import el_tablon_de_hoy
+
+        ruta = Path("data") / "rival_intelligence" / "board_events.json"
+        eventos = _json.loads(ruta.read_text(encoding="utf-8"))
+        nombres = {
+            pid: ficha.get("name")
+            for pid, ficha in _catalogo_por_id(snapshot).items()
+            if isinstance(ficha, dict)
+        }
+        return el_tablon_de_hoy(eventos, nombres)
+
+    except Exception as error:                      # noqa: BLE001
+        return {"lineas": [], "n": 0, "error": f"{type(error).__name__}: {error}"}
+
+
 def _catalogo_por_id(snapshot) -> dict:
     """
     El catalogo indexado por id. `{}` si no se puede leer.
@@ -6679,6 +6705,9 @@ def build_dashboard_state() -> dict:
         # ANOTAR EL ONCE. El numero se cuenta; las jornadas sin
         # once son IRRECUPERABLES y se dice, porque reconstruir
         # una a ojo daria una nota inventada.
+        # EL TABLON DEL DIA (29/09/2026), en frases, para Inicio.
+        "tablon": _el_tablon_del_dia(snapshot),
+
         "marcador": {
             **(marcador_estado or {}),
             "el_once_anotado": _lo_que_se_perdio,

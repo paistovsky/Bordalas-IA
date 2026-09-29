@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 29/09/2026, 14:45 de Madrid (rafaga de las 14:15).
+Actualizado: 29/09/2026, 21:40 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -40,6 +40,15 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
   quieres. Que tenga disponibilidad y que mejore». Via libre total sobre el
   codigo. Lo unico que no se negocia es que Pepe siga corriendo (el ciclo
   verde) mientras se cambia: nada se sube sin verja.
+- **Mision terciaria (29/09, «no muy relevante»):** una APK para que la
+  gente lo disfrute. **El dueno decide: BOT COMPLETO, no consejero.**
+  Condiciones del gestor: (1) leer antes las condiciones de uso de
+  Biwenger sobre automatizar cuentas: una app publica arriesga baneos de
+  usuarios y que corten el acceso, Pepe incluido; (2) el bot corre EN EL
+  MOVIL de cada usuario, con su contrasena guardada solo alli: nunca
+  claves ajenas en un servidor nuestro; (3) el usuario elige que permite
+  (aconsejar / pujar / vender), todo apagado de serie; (4) limites de
+  peticiones por usuario. Detras de la liga y del panel.
 - **Mision secundaria:** un panel para ver en tiempo real que pasa. Hoy
   existe https://bordalas-ia-dashboard.bordalas.workers.dev/ (usuario y
   contrasena: los tiene el dueno; NO se escriben en el repo, que es publico).
@@ -313,6 +322,30 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **29/09 21:15 (rafaga de la noche).** GitHub: escribo en main y ramas.
+  Ciclos: verdes (#1883 a #1889). Pepe: nada nuevo desde las 14:15;
+  sigue viva la puja por Roberto (8.950.000, reset del 30/09 07:00) y hoy
+  ya se encendio un interruptor (la revision de pujas, desde el chat del
+  dueno), asi que esta noche NO se enciende nada. E6 del laboratorio
+  contesto a mi pregunta de E4: los filtros de hoy frenan 30 de 41 bajas;
+  el hueco eran las pujas ya puestas, y eso lo tapa la revision de pujas.
+  E4 queda cerrado.
+  **Punto 4 del plan, la otra mitad: LAS GUARDIAS NO ESCRIBEN EN LOS LIBROS.
+  HECHO, pendiente del canario** (43d3c21). El vigilante apunta ahora
+  tambien las escrituras bajo `data/` (open en escritura, write_text/bytes,
+  os.replace/rename) con ruta absoluta; la verja tumba a la guardia que
+  escriba en el `data/` del repositorio. Censo: 2 de 197,
+  `test_divergencia_v1` y `test_ojeador_informe_v1`, que en su prueba «el
+  enganche nunca lanza» llamaban a sync_* SIN ruta y escribian
+  divergence_ledger.json y scout_accuracy_ledger.json de produccion en cada
+  verja (tambien en CI, dentro de la cache). Ahora con temporal. Verja
+  197/197 sin tocar `data/`; paso 0 con 37; ensayo #10 verde en CI.
+  Canario: el ciclo de las 22:07 (comprobacion a las 22:15).
+  **Con esto el punto 4 queda entero: la verja ni sale a la red ni escribe
+  en los libros.** Lo que sigue: la VENTA de E1 (E5 la da ganadora; leerlo
+  entero y mirar la orden del gestor, que ya vende), y el detalle de la
+  orden (`decidir`: mirar «ya hay puja nuestra» antes que el tope).
 
 - **29/09 14:15 (rafaga de la tarde).** GitHub: escribo en main y ramas.
   Ciclos: verdes (#1876 a #1882). Pepe: vendio un jugador (37715) al

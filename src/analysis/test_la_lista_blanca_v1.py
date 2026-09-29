@@ -65,6 +65,11 @@ LECTOR = RAIZ / "dashboard-v8" / "src" / "lib" / "status.js"
 #     Si añades una aqui, escribe POR QUE. El dia que alguien
 #     borre el motivo, esta lista vuelve a ser un cajon.
 NO_SE_PINTAN = {
+    # El tablon del dia (29/09/2026). Lo pinta INICIO en la rama
+    # `panel/portada-del-dueno`, que recoge `tablon` en status.js;
+    # al fusionarla, esta linea se quita.
+    "tablon": "lo pinta la rama panel/portada-del-dueno; quitar al fusionar",
+
     # El libro de aciertos de la valoracion y la foto de cada
     # jornada (23/09/2026). Es un cuaderno: lo que se publica es si
     # se escribio y por que, para mirarlo en el JSON.

@@ -54,6 +54,8 @@ import os
 
 MARCA = "VIGILANTE-DATA:"
 
+MARCA_ESCRIBE = "VIGILANTE-ESCRIBE:"
+
 _ENCENDIDO = "BORDALAS_VIGILA_DATA"
 
 
@@ -109,10 +111,22 @@ def _activar() -> None:
 
     read_bytes_real = Path.read_bytes
 
+    # LO QUE SE ESCRIBE (29/09/2026). Leer `data/` es deuda; escribir
+    # es peor: la verja en local cambia los libros de Pepe
+    # (divergence_ledger, scout_accuracy_ledger...) y en CI deja
+    # rastro en la cache. Se apunta con su propia marca.
+    escritos = set()
+
+    def _modo(args, kwargs) -> str:
+        return str(kwargs.get("mode") or (args[0] if args else "r"))
+
     def _open(archivo, *args, **kwargs):
 
         if _bajo_data(archivo):
             vistos.add(str(archivo))
+
+            if any(c in _modo(args, kwargs) for c in "wax+"):
+                escritos.add(os.path.abspath(str(archivo)))
 
         return open_real(archivo, *args, **kwargs)
 
@@ -132,6 +146,50 @@ def _activar() -> None:
 
     builtins.open = _open
 
+    write_text_real = Path.write_text
+
+    write_bytes_real = Path.write_bytes
+
+    replace_real = os.replace
+
+    rename_real = os.rename
+
+    def _write_text(self, *args, **kwargs):
+
+        if _bajo_data(self):
+            escritos.add(os.path.abspath(str(self)))
+
+        return write_text_real(self, *args, **kwargs)
+
+    def _write_bytes(self, *args, **kwargs):
+
+        if _bajo_data(self):
+            escritos.add(os.path.abspath(str(self)))
+
+        return write_bytes_real(self, *args, **kwargs)
+
+    def _replace(origen, destino, *args, **kwargs):
+
+        if _bajo_data(destino):
+            escritos.add(os.path.abspath(str(destino)))
+
+        return replace_real(origen, destino, *args, **kwargs)
+
+    def _rename(origen, destino, *args, **kwargs):
+
+        if _bajo_data(destino):
+            escritos.add(os.path.abspath(str(destino)))
+
+        return rename_real(origen, destino, *args, **kwargs)
+
+    Path.write_text = _write_text
+
+    Path.write_bytes = _write_bytes
+
+    os.replace = _replace
+
+    os.rename = _rename
+
     Path.read_text = _read_text
 
     Path.read_bytes = _read_bytes
@@ -142,6 +200,14 @@ def _activar() -> None:
 
             try:
                 sys.stderr.write(f"{MARCA} {ruta}\n")
+
+            except Exception:                       # noqa: BLE001
+                pass
+
+        for ruta in sorted(escritos):
+
+            try:
+                sys.stderr.write(f"{MARCA_ESCRIBE} {ruta}\n")
 
             except Exception:                       # noqa: BLE001
                 pass
