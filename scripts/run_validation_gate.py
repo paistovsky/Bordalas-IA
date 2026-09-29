@@ -1142,6 +1142,8 @@ def main() -> int:
 
     a_la_red = {}
 
+    escriben = {}
+
     entorno["PYTHONPATH"] = os.pathsep.join(
         x
         for x in (
@@ -1242,6 +1244,46 @@ def main() -> int:
         if intentos_de_red:
             a_la_red[modulo] = intentos_de_red
 
+        # LO QUE ESCRIBE EN LOS LIBROS DE VERDAD (29/09/2026). Solo
+        # cuenta lo que cae dentro del `data/` de este repositorio:
+        # una guardia que escribe en su carpeta temporal esta bien.
+        _libros_de_verdad = str(RAIZ / "data") + os.sep
+
+        escribe = sorted(
+            {
+                linea.split("VIGILANTE-ESCRIBE:", 1)[1].strip()
+                for linea in (proceso.stderr or "").splitlines()
+                if "VIGILANTE-ESCRIBE:" in linea
+            }
+        )
+
+        escribe = [
+            str(Path(r).relative_to(RAIZ))
+            for r in escribe
+            if r.startswith(_libros_de_verdad)
+        ]
+
+        if escribe:
+            escriben[modulo] = escribe
+
+            # ESTO SI TUMBA (29/09/2026). A diferencia de leer, escribir
+            # en los libros de Pepe no es deuda: es la verja cambiando
+            # lo que el ciclo va a leer. El censo del 29/09 dio 2 y se
+            # arreglaron las 2; desde hoy, ninguna.
+            print(
+                f"  {indice:>2}/{len(modulos)}  FALLA "
+                f"{modulo.rsplit('.', 1)[-1]}"
+            )
+
+            print(
+                "        -> escribe en los libros de Pepe: "
+                + ", ".join(escribe)
+            )
+
+            fallos.append(modulo)
+
+            continue
+
         corto = modulo.rsplit(".", 1)[-1]
 
         # UNA GUARDIA MUDA NO HA PROBADO NADA (14/09/2026)
@@ -1314,6 +1356,7 @@ def main() -> int:
                 ).strip().splitlines()
                 if "VIGILANTE-DATA:" not in linea
                 and "VIGILANTE-RED:" not in linea
+                and "VIGILANTE-ESCRIBE:" not in linea
             ]
 
             # EL NOMBRE DE LA QUE FALLA, NO SOLO CUANTAS
@@ -1364,6 +1407,21 @@ def main() -> int:
     #     desactivando, y entonces no queda nada. Este no bloquea
     #     por las censadas — pero NO se calla: la deuda se ve en
     #     cada vuelta, con nombre y fichero, o deja de existir.
+    # QUIEN ESCRIBE EN LOS LIBROS DE PEPE. Cada una ya cuenta como
+    # fallo arriba; aqui se juntan.
+    if escriben:
+        print()
+        print(
+            f"ESCRIBEN EN LOS LIBROS DE PEPE: "
+            f"{len(escriben)} de {len(modulos)}"
+        )
+
+        for modulo in sorted(escriben):
+            print(
+                f"  {modulo.rsplit('.', 1)[-1]}: "
+                + ", ".join(escriben[modulo])
+            )
+
     # QUIEN INTENTO SALIR A LA RED. La conexion ya se corto; esto
     # solo dice quien lo intento, para arreglarlo una a una. Si una
     # guardia DEPENDIA de la red, ya se habra puesto roja sola.
