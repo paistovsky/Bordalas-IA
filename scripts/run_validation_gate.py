@@ -1297,10 +1297,21 @@ def main() -> int:
         else:
             print(f"  {indice:>2}/{len(modulos)}  FALLA {corto}")
 
-            salida = (
-                (proceso.stderr or "")
-                + (proceso.stdout or "")
-            ).strip().splitlines()
+            # LA TRAZA, AL FINAL (29/09/2026). Antes iba primero el
+            # stderr y detras el stdout, con las marcas de los
+            # vigilantes en medio: las 8 ultimas lineas eran los
+            # "OK" de la propia guardia y la excepcion no se veia.
+            # Paso con `test_el_ciclo_publica_v1` en el ensayo #5.
+            salida = [
+                linea
+                for linea in (
+                    (proceso.stdout or "")
+                    + "\n"
+                    + (proceso.stderr or "")
+                ).strip().splitlines()
+                if "VIGILANTE-DATA:" not in linea
+                and "VIGILANTE-RED:" not in linea
+            ]
 
             # EL NOMBRE DE LA QUE FALLA, NO SOLO CUANTAS
             # (14/09/2026, madrugada)
