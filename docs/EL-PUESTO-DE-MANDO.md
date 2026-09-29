@@ -41,11 +41,14 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
   codigo. Lo unico que no se negocia es que Pepe siga corriendo (el ciclo
   verde) mientras se cambia: nada se sube sin verja.
 - **Mision terciaria (29/09, «no muy relevante»):** una APK para que la
-  gente lo disfrute. Decision del gestor: NUNCA una app que juegue sola en
-  cuentas ajenas (normas de Biwenger y contrasenas de terceros); SI una
-  app CONSEJERA (once ideal, quien sube/baja, a quien no fichar por
-  lesion), como web instalable (PWA) empaquetada en APK. Detras de la liga
-  y del panel.
+  gente lo disfrute. **El dueno decide: BOT COMPLETO, no consejero.**
+  Condiciones del gestor: (1) leer antes las condiciones de uso de
+  Biwenger sobre automatizar cuentas: una app publica arriesga baneos de
+  usuarios y que corten el acceso, Pepe incluido; (2) el bot corre EN EL
+  MOVIL de cada usuario, con su contrasena guardada solo alli: nunca
+  claves ajenas en un servidor nuestro; (3) el usuario elige que permite
+  (aconsejar / pujar / vender), todo apagado de serie; (4) limites de
+  peticiones por usuario. Detras de la liga y del panel.
 - **Mision secundaria:** un panel para ver en tiempo real que pasa. Hoy
   existe https://bordalas-ia-dashboard.bordalas.workers.dev/ (usuario y
   contrasena: los tiene el dueno; NO se escriben en el repo, que es publico).
