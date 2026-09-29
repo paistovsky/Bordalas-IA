@@ -5,11 +5,14 @@ import {
   UsersRound,
   Trophy,
   Gauge,
-  ClipboardList
+  ClipboardList,
+  Newspaper
 } from "lucide-react";
 import { cadenciaEnPalabras } from "../lib/relojes";
 
 const ITEMS = [
+  // La portada del dueño: lo primero, y lo que se abre al entrar.
+  ["portada", "PORTADA", Newspaper],
   ["home", "INICIO", Home],
   ["market", "MERCADO", ShoppingCart],
   ["brain", "ESTRATEGIA", Brain],

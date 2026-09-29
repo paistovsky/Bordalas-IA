@@ -4,12 +4,29 @@ import tailwindcss from "@tailwindcss/vite";
 import fs from "node:fs";
 import path from "node:path";
 
-function localStatusJson() {
-  return {
-    name: "bordalas-local-status",
-    configureServer(server) {
+/* LA FOTO DE MUESTRA PARA DESARROLLAR (29/09/2026)
+ *
+ * `npm run dev` lee ../dashboard/data/status.json, que solo existe
+ * si se ha corrido `python -m src.telemetry.build_dashboard` con
+ * una foto de Biwenger y credenciales.
+ *
+ * `npm run dev:muestra` (vite --mode muestra) lee en cambio
+ * dev/status.muestra.json: una copia EXACTA de la foto diaria
+ * versionada data/fotos/2026-09-18.json. Sin red, sin
+ * credenciales, y siempre la misma, para las capturas. */
+const RUTA_DE_LA_FOTO = {
+  muestra: "dev/status.muestra.json"
+};
+
+function localStatusJson(mode) {
+  // El mismo servidor de la foto para `vite` y para `vite preview`:
+  // asi se puede mirar tambien el bundle compilado con la muestra.
+  const servir = (server) => {
       server.middlewares.use("/data/status.json", (_req, res) => {
-        const statusPath = path.resolve(process.cwd(), "../dashboard/data/status.json");
+        const statusPath = path.resolve(
+          process.cwd(),
+          RUTA_DE_LA_FOTO[mode] || "../dashboard/data/status.json"
+        );
         try {
           const body = fs.readFileSync(statusPath, "utf8");
           res.statusCode = 200;
@@ -24,14 +41,19 @@ function localStatusJson() {
           }));
         }
       });
-    }
+  };
+
+  return {
+    name: "bordalas-local-status",
+    configureServer: servir,
+    configurePreviewServer: servir
   };
 }
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), localStatusJson()],
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), tailwindcss(), localStatusJson(mode)],
   build: {
     outDir: "dist",
     emptyOutDir: true
   }
-});
+}));

@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:muestra": "vite --mode muestra",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:muestra": "vite preview --mode muestra"
   },
   "dependencies": {
     "@radix-ui/react-tabs": "^1.1.3",

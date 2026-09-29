@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import KpiStrip from "./components/KpiStrip";
+import PortadaPage from "./pages/PortadaPage";
 import HomePage from "./pages/HomePage";
 import MarketPage from "./pages/MarketPage";
 import BrainPage from "./pages/BrainPage";
@@ -21,6 +22,7 @@ import {
 } from "./lib/relojes";
 
 const TITLES = {
+  portada: "PORTADA",
   home: "INICIO",
   market: "MERCADO",
   brain: "ESTRATEGIA",
@@ -31,7 +33,10 @@ const TITLES = {
 };
 
 export default function App() {
-  const [page, setPage] = useState("home");
+  // LA PORTADA ES LO PRIMERO QUE SE VE (29/09/2026). El dueño
+  // abre esto en el móvil: entra a la portada sencilla, y el resto
+  // de pestañas sigue en la barra, igual que antes.
+  const [page, setPage] = useState("portada");
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
@@ -87,6 +92,7 @@ export default function App() {
   }
 
   const pages = {
+    portada: <PortadaPage data={data} />,
     home: <HomePage data={data} />,
     market: <MarketPage data={data} />,
     brain: <BrainPage data={data} />,
@@ -132,7 +138,7 @@ export default function App() {
     <>
       <Sidebar page={page} setPage={setPage} data={data} />
 
-      <main>
+      <main className={page === "portada" ? "main-portada" : undefined}>
         <div className="page-head">
           <h1>{TITLES[page]}</h1>
           <span className="tag">
@@ -193,6 +199,12 @@ export default function App() {
           </span>
         </div>
 
+        {/* EN LA PORTADA, SIN LA TIRA DE AVISOS (29/09/2026).
+            La portada es la version sencilla: los avisos tecnicos
+            se resumen en su semaforo («ALGO NO VA» y por que, en
+            una frase) y salen enteros en todas las demas pestañas. */}
+        {page !== "portada" && (
+          <>
         {/* UN SENTIDO CADUCADO SE GRITA (14/09/2026)
 
             El tablero de titulares se cayó el 17 de agosto y
@@ -431,7 +443,12 @@ export default function App() {
           </div>
         )}
 
-        <KpiStrip data={data} />
+          </>
+        )}
+
+        {/* La portada va sin la tira de KPIs: es la version
+            sencilla. La tira sigue en INICIO y en las demas. */}
+        {page !== "portada" && <KpiStrip data={data} />}
 
         {pages[page]}
 
