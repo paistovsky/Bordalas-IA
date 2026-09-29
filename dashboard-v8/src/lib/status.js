@@ -276,6 +276,14 @@ export function normalizeStatus(raw = {}) {
     // nada", es que no se publico.
     tablon: raw.tablon ?? null,
 
+    // LA SEMANA DEL TABLÓN Y LAS REGLAS ENCENDIDAS (30/09/2026).
+    // Misma regla que el tablón: sin la clave se quedan en `null`
+    // y su cuadro no se pinta -no es "no hay nada", es que no se
+    // publicó-. La semana es el tablón a 168 h; las reglas, los
+    // interruptores de producción con lo que hace cada uno.
+    tablonSemana: raw.tablon_semana ?? null,
+    reglas: raw.reglas ?? null,
+
     // Que trae la tanda nueva del Computer en cada reset.
     censoDelReset: raw.censo_del_reset || { available: false },
 

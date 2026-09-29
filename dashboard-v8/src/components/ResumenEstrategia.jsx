@@ -12,8 +12,11 @@ import { SIN_DATO } from "../lib/resumen";
  *   - concentration el tope por jugador y por equipo
  *   - doctrina      las reglas escritas y cuántas decisiones citan
  *
- * La LISTA de interruptores de producción (BORDALAS_*) no se
- * publica: se deja el hueco, a la vista, «pendiente de publicar».
+ * Y arriba del todo, LO QUE PEPE TIENE ENCENDIDO: los
+ * interruptores de producción (BORDALAS_*) que publica `reglas`,
+ * una línea cada uno con lo que hace en cristiano. El nombre
+ * técnico va pequeño y gris, debajo. Sin la clave, el cuadro no se
+ * pinta (30/09/2026).
  */
 
 function Regla({ on, titulo, detalle }) {
@@ -46,12 +49,39 @@ export default function ResumenEstrategia({ data }) {
   const citas = data.doctrina?.citations || {};
   const porRegla = citas.by_rule || [];
 
+  const reglas = data.reglas;
+
   const pct = (x) => `${Math.round(Number(x) * 100)} %`;
 
   return (
     <div className="resumen">
+      {reglas && (
+        <section className="pan rs-card">
+          <h2>LO QUE PEPE TIENE ENCENDIDO</h2>
+          {reglas.ok === false || !(reglas.reglas || []).length ? (
+            <p className="rs-frase dim">
+              {reglas.ok === false
+                ? "Esta vuelta no se pudo leer qué tiene encendido."
+                : "No tiene ninguna regla especial encendida."}
+            </p>
+          ) : (
+            <ul className="rs-encendido">
+              {reglas.reglas.map((r) => (
+                <li key={r.nombre}>
+                  <span className="rs-dot" aria-hidden="true" />
+                  <div>
+                    {r.que_hace || r.nombre}
+                    {r.que_hace && <small>{r.nombre}</small>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       <section className="pan rs-card">
-        <h2>LO QUE PEPE TIENE ENCENDIDO</h2>
+        <h2>SUS MOTORES, AHORA</h2>
         <ul className="rs-reglas">
           <Regla
             on={vara.available ? !!vara.active : null}
@@ -95,10 +125,6 @@ export default function ResumenEstrategia({ data }) {
             }
           />
         </ul>
-        <p className="rs-frase dim">
-          Lista completa de interruptores de producción: pendiente de
-          publicar.
-        </p>
       </section>
 
       <section className="pan rs-card">
