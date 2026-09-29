@@ -110,18 +110,6 @@ export default function KpiStrip({ data }) {
   // que está medida al euro en 12 de 12 estados. Si las dos no
   // dan lo mismo, una de las dos miente y hay que verlo — no
   // elegir en silencio cuál creer.
-  const medido = data.pujasDelDueno?.credito || {};
-
-  const creditoMedido = Number(medido.headroom || 0);
-
-  // Un euro de margen por el redondeo del 0,25 sobre la
-  // plantilla. Ni uno más: la medición fue exacta.
-  const descuadre =
-    medido.available && comprometido
-      ? Math.abs(credito - creditoMedido)
-      : 0;
-
-  const cuadra = descuadre <= 1;
 
   // ------------------------------------------------------
   // LOS DOS RELOJES
@@ -155,26 +143,23 @@ export default function KpiStrip({ data }) {
         sub={summary.phase || ""}
       />
 
-      {/* DEUDA MÁXIMA: lo que se puede comprometer, ya neto.
-          Y en ROJO si las dos vías del crédito no coinciden. */}
+      {/* EL SALDO, EN GRANDE (30/09/2026)
+
+          El dueño: la tarjeta grande es el SALDO, lo que hay en
+          caja. La deuda máxima -lo que se puede comprometer, ya
+          neto- baja a la línea pequeña de debajo, con su
+          desglose. Si las dos vías del crédito no cuadran, eso ya
+          no se canta aquí: está en DIAGNÓSTICO, en AUDITORÍA. */}
       <Kpi
-        label={cuadra ? "Deuda máxima" : "Deuda máxima NO CUADRA"}
-        value={formatMoney(deudaMaxima)}
+        label="Saldo"
+        value={formatMoney(saldo)}
         sub={
-          !cuadra
-            ? `crédito ${formatMoney(credito)} por resta, pero ` +
-              `${formatMoney(creditoMedido)} por plantilla ` +
-              `(${formatMoney(medido.roster_value)} × 0,25): ` +
-              `se llevan ${formatMoney(descuadre)}`
-            : comprometido
-            ? `saldo ${formatMoney(saldo)} · comprometido ${formatMoney(
-                comprometido
-              )} · crédito ${formatMoney(credito)}`
-            : `saldo ${formatMoney(saldo)} · crédito ${formatMoney(
-                credito
-              )} · sin pujas puestas`
+          `Deuda máxima ${formatMoney(deudaMaxima)}` +
+          (comprometido
+            ? ` · comprometido ${formatMoney(comprometido)}`
+            : " · sin pujas puestas") +
+          ` · crédito ${formatMoney(credito)}`
         }
-        tone={!cuadra ? "bad" : comprometido ? "warn" : ""}
       />
 
       {/* RESET — EN VIVO. */}
@@ -182,7 +167,6 @@ export default function KpiStrip({ data }) {
         label="Reset"
         value={cuenta(alReset)}
         sub="07:00 de Madrid"
-        tone={alReset != null && alReset < 900 ? "warn" : ""}
       />
 
       <Kpi
@@ -206,7 +190,6 @@ export default function KpiStrip({ data }) {
         label="XI"
         value={`${lineup.playable ?? 0}/11`}
         sub={lineup.formation || "—"}
-        tone={Number(lineup.missing || 0) ? "bad" : ""}
       />
 
       <Kpi
@@ -221,7 +204,6 @@ export default function KpiStrip({ data }) {
             ? `vía ${pujas.source}`
             : ""
         }
-        tone={comprometido ? "warn" : ""}
       />
     </div>
   );

@@ -41,7 +41,7 @@ export default function LeaguePage({ data }) {
             <h2>LIBRO DE OPERACIONES RIVAL</h2>
             <div className="sub">¿Explicamos la plantilla que tiene hoy cada mánager?</div>
           </div>
-          <span className={audit.status === "COMPLETO" ? "pill ok" : "pill warn"}>
+          <span className={audit.status === "COMPLETO" ? "pill ok" : "pill idle"}>
             {audit.status || "—"}
           </span>
         </div>

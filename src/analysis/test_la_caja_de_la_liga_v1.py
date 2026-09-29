@@ -422,12 +422,28 @@ def test_la_alarma_del_cuadre_solo_sale_si_esta_roja() -> None:
 
     from pathlib import Path
 
+    # 30/09/2026: la alarma se mudo de la banda de arriba a
+    # DIAGNOSTICO (AUDITORIA). Misma condicion, mismo texto.
     app = (
         Path(__file__).parents[2]
         / "dashboard-v8"
         / "src"
-        / "App.jsx"
+        / "components"
+        / "Diagnostico.jsx"
     ).read_text(encoding="utf-8")
+
+    # Y DIAGNOSTICO esta montado en AUDITORIA: un aviso mudado a un
+    # componente que no se pinta en ninguna pagina es un aviso
+    # borrado.
+    auditoria = (
+        Path(__file__).parents[2]
+        / "dashboard-v8" / "src" / "pages" / "AuditPage.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "<Diagnostico" in auditoria, (
+        "DIAGNOSTICO no esta montado en AUDITORIA: los avisos no "
+        "llegan a ninguna pantalla"
+    )
 
     assert "cash_check?.ok === false" in app, (
         "la alarma del cuadre no existe, o no se esconde cuando "

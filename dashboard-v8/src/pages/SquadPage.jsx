@@ -180,15 +180,7 @@ export default function SquadPage({ data }) {
 
           {/* Cuanta de esa plantilla sabemos explicar. Una pantalla
               a medias no puede parecer una pantalla completa. */}
-          {managerElegido &&
-            managerElegido.with_starter_data < managerElegido.squad_size && (
-              <div className="alert warn">
-                Tenemos pronóstico de titularidad para{" "}
-                {managerElegido.with_starter_data} de{" "}
-                {managerElegido.squad_size} jugadores. Los huecos dicen «sin
-                dato» en vez de un 0 % que no significaría nada.
-              </div>
-            )}
+          {/* Aviso mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
 
           <SquadTable players={jugadores} />
 

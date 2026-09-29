@@ -3,7 +3,6 @@ import QuienMejoraElOncePanel from "../components/QuienMejoraElOncePanel";
 import ElVestuarioLibrePanel from "../components/ElVestuarioLibrePanel";
 import LosRivalesPanel from "../components/LosRivalesPanel";
 import LaPuertaDeLosManagersPanel from "../components/LaPuertaDeLosManagersPanel";
-import LosSentidosPanel from "../components/LosSentidosPanel";
 import ElCalendarioPanel from "../components/ElCalendarioPanel";
 import DoctrinaPanel from "../components/DoctrinaPanel";
 import ArbiterPanel from "../components/ArbiterPanel";
@@ -277,14 +276,9 @@ export default function BrainPage({ data }) {
 
   return (
     <>
-      {/* LOS SENTIDOS, EL PRIMERO DE TODO (13/09/2026, noche).
-
-          Es el cuadro que da sentido a la pagina: antes de mirar
-          que decide Pepe hay que saber de que se entera. Hoy hay
-          64 objetivos y ni una puja porque el tablero de
-          titulares es de la jornada 2, y eso estaba repetido 64
-          veces fila a fila sin verse. */}
-      <LosSentidosPanel data={data} />
+      {/* LOS SENTIDOS (el cuadro de salud de lo que Pepe lee) se
+          mudaron el 30/09/2026 a DIAGNÓSTICO, en AUDITORÍA: el
+          dueño no quiere avisos fuera de allí. */}
 
       {/* El plan primero y el mecanismo despues: a corto y largo
           plazo arriba, y debajo la maquinaria que lo ejecuta. */}

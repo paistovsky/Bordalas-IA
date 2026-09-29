@@ -679,13 +679,30 @@ def test_las_jornadas_perdidas_se_cuentan_y_no_se_reconstruyen() -> None:
     #     dato que no se ve no avisa de nada: la pagina del
     #     marcador decia "0 de 6 fiables" sin decir que seis
     #     estan PERDIDAS y desde cual empieza a contar.
+    #
+    #     30/09/2026: el cartel se mudo de MARCADOR a DIAGNOSTICO
+    #     (AUDITORIA), por encargo del dueño -cero avisos fuera de
+    #     alli-. Se vigila donde vive ahora.
     pagina = (
         Path(__file__).parents[2]
         / "dashboard-v8"
         / "src"
-        / "pages"
-        / "MarcadorPage.jsx"
+        / "components"
+        / "Diagnostico.jsx"
     ).read_text(encoding="utf-8")
+
+    # Y DIAGNOSTICO esta montado en AUDITORIA: un aviso mudado a un
+    # componente que no se pinta en ninguna pagina es un aviso
+    # borrado.
+    auditoria = (
+        Path(__file__).parents[2]
+        / "dashboard-v8" / "src" / "pages" / "AuditPage.jsx"
+    ).read_text(encoding="utf-8")
+
+    assert "<Diagnostico" in auditoria, (
+        "DIAGNOSTICO no esta montado en AUDITORIA: los avisos no "
+        "llegan a ninguna pantalla"
+    )
 
     assert "el_once_anotado" in pagina, (
         "la pagina del marcador no dice cuantas jornadas se "

@@ -80,9 +80,6 @@ export default function MarcadorPage({ data }) {
               Lo que puntuó Pepe contra lo que podía haber puntuado
             </div>
           </div>
-          {resumen.cuadra_todo === false && (
-            <span className="pill crit">NO CUADRA</span>
-          )}
         </div>
 
         <div className="grid g3">
@@ -112,7 +109,7 @@ export default function MarcadorPage({ data }) {
             <div className="s">
               de {resumen.jornadas_observadas ?? 0} anotadas
               {resumen.jornadas_descartadas
-                ? ` · ${resumen.jornadas_descartadas} descartada(s) por no cuadrar`
+                ? ` · ${resumen.jornadas_descartadas} sin nota`
                 : ""}
             </div>
           </div>
@@ -125,14 +122,7 @@ export default function MarcadorPage({ data }) {
           </p>
         </div>
 
-        {resumen.cuadra_todo === false && (
-          <div className="alert crit" style={{ marginTop: 11 }}>
-            <b>LOS NÚMEROS NO CUADRAN CON BIWENGER.</b> El once que
-            hemos reconstruido no suma lo mismo que los puntos que
-            Biwenger le dio a Pepe en la clasificación. Hasta que
-            coincidan, la nota de arriba no vale.
-          </div>
-        )}
+        {/* Aviso mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
 
         {/* LO QUE SE PERDIÓ, Y DESDE CUÁNDO SE MIDE (14/09/2026)
 
@@ -146,22 +136,6 @@ export default function MarcadorPage({ data }) {
             jornadas» puesto a mano sería verdad hoy y mentira la
             semana que viene, que es justo cuando nadie estaría
             mirando este número. */}
-        {marcador.el_once_anotado?.available &&
-          marcador.el_once_anotado.irrecuperables > 0 && (
-            <div className="alert warn" style={{ marginTop: 11 }}>
-              <b>
-                {marcador.el_once_anotado.irrecuperables} jornada(s)
-                sin once anotado, irrecuperables.
-              </b>{" "}
-              {marcador.el_once_anotado.desde
-                ? `La medición empieza en la jornada ${marcador.el_once_anotado.desde}.`
-                : "Todavía no hay ninguna anotada: la medición no ha empezado."}{" "}
-              <span className="dim">
-                No se reconstruyen: un once a ojo daría una nota
-                inventada, y esa se usaría para decidir.
-              </span>
-            </div>
-          )}
 
         {/* Y SI EL ONCE DE ESTA JORNADA YA ESTÁ CONGELADO, SE DICE
             CON EL MARGEN QUE TENÍA. Es la única prueba de que se
@@ -321,7 +295,7 @@ export default function MarcadorPage({ data }) {
                           className="dim"
                           title={`Reconstruimos ${jornada.puntos_once} puntos y Biwenger pagó ${jornada.puntos_biwenger}. El once que anotamos no es el que jugó.`}
                         >
-                          no cuadra
+                          sin nota
                         </span>
                       )}
                     </td>
@@ -337,7 +311,7 @@ export default function MarcadorPage({ data }) {
                       {jornada.cuadra ? (
                         <span className="pill ok">SÍ</span>
                       ) : (
-                        <span className="pill crit">NO</span>
+                        <span className="pill idle">NO</span>
                       )}
                     </td>
                   </tr>
