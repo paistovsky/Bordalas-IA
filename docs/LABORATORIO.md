@@ -50,6 +50,20 @@ bot completo, siempre que lo DEMUESTRE con datos.
    guardias y modulos que solo miran. Como seria un bot pequeno que hiciera lo
    que gana y nada mas. Prototipo en `lab/`.
 
+6. **(PRIORIDAD, pedido del dueno el 29/09) Las noticias que se adelantan.**
+   Pepe lee la alineacion probable de FutbolFantasy y prensa nacional
+   (Marca, MD, Relevo), pero NO partes de entrenamiento, prensa local ni
+   foros. Caso del 29/09: Aspas (Celta) roto desde ~13/09, vuelve el
+   11/10 contra el Elche; Pablo Duran (Celta, «Rotacion», 30 %) paso de
+   0,36 a 1,33 M del 19/09 al 29/09 por los minutos que dejaba Aspas, y
+   Pepe no tenia la lesion en ningun sitio. Pregunta: ¿las noticias de
+   entrenamiento (FutbolFantasy /laliga/noticias, una o dos por equipo y
+   dia) y la prensa local de cada club anuncian cambios de titularidad y
+   bajas ANTES de que se muevan el % de titular y el precio? ¿Cuantos
+   dias? Medir con el historico de precios y un archivo diario de esas
+   noticias; si se adelantan, entra en el ojeador de prensa
+   (src/intelligence/scout/press.py) con su guardia.
+
 ## Experimentos
 
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
