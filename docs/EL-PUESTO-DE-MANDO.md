@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/09/2026, 21:35 de Madrid (rafaga de las 21:15: la rampa, ENCENDIDA).
+Actualizado: 29/09/2026, 07:55 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -41,7 +41,7 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
 ## Donde estamos
 
     clasificacion   1o, a 3 puntos de Pollo17, 31 jornadas por delante
-    saldo           +1.569.876 (28/09; 1.363.592 apartados en la puja por Zubeldia)
+    saldo           +206.284 (29/09 07:19; caja libre ~31.000)
     plantilla       14 jugadores: 1 POR, 4 DEF, 6 MED, 3 DEL
     proxima jornada la 8, el 09/10 a las 21:00
     el ciclo        cada hora, GitHub Actions + cron-job.org, ~95 s, verde
@@ -148,7 +148,7 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
    ya hace parte (doctrina 84: frena lo que baja, deja pasar lo plano). Rama,
    verja, paso 0 con --con, ENSAYO con cada uno, y se enciende primero la
    COMPRA; la VENTA en otra rafaga. Detalle en docs/LABORATORIO.md (E1).
-4. **Aislar la verja de la red.** La regla «ninguna guardia sale a internet»
+4. **Aislar la verja de la red.** HECHO el 29/09 (931efbf); queda que las guardias no escriban en los libros. La regla «ninguna guardia sale a internet»
    existe y nada la hace cumplir. Veinte lineas: bloquear sockets.
 5. **Las 17 vias que escriben en Biwenger.** Creiamos cuatro. Cuatro se saltan
    la cuota de una escritura por vuelta y la sombra solo cubre tres. La peor
@@ -274,6 +274,42 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **29/09 07:15 (rafaga de la manana).** GitHub: escribo en main y ramas.
+  Ciclos: verdes (#1867 a #1875). Sin vueltas de 05:07 y 06:07 de Madrid
+  por segundo dia: parece el horario del latido (dos casi seguidas a las
+  04:45 y 04:50 y la siguiente a las 07:15), no un fallo; no se toca.
+  Pepe: GANO a Zubeldia (1.363.592, la puja del carril del 28/09, puesta
+  ANTES de encender la rampa). Plantilla 15; saldo +206.284.
+  **La rampa, primer reset:** la subasta no pujo por nadie, pero no por la
+  rampa: `SIN_CESTA`, «con 30.942 de caja libre» no llega a ningun
+  candidato. Sin dinero no se prueba la regla. La racha (encendida anoche
+  desde el chat del dueno) va sola hacia 5.
+  **E1, mitad de VENTA: NO SE CONSTRUYE AUN. Pregunta para el
+  laboratorio.** Doctrina 84: `salida_del_viaje.py` (aceptar la primera
+  oferta >= coste + 1 %, medido 3,05 %/dia, n=34) existe pero su
+  ejecutor (`salida_executor`) NO lo llama nadie; hoy Pepe vende por el
+  escaparate y la oferta del Computer. E3 comparo la salida de E1 contra
+  otras (2,70 %/dia con dia muerto) pero NO contra «aceptar el primer
+  reset con +1 %». Antes de construir: que el laboratorio compare las dos
+  con la misma vara (%/dia, con el capital limitado que tenemos) y diga
+  por donde vende Pepe de verdad hoy.
+  **Punto 4 del plan (aislar la verja de la red): HECHO, pendiente del
+  canario** (931efbf). El vigilante de cada guardia
+  (`scripts/vigila_data/sitecustomize.py`) corta ahora toda conexion fuera
+  de la maquina con `VERJA_SIN_RED=1` y apunta el destino; la verja lo
+  enciende y quita el proxy. Guardia `test_la_verja_no_sale_a_la_red_v1`.
+  El ENSAYO lo destapo: `test_el_ciclo_publica_v1` ENTRABA EN BIWENGER
+  con las credenciales de verdad en cada verja de CI (via
+  `collect_board_history`, sin proteger). Arreglado en la guardia: monta
+  el estado con el tablon de disco. De paso, la verja ensena ahora la
+  traza de la guardia que falla (antes la tapaban sus propios OK).
+  Verja 195/195; paso 0 pasado con 35; ensayos #5 y #6 rojos (lo que se
+  buscaba), #7 verde. Canario: el ciclo de las 08:07, comprobacion a las
+  08:15.
+  **Deuda que queda (no hecha):** varias guardias siguen ESCRIBIENDO en los
+  libros de produccion al correr en local (divergence_ledger.json,
+  scout_accuracy_ledger.json). Es la otra mitad del punto 4.
 
 - **28/09 21:15 (rafaga de la noche).** GitHub: escribo en main. Ciclos:
   verdes (#1861 a #1866, este ultimo ya con el codigo de la racha). Pepe:
