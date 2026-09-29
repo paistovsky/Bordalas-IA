@@ -1,4 +1,11 @@
-import { SIN_DATO, amenazaEnPalabras, euros, lineasDe } from "../lib/resumen";
+import {
+  SIN_DATO,
+  amenazaEnPalabras,
+  euros,
+  lineasDe,
+  porManager,
+  recuento
+} from "../lib/resumen";
 
 /* LIGA: ¿CÓMO VAN LOS RIVALES? (30/09/2026)
  *
@@ -111,8 +118,58 @@ export default function ResumenLiga({ data }) {
             );
           })()
         )}
-        <p className="rs-frase dim">Lo movido en la semana entera: {SIN_DATO}.</p>
       </section>
+
+      {/* LA SEMANA DE CADA RIVAL (30/09/2026). `tablon_semana` es
+          el tablón a 168 h. Un plegable por mánager, con cuántos
+          fichajes y ventas lleva; sin la clave, no se pinta. */}
+      {data.tablonSemana && (
+        <section className="pan rs-card">
+          <h2>LO QUE HA MOVIDO CADA RIVAL ESTA SEMANA</h2>
+          {(() => {
+            const rivales = tabla.filter((f) => !f.is_current_user).map((f) => f.name);
+            const grupos = porManager(data.tablonSemana, rivales);
+            const conAlgo = rivales.filter((n) => grupos.get(n).length);
+            if (!conAlgo.length) {
+              return (
+                <p className="rs-frase">
+                  Ningún rival ha movido ficha en los últimos 7 días.
+                </p>
+              );
+            }
+            return (
+              <div className="rs-semana">
+                {rivales.map((n) => {
+                  const lineas = grupos.get(n);
+                  const { fichajes, ventas } = recuento(lineas);
+                  return (
+                    <details key={n} className="rs-rival">
+                      <summary>
+                        <b>{n}</b>
+                        <span>
+                          {lineas.length
+                            ? `${fichajes} fichaje${fichajes === 1 ? "" : "s"} · ${ventas} venta${ventas === 1 ? "" : "s"}`
+                            : "nada esta semana"}
+                        </span>
+                      </summary>
+                      {lineas.length > 0 && (
+                        <ul>
+                          {lineas.map((l, i) => (
+                            <li key={i}>
+                              <small className="rs-hora">{l.hora}</small>{" "}
+                              {String(l.texto).replace(`${n} `, "")}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </details>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </section>
+      )}
     </div>
   );
 }

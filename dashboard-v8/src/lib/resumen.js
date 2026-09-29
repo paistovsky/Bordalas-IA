@@ -63,3 +63,29 @@ export function lineasDe(tablon, nombre) {
     String(l.texto || "").startsWith(`${nombre} `)
   );
 }
+
+/* Las líneas del tablón agrupadas por mánager. El nombre va al
+   principio del texto; se prueba primero el nombre más largo para
+   que "Pepe" no se quede con las de "Pepe Bordalás". */
+export function porManager(tablon, nombres) {
+  const orden = [...nombres].sort((a, b) => b.length - a.length);
+  const grupos = new Map(nombres.map((n) => [n, []]));
+  for (const l of (tablon && tablon.lineas) || []) {
+    const texto = String(l.texto || "");
+    const quien = orden.find((n) => texto.startsWith(`${n} `));
+    if (quien) grupos.get(quien).push(l);
+  }
+  return grupos;
+}
+
+/* Fichajes y ventas de un puñado de líneas. */
+export function recuento(lineas) {
+  let fichajes = 0;
+  let ventas = 0;
+  for (const l of lineas) {
+    const t = String(l.texto || "");
+    if (l.tipo === "market" || / ficha a /.test(t)) fichajes += 1;
+    else if (/ vende a /.test(t)) ventas += 1;
+  }
+  return { fichajes, ventas };
+}
