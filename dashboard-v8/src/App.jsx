@@ -149,7 +149,11 @@ export default function App() {
           {parado ? ` · hace ${haceTexto}` : ""}
         </div>
 
-        <KpiStrip data={data} />
+        {/* LA TIRA, SOLO EN INICIO (30/09/2026). Cada página
+            contesta su pregunta arriba; repetir seis tarjetas
+            encima de todas empujaba la respuesta fuera de la
+            pantalla del móvil. */}
+        {page === "home" && <KpiStrip data={data} />}
 
         {pages[page]}
 
