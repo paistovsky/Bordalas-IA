@@ -434,6 +434,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **29/09 23:10 (el gestor).** (1) **Puja por Roberto SUBIDA a 9.650.000**
+  (+15,2 % sobre 8,38 M; 94e2372). En peleas por jugadores caros se paga
+  +7 a +16,5 % (Pollo17 +9,8 % hoy por Moleiro, +16,5 % el 11/09). Caja
+  reconstruida (con la reja): Pollo17 ~7,5 M (puja maxima > 25 M), Luismi
+  -16,6 M (tope ~6,9 M: tendria que vender ~3,6 M). El dueno avisa: Luismi
+  vive en NY y puja a ultima hora; Pollo tiene «mazo de pasta y el equipo
+  vacio». La orden sabe SUSTITUIR una puja viva: pone la nueva y, si entra,
+  retira la vieja; si Biwenger no admite dos, retira y vuelve a pujar
+  (guardia 14/14, ensayo #36629224877 BID 9.650.000). Arreglado a la vez
+  el NADA enganoso (el tope es maximumBid + la puja que se sustituye).
+  Comprobacion 00:20: committed debe ser 9.650.000.
+  (2) La pantalla ya no anuncia «Pujar por Lejeune»: los no_pujar se
+  quitan en plan_desde_el_estado (c9df0a0). (3) Panel sin avisos
+  PUBLICADO (b0d3ca9): saldo en grande, una linea «Ultima vuelta de Pepe»,
+  avisos en Diagnostico (AUDITORIA, plegado). En curso: menus limpios
+  (rama panel/menus-limpios), se publica al revisar.
+
 - **29/09 22:30 (el gestor). EL PANEL, PUBLICADO; LA CAJA DE LA LIGA, CUADRA.**
   - Panel (mision secundaria), a peticion del dueno: sin portada; INICIO
     con «EL TABLON DE HOY» arriba (clave `tablon`, src/telemetry/el_tablon.py,
