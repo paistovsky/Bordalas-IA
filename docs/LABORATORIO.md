@@ -69,6 +69,92 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E5 · 29/09/2026 11:20 de Madrid · Vender el dia que baja (E1) o aceptar la primera oferta +1 % (salida_del_viaje)
+
+**Pregunta del gestor (29/09 07:15):** comparar las dos salidas con la
+misma vara (%/dia, con la caja limitada de Pepe) y decir por donde vende
+Pepe hoy. **Codigo:** `lab/precio/salida_contra_viaje.py`.
+
+**Como:** mismas compras para las dos (las de la rampa: el precio subio
+en el ultimo cambio). E1 vende al Computer el primer dia que el precio
+baja. VIAJE (`src/analysis/salida_del_viaje.py`) acepta la primera oferta
+>= coste + 1 %; tras 4 resets caduca y pasa a E1. La oferta de cada dia
+se saca al azar de las 204 ventas reales al Computer del tablon, segun el
+precio ese dia (50 repeticiones, semilla fija).
+
+**1) Sin tope de caja (6.239 entradas, un dia muerto por viaje):**
+
+    E1      verde 91,1 %   ROI medio +31,9 %   +2,66 %/dia
+    VIAJE   verde 94,6 %   ROI medio  +3,9 %   +1,35 %/dia
+
+**2) Con la caja de Pepe (solo lo que el Computer subasto, puja = ganador
++ 1 %, 20/08 a 29/09):**
+
+    caja    salida   viajes   cobrado      sin vender     total
+    2 M     E1         10    +2.048.909   +3.468.802   +5.517.711
+    2 M     VIAJE      16      +771.633      -63.137     +708.495
+    5 M     E1         15    +2.962.267   +4.775.962   +7.738.229
+    5 M     VIAJE      27      +414.428     -165.876     +248.552
+    10 M    E1         21    +3.485.551   +7.636.692  +11.122.243
+    10 M    VIAJE      42    +1.201.792     -315.495     +886.297
+
+Aun contando solo lo ya cobrado, E1 gana: +2,05 M contra +0,77 M con 2 M
+de caja. VIAJE mueve el doble de viajes y gana entre 3 y 30 veces menos.
+Vende al primer reset, justo cuando la subida acaba de empezar: la
+inercia de E1 (92 % de «manana sigue») es lo que regala. Su 3,05 %/dia
+salio de medir la prima del Computer (n=34), no lo que el precio sigue
+subiendo despues de vender.
+
+**3) Como vende Pepe de verdad (33 viajes cerrados del tablon, 31 al
+Computer):** ni con una regla ni con la otra. El dia de la venta el precio
+subio en 5, estaba quieto en 15 y bajo en 13. Aguanta 4 dias de mediana,
+pero 16 de 33 pasan de 5 dias y tres pasan de 24 (-221.001, -538.901,
++246.363). Desde el 14/09: 27 viajes, **-2.742.657**, y solo 11 cobrados
+por encima de coste + 1 %. El peor: Ceballos, comprado el 24/09 a
+5.480.138 y vendido el 27/09 a 4.320.600 (-1.159.538). Vende lo que el
+escaparate y las ofertas del Computer le traen, cuando le llegan.
+
+**Limites:** las primas se sacan de ventas que alguien ACEPTO (las
+ofertas que se rechazaron no se ven: favorece un poco a VIAJE). Lo que
+sigue sin vender se valora a precio de hoy sin prima. Seis semanas.
+
+**Veredicto: GANA E1, CON CLARIDAD. `salida_del_viaje` NO se enciende.**
+La mitad de venta que hay que construir es la de E3 (actualizado en
+«Listo para el plan»).
+
+### E4 · 29/09/2026 12:00 de Madrid · ¿Las noticias se adelantan al precio?
+
+**Codigo e informe:** `lab/noticias/` (INFORME.md, archivar.py, analizar.py,
+contra_e1.py, caso_aspas.py). Archivo: 3.174 noticias de FutbolFantasy del
+08/08 al 29/09 (recorridas por ID, el listado esta cacheado), con hora y
+equipo; 629 BAJA, 291 VUELTA, 135 TITULARIDAD tras quitar traspasos y
+ruedas de prensa; clasificacion por palabras, ~80 % bien en 30 a mano.
+
+**Resultado (jugadores >= 1 M, exceso contra los del mismo dia y sentido):**
+
+    BAJA         n=180   -2,5 % a 3 dias (IC90 -3,6 / -1,2)   -4,3 % a 7
+    VUELTA       n= 94   sin senal de subida (-1,3 %)
+    TITULARIDAD  n= 77   sin senal (+0,9 %, cruza el cero)
+
+- La BAJA adelanta la caida 0-1 dias; en el 58 % el precio ya caia (lesion
+  en partido). Vender al leerla NO mejora la salida de E1 (-4,2 % de
+  media, gana 14 de 70): E1 ya sale a tiempo.
+- Lo que si vale: **NO COMPRAR** a quien tiene BAJA reciente. En los que
+  venian subiendo (justo la compra de E1): -3,7 % a 3 dias (n=50).
+- Caso Celta: Aspas, parte en FF el 13/09 16:15, el precio cae el 14 y el
+  15 (-7,3 %); -37 % hasta el 29/09. Duran subio por su doblete del 19/09
+  (E2), no por una noticia. Jutgla: ninguna noticia explica su caida.
+- **Piloto de fuentes locales (Celta, n=1):** Faro de Vigo se lee (hora por
+  articulo): lesion 5 h DESPUES que FF, plazo de baja ~39 h antes que el
+  parte oficial, pero con el precio ya cayendo. Moi Celeste, Minuto
+  Noventa, foros celtistas: cortan la conexion; Reddit 403; X sin sesion
+  nada. No compensa montar fuentes locales para los 20: basta FF.
+
+**Veredicto: PROMETEDOR COMO GUARDIA DE COMPRA.** Pasa a «Listo para el
+plan»: «no pujar por quien tenga una noticia de BAJA en FutbolFantasy en
+las ultimas 72 h». Limites: 6 semanas, pretemporada, parón desde el 20/09,
+clasificacion por palabras, piloto local n=1.
+
 ### E3 · 28/09/2026 17:20 de Madrid · Cuando vender lo que se compro subiendo
 
 **Codigo:** `lab/precio/cuando_vender.py`. Lee el tablon y
@@ -121,39 +207,6 @@ entre salidas lo que vale, no los porcentajes absolutos.
 mejor en todo lo medido, y el detalle que faltaba es de horas: aceptar la
 oferta del Computer el mismo dia de la bajada. Actualizado en «Listo para
 el plan».
-
-### E4 · 29/09/2026 12:00 de Madrid · ¿Las noticias se adelantan al precio?
-
-**Codigo e informe:** `lab/noticias/` (INFORME.md, archivar.py, analizar.py,
-contra_e1.py, caso_aspas.py). Archivo: 3.174 noticias de FutbolFantasy del
-08/08 al 29/09 (recorridas por ID, el listado esta cacheado), con hora y
-equipo; 629 BAJA, 291 VUELTA, 135 TITULARIDAD tras quitar traspasos y
-ruedas de prensa; clasificacion por palabras, ~80 % bien en 30 a mano.
-
-**Resultado (jugadores >= 1 M, exceso contra los del mismo dia y sentido):**
-
-    BAJA         n=180   -2,5 % a 3 dias (IC90 -3,6 / -1,2)   -4,3 % a 7
-    VUELTA       n= 94   sin senal de subida (-1,3 %)
-    TITULARIDAD  n= 77   sin senal (+0,9 %, cruza el cero)
-
-- La BAJA adelanta la caida 0-1 dias; en el 58 % el precio ya caia (lesion
-  en partido). Vender al leerla NO mejora la salida de E1 (-4,2 % de
-  media, gana 14 de 70): E1 ya sale a tiempo.
-- Lo que si vale: **NO COMPRAR** a quien tiene BAJA reciente. En los que
-  venian subiendo (justo la compra de E1): -3,7 % a 3 dias (n=50).
-- Caso Celta: Aspas, parte en FF el 13/09 16:15, el precio cae el 14 y el
-  15 (-7,3 %); -37 % hasta el 29/09. Duran subio por su doblete del 19/09
-  (E2), no por una noticia. Jutgla: ninguna noticia explica su caida.
-- **Piloto de fuentes locales (Celta, n=1):** Faro de Vigo se lee (hora por
-  articulo): lesion 5 h DESPUES que FF, plazo de baja ~39 h antes que el
-  parte oficial, pero con el precio ya cayendo. Moi Celeste, Minuto
-  Noventa, foros celtistas: cortan la conexion; Reddit 403; X sin sesion
-  nada. No compensa montar fuentes locales para los 20: basta FF.
-
-**Veredicto: PROMETEDOR COMO GUARDIA DE COMPRA.** Pasa a «Listo para el
-plan»: «no pujar por quien tenga una noticia de BAJA en FutbolFantasy en
-las ultimas 72 h». Limites: 6 semanas, pretemporada, parón desde el 20/09,
-clasificacion por palabras, piloto local n=1.
 
 ### E2 · 28/09/2026 11:30 de Madrid · Que hace que un jugador EMPIECE a subir
 
@@ -295,3 +348,11 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
     91 % al 78 %. (3) No vender por tiempo ni «cuando frena»: rinden
     menos o empatan. Excepciones que no mide esto: Yamal y los titulares
     del once (no son reventa).
+  - **(E5, 29/09) Contestado al gestor: NO usar `salida_del_viaje.py`
+    (aceptar la primera oferta >= coste + 1 %).** Con la misma vara y la
+    caja de Pepe (2 M), E1 +5,5 M (+2,0 M ya cobrados) contra +0,7 M.
+    Vende al primer reset y se pierde la subida. Lo que hay que
+    construir es la salida de E3, y se puede reusar de `salida_executor`
+    lo que valga (la unica llamada `accept_offer`, los limites de la
+    ruta: nunca el once, nunca el ultimo portero, nunca Yamal), cambiando
+    la condicion: «el precio bajo hoy» en vez de «oferta >= coste + 1 %».
