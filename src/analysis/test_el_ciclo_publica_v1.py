@@ -492,9 +492,52 @@ def test_el_estado_del_dashboard_se_construye_entero() -> None:
     #     DESPUES que los de verdad siguen como estaban.
     libros = _como_estaban()
 
+    # SIN ENTRAR EN BIWENGER (29/09/2026)
+    #
+    #     `build_dashboard_state` llama a `collect_board_history()`,
+    #     que inicia sesion en Biwenger y baja el tablon. En CI eso
+    #     era esta guardia ENTRANDO EN BIWENGER con las credenciales
+    #     de verdad en cada verja. Con la red cortada (VERJA_SIN_RED)
+    #     se vio: ConnectionError a biwenger.as.com.
+    #
+    #     Aqui se mide que el montaje TERMINE, no el tablon: se le da
+    #     el tablon que ya esta en disco, con la misma forma.
+    import src.telemetry.dashboard_state as tablero_del_estado
+
+    original = tablero_del_estado.collect_board_history
+
+    def _tablon_de_disco(*args, **kwargs):
+
+        from src.collectors.board_history_collector import (
+            load_persisted_events,
+        )
+
+        eventos = load_persisted_events()
+
+        return {
+            "collected_at": None,
+            "league_id": None,
+            "current_user_id": None,
+            "api_events": 0,
+            "current_era_events": 0,
+            "persisted_events": len(eventos),
+            "new_events": 0,
+            "reset": None,
+            "users": [],
+            "profiles": [],
+            "own_finances": {},
+            "events": eventos,
+        }
+
     with _sobre_una_copia():
 
-        estado = build_dashboard_state()
+        tablero_del_estado.collect_board_history = _tablon_de_disco
+
+        try:
+            estado = build_dashboard_state()
+
+        finally:
+            tablero_del_estado.collect_board_history = original
 
     cambiados = _lo_que_cambio(libros)
 
