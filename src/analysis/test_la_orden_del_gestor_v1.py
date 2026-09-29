@@ -288,7 +288,40 @@ def test_la_pantalla_tampoco_anuncia_al_vetado() -> None:
                 os.environ[orden_mod.ENV] = antes_env
 
 
+def test_subir_la_puja() -> None:
+    # maximumBid ya descuenta la puja viva (8,95 M): 5,46 M libres.
+    a = _decide(nuestras_pujas={ROBERTO: {"offer_id": 9, "amount": 8_000_000}},
+                maximo_de_puja=5_458_784)
+    assert _tipos(a) == [("PUJAR", ROBERTO)], a
+    assert a[0]["sustituye"]["offer_id"] == 9, a
+
+    class _Esc:
+        def __init__(self, admite_dos):
+            self.admite_dos, self.log, self.vivas = admite_dos, [], {9}
+
+        def place_bid(self, player_id, amount, execute=False):
+            ok = self.admite_dos or not self.vivas
+            self.log.append(("place", amount, ok))
+            return {"sent": True, "success": ok}
+
+        def cancel_bid(self, offer_id, execute=False):
+            self.log.append(("cancel", offer_id))
+            self.vivas.discard(offer_id)
+            return {"sent": True, "success": True}
+
+    e = _Esc(admite_dos=True)
+    orden_mod.ejecutar(a, e)
+    assert e.log == [("place", 8_800_000, True), ("cancel", 9)], e.log
+
+    e = _Esc(admite_dos=False)
+    h = orden_mod.ejecutar(a, e)
+    assert e.log == [("place", 8_800_000, False), ("cancel", 9),
+                     ("place", 8_800_000, True)], e.log
+    assert h[0]["exito"] is True, h
+
+
 TESTS = [
+    test_subir_la_puja,
     test_la_pantalla_tampoco_anuncia_al_vetado,
     test_conservar_cierra_la_venta_de_pepe,
     test_el_ultimo_recurso,
