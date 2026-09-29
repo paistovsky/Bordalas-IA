@@ -186,6 +186,15 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_ORDEN_DEL_GESTOR: "1"
 
+      # Encendido 29/09 de Madrid. LA REVISION DE LAS PUJAS VIVAS.
+      #
+      #   En la ventana del reset retira nuestras pujas por jugadores que
+      #   Biwenger ya marca lesionados, en duda o sancionados (caso
+      #   Zubeldia, laboratorio E6). No toca las de la orden del gestor.
+      #   Verja 197/197; paso 0; ensayo #36602358126 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_REVISA_LAS_PUJAS_VIVAS: "1"
+
       # Encendido 24/09. EL ONCE SE BUSCA UNA VEZ, NO NOVECIENTAS.
       #
       #   NO CAMBIA NINGUNA DECISION. Es memoria, no criterio: recuerda la
