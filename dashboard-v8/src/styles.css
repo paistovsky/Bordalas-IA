@@ -1003,51 +1003,65 @@ td.pj-c .muted{font-size:11px}
 .tablon-error{font-size:11px;color:var(--warn);margin-top:6px}
 
 /* ============================================================
-   MENOS AVISOS (29/09/2026)
+   CERO AVISOS (30/09/2026)
    ------------------------------------------------------------
-   «No quiero tantos avisos amarillos y rojos.» Arriba hay UNA
-   línea de estado que se despliega; y en todas las páginas los
-   avisos dejan de ser franjas de color: son una nota con un
-   punto pequeño delante. El texto es el mismo; el grito no.
+   «Los avisos siguen saliendo.» Fuera de DIAGNÓSTICO no se pinta
+   ningún aviso: los carteles se mudaron allí, y las notas que
+   quedan dentro de un cuadro (la razón de la doctrina, el reloj
+   de la solvencia, la vara...) son TEXTO del cuadro, sin franja,
+   sin color y sin punto. Lo mismo el `aviso-ambar` y el `godnote`
+   que queden: se leen, no gritan.
+
+   Dentro de DIAGNÓSTICO, un punto pequeño delante, ámbar u
+   oscuro. Nada más.
    ============================================================ */
 
 .alert,.alert.warn,.alert.crit,.alert.ok{
-  background:none;border:0;border-left:2px solid var(--line);
-  border-radius:0;color:var(--tx);
-  padding:3px 0 3px 12px;margin-bottom:8px;font-size:12px;
-  position:relative;
+  background:none;border:0;border-radius:0;color:var(--tx);
+  padding:2px 0;margin-bottom:8px;font-size:12px;position:relative;
 }
-.alert::before{
-  content:"";position:absolute;left:-5px;top:.75em;
-  width:8px;height:8px;border-radius:50%;
+.aviso-ambar,.godnote,.godnote.crit,.godnote.warn{
+  background:none;border:0;border-radius:0;color:var(--tx);
+  padding:2px 0;margin-bottom:8px;font-size:12px;font-weight:400;letter-spacing:0;
+}
+.aviso-ambar b{color:var(--tx)}
+
+/* La línea de arriba: la última vuelta de Pepe y nada más. */
+.estado{
+  display:flex;align-items:center;gap:9px;
+  margin:0 0 11px;padding:9px 12px;
+  border:1px solid var(--line);border-radius:9px;background:var(--pan);
+  font-size:13px;font-weight:600;
+}
+.estado-punto{width:10px;height:10px;border-radius:50%;flex:none;background:var(--ok)}
+.estado.parado{color:var(--crit)}
+.estado.parado .estado-punto{background:var(--crit);box-shadow:0 0 0 4px rgba(239,68,68,.18)}
+
+/* DIAGNÓSTICO: plegado al final de AUDITORÍA. */
+.pan.diagnostico{margin-top:11px}
+.diagnostico>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.diagnostico>summary::-webkit-details-marker{display:none}
+.diagnostico>summary h2{margin:0}
+.diagnostico>summary h2::after{content:" ▾";color:var(--dim)}
+.diagnostico[open]>summary h2::after{content:" ▴"}
+.diagnostico>summary .sub{margin:0}
+.diag-cuerpo{margin-top:10px}
+.diag-grupo{margin:10px 0 12px}
+.diag-grupo h3{font:700 11px/1 sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.diagnostico .alert,.diagnostico .aviso-ambar,.diagnostico .godnote{
+  padding-left:14px;border-left:2px solid var(--line);
+}
+.diagnostico .alert::before,.diagnostico .aviso-ambar::before,.diagnostico .godnote::before{
+  content:"";position:absolute;left:-5px;top:.7em;width:8px;height:8px;border-radius:50%;
   background:var(--dim);box-shadow:0 0 0 2px var(--pan);
 }
-.alert.warn::before,.alert.crit::before{background:var(--warn)}
-.alert.ok::before{background:var(--ok)}
+.diagnostico .aviso-ambar,.diagnostico .godnote{position:relative}
+.diagnostico .alert.warn::before,.diagnostico .alert.crit::before,
+.diagnostico .aviso-ambar::before,.diagnostico .godnote::before{background:var(--warn)}
+.diagnostico .alert.ok::before{background:var(--ok)}
 
-/* La línea de estado. */
-.estado{
-  margin:0 0 11px;border:1px solid var(--line);border-radius:9px;
-  background:var(--pan);
-}
-.estado>summary{
-  list-style:none;cursor:pointer;
-  display:flex;align-items:center;gap:9px;
-  padding:9px 12px;font-size:13px;font-weight:600;
-}
-.estado>summary::-webkit-details-marker{display:none}
-.estado-punto{width:10px;height:10px;border-radius:50%;flex:none;background:var(--ok)}
-.estado.aviso .estado-punto{background:var(--warn)}
-.estado.parado .estado-punto{background:var(--crit);box-shadow:0 0 0 4px rgba(239,68,68,.18)}
-.estado.parado>summary{color:var(--crit)}
-.estado-mas{margin-left:auto;font-size:10.5px;font-weight:500;color:var(--dim)}
-.estado-mas::after{content:" ▾"}
-.estado[open] .estado-mas::after{content:" ▴"}
-.estado-detalle{padding:4px 14px 10px 16px;border-top:1px solid var(--line)}
-.estado-pastillas{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
-.estado-nada{font-size:12px;color:var(--dim);margin:2px 0 4px}
-/* Las pastillas de la foto y la racha, dentro del detalle y sin
-   ámbar ni rojo: el tono ya lo da el punto de la línea. */
+.estado-pastillas{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+/* La foto y la racha, dentro de DIAGNÓSTICO y sin ámbar ni rojo. */
 .estado-pastillas .freshness,
 .estado-pastillas .freshness.stale,
 .estado-pastillas .freshness.cobrar{

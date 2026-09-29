@@ -14,6 +14,8 @@ import TargetsDetailPanel from "../components/TargetsDetailPanel";
 import ViaTenerPanel from "../components/ViaTenerPanel";
 import SeasonHorizonPanel from "../components/SeasonHorizonPanel";
 import RosterExpansionPanel from "../components/RosterExpansionPanel";
+import Diagnostico from "../components/Diagnostico";
+import LosSentidosPanel from "../components/LosSentidosPanel";
 import { ago, formatMoney } from "../lib/utils";
 
 /* LO QUE BAJO DE INICIO EL 10/09/2026
@@ -252,7 +254,7 @@ function Objetivos({ data }) {
   );
 }
 
-export default function AuditPage({ data }) {
+export default function AuditPage({ data, error = "" }) {
   const [filter, setFilter] = useState("all");
   const backoff = data.backoff || {};
 
@@ -263,10 +265,8 @@ export default function AuditPage({ data }) {
 
   return (
     <>
-      {/* LO QUE BAJO DE INICIO. Va primero porque `AhoraPanel`
-          sigue siendo lo que exige una decision hoy: solo que
-          Inicio ya no es su sitio. */}
-      <AhoraPanel data={data} />
+      {/* `AhoraPanel` -las urgencias, en rojo- se mudo el
+          30/09/2026 a DIAGNÓSTICO, al final de esta página. */}
 
       <div className="grid g2">
         <DineroPanel data={data} />
@@ -476,6 +476,16 @@ export default function AuditPage({ data }) {
       <ConcentrationPanel data={data} />
       <ScoutPanel data={data} />
       <PressPanel data={data} />
+
+      {/* DIAGNÓSTICO (30/09/2026). Todos los avisos del panel,
+          plegados y cerrados por defecto. Es el único sitio donde
+          se canta lo que no cuadra; fuera de aquí, cero avisos. */}
+      <Diagnostico data={data} error={error}>
+        {/* Las urgencias y los sentidos de Pepe: son cuadros de
+            avisos y de salud, y viven aquí plegados. */}
+        <AhoraPanel data={data} />
+        <LosSentidosPanel data={data} />
+      </Diagnostico>
     </>
   );
 }

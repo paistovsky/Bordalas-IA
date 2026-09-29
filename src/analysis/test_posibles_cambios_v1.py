@@ -420,6 +420,11 @@ def test_las_dos_cuentas_atras_corren_en_el_navegador() -> None:
 
     Viven en dos sitios desde el 10/09: el ciclo en la pastilla
     de la cabecera, el reset en la tira.
+
+    30/09/2026: la pastilla del ciclo se mudo de la cabecera a
+    DIAGNOSTICO (AUDITORIA); arriba solo queda la hora de la
+    ultima vuelta. Sigue corriendo y sigue cantando el ciclo que
+    no llega.
     """
 
     tira = _lee(DASHBOARD / "components" / "KpiStrip.jsx")
@@ -428,7 +433,11 @@ def test_las_dos_cuentas_atras_corren_en_el_navegador() -> None:
         "el reset no corre en la tira"
     )
 
-    cabecera = _lee(DASHBOARD / "App.jsx")
+    cabecera = _lee(DASHBOARD / "components" / "Diagnostico.jsx")
+
+    assert "<Diagnostico" in _lee(DASHBOARD / "pages" / "AuditPage.jsx"), (
+        "DIAGNOSTICO no esta montado en AUDITORIA"
+    )
 
     assert "setInterval" in cabecera, (
         "la pastilla no tiene reloj: la cuenta atras del ciclo "
@@ -491,7 +500,14 @@ def test_la_edad_de_la_foto_va_en_minutos_enteros() -> None:
         "la edad de la foto sigue devolviendo decimales"
     )
 
-    cabecera = _lee(DASHBOARD / "App.jsx")
+    # La cabecera enseña la hora de la ultima vuelta con los
+    # minutos enteros; la pastilla con la cuenta atras vive en
+    # DIAGNOSTICO desde el 30/09/2026.
+    assert "minutosDeLaFoto" in _lee(DASHBOARD / "App.jsx"), (
+        "la cabecera calcula la edad de la foto con decimales"
+    )
+
+    cabecera = _lee(DASHBOARD / "components" / "Diagnostico.jsx")
 
     assert "minutosDeLaFoto" in cabecera, (
         "la pastilla sigue pintando minutos con decimales"

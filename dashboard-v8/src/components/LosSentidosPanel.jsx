@@ -65,20 +65,7 @@ export default function LosSentidosPanel({ data }) {
           0» no es una alarma, es que no ha llegado nada, y un
           aviso que se enciende con la ausencia de datos tapa el
           fallo que tenía que enseñar. */}
-      {ciego.hay ? (
-        <p className="aviso-ambar">
-          <b>
-            Hoy Pepe está medio ciego: {ciego.sin_pronostico} de{" "}
-            {ciego.objetivos} objetivos salen sin pronóstico de
-            titularidad.
-          </b>{" "}
-          {ciego.reason}{" "}
-          <b>
-            La vía de fichar está cerrada por falta de un dato, no
-            por criterio.
-          </b>
-        </p>
-      ) : null}
+      {/* «Pepe medio ciego», mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
 
       <div className="pan-head">
         <div>
@@ -89,7 +76,9 @@ export default function LosSentidosPanel({ data }) {
           </p>
         </div>
         {muertos.length ? (
-          <span className="pill crit">
+          /* Un recuento, no una alarma (30/09/2026): el aviso del
+             sentido apagado vive en DIAGNÓSTICO. */
+          <span className="pill idle">
             {muertos.length} APAGADO{muertos.length === 1 ? "" : "S"}
           </span>
         ) : (

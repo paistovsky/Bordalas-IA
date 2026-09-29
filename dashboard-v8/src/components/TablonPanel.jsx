@@ -86,9 +86,6 @@ export default function TablonPanel({ data }) {
         </ul>
       )}
 
-      {tablon.error && (
-        <p className="tablon-error">No se pudo leer todo el tablón: {tablon.error}</p>
-      )}
     </section>
   );
 }

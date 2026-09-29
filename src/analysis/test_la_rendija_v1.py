@@ -2093,9 +2093,10 @@ def test_el_cartel_dice_lo_que_pasa_en_una_frase() -> None:
     # Y NO SE REPITE. La pantalla no le pone titulo encima.
     from pathlib import Path
 
+    # 30/09/2026: el cartel se mudo a DIAGNOSTICO (AUDITORIA).
     app = (
         Path(__file__).parents[2] / "dashboard-v8" / "src"
-        / "App.jsx"
+        / "components" / "Diagnostico.jsx"
     ).read_text(encoding="utf-8")
 
     assert "VIAJE COMPRADO Y SIN LISTAR" not in app.replace(
@@ -2442,10 +2443,15 @@ def test_la_racha_se_lee_y_no_se_estima() -> None:
             f"de leerse"
         )
 
-    # LA PANTALLA: el numero, y "SIN MEDIR" si no viene.
+    # LA PANTALLA: el numero, y "SIN MEDIR" si no viene. Desde el
+    # 30/09/2026 la pildora vive en DIAGNOSTICO (AUDITORIA).
     app = (
-        raiz / "dashboard-v8" / "src" / "App.jsx"
+        raiz / "dashboard-v8" / "src" / "components" / "Diagnostico.jsx"
     ).read_text(encoding="utf-8")
+
+    assert "<Diagnostico" in (
+        raiz / "dashboard-v8" / "src" / "pages" / "AuditPage.jsx"
+    ).read_text(encoding="utf-8"), "DIAGNOSTICO no esta montado"
 
     assert "daily_streak" in app, "la pantalla no lee la racha"
 

@@ -534,17 +534,33 @@ def test_el_aviso_de_comprado_sin_publicar_no_es_fijo() -> None:
     )
 
     # 5. LA PANTALLA LO PINTA CONDICIONADO, no siempre.
-    panel = _jsx_sin_comentarios(
-        PANEL.read_text(encoding="utf-8")
+    #
+    #    30/09/2026: el aviso se mudo del cuadro de MERCADO a
+    #    DIAGNOSTICO (AUDITORIA) -el dueño no quiere avisos fuera
+    #    de alli-. Alli se pinta con o sin cuadro: lee el bloque
+    #    directamente, no depende de que haya filas.
+    diagnostico = _jsx_sin_comentarios(
+        (PANEL.parent / "Diagnostico.jsx").read_text(encoding="utf-8")
     )
 
-    assert "aviso.hay ?" in panel, (
+    assert "sinPublicar.hay &&" in diagnostico, (
         "el aviso no depende del hecho: seria un cartel fijo"
     )
 
-    # Y en las dos ramas del panel: con cuadro y sin cuadro.
-    assert panel.count("aviso.hay ?") >= 2, (
-        "el aviso solo se pinta en una de las dos ramas"
+    assert "comprado_sin_publicar" in diagnostico, (
+        "DIAGNOSTICO no lee `comprado_sin_publicar`"
+    )
+
+    assert "<Diagnostico" in (
+        PANEL.parents[1] / "pages" / "AuditPage.jsx"
+    ).read_text(encoding="utf-8"), "DIAGNOSTICO no esta montado"
+
+    # Y el cuadro de MERCADO ya no lo pinta: un aviso en dos
+    # sitios acaba diciendo dos cosas distintas.
+    panel = _jsx_sin_comentarios(PANEL.read_text(encoding="utf-8"))
+
+    assert "<Aviso" not in panel, (
+        "el aviso ha vuelto al cuadro de MERCADO"
     )
 
 

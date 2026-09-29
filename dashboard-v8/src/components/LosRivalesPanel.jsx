@@ -97,16 +97,7 @@ export default function LosRivalesPanel({ data }) {
         </p>
       )}
 
-      {bloque.sin_plantilla && bloque.sin_plantilla.length ? (
-        <p className="aviso-ambar">
-          <b>
-            {bloque.sin_plantilla.length} mánager(s) sin plantilla
-            cruzada:
-          </b>{" "}
-          {bloque.sin_plantilla.join(", ")}. Sus fichas salen sin
-          dato.
-        </p>
-      ) : null}
+      {/* Aviso mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
 
       <div className="scroll-y">
         <table className="tbl">

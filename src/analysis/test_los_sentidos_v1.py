@@ -350,14 +350,20 @@ def test_si_el_tablero_esta_rechazado_la_pantalla_lo_grita() -> None:
 
         assert hueco["ciego"]["objetivos"] == 0, vacia
 
-    # 4. Y LA PANTALLA LO PINTA.
+    # 4. Y LA PANTALLA LO PINTA. Desde el 30/09/2026, en
+    #    DIAGNOSTICO (AUDITORIA): el dueño no quiere avisos fuera
+    #    de alli, y esta banda es un aviso.
     panel = (
         RAIZ
         / "dashboard-v8"
         / "src"
         / "components"
-        / "LosSentidosPanel.jsx"
+        / "Diagnostico.jsx"
     ).read_text(encoding="utf-8")
+
+    assert "<Diagnostico" in (
+        RAIZ / "dashboard-v8" / "src" / "pages" / "AuditPage.jsx"
+    ).read_text(encoding="utf-8"), "DIAGNOSTICO no esta montado"
 
     assert "ciego.sin_pronostico" in panel, (
         "la pantalla no pinta el recuento de ciegos"

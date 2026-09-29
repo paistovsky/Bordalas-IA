@@ -262,8 +262,15 @@ def test_ningun_texto_lleva_la_cadencia_escrita_a_mano() -> None:
     quedaran atras el dia que el cron cambie otra vez.
     """
 
-    app = _sin_comentarios(
+    # 30/09/2026: el aviso de la foto vieja se mudo de la banda
+    # de arriba a DIAGNOSTICO (AUDITORIA). Se vigila alli; y la
+    # cabecera tampoco puede volver a leer `cycle_minutes`.
+    assert "cycle_minutes" not in _sin_comentarios(
         _lee(RAIZ / "dashboard-v8" / "src" / "App.jsx")
+    ), "la cabecera ha vuelto a leer `cycle_minutes`"
+
+    app = _sin_comentarios(
+        _lee(RAIZ / "dashboard-v8" / "src" / "components" / "Diagnostico.jsx")
     )
 
     assert "cadenciaEnPalabras" in app, (

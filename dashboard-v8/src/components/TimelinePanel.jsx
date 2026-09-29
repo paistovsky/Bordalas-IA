@@ -91,9 +91,6 @@ export default function TimelinePanel({ data }) {
           <h2>CRONOLOGÍA DE BORDALÁS</h2>
           <div className="sub">Línea temporal · derivada de la telemetría</div>
         </div>
-        {Number(backoff.blocked_count || 0) > 0 && (
-          <span className="pill warn">{backoff.blocked_count} EN ESPERA</span>
-        )}
       </div>
 
       {steps.length ? (
@@ -112,16 +109,7 @@ export default function TimelinePanel({ data }) {
         </div>
       )}
 
-      {(backoff.blocked || []).map((item, index) => (
-        <div className="alert warn" key={index} style={{ marginTop: 10, marginBottom: 0 }}>
-          <b>{String(item.action || "").replaceAll("_", " ")}</b> apartada:{" "}
-          {item.consecutive_failures === 1
-            ? "ha fallado 1 vez"
-            : `ha fallado ${item.consecutive_failures} veces seguidas`}
-          {item.last_http_status ? ` (HTTP ${item.last_http_status})` : ""}. Se
-          reintenta en {Math.max(Math.floor(Number(item.seconds_remaining || 0) / 60), 1)} min.
-        </div>
-      ))}
+      {/* Las acciones en espera, mudadas a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
     </section>
   );
 }

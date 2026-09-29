@@ -114,7 +114,6 @@ function CaducaEn({ horas, caducada }) {
 export default function LoNuestroALaVentaPanel({ data }) {
   const venta = data.loNuestroALaVenta || {};
 
-  const aviso = venta.comprado_sin_publicar || {};
 
   if (!venta.available) {
     return (
@@ -129,7 +128,6 @@ export default function LoNuestroALaVentaPanel({ data }) {
         {/* EL AVISO SE PINTA IGUAL AUNQUE NO HAYA CUADRO: un
             jugador comprado para revender y sin publicar es justo
             el caso en que puede no haber ni una fila. */}
-        {aviso.hay ? <Aviso aviso={aviso} /> : null}
 
         <p className="note">
           {venta.reason || "No llegó lo que tenemos publicado."}
@@ -160,7 +158,7 @@ export default function LoNuestroALaVentaPanel({ data }) {
         </div>
       </div>
 
-      {aviso.hay ? <Aviso aviso={aviso} /> : null}
+      {/* «Comprado y sin publicar», mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
 
       <div className="scroll-y">
         <table className="tbl">
@@ -327,21 +325,6 @@ export default function LoNuestroALaVentaPanel({ data }) {
   );
 }
 
-/* COMPRADO PARA REVENDER Y TODAVÍA SIN PUBLICAR.
- *
- *   Mientras no esté en el escaparate, el Computer no le hace
- *   ninguna oferta: el viaje está parado y no se nota en ningún
- *   sitio.
- *
- *   LO ENCIENDE EL HECHO, NO LA INTENCIÓN (regla 37): si no hay
- *   ninguno, este cartel no existe. Un aviso fijo se deja de leer
- *   a los dos días y entonces ya no avisa de nada. */
-function Aviso({ aviso }) {
-  return (
-    <p className="aviso-ambar">
-      <b>Comprado para revender y todavía sin poner a la venta:</b>{" "}
-      {aviso.players.join(", ")}. Mientras no esté publicado, el
-      Computer no le hace ninguna oferta.
-    </p>
-  );
-}
+/* COMPRADO PARA REVENDER Y TODAVÍA SIN PUBLICAR: el cartel se
+ * mudó a DIAGNÓSTICO (AUDITORÍA) el 30/09/2026. Allí se enciende
+ * con el mismo hecho -`comprado_sin_publicar.hay`-. */

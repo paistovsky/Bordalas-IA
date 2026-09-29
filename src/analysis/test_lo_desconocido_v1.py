@@ -390,18 +390,25 @@ def test_el_credito_derivado_se_contrasta_con_lo_medido() -> None:
     via, la que no pasa por `maximumBid`.
     """
 
-    fuente = _lee(DASHBOARD / "components" / "KpiStrip.jsx")
+    # 30/09/2026: el dueño quiere el SALDO en grande en la tira y
+    # ningun aviso fuera de DIAGNOSTICO. El contraste no se ha
+    # quitado: se hace y se canta en DIAGNOSTICO (AUDITORIA).
+    fuente = _lee(DASHBOARD / "components" / "Diagnostico.jsx")
 
     assert "creditoMedido" in fuente, (
-        "la tira no contrasta el credito contra la via medida"
+        "nadie contrasta el credito contra la via medida"
     )
 
     assert "NO CUADRA" in fuente, (
-        "el descuadre no se canta en la etiqueta"
+        "el descuadre no se canta"
     )
 
-    assert 'tone={!cuadra ? "bad"' in fuente, (
-        "el descuadre no sale en ROJO"
+    assert "{!cuadra && (" in fuente and 'className="alert crit"' in fuente, (
+        "el descuadre no sale como aviso en DIAGNOSTICO"
+    )
+
+    assert "<Diagnostico" in _lee(DASHBOARD / "pages" / "AuditPage.jsx"), (
+        "DIAGNOSTICO no esta montado en AUDITORIA"
     )
 
 

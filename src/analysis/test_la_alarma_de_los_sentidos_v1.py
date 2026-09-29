@@ -60,7 +60,12 @@ PANEL = (
     / "LosSentidosPanel.jsx"
 )
 
-APP = RAIZ / "dashboard-v8" / "src" / "App.jsx"
+# La banda de arriba se plego en DIAGNOSTICO (AUDITORIA) el
+# 30/09/2026: el dueño no quiere avisos fuera de alli. La alarma
+# sigue saliendo, con las mismas palabras, donde se mira lo tecnico.
+APP = RAIZ / "dashboard-v8" / "src" / "components" / "Diagnostico.jsx"
+
+AUDITORIA = RAIZ / "dashboard-v8" / "src" / "pages" / "AuditPage.jsx"
 
 NORMALIZA = RAIZ / "dashboard-v8" / "src" / "lib" / "status.js"
 
@@ -266,6 +271,11 @@ def test_un_sentido_caducado_se_grita() -> None:
 
     assert "que_queda_bloqueado" in app, (
         "la banda de arriba no dice que decision queda bloqueada"
+    )
+
+    assert "<Diagnostico" in AUDITORIA.read_text(encoding="utf-8"), (
+        "DIAGNOSTICO no esta montado en AUDITORIA: la alarma no "
+        "llega a ninguna pantalla"
     )
 
     # Y llega hasta la pantalla: sin esto, `raw` la trae y

@@ -77,16 +77,7 @@ export default function ElCalendarioPanel({ data }) {
   return (
     <section className="pan">
       {/* LO QUE NO CASA, ARRIBA Y CON NOMBRE. */}
-      {cal.sin_casar && cal.sin_casar.length ? (
-        <p className="aviso-ambar">
-          <b>
-            {cal.sin_casar.length} ficha(s) del calendario no
-            casan con la clasificación:
-          </b>{" "}
-          {cal.sin_casar.join(", ")}. Sus partidos salen igual,
-          pero con el puesto del rival sin dato.
-        </p>
-      ) : null}
+      {/* Aviso mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
 
       <div className="pan-head">
         <div>

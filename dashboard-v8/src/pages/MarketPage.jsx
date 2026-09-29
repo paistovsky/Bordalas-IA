@@ -595,12 +595,7 @@ function ClockPanel({ clock }) {
 
       <div className="kv"><span>Origen del dato</span><span className="tag">{clock.source}</span></div>
 
-      {clock.listings_stale && (
-        <div className="alert warn" style={{ marginTop: 9, marginBottom: 0 }}>
-          El snapshot es anterior al último reset: puede traer jugadores que ya
-          no existen. No se puja sobre datos caducados.
-        </div>
-      )}
+      {/* Aviso mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
     </section>
   );
 }
@@ -1258,33 +1253,9 @@ function TargetsPanel({ acquisition, pointsMarket, exposure = {} }) {
           El aviso NO se borra: se queda por si algún día el
           motor recorta de verdad. Lo enciende el hecho —que
           `hidden` traiga un número— y no la intención. */}
-      {recortados > 0 && (
-        <div className="alert warn">
-          Esta tabla enseña {acquisition.shown} de{" "}
-          {acquisition.valued} jugadores valorados.{" "}
-          <b>{recortados} se quedan fuera</b>, y no porque Pepe no
-          los haya mirado. La pantalla no pone ningún tope: éste
-          viene del motor.
-        </div>
-      )}
+      {/* Aviso mudado a DIAGNÓSTICO (AUDITORÍA), 30/09/2026. */}
 
-      {sinPronostico && (
-        <div className="alert warn" style={{ marginTop: 10 }}>
-          Ningún candidato del mercado tiene pronóstico de titularidad, así que
-          la regla del once bloquea las {cobertura.blocked_by_starter_rule ?? 0}{" "}
-          mejoras que había. No es que no haya chollos: es que falta el dato
-          para juzgarlos. Revisa el refresco de FutbolFantasy.
-        </div>
-      )}
 
-      {descuadre && (
-        <div className="alert warn" style={{ marginTop: 10 }}>
-          La caja dice {exposure.operation_count} puja(s) viva(s) y esta tabla
-          encuentra {vivas}. Alguna puja es de un jugador que ya no está en el
-          mercado del Computer. No se decide nada con esta tabla hasta que
-          cuadren.
-        </div>
-      )}
 
       <p className="note" style={{ textAlign: "left" }}>
         <b>PUESTO</b> es lo que ya hay comprometido en Biwenger ahora mismo.{" "}
