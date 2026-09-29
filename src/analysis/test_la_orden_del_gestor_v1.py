@@ -258,7 +258,38 @@ def test_conservar_cierra_la_venta_de_pepe() -> None:
     )
 
 
+def test_la_pantalla_tampoco_anuncia_al_vetado() -> None:
+    import src.analysis.la_subasta as sub
+
+    plan_falso = {"bids": [{"id": LEJEUNE, "name": "Lejeune"},
+                           {"id": 7, "name": "Otro"}], "execute": False}
+    antes_env = os.environ.get(orden_mod.ENV)
+    reales = (sub.plan_del_reset, sub.lectura_del_estado)
+    with tempfile.TemporaryDirectory() as tmp:
+        ruta = Path(tmp) / "orden.json"
+        ruta.write_text(__import__("json").dumps(ORDEN), encoding="utf-8")
+        ruta_antes = orden_mod.RUTA
+        orden_mod.RUTA = ruta
+        try:
+            sub.plan_del_reset = lambda **kw: dict(plan_falso)
+            sub.lectura_del_estado = lambda state, snapshot: {}
+            os.environ[orden_mod.ENV] = "1"
+            ids = [b["id"] for b in sub.plan_desde_el_estado({}, {})["bids"]]
+            assert ids == [7], ids
+            os.environ.pop(orden_mod.ENV, None)
+            ids = [b["id"] for b in sub.plan_desde_el_estado({}, {})["bids"]]
+            assert ids == [LEJEUNE, 7], "apagada no debe quitar nada"
+        finally:
+            sub.plan_del_reset, sub.lectura_del_estado = reales
+            orden_mod.RUTA = ruta_antes
+            if antes_env is None:
+                os.environ.pop(orden_mod.ENV, None)
+            else:
+                os.environ[orden_mod.ENV] = antes_env
+
+
 TESTS = [
+    test_la_pantalla_tampoco_anuncia_al_vetado,
     test_conservar_cierra_la_venta_de_pepe,
     test_el_ultimo_recurso,
     test_no_se_publica_a_un_protegido,

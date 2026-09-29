@@ -2435,12 +2435,35 @@ def plan_desde_el_estado(
     pasando por el mismo sitio.
     """
 
-    return plan_del_reset(
+    plan = plan_del_reset(
         **lectura_del_estado(state, snapshot),
         ya_pujados=ya_pujados,
         en_vivo=en_vivo,
         max_pujas=max_pujas,
     )
+
+    # LA ORDEN DEL GESTOR MANDA, TAMBIEN EN LA PANTALLA (29/09/2026)
+    #
+    #     El ciclo ya quitaba los `no_pujar` de la orden despues de
+    #     llamar aqui; la pantalla no, y el panel anunciaba «Pujar por
+    #     Lejeune» mientras la orden lo prohibia. Quitados aqui, el
+    #     ciclo y la pantalla ven el mismo plan. Nunca lanza.
+    try:
+        from src.actions.la_orden_del_gestor import vetados
+
+        fuera = vetados()
+        if fuera and isinstance(plan, dict) and plan.get("bids"):
+            plan = {
+                **plan,
+                "bids": [
+                    b for b in plan["bids"]
+                    if safe_int(b.get("id")) not in fuera
+                ],
+            }
+    except Exception:                               # noqa: BLE001
+        pass
+
+    return plan
 
 
 def para_la_pantalla(
