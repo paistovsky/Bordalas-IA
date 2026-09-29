@@ -1,6 +1,6 @@
 {
   "version": "V10.5",
-  "updated_at": "2026-09-29T09:09:45.591158+00:00",
+  "updated_at": "2026-09-29T10:09:50.855570+00:00",
   "positions": [
     {
       "position_id": "BID-4138078754",
@@ -199,7 +199,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-16T18:44:52.454534+00:00",
-      "updated_at": "2026-09-29T09:09:45.314744+00:00",
+      "updated_at": "2026-09-29T10:09:50.607843+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -444,7 +444,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-17T19:57:28.828214+00:00",
-      "updated_at": "2026-09-29T09:09:45.314760+00:00",
+      "updated_at": "2026-09-29T10:09:50.607848+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -579,7 +579,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-18T11:40:21.466744+00:00",
-      "updated_at": "2026-09-29T09:09:45.314770+00:00",
+      "updated_at": "2026-09-29T10:09:50.607855+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -723,7 +723,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588273+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852634+00:00",
         "action": "CUT_LOSS",
         "priority": 90,
         "decision_basis": "LOSS_AND_DETERIORATION",
@@ -776,7 +776,7 @@
       "realized_roi_percent": null,
       "thesis_source": "LIVE_DECISION_EXACT",
       "created_at": "2026-08-18T12:01:03.975162+00:00",
-      "updated_at": "2026-09-29T09:09:45.314774+00:00",
+      "updated_at": "2026-09-29T10:09:50.607858+00:00",
       "events": [
         {
           "type": "BID_SENT",
@@ -1135,7 +1135,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T10:49:10.880549+00:00",
-      "updated_at": "2026-09-29T09:09:45.314776+00:00",
+      "updated_at": "2026-09-29T10:09:50.607860+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1260,7 +1260,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T13:11:38.127443+00:00",
-      "updated_at": "2026-09-29T09:09:45.314779+00:00",
+      "updated_at": "2026-09-29T10:09:50.607863+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1685,7 +1685,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-21T23:12:10.013730+00:00",
-      "updated_at": "2026-09-29T09:09:45.314784+00:00",
+      "updated_at": "2026-09-29T10:09:50.607868+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1841,7 +1841,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588284+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852646+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -1946,7 +1946,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-22T12:58:05.170012+00:00",
-      "updated_at": "2026-09-29T09:09:45.314788+00:00",
+      "updated_at": "2026-09-29T10:09:50.607872+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2066,7 +2066,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588290+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852652+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -2276,7 +2276,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-26T22:28:55.623930+00:00",
-      "updated_at": "2026-09-29T09:09:45.314792+00:00",
+      "updated_at": "2026-09-29T10:09:50.607876+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2396,7 +2396,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588295+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852657+00:00",
         "action": "TAKE_PROFIT",
         "priority": 85,
         "decision_basis": "PROFIT_HARVEST",
@@ -2676,7 +2676,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-29T00:02:10.740691+00:00",
-      "updated_at": "2026-09-29T09:09:45.314795+00:00",
+      "updated_at": "2026-09-29T10:09:50.607879+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3398,7 +3398,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764569+00:00",
-      "updated_at": "2026-09-29T09:09:45.314798+00:00",
+      "updated_at": "2026-09-29T10:09:50.607883+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3487,7 +3487,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764612+00:00",
-      "updated_at": "2026-09-29T09:09:45.314801+00:00",
+      "updated_at": "2026-09-29T10:09:50.607885+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3576,7 +3576,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T14:50:32.666545+00:00",
-      "updated_at": "2026-09-29T09:09:45.314803+00:00",
+      "updated_at": "2026-09-29T10:09:50.607887+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3665,7 +3665,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T20:09:49.948144+00:00",
-      "updated_at": "2026-09-29T09:09:45.314805+00:00",
+      "updated_at": "2026-09-29T10:09:50.607889+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3863,7 +3863,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-14T20:11:05.102108+00:00",
-      "updated_at": "2026-09-29T09:09:45.314807+00:00",
+      "updated_at": "2026-09-29T10:09:50.607891+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3953,7 +3953,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T02:54:37.362776+00:00",
-      "updated_at": "2026-09-29T09:09:45.314809+00:00",
+      "updated_at": "2026-09-29T10:09:50.607893+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4042,7 +4042,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T12:02:13.172318+00:00",
-      "updated_at": "2026-09-29T09:09:45.314812+00:00",
+      "updated_at": "2026-09-29T10:09:50.607895+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4182,7 +4182,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-17T03:03:05.858859+00:00",
-      "updated_at": "2026-09-29T09:09:45.314814+00:00",
+      "updated_at": "2026-09-29T10:09:50.607897+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4271,7 +4271,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T00:12:39.103782+00:00",
-      "updated_at": "2026-09-29T09:09:45.314816+00:00",
+      "updated_at": "2026-09-29T10:09:50.607899+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4360,7 +4360,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510843+00:00",
-      "updated_at": "2026-09-29T09:09:45.314818+00:00",
+      "updated_at": "2026-09-29T10:09:50.607901+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4449,7 +4449,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510907+00:00",
-      "updated_at": "2026-09-29T09:09:45.314820+00:00",
+      "updated_at": "2026-09-29T10:09:50.607903+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4538,7 +4538,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510947+00:00",
-      "updated_at": "2026-09-29T09:09:45.314822+00:00",
+      "updated_at": "2026-09-29T10:09:50.607905+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4627,7 +4627,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T06:18:56.178648+00:00",
-      "updated_at": "2026-09-29T09:09:45.314824+00:00",
+      "updated_at": "2026-09-29T10:09:50.607907+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4716,7 +4716,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T02:53:28.328041+00:00",
-      "updated_at": "2026-09-29T09:09:45.314827+00:00",
+      "updated_at": "2026-09-29T10:09:50.607911+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4755,7 +4755,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588301+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852663+00:00",
         "action": "CUT_LOSS",
         "priority": 90,
         "decision_basis": "LOSS_AND_DETERIORATION",
@@ -4809,7 +4809,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T12:14:41.399274+00:00",
-      "updated_at": "2026-09-29T09:09:45.314831+00:00",
+      "updated_at": "2026-09-29T10:09:50.607914+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4839,7 +4839,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588305+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852667+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -4893,7 +4893,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T12:14:41.399314+00:00",
-      "updated_at": "2026-09-29T09:09:45.314835+00:00",
+      "updated_at": "2026-09-29T10:09:50.607918+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4923,7 +4923,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588309+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852670+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -4977,7 +4977,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-23T03:19:41.972654+00:00",
-      "updated_at": "2026-09-29T09:09:45.314838+00:00",
+      "updated_at": "2026-09-29T10:09:50.607921+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5007,7 +5007,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588312+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852673+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -5061,7 +5061,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-23T09:39:39.218808+00:00",
-      "updated_at": "2026-09-29T09:09:45.314840+00:00",
+      "updated_at": "2026-09-29T10:09:50.607924+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5207,7 +5207,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-25T13:12:49.500390+00:00",
-      "updated_at": "2026-09-29T09:09:45.314844+00:00",
+      "updated_at": "2026-09-29T10:09:50.607927+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5237,7 +5237,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-09-29T09:09:45.588316+00:00",
+        "last_evaluated_at": "2026-09-29T10:09:50.852677+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -5307,6 +5307,51 @@
           "at": "2026-09-26T05:20:08.964855+00:00",
           "detail": "La oferta ya no esta activa, el jugador no esta en plantilla y el plazo registrado ha expirado.",
           "data": {}
+        }
+      ]
+    },
+    {
+      "position_id": "BID-1839426352",
+      "player_id": 35678,
+      "player_name": "Jugador 35678",
+      "strategy": "ACTIVE_BID",
+      "origin": "BOOTSTRAP_ACTIVE_BID",
+      "status": "BID_PENDING",
+      "offer_id": 1839426352,
+      "seller_id": null,
+      "seller": null,
+      "bid_amount": 8950000,
+      "entry_price": null,
+      "bid_created_epoch": 1790672987,
+      "bid_until_epoch": 1790744400,
+      "snapshot_player_value": 0,
+      "listing_price_at_bid": 8380000,
+      "speculation_score_at_bid": 0.0,
+      "trading_score_at_bid": 0.0,
+      "max_rational_bid_at_bid": 0,
+      "expected_exit_value_at_bid": 0,
+      "expected_profit_at_bid": 0,
+      "expected_roi_at_bid_percent": 0.0,
+      "t15_after_bid": 0,
+      "current_value": 0,
+      "unrealized_profit": null,
+      "unrealized_roi_percent": null,
+      "opened_at": null,
+      "closed_at": null,
+      "realized_profit": null,
+      "realized_roi_percent": null,
+      "thesis_source": "UNKNOWN_ACTIVE_BID",
+      "created_at": "2026-09-29T10:09:50.607785+00:00",
+      "updated_at": "2026-09-29T10:09:50.607931+00:00",
+      "events": [
+        {
+          "type": "BID_IMPORTED",
+          "at": "2026-09-29T10:09:50.607801+00:00",
+          "detail": "Oferta activa existente adoptada por V10.5. La tesis es una reconstruccion actual, no una reescritura del instante original.",
+          "data": {
+            "offer_id": 1839426352,
+            "bid_amount": 8950000
+          }
         }
       ]
     }
