@@ -401,6 +401,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **29/09 20:20 (el gestor).** Tarde: (1) Zubeldia (FF «al margen» 21, 28
+  y 29/09; Biwenger «doubt») pasa a la VENTA en la orden y Maffeo se queda
+  de tercer defensa (f6cc0e1). (2) **ENCENDIDA la revision de las pujas
+  vivas** (`src/actions/la_revision_de_pujas.py`,
+  BORDALAS_REVISA_LAS_PUJAS_VIVAS, 9c85416): en la ventana del reset retira
+  nuestras pujas por jugadores injured/doubt/sanctioned (caso Zubeldia,
+  E6); no toca las de la orden. Verja 197/197, paso 0 con 37, ensayo
+  #36602358126 verde. **Canario #1888 (20:07) VERDE**: «FUERA_DE_LA_VENTANA».
+  - Detalle para arreglar (no esta noche): en `la_orden_del_gestor.decidir`
+    el tope `maximumBid` se mira ANTES que «ya hay puja nuestra»; con la
+    puja viva Biwenger baja maximumBid (5,57 M) y sale una accion NADA con
+    motivo enganoso. No escribe nada (correcto), pero hay que invertir el
+    orden de las dos comprobaciones.
+  - Comprobacion programada: 30/09 07:20 (resultado de Roberto, lo que
+    retiro la revision, arranque de las ventas).
+
 - **29/09 12:20 (el gestor). LA PUJA POR ROBERTO FERNANDEZ, CONFIRMADA.**
   La orden del gestor (BORDALAS_LA_ORDEN_DEL_GESTOR, encendida 10:31) pujo
   en el ciclo #1879 (11:07); en el #1880 (12:07) Biwenger marca
