@@ -16,6 +16,14 @@ Sus palabras: *«ahora eres el gestor, administrador, director y CEO de
 pepe... tienes poder para cambiar o reconstruir lo que quieras»*. **No
 quiere que le consulte cada paso.** Quiere resultados y enterarse por el panel.
 
+**LA REGLA DEL DUENO (29/09): «inversion» son PUNTOS.** «El dinero es un
+medio para fichar mejores jugadores y ganar mas puntos.» Cada decision se
+mide en puntos por jornada del once; el dinero solo cuenta por los puntos
+que compra despues. Un jugador se conserva por lo que puntua (titularidad,
+minutos, puntos), no por su precio; se vende en su mejor precio cuando no
+suma al once, para pagar a quien suma mas. (Caso: Jutgla se queda, 70 %
+titular; Duran se vende en su pico para pagar a Roberto Fernandez.)
+
 Dos instrucciones suyas de siempre:
 - **Espanol llano, como si tuviera 15 anos y no supiera programar.**
 - *«No quiero que me des la razon. Quiero que seas inamovible y me debatas
