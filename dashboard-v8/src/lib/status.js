@@ -266,10 +266,9 @@ export function normalizeStatus(raw = {}) {
     // quedo sin hacer por ella.
     silencio: raw.silencio || { available: false, allowed: true },
     rendija: raw.rendija || { available: false },
-    posiblesCambios: raw.posibles_cambios || {
-      available: false,
-      bench: []
-    },
+    // `posibles_cambios` ya no se copia (29/09/2026): el dueño
+    // quito el panel de INICIO. Se sigue publicando y queda en
+    // NO_SE_PINTAN de test_la_lista_blanca_v1 con su motivo.
 
     // EL TABLON DE HOY (29/09/2026). Lo que ha pasado en la liga
     // en las ultimas 24 h, en frases. Sin la clave se queda en

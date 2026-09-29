@@ -1001,27 +1001,151 @@ td.pj-c .muted{font-size:11px}
 .tablon-lista li.nuestra .tablon-icono{color:var(--ok)}
 .tablon-vacio{font-size:13px;color:var(--dim);padding:4px 0}
 .tablon-error{font-size:11px;color:var(--warn);margin-top:6px}
-@media (max-width:760px){
-  .tablon-lista li{grid-template-columns:76px 16px 1fr;gap:6px;font-size:14px;padding:7px 4px}
+
+/* ============================================================
+   MENOS AVISOS (29/09/2026)
+   ------------------------------------------------------------
+   «No quiero tantos avisos amarillos y rojos.» Arriba hay UNA
+   línea de estado que se despliega; y en todas las páginas los
+   avisos dejan de ser franjas de color: son una nota con un
+   punto pequeño delante. El texto es el mismo; el grito no.
+   ============================================================ */
+
+.alert,.alert.warn,.alert.crit,.alert.ok{
+  background:none;border:0;border-left:2px solid var(--line);
+  border-radius:0;color:var(--tx);
+  padding:3px 0 3px 12px;margin-bottom:8px;font-size:12px;
+  position:relative;
+}
+.alert::before{
+  content:"";position:absolute;left:-5px;top:.75em;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--dim);box-shadow:0 0 0 2px var(--pan);
+}
+.alert.warn::before,.alert.crit::before{background:var(--warn)}
+.alert.ok::before{background:var(--ok)}
+
+/* La línea de estado. */
+.estado{
+  margin:0 0 11px;border:1px solid var(--line);border-radius:9px;
+  background:var(--pan);
+}
+.estado>summary{
+  list-style:none;cursor:pointer;
+  display:flex;align-items:center;gap:9px;
+  padding:9px 12px;font-size:13px;font-weight:600;
+}
+.estado>summary::-webkit-details-marker{display:none}
+.estado-punto{width:10px;height:10px;border-radius:50%;flex:none;background:var(--ok)}
+.estado.aviso .estado-punto{background:var(--warn)}
+.estado.parado .estado-punto{background:var(--crit);box-shadow:0 0 0 4px rgba(239,68,68,.18)}
+.estado.parado>summary{color:var(--crit)}
+.estado-mas{margin-left:auto;font-size:10.5px;font-weight:500;color:var(--dim)}
+.estado-mas::after{content:" ▾"}
+.estado[open] .estado-mas::after{content:" ▴"}
+.estado-detalle{padding:4px 14px 10px 16px;border-top:1px solid var(--line)}
+.estado-pastillas{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
+.estado-nada{font-size:12px;color:var(--dim);margin:2px 0 4px}
+/* Las pastillas de la foto y la racha, dentro del detalle y sin
+   ámbar ni rojo: el tono ya lo da el punto de la línea. */
+.estado-pastillas .freshness,
+.estado-pastillas .freshness.stale,
+.estado-pastillas .freshness.cobrar{
+  color:var(--tx);border-color:var(--line);background:var(--pan2);
 }
 
-/* ---------- LA BARRA EN EL MÓVIL ----------
-   En un teléfono la barra lateral de 190px se comía media
-   pantalla. Por debajo de 760px pasa a ser una tira de arriba
-   que se desliza de lado: todas las pestañas siguen a mano. */
-@media (max-width:760px){
-  #root{flex-direction:column}
-  nav.sidebar{
-    width:100%;flex:none;min-height:0;
-    position:sticky;top:0;z-index:20;
-    display:flex;gap:4px;align-items:center;
-    padding:8px 10px;overflow-x:auto;
-    border-right:0;border-bottom:1px solid var(--line);
-    -webkit-overflow-scrolling:touch;
-  }
-  nav.sidebar .brand{margin:0 6px 0 0;padding:0}
-  nav.sidebar .brand > div:not(.blogo){display:none}
-  nav.sidebar button{width:auto;flex:0 0 auto;padding:9px 11px}
-  nav.sidebar .sidebar-foot{display:none}
-  main{padding:12px 16px}
+/* El selector «Móvil / PC», en la barra de arriba. */
+.disposicion{
+  margin-left:auto;display:inline-flex;align-items:center;gap:2px;
+  border:1px solid var(--line);border-radius:99px;padding:2px;background:var(--pan2);
 }
+.disposicion button{
+  display:inline-flex;align-items:center;gap:4px;
+  border:0;border-radius:99px;background:transparent;color:var(--dim);
+  font:600 11.5px/1 inherit;padding:6px 10px;cursor:pointer;
+}
+.disposicion button.on{background:rgba(34,197,94,.16);color:var(--acc)}
+.disposicion-modo{font-size:9.5px;color:var(--dim);padding:0 7px 0 3px;letter-spacing:.04em}
+
+/* ============================================================
+   CERO SCROLL LATERAL (29/09/2026)
+   ------------------------------------------------------------
+   Las columnas de las rejillas eran `1fr`, que no baja de lo que
+   mide su contenido: el campo y la clasificación empujaban la
+   página hacia la derecha. Con `minmax(0,1fr)` la columna manda
+   y lo que no quepa se recoge DENTRO de su panel, nunca en la
+   página.
+   ============================================================ */
+@media(max-width:1150px){.g23,.g21,.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.grid>*,.stack>*{min-width:0}
+.pan{min-width:0;overflow-x:auto}
+
+/* En PC, INICIO pone el campo y la columna de la derecha lado a
+   lado solo si caben la tabla entera de la clasificación; si no,
+   uno debajo del otro. */
+@media(max-width:1500px){.g23{grid-template-columns:minmax(0,1fr)}}
+
+/* La tabla de la clasificación: en móvil, cuatro columnas
+   (puesto, mánager, puntos, caja). El resto sale al tocar la
+   fila. En PC la tabla va entera y el detalle no existe. */
+.clasif tbody tr.clasif-fila{cursor:default}
+.clasif-detalle{display:none}
+.clasif-toca{display:none}
+
+/* ============================================================
+   EL DISEÑO DE MÓVIL (29/09/2026)
+   ------------------------------------------------------------
+   Cuelga de <html data-layout="movil">, que pone el selector
+   «Móvil / PC» (o el ancho, en automático). No de una media
+   query: así, forzado, manda también en el ordenador.
+   ============================================================ */
+
+/* La barra lateral de 190 px se comía media pantalla: en móvil
+   es una tira de arriba que se desliza de lado. */
+[data-layout="movil"] #root{flex-direction:column;max-width:520px;margin:0 auto}
+[data-layout="movil"] nav.sidebar{
+  width:100%;flex:none;min-height:0;
+  position:sticky;top:0;z-index:20;
+  display:flex;gap:4px;align-items:center;
+  padding:8px 10px;overflow-x:auto;
+  border-right:0;border-bottom:1px solid var(--line);
+  -webkit-overflow-scrolling:touch;
+}
+[data-layout="movil"] nav.sidebar .brand{margin:0 6px 0 0;padding:0}
+[data-layout="movil"] nav.sidebar .brand > div:not(.blogo){display:none}
+[data-layout="movil"] nav.sidebar button{width:auto;flex:0 0 auto;padding:9px 11px}
+[data-layout="movil"] nav.sidebar .sidebar-foot{display:none}
+[data-layout="movil"] main{padding:12px 16px;width:100%}
+[data-layout="movil"] .g23,
+[data-layout="movil"] .g21,
+[data-layout="movil"] .g3,
+[data-layout="movil"] .g2{grid-template-columns:minmax(0,1fr)}
+[data-layout="movil"] .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* El campo, a escala: las fichas se estrechan y lo que no se lee
+   a ese tamaño (escudo, valor de la semana) se esconde. */
+[data-layout="movil"] .pitch{min-height:0;padding:16px 5px;gap:10px}
+[data-layout="movil"] .pline{gap:3px}
+[data-layout="movil"] .pcard{padding:5px 3px;border-width:1px;border-radius:7px}
+[data-layout="movil"] .pface{width:32px;height:32px}
+[data-layout="movil"] .pface.ini{font-size:12px}
+[data-layout="movil"] .pcrest,
+[data-layout="movil"] .pev,
+[data-layout="movil"] .pteam{display:none}
+[data-layout="movil"] .pname{font-size:10.5px}
+[data-layout="movil"] .phier .pill{font-size:6.5px;padding:1px 3px}
+[data-layout="movil"] .prow{font-size:8.5px}
+[data-layout="movil"] .pfoot{font-size:8.5px}
+
+/* La clasificación, a cuatro columnas y la fila que se despliega. */
+[data-layout="movil"] .clasif .extra{display:none}
+[data-layout="movil"] .clasif tbody tr.clasif-fila{cursor:pointer}
+[data-layout="movil"] .clasif-toca{display:inline;color:var(--dim);font-size:10px;margin-left:4px}
+[data-layout="movil"] .clasif-detalle.abierta{display:table-row}
+.clasif-detalle td{background:var(--pan2)}
+.clasif-datos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;padding:4px 2px}
+.clasif-datos div{display:flex;justify-content:space-between;gap:6px;font-size:12px}
+.clasif-datos span{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+
+[data-layout="movil"] .tablon-lista li{grid-template-columns:76px 16px 1fr;gap:6px;font-size:14px;padding:7px 4px}
+[data-layout="movil"] .page-head h1{font-size:13px}

@@ -65,10 +65,12 @@ LECTOR = RAIZ / "dashboard-v8" / "src" / "lib" / "status.js"
 #     Si añades una aqui, escribe POR QUE. El dia que alguien
 #     borre el motivo, esta lista vuelve a ser un cajon.
 NO_SE_PINTAN = {
-    # El tablon del dia (29/09/2026). Lo pinta INICIO en la rama
-    # `panel/portada-del-dueno`, que recoge `tablon` en status.js;
-    # al fusionarla, esta linea se quita.
-    "tablon": "lo pinta la rama panel/portada-del-dueno; quitar al fusionar",
+    # POSIBLES CAMBIOS (29/09/2026). El dueño pidio quitar el
+    # panel de INICIO y se borro el componente. El bloque se sigue
+    # publicando -lo monta el motor del once y lo vigila
+    # `test_el_ciclo_publica_v1`-, pero ya no hay cuadro que lo
+    # enseñe: se mira en el JSON.
+    "posibles_cambios": "panel quitado de INICIO por el dueño el 29/09; se mira en el JSON",
 
     # El libro de aciertos de la valoracion y la foto de cada
     # jornada (23/09/2026). Es un cuaderno: lo que se publica es si
