@@ -148,6 +148,16 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
    ya hace parte (doctrina 84: frena lo que baja, deja pasar lo plano). Rama,
    verja, paso 0 con --con, ENSAYO con cada uno, y se enciende primero la
    COMPRA; la VENTA en otra rafaga. Detalle en docs/LABORATORIO.md (E1).
+3-ter. **PARA LA RAFAGA DE LAS 14:15 DEL 29/09: la guardia de las noticias
+   (E4 del laboratorio).** «No se puja por quien tenga una noticia de BAJA
+   en FutbolFantasy en las ultimas 72 h.» n=180, -2,5 % a 3 dias; entre los
+   que suben (la rampa), -3,7 % (n=50). Detalle y codigo de medida en
+   lab/noticias/ y docs/LABORATORIO.md (E4). Interruptor apagado, guardia,
+   verja, paso 0, ensayo, encender, canario. Tambien: la orden del gestor
+   (config/la_orden_del_gestor.json) esta viva hasta el 09/10: puja por
+   Roberto, venta para pagarlo, Jutgla ultimo recurso; no tocarla sin
+   leerla.
+
 3-bis. **LO SIGUIENTE DE VERDAD (decidido 29/09 09:30 por el gestor, tras
    la queja del dueno «solo ficha defensas»): LA HUCHA PARA EL ONCE.**
    Medido: 32 de las 55 pujas ganadas son defensas, porque con 1-3 M solo
