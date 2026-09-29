@@ -173,6 +173,19 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_COBRA_LA_RACHA: "1"
 
+      # Encendido 29/09 de Madrid. LA ORDEN DEL GESTOR.
+      #
+      #   Ejecuta config/la_orden_del_gestor.json y nada mas: pujar
+      #   8.950.000 por Roberto Fernandez (59 pts en 7 jornadas, 8.o de
+      #   547), no pujar por Lejeune, y con Roberto dentro vender al
+      #   Computer (con suelo) a Jutgla, Antonio Blanco, Maffeo y Zubeldia
+      #   para volver a saldo >= 0 antes de la J8. Protege a Yamal y a
+      #   Roberto: no se pueden publicar. Caduca el 09/10 15:00.
+      #
+      #   Verja 196/196; paso 0 con 36; ensayo #36542542273 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_ORDEN_DEL_GESTOR: "1"
+
       # Encendido 24/09. EL ONCE SE BUSCA UNA VEZ, NO NOVECIENTAS.
       #
       #   NO CAMBIA NINGUNA DECISION. Es memoria, no criterio: recuerda la
