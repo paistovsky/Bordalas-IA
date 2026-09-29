@@ -195,6 +195,18 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_REVISA_LAS_PUJAS_VIVAS: "1"
 
+      # Encendido 29/09 22:20 de Madrid. LA REJA CON TOLERANCIA.
+      #
+      #   Biwenger reemite en el tablon los bloques de ventas al Computer
+      #   con fecha nueva (Lunin, 420.200, el 18/09 a las 06:53 y 07:03).
+      #   Sin tolerancia se contaban dos veces: la caja de Pepe salia
+      #   420.200 de mas y la de los rivales no valia (MUERTO). Con ella:
+      #   418/438 lecturas del saldo cuadran al euro (las 20 restantes son
+      #   lecturas en mitad del reset, cuadran en la siguiente); Luismi
+      #   baja 13,3 M. Verja 198/198 con el; paso 0 con 37; ensayo
+      #   #36624537781 verde. Si la vuelta siguiente sale roja, se quita.
+      BORDALAS_REJA_CON_TOLERANCIA: "1"
+
       # Encendido 24/09. EL ONCE SE BUSCA UNA VEZ, NO NOVECIENTAS.
       #
       #   NO CAMBIA NINGUNA DECISION. Es memoria, no criterio: recuerda la
