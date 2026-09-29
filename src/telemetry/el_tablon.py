@@ -178,3 +178,61 @@ def el_tablon_de_hoy(
         salida["error"] = f"{type(error).__name__}: {error}"
 
     return salida
+
+
+# ============================================================
+# LAS REGLAS ENCENDIDAS, EN UNA LINEA CADA UNA (30/09/2026)
+# ============================================================
+#
+#     Para la pagina ESTRATEGIA del panel: que interruptores de
+#     produccion estan encendidos (leidos del YAML de produccion, no de
+#     una copia) y que hace cada uno, en palabras del dueno. Uno sin
+#     frase sale con su nombre tecnico: nunca se esconde.
+
+QUE_HACE = {
+    "BORDALAS_COBRA_LA_RACHA":
+        "Cobra solo los 250.000 € de la racha diaria cuando llega a 5.",
+    "BORDALAS_COMPRA_SOLO_SI_SUBE":
+        "Para revender, solo compra jugadores cuyo precio está subiendo.",
+    "BORDALAS_EL_ONCE_UNA_VEZ":
+        "Calcula el mejor once una vez por vuelta y lo recuerda (más rápido).",
+    "BORDALAS_JORNADAS_POR_SU_FECHA":
+        "Cuenta las jornadas por la fecha de los partidos, no por Biwenger.",
+    "BORDALAS_LA_MONEDA_DE_LA_LIGA":
+        "Usa el dinero real de la liga (saldo y reparto) en sus cuentas.",
+    "BORDALAS_LA_ORDEN_DEL_GESTOR":
+        "Cumple las órdenes concretas del gestor (hoy: ir a por Roberto "
+        "Fernández y vender para pagarlo, sin tocar el once).",
+    "BORDALAS_REJA_CON_TOLERANCIA":
+        "No cuenta dos veces las ventas que Biwenger repite en el tablón "
+        "(así la caja de los rivales cuadra).",
+    "BORDALAS_REVENTA_SOLO_SI_JUEGA":
+        "En la subasta de las 07:00 solo compra para revender a quien va a jugar.",
+    "BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL":
+        "Durante el día, lo mismo: solo compra para revender a quien va a jugar.",
+    "BORDALAS_REVISA_LAS_PUJAS_VIVAS":
+        "Antes de las 07:00 retira las pujas por jugadores que se han lesionado.",
+    "BORDALAS_SOLVENCIA_POR_SU_PLAZO":
+        "Vigila que el saldo esté en positivo antes de que empiece la jornada.",
+}
+
+
+def las_reglas_encendidas() -> dict:
+    """`{"ok", "reglas": [{"nombre", "que_hace"}], "n"}`. Nunca lanza."""
+
+    try:
+        from src.analysis.los_interruptores_de_produccion import (
+            los_de_produccion,
+        )
+
+        prod = los_de_produccion()
+        reglas = [
+            {"nombre": n, "que_hace": QUE_HACE.get(n) or n}
+            for n in prod.get("interruptores") or []
+            if n != "BORDALAS_ENSAYO"
+        ]
+        return {"ok": bool(prod.get("ok")), "reglas": reglas, "n": len(reglas)}
+
+    except Exception as error:                      # noqa: BLE001
+        return {"ok": False, "reglas": [], "n": 0,
+                "error": f"{type(error).__name__}: {error}"}

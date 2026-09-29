@@ -65,6 +65,12 @@ LECTOR = RAIZ / "dashboard-v8" / "src" / "lib" / "status.js"
 #     Si añades una aqui, escribe POR QUE. El dia que alguien
 #     borre el motivo, esta lista vuelve a ser un cajon.
 NO_SE_PINTAN = {
+    # La semana del tablon y las reglas encendidas (30/09/2026). Las
+    # pintan LIGA y ESTRATEGIA en la rama `panel/reglas-y-semana`;
+    # al fusionarla, estas dos lineas se quitan.
+    "tablon_semana": "lo pinta la rama panel/reglas-y-semana; quitar al fusionar",
+    "reglas": "lo pinta la rama panel/reglas-y-semana; quitar al fusionar",
+
     # POSIBLES CAMBIOS (29/09/2026). El dueño pidio quitar el
     # panel de INICIO y se borro el componente. El bloque se sigue
     # publicando -lo monta el motor del once y lo vigila

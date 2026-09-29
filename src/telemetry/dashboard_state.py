@@ -3572,7 +3572,17 @@ def _saldo_fresco(market_status: dict | None):
     return None
 
 
-def _el_tablon_del_dia(snapshot) -> dict:
+def _las_reglas_encendidas() -> dict:
+    try:
+        from src.telemetry.el_tablon import las_reglas_encendidas
+
+        return las_reglas_encendidas()
+    except Exception as error:                      # noqa: BLE001
+        return {"ok": False, "reglas": [], "n": 0,
+                "error": f"{type(error).__name__}: {error}"}
+
+
+def _el_tablon_del_dia(snapshot, horas: int = 24) -> dict:
     """
     El tablon de la liga de las ultimas 24 h, en frases (29/09/2026).
     Lo pidio el dueno: «lo que pone en el tablon del dia en Biwenger».
@@ -3592,7 +3602,7 @@ def _el_tablon_del_dia(snapshot) -> dict:
             for pid, ficha in _catalogo_por_id(snapshot).items()
             if isinstance(ficha, dict)
         }
-        return el_tablon_de_hoy(eventos, nombres)
+        return el_tablon_de_hoy(eventos, nombres, horas=horas)
 
     except Exception as error:                      # noqa: BLE001
         return {"lineas": [], "n": 0, "error": f"{type(error).__name__}: {error}"}
@@ -6707,6 +6717,11 @@ def build_dashboard_state() -> dict:
         # una a ojo daria una nota inventada.
         # EL TABLON DEL DIA (29/09/2026), en frases, para Inicio.
         "tablon": _el_tablon_del_dia(snapshot),
+
+        # LA SEMANA DEL TABLON Y LAS REGLAS ENCENDIDAS (30/09/2026),
+        # para LIGA (lo que movio cada rival) y ESTRATEGIA.
+        "tablon_semana": _el_tablon_del_dia(snapshot, horas=168),
+        "reglas": _las_reglas_encendidas(),
 
         "marcador": {
             **(marcador_estado or {}),

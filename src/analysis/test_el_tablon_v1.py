@@ -70,7 +70,26 @@ def test_con_basura_no_lanza() -> None:
         assert isinstance(t["lineas"], list), t
 
 
-TESTS = [test_frases_y_orden, test_con_basura_no_lanza]
+def test_las_reglas_encendidas() -> None:
+    from src.telemetry.el_tablon import QUE_HACE, las_reglas_encendidas
+    from src.analysis.los_interruptores_de_produccion import los_de_produccion
+
+    r = las_reglas_encendidas()
+    prod = los_de_produccion()["interruptores"]
+    assert r["ok"] and r["n"] == len(prod), r
+    sin_frase = [x for x in prod if x not in QUE_HACE]
+    assert not sin_frase, (
+        f"interruptores encendidos sin frase para el dueno: {sin_frase}"
+    )
+
+
+def test_la_semana() -> None:
+    t = el_tablon_de_hoy(EVENTOS, {1: "Moleiro"}, ahora=AHORA, horas=168)
+    assert any("Viejo" in l["texto"] for l in t["lineas"]), t
+
+
+TESTS = [test_frases_y_orden, test_con_basura_no_lanza,
+         test_las_reglas_encendidas, test_la_semana]
 
 
 def main() -> None:
