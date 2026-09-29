@@ -88,7 +88,13 @@ TABLAS_DE_ALARMA = [
     ("SolvencyClockPanel.jsx", "TONO"),
     ("ScoutPanel.jsx", "DIRECCION"),
     ("ScoutPanel.jsx", "ACUERDO"),
-    ("PosiblesCambiosPanel.jsx", "TONO"),
+    # POSIBLES CAMBIOS salio de INICIO y se borro el 29/09/2026
+    # (encargo del dueño). Su sitio en esta lista lo ocupa otra
+    # tabla que tambien pinta una alarma y pasa por `tonoDe`: la
+    # compuerta que frena una compra en el detalle de objetivos.
+    # Si cae a lo benigno, un freno desconocido se veria como un
+    # "adelante".
+    ("TargetsDetailPanel.jsx", "COMPUERTA"),
 ]
 
 # Lo que NO puede ir detras de un `||` cuando se traduce una

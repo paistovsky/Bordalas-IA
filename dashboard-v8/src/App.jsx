@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import KpiStrip from "./components/KpiStrip";
+import SelectorDisposicion from "./components/SelectorDisposicion";
+import { useDisposicion } from "./lib/disposicion";
 import HomePage from "./pages/HomePage";
 import MarketPage from "./pages/MarketPage";
 import BrainPage from "./pages/BrainPage";
@@ -78,6 +80,10 @@ export default function App() {
     return () => clearInterval(t);
   }, []);
 
+  // MÓVIL O PC. También arriba, con los demás hooks: el selector
+  // se ve y se recuerda aunque todavía no hayan llegado los datos.
+  const disposicion = useDisposicion();
+
   if (error && !data) {
     return <div className="screen err">NO SE PUDO CARGAR BORDALÁS IA · {error}</div>;
   }
@@ -128,6 +134,66 @@ export default function App() {
   const rancio =
     edad != null && cicloMin != null && edad > cicloMin * 1.5;
 
+  /* UNA LÍNEA DE ESTADO EN VEZ DE UNA PARED DE AVISOS (29/09/2026)
+
+     El dueño: «no quiero tantos avisos amarillos y rojos». Arriba
+     había hasta nueve franjas de colores. Ahora hay UNA línea: un
+     punto y una frase («Todo al día», «Datos de hace 3 h», «Hay 2
+     avisos»). Al tocarla se despliega el detalle, que es el mismo
+     de antes, palabra por palabra: no se ha borrado ningún aviso,
+     se ha plegado.
+
+     Rojo SOLO si Pepe está parado: la última vuelta tiene más de
+     tres horas. Lo demás es ámbar o verde. Si todo es rojo, el
+     rojo no significa nada. */
+  const racha5 =
+    data.meta?.daily_streak != null && Number(data.meta.daily_streak) >= 5;
+
+  const avisos = [
+    data.alarmaDeLosSentidos?.hay,
+    !!error,
+    rancio && !error,
+    !!fueraDeHora,
+    page === "market" && data.rendija?.sin_listar && data.rendija.sin_listar.ok === false,
+    data.rivalIntel?.cash_check?.ok === false,
+    data.lineup?.live?.known && data.lineup.live.matches === false,
+    data.lineup?.live?.known === false,
+    data.consistency?.available && !data.consistency.ok,
+    data.lineup?.starter_data_total > 0 && !data.lineup?.starter_data_ok,
+    racha5
+  ].filter(Boolean).length;
+
+  const parado = minutosFoto != null && minutosFoto > 180;
+  const viejo = rancio || !!ciclo.lateMinutes;
+
+  const haceTexto =
+    minutosFoto == null
+      ? ago(data.meta.generated_at)
+      : minutosFoto < 60
+      ? `hace ${minutosFoto} min`
+      : minutosFoto < 48 * 60
+      ? `hace ${Math.floor(minutosFoto / 60)} h`
+      : `hace ${Math.floor(minutosFoto / 1440)} días`;
+
+  const estadoTono = parado ? "parado" : viejo || avisos ? "aviso" : "ok";
+
+  const estadoFrase = [
+    parado
+      ? `Pepe parado: última vuelta ${haceTexto}`
+      : viejo
+      ? `Datos de ${haceTexto}`
+      : avisos
+      ? null
+      : "Todo al día",
+    avisos
+      ? avisos === 1
+        ? "Hay 1 aviso"
+        : `Hay ${avisos} avisos`
+      : null
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <>
       <Sidebar page={page} setPage={setPage} data={data} />
@@ -138,6 +204,18 @@ export default function App() {
           <span className="tag">
             JORNADA {data.summary.target_matchday ?? "—"}
           </span>
+          <SelectorDisposicion {...disposicion} />
+        </div>
+
+        <details className={`estado ${estadoTono}`}>
+          <summary>
+            <span className="estado-punto" aria-hidden="true" />
+            {estadoFrase}
+            <span className="estado-mas">detalle</span>
+          </summary>
+
+          <div className="estado-detalle">
+            <div className="estado-pastillas">
           <span
             className={
               ciclo.lateMinutes
@@ -191,7 +269,7 @@ export default function App() {
               ? `● RACHA 5/5 · CANJEA 250.000`
               : `● RACHA ${data.meta.daily_streak}/5`}
           </span>
-        </div>
+            </div>
 
         {/* UN SENTIDO CADUCADO SE GRITA (14/09/2026)
 
@@ -430,6 +508,12 @@ export default function App() {
             </div>
           </div>
         )}
+
+            {!avisos && (
+              <p className="estado-nada">No hay ningún aviso.</p>
+            )}
+          </div>
+        </details>
 
         <KpiStrip data={data} />
 

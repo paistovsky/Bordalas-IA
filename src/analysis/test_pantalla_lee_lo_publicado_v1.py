@@ -59,14 +59,14 @@ CADENAS = [
         "RendijaPanel",
         ["AuditPage.jsx"],
     ),
-    (
-        # POSIBLES CAMBIOS (10/09/2026). El banquillo con el
-        # motivo que dio el motor al descartarlo.
-        "posibles_cambios",
-        "posiblesCambios",
-        "PosiblesCambiosPanel",
-        ["HomePage.jsx"],
-    ),
+    # POSIBLES CAMBIOS (10/09/2026) estaba aqui, montado en
+    # INICIO. El 29/09/2026 el dueño pidio quitarlo: se borro el
+    # componente y el normalizador ya no copia la clave, que queda
+    # en `NO_SE_PINTAN` de `test_la_lista_blanca_v1` con su motivo.
+    # En su lugar INICIO lleva EL TABLON DE HOY, que tiene su
+    # propia guardia abajo porque no sigue el patron de estas
+    # cadenas: sin la clave NO se pinta (lo pidio asi el dueño),
+    # en vez de decir "no hay dato".
     (
         "bid_outcomes",
         "bidOutcomes",
@@ -1120,6 +1120,56 @@ def test_el_arbitro_enseña_los_dias_y_las_ventas() -> None:
     )
 
 
+def test_el_tablon_llega_a_inicio_arriba_del_todo() -> None:
+    """
+    EL TABLON DE HOY (29/09/2026)
+
+        Lo que ha pasado en la liga en las ultimas 24 horas, en
+        frases. Mismo ultimo metro que las demas cadenas: se
+        publica, el normalizador lo copia, un componente lo lee y
+        una pagina viva lo monta. Y ademas, como lo pidio el
+        dueño:
+
+        - va ARRIBA del todo en INICIO, antes que el once;
+        - sin la clave no se pinta (no es "no ha pasado nada");
+        - con cero lineas lo dice con una frase, no con un hueco.
+    """
+
+    assert '"tablon":' in _lee(ESTADO), "`tablon` no se publica"
+
+    normalizador = _lee(NORMALIZADOR)
+
+    assert "raw.tablon" in normalizador, (
+        "el normalizador no lee `raw.tablon`: la pantalla no lo ve"
+    )
+    assert re.search(r"\btablon\s*:", normalizador), (
+        "el normalizador no expone `tablon`"
+    )
+
+    panel = _lee(DASHBOARD / "components" / "TablonPanel.jsx")
+
+    assert "data.tablon" in panel, "TablonPanel no lee `data.tablon`"
+    assert "return null" in panel, (
+        "sin la clave el tablon tiene que desaparecer, no inventar"
+    )
+    assert "Hoy no ha pasado nada en el tablón." in panel, (
+        "con cero lineas el tablon se queda en blanco sin decirlo"
+    )
+
+    inicio = _lee(DASHBOARD / "pages" / "HomePage.jsx")
+
+    assert "import TablonPanel" in inicio and "<TablonPanel" in inicio, (
+        "INICIO no monta el tablon"
+    )
+    assert inicio.index("<TablonPanel") < inicio.index("<PitchXI"), (
+        "el tablon tiene que ir arriba del todo, antes que el once"
+    )
+    assert "HomePage.jsx" in {
+        f"{n}.jsx"
+        for n in re.findall(r'from "\./pages/(\w+)"', _lee(DASHBOARD / "App.jsx"))
+    }, "INICIO no esta enrutada"
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -1153,6 +1203,7 @@ TESTS = [
     test_el_arbitro_enseña_los_dias_y_las_ventas,
     test_el_ritmo_neto_de_la_plantilla_se_ve,
     test_ningun_panel_nuevo_decide_nada,
+    test_el_tablon_llega_a_inicio_arriba_del_todo,
 ]
 
 

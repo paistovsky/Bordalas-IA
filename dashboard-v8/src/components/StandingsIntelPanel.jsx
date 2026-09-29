@@ -1,3 +1,4 @@
+import { Fragment, useState } from "react";
 import { formatMoney } from "../lib/utils";
 import { tonoDe } from "../lib/tono";
 
@@ -63,6 +64,10 @@ export default function StandingsIntelPanel({ data }) {
   const managers = data.rivalIntel?.managers || [];
   const calibration = data.rivalIntel?.maximum_bid_calibration || {};
 
+  // MÓVIL: la fila que se ha tocado enseña debajo las columnas
+  // que no caben (29/09/2026). En PC la tabla va entera.
+  const [abierta, setAbierta] = useState(null);
+
   const byName = new Map(rivals.map((rival) => [rival.name, rival]));
   const intelByName = new Map(managers.map((manager) => [manager.name, manager]));
 
@@ -80,19 +85,19 @@ export default function StandingsIntelPanel({ data }) {
         )}
       </div>
 
-      <table>
+      <table className="clasif">
         <thead>
           <tr>
             <th>#</th>
             <th>MÁNAGER</th>
             <th className="n">PTS</th>
             <th className="n">CAJA</th>
-            <th className="n">PLANTILLA</th>
-            <th className="n">PATRIMONIO</th>
-            <th className="n">TOPE</th>
-            <th className="n">PUJA</th>
-            <th className="n">MÁX. VISTO</th>
-            <th className="n">AMENAZA</th>
+            <th className="n extra">PLANTILLA</th>
+            <th className="n extra">PATRIMONIO</th>
+            <th className="n extra">TOPE</th>
+            <th className="n extra">PUJA</th>
+            <th className="n extra">MÁX. VISTO</th>
+            <th className="n extra">AMENAZA</th>
           </tr>
         </thead>
         <tbody>
@@ -107,13 +112,22 @@ export default function StandingsIntelPanel({ data }) {
                 : null;
 
             return (
-              <tr key={row.user_id} className={row.is_current_user ? "me" : ""}>
+              <Fragment key={row.user_id}>
+              <tr
+                className={`clasif-fila ${row.is_current_user ? "me" : ""}`}
+                onClick={() =>
+                  setAbierta(abierta === row.user_id ? null : row.user_id)
+                }
+              >
                 <td className="dim">{row.rank}º</td>
                 <td>
                   {row.name}
                   {row.is_current_user && (
                     <span className="pill me" style={{ marginLeft: 6 }}>TÚ</span>
                   )}
+                  <span className="clasif-toca">
+                    {abierta === row.user_id ? "▴" : "▾"}
+                  </span>
                 </td>
                 <td className="n">{row.points}</td>
                 {/* LA CAJA YA LLEVA LOS ABONOS DENTRO
@@ -140,7 +154,7 @@ export default function StandingsIntelPanel({ data }) {
                     hoy, pero no quien es rico: un manager con la
                     caja a cero y 60 M en jugadores no es pobre,
                     es liquido cuando quiere. */}
-                <td className="n dim" title={
+                <td className="n dim extra" title={
                   intel?.roster_count != null
                     ? `${intel.roster_count} jugadores`
                     : undefined
@@ -150,14 +164,14 @@ export default function StandingsIntelPanel({ data }) {
                     : "—"}
                 </td>
 
-                <td className="n strong">
+                <td className="n strong extra">
                   {intel?.net_worth != null
                     ? formatMoney(intel.net_worth)
                     : "—"}
                 </td>
 
-                <td className="n">{cap != null ? formatMoney(cap) : "—"}</td>
-                <td className="n">
+                <td className="n extra">{cap != null ? formatMoney(cap) : "—"}</td>
+                <td className="n extra">
                   {rival?.never_bids ? (
                     <span className="pill idle">NUNCA</span>
                   ) : percent != null ? (
@@ -176,7 +190,7 @@ export default function StandingsIntelPanel({ data }) {
                 {/* Lo mas alto que se le ha visto pagar de
                     verdad. El tope dice lo que PODRIA; esto dice
                     hasta donde ha llegado. */}
-                <td className="n dim" title={
+                <td className="n dim extra" title={
                   intel?.lost_bids != null
                     ? `${intel.lost_bids} puja(s) perdida(s) registradas`
                     : undefined
@@ -186,7 +200,7 @@ export default function StandingsIntelPanel({ data }) {
                     : "—"}
                 </td>
 
-                <td className="n">
+                <td className="n extra">
                   {intel?.threat_level ? (
                     <span
                       className={
@@ -203,6 +217,49 @@ export default function StandingsIntelPanel({ data }) {
                   )}
                 </td>
               </tr>
+
+              {/* Lo que no cabe en el móvil, al tocar la fila. */}
+              <tr
+                className={`clasif-detalle ${
+                  abierta === row.user_id ? "abierta" : ""
+                }`}
+              >
+                <td colSpan={4}>
+                  <div className="clasif-datos">
+                    <div>
+                      <span>Plantilla</span>
+                      {intel?.roster_value ? formatMoney(intel.roster_value) : "—"}
+                    </div>
+                    <div>
+                      <span>Patrimonio</span>
+                      <b>{intel?.net_worth != null ? formatMoney(intel.net_worth) : "—"}</b>
+                    </div>
+                    <div>
+                      <span>Tope</span>
+                      {cap != null ? formatMoney(cap) : "—"}
+                    </div>
+                    <div>
+                      <span>Puja</span>
+                      {rival?.never_bids ? "nunca" : percent != null ? `${percent}%` : "—"}
+                    </div>
+                    <div>
+                      <span>Máx. visto</span>
+                      {intel?.max_observed_bid ? formatMoney(intel.max_observed_bid) : "—"}
+                    </div>
+                    <div>
+                      <span>Amenaza</span>
+                      {intel?.threat_level
+                        ? `${intel.threat_level}${
+                            intel.threat_score != null
+                              ? ` ${Math.round(Number(intel.threat_score))}`
+                              : ""
+                          }`
+                        : "—"}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              </Fragment>
             );
           })}
         </tbody>

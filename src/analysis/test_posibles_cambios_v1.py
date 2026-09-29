@@ -333,24 +333,40 @@ def _lee(ruta: Path) -> str:
     return ruta.read_text(encoding="utf-8")
 
 
-def test_inicio_tiene_los_cuatro_paneles_y_solo_esos() -> None:
+def test_inicio_tiene_el_tablon_y_cuatro_paneles_y_solo_esos() -> None:
     """
     El encargo del 10/09 fue explicito: la tira y cuatro paneles.
     Esta guardia existe porque la portada ya se lleno una vez, y
     se vuelve a llenar sola en cuanto nadie mira.
+
+    29/09/2026, encargo del dueño: arriba del todo EL TABLON DE
+    HOY, y fuera POSIBLES CAMBIOS. Siguen siendo cuatro paneles
+    debajo del tablon; lo que sale no puede volver a colarse.
     """
 
     fuente = _lee(DASHBOARD / "pages" / "HomePage.jsx")
 
     for panel in (
+        "TablonPanel",
         "PitchXI",
         "StandingsIntelPanel",
+        "PujasVivasPanel",
         "TimelinePanel",
-        "PosiblesCambiosPanel",
     ):
         assert f"<{panel}" in fuente, (
             f"{panel} no esta montado en Inicio"
         )
+
+    # El tablon, lo primero.
+    assert fuente.index("<TablonPanel") < fuente.index("<PitchXI"), (
+        "el tablon tiene que ir arriba del todo en Inicio"
+    )
+
+    # Lo que el dueño quito el 29/09 no vuelve por la puerta de
+    # atras.
+    assert "PosiblesCambiosPanel" not in fuente.split("*/", 1)[-1], (
+        "POSIBLES CAMBIOS ha vuelto a Inicio y el dueño lo quito"
+    )
 
     # Los que bajaron a Auditoria. Nada se borro: se movio.
     for panel in (
@@ -559,21 +575,33 @@ def test_sin_dato_de_titularidad_no_se_pinta_un_cero() -> None:
     """
     Pintar "tit. 0 %" cuando la fuente externa falla hace creer
     que el jugador no juega, que es lo contrario de "no se sabe".
-    Es la misma regla que ya rige en las tarjetas del once.
+
+    El panel de POSIBLES CAMBIOS se borro el 29/09/2026 (encargo
+    del dueño). La regla sigue valiendo para las tarjetas del
+    once, que son las que hoy pintan el tit. %, y para el panel
+    si algun dia vuelve.
     """
 
-    fuente = _lee(
-        DASHBOARD / "components" / "PosiblesCambiosPanel.jsx"
-    )
+    fichas = [DASHBOARD / "components" / "PitchXI.jsx"]
 
-    assert "sin dato" in fuente, (
-        "el panel no distingue 'no se sabe' de un 0 %"
-    )
+    panel = DASHBOARD / "components" / "PosiblesCambiosPanel.jsx"
 
-    assert "jp_confidence" in fuente, (
-        "el panel no usa la misma cadena de titularidad que el "
-        "once: dos numeros distintos para el mismo jugador"
-    )
+    if panel.exists():
+        fichas.append(panel)
+
+    for ruta in fichas:
+
+        fuente = _lee(ruta)
+
+        assert "sin dato" in fuente, (
+            f"{ruta.name} no distingue 'no se sabe' de un 0 %"
+        )
+
+        assert "jp_confidence" in fuente, (
+            f"{ruta.name} no usa la misma cadena de titularidad "
+            f"que el resto: dos numeros distintos para el mismo "
+            f"jugador"
+        )
 
 
 def test_la_deuda_maxima_ensena_su_desglose() -> None:
@@ -604,7 +632,7 @@ TESTS = [
     test_el_que_esta_mas_cerca_de_entrar_sale_primero,
     test_ningun_titular_aparece_como_suplente,
     test_sin_once_no_se_inventa_una_comparacion,
-    test_inicio_tiene_los_cuatro_paneles_y_solo_esos,
+    test_inicio_tiene_el_tablon_y_cuatro_paneles_y_solo_esos,
     test_la_amenaza_mas_alta_sale_en_rojo,
     test_las_dos_cuentas_atras_corren_en_el_navegador,
     test_la_deuda_maxima_ensena_su_desglose,

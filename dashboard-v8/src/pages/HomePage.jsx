@@ -1,6 +1,6 @@
 import PitchXI from "../components/PitchXI";
-import PosiblesCambiosPanel from "../components/PosiblesCambiosPanel";
 import PujasVivasPanel from "../components/PujasVivasPanel";
+import TablonPanel from "../components/TablonPanel";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
 import TimelinePanel from "../components/TimelinePanel";
 import { formatMoney } from "../lib/utils";
@@ -14,7 +14,12 @@ import { formatMoney } from "../lib/utils";
  *   2. CLASIFICACION E INTELIGENCIA  como vamos y quien aprieta
  *   3. PUJAS EN VIVO              que esta en juego AHORA
  *   4. CRONOLOGIA DE BORDALAS     que hizo y que hara
- *   5. POSIBLES CAMBIOS           quien esta fuera, y por que
+ *
+ * EL TABLON ARRIBA, POSIBLES CAMBIOS FUERA (29/09/2026)
+ *
+ *   Encargo del dueño: arriba del todo, EL TABLON DE HOY -lo que
+ *   ha pasado en la liga en las ultimas 24 horas, en frases-, y
+ *   fuera el panel de POSIBLES CAMBIOS. El componente no se borra.
  *
  *   Las pujas en vivo van ENCIMA de la cronologia: lo primero
  *   que se lee tiene que ser lo que esta pasando ahora, no lo
@@ -51,6 +56,10 @@ export default function HomePage({ data }) {
 
   return (
     <>
+      {/* 0. QUÉ HA PASADO HOY EN LA LIGA. Si la telemetría no
+          publica `tablon`, no sale nada. */}
+      <TablonPanel data={data} />
+
       {/* 1. EL XI, y 2. cómo vamos, a su lado. */}
       <div className="grid g23">
         <section className="pan pan-pitch">
@@ -119,8 +128,6 @@ export default function HomePage({ data }) {
         </div>
       </div>
 
-      {/* 4. QUIÉN ESTÁ FUERA DEL XI, Y POR QUÉ. */}
-      <PosiblesCambiosPanel data={data} />
     </>
   );
 }
