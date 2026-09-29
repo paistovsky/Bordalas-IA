@@ -157,3 +157,104 @@ except Exception:                                   # noqa: BLE001
     # puede instalarse, no vigila — y la comprobacion estatica de
     # `test_verja_determinista_v1` sigue en pie.
     pass
+
+
+# ============================================================
+# LA VERJA NO SALE A LA RED (29/09/2026)
+# ============================================================
+#
+#     La regla «ninguna guardia sale a internet» existia y nada la
+#     hacia cumplir. El 28/09, correr la verja en local escribio
+#     311 lineas en `data/calendar/calendar_changes.jsonl`: alguna
+#     guardia llego, por codigo de produccion, a bajar el
+#     calendario de LaLiga. Una guardia que sale a la red depende
+#     de lo que diga internet ese dia: el mismo commit, verde por
+#     la manana y rojo por la tarde.
+#
+#     AQUI SI SE IMPIDE. A diferencia de `data/`, cortar la red no
+#     cambia lo que se mide: una guardia no deberia depender de
+#     ella nunca. Cada intento se corta con un `OSError` —que el
+#     codigo de produccion ya sabe tratar: sin red, no hay dato— y
+#     se apunta con su destino para que la verja diga quien fue.
+#
+#     La propia maquina (127.0.0.1, ::1, sockets de fichero) sigue
+#     abierta: eso no es internet.
+#
+#     Solo con `VERJA_SIN_RED=1`. No lleva `BORDALAS_` a proposito:
+#     no es un interruptor de Pepe y el paso 0 no debe encenderlo.
+
+MARCA_RED = "VIGILANTE-RED:"
+
+_SIN_RED = "VERJA_SIN_RED"
+
+
+def _cortar_la_red() -> None:
+
+    if str(os.environ.get(_SIN_RED, "")).strip() != "1":
+        return
+
+    import atexit
+    import socket
+    import sys
+
+    intentos = set()
+
+    LOCALES = {"127.0.0.1", "::1", "localhost", "0.0.0.0"}
+
+    def _es_fuera(direccion) -> bool:
+
+        # Sockets de fichero (AF_UNIX): una ruta, no una maquina.
+        if not isinstance(direccion, tuple) or not direccion:
+            return False
+
+        return str(direccion[0]) not in LOCALES
+
+    connect_real = socket.socket.connect
+
+    connect_ex_real = socket.socket.connect_ex
+
+    def _cortar(direccion):
+
+        intentos.add(f"{direccion[0]}:{direccion[1] if len(direccion) > 1 else '?'}")
+
+        raise OSError(
+            f"La verja no sale a la red ({direccion[0]}): una guardia "
+            f"no puede depender de internet."
+        )
+
+    def _connect(self, direccion):
+
+        if _es_fuera(direccion):
+            _cortar(direccion)
+
+        return connect_real(self, direccion)
+
+    def _connect_ex(self, direccion):
+
+        if _es_fuera(direccion):
+            _cortar(direccion)
+
+        return connect_ex_real(self, direccion)
+
+    socket.socket.connect = _connect
+
+    socket.socket.connect_ex = _connect_ex
+
+    def _al_salir() -> None:
+
+        for destino in sorted(intentos):
+
+            try:
+                sys.stderr.write(f"{MARCA_RED} {destino}\n")
+
+            except Exception:                       # noqa: BLE001
+                pass
+
+    atexit.register(_al_salir)
+
+
+try:
+    _cortar_la_red()
+
+except Exception:                                   # noqa: BLE001
+    pass

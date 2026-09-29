@@ -381,6 +381,7 @@ TESTS = [
     "src.analysis.test_el_once_que_jugo_v1",
     "src.analysis.test_el_cuaderno_v1",
     "src.analysis.test_la_regla_de_la_rampa_v1",
+    "src.analysis.test_la_verja_no_sale_a_la_red_v1",
     "src.analysis.test_el_orden_del_tiempo_v1",
     "src.analysis.test_el_vestuario_libre_v1",
     "src.analysis.test_los_libros_v1",
@@ -1122,6 +1123,22 @@ def main() -> int:
 
     entorno["BORDALAS_VIGILA_DATA"] = "1"
 
+    # LA VERJA NO SALE A LA RED (29/09/2026)
+    #
+    #     El mismo vigilante corta cualquier conexion fuera de la
+    #     maquina y apunta el destino. Sin el proxy de la consola:
+    #     con el, todo sale por 127.0.0.1 y el corte no veria nada.
+    #     En CI no hay proxy; asi la corrida de aqui es la de alli.
+    entorno["VERJA_SIN_RED"] = "1"
+
+    for _proxy in (
+        "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+        "http_proxy", "https_proxy", "all_proxy",
+    ):
+        entorno.pop(_proxy, None)
+
+    a_la_red = {}
+
     entorno["PYTHONPATH"] = os.pathsep.join(
         x
         for x in (
@@ -1210,6 +1227,17 @@ def main() -> int:
         #     una, cada una con su guardia propia y esa si roja.
         if abiertos:
             censadas[modulo] = abiertos
+
+        intentos_de_red = sorted(
+            {
+                linea.split("VIGILANTE-RED:", 1)[1].strip()
+                for linea in (proceso.stderr or "").splitlines()
+                if "VIGILANTE-RED:" in linea
+            }
+        )
+
+        if intentos_de_red:
+            a_la_red[modulo] = intentos_de_red
 
         corto = modulo.rsplit(".", 1)[-1]
 
@@ -1322,6 +1350,22 @@ def main() -> int:
     #     desactivando, y entonces no queda nada. Este no bloquea
     #     por las censadas — pero NO se calla: la deuda se ve en
     #     cada vuelta, con nombre y fichero, o deja de existir.
+    # QUIEN INTENTO SALIR A LA RED. La conexion ya se corto; esto
+    # solo dice quien lo intento, para arreglarlo una a una. Si una
+    # guardia DEPENDIA de la red, ya se habra puesto roja sola.
+    if a_la_red:
+        print()
+        print(
+            f"INTENTARON SALIR A LA RED (cortado): "
+            f"{len(a_la_red)} de {len(modulos)}"
+        )
+
+        for modulo in sorted(a_la_red):
+            print(
+                f"  {modulo.rsplit('.', 1)[-1]}: "
+                + ", ".join(a_la_red[modulo])
+            )
+
     if censadas:
         print()
         print(
