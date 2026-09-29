@@ -381,6 +381,7 @@ TESTS = [
     "src.analysis.test_el_once_que_jugo_v1",
     "src.analysis.test_el_cuaderno_v1",
     "src.analysis.test_la_regla_de_la_rampa_v1",
+    "src.analysis.test_la_verja_no_sale_a_la_red_v1",
     "src.analysis.test_el_orden_del_tiempo_v1",
     "src.analysis.test_el_vestuario_libre_v1",
     "src.analysis.test_los_libros_v1",
@@ -1122,6 +1123,22 @@ def main() -> int:
 
     entorno["BORDALAS_VIGILA_DATA"] = "1"
 
+    # LA VERJA NO SALE A LA RED (29/09/2026)
+    #
+    #     El mismo vigilante corta cualquier conexion fuera de la
+    #     maquina y apunta el destino. Sin el proxy de la consola:
+    #     con el, todo sale por 127.0.0.1 y el corte no veria nada.
+    #     En CI no hay proxy; asi la corrida de aqui es la de alli.
+    entorno["VERJA_SIN_RED"] = "1"
+
+    for _proxy in (
+        "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+        "http_proxy", "https_proxy", "all_proxy",
+    ):
+        entorno.pop(_proxy, None)
+
+    a_la_red = {}
+
     entorno["PYTHONPATH"] = os.pathsep.join(
         x
         for x in (
@@ -1211,6 +1228,17 @@ def main() -> int:
         if abiertos:
             censadas[modulo] = abiertos
 
+        intentos_de_red = sorted(
+            {
+                linea.split("VIGILANTE-RED:", 1)[1].strip()
+                for linea in (proceso.stderr or "").splitlines()
+                if "VIGILANTE-RED:" in linea
+            }
+        )
+
+        if intentos_de_red:
+            a_la_red[modulo] = intentos_de_red
+
         corto = modulo.rsplit(".", 1)[-1]
 
         # UNA GUARDIA MUDA NO HA PROBADO NADA (14/09/2026)
@@ -1269,10 +1297,21 @@ def main() -> int:
         else:
             print(f"  {indice:>2}/{len(modulos)}  FALLA {corto}")
 
-            salida = (
-                (proceso.stderr or "")
-                + (proceso.stdout or "")
-            ).strip().splitlines()
+            # LA TRAZA, AL FINAL (29/09/2026). Antes iba primero el
+            # stderr y detras el stdout, con las marcas de los
+            # vigilantes en medio: las 8 ultimas lineas eran los
+            # "OK" de la propia guardia y la excepcion no se veia.
+            # Paso con `test_el_ciclo_publica_v1` en el ensayo #5.
+            salida = [
+                linea
+                for linea in (
+                    (proceso.stdout or "")
+                    + "\n"
+                    + (proceso.stderr or "")
+                ).strip().splitlines()
+                if "VIGILANTE-DATA:" not in linea
+                and "VIGILANTE-RED:" not in linea
+            ]
 
             # EL NOMBRE DE LA QUE FALLA, NO SOLO CUANTAS
             # (14/09/2026, madrugada)
@@ -1322,6 +1361,22 @@ def main() -> int:
     #     desactivando, y entonces no queda nada. Este no bloquea
     #     por las censadas — pero NO se calla: la deuda se ve en
     #     cada vuelta, con nombre y fichero, o deja de existir.
+    # QUIEN INTENTO SALIR A LA RED. La conexion ya se corto; esto
+    # solo dice quien lo intento, para arreglarlo una a una. Si una
+    # guardia DEPENDIA de la red, ya se habra puesto roja sola.
+    if a_la_red:
+        print()
+        print(
+            f"INTENTARON SALIR A LA RED (cortado): "
+            f"{len(a_la_red)} de {len(modulos)}"
+        )
+
+        for modulo in sorted(a_la_red):
+            print(
+                f"  {modulo.rsplit('.', 1)[-1]}: "
+                + ", ".join(a_la_red[modulo])
+            )
+
     if censadas:
         print()
         print(
