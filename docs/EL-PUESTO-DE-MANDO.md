@@ -434,6 +434,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **29/09 22:30 (el gestor). EL PANEL, PUBLICADO; LA CAJA DE LA LIGA, CUADRA.**
+  - Panel (mision secundaria), a peticion del dueno: sin portada; INICIO
+    con «EL TABLON DE HOY» arriba (clave `tablon`, src/telemetry/el_tablon.py,
+    guardia test_el_tablon_v1), sin «Posibles cambios», una sola linea de
+    estado en vez de los avisos amarillos/rojos (rojo solo si Pepe lleva
+    > 3 h parado), movil y PC sin scroll lateral y selector «Movil / PC».
+    Fusionado f580554, verja 198/198, publicado por dashboard-deploy.yml
+    (se dispara solo con push a main en dashboard-v8/, dashboard/,
+    src/telemetry/, cloudflare/; corre un ciclo OBSERVER sin --live).
+  - Caja de la liga: la reja de duplicados estaba apagada y Biwenger
+    reemite ventas al Computer con fecha nueva (Lunin, 420.200, contado dos
+    veces). ENCENDIDO BORDALAS_REJA_CON_TOLERANCIA (2724e17): 418/438
+    lecturas del saldo cuadran al euro; Luismi baja 13,3 M. Residuo sin
+    explicar en Luismi (< 60.000 en J4, J5, J7). Canario: 23:07.
+  - Dueno: la APK, aparcada («ni de segunda fila»); el panel es la
+    secundaria.
+
 - **29/09 20:20 (el gestor).** Tarde: (1) Zubeldia (FF «al margen» 21, 28
   y 29/09; Biwenger «doubt») pasa a la VENTA en la orden y Maffeo se queda
   de tercer defensa (f6cc0e1). (2) **ENCENDIDA la revision de las pujas
