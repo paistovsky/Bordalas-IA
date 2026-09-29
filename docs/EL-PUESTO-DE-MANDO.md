@@ -341,7 +341,7 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   divergence_ledger.json y scout_accuracy_ledger.json de produccion en cada
   verja (tambien en CI, dentro de la cache). Ahora con temporal. Verja
   197/197 sin tocar `data/`; paso 0 con 37; ensayo #10 verde en CI.
-  Canario: el ciclo de las 22:07 (comprobacion a las 22:15).
+  **Canario: el ciclo #1890 de las 22:07, VERDE (comprobado a las 22:17).**
   **Con esto el punto 4 queda entero: la verja ni sale a la red ni escribe
   en los libros.** Lo que sigue: la VENTA de E1 (E5 la da ganadora; leerlo
   entero y mirar la orden del gestor, que ya vende), y el detalle de la
