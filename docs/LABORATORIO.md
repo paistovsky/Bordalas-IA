@@ -69,6 +69,58 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E6 · 29/09/2026 17:30 de Madrid · E4-bis: ¿los filtros de hoy ya frenan las noticias de BAJA?
+
+**Pregunta del gestor (29/09 14:15):** de las BAJA de E4, ¿cuantas pasarian
+HOY los filtros que ya hay (estado de Biwenger, titularidad >= 40 %, la
+rampa)? Si son pocas, E4 esta cubierto.
+
+**Codigo y datos:** `lab/noticias/e4bis_filtros.py`. Archivo de FF
+ampliado hasta el 29/09 16:24 (`eventos_hasta_29_09.jsonl`). El estado de
+Biwenger y el ultimo cambio de precio de los 547, hora a hora, sacados de
+los 45 artefactos de produccion que quedan (27/09 16:10 a 29/09 15:09 UTC;
+caducan a los 2 dias) mas la foto del 18/09
+(`ciclos_27_29_09.json`, extracto de 0,6 MB). Una BAJA «se cuela» si en
+algun ciclo de sus 72 h el jugador tiene estado ok Y su precio sube (y,
+si esta en el tablero, disponible y con titularidad >= 40 %).
+
+**Resultado: 41 episodios de BAJA con algun ciclo en sus 72 h.**
+
+    frenados por lo que ya hay                 30/41
+      Biwenger ya lo marca en el 1er ciclo      22   (injured, doubt, sanctioned)
+      la rampa (el precio no sube) o lo marca despues   8
+    se cuelan                                  11/41
+      noticia mal clasificada (no es una baja)   6   Tsitaishvili «golpe sin
+                                                     importancia», Valentini y
+                                                     J. David (titularidad),
+                                                     Simeone, Szczesny «dudas»,
+                                                     De la Fuente (seleccionador)
+      baja de verdad                             2   Gaya (-6,2 % en 3 dias),
+                                                     Danjuma (0 %; en el tablero)
+      demasiado recientes para saberlo           3   Rioja, Raphinha, Miguel
+                                                     Roman (29/09; 2-4 h de ciclos)
+
+**El caso que si cuesta: Zubeldia.** FF: «sigue al margen», 28/09 a las
+14:59. Biwenger lo pasa a «doubt» el 29/09 a las 07:19 de Madrid, DESPUES
+del reset en que Pepe lo gano (1.363.592; la puja se puso el 28/09 a las
+07:19, antes de la noticia y antes de encender la rampa). La noticia fue
+**16 horas por delante de Biwenger**, y la puja viva no se reviso.
+
+**Lo que se aprende:**
+1. Para las pujas NUEVAS, E4 ya esta casi cubierto: los filtros de hoy
+   frenan 30 de 41, y de las 11 que se cuelan 6 no son bajas. Una guardia
+   por palabras frenaria tantas buenas como malas.
+2. El hueco real son las **pujas ya puestas** cuando llega la noticia (o
+   cuando Biwenger cambia el estado): la regla actua al pujar, no antes
+   del reset.
+
+**Veredicto: NO CONSTRUIR la fuente nueva de noticias.** n=41 en dos
+ventanas cortas (15-18/09 y 24-29/09). Pista para el gestor, sin medir
+bien (n=1): revisar las pujas vivas en el ultimo ciclo antes del reset
+con lo que ya hay en la foto (estado de Biwenger, `absence` de FF con
+fecha posterior a la puja, la rampa) y retirarlas si ya no pasarian.
+Antes (doctrina 84): mirar si Pepe ya retira pujas y por que via.
+
 ### E5 · 29/09/2026 11:20 de Madrid · Vender el dia que baja (E1) o aceptar la primera oferta +1 % (salida_del_viaje)
 
 **Pregunta del gestor (29/09 07:15):** comparar las dos salidas con la
@@ -327,6 +379,13 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
   por ID en el ojeador de prensa, casar por nombre (sin ambiguos) y
   frenar en la subasta del reset y en el carril, con interruptor apagado,
   guardia, ensayo y canario.
+  - **(E6, 29/09 17:30) Contestado al gestor: la guardia de noticias NO
+    hace falta para las pujas nuevas.** De 41 BAJA, los filtros de hoy
+    frenan 30; de las 11 que se cuelan, 6 son noticias mal leidas y 2
+    bajas de verdad (Gaya, Danjuma). El hueco esta en las pujas YA
+    PUESTAS (Zubeldia: FF 16 h antes que Biwenger; Pepe lo gano igual).
+    Si se hace algo: revisar las pujas vivas antes del reset con la foto
+    (estado, `absence` posterior a la puja, la rampa). n=1: es pista.
 - **(E1, 28/09) «Solo se compra para revender lo que SUBIO en el ultimo
   cambio de precio; se vende al Computer el primer dia que BAJA».** Medido
   en 191 compras reales: los que subian, 57/73 verdes y +25,7 M; los que
