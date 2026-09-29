@@ -122,6 +122,39 @@ mejor en todo lo medido, y el detalle que faltaba es de horas: aceptar la
 oferta del Computer el mismo dia de la bajada. Actualizado en «Listo para
 el plan».
 
+### E4 · 29/09/2026 12:00 de Madrid · ¿Las noticias se adelantan al precio?
+
+**Codigo e informe:** `lab/noticias/` (INFORME.md, archivar.py, analizar.py,
+contra_e1.py, caso_aspas.py). Archivo: 3.174 noticias de FutbolFantasy del
+08/08 al 29/09 (recorridas por ID, el listado esta cacheado), con hora y
+equipo; 629 BAJA, 291 VUELTA, 135 TITULARIDAD tras quitar traspasos y
+ruedas de prensa; clasificacion por palabras, ~80 % bien en 30 a mano.
+
+**Resultado (jugadores >= 1 M, exceso contra los del mismo dia y sentido):**
+
+    BAJA         n=180   -2,5 % a 3 dias (IC90 -3,6 / -1,2)   -4,3 % a 7
+    VUELTA       n= 94   sin senal de subida (-1,3 %)
+    TITULARIDAD  n= 77   sin senal (+0,9 %, cruza el cero)
+
+- La BAJA adelanta la caida 0-1 dias; en el 58 % el precio ya caia (lesion
+  en partido). Vender al leerla NO mejora la salida de E1 (-4,2 % de
+  media, gana 14 de 70): E1 ya sale a tiempo.
+- Lo que si vale: **NO COMPRAR** a quien tiene BAJA reciente. En los que
+  venian subiendo (justo la compra de E1): -3,7 % a 3 dias (n=50).
+- Caso Celta: Aspas, parte en FF el 13/09 16:15, el precio cae el 14 y el
+  15 (-7,3 %); -37 % hasta el 29/09. Duran subio por su doblete del 19/09
+  (E2), no por una noticia. Jutgla: ninguna noticia explica su caida.
+- **Piloto de fuentes locales (Celta, n=1):** Faro de Vigo se lee (hora por
+  articulo): lesion 5 h DESPUES que FF, plazo de baja ~39 h antes que el
+  parte oficial, pero con el precio ya cayendo. Moi Celeste, Minuto
+  Noventa, foros celtistas: cortan la conexion; Reddit 403; X sin sesion
+  nada. No compensa montar fuentes locales para los 20: basta FF.
+
+**Veredicto: PROMETEDOR COMO GUARDIA DE COMPRA.** Pasa a «Listo para el
+plan»: «no pujar por quien tenga una noticia de BAJA en FutbolFantasy en
+las ultimas 72 h». Limites: 6 semanas, pretemporada, parón desde el 20/09,
+clasificacion por palabras, piloto local n=1.
+
 ### E2 · 28/09/2026 11:30 de Madrid · Que hace que un jugador EMPIECE a subir
 
 **Codigo:** `lab/precio/que_predice.py`. Lee `price_history.json` (16/08 a
@@ -233,6 +266,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E4, 29/09) «No se puja por quien tenga una noticia de BAJA en
+  FutbolFantasy en las ultimas 72 h», aunque cumpla la rampa.** n=180:
+  -2,5 % a 3 dias y -4,3 % a 7; entre los que subian, -3,7 % (n=50). FF
+  publica entre las 11 y las 15 h, 16-20 h antes del cambio de las 07:00:
+  hay tiempo de quitar la puja. Como: leer el listado de noticias de FF
+  por ID en el ojeador de prensa, casar por nombre (sin ambiguos) y
+  frenar en la subasta del reset y en el carril, con interruptor apagado,
+  guardia, ensayo y canario.
 - **(E1, 28/09) «Solo se compra para revender lo que SUBIO en el ultimo
   cambio de precio; se vende al Computer el primer dia que BAJA».** Medido
   en 191 compras reales: los que subian, 57/73 verdes y +25,7 M; los que

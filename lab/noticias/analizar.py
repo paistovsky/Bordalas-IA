@@ -350,3 +350,51 @@ def medir(eventos, precios, jug):
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------- intervalos
+def ic(xs, B=2000, seed=7):
+    import random
+    xs = [x for x in xs if x is not None]
+    if len(xs) < 5:
+        return None
+    rnd = random.Random(seed)
+    ms = sorted(st.mean(rnd.choices(xs, k=len(xs))) for _ in range(B))
+    return st.mean(xs), ms[int(.05 * B)], ms[int(.95 * B)], len(xs)
+
+
+FUERTE = re.compile(r"lesion|rotura|parte medico|se pierde|semanas|operad|quirofano|intervenid|"
+                    r"esguince|fractura|ligamento|periodo estimado|mes de baja")
+
+
+def intervalos():
+    filas = json.load(open(AQUI / "episodios.json"))
+    pc = lambda x: f"{100*x:+.1f} %"
+    print("\n== Exceso r3 / r7 con intervalo al 90 % (bootstrap), precio >= 1 M ==")
+    grupos = {
+        "BAJA todas": lambda f: f["tipo"] == "BAJA",
+        "BAJA venia subiendo o quieto": lambda f: f["tipo"] == "BAJA" and f["prev"] in (0, 1),
+        "BAJA venia quieto": lambda f: f["tipo"] == "BAJA" and f["prev"] == 0,
+        "BAJA fuerte (lesion/rotura/parte)": lambda f: f["tipo"] == "BAJA" and FUERTE.search(norm(f["titulo"])),
+        "BAJA fuerte, no venia bajando": lambda f: f["tipo"] == "BAJA" and f["prev"] in (0, 1) and FUERTE.search(norm(f["titulo"])),
+        "VUELTA todas": lambda f: f["tipo"] == "VUELTA",
+        "VUELTA no venia subiendo": lambda f: f["tipo"] == "VUELTA" and f["prev"] in (0, -1),
+        "TITULARIDAD": lambda f: f["tipo"] == "TITULARIDAD",
+    }
+    for nom, g in grupos.items():
+        fs = [f for f in filas if f["base"] >= 1_000_000 and g(f)]
+        out = []
+        for k in ("r1", "x1", "r3", "x3", "x7"):
+            r = ic([f[k] for f in fs])
+            out.append(f"{k} {pc(r[0])} [{pc(r[1])}, {pc(r[2])}]" if r else f"{k} -")
+        print(f"  {nom:36s} n={len(fs):3d}  " + "  ".join(out))
+    # por mitades de tiempo
+    print("\n  BAJA por mitades (exceso r3):")
+    for nom, g in (("hasta 06/09", lambda f: f["E"] <= "2026-09-06"), ("desde 07/09", lambda f: f["E"] > "2026-09-06")):
+        fs = [f for f in filas if f["base"] >= 1_000_000 and f["tipo"] == "BAJA" and g(f)]
+        r = ic([f["x3"] for f in fs])
+        print(f"    {nom}: {pc(r[0])} [{pc(r[1])}, {pc(r[2])}] n={r[3]}")
+
+
+if __name__ == "__main__":
+    intervalos()
