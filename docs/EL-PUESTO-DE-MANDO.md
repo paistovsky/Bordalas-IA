@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 29/09/2026, 07:55 de Madrid (rafaga de las 07:15).
+Actualizado: 29/09/2026, 14:45 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -313,6 +313,37 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **29/09 14:15 (rafaga de la tarde).** GitHub: escribo en main y ramas.
+  Ciclos: verdes (#1876 a #1882). Pepe: vendio un jugador (37715) al
+  Computer por 150.300 a las 14:09; sigue viva la puja por
+  Roberto Fernandez (committed 8.950.000, se resuelve el 30/09 07:00);
+  saldo +356.584. Rutina del cierre de la J8: comprobada hoy (09/10 12:45).
+  **La guardia de las noticias (E4): NO SE CONSTRUYE AUN. Debatido con
+  datos (doctrina 84).**
+  - Lo que ya existe: `futbolfantasy_absences.py` lee cada vuelta los
+    lesionados y sancionados de FF, con «desde» y `days_out`, y llega a
+    cada fila del tablero como `absence`. Los lesionados y en duda ya
+    salen `NO_DISPONIBLE`; «¿va a jugar?» exige 40 % de titularidad; y la
+    rampa frena al que no sube (E4: en el 58 % de las BAJA el precio ya
+    caia).
+  - Tablero de produccion del #1882: 70 candidatos, 5 con ausencia de FF,
+    NINGUNA de las ultimas 72 h (la mas reciente, 9 dias); las dos mas
+    recientes ya estan en NO_DISPONIBLE. Hoy la guardia no frenaria a
+    nadie.
+  - Hacerla como dice E4 pide una FUENTE NUEVA en cada vuelta (las
+    noticias de FF, recorridas por ID y clasificadas por palabras, ~80 %
+    bien). Mas peticiones y mas pantalla para un efecto sin medir.
+  - **Pregunta para el laboratorio (E4-bis):** de las BAJA de E4 en
+    jugadores que subian (n=50, -3,7 %), ¿cuantas habrian pasado HOY los
+    filtros que ya hay (estado de Biwenger ok, titularidad >= 40 %, precio
+    subiendo)? Si son pocas, E4 ya esta cubierto; si son muchas, se
+    construye con la fuente minima: la lista de lesionados de FF
+    (`absence.days_out` <= 3 con estado ok), que ya esta en la foto.
+  **Lo que sigue en la cola:** que las guardias no escriban en los libros
+  (la otra mitad del punto 4) y la VENTA de E1, cuando E5 se haya leido
+  entero (el laboratorio la da como ganadora: +5,5 M contra +0,7 M con 2 M
+  de caja).
 
 - **29/09 07:15 (rafaga de la manana).** GitHub: escribo en main y ramas.
   Ciclos: verdes (#1867 a #1875). Sin vueltas de 05:07 y 06:07 de Madrid
