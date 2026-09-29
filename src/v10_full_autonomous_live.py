@@ -1421,6 +1421,30 @@ def run_full_autonomous_cycle() -> dict:
     escaparate = _llenar_el_escaparate(cycle, action_taken)
 
     # ==========================================================
+    # 3-bis) LA REVISION DE LAS PUJAS VIVAS (29/09/2026)
+    # ==========================================================
+    #
+    #     En la ventana del reset, retira nuestras pujas por jugadores
+    #     que Biwenger ya marca lesionados, en duda o sancionados (caso
+    #     Zubeldia, laboratorio E6). No toca las de la orden del gestor.
+    #     APAGADA: `BORDALAS_REVISA_LAS_PUJAS_VIVAS`. Nunca lanza.
+    from src.actions.la_revision_de_pujas import correr as _revisar_pujas
+
+    try:
+        _segundos = (_estado_publicado(cycle).get("market_clock") or {}).get(
+            "seconds_to_reset"
+        )
+    except Exception:                                   # noqa: BLE001
+        _segundos = None
+
+    revision_de_pujas = _revisar_pujas(cycle, _segundos)
+    print(
+        f"La revision de las pujas vivas: {revision_de_pujas.get('motivo')} "
+        f"retiradas={[(r.get('player_id'), r.get('estado')) for r in revision_de_pujas.get('retiradas') or []]} "
+        f"avisos={[(a.get('player_id'), a.get('estado')) for a in revision_de_pujas.get('avisos') or []]}"
+    )
+
+    # ==========================================================
     # 4) LA ORDEN DEL GESTOR (29/09/2026)
     # ==========================================================
     #
@@ -1465,6 +1489,7 @@ def run_full_autonomous_cycle() -> dict:
         "escaparate": escaparate,
         "racha": racha,
         "orden_del_gestor": orden_del_gestor,
+        "revision_de_pujas": revision_de_pujas,
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
