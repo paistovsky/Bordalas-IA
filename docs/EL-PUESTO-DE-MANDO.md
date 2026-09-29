@@ -40,6 +40,12 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
   quieres. Que tenga disponibilidad y que mejore». Via libre total sobre el
   codigo. Lo unico que no se negocia es que Pepe siga corriendo (el ciclo
   verde) mientras se cambia: nada se sube sin verja.
+- **Mision terciaria (29/09, «no muy relevante»):** una APK para que la
+  gente lo disfrute. Decision del gestor: NUNCA una app que juegue sola en
+  cuentas ajenas (normas de Biwenger y contrasenas de terceros); SI una
+  app CONSEJERA (once ideal, quien sube/baja, a quien no fichar por
+  lesion), como web instalable (PWA) empaquetada en APK. Detras de la liga
+  y del panel.
 - **Mision secundaria:** un panel para ver en tiempo real que pasa. Hoy
   existe https://bordalas-ia-dashboard.bordalas.workers.dev/ (usuario y
   contrasena: los tiene el dueno; NO se escriben en el repo, que es publico).
