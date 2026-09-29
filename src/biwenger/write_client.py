@@ -1021,6 +1021,26 @@ class BiwengerWriteClient:
             )
         )
 
+        # LOS PROTEGIDOS DE LA ORDEN DEL GESTOR (29/09/2026)
+        #
+        #     Con el saldo en rojo, la liquidez publica a cualquiera en
+        #     el orden de Biwenger, y lo publicado recibe oferta del
+        #     Computer. Aqui, que es la unica puerta de publicar, se
+        #     cierra para los que la orden protege (el fichaje y
+        #     Yamal). Con la orden apagada o caducada, nada cambia.
+        try:
+            from src.actions.la_orden_del_gestor import protegidos
+
+            if int(player_id) in protegidos():
+                return {
+                    **request,
+                    "sent": False,
+                    "success": False,
+                    "blocked": "PROTEGIDO_POR_LA_ORDEN_DEL_GESTOR",
+                }
+        except Exception:                           # noqa: BLE001
+            pass
+
         if not execute or self._en_ensayo(request):
             return {
                 **request,
