@@ -148,6 +148,27 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
    ya hace parte (doctrina 84: frena lo que baja, deja pasar lo plano). Rama,
    verja, paso 0 con --con, ENSAYO con cada uno, y se enciende primero la
    COMPRA; la VENTA en otra rafaga. Detalle en docs/LABORATORIO.md (E1).
+3-bis. **LO SIGUIENTE DE VERDAD (decidido 29/09 09:30 por el gestor, tras
+   la queja del dueno «solo ficha defensas»): LA HUCHA PARA EL ONCE.**
+   Medido: 32 de las 55 pujas ganadas son defensas, porque con 1-3 M solo
+   hay defensas y porteros. Hoy Adeyemi (10,28 M) y Roberto Fernandez
+   (8,38 M), del Computer, caen por SUPERA_PRESUPUESTO con la caja en
+   ~1,6 M, y la unica puja es Lejeune (DEF, 3,66 M). La distancia al once
+   objetivo (~16 pts/jornada) esta ARRIBA. Pepe gasta cada euro en
+   calderilla y nunca junta para quien cambia el once. Lo que hay que meter:
+   a) la lista de OBJETIVOS = el once objetivo (el_once_objetivo.py),
+      ordenada por puntos/jornada que suma al once;
+   b) cuando un objetivo sale al mercado del Computer: ¿llega vendiendo al
+      Computer (oferta en firme del dia) a quien no es titular? Si llega,
+      vende y puja; nunca a perdida sin mirarlo, nunca Yamal;
+   c) la reventa sigue, pero sin gastar la reserva del proximo objetivo.
+   Primero MEDIR (doctrina 84: mirar si OBJETIVOS_EL_CATALOGO o la
+   cola de destino ya hacen parte): cuanto suman hoy las ofertas del
+   Computer por los no titulares, y si con eso Adeyemi o Roberto cabian.
+   Rama, verja, paso 0, ensayo, un interruptor, canario.
+   **Y de paso:** Gordon (9,66 M) y Lookman (5,42 M) salen con valor 0
+   (SIN_VALOR, «no vale por ninguna via») el 29/09. Mirar si es un fallo
+   de valoracion (sin emparejar en el ojeador, sin puntos) y no un juicio.
 4. **Aislar la verja de la red.** HECHO el 29/09 (931efbf); queda que las guardias no escriban en los libros. La regla «ninguna guardia sale a internet»
    existe y nada la hace cumplir. Veinte lineas: bloquear sockets.
 5. **Las 17 vias que escriben en Biwenger.** Creiamos cuatro. Cuatro se saltan
