@@ -480,6 +480,17 @@ def _pujar_en_el_reset(cycle: dict | None) -> dict:
             ya_pujados=ya_pujados,
         )
 
+        # LA ORDEN DEL GESTOR MANDA (29/09/2026): lo que dice
+        # `no_pujar` no se puja, aunque el plan lo quiera.
+        from src.actions.la_orden_del_gestor import vetados as _vetados
+
+        _fuera = _vetados()
+        if _fuera and plan.get("bids"):
+            quitadas = [b for b in plan["bids"] if int(b.get("id") or 0) in _fuera]
+            if quitadas:
+                plan = {**plan, "bids": [b for b in plan["bids"] if b not in quitadas]}
+                print(f"  La orden del gestor quita: {[b.get('name') for b in quitadas]}")
+
         if ya_pujados:
             print(
                 f"  Ya hay {len(ya_pujados)} puja(s) nuestras en "
@@ -1409,6 +1420,23 @@ def run_full_autonomous_cycle() -> dict:
     #     resuelto y el jugador esta en la plantilla.
     escaparate = _llenar_el_escaparate(cycle, action_taken)
 
+    # ==========================================================
+    # 4) LA ORDEN DEL GESTOR (29/09/2026)
+    # ==========================================================
+    #
+    #     Lo ultimo de la vuelta, para que lo que ordena el gestor
+    #     (fichar, no pujar, vender para pagar) no lo deshaga nadie
+    #     despues. Solo ejecuta `config/la_orden_del_gestor.json`, que
+    #     caduca sola. No consume `write_used`. APAGADA:
+    #     `BORDALAS_LA_ORDEN_DEL_GESTOR`. Nunca lanza.
+    from src.actions.la_orden_del_gestor import correr as _la_orden
+
+    orden_del_gestor = _la_orden(cycle)
+    print(
+        f"La orden del gestor: {orden_del_gestor.get('motivo')} "
+        f"{[(a.get('accion'), a.get('nombre')) for a in orden_del_gestor.get('acciones') or []]}"
+    )
+
     payload = {
         "version": "V10.13.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1436,6 +1464,7 @@ def run_full_autonomous_cycle() -> dict:
         "carril": carril,
         "escaparate": escaparate,
         "racha": racha,
+        "orden_del_gestor": orden_del_gestor,
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)

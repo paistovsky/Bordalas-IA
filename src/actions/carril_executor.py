@@ -583,9 +583,17 @@ def correr(
 
         fallidas = []
 
+        # LA ORDEN DEL GESTOR MANDA (29/09/2026): `no_pujar`.
+        from src.actions.la_orden_del_gestor import vetados as _vetados
+
+        _fuera = _vetados()
+
         for fila in elegidos:
 
             pid = safe_int(fila.get("player_id"))
+
+            if pid in _fuera:
+                continue
 
             # EL IMPORTE SALE DE LA CURVA, NO DEL TABLERO.
             #

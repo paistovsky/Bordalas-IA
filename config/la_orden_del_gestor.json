@@ -1,0 +1,54 @@
+{
+  "escrita": "2026-09-29T10:30:00+02:00",
+  "por": "el gestor, a peticion del dueno («alguien se los va a llevar»)",
+  "motivo": "Roberto Fernandez: 59 puntos en 7 jornadas (8.o de 547), sube diez dias seguidos. Jutgla, nuestro segundo delantero, 29. Se paga vendiendo al Computer a cuatro que no mueven el once; el saldo vuelve a positivo antes de la J8 (09/10 21:00).",
+  "caduca": "2026-10-09T15:00:00+02:00",
+  "fichar": [
+    {
+      "player_id": 35678,
+      "nombre": "Roberto Fernández",
+      "puja": 8950000
+    }
+  ],
+  "no_pujar": [
+    {
+      "player_id": 2476,
+      "nombre": "Lejeune"
+    }
+  ],
+  "vender_si_ficha": {
+    "si_esta": 35678,
+    "jugadores": [
+      {
+        "player_id": 3159,
+        "nombre": "Jutglà",
+        "suelo": 2900000
+      },
+      {
+        "player_id": 1612,
+        "nombre": "Antonio Blanco",
+        "suelo": 3220000
+      },
+      {
+        "player_id": 10030,
+        "nombre": "Maffeo",
+        "suelo": 1520000
+      },
+      {
+        "player_id": 8376,
+        "nombre": "Zubeldia",
+        "suelo": 1370000
+      }
+    ]
+  },
+  "proteger": [
+    {
+      "player_id": 26271,
+      "nombre": "Yamal"
+    },
+    {
+      "player_id": 35678,
+      "nombre": "Roberto Fernández"
+    }
+  ]
+}
