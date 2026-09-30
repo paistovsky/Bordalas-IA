@@ -323,6 +323,26 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **30/09 18:25 (chat del dueno).** Tres pujas vivas para el reset del
+  01/10 07:00, las tres de la orden y comprobadas en los ciclos: Diego Rico
+  0,62 M (once 11/11), **Akhomach 3,17 M** (primer viaje corto: sube cada
+  dia, 1,63 -> 3,17 M desde el 24/09; es reventa, NO delantero: 3,83
+  pts/partido contra 4,14 de Jutgla) y **Fofana 5,26 M** (primer cambio del
+  comparador: 6,75 pts/partido contra 5,0 de Exposito, mismo precio, los
+  dos 80 % en FF; Exposito solo se vende cuando Fofana es nuestro, suelo
+  5,1 M, y salio de `conservar`). Comprometido 9,05 M; queda ~3,9 M de puja.
+  Construido hoy: cuadro «Como salimos del rojo» (hoja de ruta en la
+  orden), viajes cortos en la orden, **el comparador de cambios**
+  (`cambios` en el panel, El Plan; solo mira). Limite conocido: el
+  comparador no mira la titularidad (Moi Gomez, 30 %, salia «nos saca del
+  rojo»): se filtra a mano hasta meterla.
+  **Manana:** si se gana Akhomach, cambiar su salida a «aguantar mientras
+  sube, vender el primer dia que baje, antes del 07/10» y quitarlo de
+  candidatos cuando se venda (si no, lo recompra). Pendiente: B (viajes con
+  saldo en rojo, en Pepe) y C (comprar a rivales; hoy la puerta solo mira,
+  `would_decision`). Ninguno cambia nada antes del 09/10 con el margen que
+  queda: van despues de la J8.
+
 - **30/09 14:15 (rafaga de la tarde).** GitHub: escribo en main. Ciclos:
   verdes (#1898 a #1905). Pepe: vendio a Antonio Blanco (09:10, 2.899.200,
   con el suelo bajado a 2,85 M por la orden). Saldo -1.214.616; el chat del
