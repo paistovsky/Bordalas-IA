@@ -434,6 +434,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **30/09 07:25 (el gestor). ROBERTO FERNANDEZ ES NUESTRO** (9.650.000;
+  segundo Pollo17 con 8.777.000: los 8,95 M tambien habrian ganado, por
+  173.000; la subida costo 700.000 de seguro). Adeyemi: Manzagool 11,08 M
+  (Pollo 10,78, Luismi 10,74). Ventana: la revision de pujas vivas miro la
+  de Roberto, TODAS_PASAN, no toco nada; la subasta no pujo por nadie
+  (presupuesto 0). Ciclo #1898 (07:15): la orden ACEPTO las ofertas del
+  Computer por Cabrera 2.432.000, Zubeldia 1.265.500, Pablo Duran
+  1.316.700 y Guevara 165.400 (todas sobre su suelo). Antonio Blanco
+  sigue sin oferta que llegue a 3,15 M. Saldo tras Roberto -9.293.416;
+  tras las cuatro ventas ~-4,11 M; con Blanco (~3,2 M) y la racha del
+  01/10 (0,25 M) quedaria ~-0,66 M; con la racha del ~06/10, ~-0,41 M:
+  **Jutgla (ultimo recurso, desde el 08/10 07:00 si sigue en rojo) puede
+  hacer falta.** Plantilla tras Blanco: 11 justos. Pendiente: medir el
+  saldo real en el ciclo de las 08:07 y buscar otra salida antes del
+  08/10 (p. ej. bajar el suelo de Blanco si la oferta se queda corta,
+  o una venta con prima).
+
 - **30/09 00:20 (el gestor). PUJA SUBIDA, CONFIRMADA.** La orden pujo
   9.650.000 en el ciclo #1891 (23:07) y retiro la de 8.950.000: en la foto
   de las 00:09 Biwenger marca committed 9.650.000 (una sola puja) y
