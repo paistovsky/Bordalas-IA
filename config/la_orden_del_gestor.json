@@ -1,7 +1,7 @@
 {
   "escrita": "2026-09-29T10:30:00+02:00",
   "por": "el gestor, a peticion del dueno («alguien se los va a llevar»)",
-  "motivo": "Roberto Fernandez: 59 puntos en 7 jornadas (8.o de 547), sube diez dias seguidos. Jutgla, nuestro segundo delantero, 29. Se paga vendiendo al Computer a cuatro que no mueven el once; el saldo vuelve a positivo antes de la J8 (09/10 21:00). 29/09 11:00: el dueno no quiere vender a Jutgla; se vende a Pablo Duran (Celta), Cabrera y Guevara, y Jutgla queda como ultimo recurso (solo desde el 08/10 07:00 y si el saldo sigue en rojo). 29/09 19:00: Zubeldia sigue al margen (FF 21/09, 28/09 y 29/09; Biwenger «doubt» desde el 29/09): pasa a la venta y Maffeo se queda como tercer defensa. 29/09 22:50: puja subida de 8.950.000 a 9.650.000 (+15,2 % sobre 8,38 M). En las peleas por jugadores caros se paga +7 a +16,5 % (Pollo17: Moleiro +9,8 % hoy, +16,5 % el 11/09); Pollo17 tiene ~7,5 M en caja y puja maxima >25 M; el dueno avisa de que Pollo y Luismi van a ir a por el.",
+  "motivo": "Roberto Fernandez: 59 puntos en 7 jornadas (8.o de 547), sube diez dias seguidos. Jutgla, nuestro segundo delantero, 29. Se paga vendiendo al Computer a cuatro que no mueven el once; el saldo vuelve a positivo antes de la J8 (09/10 21:00). 29/09 11:00: el dueno no quiere vender a Jutgla; se vende a Pablo Duran (Celta), Cabrera y Guevara, y Jutgla queda como ultimo recurso (solo desde el 08/10 07:00 y si el saldo sigue en rojo). 29/09 19:00: Zubeldia sigue al margen (FF 21/09, 28/09 y 29/09; Biwenger «doubt» desde el 29/09): pasa a la venta y Maffeo se queda como tercer defensa. 29/09 22:50: puja subida de 8.950.000 a 9.650.000 (+15,2 % sobre 8,38 M). En las peleas por jugadores caros se paga +7 a +16,5 % (Pollo17: Moleiro +9,8 % hoy, +16,5 % el 11/09); Pollo17 tiene ~7,5 M en caja y puja maxima >25 M; el dueno avisa de que Pollo y Luismi van a ir a por el. 30/09 08:30: Roberto fichado (9.650.000). Vendidos Cabrera, Zubeldia, Duran y Guevara (5,18 M); saldo -4.113.816. Blanco: el Computer ofrece 2.899.200 (-4 %) y su precio baja cada dia; suelo a 2.850.000 para venderlo ya.",
   "caduca": "2026-10-09T15:00:00+02:00",
   "fichar": [
     {
@@ -22,7 +22,7 @@
       {
         "player_id": 1612,
         "nombre": "Antonio Blanco",
-        "suelo": 3150000
+        "suelo": 2850000
       },
       {
         "player_id": 11800,
