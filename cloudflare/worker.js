@@ -69,6 +69,19 @@ export default {
       });
     }
 
-    return env.ASSETS.fetch(request);
+    // EL DISENO SIEMPRE FRESCO (30/09/2026). La pagina (index.html)
+    // no se guarda en el navegador: si no, el movil seguia pintando el
+    // panel viejo despues de publicar uno nuevo. Los .js/.css llevan
+    // huella en el nombre y pueden guardarse.
+    const respuesta = await env.ASSETS.fetch(request);
+    const tipo = respuesta.headers.get("content-type") || "";
+
+    if (tipo.includes("text/html")) {
+      const fresca = new Response(respuesta.body, respuesta);
+      fresca.headers.set("cache-control", "no-cache, no-store, must-revalidate");
+      return fresca;
+    }
+
+    return respuesta;
   }
 };
