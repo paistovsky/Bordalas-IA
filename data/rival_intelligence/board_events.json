@@ -170048,5 +170048,188 @@
         "amount": 3995900
       }
     ]
+  },
+  {
+    "event_id": "e384a5ae695b4b2c51b65fcf",
+    "date": 1790737117,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 34557,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 7198300
+      }
+    ]
+  },
+  {
+    "event_id": "f102f7bebe011429d343465b",
+    "date": 1790737893,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
+  },
+  {
+    "event_id": "553164a7956b4d0c4bcbb115",
+    "date": 1790744699,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 42557,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 11080000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 10777000
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 10736000
+          }
+        ]
+      },
+      {
+        "player": 33970,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 940230,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 907000
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 872000
+          }
+        ]
+      },
+      {
+        "player": 35678,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 9650000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 8777000
+          }
+        ]
+      },
+      {
+        "player": 41200,
+        "to": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 9740000
+      },
+      {
+        "player": 41093,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 2503000
+      }
+    ]
+  },
+  {
+    "event_id": "0d77c4627595e3dc2d3eca5c",
+    "date": 1790745517,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 11800,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 2432000
+      },
+      {
+        "player": 8376,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1265500
+      },
+      {
+        "player": 29185,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1316700
+      },
+      {
+        "player": 17369,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 165400
+      }
+    ]
   }
 ]

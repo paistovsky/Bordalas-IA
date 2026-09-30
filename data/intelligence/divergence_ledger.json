@@ -31026,7 +31026,7 @@
       "price_after_7d": null,
       "return_3d_percent": 0.0,
       "return_7d_percent": null,
-      "resolved_at": "2026-09-30T02:52:13.188446+00:00"
+      "resolved_at": "2026-09-30T05:18:27.596913+00:00"
     },
     "24576|2026-09-07": {
       "player_id": "24576",
@@ -33857,7 +33857,7 @@
       "price_after_7d": null,
       "return_3d_percent": 0.0,
       "return_7d_percent": null,
-      "resolved_at": "2026-09-30T02:52:13.188446+00:00"
+      "resolved_at": "2026-09-30T05:18:27.596913+00:00"
     },
     "22690|2026-09-08": {
       "player_id": "22690",
@@ -51750,12 +51750,12 @@
       "trend_days": 0,
       "divergent": false,
       "divergence_kind": null,
-      "outcome": "PENDING",
+      "outcome": "UNKNOWN",
       "price_after_3d": 150000,
       "price_after_7d": null,
       "return_3d_percent": 0.0,
       "return_7d_percent": null,
-      "resolved_at": null
+      "resolved_at": "2026-09-30T05:18:27.596913+00:00"
     },
     "39327|2026-09-09": {
       "player_id": "39327",
@@ -51769,12 +51769,12 @@
       "trend_days": 0,
       "divergent": false,
       "divergence_kind": null,
-      "outcome": "PENDING",
+      "outcome": "UNKNOWN",
       "price_after_3d": 150000,
       "price_after_7d": null,
       "return_3d_percent": 0.0,
       "return_7d_percent": null,
-      "resolved_at": null
+      "resolved_at": "2026-09-30T05:18:27.596913+00:00"
     },
     "43386|2026-09-09": {
       "player_id": "43386",
@@ -269108,6 +269108,25 @@
       "demand_net": null,
       "demand_source": null,
       "trend_days": -27,
+      "divergent": false,
+      "divergence_kind": null,
+      "outcome": "PENDING",
+      "price_after_3d": null,
+      "price_after_7d": null,
+      "return_3d_percent": null,
+      "return_7d_percent": null,
+      "resolved_at": null
+    },
+    "39813|2026-09-30": {
+      "player_id": "39813",
+      "player_name": "Hugo Burcio",
+      "seen_at": "2026-09-30T05:18:27.596733+00:00",
+      "price": 870000,
+      "price_change_eur": 0,
+      "price_change_percent": 0.0,
+      "demand_net": null,
+      "demand_source": null,
+      "trend_days": null,
       "divergent": false,
       "divergence_kind": null,
       "outcome": "PENDING",
