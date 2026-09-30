@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 29/09/2026, 21:40 de Madrid (rafaga de las 21:15).
+Actualizado: 30/09/2026, 07:45 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -322,6 +322,26 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **30/09 07:15 (rafaga de la manana). ROBERTO FERNANDEZ ES NUESTRO.**
+  Ciclos: verdes (#1890 a #1898). En el reset de las 07:04 Pepe gano a
+  Roberto por 9.650.000; Pollo17 pujo 8.777.000 (subir anoche de 8,95 M a
+  9,65 M fue lo que lo gano). A las 07:18 la orden vendio al Computer:
+  Cabrera 2.432.000, Zubeldia 1.265.500, Pablo Duran 1.316.700 y 17369
+  por 165.400 (+5,18 M). Saldo antes de esas ventas: -9.293.416; despues,
+  hacia -4,1 M. Queda Antonio Blanco (suelo 3,15 M) y, si hace falta,
+  Jutgla desde el 08/10 07:00. Plazo de solvencia: 09/10 15:00; la rutina
+  del cierre salta ese dia a las 12:45 (comprobada).
+  - El detalle de `decidir` (tope antes que «ya hay puja») ya lo arreglo el
+    chat del dueno (7a2f242). Nada que hacer.
+  - Gordon y Lookman con valor 0: NO es un fallo. Lookman: 16 pts en 7
+    partidos, 50 % titular, precio sin subir -> NO_MEJORA del once; Gordon
+    ya no esta en el tablero. Cerrado.
+  - La VENTA de E1 se aplaza a despues del cierre de la J8 (10/10): la
+    orden del gestor esta vendiendo hasta el 09/10 y dos reglas de venta a
+    la vez se pisarian.
+  - Hoy no se enciende nada: la hucha para el once la lleva el chat del
+    dueno y no se duplica.
 
 - **29/09 21:15 (rafaga de la noche).** GitHub: escribo en main y ramas.
   Ciclos: verdes (#1883 a #1889). Pepe: nada nuevo desde las 14:15;
