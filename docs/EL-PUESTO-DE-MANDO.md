@@ -454,6 +454,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **30/09 14:00 (el gestor). ERROR MIO: MAFFEO YA NO ERA NUESTRO.** El
+  dueno: «estamos en negativo y nos falta 1 jugador». La plantilla tras
+  vender a Blanco es de 10 con 2 DEF (Chust, Jonny): planifique el 3-4-3
+  con Maffeo sin comprobar la plantilla real (Maffeo se vendio antes).
+  **Leccion: todo plan de ventas se valida contra la plantilla real de la
+  foto, no contra la memoria.** Arreglo: la orden ficha a Diego Rico
+  (Osasuna, 50 % titular FF «Rotacion», 0,57 M; puja 620.000; f6fcada).
+  Alternativas medidas en FF: Lejeune 95 % «Clave» pero 3,37 M; Johaneko
+  30 %; Jesus Vazquez 20 %. Saldo: -1,21 M (tras Blanco, 2.899.200) ->
+  -1,83 M con Diego Rico -> ~-1,33 M con las rachas. **Faltan ~1,3 M antes
+  del 09/10 15:00.** Opcion A (preferida hoy): vender Dmitrovic (~3,96 M)
+  y fichar portero barato (~-2 pts/j). Opcion B: Jutgla (~3 M) + DEL
+  barato (~-3 pts/j). Decidir el 06/10 con precios de ese dia.
+
 - **30/09 10:45 (el gestor). EL PANEL, HECHO DE CERO, PUBLICADO** (d9e8b5d,
   despliegue verde). Menus: INICIO (igual, con la cronologia rehecha desde
   el plan real: pujas vivas, `subasta`, `orden`, cierre de jornada; ya no
