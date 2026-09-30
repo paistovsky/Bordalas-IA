@@ -372,6 +372,10 @@ import { normalizeStatus } from "./src/lib/status.js";
 import HomePage from "./src/pages/HomePage.jsx";
 import AuditPage from "./src/pages/AuditPage.jsx";
 import KpiStrip from "./src/components/KpiStrip.jsx";
+import PlanPage from "./src/pages/PlanPage.jsx";
+import MercadoPage from "./src/pages/MercadoPage.jsx";
+import PlantillaPage from "./src/pages/PlantillaPage.jsx";
+import LigaPage from "./src/pages/LigaPage.jsx";
 
 export function pinta(crudo) {
   const data = normalizeStatus(crudo);
@@ -380,6 +384,11 @@ export function pinta(crudo) {
     tira: renderToString(React.createElement(KpiStrip, { data })).length,
     inicio: renderToString(React.createElement(HomePage, { data })).length,
     auditoria: renderToString(React.createElement(AuditPage, { data })).length,
+    // Los menús nuevos del 30/09/2026: tampoco pueden salir en blanco.
+    plan: renderToString(React.createElement(PlanPage, { data })).length,
+    mercado: renderToString(React.createElement(MercadoPage, { data })).length,
+    plantilla: renderToString(React.createElement(PlantillaPage, { data })).length,
+    liga: renderToString(React.createElement(LigaPage, { data })).length,
   };
 }
 `;
@@ -405,6 +414,9 @@ await esbuild.build({
   outfile: salida,
   jsx: "automatic",
   logLevel: "silent",
+  // Las fotos de Bordalás de los cuadros nuevos: aquí no se pintan,
+  // solo se nombran.
+  loader: { ".jpg": "file" },
   define: { "process.env.NODE_ENV": '"development"' },
 });
 

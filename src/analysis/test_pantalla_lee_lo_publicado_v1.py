@@ -1170,6 +1170,44 @@ def test_el_tablon_llega_a_inicio_arriba_del_todo() -> None:
     }, "INICIO no esta enrutada"
 
 
+def test_la_cronologia_lee_lo_que_de_verdad_va_a_pasar() -> None:
+    """
+    LA CRONOLOGIA DEL 30/09/2026
+
+        Anunciaba «ANTES DEL RESET: Pujar por Lejeune» mientras la
+        orden del gestor lo prohibia: leia el cuadro de VALORACION
+        (`acquisition.targets` con BID), no lo que Pepe ejecuta.
+        Ahora lee la orden (`orden`), el plan de la subasta
+        (`subasta`) y nuestras pujas vivas, y la orden se copia en
+        el normalizador.
+    """
+
+    normalizador = _lee(NORMALIZADOR)
+
+    assert "raw.orden" in normalizador and re.search(r"\borden\s*:", normalizador), (
+        "el normalizador no expone `orden`: la cronologia y EL PLAN no la ven"
+    )
+
+    cronologia = _lee(DASHBOARD / "components" / "TimelinePanel.jsx")
+    codigo = re.sub(r"/\*.*?\*/", "", cronologia, flags=re.S)
+
+    assert '"BID"' not in codigo, (
+        "la cronologia vuelve a anunciar pujas del cuadro de valoracion"
+    )
+
+    for lectura in ("laOrden", "pujasDelReset", "pujasVivas"):
+        assert lectura in codigo, f"la cronologia ya no usa `{lectura}`"
+
+    lectura = _lee(DASHBOARD / "lib" / "lectura.js")
+
+    assert "data?.orden" in lectura and "data?.subasta" in lectura, (
+        "`lectura.js` ya no lee la orden o la subasta"
+    )
+    assert "noPujar" in lectura.split("export function pujasDelReset", 1)[-1], (
+        "el plan del reset ya no quita a los que la orden prohibe"
+    )
+
+
 TESTS = [
     test_el_backend_publica_los_bloques,
     test_el_normalizador_copia_los_bloques,
@@ -1204,6 +1242,7 @@ TESTS = [
     test_el_ritmo_neto_de_la_plantilla_se_ve,
     test_ningun_panel_nuevo_decide_nada,
     test_el_tablon_llega_a_inicio_arriba_del_todo,
+    test_la_cronologia_lee_lo_que_de_verdad_va_a_pasar,
 ]
 
 

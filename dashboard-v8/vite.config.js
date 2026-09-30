@@ -15,7 +15,12 @@ import path from "node:path";
  * data/fotos/2026-09-18.json, mas una clave `tablon` con lineas
  * reales del tablon del 28-29/09 (la foto es anterior a que se
  * publicara). Sin red, sin credenciales, y siempre la misma, para
- * las capturas. */
+ * las capturas.
+ *
+ * 30/09/2026: lleva ademas `tablon_semana`, `reglas` y una `orden`
+ * del gestor ESCRITA A MANO para la muestra (clave `_muestra`). Sus
+ * horas son las del 18/09: para verlas, reloj del navegador en
+ * 2026-09-18 ~16:30 de Madrid (las capturas lo fijan asi). */
 const RUTA_DE_LA_FOTO = {
   muestra: "dev/status.muestra.json"
 };
