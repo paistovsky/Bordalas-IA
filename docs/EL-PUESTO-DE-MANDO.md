@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 30/09/2026, 07:45 de Madrid (rafaga de las 07:15).
+Actualizado: 30/09/2026, 14:35 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -322,6 +322,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **30/09 14:15 (rafaga de la tarde).** GitHub: escribo en main. Ciclos:
+  verdes (#1898 a #1905). Pepe: vendio a Antonio Blanco (09:10, 2.899.200,
+  con el suelo bajado a 2,85 M por la orden). Saldo -1.214.616; el chat del
+  dueno lleva el agujero (~1,3 M con Diego Rico) y el examen «salir del
+  rojo sin vender a los top». No lo duplico.
+  **COMPROBADO CONTRA LA FOTO (la leccion de Maffeo):** plantilla de 10
+  (marcador, 14:09): 1 POR (Dmitrovic), 2 DEF (Jonny, Chust), 4 MED (Unai
+  Lopez, Pablo Ibanez, Exposito, Olasagasti), 3 DEL (Yamal, Jutgla,
+  Roberto). **El once guardado en Biwenger es un 3-4-3 con SOLO 9
+  nombres**: falta el tercer defensa (Diego Rico, si se gana) y un cuarto
+  medio, aunque Unai Lopez esta en la plantilla y NO esta alineado. El
+  ciclo pone el once antes del 09/10, pero **el turno del cierre (09/10
+  12:45) tiene que comprobar que salen 11 nombres** y, si Unai sigue
+  fuera, por que (lesion, duda o fallo del motor del once).
+  Hoy no se construye ni se enciende nada: el chat del dueno esta tocando
+  la orden y las ventas en vivo, y dos manos a la vez en el mismo sitio es
+  como se cometio el error de Maffeo.
 
 - **30/09 07:15 (rafaga de la manana). ROBERTO FERNANDEZ ES NUESTRO.**
   Ciclos: verdes (#1890 a #1898). En el reset de las 07:04 Pepe gano a
