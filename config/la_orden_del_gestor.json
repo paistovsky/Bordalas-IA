@@ -13,6 +13,12 @@
       "player_id": 5678,
       "nombre": "Diego Rico",
       "puja": 620000
+    },
+    {
+      "player_id": 43272,
+      "nombre": "Fofana",
+      "puja": 5260000,
+      "por_que": "Comparador de cambios 30/09: 6,75 pts/partido contra 5,0 de Expósito, mismo precio (5,26 M contra 5,29 M), los dos 80 % titulares en FF; Fofana sube (+0,5 M en 12 días), Expósito plano."
     }
   ],
   "no_pujar": [],
@@ -50,6 +56,12 @@
         "suelo": 2900000,
         "desde": "2026-10-08T07:00:00+02:00",
         "si_saldo_negativo": true
+      },
+      {
+        "player_id": 19862,
+        "nombre": "Expósito",
+        "suelo": 5100000,
+        "si_esta": 43272
       }
     ]
   },
@@ -79,10 +91,6 @@
     {
       "player_id": 1599,
       "nombre": "Jonny"
-    },
-    {
-      "player_id": 19862,
-      "nombre": "Expósito"
     },
     {
       "player_id": 29661,
@@ -137,6 +145,11 @@
         "fecha": "2026-10-01T08:00:00+02:00",
         "que": "Cobrar la racha diaria (+0,25 M)",
         "estado": "pendiente"
+      },
+      {
+        "fecha": "2026-10-01T07:00:00+02:00",
+        "que": "Primer cambio del comparador: Fofana (Sevilla, 5,26 M) por Expósito (5,29 M). +1,75 pts/partido sin gastar: Expósito solo se vende cuando Fofana ya es nuestro",
+        "estado": "en marcha"
       },
       {
         "fecha": "2026-10-07T07:00:00+02:00",
