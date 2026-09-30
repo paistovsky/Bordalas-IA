@@ -4,6 +4,11 @@ import KpiStrip from "./components/KpiStrip";
 import SelectorDisposicion from "./components/SelectorDisposicion";
 import { useDisposicion } from "./lib/disposicion";
 import HomePage from "./pages/HomePage";
+import PlanPage from "./pages/PlanPage";
+import MercadoPage from "./pages/MercadoPage";
+import PlantillaPage from "./pages/PlantillaPage";
+import LigaPage from "./pages/LigaPage";
+import TallerPage from "./pages/TallerPage";
 import MarketPage from "./pages/MarketPage";
 import BrainPage from "./pages/BrainPage";
 import SquadPage from "./pages/SquadPage";
@@ -14,14 +19,23 @@ import { fetchStatus, normalizeStatus } from "./lib/status";
 import { ago } from "./lib/utils";
 import { madridNaiveAUTC, minutosDeLaFoto } from "./lib/relojes";
 
+/* LOS SEIS MENÚS (30/09/2026)
+ *
+ * INICIO se queda como estaba. Los demás se hicieron desde cero,
+ * cada uno con una pregunta: EL PLAN (¿qué va a hacer Pepe y con
+ * qué dinero?), MERCADO (¿qué nos hace ganar hoy?), PLANTILLA
+ * (¿cómo está el equipo?), LIGA (¿quién nos puede quitar el
+ * título?). MARCADOR se repartió entre PLANTILLA y LIGA.
+ *
+ * Todo lo técnico -las pantallas de antes, enteras, con la
+ * auditoría y el diagnóstico- vive cerrado en el TALLER. */
 const TITLES = {
   home: "INICIO",
+  plan: "EL PLAN",
   market: "MERCADO",
-  brain: "ESTRATEGIA",
   squad: "PLANTILLA",
   league: "LIGA",
-  marcador: "MARCADOR",
-  audit: "AUDITORÍA"
+  taller: "TALLER"
 };
 
 export default function App() {
@@ -84,14 +98,48 @@ export default function App() {
     return <div className="screen">CARGANDO BORDALÁS IA…</div>;
   }
 
+  // Las pantallas de antes, enteras, en los cajones del taller.
+  // No se pintan hasta que se abre su cajón.
+  const cajones = [
+    {
+      titulo: "Auditoría y diagnóstico",
+      detalle: "la salud de Pepe, sus comprobaciones y las pujas por dentro",
+      contenido: <AuditPage data={data} error={error} />
+    },
+    {
+      titulo: "El mercado por dentro",
+      detalle: "reloj, caja, objetivos, publicaciones y la liga entera",
+      contenido: <MarketPage data={data} />
+    },
+    {
+      titulo: "Cómo piensa Pepe",
+      detalle: "planes, doctrina, rivales, calendario, ojeador y solvencia",
+      contenido: <BrainPage data={data} />
+    },
+    {
+      titulo: "La plantilla al detalle",
+      detalle: "el campo, la tabla, las plantillas rivales, la vara y el orden de venta",
+      contenido: <SquadPage data={data} />
+    },
+    {
+      titulo: "La liga al detalle",
+      detalle: "la tabla de inteligencia y el libro de operaciones",
+      contenido: <LeaguePage data={data} />
+    },
+    {
+      titulo: "El marcador al detalle",
+      detalle: "la nota del once jornada a jornada",
+      contenido: <MarcadorPage data={data} />
+    }
+  ];
+
   const pages = {
     home: <HomePage data={data} />,
-    market: <MarketPage data={data} />,
-    brain: <BrainPage data={data} />,
-    squad: <SquadPage data={data} />,
-    league: <LeaguePage data={data} />,
-    marcador: <MarcadorPage data={data} />,
-    audit: <AuditPage data={data} error={error} />
+    plan: <PlanPage data={data} />,
+    market: <MercadoPage data={data} />,
+    squad: <PlantillaPage data={data} />,
+    league: <LigaPage data={data} />,
+    taller: <TallerPage cajones={cajones} />
   };
 
   const minutosFoto = minutosDeLaFoto(data.meta.generated_at);
@@ -142,7 +190,7 @@ export default function App() {
             si lleva más de tres horas sin vuelta. Todo lo que había
             debajo -edad de la foto, racha, sentidos, caja de los
             rivales, XI de Biwenger, cuadre, titularidad- vive
-            plegado en DIAGNÓSTICO, al final de AUDITORÍA. */}
+            plegado en DIAGNÓSTICO, en el TALLER. */}
         <div className={`estado ${parado ? "parado" : "ok"}`}>
           <span className="estado-punto" aria-hidden="true" />
           Última vuelta de Pepe: {horaDeLaVuelta}

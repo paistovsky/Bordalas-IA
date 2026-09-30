@@ -1,5 +1,3 @@
-import ResumenMercado from "../components/ResumenMercado";
-import Plegado from "../components/Plegado";
 import LoNuestroALaVentaPanel from "../components/LoNuestroALaVentaPanel";
 import TodaLaLigaPanel from "../components/TodaLaLigaPanel";
 import { useEffect, useState } from "react";
@@ -1376,12 +1374,11 @@ export default function MarketPage({ data }) {
     <>
       {/* ¿QUÉ ESTÁ HACIENDO PEPE CON EL DINERO? (30/09/2026)
 
-          Arriba, la respuesta en frases y números grandes.
-          Todo lo que había en esta página sigue aquí debajo,
-          plegado: mismo dato, fuera de en medio. */}
-      <ResumenMercado data={data} />
+          Desde el 30/09/2026 esta pantalla vive entera en un
+          cajón del TALLER; el menú nuevo contesta la pregunta
+          con cuadros hechos desde cero. Mismo dato, aquí. */}
 
-      <Plegado titulo="El detalle del mercado: reloj, caja, objetivos, publicaciones y la liga entera">
+      <>
       {/* ARRIBA, SOLO TRES COSAS (13/09/2026)
 
           El dueño leyó el cuadro de objetivos y no entendía doce
@@ -1452,7 +1449,7 @@ export default function MarketPage({ data }) {
           se mira cuando se quiere mirar, no cuando hay que
           decidir. */}
       <TodaLaLigaPanel data={data} />
-      </Plegado>
+      </>
     </>
   );
 }

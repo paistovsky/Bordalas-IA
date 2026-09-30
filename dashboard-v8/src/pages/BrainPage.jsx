@@ -1,5 +1,3 @@
-import ResumenEstrategia from "../components/ResumenEstrategia";
-import Plegado from "../components/Plegado";
 import ElOjeadorPanel from "../components/ElOjeadorPanel";
 import QuienMejoraElOncePanel from "../components/QuienMejoraElOncePanel";
 import ElVestuarioLibrePanel from "../components/ElVestuarioLibrePanel";
@@ -280,12 +278,11 @@ export default function BrainPage({ data }) {
     <>
       {/* ¿QUÉ REGLAS SIGUE PEPE? (30/09/2026)
 
-          Arriba, la respuesta en frases y números grandes.
-          Todo lo que había en esta página sigue aquí debajo,
-          plegado: mismo dato, fuera de en medio. */}
-      <ResumenEstrategia data={data} />
+          Desde el 30/09/2026 esta pantalla vive entera en un
+          cajón del TALLER; el menú nuevo contesta la pregunta
+          con cuadros hechos desde cero. Mismo dato, aquí. */}
 
-      <Plegado titulo="Cómo piensa Pepe por dentro: planes, doctrina, rivales, calendario, ojeador y solvencia">
+      <>
       {/* LOS SENTIDOS (el cuadro de salud de lo que Pepe lee) se
           mudaron el 30/09/2026 a DIAGNÓSTICO, en AUDITORÍA: el
           dueño no quiere avisos fuera de allí. */}
@@ -396,7 +393,7 @@ export default function BrainPage({ data }) {
 
 
       </div>
-      </Plegado>
+      </>
     </>
   );
 }

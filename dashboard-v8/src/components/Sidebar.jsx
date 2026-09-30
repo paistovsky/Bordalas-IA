@@ -1,26 +1,24 @@
 import {
   Home,
+  ListChecks,
   ShoppingCart,
-  Brain,
   UsersRound,
   Trophy,
-  Gauge,
-  ClipboardList
+  Wrench
 } from "lucide-react";
 import { cadenciaEnPalabras } from "../lib/relojes";
 
+// Seis menús (30/09/2026). En el móvil van abajo, como una barra
+// de pestañas: seis caben en 390 px sin deslizar.
 const ITEMS = [
   ["home", "INICIO", Home],
+  ["plan", "EL PLAN", ListChecks],
   ["market", "MERCADO", ShoppingCart],
-  ["brain", "ESTRATEGIA", Brain],
   ["squad", "PLANTILLA", UsersRound],
   ["league", "LIGA", Trophy],
 
-  // El marcador va antes de AUDITORIA a proposito: auditoria es
-  // para cuando algo huele mal, el marcador es para el lunes.
-  ["marcador", "MARCADOR", Gauge],
-
-  ["audit", "AUDITORÍA", ClipboardList]
+  // Lo técnico, al final: es para cuando algo huele mal.
+  ["taller", "TALLER", Wrench]
 ];
 
 export default function Sidebar({ page, setPage, data }) {

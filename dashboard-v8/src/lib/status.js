@@ -284,6 +284,12 @@ export function normalizeStatus(raw = {}) {
     tablonSemana: raw.tablon_semana ?? null,
     reglas: raw.reglas ?? null,
 
+    // LA ORDEN DEL GESTOR (30/09/2026). A por quién va Pepe, a
+    // quién vende para pagarlo y a quién no toca. La leen la
+    // CRONOLOGÍA de INICIO y EL PLAN. Sin la clave se queda en
+    // `null` y los cuadros dicen que no se publicó.
+    orden: raw.orden ?? null,
+
     // Que trae la tanda nueva del Computer en cada reset.
     censoDelReset: raw.censo_del_reset || { available: false },
 

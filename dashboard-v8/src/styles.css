@@ -1287,3 +1287,226 @@ td.pj-c .muted{font-size:11px}
 .rs-rival[open]>summary span::after{content:" ▴"}
 .rs-rival ul{list-style:none;padding:0 12px 9px}
 .rs-rival li{padding:5px 0;border-top:1px solid rgba(255,255,255,.05);font-size:13.5px;line-height:1.45}
+
+/* ============================================================
+   LOS MENÚS NUEVOS (30/09/2026)
+   ------------------------------------------------------------
+   EL PLAN, MERCADO, PLANTILLA, LIGA y TALLER, hechos desde cero.
+   Tarjetas con una pregunta, cifras grandes y frases cortas. El
+   verde es para lo que va bien o sube; lo que baja va en gris.
+   Ni ámbar ni rojo: el único rojo de la página es el punto de
+   «Pepe parado» de arriba.
+   ============================================================ */
+
+.c2-rejilla{
+  display:grid;gap:12px;align-items:start;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));
+}
+.pan.c2{
+  padding:15px 16px 14px;margin:0;
+  background:linear-gradient(180deg,rgba(34,197,94,.045),rgba(34,197,94,0) 90px),var(--pan);
+  border-top:2px solid rgba(34,197,94,.35);
+}
+.pan.c2+.pan.c2{margin-top:0}
+.c2-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.c2-titulos{min-width:0}
+.c2 h2{font:800 13px/1.15 -apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.08em;margin:0}
+.c2-pregunta{font-size:13px;color:var(--dim);margin-top:3px;line-height:1.35}
+.c2-pill{
+  flex:none;font-size:11px;font-weight:700;letter-spacing:.03em;white-space:nowrap;
+  padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--dim);background:var(--pan2);
+}
+.c2-pill.on{color:var(--acc);border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
+.c2-sindato{font-size:14px;color:var(--dim);line-height:1.45;padding:2px 0}
+.c2-frase{font-size:15px;line-height:1.45;margin:4px 0 8px}
+.c2-pie{font-size:12.5px;color:var(--dim);line-height:1.45;margin-top:10px}
+
+.c2-bloque{margin-top:12px}
+.c2-bloque:first-of-type{margin-top:2px}
+.c2-bloque-t{
+  font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:6px;
+}
+
+/* Filas: nombre a la izquierda (con su línea gris), cifra a la derecha. */
+.c2-filas{list-style:none}
+.c2-filas li{
+  display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:15px;
+}
+.c2-filas li:last-child{border-bottom:0}
+.c2-filas li>span{min-width:0}
+.c2-filas li small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.35}
+.c2-filas li>b{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:15.5px}
+.c2-filas li.hecho{opacity:.55}
+.c2-compacta li{padding:7px 0;font-size:14px}
+.c2-compacta li>b{font-size:14px}
+
+.sube{color:var(--ok)}
+.baja{color:var(--dim)}
+.bien{color:var(--ok)}
+
+.c2-chips{display:flex;flex-wrap:wrap;gap:6px}
+.c2-chip{
+  font-size:13px;padding:4px 10px;border-radius:99px;
+  background:var(--pan2);border:1px solid var(--line);
+}
+.c2-chip.tachado{text-decoration:line-through;color:var(--dim)}
+
+/* LA ORDEN */
+.c2-fichaje{display:flex;align-items:center;gap:12px;padding:6px 0}
+.c2-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none;border:2px solid rgba(34,197,94,.45)}
+.c2-fichaje-txt b{display:block;font-size:21px;line-height:1.15}
+.c2-fichaje-txt span{display:block;font-size:13.5px;color:var(--dim);margin-top:2px}
+
+/* CIFRAS GRANDES */
+.c2-cifras{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:2px 0 6px}
+.c2-cifra{
+  display:flex;flex-direction:column;gap:1px;min-width:0;
+  padding:10px 11px;border-radius:10px;background:var(--pan2);border:1px solid var(--line);
+}
+.c2-cifra-l{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.c2-cifra-v{font:800 27px/1.1 -apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.c2-cifra-p{font-size:12px;color:var(--dim);line-height:1.3;overflow-wrap:anywhere}
+.c2-cifra.bien .c2-cifra-v{color:var(--ok)}
+
+/* LA CASCADA DEL DINERO */
+.c2-cascada{list-style:none}
+.c2-cascada li{
+  display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:10px;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:14px;
+}
+.c2-cascada li>b{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:15px;text-align:right}
+.c2-cascada-barra{height:10px;border-radius:5px;background:#08111a;overflow:hidden}
+.c2-cascada-barra i{display:block;height:100%;border-radius:5px;background:#3d4a58}
+.c2-cascada li.base .c2-cascada-barra i{background:var(--blue)}
+.c2-cascada li.entra .c2-cascada-barra i{background:var(--ok)}
+.c2-cascada li.entra>b{color:var(--ok)}
+.c2-cascada-final{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  margin-top:10px;padding:12px 13px;border-radius:10px;background:var(--pan2);border:1px solid var(--line);
+}
+.c2-cascada-final span{font-size:14px;font-weight:650}
+.c2-cascada-final small{display:block;font-size:12px;font-weight:400;color:var(--dim);margin-top:2px}
+.c2-cascada-final b{font:800 26px/1 -apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* LAS REGLAS */
+.c2-reglas{list-style:none}
+.c2-reglas li{
+  display:grid;grid-template-columns:10px minmax(0,1fr);gap:10px;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:14.5px;line-height:1.4;
+}
+.c2-reglas li:last-child{border-bottom:0}
+.c2-punto{width:8px;height:8px;border-radius:50%;background:var(--ok);align-self:start;margin-top:.5em}
+
+/* EL ESCAPARATE */
+.c2-jugs{list-style:none;display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
+.c2-jug{padding:10px 12px;border-radius:10px;background:var(--pan2);border:1px solid var(--line)}
+.c2-jug.mejora{border-color:rgba(34,197,94,.45)}
+.c2-jug.puja{border-color:rgba(59,130,246,.5)}
+.c2-jug-arriba{display:flex;align-items:baseline;gap:8px}
+.c2-jug-arriba b{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2-pos{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--dim);flex:none}
+.c2-precio{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.c2-jug-abajo{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--dim);margin-top:3px}
+.c2-jug-abajo .sube{color:var(--ok)}
+.c2-jug-nota{font-size:13px;margin-top:5px}
+.c2-jug.mejora .c2-jug-nota{color:var(--ok)}
+.c2-jug.puja .c2-jug-nota{color:#93c5fd}
+.c2-mas{margin-top:8px}
+.c2-mas>summary{cursor:pointer;font-size:13px;color:var(--dim);padding:6px 0;list-style:none}
+.c2-mas>summary::-webkit-details-marker{display:none}
+.c2-mas>summary::after{content:" ▾"}
+.c2-mas[open]>summary::after{content:" ▴"}
+
+.c2-destacado{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;
+  padding:11px 12px;border-radius:10px;background:var(--pan2);border:1px solid var(--line);margin-bottom:12px;
+}
+.c2-destacado span{font-size:14px}
+.c2-destacado b{font:800 22px/1.1 -apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+.c2-destacado small{flex-basis:100%;font-size:12.5px;color:var(--dim)}
+.c2-dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:4px 18px}
+
+/* LA PLANTILLA */
+.c2-linea+.c2-linea{margin-top:14px}
+.c2-squad{list-style:none;display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+.c2-squad li{padding:9px 11px;border-radius:9px;background:var(--pan2);border:1px solid var(--line)}
+.c2-sq-arriba{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.c2-sq-arriba b{font-size:15.5px}
+.c2-xi{font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--acc);border:1px solid rgba(34,197,94,.45);border-radius:4px;padding:0 4px}
+.c2-marca{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:0 7px}
+.c2-sq-pts{margin-left:auto;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
+.c2-sq-barra{height:5px;border-radius:3px;background:#08111a;overflow:hidden;margin:6px 0 4px}
+.c2-sq-barra i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.c2-sq-abajo{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:12.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.c2-sq-abajo .sube{color:var(--ok)}
+.c2-sq-estado{color:var(--tx);font-weight:650}
+
+/* LA LIGA */
+.c2-liga{display:grid;gap:12px}
+.c2-rivales{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.c2-rival{padding:12px 13px;border-radius:11px;background:var(--pan2);border:1px solid var(--line);min-width:0}
+.c2-rival.es-nos{border-color:rgba(59,130,246,.5);background:linear-gradient(180deg,rgba(59,130,246,.08),rgba(59,130,246,0)),var(--pan2)}
+.c2-rival-arriba{display:flex;align-items:baseline;gap:9px}
+.c2-rival-puesto{font-weight:800;color:var(--dim);font-variant-numeric:tabular-nums;flex:none}
+.c2-rival-nombre{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2-rival-pts{margin-left:auto;font:800 22px/1 -apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.c2-rival-pts small{font-size:11px;font-weight:500;color:var(--dim);margin-left:3px}
+.c2-rival-frase{font-size:14px;margin-top:4px}
+.c2-rival-datos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:9px 0 6px}
+.c2-rival-datos div{min-width:0}
+.c2-rival-datos dt{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.c2-rival-datos dd{font-size:14.5px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.c2-amenaza{display:inline-flex;align-items:center;gap:3px}
+.c2-amenaza i{width:9px;height:9px;border-radius:50%;background:#253241}
+.c2-amenaza i.on{background:#cbd5e1}
+.c2-amenaza small{font-size:12.5px;color:var(--dim);margin-left:6px}
+.c2-rival-semana{margin-top:8px;border-top:1px solid rgba(255,255,255,.06);padding-top:6px}
+.c2-rival-semana>summary{cursor:pointer;font-size:13.5px;list-style:none}
+.c2-rival-semana>summary::-webkit-details-marker{display:none}
+.c2-rival-semana>summary::after{content:" ▾";color:var(--dim)}
+.c2-rival-semana[open]>summary::after{content:" ▴"}
+.c2-rival-semana ul{list-style:none;margin-top:4px}
+.c2-rival-semana li{font-size:13px;line-height:1.45;padding:4px 0;border-top:1px solid rgba(255,255,255,.04)}
+.c2-rival-semana li span{font:11px/1.4 ui-monospace,Menlo,monospace;color:var(--dim);margin-right:4px}
+.c2-rival-quieto{margin-top:8px;font-size:13px;color:var(--dim)}
+
+/* EL TALLER */
+.pan.c2-taller{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.c2-taller-foto{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:none}
+.cajon-detalle{display:block;font-size:12px;font-weight:400;color:var(--dim);margin-top:2px}
+.plegado.cajon>summary{color:var(--tx);font-size:14.5px}
+
+/* LA CRONOLOGÍA NUEVA: el paso siguiente en azul, nunca ámbar. */
+.tli.next::before{border-color:var(--blue)}
+.tli .when{font-size:10.5px}
+.tli .what{font-size:13.5px}
+.tli .why{font-size:12px}
+.crono-vacia{font-size:13.5px;color:var(--dim);padding:6px 0}
+.crono-mientras{
+  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  margin:12px 0 2px;padding-top:9px;border-top:1px solid var(--line);
+}
+
+/* EN EL MÓVIL, LOS SEIS MENÚS ABAJO (30/09/2026). Seis caben en
+   390 px, sin deslizar, al alcance del pulgar. */
+[data-layout="movil"] nav.sidebar{
+  position:sticky;top:auto;bottom:0;z-index:30;order:1;
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;
+  padding:4px 2px calc(4px + env(safe-area-inset-bottom));overflow:visible;
+  border-top:1px solid var(--line);border-bottom:0;
+  background:rgba(13,21,29,.97);backdrop-filter:blur(6px);
+}
+[data-layout="movil"] nav.sidebar .brand{display:none}
+[data-layout="movil"] nav.sidebar button{
+  width:auto;flex-direction:column;gap:3px;align-items:center;justify-content:center;
+  padding:7px 1px 6px;font-size:9px;letter-spacing:.02em;text-align:center;min-width:0;
+}
+[data-layout="movil"] nav.sidebar button span{white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%}
+[data-layout="movil"] nav.sidebar button svg{width:19px;height:19px}
+[data-layout="movil"] main{padding-bottom:84px}
+[data-layout="movil"] .c2-cifra-v{font-size:23px}
+[data-layout="movil"] .c2-cifras{gap:7px}
+[data-layout="movil"] .c2-cifra{padding:9px 9px}
+[data-layout="movil"] .c2-rejilla{grid-template-columns:minmax(0,1fr)}

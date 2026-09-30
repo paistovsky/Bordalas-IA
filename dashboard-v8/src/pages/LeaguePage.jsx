@@ -1,5 +1,3 @@
-import ResumenLiga from "../components/ResumenLiga";
-import Plegado from "../components/Plegado";
 import StandingsIntelPanel from "../components/StandingsIntelPanel";
 import { formatEuros } from "../lib/utils";
 
@@ -37,12 +35,11 @@ export default function LeaguePage({ data }) {
     <>
       {/* ¿CÓMO VAN LOS RIVALES? (30/09/2026)
 
-          Arriba, la respuesta en frases y números grandes.
-          Todo lo que había en esta página sigue aquí debajo,
-          plegado: mismo dato, fuera de en medio. */}
-      <ResumenLiga data={data} />
+          Desde el 30/09/2026 esta pantalla vive entera en un
+          cajón del TALLER; el menú nuevo contesta la pregunta
+          con cuadros hechos desde cero. Mismo dato, aquí. */}
 
-      <Plegado titulo="La tabla completa de inteligencia y el libro de operaciones de los rivales">
+      <>
       <StandingsIntelPanel data={data} />
 
       <section className="pan">
@@ -115,7 +112,7 @@ export default function LeaguePage({ data }) {
           <p className="note" style={{ textAlign: "left" }}>{data.pointsMarket.reason}</p>
         </section>
       )}
-      </Plegado>
+      </>
     </>
   );
 }
