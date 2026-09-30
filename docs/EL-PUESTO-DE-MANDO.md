@@ -454,6 +454,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **30/09 10:45 (el gestor). EL PANEL, HECHO DE CERO, PUBLICADO** (d9e8b5d,
+  despliegue verde). Menus: INICIO (igual, con la cronologia rehecha desde
+  el plan real: pujas vivas, `subasta`, `orden`, cierre de jornada; ya no
+  lee la valoracion), EL PLAN (la orden en marcha, el dinero hasta la
+  jornada en cascada, el proximo reset, las reglas), MERCADO, PLANTILLA,
+  LIGA (una carta por rival) y TALLER (lo tecnico y las paginas viejas,
+  plegadas). Nueva clave `orden` en status.json (680a0ea).
+  **Arreglado el origen de los datos viejos**: dashboard-deploy.yml corria
+  su propia vuelta SIN interruptores y subia status.json al KV, pisando
+  el del ciclo en cada publicacion (asi salia «Pujar por Lejeune»). Ahora
+  solo despliega el diseno (e1b9643); los datos los escribe solo
+  bordalas-live.yml.
+
 - **30/09 08:30 (el gestor). EL AGUJERO QUE QUEDA.** Saldo real tras las
   cuatro ventas: -4.113.816 (#1899). Blanco: el Computer ofrece 2.899.200
   (-4 %), su precio baja; suelo bajado a 2.850.000 (325cf7c) para que la
