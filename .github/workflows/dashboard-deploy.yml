@@ -19,6 +19,15 @@ concurrency:
   group: bordalas-dashboard-deploy
   cancel-in-progress: true
 
+# SOLO EL DISENO (30/09/2026)
+#
+#   Antes este flujo corria su propia vuelta OBSERVER, rehacia
+#   status.json SIN los interruptores de produccion y lo subia al KV:
+#   cada publicacion del panel pisaba los datos buenos del ciclo hasta
+#   la vuelta siguiente (el dueno veia datos viejos y, por ejemplo,
+#   «Pujar por Lejeune» que la orden prohibia). Ahora solo compila el
+#   React y despliega el Worker. Los datos los escribe bordalas-live.yml.
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -97,45 +106,6 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
 
-      - name: Fresh OBSERVER cycle
-        run: python -m src.autopilot --once
-
-      - name: Validate execution telemetry
-        run: python -m src.telemetry.test_dashboard_execution_v121
-
-      - name: Build telemetry
-        run: |
-          mkdir -p dashboard/data
-          python -m src.telemetry.build_dashboard
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          data = json.loads(
-              Path("dashboard/data/status.json")
-              .read_text(encoding="utf-8")
-          )
-
-          balance = (data.get("summary") or {}).get("balance", 0)
-          plans = (
-              (data.get("solvency") or {}).get("plans", {})
-              or {}
-          )
-
-          print("Balance:", balance)
-          print("Source:", plans.get("source"))
-          print("Plan A:", (plans.get("a") or {}).get("player_names"))
-          print("Plan B:", (plans.get("b") or {}).get("player_names"))
-          print("Plan C:", (plans.get("c") or {}).get("player_names"))
-
-          if balance < 0:
-              assert plans.get("source") == "SAFE_DEBT_V10"
-              assert plans.get("a")
-              assert plans.get("b")
-              assert plans.get("c")
-          PY
-
       - name: Build React
         working-directory: dashboard-v8
         run: npm run build
@@ -145,15 +115,6 @@ jobs:
           find dashboard -mindepth 1 -maxdepth 1 ! -name data -exec rm -rf {} +
           cp -R dashboard-v8/dist/. dashboard/
           test -f dashboard/index.html
-          test -f dashboard/data/status.json
-
-      - name: Update Cloudflare KV
-        run: |
-          npx --yes wrangler@4.120.1 kv key put \
-            "status.json" \
-            --path "dashboard/data/status.json" \
-            --namespace-id "dbb7542f31b34d8ab0590bf774538b21" \
-            --remote
 
       - name: Deploy Worker
         run: |
@@ -162,6 +123,6 @@ jobs:
 
       - name: Summary
         run: |
-          echo "BORDALAS DASHBOARD DEPLOYED"
+          echo "BORDALAS DASHBOARD DEPLOYED (solo el diseno)"
           echo "Commit: $GITHUB_SHA"
-          echo "Plans: SAFE_DEBT_V10 A/B/C"
+          echo "Los datos (status.json en KV) los escribe SOLO bordalas-live.yml."
