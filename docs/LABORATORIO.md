@@ -69,6 +69,51 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E8 · 30/09/2026 17:25 de Madrid · ¿Cuanto dan los VIAJES CORTOS con plazo fijo? (el agujero del 09/10)
+
+**El caso:** Pepe en rojo (~-1,3 M) y tiene que estar en verde el 09/10
+a las 15:00 sin vender a los top. La estrategia (2) del gestor: viajes
+cortos de reventa (E1/E3), tope 2 M por viaje, 3-4 M en total, todo
+vendido antes del 07/10. Su cuenta a ojo: +0,2-0,4 M. **Codigo:**
+`lab/precio/viajes_con_plazo.py`.
+
+**Como:** 35 semanas (arranques del 20/08 al 23/09). En cada una: compra
+de S a S+5 lo que el Computer subasto y SUBIO en el ultimo cambio
+(tablon), pagando lo del ganador real + 1 %; vende al Computer el primer
+dia que baja o, a la fuerza, el dia S+7; ofertas segun E3; el dinero
+vuelve al dia siguiente.
+
+    caja   tope/viaje   mediana    peor semana   mejor      en verde   viajes/sem
+    2 M       2 M      +327.123     -87.870    +2.444.324    29/35       2,2
+    3 M       2 M      +389.979    -175.294    +1.983.564    31/35       3,1
+    4 M       2 M      +685.540     -22.220    +2.424.594    34/35       4,2
+    4 M       1 M      +327.123     -57.417    +2.444.324    24/35       2,9
+
+    semanas que tapan 1,3 M:  2 M: 3/35   3 M: 6/35   4 M: 5/35
+    semanas que dan >= 0,5 M: 2 M: 13/35  3 M: 15/35  4 M: 20/35
+
+- **Las semanas del paron (arranques del 20 al 23/09), con 4 M:** +0,28
+  a +0,99 M. En el paron tambien funciona.
+- **El 75 % de los viajes se venden A LA FUERZA el ultimo dia**, y aun
+  asi ganan: lo que se compra subiendo sigue subiendo la semana entera.
+  El plazo no es el peligro; el peligro es no ganar la puja.
+- El tope de 1 M por viaje estorba: deja fuera a los que mas suben.
+
+**Contra el plan del gestor:** su +0,2-0,4 M es prudente. La mediana
+medida es +0,33 M (2 M de caja) a +0,69 M (4 M), casi nunca pierde (peor
+semana -0,18 M) y **tapa el agujero entero solo 1 semana de cada 6-7**.
+
+**Limites:** solo se ven los jugadores que alguien compro, y se supone
+ganar la puja con +1 % sobre el ganador real (Pepe gano el 84 % de sus
+pujas). No cuenta que meter 4 M hunde el saldo a ~-5 M unos dias (hay
+que tenerlos devueltos antes del 09/10 15:00, y lo estan: el plazo es el
+07/10). Seis semanas de datos.
+
+**Veredicto: SE AGUANTA como ayuda, NO como solucion.** Abrir 3-4 M
+acotados a viajes E1/E3 hasta el 07/10 da, de mediana, +0,4-0,7 M con muy
+poco riesgo; el resto del agujero tiene que salir del cambio uno por uno
+o de la red (Jutgla). Numeros en «Listo para el plan».
+
 ### E7 · 30/09/2026 11:20 de Madrid · Que predice los PUNTOS de la jornada siguiente (y cuanto cuesta un punto)
 
 **Por que:** la regla del dueno (29/09) es que la inversion son puntos.
@@ -444,6 +489,14 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
     PUESTAS (Zubeldia: FF 16 h antes que Biwenger; Pepe lo gano igual).
     Si se hace algo: revisar las pujas vivas antes del reset con la foto
     (estado, `absence` posterior a la puja, la rampa). n=1: es pista.
+- **(E8, 30/09 17:25) Los viajes cortos para el agujero del 09/10:**
+  con 4 M de caja y tope de 2 M por viaje, comprando lo que sube y
+  vendiendo el primer dia que baja (o a la fuerza el 07/10): mediana
+  +0,69 M por semana, 34 de 35 semanas en verde, peor -22.220. Con 3 M:
+  +0,39 M; con 2 M: +0,33 M. Tapa 1,3 M solo 1 semana de cada 6-7. No
+  bajar el tope por viaje a 1 M (mediana a la mitad). Si se abre por la
+  orden: empezar YA (cada dia de retraso es un dia menos de subida) y
+  vender el 07/10 lo que quede, sin esperar.
 - **(E1, 28/09) «Solo se compra para revender lo que SUBIO en el ultimo
   cambio de precio; se vende al Computer el primer dia que BAJA».** Medido
   en 191 compras reales: los que subian, 57/73 verdes y +25,7 M; los que
