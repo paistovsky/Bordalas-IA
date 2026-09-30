@@ -69,6 +69,64 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E7 · 30/09/2026 11:20 de Madrid · Que predice los PUNTOS de la jornada siguiente (y cuanto cuesta un punto)
+
+**Por que:** la regla del dueno (29/09) es que la inversion son puntos.
+Para fichar y vender pensando en puntos hay que saber que dato los
+anticipa y cuanto cuesta subir una plaza del once. **Codigo:**
+`lab/puntos/que_predice_puntos.py`.
+
+**Datos:** lo unico con puntos por jugador en git: totales tras la J6
+(foto del 18/09, antes de la J7) y tras la J7 (`puntos_por_jornada.jsonl`).
+Puntos de la J7 = diferencia; n=545. **Una sola jornada fuera de muestra**
+(no hay fotos antiguas en git y los artefactos duran 2 dias).
+
+**1) Que predice la J7 (correlacion de rangos; estado ok el 18/09, n=479):**
+
+    puntos totales hasta J6 (lo que usa `nos_suma`)   +0,48   el mejor 20 % hizo 4,88 pts
+    precio de Biwenger                                +0,46                      4,60
+    puntos por partido jugado                          +0,44                      4,54
+
+Casi empatan; la media por partido es la peor, como ya midio
+`el_que_va_a_despegar` el 13/09 y el 19/09. **Pepe ordena bien.** Por
+posicion, lo mas previsible son los porteros (+0,71) y lo menos, los
+defensas (+0,36).
+
+**2) El estado es el filtro que mas separa:** ok 2,77 pts (jugaron 69 %),
+doubt 1,29 (14 %), injured 0,06 (2 %), sancionado 0.
+
+**3) Cuanto da cada tramo de precio (estado ok):**
+
+    tramo     n    jugaron   puntos J7   media hasta J6   precio medio
+    0-1 M    169     43 %       1,41        1,62/partido       0,41 M
+    1-3 M    157     75 %       2,58        3,24               1,87 M
+    3-6 M    113     90 %       4,27        4,61               4,20 M
+    6-10 M    23    100 %       4,87        5,88               7,84 M
+    10+ M     17    100 %       5,35        8,40              14,80 M
+
+Subir una plaza del once de 1-3 M a 3-6 M da +1,7 pts en la J7 (+1,4 de
+media) por ~2,3 M: **~0,6-0,7 pts por millon**. De 3-6 M a 6-10 M, +0,6
+(J7) a +1,3 (media) por ~3,6 M: 0,2-0,35 por millon. Por encima de 10 M,
+la J7 dice +0,5 por 7 M; la temporada, +2,5. Lo mas barato en puntos es
+**sacar del once a los de menos de 3 M**; los de menos de 1 M ni juegan
+(43 %). Y por posicion, los defensas dan menos (2,31 en la J7) que medios
+(3,16) y delanteros (3,42).
+
+**Contra lo que hace Pepe:** 32 de sus 55 pujas ganadas son defensas de
+1-3 M (medido por el gestor el 29/09): el tramo y la posicion que menos
+puntos dan por plaza.
+
+**Limites:** una jornada; la «media hasta J6» por tramo es circular (el
+precio sube con los puntos), por eso se dan las dos columnas. Sin
+titularidad historica.
+
+**Veredicto: NADA QUE CAMBIAR EN COMO ORDENA PEPE** (total de puntos y
+precio van igual de bien; el estado ya se filtra). **Numeros para las
+decisiones del gestor (la hucha, el agujero del 06/10):** el punto mas
+barato esta en subir las plazas de menos de 3 M a 3-6 M, y mejor en
+medio o delantera que en defensa. Repetir con la J8 (cierra hacia el
+12/10) antes de convertirlo en regla.
+
 ### E6 · 29/09/2026 17:30 de Madrid · E4-bis: ¿los filtros de hoy ya frenan las noticias de BAJA?
 
 **Pregunta del gestor (29/09 14:15):** de las BAJA de E4, ¿cuantas pasarian
