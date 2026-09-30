@@ -3572,6 +3572,15 @@ def _saldo_fresco(market_status: dict | None):
     return None
 
 
+def _la_orden_para_el_panel() -> dict:
+    try:
+        from src.telemetry.el_tablon import la_orden_para_el_panel
+
+        return la_orden_para_el_panel()
+    except Exception as error:                      # noqa: BLE001
+        return {"viva": False, "estado": f"ERROR: {type(error).__name__}"}
+
+
 def _las_reglas_encendidas() -> dict:
     try:
         from src.telemetry.el_tablon import las_reglas_encendidas
@@ -6722,6 +6731,7 @@ def build_dashboard_state() -> dict:
         # para LIGA (lo que movio cada rival) y ESTRATEGIA.
         "tablon_semana": _el_tablon_del_dia(snapshot, horas=168),
         "reglas": _las_reglas_encendidas(),
+        "orden": _la_orden_para_el_panel(),
 
         "marcador": {
             **(marcador_estado or {}),

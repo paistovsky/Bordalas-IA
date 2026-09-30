@@ -236,3 +236,54 @@ def las_reglas_encendidas() -> dict:
     except Exception as error:                      # noqa: BLE001
         return {"ok": False, "reglas": [], "n": 0,
                 "error": f"{type(error).__name__}: {error}"}
+
+
+# ============================================================
+# LA ORDEN DEL GESTOR, PARA EL PANEL (30/09/2026)
+# ============================================================
+
+def la_orden_para_el_panel() -> dict:
+    """
+    La orden viva en frases: a por quien va Pepe, a quien vende para
+    pagarlo, a quien protege. `{"viva", "motivo", "caduca", "fichar",
+    "vender", "proteger", "conservar", "no_pujar"}`. Nunca lanza.
+    """
+
+    try:
+        from datetime import datetime, timezone
+
+        from src.actions.la_orden_del_gestor import (
+            activa, leer_la_orden, validar,
+        )
+
+        orden = leer_la_orden()
+        invalida = validar(orden, datetime.now(timezone.utc)) if orden else "SIN_ORDEN"
+        venta = (orden or {}).get("vender_si_ficha") or {}
+
+        def nombres(lista):
+            return [x.get("nombre") for x in lista or [] if x.get("nombre")]
+
+        return {
+            "viva": bool(activa() and not invalida),
+            "estado": "VIVA" if activa() and not invalida else (invalida or "APAGADA"),
+            "caduca": (orden or {}).get("caduca"),
+            "fichar": [
+                {"nombre": f.get("nombre"), "puja": f.get("puja")}
+                for f in (orden or {}).get("fichar") or []
+            ],
+            "vender": [
+                {
+                    "nombre": j.get("nombre"),
+                    "suelo": j.get("suelo"),
+                    "ultimo_recurso": bool(j.get("desde")),
+                    "desde": j.get("desde"),
+                }
+                for j in venta.get("jugadores") or []
+            ],
+            "proteger": nombres((orden or {}).get("proteger")),
+            "conservar": nombres((orden or {}).get("conservar")),
+            "no_pujar": nombres((orden or {}).get("no_pujar")),
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {"viva": False, "estado": f"ERROR: {type(error).__name__}"}

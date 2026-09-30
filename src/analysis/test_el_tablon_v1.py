@@ -88,7 +88,22 @@ def test_la_semana() -> None:
     assert any("Viejo" in l["texto"] for l in t["lineas"]), t
 
 
-TESTS = [test_frases_y_orden, test_con_basura_no_lanza,
+def test_la_orden_en_el_panel() -> None:
+    import os
+    from src.telemetry.el_tablon import la_orden_para_el_panel
+    antes = os.environ.get("BORDALAS_LA_ORDEN_DEL_GESTOR")
+    try:
+        os.environ["BORDALAS_LA_ORDEN_DEL_GESTOR"] = "1"
+        o = la_orden_para_el_panel()
+        assert "estado" in o and isinstance(o.get("fichar"), list), o
+        os.environ.pop("BORDALAS_LA_ORDEN_DEL_GESTOR", None)
+        assert la_orden_para_el_panel()["viva"] is False
+    finally:
+        if antes is not None:
+            os.environ["BORDALAS_LA_ORDEN_DEL_GESTOR"] = antes
+
+
+TESTS = [test_la_orden_en_el_panel, test_frases_y_orden, test_con_basura_no_lanza,
          test_las_reglas_encendidas, test_la_semana]
 
 
