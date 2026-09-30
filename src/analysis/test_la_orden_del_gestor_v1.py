@@ -320,7 +320,22 @@ def test_subir_la_puja() -> None:
     assert h[0]["exito"] is True, h
 
 
+def test_se_vende_solo_con_el_relevo_dentro() -> None:
+    ORIOL, UNAI = 77, 88
+    orden = {**ORDEN, "vender_si_ficha": {"si_esta": ROBERTO, "jugadores": [
+        {"player_id": UNAI, "nombre": "Unai", "suelo": 2_700_000, "si_esta": ORIOL},
+    ]}}
+    base = dict(mercado={}, nuestras_pujas={}, ofertas_del_computer={
+        UNAI: {"offer_id": 5, "amount": 2_865_000}}, en_venta={UNAI},
+        precios={UNAI: 2_770_000}, maximo_de_puja=14_000_000)
+    a = orden_mod.decidir(orden, plantilla={ROBERTO, UNAI}, **base)
+    assert a == [], "sin el relevo dentro no se vende"
+    a = orden_mod.decidir(orden, plantilla={ROBERTO, UNAI, ORIOL}, **base)
+    assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", UNAI)], a
+
+
 TESTS = [
+    test_se_vende_solo_con_el_relevo_dentro,
     test_subir_la_puja,
     test_la_pantalla_tampoco_anuncia_al_vetado,
     test_conservar_cierra_la_venta_de_pepe,

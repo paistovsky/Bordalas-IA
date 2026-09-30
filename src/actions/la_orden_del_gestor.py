@@ -200,6 +200,13 @@ def decidir(
             if pid not in plantilla or nombre.strip().lower() in INTOCABLES:
                 continue
 
+            # SU PROPIO RELEVO (30/09): un jugador con `si_esta` solo se
+            # vende cuando SU sustituto ya es nuestro (Unai Lopez, cuando
+            # llegue Oriol Rey). Asi nunca se queda un hueco en el once.
+            relevo = _int(j.get("si_esta"))
+            if relevo and relevo not in plantilla:
+                continue
+
             # EL ULTIMO RECURSO (29/09): `desde` + `si_saldo_negativo`.
             # No se toca hasta esa fecha, y solo si el saldo sigue en
             # rojo. Sin saber el saldo o la hora, no se vende.
