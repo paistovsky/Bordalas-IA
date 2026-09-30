@@ -170287,5 +170287,24 @@
         "amount": 2504800
       }
     ]
+  },
+  {
+    "event_id": "8742da116f2253ac0005d654",
+    "date": 1790806243,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
