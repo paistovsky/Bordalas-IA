@@ -454,6 +454,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **30/09 14:30 (el dueno y el gestor). EL EXAMEN: SALIR DEL ROJO SIN VENDER
+  A LOS TOP.** El dueno: «buen examen para ver como salimos de este
+  embrollo sin tener que vender a uno de nuestros delanteros o jugadores
+  top. Aun hay tiempo y estrategias distintas, eso es lo que quiero ver.»
+  Estrategias, por orden: (1) CAMBIO UNO POR OTRO (caro por titular barato
+  de su posicion, venta con relevo `si_esta`), cada manana con el mercado
+  nuevo; (2) VIAJES CORTOS de reventa sobre lo que SUBE (E1/E3: vender al
+  Computer el primer dia que baja), con tope 2 M por viaje, ~3-4 M en
+  total, todo cerrado antes del 07/10: da ~0,2-0,4 M, no cierra solo el
+  agujero (para 1,3 M a +5 % harian falta ~26 M). Hoy Pepe NO especula en
+  rojo (carril: presupuesto = saldo - comprometido; subasta: tope max(0,
+  caja)); hay que abrirlo por la orden, acotado; (3) red: Jutgla el 08/10.
+  **Error de metodo del 30/09 (dos veces):** grep '"2026-09-30"' en
+  libro_de_la_valoracion.jsonl casa con el campo d7 de filas viejas; Oriol
+  Rey parecia estar en el mercado y era del 23/09. Filtrar por la clave
+  "dia" parseando el JSON.
+
 - **30/09 14:00 (el gestor). ERROR MIO: MAFFEO YA NO ERA NUESTRO.** El
   dueno: «estamos en negativo y nos falta 1 jugador». La plantilla tras
   vender a Blanco es de 10 con 2 DEF (Chust, Jonny): planifique el 3-4-3
