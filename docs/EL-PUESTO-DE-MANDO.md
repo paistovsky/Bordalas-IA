@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 30/09/2026, 14:35 de Madrid (rafaga de las 14:15).
+Actualizado: 30/09/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -329,6 +329,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **30/09 21:15 (rafaga de la noche).** Ciclos: verdes (#1906 a #1912).
+  Nada nuevo en el mercado desde la tarde. Saldo -1.214.616; tres pujas
+  vivas para el reset del 01/10 (Diego Rico 620.000, Akhomach 3.170.000,
+  Fofana 5.260.000; comprometido 9.050.000). Si entran las tres, el saldo
+  cae a ~-5 M hasta vender a Exposito (relevo de Fofana, suelo 5,1 M) y
+  revender a Akhomach: **la rafaga de las 07:15 del 01/10 tiene que mirar
+  que esas dos ventas se disparen y que la plantilla pase de 10 a 11+**
+  (hoy 10, once guardado con 9). No se construye ni se enciende nada: la
+  orden, los viajes cortos y el comparador los lleva el chat del gestor.
 
 - **30/09 18:25 (chat del dueno).** Tres pujas vivas para el reset del
   01/10 07:00, las tres de la orden y comprobadas en los ciclos: Diego Rico
