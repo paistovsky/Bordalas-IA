@@ -289,6 +289,7 @@ export function normalizeStatus(raw = {}) {
     // CRONOLOGÍA de INICIO y EL PLAN. Sin la clave se queda en
     // `null` y los cuadros dicen que no se publicó.
     orden: raw.orden ?? null,
+    cambios: raw.cambios ?? null,
 
     // Que trae la tanda nueva del Computer en cada reset.
     censoDelReset: raw.censo_del_reset || { available: false },

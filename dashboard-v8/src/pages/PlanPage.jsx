@@ -1,4 +1,5 @@
 import SalirDelRojo from "../components/SalirDelRojo";
+import CambiosQueConvienen from "../components/CambiosQueConvienen";
 import OrdenEnMarcha from "../components/OrdenEnMarcha";
 import CascadaDinero from "../components/CascadaDinero";
 import ElReset from "../components/ElReset";
@@ -21,6 +22,7 @@ export default function PlanPage({ data }) {
   return (
     <div className="c2-rejilla">
       <SalirDelRojo data={data} />
+      <CambiosQueConvienen data={data} />
       <OrdenEnMarcha data={data} />
       <CascadaDinero data={data} />
       <ElReset data={data} />

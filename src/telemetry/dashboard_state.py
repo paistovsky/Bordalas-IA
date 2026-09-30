@@ -3581,6 +3581,25 @@ def _la_orden_para_el_panel() -> dict:
         return {"viva": False, "estado": f"ERROR: {type(error).__name__}"}
 
 
+def _los_cambios(snapshot, toda) -> dict:
+    """EL COMPARADOR DE CAMBIOS (30/09/2026): vender a uno nuestro
+    para fichar a uno del Computer, en puntos y en caja."""
+    try:
+        from src.analysis.el_comparador_de_cambios import comparar
+        from src.actions.la_orden_del_gestor import protegidos
+
+        estado = ((snapshot or {}).get("market") or {}).get("status") or {}
+        saldo = estado.get("balance")
+        return comparar(
+            (toda or {}).get("players"),
+            saldo=int(saldo) if saldo is not None else None,
+            protegidos=protegidos(),
+        )
+    except Exception as error:                      # noqa: BLE001
+        return {"ok": False, "cambios": [], "n": 0,
+                "error": f"{type(error).__name__}: {error}"}
+
+
 def _las_reglas_encendidas() -> dict:
     try:
         from src.telemetry.el_tablon import las_reglas_encendidas
@@ -6732,6 +6751,7 @@ def build_dashboard_state() -> dict:
         "tablon_semana": _el_tablon_del_dia(snapshot, horas=168),
         "reglas": _las_reglas_encendidas(),
         "orden": _la_orden_para_el_panel(),
+        "cambios": _los_cambios(snapshot, _toda_la_liga),
 
         "marcador": {
             **(marcador_estado or {}),
