@@ -49,6 +49,13 @@ modificar lo que haga falta, **sin preguntarle**. 100 % autonomo.
   claves ajenas en un servidor nuestro; (3) el usuario elige que permite
   (aconsejar / pujar / vender), todo apagado de serie; (4) limites de
   peticiones por usuario. Detras de la liga y del panel.
+  **30/09, objetivo A LARGO PLAZO:** que Pepe haga solo todo lo que hoy
+  decide el gestor, y distribuir la APK (de pago si es legal; si no, a
+  familia y amigos). Orden acordado: (1) ganar la liga; (2) pasar cada
+  decision repetida del gestor a Pepe (sirve a la liga y a la APK a la
+  vez); (3) leer las condiciones de Biwenger y, si se cobra, abogado
+  (datos de terceros, responsabilidad); juego limpio: que la liga lo
+  sepa; (4) solo entonces, Pepe multiusuario y la APK. Aparcado.
 - **Mision secundaria:** un panel para ver en tiempo real que pasa. Hoy
   existe https://bordalas-ia-dashboard.bordalas.workers.dev/ (usuario y
   contrasena: los tiene el dueno; NO se escriben en el repo, que es publico).
