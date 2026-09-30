@@ -1,3 +1,4 @@
+import SalirDelRojo from "../components/SalirDelRojo";
 import OrdenEnMarcha from "../components/OrdenEnMarcha";
 import CascadaDinero from "../components/CascadaDinero";
 import ElReset from "../components/ElReset";
@@ -19,6 +20,7 @@ import ReglasEncendidas from "../components/ReglasEncendidas";
 export default function PlanPage({ data }) {
   return (
     <div className="c2-rejilla">
+      <SalirDelRojo data={data} />
       <OrdenEnMarcha data={data} />
       <CascadaDinero data={data} />
       <ElReset data={data} />

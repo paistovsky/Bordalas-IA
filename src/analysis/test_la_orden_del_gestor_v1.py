@@ -334,7 +334,42 @@ def test_se_vende_solo_con_el_relevo_dentro() -> None:
     assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", UNAI)], a
 
 
+def test_los_viajes_cortos() -> None:
+    SUBE, OTRO = 501, 502
+    orden = {**ORDEN, "vender_si_ficha": {}, "fichar": [], "viajes": {
+        "hasta": "2026-10-07T07:00:00+02:00", "tope_por_viaje": 2_000_000,
+        "tope_total": 3_000_000, "candidatos": [
+            {"player_id": SUBE, "nombre": "Sube", "puja": 1_900_000},
+            {"player_id": OTRO, "nombre": "Otro", "puja": 1_500_000},
+        ]}}
+    base = dict(nuestras_pujas={}, ofertas_del_computer={}, en_venta=set(),
+                precios={SUBE: 1_950_000}, maximo_de_puja=12_000_000)
+    lunes = datetime(2026, 10, 1, 8, tzinfo=timezone.utc)
+    a = orden_mod.decidir(orden, mercado={SUBE: 1, OTRO: 1}, plantilla=set(),
+                          ahora=lunes, **base)
+    assert _tipos(a) == [("PUJAR", SUBE)], ("el tope total deja solo uno", a)
+
+    a = orden_mod.decidir(orden, mercado={}, plantilla={SUBE}, ahora=lunes, **base)
+    assert _tipos(a) == [("PONER_A_LA_VENTA", SUBE)], a
+
+    b = {**base, "en_venta": {SUBE},
+         "ofertas_del_computer": {SUBE: {"offer_id": 3, "amount": 1_900_000}}}
+    a = orden_mod.decidir(orden, mercado={}, plantilla={SUBE}, ahora=lunes, **b)
+    assert a == [], "a coste todavia no se vende"
+    b["ofertas_del_computer"] = {SUBE: {"offer_id": 3, "amount": 1_950_000}}
+    a = orden_mod.decidir(orden, mercado={}, plantilla={SUBE}, ahora=lunes, **b)
+    assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", SUBE)], a
+
+    tarde = datetime(2026, 10, 7, 8, tzinfo=timezone.utc)
+    b["ofertas_del_computer"] = {SUBE: {"offer_id": 3, "amount": 1_820_000}}
+    a = orden_mod.decidir(orden, mercado={}, plantilla={SUBE}, ahora=tarde, **b)
+    assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", SUBE)], a
+    a = orden_mod.decidir(orden, mercado={OTRO: 1}, plantilla=set(), ahora=tarde, **base)
+    assert a == [], "pasada la fecha no se compra"
+
+
 TESTS = [
+    test_los_viajes_cortos,
     test_se_vende_solo_con_el_relevo_dentro,
     test_subir_la_puja,
     test_la_pantalla_tampoco_anuncia_al_vetado,

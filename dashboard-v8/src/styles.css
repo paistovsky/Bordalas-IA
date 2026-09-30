@@ -1510,3 +1510,8 @@ td.pj-c .muted{font-size:11px}
 [data-layout="movil"] .c2-cifras{gap:7px}
 [data-layout="movil"] .c2-cifra{padding:9px 9px}
 [data-layout="movil"] .c2-rejilla{grid-template-columns:minmax(0,1fr)}
+
+/* Cómo salimos del rojo (30/09/2026) */
+.c2-ruta li .c2-pill{white-space:nowrap;font-size:10.5px}
+.c2-pill.marcha{color:#f5b942;border-color:rgba(245,185,66,.4);background:rgba(245,185,66,.08)}
+.c2-filas li.hecho>span{opacity:.75}

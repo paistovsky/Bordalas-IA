@@ -283,6 +283,16 @@ def la_orden_para_el_panel() -> dict:
             "proteger": nombres((orden or {}).get("proteger")),
             "conservar": nombres((orden or {}).get("conservar")),
             "no_pujar": nombres((orden or {}).get("no_pujar")),
+            "viajes": {
+                "hasta": ((orden or {}).get("viajes") or {}).get("hasta"),
+                "tope_por_viaje": ((orden or {}).get("viajes") or {}).get("tope_por_viaje"),
+                "tope_total": ((orden or {}).get("viajes") or {}).get("tope_total"),
+                "candidatos": [
+                    {"nombre": c.get("nombre"), "puja": c.get("puja")}
+                    for c in ((orden or {}).get("viajes") or {}).get("candidatos") or []
+                ],
+            },
+            "hoja_de_ruta": (orden or {}).get("hoja_de_ruta"),
         }
 
     except Exception as error:                      # noqa: BLE001

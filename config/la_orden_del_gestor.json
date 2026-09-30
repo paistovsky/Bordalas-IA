@@ -100,5 +100,57 @@
       "player_id": 1969,
       "nombre": "Unai López"
     }
-  ]
+  ],
+  "viajes": {
+    "hasta": "2026-10-07T07:00:00+02:00",
+    "tope_por_viaje": 2000000,
+    "tope_total": 4000000,
+    "candidatos": []
+  },
+  "hoja_de_ruta": {
+    "titulo": "Cómo salimos del rojo sin vender a los top",
+    "objetivo": "Saldo en positivo antes del 09/10 a las 15:00 (la jornada 8 empieza el 09/10 a las 21:00).",
+    "pasos": [
+      {
+        "fecha": "2026-09-30T07:00:00+02:00",
+        "que": "Fichado Roberto Fernández (9,65 M)",
+        "estado": "hecho"
+      },
+      {
+        "fecha": "2026-09-30T09:10:00+02:00",
+        "que": "Vendidos al Computer Cabrera, Zubeldia, Pablo Durán, Guevara y Antonio Blanco (8,08 M)",
+        "estado": "hecho"
+      },
+      {
+        "fecha": "2026-10-01T07:00:00+02:00",
+        "que": "Fichar a Diego Rico (0,62 M) para completar el once (11/11)",
+        "estado": "en marcha"
+      },
+      {
+        "fecha": "2026-10-01T08:00:00+02:00",
+        "que": "Cobrar la racha diaria (+0,25 M)",
+        "estado": "pendiente"
+      },
+      {
+        "fecha": "2026-10-07T07:00:00+02:00",
+        "que": "Cambio de uno por otro: un titular barato por uno de los nuestros caros del mismo puesto (se mira cada mañana)",
+        "estado": "en marcha"
+      },
+      {
+        "fecha": "2026-10-07T07:00:00+02:00",
+        "que": "Viajes cortos: comprar lo que sube y revenderlo al Computer con margen (máx. 2 M por viaje, 4 M en total)",
+        "estado": "en marcha"
+      },
+      {
+        "fecha": "2026-10-06T08:00:00+02:00",
+        "que": "Cobrar la segunda racha (+0,25 M)",
+        "estado": "pendiente"
+      },
+      {
+        "fecha": "2026-10-08T07:00:00+02:00",
+        "que": "Red de seguridad: si seguimos en rojo, vender a Jutglà (mejor un hueco que 0 puntos)",
+        "estado": "solo si hace falta"
+      }
+    ]
+  }
 }

@@ -238,6 +238,69 @@ def decidir(
                         "precio": precio,
                     })
 
+    # 4. LOS VIAJES CORTOS (30/09/2026)
+    #
+    #     Salir del rojo sin vender a los top: comprar al Computer a quien
+    #     SUBE (E1) y revendérselo con margen. Candidatos elegidos por el
+    #     gestor; topes por viaje y en total; todo vendido antes de `hasta`.
+    #     Se vende en cuanto la oferta del Computer supera lo pagado
+    #     (+1 %); llegado `hasta`, se acepta hasta un 5 % por debajo.
+    viajes = orden.get("viajes") or {}
+    hasta = _cuando(viajes.get("hasta")) if viajes.get("hasta") else None
+    tope_viaje = _int(viajes.get("tope_por_viaje"), 0) or 0
+    tope_total = _int(viajes.get("tope_total"), 0) or 0
+    gastado = 0
+
+    for v in viajes.get("candidatos") or []:
+        pid = _int(v.get("player_id"))
+        puja = _int(v.get("puja"), 0) or 0
+        nombre = v.get("nombre")
+        if not pid or puja <= 0 or (tope_viaje and puja > tope_viaje):
+            continue
+
+        if pid in plantilla:
+            gastado += puja
+            oferta = ofertas_del_computer.get(pid)
+            vencido = hasta is not None and ahora is not None and ahora >= hasta
+            listo = 0.95 if vencido else 1.01
+            if oferta and _int(oferta.get("amount"), 0) >= int(puja * listo):
+                acciones.append({
+                    "accion": "ACEPTAR_OFERTA_DEL_COMPUTER",
+                    "player_id": pid, "nombre": nombre,
+                    "offer_id": _int(oferta.get("offer_id")),
+                    "importe": _int(oferta.get("amount")),
+                    "suelo": int(puja * listo), "viaje": True,
+                })
+            elif pid not in en_venta and _int(precios.get(pid)):
+                acciones.append({
+                    "accion": "PONER_A_LA_VENTA", "player_id": pid,
+                    "nombre": nombre, "precio": _int(precios.get(pid)),
+                    "viaje": True,
+                })
+            continue
+
+        if hasta is None or ahora is None or ahora >= hasta:
+            continue
+        if pid not in mercado:
+            continue
+        if tope_total and gastado + puja > tope_total:
+            continue
+        ya = nuestras_pujas.get(pid)
+        if ya and _int(ya.get("amount"), 0) >= puja:
+            gastado += puja
+            continue
+        tope = (
+            None if maximo_de_puja is None
+            else maximo_de_puja + (_int((ya or {}).get("amount"), 0) or 0)
+        )
+        if tope is not None and puja > tope:
+            continue
+        gastado += puja
+        acciones.append({
+            "accion": "PUJAR", "player_id": pid, "nombre": nombre,
+            "importe": puja, "sustituye": ya, "viaje": True,
+        })
+
     return acciones
 
 
