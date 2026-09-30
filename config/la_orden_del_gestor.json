@@ -103,9 +103,16 @@
   ],
   "viajes": {
     "hasta": "2026-10-07T07:00:00+02:00",
-    "tope_por_viaje": 2000000,
+    "tope_por_viaje": 3500000,
     "tope_total": 4000000,
-    "candidatos": []
+    "candidatos": [
+      {
+        "player_id": 25159,
+        "nombre": "Akhomach",
+        "puja": 3170000,
+        "por_que": "Sube todos los días desde el 24/09 (1,63 → 3,17 M, unos +260.000 €/día); 70 % titular en el Villarreal. Puja a precio de mercado: si nadie puja más, es nuestro el 01/10 a las 07:00 y se revende al Computer en cuanto pague más de lo que costó."
+      }
+    ]
   },
   "hoja_de_ruta": {
     "titulo": "Cómo salimos del rojo sin vender a los top",
@@ -138,7 +145,7 @@
       },
       {
         "fecha": "2026-10-07T07:00:00+02:00",
-        "que": "Viajes cortos: comprar lo que sube y revenderlo al Computer con margen (máx. 2 M por viaje, 4 M en total)",
+        "que": "Viajes cortos: comprar lo que sube y revenderlo al Computer con margen. Primer viaje: Akhomach, puja de 3,17 M (se resuelve el 01/10 a las 07:00)",
         "estado": "en marcha"
       },
       {
