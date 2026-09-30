@@ -454,6 +454,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   E1 (el laboratorio ya la midio en E3: vender el mismo dia de la primera
   bajada).
 
+- **30/09 08:30 (el gestor). EL AGUJERO QUE QUEDA.** Saldo real tras las
+  cuatro ventas: -4.113.816 (#1899). Blanco: el Computer ofrece 2.899.200
+  (-4 %), su precio baja; suelo bajado a 2.850.000 (325cf7c) para que la
+  orden lo venda en la vuelta siguiente. Cuenta: -4,11 + 2,90 = -1,21 M;
+  + rachas 01/10 y ~06/10 (0,5 M) = **~-0,71 M el 06/10**. Sin mas, Jutgla
+  se vende el 08/10 (ultimo recurso). **ANTES DEL 07/10, buscar la salida
+  que menos puntos cueste**: (a) vender a Maffeo (~1,5 M, 9 pts en 6) y
+  fichar un DEF barato que juegue (<0,8 M) para seguir con 3 DEF; (b)
+  Jutgla como estaba (29 pts, 70 % titular: cuesta mas puntos); (c) lo
+  que el mercado de esos dias permita. Decidirlo con numeros el 06/10.
+  Plantilla tras Blanco: 11 justos (sin banquillo).
+
 - **30/09 07:25 (el gestor). ROBERTO FERNANDEZ ES NUESTRO** (9.650.000;
   segundo Pollo17 con 8.777.000: los 8,95 M tambien habrian ganado, por
   173.000; la subida costo 700.000 de seguro). Adeyemi: Manzagool 11,08 M
