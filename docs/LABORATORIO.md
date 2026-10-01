@@ -69,6 +69,37 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E11 · 01/10/2026 17:25 de Madrid · ¿Se sabe de antemano que subasta NO va a pelear Pollo17?
+
+**Por que:** E9 dice que las subastas de jugadores que suben y que nadie
+pelea se ganan con precio + 1 % y salen 33/33 en verde, pero solo son el
+30 %. Si se supiera cuales, Pepe pujaria solo por esas y no bloquearia
+caja en pujas perdidas. **Codigo:** `lab/subasta/quien_no_pelea.py`.
+118 subastas de jugadores que subian (tablon), 35 sin pelea. Se mira la
+tasa «sin pelea» por tramos, con dos mitades (hasta el 10/09 y desde).
+
+    subida del ultimo cambio 0-1 %    18/42 (43 %)   mitades 12/18 -> 6/24
+                             1-2 %    10/31 (32 %)            6/16 -> 4/15
+                             2-4 %     1/16  (6 %)            0/9  -> 1/7
+                             4+ %      6/29 (21 %)            2/18 -> 4/11
+    dias seguidos subiendo, precio, posicion: todos entre el 21 y el 36 %,
+    y cambian de orden entre mitades.
+    dias desde el final de la jornada: 0-1 d 37 %, 2-3 d 34 %, 4+ d 20 %.
+
+**Resultado:** nada separa de forma estable. Lo unico que apunta es que
+las subidas pequenas (0-1 %) se pelean menos, pero de una mitad a otra
+pasa del 67 % al 25 %. Ademas, la pelea va a mas: sin pelea el 33 % hasta
+el 10/09 y el 26 % despues. Los rivales ya juegan a lo mismo que E1.
+
+**Contra lo que hace Pepe:** nada que comparar; la pregunta era si se
+podia afinar la regla de E9, y no se puede con estos datos.
+
+**Veredicto: SE DESCARTA.** No hay forma de saber de antemano quien
+queda sin pelea. La regla sigue siendo la de E9: pujar precio + 1 % por
+TODOS los que suben y perder sin pena unas 7 de cada 10. El coste de esa
+regla es la caja bloqueada en pujas vivas que se pierden: con el saldo en
+rojo, que lo tenga en cuenta quien la meta.
+
 ### E10 · 01/10/2026 15:50 de Madrid · ¿Hay «chollos de la mañana» en el precio fijo del Computer?
 
 **El caso (01/10, lo vio el dueño):** Moi Gómez se pujó a 890.000 con el
