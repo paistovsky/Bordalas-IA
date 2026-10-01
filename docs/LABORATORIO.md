@@ -69,7 +69,54 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E9 · 01/10/2026 11:20 de Madrid · ¿Hay viajes sin pelearse con Pollo17? (y E8 CORREGIDO a la baja)
+
+**El caso (01/10):** Pollo17 gano las dos pujas grandes de la orden
+(Fofana, Akhomach). El gestor: «los viajes cortos tienen que ir a
+jugadores que nadie mas puja». **Codigo:** `lab/subasta/competencia.py`.
+211 subastas del Computer con precio (tablon, 17/08 a 01/10), con la puja
+ganadora y las perdedoras.
+
+**1) Pollo17 ya juega a E1.** De los 118 subastados que SUBIAN, Pollo17
+pujo en **89** (Luismi en 76). De los 93 que no subian, en 17. Solo 35 de
+los que suben (30 %) tuvieron un unico pujador.
+
+**2) Lo que paga el ganador y como sale el viaje (venta como E3):**
+
+    SUBE, un solo pujador          n=35   paga +0,1 % sobre el precio   verde 32/35   ROI med +4,3 %
+    SUBE, con Pollo17 pujando      n=89        +7,4 %                       66/89           +4,6 %
+    SUBE, disputada sin Pollo17    n=10       +10,4 %                        6/10           +2,2 %
+    NO sube, un solo pujador       n=79        +0,3 %                       30/79           -0,2 %
+
+Cuando Pepe gana una disputada paga **+14,1 % sobre el precio y +8,6 %
+sobre la segunda puja** (n=10); Pollo17, +7,4 % y +3,3 %. Pepe se pasa.
+
+**3) La regla «pujar precio + 1 % por TODO el que sube» (se gana solo si
+nadie puja mas):** 33 ganadas, **33/33 en verde**, ROI mediano +3,1 %.
+Subir la puja gana mas subastas pero peores: x1,03 33/42 verdes; x1,05
+29/55; x1,10 30/85 y ROI mediano -3,1 % (desde el 08/09, -4,9 M). **Pelear
+con Pollo17 subiendo la puja no compensa.**
+
+**4) E8 ESTABA INFLADO.** E8 suponia ganar cualquier subasta pagando +1 %
+sobre el ganador real, y el ganador real de lo que sube suele ser
+Pollo17. Rehecho ganando SOLO lo que nadie pelea (puja precio + 1 %), 36
+semanas:
+
+    caja 4 M, tope 2 M por viaje    mediana   +70.700/semana   verde 25/36   0,9 viajes/semana
+    caja 4 M, tope 4 M              mediana  +121.200          verde 33/36   1,3
+    caja 8 M, tope 4 M              mediana  +179.860          verde 33/36   2,4
+    (E8 decia +685.540 con 4 M y tope 2 M: unas diez veces mas)
+
+**Veredicto:** (a) **SE AGUANTA** como regla de puja: por los que suben,
+pujar precio + 1 % y perder sin pena las que pelea Pollo17 (33/33 en
+verde); no subir la puja para ganarle. (b) **Los viajes cortos NO tapan
+el agujero del 09/10:** con 4 M dan ~0,07-0,12 M a la semana. El agujero
+tiene que salir de los cambios uno por uno y de la red. Corregido E8 en
+«Listo para el plan».
+
 ### E8 · 30/09/2026 17:25 de Madrid · ¿Cuanto dan los VIAJES CORTOS con plazo fijo? (el agujero del 09/10)
+
+**CORREGIDO por E9 (01/10): estos numeros suponen ganarle la puja a Pollo17 y estan inflados unas diez veces. Ver E9.**
 
 **El caso:** Pepe en rojo (~-1,3 M) y tiene que estar en verde el 09/10
 a las 15:00 sin vender a los top. La estrategia (2) del gestor: viajes
@@ -489,14 +536,20 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
     PUESTAS (Zubeldia: FF 16 h antes que Biwenger; Pepe lo gano igual).
     Si se hace algo: revisar las pujas vivas antes del reset con la foto
     (estado, `absence` posterior a la puja, la rampa). n=1: es pista.
-- **(E8, 30/09 17:25) Los viajes cortos para el agujero del 09/10:**
-  con 4 M de caja y tope de 2 M por viaje, comprando lo que sube y
-  vendiendo el primer dia que baja (o a la fuerza el 07/10): mediana
-  +0,69 M por semana, 34 de 35 semanas en verde, peor -22.220. Con 3 M:
-  +0,39 M; con 2 M: +0,33 M. Tapa 1,3 M solo 1 semana de cada 6-7. No
-  bajar el tope por viaje a 1 M (mediana a la mitad). Si se abre por la
-  orden: empezar YA (cada dia de retraso es un dia menos de subida) y
-  vender el 07/10 lo que quede, sin esperar.
+- **(E8, 30/09 17:25; CORREGIDO por E9 el 01/10) Los viajes cortos para
+  el agujero del 09/10 dan POCO:** E8 suponia ganarle la puja a quien la
+  gano (casi siempre Pollo17). Ganando solo lo que nadie pelea: mediana
+  +0,07 M/semana con 4 M y tope 2 M (+0,12 M con tope 4 M). No cuentan
+  para tapar el agujero.
+- **(E9, 01/10) Pujar por los que suben a precio + 1 % y NO pelear.** De
+  las subastas de jugadores que suben, Pollo17 puja en el 75 %. Las que
+  nadie pelea se ganan con precio + 1 % y salen en verde 33 de 33; subir
+  la puja para ganarle a Pollo17 empeora (x1,10: ROI mediano -3,1 %).
+  Pepe, cuando gana una disputada, paga +14 % sobre el precio. Para
+  meterlo: en la subasta y el carril, la puja de REVENTA = precio + 1 %
+  (sin escalar por competencia), y en la orden del gestor lo mismo para
+  los viajes cortos. Para los fichajes del once (puntos) es otra cosa: ahi
+  pagar mas puede valer (Roberto).
 - **(E1, 28/09) «Solo se compra para revender lo que SUBIO en el ultimo
   cambio de precio; se vende al Computer el primer dia que BAJA».** Medido
   en 191 compras reales: los que subian, 57/73 verdes y +25,7 M; los que
