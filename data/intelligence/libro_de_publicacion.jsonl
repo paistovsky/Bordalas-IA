@@ -1,6 +1,6 @@
 {"player_id": 19862, "player_name": "Expósito", "first_listed_at": "2026-09-11T22:32:37.536528+00:00", "last_seen": "2026-09-17T05:17:33.846356+00:00", "price_at_listing": 5250000, "listed_price": 7820000}
 {"player_id": 26271, "player_name": "Yamal", "first_listed_at": "2026-09-11T22:32:37.536528+00:00", "last_seen": "2026-09-27T05:19:09.012792+00:00", "price_at_listing": 21570000, "listed_price": 32160000}
-{"player_id": 29661, "player_name": "Olasagasti", "first_listed_at": "2026-09-11T22:32:37.536528+00:00", "last_seen": "2026-10-01T09:09:42.008730+00:00", "price_at_listing": 3220000, "listed_price": 3760000}
+{"player_id": 29661, "player_name": "Olasagasti", "first_listed_at": "2026-09-11T22:32:37.536528+00:00", "last_seen": "2026-10-01T10:09:50.536956+00:00", "price_at_listing": 3220000, "listed_price": 3760000}
 {"player_id": 39874, "player_name": "Cepeda", "first_listed_at": "2026-09-11T22:32:37.536528+00:00", "last_seen": "2026-09-15T11:54:20.049808+00:00", "price_at_listing": 590000, "listed_price": 553575}
 {"player_id": 41606, "player_name": "Mangala", "first_listed_at": "2026-09-12T05:16:54.939447+00:00", "last_seen": "2026-09-12T05:16:54.939447+00:00", "price_at_listing": 2480000, "listed_price": 3330000}
 {"player_id": 17482, "player_name": "Dituro", "first_listed_at": "2026-09-12T05:16:54.939447+00:00", "last_seen": "2026-09-16T06:14:20.734629+00:00", "price_at_listing": 2390000, "listed_price": 3100000}
@@ -34,9 +34,9 @@
 {"player_id": 27575, "player_name": "Barzic", "first_listed_at": "2026-09-20T05:17:40.617495+00:00", "last_seen": "2026-09-20T07:04:37.093329+00:00", "price_at_listing": 150000, "listed_price": 160638}
 {"player_id": 37526, "player_name": "Iturbe", "first_listed_at": "2026-09-20T05:17:40.617495+00:00", "last_seen": "2026-09-22T10:14:40.868752+00:00", "price_at_listing": 150000, "listed_price": 160576}
 {"player_id": 43281, "player_name": "Esquivel", "first_listed_at": "2026-09-20T05:17:40.617495+00:00", "last_seen": "2026-09-20T07:04:37.093329+00:00", "price_at_listing": 150000, "listed_price": 180000}
-{"player_id": 1599, "player_name": "Jonny", "first_listed_at": "2026-09-21T07:51:09.478285+00:00", "last_seen": "2026-10-01T09:09:42.008730+00:00", "price_at_listing": 2350000, "listed_price": 2860000}
+{"player_id": 1599, "player_name": "Jonny", "first_listed_at": "2026-09-21T07:51:09.478285+00:00", "last_seen": "2026-10-01T10:09:50.536956+00:00", "price_at_listing": 2350000, "listed_price": 2860000}
 {"player_id": 1602, "player_name": "Rubén García", "first_listed_at": "2026-09-21T07:51:09.478285+00:00", "last_seen": "2026-09-25T07:13:58.270357+00:00", "price_at_listing": 2510000, "listed_price": 3040000}
-{"player_id": 3159, "player_name": "Jutglà", "first_listed_at": "2026-09-21T07:51:09.478285+00:00", "last_seen": "2026-10-01T09:09:42.008730+00:00", "price_at_listing": 3200000, "listed_price": 3830000}
+{"player_id": 3159, "player_name": "Jutglà", "first_listed_at": "2026-09-21T07:51:09.478285+00:00", "last_seen": "2026-10-01T10:09:50.536956+00:00", "price_at_listing": 3200000, "listed_price": 3830000}
 {"player_id": 11800, "player_name": "Cabrera", "first_listed_at": "2026-09-21T07:51:09.478285+00:00", "last_seen": "2026-09-29T08:10:20.289394+00:00", "price_at_listing": 2790000, "listed_price": 3510000}
 {"player_id": 14800, "player_name": "Pablo Ibáñez", "first_listed_at": "2026-09-21T08:10:11.051659+00:00", "last_seen": "2026-09-23T12:51:27.997679+00:00", "price_at_listing": 2500000, "listed_price": 3020000}
 {"player_id": 29185, "player_name": "Pablo Durán", "first_listed_at": "2026-09-21T08:10:11.051659+00:00", "last_seen": "2026-09-23T12:51:27.997679+00:00", "price_at_listing": 520000, "listed_price": 450173}
@@ -54,9 +54,9 @@
 {"player_id": 9090, "player_name": "Dmitrovic", "first_listed_at": "2026-09-26T05:21:01.510070+00:00", "last_seen": "2026-09-30T06:09:29.518786+00:00", "price_at_listing": 4220000, "listed_price": 5600000}
 {"player_id": 37526, "player_name": "Iturbe", "first_listed_at": "2026-09-26T05:21:01.510070+00:00", "last_seen": "2026-09-26T08:12:20.387070+00:00", "price_at_listing": 150000, "listed_price": 160576}
 {"player_id": 2044, "player_name": "Ceballos", "first_listed_at": "2026-09-26T05:21:01.510070+00:00", "last_seen": "2026-09-26T10:10:43.363431+00:00", "price_at_listing": 4220000, "listed_price": 6800000}
-{"player_id": 26271, "player_name": "Yamal", "first_listed_at": "2026-09-29T05:19:09.193259+00:00", "last_seen": "2026-10-01T09:09:42.008730+00:00", "price_at_listing": 23890000, "listed_price": 32160000}
+{"player_id": 26271, "player_name": "Yamal", "first_listed_at": "2026-09-29T05:19:09.193259+00:00", "last_seen": "2026-10-01T10:09:50.536956+00:00", "price_at_listing": 23890000, "listed_price": 32160000}
 {"player_id": 1612, "player_name": "Antonio Blanco", "first_listed_at": "2026-09-29T05:19:09.193259+00:00", "last_seen": "2026-09-29T13:10:22.987694+00:00", "price_at_listing": 3060000, "listed_price": 3780000}
-{"player_id": 1969, "player_name": "Unai López", "first_listed_at": "2026-09-29T05:19:09.193259+00:00", "last_seen": "2026-10-01T09:09:42.008730+00:00", "price_at_listing": 2720000, "listed_price": 3350000}
+{"player_id": 1969, "player_name": "Unai López", "first_listed_at": "2026-09-29T05:19:09.193259+00:00", "last_seen": "2026-10-01T10:09:50.536956+00:00", "price_at_listing": 2720000, "listed_price": 3350000}
 {"player_id": 1760, "player_name": "Chust", "first_listed_at": "2026-09-30T05:18:48.713611+00:00", "last_seen": "2026-09-30T05:18:48.713611+00:00", "price_at_listing": 1640000, "listed_price": 2200000}
 {"player_id": 14800, "player_name": "Pablo Ibáñez", "first_listed_at": "2026-09-30T05:18:48.713611+00:00", "last_seen": "2026-09-30T07:10:59.716650+00:00", "price_at_listing": 2350000, "listed_price": 2870000}
 {"player_id": 29185, "player_name": "Pablo Durán", "first_listed_at": "2026-09-30T05:18:48.713611+00:00", "last_seen": "2026-09-30T05:18:48.713611+00:00", "price_at_listing": 1340000, "listed_price": 1580000}
