@@ -112,13 +112,19 @@
   "viajes": {
     "hasta": "2026-10-07T07:00:00+02:00",
     "tope_por_viaje": 3500000,
-    "tope_total": 4000000,
+    "tope_total": 4500000,
     "candidatos": [
       {
         "player_id": 25159,
         "nombre": "Akhomach",
         "puja": 3170000,
         "por_que": "Sube todos los días desde el 24/09 (1,63 → 3,17 M, unos +260.000 €/día); 70 % titular en el Villarreal. Puja a precio de mercado: si nadie puja más, es nuestro el 01/10 a las 07:00 y se revende al Computer en cuanto pague más de lo que costó."
+      },
+      {
+        "player_id": 1462,
+        "nombre": "Moi Gómez",
+        "puja": 890000,
+        "por_que": "Puja del dueño (01/10) a 890.000 con el precio ya en 900.000: si entra, se revende al Computer en cuanto pague más de lo que costó. No sustituye a Unai López (30 % titular en FF)."
       }
     ]
   },
