@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 01/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 01/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -329,6 +329,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **01/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1929 a #1935).
+  Pepe: sin compras, ventas ni pujas nuevas; sigue solo la de Gulacsi
+  (2.437.000, comprometido igual), que se resuelve el 02/10 a las 07:00.
+  Saldo -2.434.617, plantilla 12, once 3-4-3 con 11. Laboratorio: E10
+  (chollos de la manana, raros) y E11 (adivinar que subasta no pelea
+  Pollo17, descartado): nada listo para el plan. Rutina del cierre J8
+  comprobada (09/10 12:45). **La rafaga de las 07:15 del 02/10 mira:**
+  si entro Gulacsi, que Dmitrovic se venda (suelo 3,75 M) y el once siga
+  con 11; si no, que Dmitrovic siga en el once.
 
 - **01/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#1922 a #1928).
   Pepe: sin compras ni ventas desde el reset. Puja viva de la orden por
