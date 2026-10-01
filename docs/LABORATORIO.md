@@ -69,6 +69,30 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E10 · 01/10/2026 15:50 de Madrid · ¿Hay «chollos de la mañana» en el precio fijo del Computer?
+
+**El caso (01/10, lo vio el dueño):** Moi Gómez se pujó a 890.000 con el
+precio ya en 900.000. **La venta del Computer pide el precio del día en que
+salió y no se mueve; el valor sí.** Hipótesis: comprar cada mañana a los
+que siguen en el mercado y ya valen más de lo que piden.
+
+**Cómo:** `libro_del_escaparate.jsonl`, última foto de cada día, 15 días
+(17/09 a 01/10). Lo que pide = precio del primer día de su racha en el
+mercado. 120 apariciones de 2.º día o más. (Ojo: el escaparate son los ~20
+que Pepe mira cada día, no todo el mercado.)
+
+    valen MÁS de lo que piden    7    (+10.000 a +50.000; total +160.000)
+    valen MENOS                  61
+    igual                        52
+
+**Veredicto: NO SE AGUANTA como negocio.** Los que suben se venden el
+primer día (Pollo17 puja en el 75 %, E9); los que se quedan en el mercado
+son, sobre todo, los que bajan. Lo que sí deja: **(1) regla de defensa:**
+por un jugador que lleva días en el mercado, pujar mirando lo que PIDE la
+venta, no su valor: casi siempre pide más de lo que vale (Lejeune, Rico,
+Cubarsí el 30/09). **(2)** Si sale uno que vale más de lo que pide (como
+Moi), pujar lo que pide: ganancia pequeña y sin pelea.
+
 ### E9 · 01/10/2026 11:20 de Madrid · ¿Hay viajes sin pelearse con Pollo17? (y E8 CORREGIDO a la baja)
 
 **El caso (01/10):** Pollo17 gano las dos pujas grandes de la orden
