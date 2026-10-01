@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 30/09/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 01/10/2026, 07:35 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -329,6 +329,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **01/10 07:15 (rafaga de la manana). Reset de las 07:05.** Ciclos:
+  verdes (#1914 a #1921). GANADAS: Diego Rico (580.001) y Moi Gomez
+  (890.000, viaje corto). PERDIDAS, las dos con Pollo17: Fofana (5.707.000
+  contra nuestros 5.262.000) y Akhomach (4.477.000 contra 3.192.006).
+  Como Fofana no llego, Exposito NO se vende: el relevo `si_esta` funciono.
+  Plantilla 12 (once guardado con 11 nombres: arreglado lo de ayer). Saldo
+  -2.434.617; faltan ~2,4 M antes del 09/10 15:00. Moi Gomez se revende en
+  cuanto pague mas de lo que costo (orden). Pollo17 nos gano las dos pujas
+  grandes por +8 % y +40 %: con la caja que tenemos no se le gana una
+  subasta disputada; los viajes cortos tienen que ir a jugadores que nadie
+  mas puja. No se construye ni se enciende nada (lo lleva el gestor).
 
 - **30/09 21:15 (rafaga de la noche).** Ciclos: verdes (#1906 a #1912).
   Nada nuevo en el mercado desde la tarde. Saldo -1.214.616; tres pujas
