@@ -15,10 +15,10 @@
       "puja": 620000
     },
     {
-      "player_id": 43272,
-      "nombre": "Fofana",
-      "puja": 5260000,
-      "por_que": "Comparador de cambios 30/09: 6,75 pts/partido contra 5,0 de Expósito, mismo precio (5,26 M contra 5,29 M), los dos 80 % titulares en FF; Fofana sube (+0,5 M en 12 días), Expósito plano."
+      "player_id": 38433,
+      "nombre": "Gulácsi",
+      "puja": 2437000,
+      "por_que": "01/10: portero del Villarreal, titular desde la J5 (80 % en FF, Luiz Junior 20 %), 5,33 pts/partido contra 4,0 de Dmitrovic; cuesta 1,5 M menos. Puja un pico por encima del precio (2,42 M) para ganar empates."
     }
   ],
   "no_pujar": [],
@@ -58,10 +58,10 @@
         "si_saldo_negativo": true
       },
       {
-        "player_id": 19862,
-        "nombre": "Expósito",
-        "suelo": 5100000,
-        "si_esta": 43272
+        "player_id": 9090,
+        "nombre": "Dmitrovic",
+        "suelo": 3750000,
+        "si_esta": 38433
       }
     ]
   },
@@ -80,10 +80,6 @@
     }
   ],
   "conservar": [
-    {
-      "player_id": 9090,
-      "nombre": "Dmitrovic"
-    },
     {
       "player_id": 1760,
       "nombre": "Chust"
@@ -107,6 +103,10 @@
     {
       "player_id": 1969,
       "nombre": "Unai López"
+    },
+    {
+      "player_id": 19862,
+      "nombre": "Expósito"
     }
   ],
   "viajes": {
@@ -114,12 +114,6 @@
     "tope_por_viaje": 3500000,
     "tope_total": 4500000,
     "candidatos": [
-      {
-        "player_id": 25159,
-        "nombre": "Akhomach",
-        "puja": 3170000,
-        "por_que": "Sube todos los días desde el 24/09 (1,63 → 3,17 M, unos +260.000 €/día); 70 % titular en el Villarreal. Puja a precio de mercado: si nadie puja más, es nuestro el 01/10 a las 07:00 y se revende al Computer en cuanto pague más de lo que costó."
-      },
       {
         "player_id": 1462,
         "nombre": "Moi Gómez",
@@ -144,17 +138,22 @@
       },
       {
         "fecha": "2026-10-01T07:00:00+02:00",
-        "que": "Fichar a Diego Rico (0,62 M) para completar el once (11/11)",
-        "estado": "en marcha"
+        "que": "Fichado Diego Rico (580.001): once completo",
+        "estado": "hecho"
       },
       {
         "fecha": "2026-10-01T08:00:00+02:00",
         "que": "Cobrar la racha diaria (+0,25 M)",
-        "estado": "pendiente"
+        "estado": "hecho"
       },
       {
         "fecha": "2026-10-01T07:00:00+02:00",
-        "que": "Primer cambio del comparador: Fofana (Sevilla, 5,26 M) por Expósito (5,29 M). +1,75 pts/partido sin gastar: Expósito solo se vende cuando Fofana ya es nuestro",
+        "que": "Fofana por Expósito: Pollo17 pujó más (5,71 M). Expósito se queda",
+        "estado": "hecho"
+      },
+      {
+        "fecha": "2026-10-02T07:00:00+02:00",
+        "que": "Gulácsi (Villarreal, 2,42 M) por Dmitrovic (3,95 M): más puntos y +1,5 M. Dmitrovic solo se vende cuando Gulácsi ya es nuestro",
         "estado": "en marcha"
       },
       {
@@ -164,7 +163,7 @@
       },
       {
         "fecha": "2026-10-07T07:00:00+02:00",
-        "que": "Viajes cortos: comprar lo que sube y revenderlo al Computer con margen. Primer viaje: Akhomach, puja de 3,17 M (se resuelve el 01/10 a las 07:00)",
+        "que": "Viajes cortos: Akhomach se lo llevó Pollo17 (4,48 M). Ganado Moi Gómez a 890.000 (vale 920.000): se revende al Computer",
         "estado": "en marcha"
       },
       {

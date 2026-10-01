@@ -330,6 +330,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **01/10 08:40 (chat del dueno, comprobacion del agujero).** Ganados
+  Diego Rico y Moi Gomez (el dueno pujo 890.000 con el precio ya en 900.000:
+  **la venta del Computer pide el precio del dia en que salio y no se
+  mueve; el valor si.** Si sube, se compra por debajo de lo que vale; si
+  baja, por encima. Pepe puja con el valor, no con lo que pide la venta:
+  proximo trabajo, «los chollos de la manana»). Perdidos Fofana y Akhomach
+  con Pollo17. Racha cobrada. Saldo -2.434.617, plantilla 12.
+  **Decision:** Gulacsi (Villarreal, titular desde la J5, 80 % en FF;
+  5,33 pts/partido) por Dmitrovic (95 %, 4,0): +puntos esperados (4,3
+  contra 3,8 ponderando la titularidad) y +1,5 M. Puja 2.437.000 (un pico
+  sobre el precio, idea del dueno contra los empates); Dmitrovic se vende
+  solo con Gulacsi dentro, suelo 3,75 M. Con Moi revendido (~0,92 M) el
+  agujero queda en ~0; la racha del ~06/10 deja margen. Fuera de la orden:
+  Fofana, Akhomach. Exposito vuelve a `conservar`.
+
 - **01/10 07:15 (rafaga de la manana). Reset de las 07:05.** Ciclos:
   verdes (#1914 a #1921). GANADAS: Diego Rico (580.001) y Moi Gomez
   (890.000, viaje corto). PERDIDAS, las dos con Pollo17: Fofana (5.707.000
