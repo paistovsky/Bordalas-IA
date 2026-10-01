@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 01/10/2026, 07:35 de Madrid (rafaga de las 07:15).
+Actualizado: 01/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -329,6 +329,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **01/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#1922 a #1928).
+  Pepe: sin compras ni ventas desde el reset. Puja viva de la orden por
+  Gulacsi (2.437.000) para cambiarlo por Dmitrovic (+puntos, +1,5 M de
+  caja si se vende Dmitrovic); se resuelve el 02/10 07:00. Saldo
+  -2.434.617. Plantilla 12, once con 11. E9 del laboratorio confirma la
+  leccion del reset: Pollo17 puja en el 75 % de los que suben; pujar a
+  precio +1 % y no pelear. Nada que construir ni encender por mi parte.
 
 - **01/10 08:40 (chat del dueno, comprobacion del agujero).** Ganados
   Diego Rico y Moi Gomez (el dueno pujo 890.000 con el precio ya en 900.000:
