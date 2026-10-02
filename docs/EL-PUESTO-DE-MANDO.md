@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 02/10/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 02/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -273,6 +273,11 @@ cualquier cambio grande ANTES de fusionarlo a main:
   libros, pasa con las manos vacias, mira el reloj del sistema ni depende de
   que BORDALAS_* haya en el entorno.
 - **No se propone vender a perdida ni vender a Yamal.**
+- **Un fichaje para el once no se revende antes de jugar con nosotros**
+  (E14, 02/10): cuatro lo hicieron en el paron, -3,3 M y cero puntos. Si
+  hace falta caja, se vende antes a quien ya ha jugado y no suma al once.
+  Excepcion unica: un cambio por otro MEJOR del mismo puesto, con los
+  puntos esperados medidos y apuntados en la orden.
 - **No se tocan:** MAX_SINGLE_SPECULATION_PERCENT, MAX_SAFE_DEBT, el suelo de
   cobro, MIN_WIN_PROBABILITY, MAX_PROJECTED_DAILY_RATE, las cinco de
   PUEDEN_ENCERRARLO, PRIMA_MAXIMA_DE_PUJA, el margen del plazo, la cuota de
@@ -333,6 +338,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **02/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1952 a #1958).
+  Pepe: sin compras, ventas ni pujas; saldo +159.783, comprometido 0;
+  plantilla 11, once 11. **Laboratorio E14 («Listo para el plan»):** las
+  tres vias automaticas de Pepe, 21 compras, -1,24 M (casi todas antes de
+  encender la rampa el 29/09); y lo que mas costo, cuatro fichajes de
+  2,5 M+ revendidos ANTES de jugar con nosotros (Cabrera, Dmitrovic,
+  Ceballos, Blanco): **-3,3 M y cero puntos**. Los caros bajan un 5-8 %
+  cada 11 dias y se pagan +4-14 %: comprar caro y revender en dias es
+  perder seguro. **Hecho:** la regla pasa a «Reglas de la casa» (abajo).
+  Es una regla del gestor y de la orden, no codigo: Pepe no ficha caro
+  para el once por su cuenta. La rafaga de las 07:15 del 03/10 mira el
+  reset (sin pujas vivas: no deberia cambiar nada).
 
 - **02/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#1944 a #1951).
   Confirmado en el libro del saldo: **+159.783**, comprometido 0. Plantilla
