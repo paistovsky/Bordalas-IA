@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 02/10/2026, 07:35 de Madrid (rafaga de las 07:15).
+Actualizado: 02/10/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -211,6 +211,10 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
 6. **BORDALAS_EL_PRECIO_NO_SE_PIERDE** y **BORDALAS_OBJETIVOS_EL_CATALOGO**,
    los dos construidos y apagados. El segundo pasa la titularidad de 142 a 504.
 7. **El once objetivo en el panel**, todos los dias.
+8. **DESDE EL 10/10 (tras la J8): el banquillo (E12 del laboratorio).**
+   Primero un DEFENSA de 1-3 M que juegue (70 %+), despues un medio. Con
+   11 justos y 3 defensas, una baja sabida de un defensa es un cero.
+   Va por la orden del gestor (fichar), con el saldo en verde.
 
 Parado a proposito: los 31 interruptores y las 75 guardias que no protegen
 nada (ruido, no puntos), el calendario (medido: no decide), la varianza, y la
@@ -329,6 +333,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **02/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#1944 a #1951).
+  Confirmado en el libro del saldo: **+159.783**, comprometido 0. Plantilla
+  11, once 3-4-3 con 11 (Gulacsi de portero). Sin compras ni ventas desde
+  las 07:18. Orden limpia por el chat del dueno (c7aac47); no la toco.
+  **E12 (suplente, «Listo para el plan»): lo debato y lo APLAZO al 10/10.**
+  En el mercado de hoy, el defensa que juega de verdad (Jorge Salinas,
+  2,25 M, 70 %) nos devuelve al rojo antes del plazo del 09/10 15:00; los
+  que caben son de 0,2-0,3 M y 40 % (Berrocal, Boselli), y aun asi Boselli
+  (320.000) deja -160.000 hasta la racha del ~06/10. Cuenta: un defensa
+  suplente solo cubre a los 3 defensas (3 de 11 de las bajas sabidas,
+  ~0,1-0,25 por jornada) y uno del 40 % juega la mitad: **~0,1 pts en la
+  J8, contra arriesgar la regla de la solvencia.** No compensa. Tras la
+  J8 (pago de la jornada + racha) va lo primero: un defensa de 1-3 M que
+  juegue, despues un medio. Lo apunto en el plan.
 
 - **02/10 08:35 (chat del dueno, comprobacion del agujero). EXAMEN
   APROBADO: FUERA DEL ROJO SIN VENDER A NINGUN TOP.** Libro del saldo de
