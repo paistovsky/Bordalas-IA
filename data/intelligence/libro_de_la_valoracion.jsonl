@@ -618,3 +618,4 @@
 {"dia":"2026-10-01","id":34483,"name":"Pedro Díaz","value":0,"price":1160000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-01","id":2184,"name":"Ryan","value":4945050,"price":4210000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
 {"dia":"2026-10-01","id":15396,"name":"Brugué","value":3960000,"price":3890000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-01","id":32440,"name":"Cubarsí","value":4085100,"price":9120000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
