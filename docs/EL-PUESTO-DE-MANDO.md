@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 01/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 02/10/2026, 07:35 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -329,6 +329,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **02/10 07:15 (rafaga de la manana). Reset de las 07:00: GULACSI ES
+  NUESTRO** (2.437.000). Ciclos: verdes (#1936 a #1944). La orden hizo
+  lo suyo en la vuelta de las 07:18 (tablon): **vendio a Dmitrovic al
+  Computer por 4.076.200** (suelo 3,75 M; relevo Gulacsi dentro) **y a
+  Moi Gomez por 955.200** (pagado 890.000: viaje corto +65.200). Saldo
+  antes de las ventas -4.871.617; despues, por cuenta, **~+159.783: fuera
+  del rojo antes del 09/10**. El once 3-4-3 ya lleva a Gulacsi de
+  portero, 11 nombres; plantilla 11 (sin banquillo). Pendiente de
+  confirmar en el libro del saldo de la vuelta de las 08:07 (la foto del
+  marcador de las 07:18 es de antes de las ventas). **La rafaga de las
+  14:15 mira:** saldo positivo en la bitacora del saldo, plantilla 11 y
+  once 11; y que la orden quite a Dmitrovic y a Moi de sus listas (si
+  no, nada que vender: no hace dano, pero se limpia).
 
 - **01/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1929 a #1935).
   Pepe: sin compras, ventas ni pujas nuevas; sigue solo la de Gulacsi
