@@ -330,6 +330,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **02/10 08:35 (chat del dueno, comprobacion del agujero). EXAMEN
+  APROBADO: FUERA DEL ROJO SIN VENDER A NINGUN TOP.** Libro del saldo de
+  las 08:09: **+159.783**. Camino: Roberto (9,65 M) -> ventas de
+  Cabrera, Zubeldia, Duran, Guevara y Blanco -> Diego Rico -> racha ->
+  Gulacsi por Dmitrovic (+1,64 M y mas puntos) -> viaje de Moi (+65.200).
+  Orden limpia: `fichar` vacio, viajes vacios; Gulacsi a `proteger`;
+  queda solo la red de Jutgla (08/10, si_saldo_negativo: no salta en
+  verde). Rutina diaria del agujero apagada. Margen fino: la racha del
+  ~06/10 (+0,25 M) lo agranda; cualquier puja nueva antes del 09/10 15:00
+  tiene que dejar el saldo en verde a esa hora.
+
 - **02/10 07:15 (rafaga de la manana). Reset de las 07:00: GULACSI ES
   NUESTRO** (2.437.000). Ciclos: verdes (#1936 a #1944). La orden hizo
   lo suyo en la vuelta de las 07:18 (tablon): **vendio a Dmitrovic al
