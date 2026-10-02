@@ -100,6 +100,60 @@ TODOS los que suben y perder sin pena unas 7 de cada 10. El coste de esa
 regla es la caja bloqueada en pujas vivas que se pierden: con el saldo en
 rojo, que lo tenga en cuenta quien la meta.
 
+### E12 · 02/10/2026 16:15 de Madrid · ¿Se puede pujar el precio VIEJO de la venta del Computer? (Moi Gómez, a fondo)
+
+**El caso (01/10):** el dueño pujó 890.000 por Moi Gómez con el valor ya
+en 900.000, y lo ganó (esa mañana valía 920.000). Hipótesis: la venta del
+Computer pide el valor del día en que salió y no se mueve; el valor sí.
+E10 solo miró el escaparate. **Código:** `lab/subasta/chollos_de_publicacion.py`.
+Tablón (compras al Computer, 17/08 a 02/10, 214 con valor) + historial de
+precios + las listas del Computer de `libro_del_escaparate.jsonl` (15 días,
+17/09 a 02/10; falta el 21/09). Ojo: las fotos del 19 al 21/09 se hicieron
+antes del cierre y son la lista del día anterior; corregido.
+
+**1) El mecanismo es cierto.** Una venta del Computer dura uno o dos días
+(salen 1 día: 53; 2 días: 62; 4 días: 2, re-puestos). Pide el valor del día en que salió y
+no se mueve el 2.º día: de las 16 compras en 2.º día, las 16 pagan lo que
+pedía o más, nunca menos. Biwenger acepta pujar lo que pide aunque el valor
+ya haya subido.
+
+**2) Cuántas veces se gana por debajo del valor (todo el tablón):**
+
+    ganadas por debajo del valor que se veía al pujar     7 de 214
+      Pollo17 4, Luismi_Haz 2, Pepe 1 (Moi)
+      todas a «lo que pide» + 7 € / + 1.000-3.000 €
+      ganancia contra el valor de la mañana de compra       +232.000 en total (7 casos, 47 días)
+    ganadas por debajo del valor con que se despiertan     33 de 214
+      (casi todo es que el precio siguió subiendo esa noche, no el truco)
+
+**3) Lo que de verdad estaba disponible (15 días de listas):** 98 jugadores
+siguieron sin vender un día después de salir. De ellos **valen MÁS de lo que
+piden 6**, menos 53, igual 39. La diferencia es pequeña: +10.000 a +50.000
+(+0,1 % a +1,6 %). De esos 6: Luismi se llevó 2, Pollo17 1, otro rival 1,
+Pepe 1 (Moi) y 1 se quedó sin comprar. O sea: unos 3 a la semana, y los
+rivales ya pujan por la mitad.
+
+    Regla probada, solo sobre esos 6 (venta como E3 o a valor al día siguiente):
+    pujar lo que pide + 1 €     ganadas 2   +50.000 al cierre   +80.000 al día siguiente
+    pujar lo que pide + 1 %     ganadas 4   +71.000             +161.000
+    pujar el VALOR de hoy       ganadas 4   +90.000             +180.000   (4/4 verdes)
+    (13 días medibles; 11 M metidos, 6,9 M de ellos en un solo jugador)
+
+**Contra lo que hace Pepe:** la puja de Moi no la puso Pepe: el libro de
+pujas la apunta al encontrarlo en la plantilla (`EN_LA_PLANTILLA`, sin
+valor ni probabilidad). Pepe no mira lo que pide la venta, solo el valor.
+
+**Veredicto: el mecanismo SE CONFIRMA; como negocio NO da para mucho.**
+Unos 3 casos a la semana, ~+50.000-100.000 a la semana en el mejor caso,
+y la mitad ya se los llevan Pollo17 y Luismi con «lo que pide + poco». No
+tapa ningún agujero. Sí vale como **regla menor, sin riesgo:** por un
+jugador del Computer en su 2.º día en la lista (salió ayer) que hoy vale
+más de lo que pide, **pujar su valor de hoy, ni un euro más.** Se paga
+menos de lo que vale, se gana a las pujas de «pide + 7 €» de Pollo17 y
+Luismi, y se pierde sin pena cuando alguien puja más. Y la regla de defensa
+de E10 sigue: en 2.º día casi siempre pide MÁS de lo que vale (53 de 98);
+ahí no pujar mirando el valor sino lo que pide.
+
 ### E10 · 01/10/2026 15:50 de Madrid · ¿Hay «chollos de la mañana» en el precio fijo del Computer?
 
 **El caso (01/10, lo vio el dueño):** Moi Gómez se pujó a 890.000 con el
