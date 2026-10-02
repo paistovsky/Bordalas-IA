@@ -69,6 +69,53 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E12 · 02/10/2026 11:20 de Madrid · ¿Cuantos puntos cuesta jugar con 11 justos?
+
+**El caso (02/10):** Pepe sale del rojo con 11 jugadores, sin banquillo.
+En esta liga el once se cierra al empezar la jornada (`lineupRoundChanges:
+0` en el tablon): un suplente solo sirve si se sabe ANTES del primer
+partido que un titular no juega. **Codigo:** `lab/puntos/sin_banquillo.py`.
+
+**Datos:** «fijos» = los que jugaron 5-6 de los 6 partidos hasta la J6
+(n=249, lo mas parecido a un titular). Estado de Biwenger en la foto del
+18/09 a las 16:16 (5 h antes del primer partido de la J7) y en los 45
+ciclos del 27-29/09 (`lab/noticias/ciclos_27_29_09.json`).
+
+**1) Cuantos fijos se caen:**
+
+    no jugaron la J7                       29/249  (11,6 %)
+      SE SABIA antes (lesion/duda/sancion)  8/249   (3,2 %)   <- un suplente lo cubre
+      no se sabia (ok y no jugo)           22/249   (8,8 %)   <- nada lo cubre
+    fijos con estado no ok en el paron (27-29/09): 18-20/249 (7,2-8,0 %)
+
+Con 10 de campo, la probabilidad de que al menos uno se sepa fuera antes
+de cerrar el once va del 28 % (3,2 %) al 57 % (8 %).
+
+**2) Lo que da el suplente si entra (J7, estado ok):** un medio de 1-3 M
+que venia jugando, 3,18 pts (jugo el 82 %); un defensa de 1-3 M, 2,31;
+uno de menos de 1 M casi nunca juega (41-48 %). No hay multiposicion, pero
+la formacion se puede cambiar antes de cerrar, y todas las de Biwenger
+llevan 3 defensas o mas: **un medio suplente cubre a un medio (3-4-3) o a
+un delantero (3-4-3 -> 3-5-2); a un defensa, solo otro defensa.**
+
+**3) La cuenta:** plazas vacias que se saben a tiempo, 11 x 3,2-8 % =
+**0,35 a 0,85 por jornada**; por ~3 pts del suplente = **~1 a 2,5 pts por
+jornada, 30-80 en lo que queda de liga**. Vamos a 3 puntos de Pollo17.
+Como inversion (E7: subir una plaza de <3 M a 3-6 M da ~1,5 pts por
+~2,3 M), un suplente que juegue por ~2 M rinde lo mismo o mas.
+
+**Contra lo que hace Pepe hoy:** 11 justos (1 POR, 3 DEF, 4 MED, 3 DEL
+en 3-4-3). Con 3 DEF, un defensa que caiga NO lo cubre un medio (no hay
+formacion de 2 defensas): el primer suplente tiene que ser DEFENSA, y el
+segundo, un medio.
+
+**Limites:** una jornada de «se sabia» (n=8) y el paron infla las bajas
+(7-8 %); la foto es de 5 h antes del cierre (lo que se sabe al cerrar es
+algo mas). Puntos del suplente de una sola jornada.
+
+**Veredicto: SE AGUANTA.** Tener al menos un suplente que juegue vale
+~1-2,5 pts por jornada. Pasa a «Listo para el plan».
+
 ### E11 · 01/10/2026 17:25 de Madrid · ¿Se sabe de antemano que subasta NO va a pelear Pollo17?
 
 **Por que:** E9 dice que las subastas de jugadores que suben y que nadie
@@ -576,6 +623,15 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E12, 02/10) Antes del cierre de la J8 (09/10 21:00), un suplente
+  que juegue; con el 3-4-3 de hoy, primero un DEFENSA.** Con 11 justos,
+  cada jornada hay un 28-57 % de que un titular se sepa fuera antes de
+  cerrar el once y esa plaza de 0: ~1-2,5 pts por jornada. Un defensa de
+  1-3 M que venga jugando (estado ok, 4+ partidos) da ~2,3 pts cuando
+  entra; un medio, ~3,2 (y cubre bajas de medio y delantero cambiando de
+  formacion). Condiciones: que el saldo quede >= 0 el 09/10 a las 15:00, y
+  comprobar (doctrina 84) que el motor del once cambia al titular «injured/
+  doubt» por el suplente en la ultima vuelta antes del cierre.
 - **(E4, 29/09) «No se puja por quien tenga una noticia de BAJA en
   FutbolFantasy en las ultimas 72 h», aunque cumpla la rampa.** n=180:
   -2,5 % a 3 dias y -4,3 % a 7; entre los que subian, -3,7 % (n=50). FF
