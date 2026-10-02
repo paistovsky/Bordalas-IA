@@ -69,6 +69,112 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E14 · 02/10/2026 17:20 de Madrid · Agenda 5: ¿que parte de Pepe gana dinero de verdad?
+
+**Por que:** antes de dibujar un bot pequeno hay que saber que vias de
+compra han hecho algo bueno. **Codigo:** `lab/arquitectura/quien_gana.py`.
+Cada compra de Pepe al Computer del tablon (50, del 10/08 al 02/10; el
+tablon repite eventos y se quitan los duplicados) se cruza con la puja de
+`bid_outcome_ledger.json`, que dice quien la decidio. Cerradas: venta real
+menos compra. Abiertas: valor de hoy menos compra.
+
+    via (quien decidio)                    n   P&L          verde   rampa (E1)
+    subasta del reset                     14     -339.814   10/14     1/14
+    carril                                 5     -372.315    1/5      0/5
+    tablero (para el once)                 2     -529.265    0/2      1/2
+    sin decision de Pepe apuntada (tablon)  11   -4.778.553    1/11     4/11
+    sin decision de Pepe (plantilla)       13     +480.451    9/13     5/13
+    sin apunte (agosto)                    5     +852.579    4/5      0/5
+
+Las tres vias automaticas de Pepe (subasta, carril, tablero): **21
+compras, -1,24 M, y solo 2 cumplian la rampa.** La subasta del reset vive
+de jugadores de 150.000 (+35.000 en 11) y pierde en los de 1,6 M (Balde,
+Yeray).
+
+**Lo que mas cuesta no es la reventa: son fichajes caros revendidos sin
+jugar.** Seis fichajes de 2,5 M o mas ya vendidos: -3.989.914. **Cuatro
+se vendieron ANTES de jugar una sola jornada con nosotros** (todos en el
+paron, sin decision de Pepe apuntada): Cabrera -684.031, Dmitrovic
+-915.801, Ceballos -1.159.538 (tres dias), Antonio Blanco -548.704 (cuatro
+dias). **-3.308.074 y cero puntos.** El porque esta medido: los jugadores
+de 2,5 M o mas bajan de mediana un 5-8 % cada 11 dias (n=185-199; solo
+suben 4 de cada 10), con jornadas o sin ellas, y la compra ya se paga
++4-14 % sobre el precio. Comprar caro y revender en dias es perder un
+10-20 % seguro.
+
+**Para el bot pequeno (agenda 5):** las vias que compran hoy no ganan;
+lo que gana esta medido en E1/E3/E9 (rampa, precio + 1 %, vender el dia
+que baja) y casi nada de eso lo hacen hoy las vias automaticas. El bot
+pequeno necesita tres piezas y no veinte: (1) reventa con E1/E3/E9;
+(2) fichajes para el once por puntos (E7), que NO se revenden en dias;
+(3) el once y el banquillo (E12). Siguiente paso: el prototipo en `lab/`.
+
+**Limites:** la etiqueta de quien decidio sale de un libro con huecos
+(«sin apunte», «sin decision de Pepe»: el dueno o la orden del gestor);
+los abiertos se valoran a precio de hoy; los puntos de los fichajes no se
+cuentan (los cuatro vendidos no jugaron, asi que ahi no hay puntos que
+contar).
+
+**Veredicto: SE AGUANTA.** Pasa a «Listo para el plan» una regla de
+proceso: un fichaje para el once no se revende antes de jugar con
+nosotros.
+
+### E13 · 02/10/2026 16:15 de Madrid · ¿Se puede pujar el precio VIEJO de la venta del Computer? (Moi Gómez, a fondo)
+
+(Renumerado de E12 a E13 por el laboratorio a las 17:20: el E12 del banquillo ya existia y el puesto de mando lo cita. Su commit es d77cc6e.)
+
+**El caso (01/10):** el dueño pujó 890.000 por Moi Gómez con el valor ya
+en 900.000, y lo ganó (esa mañana valía 920.000). Hipótesis: la venta del
+Computer pide el valor del día en que salió y no se mueve; el valor sí.
+E10 solo miró el escaparate. **Código:** `lab/subasta/chollos_de_publicacion.py`.
+Tablón (compras al Computer, 17/08 a 02/10, 214 con valor) + historial de
+precios + las listas del Computer de `libro_del_escaparate.jsonl` (15 días,
+17/09 a 02/10; falta el 21/09). Ojo: las fotos del 19 al 21/09 se hicieron
+antes del cierre y son la lista del día anterior; corregido.
+
+**1) El mecanismo es cierto.** Una venta del Computer dura uno o dos días
+(salen 1 día: 53; 2 días: 62; 4 días: 2, re-puestos). Pide el valor del día en que salió y
+no se mueve el 2.º día: de las 16 compras en 2.º día, las 16 pagan lo que
+pedía o más, nunca menos. Biwenger acepta pujar lo que pide aunque el valor
+ya haya subido.
+
+**2) Cuántas veces se gana por debajo del valor (todo el tablón):**
+
+    ganadas por debajo del valor que se veía al pujar     7 de 214
+      Pollo17 4, Luismi_Haz 2, Pepe 1 (Moi)
+      todas a «lo que pide» + 7 € / + 1.000-3.000 €
+      ganancia contra el valor de la mañana de compra       +232.000 en total (7 casos, 47 días)
+    ganadas por debajo del valor con que se despiertan     33 de 214
+      (casi todo es que el precio siguió subiendo esa noche, no el truco)
+
+**3) Lo que de verdad estaba disponible (15 días de listas):** 98 jugadores
+siguieron sin vender un día después de salir. De ellos **valen MÁS de lo que
+piden 6**, menos 53, igual 39. La diferencia es pequeña: +10.000 a +50.000
+(+0,1 % a +1,6 %). De esos 6: Luismi se llevó 2, Pollo17 1, otro rival 1,
+Pepe 1 (Moi) y 1 se quedó sin comprar. O sea: unos 3 a la semana, y los
+rivales ya pujan por la mitad.
+
+    Regla probada, solo sobre esos 6 (venta como E3 o a valor al día siguiente):
+    pujar lo que pide + 1 €     ganadas 2   +50.000 al cierre   +80.000 al día siguiente
+    pujar lo que pide + 1 %     ganadas 4   +71.000             +161.000
+    pujar el VALOR de hoy       ganadas 4   +90.000             +180.000   (4/4 verdes)
+    (13 días medibles; 11 M metidos, 6,9 M de ellos en un solo jugador)
+
+**Contra lo que hace Pepe:** la puja de Moi no la puso Pepe: el libro de
+pujas la apunta al encontrarlo en la plantilla (`EN_LA_PLANTILLA`, sin
+valor ni probabilidad). Pepe no mira lo que pide la venta, solo el valor.
+
+**Veredicto: el mecanismo SE CONFIRMA; como negocio NO da para mucho.**
+Unos 3 casos a la semana, ~+50.000-100.000 a la semana en el mejor caso,
+y la mitad ya se los llevan Pollo17 y Luismi con «lo que pide + poco». No
+tapa ningún agujero. Sí vale como **regla menor, sin riesgo:** por un
+jugador del Computer en su 2.º día en la lista (salió ayer) que hoy vale
+más de lo que pide, **pujar su valor de hoy, ni un euro más.** Se paga
+menos de lo que vale, se gana a las pujas de «pide + 7 €» de Pollo17 y
+Luismi, y se pierde sin pena cuando alguien puja más. Y la regla de defensa
+de E10 sigue: en 2.º día casi siempre pide MÁS de lo que vale (53 de 98);
+ahí no pujar mirando el valor sino lo que pide.
+
 ### E12 · 02/10/2026 11:20 de Madrid · ¿Cuantos puntos cuesta jugar con 11 justos?
 
 **El caso (02/10):** Pepe sale del rojo con 11 jugadores, sin banquillo.
@@ -146,60 +252,6 @@ queda sin pelea. La regla sigue siendo la de E9: pujar precio + 1 % por
 TODOS los que suben y perder sin pena unas 7 de cada 10. El coste de esa
 regla es la caja bloqueada en pujas vivas que se pierden: con el saldo en
 rojo, que lo tenga en cuenta quien la meta.
-
-### E12 · 02/10/2026 16:15 de Madrid · ¿Se puede pujar el precio VIEJO de la venta del Computer? (Moi Gómez, a fondo)
-
-**El caso (01/10):** el dueño pujó 890.000 por Moi Gómez con el valor ya
-en 900.000, y lo ganó (esa mañana valía 920.000). Hipótesis: la venta del
-Computer pide el valor del día en que salió y no se mueve; el valor sí.
-E10 solo miró el escaparate. **Código:** `lab/subasta/chollos_de_publicacion.py`.
-Tablón (compras al Computer, 17/08 a 02/10, 214 con valor) + historial de
-precios + las listas del Computer de `libro_del_escaparate.jsonl` (15 días,
-17/09 a 02/10; falta el 21/09). Ojo: las fotos del 19 al 21/09 se hicieron
-antes del cierre y son la lista del día anterior; corregido.
-
-**1) El mecanismo es cierto.** Una venta del Computer dura uno o dos días
-(salen 1 día: 53; 2 días: 62; 4 días: 2, re-puestos). Pide el valor del día en que salió y
-no se mueve el 2.º día: de las 16 compras en 2.º día, las 16 pagan lo que
-pedía o más, nunca menos. Biwenger acepta pujar lo que pide aunque el valor
-ya haya subido.
-
-**2) Cuántas veces se gana por debajo del valor (todo el tablón):**
-
-    ganadas por debajo del valor que se veía al pujar     7 de 214
-      Pollo17 4, Luismi_Haz 2, Pepe 1 (Moi)
-      todas a «lo que pide» + 7 € / + 1.000-3.000 €
-      ganancia contra el valor de la mañana de compra       +232.000 en total (7 casos, 47 días)
-    ganadas por debajo del valor con que se despiertan     33 de 214
-      (casi todo es que el precio siguió subiendo esa noche, no el truco)
-
-**3) Lo que de verdad estaba disponible (15 días de listas):** 98 jugadores
-siguieron sin vender un día después de salir. De ellos **valen MÁS de lo que
-piden 6**, menos 53, igual 39. La diferencia es pequeña: +10.000 a +50.000
-(+0,1 % a +1,6 %). De esos 6: Luismi se llevó 2, Pollo17 1, otro rival 1,
-Pepe 1 (Moi) y 1 se quedó sin comprar. O sea: unos 3 a la semana, y los
-rivales ya pujan por la mitad.
-
-    Regla probada, solo sobre esos 6 (venta como E3 o a valor al día siguiente):
-    pujar lo que pide + 1 €     ganadas 2   +50.000 al cierre   +80.000 al día siguiente
-    pujar lo que pide + 1 %     ganadas 4   +71.000             +161.000
-    pujar el VALOR de hoy       ganadas 4   +90.000             +180.000   (4/4 verdes)
-    (13 días medibles; 11 M metidos, 6,9 M de ellos en un solo jugador)
-
-**Contra lo que hace Pepe:** la puja de Moi no la puso Pepe: el libro de
-pujas la apunta al encontrarlo en la plantilla (`EN_LA_PLANTILLA`, sin
-valor ni probabilidad). Pepe no mira lo que pide la venta, solo el valor.
-
-**Veredicto: el mecanismo SE CONFIRMA; como negocio NO da para mucho.**
-Unos 3 casos a la semana, ~+50.000-100.000 a la semana en el mejor caso,
-y la mitad ya se los llevan Pollo17 y Luismi con «lo que pide + poco». No
-tapa ningún agujero. Sí vale como **regla menor, sin riesgo:** por un
-jugador del Computer en su 2.º día en la lista (salió ayer) que hoy vale
-más de lo que pide, **pujar su valor de hoy, ni un euro más.** Se paga
-menos de lo que vale, se gana a las pujas de «pide + 7 €» de Pollo17 y
-Luismi, y se pierde sin pena cuando alguien puja más. Y la regla de defensa
-de E10 sigue: en 2.º día casi siempre pide MÁS de lo que vale (53 de 98);
-ahí no pujar mirando el valor sino lo que pide.
 
 ### E10 · 01/10/2026 15:50 de Madrid · ¿Hay «chollos de la mañana» en el precio fijo del Computer?
 
@@ -677,6 +729,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E14, 02/10) Un fichaje para el once NO se revende antes de jugar con
+  nosotros** (salvo lesion larga). Cuatro fichajes de 2,5 M o mas
+  vendidos en el paron sin jugar una jornada: -3.308.074 y cero puntos.
+  Los de 2,5 M o mas bajan de mediana un 5-8 % cada 11 dias y se compran
+  pagando +4-14 %: revender en dias es perder un 10-20 % seguro. Para la
+  orden del gestor y para Pepe: si un fichaje para el once se quiere
+  cambiar antes de jugar, el cambio tiene que ganar en puntos MAS de lo
+  que cuesta en dinero, contado con E7 (~0,6 pts por millon como mucho).
 - **(E12, 02/10) Antes del cierre de la J8 (09/10 21:00), un suplente
   que juegue; con el 3-4-3 de hoy, primero un DEFENSA.** Con 11 justos,
   cada jornada hay un 28-57 % de que un titular se sepa fuera antes de
