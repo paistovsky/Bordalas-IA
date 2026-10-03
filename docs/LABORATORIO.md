@@ -69,6 +69,54 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E15 · 03/10/2026 11:20 de Madrid · El bot pequeno, prototipo, contra Pepe en 91 vueltas reales
+
+**Que es:** `lab/bot_pequeno/bot.py`, ~130 lineas, solo con lo medido:
+caja sin deuda; reventa E1+E9 (lo que sube, estado ok, titular >= 40 %,
+puja = max(lo que pide, precio + 1 %)); venta E3/E5 (el dia que baja; E14:
+el once no se revende antes de jugar; Yamal nunca); once E7 (11 de mas
+puntos con estado ok en la mejor formacion); banquillo E12.
+`lab/bot_pequeno/replay.py` lo pasa por las fotos REALES de produccion:
+la del 18/09 y los status.json de 89 ciclos (27-29/09 y 01-03/10,
+artefactos de Actions que caducan a los 2 dias: no estan en git).
+
+**1) El once:** igual que el de Pepe en 44 de 91 fotos. Las diferencias
+son de transicion: el 18/09 Pepe ponia a Djene y Esquivel (0 puntos en
+toda la temporada) y el bot a Dituro y Alvaro Carreras: en la J7, 4 contra
+5 puntos. El 02/10, Gulacsi (Pepe) contra Dmitrovic (bot, mas puntos
+totales; se vendia esa manana). Con 11 justos no hay nada que elegir.
+
+**2) La caja:** en 30 de 91 fotos no habia ni un euro libre (saldo menos
+pujas vivas <= 0). El bot no pujaria nada en esas vueltas.
+
+**3) La reventa:** el bot pondria 4 pujas en 91 vueltas (Bouare, Osorio y
+Szczesny el 18/09; Freeman el 28/09). Sus precios despues: +9 %, +126 %,
++2 % (vendidos el dia que bajaron) y +7 % (aun subiendo). **Pero las
+cuatro se las llevaron rivales pagando mas:** Luismi_Haz 921.000 por
+Bouare (el bot 878.700), 878.000 por Osorio (575.700), 351.000 por
+Szczesny (323.200); Manzagool 1.850.000 por Freeman (1.464.500, Pollo17
+1.777.000). **El bot no habria ganado ninguna.** Pepe esos dias: Boyomo
++28.503, Maffeo -42.850, Zubeldia -98.092 y jugadores de 150.000.
+
+**Lo que se aprende:**
+1. Con la caja de hoy y la pelea de hoy (E9, E11), **la reventa no da
+   casi nada**, ni a Pepe ni al bot pequeno. El precio + 1 % no pierde
+   dinero, pero tampoco gana subastas cuando hay alguien mirando.
+2. Lo que de verdad decide el bot es **el once y la caja** (que hay para
+   fichar puntos y cuando). Esa es la pieza que hay que hacer bien.
+3. Un bot de ~130 lineas reproduce lo que hace Pepe en el once y no
+   hace ninguna de las compras que perdieron dinero (E14), porque no
+   compra sin caja ni lo que no sube.
+
+**Limites:** 91 fotos de 3 ventanas cortas, casi todas con Pepe en rojo
+o con 11 justos; no se puede probar su reventa con caja (no la hubo). Los
+precios de despues llegan solo al 03/10.
+
+**Veredicto: PROMETEDOR, NO LISTO.** El prototipo funciona sobre fotos
+reales y no hace nada malo, pero en estas vueltas casi no hace nada. Se
+sigue con la pieza que decide: fichar para el once con la caja (E7, E12,
+E14), cuando haya caja despues de la J8.
+
 ### E14 · 02/10/2026 17:20 de Madrid · Agenda 5: ¿que parte de Pepe gana dinero de verdad?
 
 **Por que:** antes de dibujar un bot pequeno hay que saber que vias de
