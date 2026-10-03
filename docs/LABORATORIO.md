@@ -69,6 +69,52 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E16 · 03/10/2026 17:20 de Madrid · El primer fichaje despues de la J8: cuanta caja habra y en que se gasta
+
+**Por que:** E15 dice que lo que decide es fichar para el once con la
+caja. El plan del gestor (punto 8) es, desde el 10/10, un defensa suplente
+de 1-3 M que juegue (E12). Aqui se mide cuanta caja habra y que defensa
+da mas. **Codigo:** `lab/puntos/primer_fichaje.py` (tablon + la foto del
+ciclo de hoy + las fotos de 89 ciclos del 27/09 al 03/10).
+
+**1) Cada punto de la jornada es dinero:** Biwenger paga **30.000 EUR por
+punto** (las 8 jornadas de Pepe; algo mas cuando se va abajo en la
+general). J7: 47 pts, 1.510.000. Despues de la J8, con ~45-50 pts y la
+racha: saldo +159.783 + ~1,4-1,5 M + 0,25 M = **~1,8 M para fichar**.
+Un punto mas por jornada en el once son ~0,9 M en lo que queda de liga,
+ademas del punto.
+
+**2) El hueco mas flojo del once (puntos por partido x titularidad):**
+Diego Rico 1,50; Jonny 2,10; Chust 2,40; Jutgla 2,90; el resto, 3,3 a 11,3.
+Los tres defensas son los tres peores del once.
+
+**3) Lo que el Computer saco en 7 dias (defensas <= 3,2 M, titular >=
+60 %, estado ok): 9 distintos**, mas de uno al dia:
+
+    Rafita        2,52 M   3,86 pts/jornada esperados
+    Kike Salas    3,02 M   3,42
+    Puga          1,55 M   2,57
+    Freeman       1,45 M   2,33
+    Rueda         1,74 M   2,20
+    (y Bellerin, Sadick, Jorge Salinas, Sergi Cardona: 1,0-2,1)
+
+**La cuenta:** el defensa que se fiche no es un suplente: es TITULAR en
+lugar de Diego Rico, y Rico pasa al banquillo. Con un Puga (1,55 M): +1,1
+pts por jornada en el once, mas Rico cubriendo bajas de defensa (3 x
+3,2-8 % x 1,5 = +0,15-0,35). Con un Rafita (2,52 M): +2,4 y lo mismo.
+Eso son ~1,2-2,7 pts por jornada (36.000-80.000 EUR de premio por jornada).
+El plan del gestor acierta en la posicion; lo que cambia es el criterio:
+**elegirlo por puntos esperados (media x titularidad), no solo «de 1-3 M
+que juegue»** (Jorge Salinas, 2,22 M y 70 %, solo da 1,80: casi lo mismo
+que Rico).
+
+**Limites:** «puntos esperados» = media x titularidad de FF, sin validar
+fuera de muestra (E7 valido el total de puntos, no esto); 7 dias de
+mercado; el premio de la J8 depende de la J8.
+
+**Veredicto: SE AGUANTA** (afina el punto 8 del plan). Actualizado en
+«Listo para el plan».
+
 ### E15 · 03/10/2026 11:20 de Madrid · El bot pequeno, prototipo, contra Pepe en 91 vueltas reales
 
 **Que es:** `lab/bot_pequeno/bot.py`, ~100 lineas, solo con lo medido:
@@ -794,6 +840,13 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
   formacion). Condiciones: que el saldo quede >= 0 el 09/10 a las 15:00, y
   comprobar (doctrina 84) que el motor del once cambia al titular «injured/
   doubt» por el suplente en la ultima vuelta antes del cierre.
+  - **Afinado por E16 (03/10):** el defensa que se fiche entra de TITULAR
+    por Diego Rico (1,5 pts esperados, el peor del once) y Rico pasa a
+    suplente. Elegirlo por puntos esperados (media x titularidad >= 2,5),
+    no solo por precio: en 7 dias el Computer saco 9 defensas <= 3,2 M con
+    titular >= 60 % (Rafita 3,86 por 2,52 M; Puga 2,57 por 1,55 M). Caja
+    esperada tras la J8: ~1,8 M (30.000 EUR por punto + racha). Gana
+    ~1,2-2,7 pts por jornada.
 - **(E4, 29/09) «No se puja por quien tenga una noticia de BAJA en
   FutbolFantasy en las ultimas 72 h», aunque cumpla la rampa.** n=180:
   -2,5 % a 3 dias y -4,3 % a 7; entre los que subian, -3,7 % (n=50). FF
