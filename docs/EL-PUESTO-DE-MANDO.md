@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 03/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -212,9 +212,15 @@ Filtrando por eso, nuestra temporada pasa de +92.375 a +567.490. Seis veces.
    los dos construidos y apagados. El segundo pasa la titularidad de 142 a 504.
 7. **El once objetivo en el panel**, todos los dias.
 8. **DESDE EL 10/10 (tras la J8): el banquillo (E12 del laboratorio).**
-   Primero un DEFENSA de 1-3 M que juegue (70 %+), despues un medio. Con
-   11 justos y 3 defensas, una baja sabida de un defensa es un cero.
-   Va por la orden del gestor (fichar), con el saldo en verde.
+   Primero un DEFENSA, despues un medio. Con 11 justos y 3 defensas, una
+   baja sabida de un defensa es un cero. Va por la orden del gestor
+   (fichar), con el saldo en verde.
+   **Afinado por E16 (03/10):** tras la J8 habra ~1,8 M (premio ~30.000
+   por punto). El defensa NO es suplente: entra TITULAR por Diego Rico,
+   que pasa al banquillo. Se elige por PUNTOS ESPERADOS (media x
+   titularidad de FF), no por «1-3 M que juegue»: el 03/10, Rafita
+   (2,52 M, 3,86) o Puga (1,55 M, 2,57); Jorge Salinas (1,80) casi no
+   mejora a Rico. Mirar el mercado de ese dia: ~+1,2 a +2,7 pts/jornada.
 
 Parado a proposito: los 31 interruptores y las 75 guardias que no protegen
 nada (ruido, no puntos), el calendario (medido: no decide), la varianza, y la
@@ -338,6 +344,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1974 a #1981).
+  Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
+  11. Laboratorio E16 afina el punto 8 del plan (el defensa entra de
+  titular por Diego Rico, elegido por puntos esperados): plan
+  actualizado. Nada construido ni encendido.
 
 - **03/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#1967 a #1974).
   Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
