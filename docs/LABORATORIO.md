@@ -71,7 +71,7 @@ datos y n, resultado, veredicto)
 
 ### E15 · 03/10/2026 11:20 de Madrid · El bot pequeno, prototipo, contra Pepe en 91 vueltas reales
 
-**Que es:** `lab/bot_pequeno/bot.py`, ~130 lineas, solo con lo medido:
+**Que es:** `lab/bot_pequeno/bot.py`, ~100 lineas, solo con lo medido:
 caja sin deuda; reventa E1+E9 (lo que sube, estado ok, titular >= 40 %,
 puja = max(lo que pide, precio + 1 %)); venta E3/E5 (el dia que baja; E14:
 el once no se revende antes de jugar; Yamal nunca); once E7 (11 de mas
@@ -104,7 +104,7 @@ Szczesny (323.200); Manzagool 1.850.000 por Freeman (1.464.500, Pollo17
    dinero, pero tampoco gana subastas cuando hay alguien mirando.
 2. Lo que de verdad decide el bot es **el once y la caja** (que hay para
    fichar puntos y cuando). Esa es la pieza que hay que hacer bien.
-3. Un bot de ~130 lineas reproduce lo que hace Pepe en el once y no
+3. Un bot de ~100 lineas reproduce lo que hace Pepe en el once y no
    hace ninguna de las compras que perdieron dinero (E14), porque no
    compra sin caja ni lo que no sube.
 
