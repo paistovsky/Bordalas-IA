@@ -170526,5 +170526,41 @@
         "amount": 955200
       }
     ]
+  },
+  {
+    "event_id": "bbe1b224d5c93574c2a96e50",
+    "date": 1791017066,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
+  },
+  {
+    "event_id": "c578fd67a32c18c79351262b",
+    "date": 1791017139,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 5697,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 4704900
+      }
+    ]
   }
 ]
