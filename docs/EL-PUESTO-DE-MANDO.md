@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 02/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 03/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -338,6 +338,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/10 07:15 (rafaga de la manana). Reset de las 07:00 sin nada.**
+  Ciclos: verdes (#1959 a #1967; la #1967 es la de despues del reset).
+  Pepe: sin compras, ventas ni pujas (comprometido 0). Saldo +159.783,
+  plantilla 11, once 11. Nada nuevo del laboratorio desde el E14. No se
+  construye ni se enciende nada: el plan dice banquillo desde el 10/10 y
+  el saldo no da para mas antes del plazo del 09/10 15:00.
 
 - **02/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1952 a #1958).
   Pepe: sin compras, ventas ni pujas; saldo +159.783, comprometido 0;
