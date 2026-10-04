@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 04/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -344,6 +344,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
+  (#1982 a #1990). Pepe: sin compras, ventas ni pujas (comprometido 0).
+  Saldo +159.783, plantilla 11, once 11. En el reset el escaparate
+  renovo a Jonny, Unai Lopez, Jutgla y Diego Rico a la venta (+20 %
+  sobre su precio): es lo de siempre desde septiembre (Yamal incluido),
+  no algo nuevo. La regla de la casa sigue: si llega una oferta por un
+  titular antes del 09/10, no se acepta sin relevo en el once.
 
 - **03/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1974 a #1981).
   Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
