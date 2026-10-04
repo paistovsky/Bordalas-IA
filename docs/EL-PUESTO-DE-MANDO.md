@@ -345,6 +345,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **04/10 13:40 (chat del dueno). PATRIMONIO Y ESTRATEGIA (el dueno: «la
+  estrategia es cosa tuya»).** Patrimonio (rival_intelligence, 04/10):
+  Pollo17 98,7 M (20 jug., puja max 27,8 M), Luismi 92,0 M (saldo -17,0 M),
+  Pepe 56,0 M (11 jug., puja max 14,1 M), lideres en puntos (323 contra 320).
+  Diferencia: mercado (Pollo +64 M, Luismi +59 M, Pepe +22 M) y plantilla
+  que sube (Pollo +0,62 M/dia, Pepe +0,05). **Estrategia:** no pelear a
+  Pollo en su terreno (E9); recortar sin pelear: (1) chollos (se encienden
+  el 13/10), (2) viajes a precio +1 % perdiendo sin pena lo que pelea
+  Pollo, (3) tras la J8, la caja nueva a jugadores que sumen puntos Y
+  suban (no solo puntos), (4) **Luismi en -17 M y DiosMande en -9,8 M a 5
+  dias de la J8: venderan.** Cada rafaga hasta el 09/10 mira que ponen a
+  la venta; si sale alguien bueno barato, al comparador, y solo con caja
+  propia hasta el 09/10 15:00. Medir el patrimonio una vez por semana.
+
 - **04/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
   (#1982 a #1990). Pepe: sin compras, ventas ni pujas (comprometido 0).
   Saldo +159.783, plantilla 11, once 11. En el reset el escaparate
