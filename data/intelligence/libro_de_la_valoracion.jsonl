@@ -787,3 +787,18 @@
 {"dia":"2026-10-04","id":41200,"name":"Gordon","value":0,"price":9380000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-04","id":31475,"name":"Zakharyan","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-04","id":35308,"name":"Córdoba","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-04","id":19547,"name":"Baena","value":11693872,"price":11510000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":42557,"name":"Adeyemi","value":11160506,"price":10940000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":25127,"name":"Ez Abde","value":10085950,"price":9890000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":30487,"name":"Álvaro Valles","value":6664796,"price":6560000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":43262,"name":"Félix Correia","value":2570416,"price":2530000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":39901,"name":"Freeman","value":1622047,"price":1590000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":10158,"name":"Guridi","value":1568160,"price":2020000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":5220,"name":"Fran García","value":1227082,"price":4260000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":33970,"name":"Rosier","value":1178801,"price":1120000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":37719,"name":"Álvaro Núñez","value":816124,"price":800000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":12734,"name":"Javi Morcillo","value":699602,"price":680000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":41264,"name":"Mantilla","value":658935,"price":990000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":36538,"name":"Beitia","value":379598,"price":360000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-04","id":10155,"name":"Unai Núñez","value":0,"price":1720000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-04","id":34483,"name":"Pedro Díaz","value":0,"price":1130000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
