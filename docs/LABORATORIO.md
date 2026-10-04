@@ -69,6 +69,46 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E18 · 04/10/2026 17:20 de Madrid · ¿Un rival en rojo antes de la jornada vende BARATO?
+
+**El caso (04/10):** Luismi_Haz (-17 M) y DiosMande (-9,8 M) tienen que
+estar en verde antes de la J8 y ponen jugadores a la venta (Rafita,
+Tenaglia, Veiga...). La estrategia del gestor (punto 4) espera que alguno
+salga barato. **Codigo:** `lab/rivales/venden_en_rojo.py` (tablon y
+precios; los eventos repetidos se quitan).
+
+**La sospecha:** un manager en rojo siempre puede vender al Computer, que
+paga el precio + 1-3 % (E3). Con ese suelo, no tiene por que regalar nada
+a otro manager.
+
+**1) Traspasos de manager a manager (toda la temporada): 9, y NINGUNO por
+debajo del precio.** Mediana +7,5 % sobre el precio (de +0,2 % a +59 %).
+Los de Luismi_Haz: a Pollo17 por +59 %, +0,2 % y +5,4 %.
+
+**2) Ventas de los rivales al Computer:**
+
+    en las 48 h antes de empezar una jornada   n=91   mediana +2,0 %   por debajo del precio 23 (25 %)
+    el resto del tiempo                        n=82   mediana +3,2 %   por debajo del precio  9 (11 %)
+
+Con prisa, los rivales SI venden peor... **pero al Computer**: aceptan la
+oferta que haya, aunque este por debajo del precio, antes que bajarle el
+precio a otro manager.
+
+**Lo que se aprende:** del rival en rojo no salen chollos para Pepe: o
+vende al Computer, o vende a otro manager a precio o por encima. Lo que
+SI pasa es que **se debilita**: vende titulares (Rafita, 90 %; Veiga,
+80 %) y eso le quita puntos en la carrera. Y los que vende al Computer
+vuelven mas adelante al mercado del Computer, donde se compran a lo que
+piden (E9, E13).
+
+**Contra lo que hace Pepe:** la decision de las rafagas («con 159.783 no
+llega ninguno: no se puja») es la buena. Si se quiere a Rafita el 10/10,
+contar con pagar el precio o algo mas, no menos.
+
+**Veredicto: SE DESCARTA la idea de chollos de rivales en rojo** (9 de 9
+traspasos a precio o mas). n pequeno en traspasos; con prisa se ve en las
+ventas al Computer (n=91).
+
 ### E17 · 04/10/2026 11:20 de Madrid · ¿La vara de E16 (puntos por partido x titularidad) anticipa los puntos?
 
 **Por que:** E16 eligio el defensa para la J8 por «puntos esperados» =
