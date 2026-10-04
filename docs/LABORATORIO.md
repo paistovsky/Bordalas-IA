@@ -69,6 +69,35 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E17 · 04/10/2026 11:20 de Madrid · ¿La vara de E16 (puntos por partido x titularidad) anticipa los puntos?
+
+**Por que:** E16 eligio el defensa para la J8 por «puntos esperados» =
+puntos por partido x titularidad de FutbolFantasy, y lo dejo sin validar.
+**Codigo:** `lab/puntos/valida_esperado.py`. Datos: los 140 jugadores con
+titularidad FF en la foto del 18/09 (antes de la J7) y sus puntos en la
+J7.
+
+    vara                           Spearman con la J7   mejor tercio (n=46)   jugaron
+    puntos esperados (E16)              +0,37                4,67 pts           98 %
+    puntos totales (E7, `nos_suma`)     +0,36                4,63               98 %
+    precio                              +0,34                4,54               98 %
+    puntos por partido                  +0,31                4,28               89 %
+    titularidad FF sola                 +0,28                3,65               93 %
+
+**La titularidad de FF esta bien calibrada:** con 70-89 % jugaron el 92 %
+(n=51); 90-100 %, el 100 % (n=11); 40-69 %, el 79 % (n=43); menos de
+40 %, el 43 % (n=35).
+
+**Resultado:** la vara de E16 vale lo mismo que el total de puntos (+0,37
+contra +0,36), ni mejor ni peor. Las dos dejan fuera al que no juega; la
+media por partido sola es la peor (premia al que jugo poco y bien, como ya
+vio E7). Una jornada, n=140.
+
+**Veredicto: SE AGUANTA, sin cambio.** El punto 8 del plan puede usar
+cualquiera de las dos varas (el total o la de E16); lo que no conviene es
+la media por partido sola. Para el banquillo (E12/E16): **titularidad FF
+de 70 % o mas** = juega 9 de cada 10.
+
 ### E16 · 03/10/2026 17:20 de Madrid · El primer fichaje despues de la J8: cuanta caja habra y en que se gasta
 
 **Por que:** E15 dice que lo que decide es fichar para el once con la
