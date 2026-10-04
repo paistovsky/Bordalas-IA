@@ -167796,6 +167796,75 @@
     }
   },
   {
+    "event_id": "6f963db773fb5e6fd57f906b",
+    "date": 1789749301,
+    "type": "poll",
+    "fixed": false,
+    "title": "",
+    "author": {
+      "id": 14156489,
+      "name": "Luismi_Haz",
+      "icon": "icons/11.png"
+    },
+    "content": {
+      "poll": {
+        "id": 635864,
+        "until": 1789922101,
+        "expired": true,
+        "questions": [
+          {
+            "title": "Devolverías los puntos de esta jornada a Luismi y le dejarías puntuar  esta jornada pasada?",
+            "choices": [
+              {
+                "title": "Si, aunque sea un cono",
+                "votes": 3
+              },
+              {
+                "title": "No, es un rival muy duro",
+                "votes": 1
+              }
+            ]
+          }
+        ],
+        "multiResponse": false,
+        "responsePrivacy": "public",
+        "responses": [
+          {
+            "id": 14145555,
+            "name": "Pollo17",
+            "icon": "icons/13.png",
+            "response": [
+              0
+            ]
+          },
+          {
+            "id": 14151726,
+            "name": "DiosMande a Rodri al Palancas",
+            "icon": "i/u/14151726.png",
+            "response": [
+              0
+            ]
+          },
+          {
+            "id": 14154203,
+            "name": "Prinzipote",
+            "response": [
+              0
+            ]
+          },
+          {
+            "id": 14175949,
+            "name": "Pepe Bordalás",
+            "icon": "i/u/14175949.png",
+            "response": [
+              1
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
     "event_id": "bd8d062307cf94193ab3fe90",
     "date": 1789749301,
     "type": "poll",
@@ -170623,6 +170692,34 @@
           "name": "Manzagool"
         },
         "amount": 880000
+      }
+    ]
+  },
+  {
+    "event_id": "65cafb0a94c48962e4542a17",
+    "date": 1791103628,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 2184,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 4184000
+      },
+      {
+        "player": 34599,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 1500200
       }
     ]
   }
