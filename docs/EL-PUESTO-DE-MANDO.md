@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 04/10/2026, 14:35 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -344,6 +344,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#1990 a #1997).
+  Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
+  11. Nuevo en main (chat del dueno): los chollos (BORDALAS_LOS_CHOLLOS,
+  apagado, se encienden el 13/10) y E17. **Lo que venden los rivales en
+  rojo (ciclo #1997):** Luismi_Haz pone a **Rafita** (DEF, 90 %, pide
+  2,56 M = precio; el primero de la lista de E16, 3,86 pts esperados),
+  Tenaglia (DEF 80 %, 4,78 M) y Areso (DEF 70 %, 2,36 M). DiosMande (13
+  a la venta): Veiga (DEF 80 %, 3,98 M), Alfonso Herrero (POR 95 %,
+  4,08 M), Cristian Romero (DEF 70 %, 6,24 M), Alvaro Garcia (DEL 80 %,
+  4,04 M), Gordon, Fermin. Todos a precio de mercado (+-2 %), sin
+  descuento: venden por necesidad pero aun no regalan. **Con 159.783 no
+  llega ninguno con caja propia antes del 09/10 15:00: no se puja.** Si
+  Rafita sigue a la venta el 10/10, es el defensa del punto 8. Las
+  rafagas hasta el 09/10 siguen mirando si alguno baja de precio.
 
 - **04/10 13:40 (chat del dueno). PATRIMONIO Y ESTRATEGIA (el dueno: «la
   estrategia es cosa tuya»).** Patrimonio (rival_intelligence, 04/10):
