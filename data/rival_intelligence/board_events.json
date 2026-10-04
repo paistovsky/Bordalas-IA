@@ -170722,5 +170722,14 @@
         "amount": 1500200
       }
     ]
+  },
+  {
+    "event_id": "7cf2d36e72bd10ef7bf7fd1a",
+    "date": 1791135840,
+    "type": "adminText",
+    "fixed": true,
+    "title": "¡Gana una Liga Premium!",
+    "author": null,
+    "content": "<p><a href=\"https://x.com/biwenger/status/2106785312642863421\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/sorteo-bw-26-27/tablon.jpg\" alt=\"\" /></a></p>\r\n<p>[followButtons instagram=\"https://www.instagram.com/p/DeFFNKQOheb/?stkn=MW1rYnFnZ2lva2ZkbA==\" facebook=\"https://www.facebook.com/share/p/1Cy1hyjwFv/ \" twitter=\"https://x.com/biwenger/status/2106785312642863421\" tiktok=\"\" telegram=\"\"]</p>"
   }
 ]
