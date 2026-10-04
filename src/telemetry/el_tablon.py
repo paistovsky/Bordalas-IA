@@ -192,6 +192,9 @@ def el_tablon_de_hoy(
 QUE_HACE = {
     "BORDALAS_COBRA_LA_RACHA":
         "Cobra solo los 250.000 € de la racha diaria cuando llega a 5.",
+    "BORDALAS_LOS_CHOLLOS":
+        "Puja por debajo de su valor por los del Computer que ya valen más de "
+        "lo que piden, y los revende en cuanto hay beneficio (detrás de todo).",
     "BORDALAS_COMPRA_SOLO_SI_SUBE":
         "Para revender, solo compra jugadores cuyo precio está subiendo.",
     "BORDALAS_EL_ONCE_UNA_VEZ":

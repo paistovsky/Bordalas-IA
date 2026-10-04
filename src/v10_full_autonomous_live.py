@@ -1461,6 +1461,26 @@ def run_full_autonomous_cycle() -> dict:
         f"{[(a.get('accion'), a.get('nombre')) for a in orden_del_gestor.get('acciones') or []]}"
     )
 
+    # ==========================================================
+    # 5) LOS CHOLLOS DEL PRECIO FIJO (02/10/2026)
+    # ==========================================================
+    #
+    #     Lo ultimo de todo: van detras de las pujas normales y de la
+    #     orden. Solo en la ultima vuelta antes del reset. APAGADA:
+    #     `BORDALAS_LOS_CHOLLOS`. Nunca lanza.
+    from src.actions.los_chollos import correr as _los_chollos
+
+    try:
+        _min_reset = (_segundos or 0) / 60 if _segundos is not None else None
+    except Exception:                                   # noqa: BLE001
+        _min_reset = None
+
+    chollos = _los_chollos(cycle, _min_reset)
+    print(
+        f"Los chollos: {chollos.get('motivo')} "
+        f"{[(a.get('accion'), a.get('player_id'), a.get('importe')) for a in chollos.get('acciones') or []]}"
+    )
+
     payload = {
         "version": "V10.13.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1490,6 +1510,7 @@ def run_full_autonomous_cycle() -> dict:
         "racha": racha,
         "orden_del_gestor": orden_del_gestor,
         "revision_de_pujas": revision_de_pujas,
+        "chollos": chollos,
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
