@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/10/2026, 14:35 de Madrid (rafaga de las 14:15).
+Actualizado: 04/10/2026, 21:30 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -344,6 +344,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1997 a #2004).
+  Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
+  11. Escaparate de Luismi y DiosMande (ciclo #2004): los mismos 19, a
+  precio de mercado (-3 % a +7 %); Rafita sigue a 2,56 M. **E18 lo
+  confirma con datos: los rivales en rojo no venden barato a otro
+  manager (9/9 a precio o mas); con prisa malvenden al COMPUTER.** O sea:
+  lo que hay que vigilar no es su escaparate sino el mercado del
+  Computer del reset (lo que ellos le vendan saldra ahi), y eso ya lo
+  miran los chollos (apagados hasta el 13/10) y la subasta. Las rafagas
+  hasta el 09/10 bastan con mirar si Rafita sigue a la venta.
 
 - **04/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#1990 a #1997).
   Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
