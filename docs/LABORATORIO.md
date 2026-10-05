@@ -69,6 +69,37 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E19 · 05/10/2026 11:20 de Madrid · Lo que un rival le vende al Computer, ¿vuelve al mercado?
+
+**El caso:** tras E18 el gestor apunta (04/10): «lo que hay que vigilar
+es el mercado del Computer: lo que los rivales le vendan saldra ahi».
+**Codigo:** `lab/rivales/vuelven_al_mercado.py`. Ventas al Computer del
+tablon (sin repetidos) contra las listas diarias del Computer de
+`libro_del_escaparate.jsonl` (20 jugadores al dia, 17/09 a 05/10).
+
+**Resultado (56 ventas al Computer con al menos 7 dias de listas
+detras):**
+
+    vuelven a salir en la lista antes del 05/10   15/56 (27 %)
+      a los 1-3 dias 3; a los 4-7 dias 5; a los 8 o mas 7
+    en 7 dias: los vendidos al Computer salen el 14 %;
+               un jugador libre cualquiera, el 20 %
+
+**Lo que se aprende:** el Computer no los «devuelve» antes: salen en su
+lista igual o menos que cualquier jugador libre, al azar, uno de cada
+siete por semana. Si Luismi vende a Rafita al Computer, la probabilidad
+de verlo en el mercado del Computer en la semana siguiente es ~1 de 7.
+
+**Contra lo que hace Pepe y el plan:** no cambia lo que hace Pepe (la
+subasta ya mira la lista del Computer cada dia). Corrige la expectativa:
+si se quiere a un jugador que tiene un rival, la forma realista es
+pujarle a ese rival a precio o algo mas (E18) o buscar otro igual en la
+lista del dia (E16: salen mas de un defensa que sirve al dia), no esperar
+a que el Computer lo saque.
+
+**Veredicto: SE DESCARTA** que las ventas de los rivales al Computer
+lleguen antes al mercado. n=56, 19 dias de listas.
+
 ### E18 · 04/10/2026 17:20 de Madrid · ¿Un rival en rojo antes de la jornada vende BARATO?
 
 **El caso (04/10):** Luismi_Haz (-17 M) y DiosMande (-9,8 M) tienen que
