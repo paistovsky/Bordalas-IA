@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/10/2026, 21:30 de Madrid (rafaga de las 21:15).
+Actualizado: 05/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -344,6 +344,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
+  (#2005 a #2013). Pepe: sin compras, ventas ni pujas (comprometido 0).
+  Saldo +159.783, plantilla 11, once 11. La racha (~+0,25 M) se espera
+  el ~06/10: la rafaga de manana mira que entre.
 
 - **04/10 21:15 (rafaga de la noche).** Ciclos: verdes (#1997 a #2004).
   Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
