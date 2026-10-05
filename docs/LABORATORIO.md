@@ -69,6 +69,53 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E20 · 05/10/2026 17:25 de Madrid · La carrera: ¿que once saca mas puntos con la plantilla de hoy?
+
+**Por que:** lo que decide la liga son los puntos por jornada, no el
+dinero. Con las plantillas de los 8 (foto del ciclo de las 17:09 del
+05/10, `rival_squads` + `todaLaLiga`) se calcula el mejor once de cada uno
+con la vara de E16/E17 (puntos por partido x titularidad FF, estado ok).
+**Codigo:** `lab/carrera/proyeccion.py` (la foto se pasa por argumento:
+los artefactos caducan a los 2 dias).
+
+    manager        puntos  fichas  once esperado  banquillo (3 mejores)  real por jornada (J1-J7)
+    Luismi_Haz       287     19        58,8              8,6                 47,5
+    Pepe             323     11        48,1              0,0                 44,0
+    Pollo17          320     20        46,2             10,9                 42,6
+    DiosMande        281     13        37,4              2,9                 39,0
+    Manzagool        253     16        37,2              3,2                 32,9
+    Mex              246     16        28,2              4,6                 36,0
+    Prinzipote       258     17        27,9              4,3                 34,0
+    Alvaro R.        198     14         (sin portero sano: no sale once)     22,7
+
+(La vara sobreestima un poco: los 4 primeros sacan de verdad un 90 % de
+lo esperado. El orden coincide con el real en los cuatro de arriba.)
+
+**Lo que se aprende:**
+1. **El once de Pepe es el segundo mejor de la liga** y va por delante del
+   de Pollo17 (48,1 contra 46,2). La ventaja de Pollo17 es el dinero y el
+   banquillo (10,9 contra 0), no el once.
+2. **El rival en puntos es Luismi_Haz**, no Pollo17: su once es el mas
+   fuerte (58,8; Camello, Budimir, David Soria, Pedri, Arda Guler) y ha
+   sacado 47,5 por jornada, el que mas. Esta 36 puntos por detras, pero
+   puede recortar ~10 por jornada. Esta en -17 M y tiene que vender: si
+   vende a Rafita, Tenaglia y Areso (los que tiene a la venta), su once
+   solo baja a 56,8. Para cuadrar 17 M tendria que vender titulares
+   caros, y ahi si se hunde.
+3. **El hueco de Pepe es el banquillo**: 0 contra 8-11 de los otros dos
+   de arriba (E12: ~1-2,5 pts por jornada).
+
+**Contra lo que hace Pepe:** confirma el orden del plan: lo primero tras
+la J8 es el defensa que entra de titular y deja banquillo (E12/E16). Y
+anade algo para el gestor: **vigilar a Luismi en puntos** (no a Pollo17)
+y que tendra que vender titulares para salir de -17 M.
+
+**Limites:** una foto; la vara es de una jornada validada (E17); la
+titularidad FF cambia de una semana a otra.
+
+**Veredicto: SE AGUANTA como lectura de la carrera** (no hay nada que
+construir). Repetir cada semana con la foto del dia.
+
 ### E19 · 05/10/2026 11:20 de Madrid · Lo que un rival le vende al Computer, ¿vuelve al mercado?
 
 **El caso:** tras E18 el gestor apunta (04/10): «lo que hay que vigilar
