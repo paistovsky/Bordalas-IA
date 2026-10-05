@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/10/2026, 07:25 de Madrid (rafaga de las 07:15).
+Actualizado: 05/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -344,6 +344,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2013 a #2020).
+  Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
+  11. **CORRIJO la nota del 04/10 21:15:** escribi que lo que los rivales
+  en rojo vendan al Computer «saldra» en su mercado. E19 lo mide: no
+  vuelve antes que cualquier libre (14 % en 7 dias). No hay atajo por
+  ahi; su urgencia no es nuestra oportunidad. Queda en pie lo de Rafita
+  (escaparate de Luismi) para el 10/10.
 
 - **05/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
   (#2005 a #2013). Pepe: sin compras, ventas ni pujas (comprometido 0).
