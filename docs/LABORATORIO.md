@@ -88,8 +88,9 @@ los artefactos caducan a los 2 dias).
     Prinzipote       258     17        27,9              4,3                 34,0
     Alvaro R.        198     14         (sin portero sano: no sale once)     22,7
 
-(La vara sobreestima un poco: los 4 primeros sacan de verdad un 90 % de
-lo esperado. El orden coincide con el real en los cuatro de arriba.)
+(La vara sobreestima algo: los 4 primeros sacaron de verdad entre el 81 %
+y el 104 % de lo esperado, con plantillas que no eran las de hoy. El orden
+coincide con el real en los cuatro de arriba.)
 
 **Lo que se aprende:**
 1. **El once de Pepe es el segundo mejor de la liga** y va por delante del
