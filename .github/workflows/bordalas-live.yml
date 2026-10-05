@@ -186,6 +186,15 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_ORDEN_DEL_GESTOR: "1"
 
+      # Encendido 05/10 de Madrid. LOS CHOLLOS DEL PRECIO FIJO (regla del
+      #   dueno, caso Moi Gomez; laboratorio E12). Puja valor - 1.000 EUR
+      #   por los del Computer que ya valen mas de lo que piden; lo ultimo
+      #   del ciclo y solo en la ultima vuelta antes del reset; a menos de
+      #   72 h de una jornada, solo con caja propia. Revende en cuanto hay
+      #   beneficio. Verja 200/200; paso 0 con 38; ensayo #37375467264 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LOS_CHOLLOS: "1"
+
       # Encendido 29/09 de Madrid. LA REVISION DE LAS PUJAS VIVAS.
       #
       #   En la ventana del reset retira nuestras pujas por jugadores que

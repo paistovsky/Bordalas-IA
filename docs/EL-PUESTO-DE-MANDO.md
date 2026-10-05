@@ -345,6 +345,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **05/10 23:40 (chat del dueno). ENCENDIDO BORDALAS_LOS_CHOLLOS** (el dueno:
+  «¿por que no encendemos ya los chollos?»; la regla de las 72 h ya impide
+  que una compra nos ponga en rojo antes de la J8). Paso 0 con 38, ensayo
+  #37375467264 verde («Los chollos: NADA_QUE_HACER», fuera de la ventana),
+  verja 200/200. GitHub Actions tuvo una caida grande esa noche (22:07 y el
+  primer ensayo sin maquina). **La rafaga de las 07:15 del 06/10 mira:** el
+  log de la vuelta de las 06:07 («Los chollos: ...»), si pujo y por quien,
+  y data/trading/los_chollos.json. Con 159.783 EUR de saldo y la J8 a <72 h,
+  solo puede pujar con caja propia.
+
 - **05/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2020 a #2027).
   Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
   11. Laboratorio E20 (la carrera): nuestro once es el segundo mejor
