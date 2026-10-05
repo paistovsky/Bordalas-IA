@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 05/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -344,6 +344,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2020 a #2027).
+  Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
+  11. Laboratorio E20 (la carrera): nuestro once es el segundo mejor
+  (48 pts esperados contra 46 de Pollo17; Luismi 59), y **el hueco de
+  Pepe es el banquillo**: confirma el punto 8 del plan (10/10). Nada que
+  construir ni encender.
 
 - **05/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2013 a #2020).
   Pepe: sin compras, ventas ni pujas. Saldo +159.783, plantilla 11, once
