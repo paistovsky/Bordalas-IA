@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 06/10/2026, 14:35 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -344,6 +344,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2037 a #2044).
+  Pepe: sin compras, ventas ni pujas. Saldo +409.783, plantilla 11, once
+  11. **CORRIJO la nota de las 07:15 (y la del chat del dueno de las
+  06:30): cron-job.org NO falla.** E21: las 05h y 06h no tienen vuelta A
+  PROPOSITO (config/disparos.json: latido a las :07 salvo 4-7; disparos
+  puntuales 04:45, 04:50 y 07:15; zona de silencio del reset). El latido
+  va 20/20 desde el 25/09. El dueno no tiene que mirar nada en
+  cron-job.org. **La red de las 06:22 (trig_01AVXpLEPRYKWuEDiEquuCdR)
+  sobra:** dispara cada dia una vuelta dentro de la franja de silencio
+  que no escribe y gasta peticiones a Biwenger (riesgo de 429). Intente
+  APAGARLA (no borrarla) y el filtro de permisos me lo nego: **queda
+  para el dueno** (apagarla en sus rutinas, o pedirselo al chat que la
+  creo, session_012cLZwP2316MR6pWJ7k5bZh).
+
 
 - **06/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2029 a
   #2037), salvo **#2028 (05/10 22:07) ROJA: la caida de GitHub Actions**
