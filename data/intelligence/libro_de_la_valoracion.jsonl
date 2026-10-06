@@ -937,3 +937,4 @@
 {"dia":"2026-10-06","id":35308,"name":"Córdoba","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-06","id":10155,"name":"Unai Núñez","value":0,"price":1690000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-06","id":34483,"name":"Pedro Díaz","value":0,"price":1120000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-06","id":25159,"name":"Akhomach","value":3570546,"price":3510000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
