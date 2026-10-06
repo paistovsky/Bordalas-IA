@@ -1,6 +1,6 @@
 {
   "version": "V10.5",
-  "updated_at": "2026-10-06T04:23:48.971936+00:00",
+  "updated_at": "2026-10-06T05:18:54.079772+00:00",
   "positions": [
     {
       "position_id": "BID-4138078754",
@@ -199,7 +199,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-16T18:44:52.454534+00:00",
-      "updated_at": "2026-10-06T04:23:48.733412+00:00",
+      "updated_at": "2026-10-06T05:18:53.830703+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -444,7 +444,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-17T19:57:28.828214+00:00",
-      "updated_at": "2026-10-06T04:23:48.733425+00:00",
+      "updated_at": "2026-10-06T05:18:53.830720+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -579,7 +579,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-18T11:40:21.466744+00:00",
-      "updated_at": "2026-10-06T04:23:48.733428+00:00",
+      "updated_at": "2026-10-06T05:18:53.830724+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -782,7 +782,7 @@
       "realized_roi_percent": null,
       "thesis_source": "LIVE_DECISION_EXACT",
       "created_at": "2026-08-18T12:01:03.975162+00:00",
-      "updated_at": "2026-10-06T04:23:48.733431+00:00",
+      "updated_at": "2026-10-06T05:18:53.830727+00:00",
       "events": [
         {
           "type": "BID_SENT",
@@ -1141,7 +1141,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T10:49:10.880549+00:00",
-      "updated_at": "2026-10-06T04:23:48.733433+00:00",
+      "updated_at": "2026-10-06T05:18:53.830729+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1266,7 +1266,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T13:11:38.127443+00:00",
-      "updated_at": "2026-10-06T04:23:48.733436+00:00",
+      "updated_at": "2026-10-06T05:18:53.830731+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1682,16 +1682,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 2250000,
-      "unrealized_profit": 170999,
-      "unrealized_roi_percent": 8.23,
+      "current_value": 2240000,
+      "unrealized_profit": 160999,
+      "unrealized_roi_percent": 7.74,
       "opened_at": "2026-08-22T05:38:11.061329+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-21T23:12:10.013730+00:00",
-      "updated_at": "2026-10-06T04:23:48.733443+00:00",
+      "updated_at": "2026-10-06T05:18:53.830740+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1847,18 +1847,18 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-10-06T04:23:48.968924+00:00",
+        "last_evaluated_at": "2026-10-06T05:18:54.076836+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": 170999,
-        "roi_percent": 8.23,
+        "profit": 160999,
+        "roi_percent": 7.74,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 70.0,
         "scores": {
           "hold": 48.5,
-          "take_profit": 22.5,
+          "take_profit": 7.5,
           "cut_loss": 0.0,
           "rotate_capital": 15.0
         },
@@ -1943,16 +1943,16 @@
       "expected_profit_at_bid": 71100,
       "expected_roi_at_bid_percent": 3.69,
       "t15_after_bid": 1753942,
-      "current_value": 1990000,
-      "unrealized_profit": 64900,
-      "unrealized_roi_percent": 3.37,
+      "current_value": 1980000,
+      "unrealized_profit": 54900,
+      "unrealized_roi_percent": 2.85,
       "opened_at": "2026-08-23T05:10:06.206673+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-22T12:58:05.170012+00:00",
-      "updated_at": "2026-10-06T04:23:48.733447+00:00",
+      "updated_at": "2026-10-06T05:18:53.830745+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2072,18 +2072,18 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-10-06T04:23:48.968934+00:00",
+        "last_evaluated_at": "2026-10-06T05:18:54.076846+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": 64900,
-        "roi_percent": 3.37,
+        "profit": 54900,
+        "roi_percent": 2.85,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 70.0,
         "scores": {
           "hold": 38.5,
-          "take_profit": 29.5,
+          "take_profit": 19.5,
           "cut_loss": 0.0,
           "rotate_capital": 37.0
         },
@@ -2281,7 +2281,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-26T22:28:55.623930+00:00",
-      "updated_at": "2026-10-06T04:23:48.733450+00:00",
+      "updated_at": "2026-10-06T05:18:53.830748+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2687,7 +2687,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-29T00:02:10.740691+00:00",
-      "updated_at": "2026-10-06T04:23:48.733453+00:00",
+      "updated_at": "2026-10-06T05:18:53.830751+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3409,7 +3409,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764569+00:00",
-      "updated_at": "2026-10-06T04:23:48.733457+00:00",
+      "updated_at": "2026-10-06T05:18:53.830755+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3498,7 +3498,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764612+00:00",
-      "updated_at": "2026-10-06T04:23:48.733459+00:00",
+      "updated_at": "2026-10-06T05:18:53.830757+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3587,7 +3587,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T14:50:32.666545+00:00",
-      "updated_at": "2026-10-06T04:23:48.733461+00:00",
+      "updated_at": "2026-10-06T05:18:53.830759+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3676,7 +3676,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T20:09:49.948144+00:00",
-      "updated_at": "2026-10-06T04:23:48.733463+00:00",
+      "updated_at": "2026-10-06T05:18:53.830761+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3874,7 +3874,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-14T20:11:05.102108+00:00",
-      "updated_at": "2026-10-06T04:23:48.733465+00:00",
+      "updated_at": "2026-10-06T05:18:53.830763+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3964,7 +3964,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T02:54:37.362776+00:00",
-      "updated_at": "2026-10-06T04:23:48.733467+00:00",
+      "updated_at": "2026-10-06T05:18:53.830765+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4053,7 +4053,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T12:02:13.172318+00:00",
-      "updated_at": "2026-10-06T04:23:48.733469+00:00",
+      "updated_at": "2026-10-06T05:18:53.830767+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4193,7 +4193,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-17T03:03:05.858859+00:00",
-      "updated_at": "2026-10-06T04:23:48.733471+00:00",
+      "updated_at": "2026-10-06T05:18:53.830769+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4282,7 +4282,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T00:12:39.103782+00:00",
-      "updated_at": "2026-10-06T04:23:48.733473+00:00",
+      "updated_at": "2026-10-06T05:18:53.830771+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4371,7 +4371,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510843+00:00",
-      "updated_at": "2026-10-06T04:23:48.733475+00:00",
+      "updated_at": "2026-10-06T05:18:53.830773+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4460,7 +4460,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510907+00:00",
-      "updated_at": "2026-10-06T04:23:48.733477+00:00",
+      "updated_at": "2026-10-06T05:18:53.830775+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4549,7 +4549,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510947+00:00",
-      "updated_at": "2026-10-06T04:23:48.733480+00:00",
+      "updated_at": "2026-10-06T05:18:53.830777+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4638,7 +4638,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T06:18:56.178648+00:00",
-      "updated_at": "2026-10-06T04:23:48.733482+00:00",
+      "updated_at": "2026-10-06T05:18:53.830779+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4727,7 +4727,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T02:53:28.328041+00:00",
-      "updated_at": "2026-10-06T04:23:48.733484+00:00",
+      "updated_at": "2026-10-06T05:18:53.830781+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4817,16 +4817,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 1570000,
-      "unrealized_profit": -317000,
-      "unrealized_roi_percent": -16.8,
+      "current_value": 1560000,
+      "unrealized_profit": -327000,
+      "unrealized_roi_percent": -17.33,
       "opened_at": "2026-09-20T05:27:25.921059+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T12:14:41.399274+00:00",
-      "updated_at": "2026-10-06T04:23:48.733488+00:00",
+      "updated_at": "2026-10-06T05:18:53.830785+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4856,13 +4856,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-10-06T04:23:48.968943+00:00",
+        "last_evaluated_at": "2026-10-06T05:18:54.076855+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": -317000,
-        "roi_percent": -16.8,
+        "profit": -327000,
+        "roi_percent": -17.33,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 90.0,
         "scores": {
@@ -4910,7 +4910,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T12:14:41.399314+00:00",
-      "updated_at": "2026-10-06T04:23:48.733490+00:00",
+      "updated_at": "2026-10-06T05:18:53.830787+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4999,16 +4999,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 2570000,
-      "unrealized_profit": -186876,
-      "unrealized_roi_percent": -6.78,
+      "current_value": 2550000,
+      "unrealized_profit": -206876,
+      "unrealized_roi_percent": -7.5,
       "opened_at": "2026-09-23T05:42:19.400084+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-23T03:19:41.972654+00:00",
-      "updated_at": "2026-10-06T04:23:48.733494+00:00",
+      "updated_at": "2026-10-06T05:18:53.830790+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5038,19 +5038,19 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-10-06T04:23:48.968948+00:00",
+        "last_evaluated_at": "2026-10-06T05:18:54.076859+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": -186876,
-        "roi_percent": -6.78,
+        "profit": -206876,
+        "roi_percent": -7.5,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 70.0,
         "scores": {
           "hold": 48.5,
           "take_profit": 0.0,
-          "cut_loss": 21.2,
+          "cut_loss": 41.2,
           "rotate_capital": 37.0
         },
         "reasons": [
@@ -5092,7 +5092,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-23T09:39:39.218808+00:00",
-      "updated_at": "2026-10-06T04:23:48.733496+00:00",
+      "updated_at": "2026-10-06T05:18:53.830792+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5238,7 +5238,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-25T13:12:49.500390+00:00",
-      "updated_at": "2026-10-06T04:23:48.733498+00:00",
+      "updated_at": "2026-10-06T05:18:53.830795+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5370,16 +5370,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 8860000,
-      "unrealized_profit": -790000,
-      "unrealized_roi_percent": -8.19,
+      "current_value": 8930000,
+      "unrealized_profit": -720000,
+      "unrealized_roi_percent": -7.46,
       "opened_at": "2026-09-30T05:18:31.516630+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-29T10:09:50.607785+00:00",
-      "updated_at": "2026-10-06T04:23:48.733502+00:00",
+      "updated_at": "2026-10-06T05:18:53.830798+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5409,13 +5409,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-10-06T04:23:48.968952+00:00",
+        "last_evaluated_at": "2026-10-06T05:18:54.076863+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": -790000,
-        "roi_percent": -8.19,
+        "profit": -720000,
+        "roi_percent": -7.46,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 70.0,
         "scores": {
@@ -5463,7 +5463,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-30T13:09:25.340152+00:00",
-      "updated_at": "2026-10-06T04:23:48.733505+00:00",
+      "updated_at": "2026-10-06T05:18:53.830801+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5493,7 +5493,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-10-06T04:23:48.968956+00:00",
+        "last_evaluated_at": "2026-10-06T05:18:54.076867+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -5640,16 +5640,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 2340000,
-      "unrealized_profit": -97000,
-      "unrealized_roi_percent": -3.98,
+      "current_value": 2330000,
+      "unrealized_profit": -107000,
+      "unrealized_roi_percent": -4.39,
       "opened_at": "2026-10-02T05:18:13.804584+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-01T08:09:46.935683+00:00",
-      "updated_at": "2026-10-06T04:23:48.733509+00:00",
+      "updated_at": "2026-10-06T05:18:53.830804+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5679,20 +5679,20 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-10-06T04:23:48.968959+00:00",
+        "last_evaluated_at": "2026-10-06T05:18:54.076871+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": -97000,
-        "roi_percent": -3.98,
+        "profit": -107000,
+        "roi_percent": -4.39,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 90.0,
         "scores": {
           "hold": 59.5,
           "take_profit": 0.0,
           "cut_loss": 21.2,
-          "rotate_capital": 23.0
+          "rotate_capital": 29.0
         },
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",

@@ -170881,5 +170881,24 @@
         "amount": 2740600
       }
     ]
+  },
+  {
+    "event_id": "6da0b8daa6e677d34a1d65e6",
+    "date": 1791263029,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 19693,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 155000
+      }
+    ]
   }
 ]
