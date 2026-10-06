@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 06/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -344,6 +344,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2029 a
+  #2037), salvo **#2028 (05/10 22:07) ROJA: la caida de GitHub Actions**
+  que apunto el chat del dueno, no un fallo nuestro; las siguientes,
+  verdes. Primera vuelta despues del reset con los chollos encendidos
+  (#2037, 07:18): «Los chollos: NADA_QUE_HACER», orden NADA, revision de
+  pujas fuera de ventana; la unica escritura, renovar un listado del
+  escaparate. Saldo **+409.783** (racha cobrada), comprometido 0,
+  plantilla 11, once 11. Aviso del log, sin importancia: seis listados
+  del escaparate (Chust, Pablo Ibanez, Jonny, Unai, Jutgla, Diego Rico)
+  caducan hoy y no se pueden renovar hasta manana: mejor asi antes de la
+  J8. La red de las 06:22 (trig_01AVXpLEPRYKWuEDiEquuCdR) queda vigilada:
+  la rafaga de las 07:15 del 07/10 mira si hubo vuelta entre las 06:00 y
+  las 07:00.
 
 - **06/10 06:30 (chat del dueno). cron-job.org SE SALTO OTRA VEZ las vueltas
   de las 05:07 y 06:07** (como el 28/09) y disparo dos casi seguidas a las
