@@ -345,6 +345,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **06/10 06:30 (chat del dueno). cron-job.org SE SALTO OTRA VEZ las vueltas
+  de las 05:07 y 06:07** (como el 28/09) y disparo dos casi seguidas a las
+  04:45 y 04:50. Lance a mano el ciclo a las 06:21 (#37413306575, verde):
+  racha ya cobrada en la de las 04:45 (saldo 409.783), revision de pujas
+  TODAS_PASAN, orden NADA, **chollos NADA_QUE_HACER** (primera vuelta en la
+  ventana: ningun chollo que quepa en caja propia). **Red nueva:** rutina
+  trig_01AVXpLEPRYKWuEDiEquuCdR a las 06:22 de Madrid cada dia: si no hubo
+  ciclo en los ultimos 30 min, lo lanza. El dueno deberia mirar la tarea de
+  cron-job.org (solo el tiene acceso): parece fallar de 05:00 a 06:59.
+
 - **05/10 23:40 (chat del dueno). ENCENDIDO BORDALAS_LOS_CHOLLOS** (el dueno:
   «¿por que no encendemos ya los chollos?»; la regla de las 72 h ya impide
   que una compra nos ponga en rojo antes de la J8). Paso 0 con 38, ensayo
