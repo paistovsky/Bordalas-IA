@@ -69,6 +69,51 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E22 · 06/10/2026 17:20 de Madrid · Agenda 4: ¿aceptar la oferta del Computer hoy o esperar a la siguiente?
+
+**Por que:** en 91 vueltas de produccion hubo ~800 lecturas de ofertas
+del Computer por nuestros jugadores y UNA de un manager (Luismi por Pablo
+Duran, 1,31 M; el Computer lo compro el 30/09 por 1,32 M). «Aceptar o
+no» es, en la practica, la oferta del Computer de hoy o la siguiente.
+E3 ya dijo que una reventa se vende el dia que su precio baja; aqui va el
+resto de ventas (las de la orden para hacer caja, por ejemplo).
+**Codigo:** `lab/ofertas/computer.py` (fotos de los ciclos del 27/09 al
+05/10; los artefactos caducan a los 2 dias).
+
+**Resultado: 19 jugadores, 51 ofertas distintas.** Prima sobre el precio
+del dia: p10 -2,8 %, mediana +0,2 %, p90 +4,2 %. Cada oferta dura ~1,5
+dias (38 h de mediana al verla) y luego llega otra.
+
+    la de hoy...           n    la siguiente (mediana)   mejora
+    baja (< 0 %)          19          +0,6 %             15/19
+    normal (0-3 %)         6          +0,2 %              2/6
+    alta (> 3 %)           7          -2,5 %              0/7
+
+Son tiradas independientes alrededor del precio: tras una mala viene,
+casi siempre, una mejor; tras una buena, una peor.
+
+**La regla que sale (para ventas que NO son reventa):**
+- Oferta de mas del 3 % sobre el precio: **aceptar**; la siguiente sera
+  peor (7 de 7).
+- Oferta por debajo del precio y el precio del jugador NO esta bajando:
+  **esperar a la siguiente** (+2 puntos de prima de mediana, en ~1,5
+  dias).
+- Si el precio esta bajando: aceptar (E3: cada dia de espera cuesta un
+  1,8 %, mas que lo que da la tirada nueva).
+- Si hay plazo (la solvencia antes de una jornada), mandan las horas que
+  quedan, no la prima.
+
+**Contra lo que hace Pepe:** su motor de ofertas decide «KEEP_OFFER» o
+reroll con su propia cuenta y la orden vende con suelo; no se ha medido
+aqui si sigue esta regla (doctrina 84: mirarlo antes de construir).
+
+**Limites:** n pequeno (32 pares de ofertas seguidas, 9 dias, casi todo
+de la plantilla de 11 que no se queria vender); la prima se mide contra
+el precio de cada dia.
+
+**Veredicto: PROMETEDOR.** Pasa a «Listo para el plan» como regla de
+venta para la orden y para el motor de ofertas, con n pequeno dicho.
+
 ### E21 · 06/10/2026 11:20 de Madrid · ¿Se salta cron-job.org las vueltas del reset? (falsa alarma)
 
 **El caso (06/10 06:30, chat del dueno):** «cron-job.org se salto OTRA VEZ
@@ -1007,6 +1052,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E22, 06/10) Vender al Computer cuando NO es una reventa: aceptar si
+  la oferta pasa del +3 % sobre el precio; si esta por debajo del precio
+  y el precio no baja, esperar a la siguiente.** Las ofertas son tiradas
+  independientes (mediana +0,2 %, de -2,8 % a +4,2 %): tras una baja,
+  la siguiente mejora 15 de 19; tras una alta, empeora 7 de 7. Si el
+  precio baja, aceptar (E3). Si hay plazo de solvencia, mandan las horas.
+  Antes de construir: mirar si el motor de ofertas o la orden ya lo hacen.
+  n pequeno (32 pares, 9 dias).
 - **(E21, 06/10) Quitar la red de las 06:22 (trig_01AVXpLEPRYKWuEDiEquuCdR)
   y no pedir al dueno que mire cron-job.org.** Las vueltas de las 05h y
   06h no existen a proposito (`config/disparos.json`: el latido salta las
