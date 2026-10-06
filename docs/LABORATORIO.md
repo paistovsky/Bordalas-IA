@@ -69,6 +69,42 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E21 · 06/10/2026 11:20 de Madrid · ¿Se salta cron-job.org las vueltas del reset? (falsa alarma)
+
+**El caso (06/10 06:30, chat del dueno):** «cron-job.org se salto OTRA VEZ
+las vueltas de las 05:07 y 06:07 y disparo dos casi seguidas a las 04:45
+y 04:50». Se creo una red (rutina trig_01AVXpLEPRYKWuEDiEquuCdR, 06:22
+cada dia: si no hubo ciclo en 30 min, lo lanza) y se pidio al dueno que
+mirara cron-job.org. **Codigo:** `lab/infra/latido.py` (historial de
+ejecuciones de bordalas-live.yml por la API de GitHub; 800 vueltas).
+
+**1) Por hora de Madrid, dias sin ninguna vuelta (10/09 a 05/10, 26 dias):**
+las 05h, 26 de 26; las 06h, 25 de 26. Las 04h, en cambio, con dos vueltas
+23 de 26 dias (04:45 y 04:50). **No es un fallo: es el diseno.**
+`config/disparos.json` declara el latido a las :07 de todas las horas
+MENOS las 4, 5, 6 y 7 («es la ventana del reset del mercado»), y tres
+disparos puntuales: 04:45 (pujar), 04:50 (renovar) y 07:15 (leer el reset
+y cobrar). `src/analysis/zona_de_silencio.py` explica por que: el reset
+de Biwenger cae entre las 05:00 y las 07:00, y una vuelta que escriba ahi
+lo hace con el mercado sin resetear (lo que costo la primera ventana de
+septiembre). Una vuelta fuera de esas horas dentro de la franja es
+«descolocada» y no escribe.
+
+**2) Contra lo declarado (13/09 a 05/10, 23 disparos al dia, gracia 12
+min):** no llegaron 56 de 529 (10,6 %): 54 del latido y 2 de la ventana;
+el de las 07:15, todos. **Pero los fallos son de una semana:** 18, 19, 22,
+23 y 24/09 (de 4 a 14 vueltas ese dia). **Desde el 25/09: 20 de 20 del
+latido todos los dias**, y la ventana (04:45/04:50) y las 07:15, todas.
+
+**Lo que se aprende:** el latido va bien desde hace 11 dias. La red de
+las 06:22 dispara vueltas DENTRO de la franja de silencio: no escriben
+(salen descolocadas), pero gastan las mismas peticiones a Biwenger que
+una vuelta normal (ya hubo un 429) y no aportan nada. Y el aviso al dueno
+para que mire cron-job.org no hace falta.
+
+**Veredicto: FALSA ALARMA, con datos.** Para el gestor (Listo para el
+plan): quitar la rutina de las 06:22 y corregir la nota del 06/10.
+
 ### E20 · 05/10/2026 17:25 de Madrid · La carrera: ¿que once saca mas puntos con la plantilla de hoy?
 
 **Por que:** lo que decide la liga son los puntos por jornada, no el
@@ -971,6 +1007,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E21, 06/10) Quitar la red de las 06:22 (trig_01AVXpLEPRYKWuEDiEquuCdR)
+  y no pedir al dueno que mire cron-job.org.** Las vueltas de las 05h y
+  06h no existen a proposito (`config/disparos.json`: el latido salta las
+  4-7 de Madrid; la ventana son los disparos de 04:45, 04:50 y 07:15; ver
+  `zona_de_silencio.py`). Desde el 25/09 han llegado todas las vueltas
+  declaradas. La red lanza vueltas descolocadas que no escriben y gastan
+  peticiones a Biwenger. Las rutinas solo se tocan desde el chat
+  principal.
 - **(E14, 02/10) Un fichaje para el once NO se revende antes de jugar con
   nosotros** (salvo lesion larga). Cuatro fichajes de 2,5 M o mas
   vendidos en el paron sin jugar una jornada: -3.308.074 y cero puntos.
