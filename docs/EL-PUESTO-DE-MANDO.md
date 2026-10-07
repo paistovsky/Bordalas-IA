@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/10/2026, 14:35 de Madrid (rafaga de las 14:15).
+Actualizado: 07/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -344,6 +344,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
+  (#2045 a #2061). Pepe: sin compras, ventas ni pujas (comprometido 0).
+  Saldo +409.783, plantilla 11, once 11. **La rafaga de las 21:15 del
+  06/10 NO SE HIZO:** el filtro de permisos bloqueo el pull y las
+  lecturas de siempre (motivo «Account & Standing-Rule Changes»); hoy el
+  pull vuelve a funcionar. La red de las 06:22 sigue encendida (disparo
+  la #2060 a las 06:22, verde, sin escribir): sigue pendiente que el
+  dueno la apague. Laboratorio E22 (ofertas del Computer: aceptar si
+  pasan del +3 %): para despues de la J8, con la VENTA de E1.
 
 - **06/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2037 a #2044).
   Pepe: sin compras, ventas ni pujas. Saldo +409.783, plantilla 11, once
