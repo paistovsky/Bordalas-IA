@@ -170937,5 +170937,33 @@
         "amount": 1117000
       }
     ]
+  },
+  {
+    "event_id": "3392faae010d6dcf5fa851e8",
+    "date": 1791349640,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 9402,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 8877000
+      },
+      {
+        "player": 1952,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 5407000
+      }
+    ]
   }
 ]
