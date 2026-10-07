@@ -345,6 +345,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **07/10 18:30 (chat del dueno). PLAN SI SE LESIONA YAMAL** (Pollo17: «en
+  cuanto se lesione Lamine nos adelanta»; el dueno: «tu eres el CEO, el
+  objetivo es ganar la liga»). Yamal: 88 pts en 7 (12,6/partido), ~1/4 de
+  nuestros puntos; le sacamos 3 a Pollo (323-320). **Regla nueva (decision
+  del CEO):** (1) baja corta (<4 semanas): Yamal se queda; ese dia se ficha
+  el mejor DEL/MED barato TITULAR que quepa en caja propia (somos 11 justos:
+  sin el, hueco = 0). (2) **baja de 4 semanas o mas: Yamal se vende al
+  Computer el primer dia** (su precio cae cada dia sin puntuar) y se
+  reinvierte en dos titulares. Mecanismo: la orden lleva
+  `yamal_por_lesion: {motivo, baja_estimada_dias >= 28}`; sin esa llave
+  sigue intocable (codigo y guardia `test_la_llave_de_yamal`). Hay que
+  quitarlo tambien de `proteger`. (3) Tras la J8: 1-2 suplentes baratos que
+  jueguen. **Cada rafaga mira el estado de Yamal** (catalogo y FF/prensa).
+
 - **07/10 14:15 (rafaga de la tarde), A MEDIAS.** Pull bien; saldo
   +409.783 y comprometido 0 (libro del saldo, vuelta de las 14:09): sin
   pujas. **No pude mirar los ciclos ni la plantilla:** el filtro de

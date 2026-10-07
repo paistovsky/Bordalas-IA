@@ -368,7 +368,29 @@ def test_los_viajes_cortos() -> None:
     assert a == [], "pasada la fecha no se compra"
 
 
+def test_la_llave_de_yamal() -> None:
+    YAMAL = 26271
+    venta = {"si_esta": ROBERTO, "jugadores": [
+        {"player_id": YAMAL, "nombre": "Yamal", "suelo": 15_000_000}]}
+    orden = {**ORDEN, "vender_si_ficha": venta}
+    assert orden_mod.validar(orden, AHORA) == "NOMBRA_A_UN_INTOCABLE"
+    corta = {**orden, "yamal_por_lesion": {"motivo": "esguince", "baja_estimada_dias": 14}}
+    assert orden_mod.validar(corta, AHORA) == "NOMBRA_A_UN_INTOCABLE"
+    sin_motivo = {**orden, "yamal_por_lesion": {"baja_estimada_dias": 60}}
+    assert orden_mod.validar(sin_motivo, AHORA) == "NOMBRA_A_UN_INTOCABLE"
+    larga = {**orden, "yamal_por_lesion": {"motivo": "cruzado", "baja_estimada_dias": 180}}
+    assert orden_mod.validar(larga, AHORA) is None
+    base = dict(mercado={}, nuestras_pujas={}, ofertas_del_computer={
+        YAMAL: {"offer_id": 9, "amount": 16_000_000}}, en_venta={YAMAL},
+        precios={YAMAL: 20_000_000}, maximo_de_puja=0)
+    a = orden_mod.decidir(orden, plantilla={ROBERTO, YAMAL}, **base)
+    assert a == [], "sin la llave no se toca a Yamal"
+    a = orden_mod.decidir(larga, plantilla={ROBERTO, YAMAL}, **base)
+    assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", YAMAL)], a
+
+
 TESTS = [
+    test_la_llave_de_yamal,
     test_los_viajes_cortos,
     test_se_vende_solo_con_el_relevo_dentro,
     test_subir_la_puja,

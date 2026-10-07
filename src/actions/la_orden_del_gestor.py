@@ -51,6 +51,25 @@ RUTA = Path("config") / "la_orden_del_gestor.json"
 INTOCABLES = frozenset({"yamal", "lamine yamal"})
 
 
+# LA LLAVE DE YAMAL (07/10/2026, decision del CEO con permiso del dueño:
+# «el objetivo es ganar la liga»). Yamal sigue intocable SALVO que la
+# orden lleve `yamal_por_lesion` con un motivo y una baja estimada de
+# `BAJA_MINIMA_DIAS` o mas: un Yamal lesionado no puntua y su precio cae
+# cada dia; venderlo pronto y reinvertir pierde menos puntos que esperar.
+BAJA_MINIMA_DIAS = 28
+
+
+def _intocables(orden: dict | None) -> frozenset:
+    llave = (orden or {}).get("yamal_por_lesion") or {}
+    if (
+        isinstance(llave, dict)
+        and str(llave.get("motivo") or "").strip()
+        and (_int(llave.get("baja_estimada_dias"), 0) or 0) >= BAJA_MINIMA_DIAS
+    ):
+        return frozenset()
+    return INTOCABLES
+
+
 def activa(interruptor: str = ENV) -> bool:
     try:
         return str(
@@ -105,7 +124,7 @@ def validar(orden: dict | None, ahora: datetime) -> str | None:
         for x in (orden.get("vender_si_ficha") or {}).get("jugadores") or []
     ]
 
-    if any(n in INTOCABLES for n in nombres):
+    if any(n in _intocables(orden) for n in nombres):
         return "NOMBRA_A_UN_INTOCABLE"
 
     for f in orden.get("fichar") or []:
@@ -197,7 +216,7 @@ def decidir(
             pid = _int(j.get("player_id"))
             nombre = str(j.get("nombre", ""))
 
-            if pid not in plantilla or nombre.strip().lower() in INTOCABLES:
+            if pid not in plantilla or nombre.strip().lower() in _intocables(orden):
                 continue
 
             # SU PROPIO RELEVO (30/09): un jugador con `si_esta` solo se
