@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 07/10/2026, 21:30 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -344,6 +344,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2067 a #2074;
+  falta la de las 17:07, no disparada: una suelta). Pepe: sin compras,
+  ventas ni pujas; saldo +409.783, comprometido 0; plantilla 11, once 11.
+  **Estado de la plantilla (ciclo #2074): los 11 «ok», Yamal ok y 90 %
+  titular.** Revisada la llave de Yamal (cab3a81, chat del dueno): la
+  orden no la lleva, asi que Yamal sigue intocable; de acuerdo con la
+  regla (baja >= 28 dias: vender el primer dia; su precio cae 1,5-2 % al
+  dia segun E24). Nada construido ni encendido.
 
 - **07/10 18:30 (chat del dueno). PLAN SI SE LESIONA YAMAL** (Pollo17: «en
   cuanto se lesione Lamine nos adelanta»; el dueno: «tu eres el CEO, el
