@@ -69,6 +69,52 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E24 · 07/10/2026 17:20 de Madrid · ¿Cuanto cae el precio de un jugador caro lesionado? (la llave de Yamal)
+
+**El caso (07/10):** decision del CEO: si Yamal se lesiona 4 semanas o
+mas, se vende al Computer el primer dia, «porque su precio cae cada dia
+sin puntuar» (llave `yamal_por_lesion`, cab3a81). **Codigo:**
+`lab/lesiones/precio_lesionado.py`. Primera noticia de BAJA fuerte de FF
+(lesion, rotura, operado, parte medico, semanas, se pierde) de jugadores
+de 3 M o mas, y su precio en los dias siguientes (20 casos, 17/08 a 30/09).
+
+    caso (precio)                +1er cambio   +7 d    +14 d   +28 d
+    Aubameyang (14,3 M, operado)     -6 %      -25 %     -      -
+    Valverde (10,9 M)                -0 %      -11 %   -18 %    -
+    Andres Martin (5,8 M)            -4 %      -24 %   -34 %  -45 %
+    Audero (5,5 M)                   -4 %      -26 %   -38 %  -52 %
+    Borja Iglesias (5,0 M, rotura)   -4 %      -21 %   -26 %  -34 %
+    Batalla (4,0 M)                  -2 %      -32 %   -43 %  -57 %
+    Aspas (3,3 M)                    -7 %      -27 %   -34 %  (-40 % a 21 d)
+    ...y 6 mas parecidos.
+    Falsas alarmas (calambres, «sin lesion», molestias leves): Exposito,
+    Alfonso Herrero, Juan Iglesias, De la Fuente (mal leido): suben o igual.
+    Mbappe (25,6 M, «no descartado»): -1 % en 7 dias.
+
+**Lo que se aprende:**
+1. **La premisa del CEO se aguanta:** una lesion de verdad le quita al
+   precio ~1,5-2 % al dia: -10 a -32 % en una semana, -21 a -57 % en
+   cuatro. Con Yamal (24,5 M), cuatro semanas lesionado serian **5 a 14 M
+   menos**, ademas de los puntos.
+2. **Lo caro del primer dia es poco** (0 a -7 % en el primer cambio): lo
+   que cae es la semana. Vender el mismo dia de la noticia, con la oferta
+   del Computer que ya tiene (Yamal esta en el escaparate), evita casi
+   todo. Esperar a «confirmar» una semana cuesta un 10-30 %.
+3. **Una de cada cinco «bajas» es una falsa alarma** (calambres, «sin
+   lesion»). Por eso la llave pide una baja estimada de 28 dias o mas, y
+   eso esta bien: con Mbappe (baja corta) el precio casi no se movio.
+
+**Contra lo que hace Pepe:** la regla nueva es la buena. Matiz para el
+gestor: «el primer dia» = la primera vuelta con la baja estimada >= 28
+dias, sin esperar al siguiente reset; y la oferta del Computer ya esta
+ahi porque Yamal sigue en el escaparate (no quitarlo de ahi).
+
+**Limites:** 20 casos, casi todos de 3-6 M; de mas de 10 M solo tres
+(Mbappe, Aubameyang, Valverde). Sin datos de como se recupera el precio
+al volver (no ha dado tiempo).
+
+**Veredicto: SE AGUANTA** (respalda la decision del CEO del 07/10).
+
 ### E23 · 07/10/2026 11:20 de Madrid · Predicciones para la J8, apuntadas ANTES de jugarla
 
 **Por que:** las varas del laboratorio para los puntos (E7, E16, E17, E20)
