@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 07/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -344,6 +344,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/10 14:15 (rafaga de la tarde), A MEDIAS.** Pull bien; saldo
+  +409.783 y comprometido 0 (libro del saldo, vuelta de las 14:09): sin
+  pujas. **No pude mirar los ciclos ni la plantilla:** el filtro de
+  permisos nego la lectura (sin motivo). Laboratorio E23: predicciones
+  de la J8 apuntadas antes de jugarla (Luismi 58, Pepe 48, Pollo17 46).
 
 - **07/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
   (#2045 a #2061). Pepe: sin compras, ventas ni pujas (comprometido 0).
