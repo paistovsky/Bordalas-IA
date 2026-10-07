@@ -69,6 +69,43 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E23 · 07/10/2026 11:20 de Madrid · Predicciones para la J8, apuntadas ANTES de jugarla
+
+**Por que:** las varas del laboratorio para los puntos (E7, E16, E17, E20)
+se han medido con una sola jornada, la J7. La J8 empieza el 09/10 a las
+21:00: se apuntan HOY sus predicciones, para juzgarlas fuera de muestra
+cuando cierre. **Codigo:** `lab/predicciones/j8.py` (`--apuntar` con la
+foto del ciclo de las 11:09 del 07/10; `--juzgar` cuando la J8 este en
+`puntos_por_jornada.jsonl` y en el tablon). Lo apuntado:
+`lab/predicciones/j8.json`.
+
+**Puntos esperados del mejor once (puntos por partido x titularidad FF):**
+
+    Luismi_Haz 58,1 · Pepe 48,1 · Pollo17 46,1 · Manzagool 36,5 · Mex 29,0
+    Prinzipote 27,2 · Alvaro R. 24,9 · DiosMande: sin once valido
+
+**Pepe, jugador a jugador:** Yamal 11,3 · Roberto 7,6 · Olasagasti 5,0 ·
+Gulacsi 4,3 · Exposito 4,0 · Pablo Ibanez 3,4 · Unai 3,3 · Jutgla 2,9 ·
+Jonny 2,5 · Chust 2,4 · Diego Rico 1,5. Por debajo del 70 % de
+titularidad (E17: juega menos de 9 de cada 10): solo **Diego Rico (50 %)**.
+
+**Lo que la foto de hoy ya deja ver:**
+- **DiosMande no puede alinear un once valido con jugadores sanos**: 3
+  defensas, 3 medios y 4 delanteros sanos, y dos en duda; ninguna
+  formacion de Biwenger cabe (todas piden 3+ defensas y 3+ medios con 4
+  delanteros solo en 3-3-4, que no existe). Jugara con alguien en duda o
+  con 10.
+- **Pollo17 esta en -8,78 M** y Luismi en -7,0 M (el 04/10 estaba en
+  -17 M): los dos tienen que estar en verde antes del primer partido. Si
+  Pollo17 vende titulares, su once baja de 46,1 (E18: vendera al
+  Computer, no barato a nosotros).
+
+**Como se juzgara:** el orden real de la J8 contra el esperado; los
+puntos de cada once contra lo esperado (en la J7 los cuatro primeros
+sacaron entre el 81 % y el 104 %); y los de cada jugador de Pepe.
+
+**Veredicto: PENDIENTE (se juzga tras la J8, hacia el 12-13/10).**
+
 ### E22 · 06/10/2026 17:20 de Madrid · Agenda 4: ¿aceptar la oferta del Computer hoy o esperar a la siguiente?
 
 **Por que:** en 91 vueltas de produccion hubo ~800 lecturas de ofertas

@@ -1,0 +1,252 @@
+{
+ "apuntado": "2026-10-07T11:09:15",
+ "jornada": 8,
+ "managers": {
+  "Pepe Bordalás": {
+   "once_esperado": 48.11,
+   "formacion": "3-4-3",
+   "once": [
+    38433,
+    1599,
+    1760,
+    5678,
+    29661,
+    19862,
+    14800,
+    1969,
+    26271,
+    35678,
+    3159
+   ]
+  },
+  "Pollo17": {
+   "once_esperado": 46.14,
+   "formacion": "3-4-3",
+   "once": [
+    16738,
+    19614,
+    37739,
+    1952,
+    42425,
+    34469,
+    23080,
+    20969,
+    43263,
+    15396,
+    24474
+   ]
+  },
+  "Luismi_Haz": {
+   "once_esperado": 58.1,
+   "formacion": "3-5-2",
+   "once": [
+    11,
+    23840,
+    32440,
+    41093,
+    19441,
+    31027,
+    17687,
+    11196,
+    6837,
+    17756,
+    18398
+   ]
+  },
+  "DiosMande a Rodri al Palancas": {
+   "once_esperado": null,
+   "formacion": null,
+   "once": []
+  },
+  "Prinzipote": {
+   "once_esperado": 27.15,
+   "formacion": "4-5-1",
+   "once": [
+    9887,
+    10574,
+    1679,
+    38143,
+    39673,
+    30123,
+    2602,
+    41092,
+    26879,
+    18256,
+    19577
+   ]
+  },
+  "Manzagool": {
+   "once_esperado": 36.5,
+   "formacion": "4-3-3",
+   "once": [
+    30487,
+    5220,
+    39901,
+    37719,
+    41264,
+    19547,
+    12734,
+    10158,
+    25127,
+    42557,
+    43262
+   ]
+  },
+  "Mex": {
+   "once_esperado": 28.95,
+   "formacion": "3-5-2",
+   "once": [
+    37894,
+    27996,
+    31018,
+    33971,
+    30477,
+    41072,
+    1083,
+    41608,
+    35171,
+    18564,
+    38308
+   ]
+  },
+  "Alvaro Retamosa Sanguino": {
+   "once_esperado": 24.85,
+   "formacion": "3-5-2",
+   "once": [
+    37600,
+    2600,
+    28103,
+    31989,
+    17344,
+    1876,
+    27591,
+    8670,
+    17121,
+    41412,
+    10745
+   ]
+  }
+ },
+ "pepe": [
+  {
+   "id": 1599,
+   "name": "Jonny",
+   "position": 2,
+   "status": "ok",
+   "tit": 70.0,
+   "total": 21,
+   "esp": 2.45,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 19862,
+   "name": "Expósito",
+   "position": 3,
+   "status": "ok",
+   "tit": 80.0,
+   "total": 35,
+   "esp": 4.0,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 29661,
+   "name": "Olasagasti",
+   "position": 3,
+   "status": "ok",
+   "tit": 90.0,
+   "total": 33,
+   "esp": 4.95,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 14800,
+   "name": "Pablo Ibáñez",
+   "position": 3,
+   "status": "ok",
+   "tit": 80.0,
+   "total": 30,
+   "esp": 3.43,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 26271,
+   "name": "Yamal",
+   "position": 4,
+   "status": "ok",
+   "tit": 90.0,
+   "total": 88,
+   "esp": 11.31,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 3159,
+   "name": "Jutglà",
+   "position": 4,
+   "status": "ok",
+   "tit": 70.0,
+   "total": 29,
+   "esp": 2.9,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 38433,
+   "name": "Gulácsi",
+   "position": 1,
+   "status": "ok",
+   "tit": 80.0,
+   "total": 16,
+   "esp": 4.27,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 1760,
+   "name": "Chust",
+   "position": 2,
+   "status": "ok",
+   "tit": 80.0,
+   "total": 21,
+   "esp": 2.4,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 5678,
+   "name": "Diego Rico",
+   "position": 2,
+   "status": "ok",
+   "tit": 50.0,
+   "total": 6,
+   "esp": 1.5,
+   "riesgo_titularidad": true
+  },
+  {
+   "id": 1969,
+   "name": "Unai López",
+   "position": 3,
+   "status": "ok",
+   "tit": 80.0,
+   "total": 29,
+   "esp": 3.31,
+   "riesgo_titularidad": false
+  },
+  {
+   "id": 35678,
+   "name": "Roberto Fernández",
+   "position": 4,
+   "status": "ok",
+   "tit": 90.0,
+   "total": 59,
+   "esp": 7.59,
+   "riesgo_titularidad": false
+  }
+ ],
+ "orden_esperado": [
+  "Luismi_Haz",
+  "Pepe Bordalás",
+  "Pollo17",
+  "Manzagool",
+  "Mex",
+  "Prinzipote",
+  "Alvaro Retamosa Sanguino",
+  "DiosMande a Rodri al Palancas"
+ ]
+}
