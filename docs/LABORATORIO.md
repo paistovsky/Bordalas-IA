@@ -69,6 +69,116 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E25 · 08/10/2026 08:58 de Madrid · Los equipazos: ¿aguanta el liderato contra Pollo17 y Luismi_Haz las 5 jornadas que vienen?
+
+(Pedido como «E13»; el numero ya estaba usado y va como E25.)
+
+**Por que:** tras la J7 vamos primeros con 323, Pollo17 320, Luismi_Haz
+287, con la mitad de patrimonio que ellos (56 M y 11 fichas contra ~100 M
+y 17-20). **Codigo:** `lab/rivales/los_equipazos.py`. **Datos:** tablon
+(`roundFinished` y compraventas hasta el 08/10 05:04 UTC), la foto del
+18/09 (plantillas de los 8 y catalogo de 546), `puntos_por_jornada.jsonl`
+(acumulado de cada jugador a la J7), precios de hoy y el estado del
+ultimo ciclo archivado (29/09). Plantilla de hoy = foto del 18/09 + el
+tablon: sale Pepe 11 y Pollo17 20 (cuadran); **Luismi_Haz 17, no 20**
+(vendio Aitor Fernandez, Recio y Lemar el 07-08/10). Vara: puntos de
+temporada / 7 («pts/jornada»: el que no jugo cuenta 0, como en el once).
+
+**1) Por jornada** (la parte 2 de una aplazada trae la jornada entera;
+cuadra con la clasificacion):
+
+                J1  J2  J3  J4  J5  J6  J7   total  media  desv
+    Pepe        41  31  61  53  61  29  47    323   46,1   12,2
+    Pollo17     31  58  57  52  55  17  50    320   45,7   14,5
+    Luismi_Haz  28  55  53  44  46   0  61    287   41,0   19,4
+    (Luismi con los 64 que se le anularon en la J6 por saldo negativo:
+     351, media 50,1, desv 11,3)
+
+Ganamos a Pollo17 5 de 7 jornadas y a Luismi 4 de 7. Somos el MAS
+REGULAR de los dos de arriba con Pollo17, pero **Luismi es el que mas
+puntua de verdad**: ultimas 3 jornadas, Luismi 171, Pepe 137, Pollo17 122.
+Los 36 puntos que nos saca de menos son, casi enteros, la J6 anulada.
+
+**2) El mejor once de HOY (pts/jornada; entre parentesis, pts/partido):**
+
+    Pepe        52,4 (58,9)  3-4-3   el mejor: Yamal 12,6 = 24 % del once
+    Pollo17     58,1 (73,8)  3-4-3   el mejor: Moleiro 6,9 = 12 %
+    Luismi_Haz  69,9 (74,5)  4-4-2   el mejor: Camello 10,7 = 15 %
+
+    media por plaza   POR    DEF    MED    DEL
+    Pepe              2,3    2,3    4,5    8,4
+    Pollo17           4,3    5,3    5,7    5,1
+    Luismi_Haz        7,0    4,5    6,6    9,3
+
+Donde nos ganan: **en la defensa** (Jonny 3,0, Chust 3,0, Diego Rico 0,9
+con 2 partidos de 7, contra Natan 6,0 / De la Fuente 5,4 / Grimaldo 4,4 de
+Pollo y Juan Iglesias 5,6 de Luismi), **en la porteria** (Gulacsi 2,3: solo
+3 partidos; por partido jugado 5,3, la duda es si ya es fijo) y en el
+medio contra Luismi (Arda Guler 7,9, Pedri 7,1, Kang-in Lee 7,0). Solo
+ganamos arriba (Yamal + Roberto Fernandez). Con la vara de E23 (que mete
+la titularidad FF) la foto es menos dura: Pepe 48,1, Pollo17 46,1, Luismi
+58,1 (sus onces del 07/10 siguen siendo suyos salvo Mayol y Lemar).
+
+**Concentracion:** Yamal es el 24 % del once (Moleiro el 12 % del de
+Pollo, Camello el 15 % del de Luismi). Si a Pollo17 le falta su mejor,
+su once baja 2,1; a Luismi, 7,4; **a Pepe no le queda once valido**: con
+3 delanteros y 4 medios no hay formacion de 10 de campo sin Yamal. Lo
+mismo con cualquier baja que se sepa: una plaza vacia (E12).
+
+**3) Banquillo:** Pollo17 tiene 9 suplentes (Valera 4,7, Valverde 4,6,
+Cancelo 4,0...), Luismi 6 (Hugo Gonzalez 3,3 el mejor), Pepe 0. Contar
+las plazas que no puntuaron jornada a jornada **no se puede con lo que hay
+en git**: el unico once de los rivales es el de la foto del 18/09 (10
+titulares guardados el 15/09) y no es el que jugaron la J7 (sus titulares
+suman 31 y 45 contra los 50 y 61 del tablon). Queda como hueco de datos.
+
+**4) Fichajes con ~0,4 M de caja** (libres entre los 8, 5+ partidos,
+estado ok o duda el 29/09; Aubameyang fuera, operado). Permuta 1 x 1:
+vender al Computer (x 1,024, E1) y comprar uno del mismo puesto:
+
+    Unai Lopez 4,1  -> Miguel Roman 6,3 (2,67 M)    +2,1/j  +11 en 5 j
+    Yamal 12,6      -> Raphinha 16,1 (24,41 M)      +3,5/j  +18 en 5 j
+    Jonny 3,0       -> Koski 4,4 (2,36 M)           +1,4/j   +7 en 5 j
+    Diego Rico 0,9  -> Nacho Perez / Riedel / Galilea 2,1 (0,8-0,95 M)  +1,2/j  +6
+    Suplente DEF que juega: Balliu 0,63 M, Jesus Vazquez 0,69 M (1,7-1,9/j)
+
+Yamal -> Raphinha deja ~1,6 M de sobra (26,0 de venta contra 24,4): da
+para el defensa suplente. Portero: ninguno mejor cabe en lo que da
+Gulacsi (2,7 M); Remiro 4,0 M y Leo Roman 4,1 M (+2,6-2,9/j) no llegan.
+
+**Lo que se aprende:**
+1. **El liderato es de 3 puntos sobre Pollo17 y es regularidad, no
+   once**: por la vara, el once de Pollo17 rinde lo mismo o algo mas que
+   el nuestro. Es una carrera a cara o cruz jornada a jornada.
+2. **El peligro es Luismi**: su once es el mejor (+10 a +17 por jornada
+   segun la vara; E20 ya lo dijo) y ha salido del rojo. A ese ritmo
+   recorta 36 puntos en 2-4 jornadas. Solo nos salva que venda titulares.
+3. **Lo que mas puntos da por millon es la defensa y un medio barato**,
+   no gastar en estrellas: Unai -> Miguel Roman y Diego Rico -> un defensa
+   que juegue cuestan ~0 M y suman ~3 por jornada. Yamal -> Raphinha es
+   el unico salto grande que cabe sin dinero (+3,5/j) y ademas paga un
+   suplente; no quita la concentracion (Raphinha seria el 30 %).
+
+**Contra lo que hace Pepe:** confirma E12/E16/E20 (lo primero, un
+defensa y banquillo). Las 3 jugadas, por orden: (1) Unai Lopez ->
+Miguel Roman en cuanto salga en el mercado del Computer; (2) Diego Rico
+-> un defensa de <1 M que juegue (o Jonny -> Koski); (3) si Raphinha sale
+en el mercado: pujar PRIMERO y vender Yamal al Computer solo si se gana
+(la venta es al momento; el saldo solo tiene que estar en verde al
+empezar la jornada), y con los ~1,6 M que sobran, un defensa suplente.
+Las tres juntas: ~+6,8 por jornada, ~+34 en 5 jornadas por la vara.
+
+**Limites:** 7 jornadas (n pequeno); pts/7 castiga al que llego tarde
+(Gulacsi 3 partidos, Diego Rico 2) y la vara sobreestima (E20: los de
+arriba sacan el 81-104 % de lo esperado). Estados de hace 9 dias. Que un
+jugador salga en el mercado del Computer es azar y la puja la puede
+pelear Pollo17 (E11); los precios de compra son el precio de hoy, no lo
+que se pagaria. Sin onces jornada a jornada de los rivales.
+
+**Veredicto: SE AGUANTA como lectura de la carrera** (el liderato es
+fragil: Luismi es favorito por once; Pollo17, a la par). Las permutas
+pasan a «Listo para el plan» si el gestor las quiere: no tocan caja.
+
 ### E24 · 07/10/2026 17:20 de Madrid · ¿Cuanto cae el precio de un jugador caro lesionado? (la llave de Yamal)
 
 **El caso (07/10):** decision del CEO: si Yamal se lesiona 4 semanas o
