@@ -172896,5 +172896,24 @@
         "amount": 2652800
       }
     ]
+  },
+  {
+    "event_id": "95835fcd02679bec2ee2f0f6",
+    "date": 1791491529,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 41200,
+        "from": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 9606400
+      }
+    ]
   }
 ]
