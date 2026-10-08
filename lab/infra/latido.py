@@ -83,3 +83,19 @@ def contra_lo_declarado(ruta, desde, hasta):
 
 if __name__ == "__main__":
     contra_lo_declarado(ruta, desde, hasta)
+
+
+# E27 (08/10): la vuelta que congela el once de la jornada.
+#   python3 lab/infra/latido.py runs.tsv 2026-09-13 2026-10-07 --horas 19 20 21
+if __name__ == "__main__" and "--horas" in sys.argv:
+    horas = [int(h) for h in sys.argv[sys.argv.index("--horas") + 1:]]
+    verdes = defaultdict(set)
+    for linea in open(ruta):
+        n, t, ev, res = linea.rstrip("\n").split("\t")
+        m = dt.datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone(MADRID)
+        if desde <= m.date() <= hasta and res == "success":
+            verdes[m.date()].add(m.hour)
+    dias = [desde + dt.timedelta(days=i) for i in range((hasta - desde).days + 1)]
+    for h in horas:
+        falta = [d for d in dias if h not in verdes[d]]
+        print(f"   {h:02d}h sin vuelta verde: {len(falta)}/{len(dias)}  {[str(d)[5:] for d in falta]}")

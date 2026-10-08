@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E27 · 08/10/2026 17:20 de Madrid · El once de la J8 se congela en UNA sola vuelta: ¿cuanto riesgo hay?
+
+**Por que:** sin el once congelado no hay nota de la jornada (la J7 se
+perdio asi: no hubo vuelta en la ventana). `el_once_que_jugo.py` solo
+anota desde el `safety_deadline` (90 min antes del primer partido) hasta
+el primer partido. En la J8 (primer partido el 09/10 a las 21:00) eso es
+de 19:30 a 21:00: **solo la vuelta de las 20:07 cae dentro.**
+**Codigo:** `lab/infra/latido.py --horas` (historial de bordalas-live.yml).
+
+    hora        13/09 a 07/10 (25 dias)                desde el 25/09 (13 dias)
+    19h  sin vuelta verde 4/25 (18, 22, 23, 24/09)      0/13
+    20h  sin vuelta verde 3/25 (18, 23, 24/09)          0/13
+    21h  sin vuelta verde 3/25 (18, 23, 24/09)          0/13
+
+**Lo que se aprende:** desde el 25/09 la vuelta de las 20h no ha fallado
+nunca; en la semana mala (18-24/09) falto 3 de 7 dias, y el 18/09 era
+precisamente el dia de la J7. Riesgo pequeno pero de todo o nada: si la
+de las 20:07 no llega manana, la J8 tambien se queda sin nota.
+
+**Una salida que hay que comprobar antes:** la liga tiene
+`lineupRoundChanges: 0` (tablon): cuando empieza la jornada ya no se
+puede cambiar el once. Si eso es asi, el once que se lee DESPUES de las
+21:00 es exactamente el que juega, y cualquier vuelta de la jornada
+(21:07, 22:07... hasta el lunes) serviria para anotarlo: decenas de
+oportunidades en vez de una. **Comprobacion para manana (gestor o
+laboratorio):** en las fotos de las vueltas de despues de las 21:00,
+`rival_squads[].lineup_date` de los 8 managers no debe ser posterior a
+las 21:00. Si se cumple, se puede dejar anotar despues del primer
+partido con la etiqueta «leido con el once ya cerrado por la liga».
+
+**Veredicto: PENDIENTE de la comprobacion de manana.** Nada que tocar
+antes de la J8 (la vuelta de las 20:07 lleva 13 de 13).
+
 ### E26 · 08/10/2026 11:20 de Madrid · Revision de la lista de objetivos de E25 contra la foto de hoy
 
 **Por que:** E25 (08/10, otra sesion del laboratorio) dejo una lista de
