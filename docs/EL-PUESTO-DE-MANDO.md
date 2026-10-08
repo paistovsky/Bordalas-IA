@@ -345,6 +345,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **08/10 09:40 (laboratorio E25, chat del dueno). Liderato fragil.** Contra
+  Pollo17 vamos a la par (ganamos 5 de 7 jornadas, por regularidad); **el
+  peligro es Luismi**: su once rinde 10-17 pts/jornada mas (la J6 la perdio
+  entera, 64 pts, por saldo negativo). Somos peores en POR y DEF, mejores
+  arriba; sin Yamal no hay once valido (3 DEL, 4 MED). **Lista de objetivos
+  (solo si salen al mercado del Computer; un jugador libre no se puede
+  fichar sin que lo publique):** Miguel Roman (MED, 6,3/j) por Unai Lopez;
+  un DEF barato que juegue (Nacho Perez, Riedel, Galilea; o Koski) por
+  Diego Rico/Jonny; **Raphinha (16,1/j): pujar y vender a Yamal SOLO si se
+  gana la puja** (`si_esta`). Cada rafaga mira el mercado de la manana
+  contra esta lista. **Luismi en rojo a 1 dia de la J8:** si no sale, otro
+  cero; mirar su saldo en la rafaga de las 14:15 del 09/10.
+
 - **08/10 09:10 (chat del dueno, con capturas de cron-job.org). ERROR MIO
   DE DIAGNOSTICO, CORREGIDO.** cron-job.org NO fallaba: son tres tareas a
   proposito (latido `7 0-3,8-23`, pre-reset 04:45 y 04:50, after-reset
