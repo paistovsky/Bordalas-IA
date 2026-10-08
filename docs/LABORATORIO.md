@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E26 · 08/10/2026 11:25 de Madrid · Revision de la lista de objetivos de E25 contra la foto de hoy
+### E26 · 08/10/2026 11:20 de Madrid · Revision de la lista de objetivos de E25 contra la foto de hoy
 
 **Por que:** E25 (08/10, otra sesion del laboratorio) dejo una lista de
 fichajes que el gestor ya ha pasado al puesto de mando («cada rafaga mira
