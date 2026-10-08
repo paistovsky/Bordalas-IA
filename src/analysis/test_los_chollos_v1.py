@@ -47,9 +47,12 @@ def test_puja_por_moi_y_no_por_los_demas():
 
 def test_solo_en_la_ultima_vuelta():
     k = dict(mercado={1: 890_000}, valores={1: 900_000})
-    assert _d(**k, minutos_al_reset=120) == []
+    assert _d(**k, minutos_al_reset=132) == []           # la de las 04:45
     assert _d(**k, minutos_al_reset=None) == []
-    assert _d(**k, minutos_al_reset=40)
+    assert _d(**k, minutos_al_reset=0) == []
+    assert _d(**k, minutos_al_reset=127)                  # la de las 04:50
+    # Fuera de las vueltas puestas a proposito (zona de silencio), nada.
+    assert _d(**k, minutos_al_reset=40, puede_escribir=False) == []
 
 
 def test_cerca_de_la_jornada_solo_caja_propia():

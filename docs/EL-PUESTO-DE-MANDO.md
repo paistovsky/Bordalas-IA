@@ -345,6 +345,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **08/10 09:10 (chat del dueno, con capturas de cron-job.org). ERROR MIO
+  DE DIAGNOSTICO, CORREGIDO.** cron-job.org NO fallaba: son tres tareas a
+  proposito (latido `7 0-3,8-23`, pre-reset 04:45 y 04:50, after-reset
+  07:15; zona de silencio 04:45-07:00, `zona_de_silencio.py`). Lo que
+  estaba mal era mio: (1) **los chollos pujaban solo a <65 min del reset y
+  ninguna vuelta cae ahi: no habrian pujado nunca.** Ahora pujan en la
+  vuelta de las 04:50 (<=129 min; la de las 04:45 llega a ~131-133) y solo
+  si `permite_escribir` lo deja. (2) La «red de las 06:22»
+  (trig_01AVXpLEPRYKWuEDiEquuCdR) lanzaba vueltas en plena zona de silencio:
+  APAGADA. Las vueltas que lance a mano el 06, 07 y 08/10 no escribieron
+  nada (no tenian que hacer). Leccion: leer la doctrina del reloj antes de
+  llamar «fallo» a un hueco del latido.
+
 - **08/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
   (#2075 a #2084). Pepe: sin compras, ventas ni pujas (comprometido 0).
   Saldo +409.783: la red de Jutgla (desde hoy, solo con saldo negativo)

@@ -47,7 +47,13 @@ RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "los_chollos.json"
 CALENDARIO = RAIZ / "data" / "calendar" / "laliga_calendar.json"
 
-MINUTOS_ULTIMA_VUELTA = 65      # las vueltas son cada hora: la última antes del reset
+# LA VUELTA QUE PUJA (08/10/2026). Las pujas del reset las disparan dos
+# vueltas a proposito, a las 04:45 y 04:50 de Madrid (cron-job.org); de
+# 04:45 a 07:00 manda la zona de silencio. La de las 04:50 llega aqui a
+# unos 126-128 min del reset y la de las 04:45 a unos 131-133: los chollos
+# pujan solo en la de las 04:50, despues de que las pujas normales hayan
+# tenido sus dos vueltas. (Antes era 65 min: no pujaba nunca.)
+MINUTOS_ULTIMA_VUELTA = 129
 RESERVA = 0                     # lo que se deja sin tocar de `maximumBid`
 TOPE_POR_DIA = 3_000_000
 HORAS_SOLO_CAJA = 72
@@ -103,7 +109,7 @@ def horas_a_la_jornada(ahora: datetime, ruta: Path | str | None = None):
 def decidir(
     *, mercado, valores, estados, nuestras_pujas, plantilla,
     ofertas_del_computer, en_venta, maximo_de_puja, saldo,
-    minutos_al_reset, horas_jornada, libro,
+    minutos_al_reset, horas_jornada, libro, puede_escribir=True,
 ) -> list:
     """Qué hacer con los chollos. Pura."""
 
@@ -129,7 +135,11 @@ def decidir(
             })
 
     # 4. Solo en la última vuelta antes del reset.
-    if minutos_al_reset is None or minutos_al_reset > MINUTOS_ULTIMA_VUELTA:
+    if (
+        not puede_escribir
+        or minutos_al_reset is None
+        or not 0 < minutos_al_reset <= MINUTOS_ULTIMA_VUELTA
+    ):
         return acciones
 
     # 5. Cerca de la jornada (o sin calendario), solo con caja propia.
@@ -163,6 +173,17 @@ def decidir(
         })
 
     return acciones
+
+
+def _puede_escribir(ahora: datetime) -> bool:
+    """La zona de silencio (04:45-07:00 de Madrid) solo deja escribir a
+    las vueltas puestas a proposito (04:45, 04:50, 07:15). Sin saberlo, no."""
+    try:
+        from src.analysis.zona_de_silencio import permite_escribir
+
+        return bool(permite_escribir(ahora).get("allowed"))
+    except Exception:                               # noqa: BLE001
+        return False
 
 
 def leer_libro(ruta: Path | str | None = None) -> dict:
@@ -211,6 +232,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             en_venta=foto["en_venta"], maximo_de_puja=foto["maximo_de_puja"],
             saldo=foto["saldo"], minutos_al_reset=minutos_al_reset,
             horas_jornada=horas_a_la_jornada(ahora), libro=libro,
+            puede_escribir=_puede_escribir(ahora),
         )
         salida["acciones"] = acciones
 
