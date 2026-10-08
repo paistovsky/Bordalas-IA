@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/10/2026, 21:30 de Madrid (rafaga de las 21:15).
+Actualizado: 08/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -344,6 +344,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **08/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
+  (#2075 a #2084). Pepe: sin compras, ventas ni pujas (comprometido 0).
+  Saldo +409.783: la red de Jutgla (desde hoy, solo con saldo negativo)
+  no salta. Plantilla 11, once 11; los 11 «ok» en el ciclo #2084, Yamal
+  ok y 90 %. Manana, turno del cierre de la J8 a las 12:45.
 
 - **07/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2067 a #2074;
   falta la de las 17:07, no disparada: una suelta). Pepe: sin compras,
