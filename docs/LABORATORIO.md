@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E26 · 08/10/2026 22:35 de Madrid · ¿Como hacen dinero Pollo17 y Luismi?
+### E28 · 08/10/2026 22:35 de Madrid · ¿Como hacen dinero Pollo17 y Luismi?
 
 **Por que:** patrimonio de hoy Pollo17 100,1 M, Luismi_Haz 92,6 M, Pepe
 56,3 M; los tres salieron de 23,3 M y cobran premios parecidos. E1 ya
@@ -249,6 +249,72 @@ que sube (55 %) + titulares comprados subiendo (29 %) + regalo (16 %).
 R1-R4 pasan a «Listo para el plan» si el gestor las quiere; R4 y R3 son
 guardias baratas, R1 necesita la linea de credito con cierre forzado la
 vispera de cada jornada.
+
+### E27 · 08/10/2026 17:20 de Madrid · El once de la J8 se congela en UNA sola vuelta: ¿cuanto riesgo hay?
+
+**Por que:** sin el once congelado no hay nota de la jornada (la J7 se
+perdio asi: no hubo vuelta en la ventana). `el_once_que_jugo.py` solo
+anota desde el `safety_deadline` (90 min antes del primer partido) hasta
+el primer partido. En la J8 (primer partido el 09/10 a las 21:00) eso es
+de 19:30 a 21:00: **solo la vuelta de las 20:07 cae dentro.**
+**Codigo:** `lab/infra/latido.py --horas` (historial de bordalas-live.yml).
+
+    hora        13/09 a 07/10 (25 dias)                desde el 25/09 (13 dias)
+    19h  sin vuelta verde 4/25 (18, 22, 23, 24/09)      0/13
+    20h  sin vuelta verde 3/25 (18, 23, 24/09)          0/13
+    21h  sin vuelta verde 3/25 (18, 23, 24/09)          0/13
+
+**Lo que se aprende:** desde el 25/09 la vuelta de las 20h no ha fallado
+nunca; en la semana mala (18-24/09) falto 3 de 7 dias, y el 18/09 era
+precisamente el dia de la J7. Riesgo pequeno pero de todo o nada: si la
+de las 20:07 no llega manana, la J8 tambien se queda sin nota.
+
+**Una salida que hay que comprobar antes:** la liga tiene
+`lineupRoundChanges: 0` (tablon): cuando empieza la jornada ya no se
+puede cambiar el once. Si eso es asi, el once que se lee DESPUES de las
+21:00 es exactamente el que juega, y cualquier vuelta de la jornada
+(21:07, 22:07... hasta el lunes) serviria para anotarlo: decenas de
+oportunidades en vez de una. **Comprobacion para manana (gestor o
+laboratorio):** en las fotos de las vueltas de despues de las 21:00,
+`rival_squads[].lineup_date` de los 8 managers no debe ser posterior a
+las 21:00. Si se cumple, se puede dejar anotar despues del primer
+partido con la etiqueta «leido con el once ya cerrado por la liga».
+
+**Veredicto: PENDIENTE de la comprobacion de manana.** Nada que tocar
+antes de la J8 (la vuelta de las 20:07 lleva 13 de 13).
+
+### E26 · 08/10/2026 11:20 de Madrid · Revision de la lista de objetivos de E25 contra la foto de hoy
+
+**Por que:** E25 (08/10, otra sesion del laboratorio) dejo una lista de
+fichajes que el gestor ya ha pasado al puesto de mando («cada rafaga mira
+el mercado de la manana contra esta lista»). Una lista vale lo que el dia
+en que se hizo. **Codigo:** `lab/objetivos/revisa.py` (foto del ciclo de
+las 11:10 del 08/10 + noticias de FF). Reglas: estado no ok = fuera (E6,
+E24); precio bajando = esperar si es reventa (E1); vara = puntos totales
+(E7/E17).
+
+    Miguel Roman   FUERA: injured. FF 29/09: «se lesiona la rodilla y podria
+                   pasar por quirofano». Precio 4,03 -> 2,67 M en 9 dias
+                   (-34 %, lo que dice E24). Era el primero de la lista.
+    Koski          FUERA: injured; hoy -190.000.
+    Nacho Perez    ok, 15 pts en 5, 0,82 M, bajando
+    Riedel         ok, 15 pts en 6, 0,93 M, bajando
+    Galilea        ok, 15 pts en 6, 0,95 M, bajando (FF 28/09: vuelve al grupo)
+    Raphinha       ok, 113 pts en 7 (Yamal 88 en 7), 24,41 M, subiendo.
+                   La cuenta de E25 (+3,5 por jornada) aguanta: no es una
+                   media de pocos partidos. Ojo: FF 29/09, sustituido con
+                   Brasil por molestias; hoy ok.
+    Rafita         ok, 30 pts en 7, 2,64 M, subiendo; es de un rival
+                   (Luismi): a precio o algo mas (E18).
+
+**Lo que se aprende:** dos de los siete objetivos (el primero incluido)
+estan lesionados hoy. Los tres defensas baratos suman 15 puntos en 5-6
+partidos (2,5-3 por partido): mejoran a Diego Rico (6 en 2) pero poco, y
+su precio baja. Para el once mandan los puntos (regla del dueno), no la
+rampa, pero un fichaje para el once que baja tambien pierde caja (E14).
+
+**Veredicto:** la lista necesita pasar por el estado del dia antes de
+cada puja. Pasa a «Listo para el plan».
 
 ### E25 · 08/10/2026 08:58 de Madrid · Los equipazos: ¿aguanta el liderato contra Pollo17 y Luismi_Haz las 5 jornadas que vienen?
 
@@ -1426,6 +1492,11 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E26, 08/10) Quitar de la lista de objetivos de E25 a Miguel Roman y a
+  Koski (lesionados hoy), y pasar la lista por el estado del dia antes de
+  cada puja** (`lab/objetivos/revisa.py`, o la misma regla dentro de la
+  orden: estado de Biwenger distinto de ok = no se puja). Miguel Roman,
+  rodilla y posible quirofano desde el 29/09, ya ha perdido el 34 %.
 - **(E22, 06/10) Vender al Computer cuando NO es una reventa: aceptar si
   la oferta pasa del +3 % sobre el precio; si esta por debajo del precio
   y el precio no baja, esperar a la siguiente.** Las ofertas son tiradas

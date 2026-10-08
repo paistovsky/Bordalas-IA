@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 08/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 08/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -344,6 +344,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **08/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2091 a #2098).
+  Pepe: sin compras, ventas ni pujas; saldo +409.783, comprometido 0.
+  Laboratorio E27: el once de la jornada se congela en la vuelta de las
+  20:07 del dia del partido (13/13). **Para manana:** el turno del cierre
+  (12:45) programa su segunda mirada a las 20:15, justo despues de esa
+  vuelta: es la buena para comprobar que salen 11 nombres.
+
+- **08/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2084 a #2091).
+  Pepe: sin compras, ventas ni pujas; saldo +409.783, comprometido 0.
+  **Mercado del Computer de hoy contra la lista de objetivos (E25):
+  ninguno** (ni Miguel Roman, ni Nacho Perez, Riedel, Galilea, Koski, ni
+  Raphinha). E26: Miguel Roman y Koski estan lesionados; Raphinha se
+  sostiene. Nada que hacer. Manana: turno del cierre de la J8 (12:45),
+  y el saldo de Luismi.
 
 - **08/10 09:40 (laboratorio E25, chat del dueno). Liderato fragil.** Contra
   Pollo17 vamos a la par (ganamos 5 de 7 jornadas, por regularidad); **el
