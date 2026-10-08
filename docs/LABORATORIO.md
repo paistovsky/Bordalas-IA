@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E26 · 08/10/2026 11:25 de Madrid · Revision de la lista de objetivos de E25 contra la foto de hoy
+
+**Por que:** E25 (08/10, otra sesion del laboratorio) dejo una lista de
+fichajes que el gestor ya ha pasado al puesto de mando («cada rafaga mira
+el mercado de la manana contra esta lista»). Una lista vale lo que el dia
+en que se hizo. **Codigo:** `lab/objetivos/revisa.py` (foto del ciclo de
+las 11:10 del 08/10 + noticias de FF). Reglas: estado no ok = fuera (E6,
+E24); precio bajando = esperar si es reventa (E1); vara = puntos totales
+(E7/E17).
+
+    Miguel Roman   FUERA: injured. FF 29/09: «se lesiona la rodilla y podria
+                   pasar por quirofano». Precio 4,03 -> 2,67 M en 9 dias
+                   (-34 %, lo que dice E24). Era el primero de la lista.
+    Koski          FUERA: injured; hoy -190.000.
+    Nacho Perez    ok, 15 pts en 5, 0,82 M, bajando
+    Riedel         ok, 15 pts en 6, 0,93 M, bajando
+    Galilea        ok, 15 pts en 6, 0,95 M, bajando (FF 28/09: vuelve al grupo)
+    Raphinha       ok, 113 pts en 7 (Yamal 88 en 7), 24,41 M, subiendo.
+                   La cuenta de E25 (+3,5 por jornada) aguanta: no es una
+                   media de pocos partidos. Ojo: FF 29/09, sustituido con
+                   Brasil por molestias; hoy ok.
+    Rafita         ok, 30 pts en 7, 2,64 M, subiendo; es de un rival
+                   (Luismi): a precio o algo mas (E18).
+
+**Lo que se aprende:** dos de los siete objetivos (el primero incluido)
+estan lesionados hoy. Los tres defensas baratos suman 15 puntos en 5-6
+partidos (2,5-3 por partido): mejoran a Diego Rico (6 en 2) pero poco, y
+su precio baja. Para el once mandan los puntos (regla del dueno), no la
+rampa, pero un fichaje para el once que baja tambien pierde caja (E14).
+
+**Veredicto:** la lista necesita pasar por el estado del dia antes de
+cada puja. Pasa a «Listo para el plan».
+
 ### E25 · 08/10/2026 08:58 de Madrid · Los equipazos: ¿aguanta el liderato contra Pollo17 y Luismi_Haz las 5 jornadas que vienen?
 
 (Pedido como «E13»; el numero ya estaba usado y va como E25.)
@@ -1245,6 +1278,11 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E26, 08/10) Quitar de la lista de objetivos de E25 a Miguel Roman y a
+  Koski (lesionados hoy), y pasar la lista por el estado del dia antes de
+  cada puja** (`lab/objetivos/revisa.py`, o la misma regla dentro de la
+  orden: estado de Biwenger distinto de ok = no se puja). Miguel Roman,
+  rodilla y posible quirofano desde el 29/09, ya ha perdido el 34 %.
 - **(E22, 06/10) Vender al Computer cuando NO es una reventa: aceptar si
   la oferta pasa del +3 % sobre el precio; si esta por debajo del precio
   y el precio no baja, esperar a la siguiente.** Las ofertas son tiradas
