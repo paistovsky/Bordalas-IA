@@ -69,6 +69,187 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E26 · 08/10/2026 22:35 de Madrid · ¿Como hacen dinero Pollo17 y Luismi?
+
+**Por que:** patrimonio de hoy Pollo17 100,1 M, Luismi_Haz 92,6 M, Pepe
+56,3 M; los tres salieron de 23,3 M y cobran premios parecidos. E1 ya
+dijo QUE compran (lo que sube); aqui se mide DE DONDE sale cada millon y
+que se puede copiar con 0,4 M de caja y 11 fichas. **Codigo:**
+`lab/rivales/como_hacen_dinero.py` (`python3 -I ... rival_intelligence.json`).
+**Datos:** `rival_intelligence.json` del 08/10 20:10 UTC (movimientos de
+los 8 desde el 10/08, plantilla de hoy con precio, coste y
+`price_increment`, saldo reconstruido; la caja de Pepe cuadra al euro con
+la real), el tablon (jornadas y racha) y `price_history.json`. Las
+reemisiones del tablon se quitan con la misma reja de 1 h que la caja:
+ventas y compras cuadran al euro con `sales_total`/`purchases_total` de
+los tres, y el coste FIFO de la plantilla con `acquisition_price`.
+
+**1) De donde sale el patrimonio** (ganancia = patrimonio - 23,3 M;
+«regalo» = la plantilla de salida, gratis: lo que se cobro al venderla +
+lo que vale hoy lo que queda):
+
+                 ganancia  viajes cerrados  latente hoy  premios  regalo
+    Pollo17       +76,8        +21,1           +11,4      +11,5    +32,9
+    Luismi_Haz    +69,3        +15,8           +14,9       +9,6    +29,0
+    Pepe          +33,0         -2,8            -1,3      +11,4    +25,7
+    (premios = jornadas + racha: Pollo 9,70 + 1,75; Luismi 8,86 + 0,75;
+     Pepe 9,89 + 1,50. Resto sin explicar: 0 en los tres.)
+
+**La brecha con Pollo17 (43,8 M): 23,9 M de viajes (55 %), 12,7 M de
+latente (29 %), 7,2 M de regalo (16 %), premios 0.** Con Luismi (36,3
+M): 18,7 viajes, 16,1 latente, 3,3 regalo y -1,8 de premios (la J6
+anulada). Del regalo, unos 4,5 M de Pollo no son suerte sino guardar a
+los de salida mientras subian (Paredes 0,81 -> 3,02 M, Iker Munoz 0,48
+-> 2,15, Larrubia 6,39 -> 6,68; precio del 16/08 contra la venta). El
+resto es la plantilla que toco. **Los premios no explican nada: el
+la brecha sale de la compraventa (cerrada + latente) en un 84-96 %.**
+
+**2) Su compraventa (viajes cerrados, FIFO por jugador):**
+
+                              Pollo17      Luismi_Haz     Pepe
+    viajes / verdes            66 / 57      53 / 36      42 / 23
+    P&L total                  +21,05 M     +15,83 M     -2,84 M
+    P&L por semana (8,4 sem)    +2,5 M       +1,9 M      -0,34 M
+    dias (mediana)               6,1          8,3          5,8
+    P&L / ROI mediano        +0,15 M/+4,7 % +0,06/+4,3 %  0,00/+0,5 %
+    compra mediana              3,24 M       2,13 M       1,21 M
+    subia el dia antes          43/51        28/37        8/39
+      P&L si subia / si no   +17,3 / +1,3  +11,1 / +0,8  +0,3 / -4,2
+    prima compra (mediana)      +1,9 %       +2,2 %       +0,3 %
+    prima venta al Computer     +3,4 %       +2,8 %       +2,3 %
+    venta en dia de bajada      38/59        29/48        17/40
+      ...en la PRIMERA bajada   16/59        10/48         4/40
+    viajes > 21 dias          6: +7,4 M    5: +6,2 M    5: +0,8 M
+
+Por tramo de precio de compra: Pollo gana en todos (<=1 M: 6 viajes
++6,0 M, todos verdes; 1-3 M: 25, +8,5 M, ROI med +7,9 %; 3-6 M: +2,6 M;
+>6 M: +3,9 M pero ROI med +2,4 %). Luismi, lo mismo (1-3 M: 10/10
+verdes, +6,4 %). **Pepe pierde justo donde ellos ganan:** 1-3 M -1,67 M
+(6/19 verdes) y 3-6 M -3,31 M (0/4: los fichajes del once revendidos,
+E14). Solo los <=1 M le salen (+2,14 M, 17/19). Venden casi todo al
+Computer (64/66 y 50/53), en dia de bajada 2 de cada 3 veces, pero NO
+esperan a la primera bajada como regla fija (16/59): venden cuando les
+hace falta caja o cuando gira. **Vender en las 24 h antes de una
+jornada no les cuesta:** Pollo 14 viajes, ROI med +7,2 % (13/14 verdes)
+contra +4,5 % el resto; Luismi +5,9 % contra +3,9 %.
+
+**Usuario a usuario:** pocos (7 de Pollo, 4 de Luismi), pero **el mejor
+viaje de Pollo17 se lo vendio Pepe**: Javi Hernandez (regalo de salida)
+a 1,25 M el 19/08, Pollo lo vendio a 3,92 M el 18/09 (+2,67 M); Castrin,
+1,35 M el 24/08 -> 2,23 M (+0,88). Entre ellos: Luismi le paso a Pollo
+Brugue (0,70 M el 28/08; hoy +3,45 M latentes para Pollo) y Jonathan
+David (8,4 M la vispera de la J7, para tener caja; hoy +2,29 M para
+Pollo).
+
+**3) La plantilla.** Los tres salieron con 15. Pollo 11 (20/08) -> 19
+(01/09) -> 20 hoy; Luismi 15 -> 20 -> 17; Pepe 13 -> 19 (15/09) -> 11.
+Fuera del mejor once (vara: puntos de temporada) Pollo tiene 9 fichas
+por 36,7 M (Valverde, Laporte, Fofana, Cancelo, Amatucci, Akhomach,
+Deossa...): **ese «almacen» HOY no revaloriza** (-0,03 M de
+`price_increment` hoy, -0,99 M de latente): es banquillo caro, no
+inventario que suba. Luismi, 6 fichas por 5,9 M (+2,69 M latentes:
+Hugo Gonzalez y Areso). **La revalorizacion la hacen los titulares
+comprados subiendo:** Luismi Arda Guler +6,1 M, Camello +5,7, Kang-in Lee
++2,8; Pollo Brugue +3,5, Natan +2,4, Jonathan David +2,3, Luka Sucic +2,2.
+Pepe: latente total -1,26 M (Roberto Fernandez -0,63).
+
+Lo que gano cada dia la plantilla que tenia cada uno (precio de cierre
+a cierre, 51 dias con precio del 17/08 al 08/10, 99-100 % de
+jugador-dias con precio):
+
+                 media/dia   por semana   ultimos 15 dias   price_increment hoy
+    Pollo17      +0,72 M      +5,1 M        +0,68 M/dia        +0,41 M
+    Luismi_Haz   +0,67 M      +4,7 M        +0,44 M/dia        +0,02 M
+    Pepe         -0,01 M      -0,1 M        -0,02 M/dia        +0,02 M
+
+Es el mismo dinero que el de los viajes y el latente visto dia a dia
+(no se suma). Pollo rinde ~0,8 % diario sobre ~90 M; Pepe ~0 % sobre
+56 M, de los que Yamal es el 45 %.
+
+**4) La deuda.** Los dos viven en rojo entre jornadas y llegan a cero
+justo al empezar:
+
+                 dias en rojo   peor saldo            saldo al empezar jornada
+    Pollo17         40/60       -20,9 M (11/09)       todas >= 0 (+0,01 a +3,8 M)
+    Luismi_Haz      55/60       -21,0 M (01/10)       J6 -13,3 M; J1-ap -8,9; J2 -0,9; resto ~0
+    Pepe            31/60        -9,3 M (30/09)       todas >= 0
+
+La mecanica: en las 24 h antes de cada jornada venden lo que haga falta
+(Pollo 21,5 M antes de la J5 con -20,9 M esa misma manana; Luismi 21,3
+M antes de la J7, 14,9 antes de la J3). Hoy estan a -3,1 M (Pollo) y
+-6,4 M (Luismi) con la J8 manana: venderan manana. **Lo que le costo a
+Luismi la J6:** empezo (Real Sociedad-Celta, 03/09 19:00) a -13,3 M y
+vendio al dia siguiente a las 16:29: 64 puntos anulados y 64 x 30.000 =
+1,92 M sin cobrar. Sin eso iria 351 y primero. La caja de los rivales es
+reconstruida (no se ve la real): las «deudas» de -0,03 a -0,06 M en
+J4/J5/J7 y la de -0,9 M en la J2 no les costaron puntos, asi que el
+momento exacto de la comprobacion no se sabe al minuto. La regla segura
+es la nuestra: >= 0 a la hora de `roundStarted`.
+
+**5) Que se puede copiar con 0,4 M, maximumBid 14,4 M y 11 fichas.** El
+motor de ellos es capital: ~100 M de plantilla + ~20 M de linea, rotando
+a lo que sube. Ese tamano no se copia (harian falta ~40 M mas). Lo que
+si:
+
+- **R1. Viajes con la linea de credito ENTRE jornadas, solo a lo que
+  sube (E1) y a precio + 1 % sin pelear (E9), cerrados en las 24 h
+  antes de la jornada.** Pepe tiene 14,4 M de maximumBid y llega a cada
+  jornada con >= 0: hay hueco para 8-10 M de viajes de lunes a jueves.
+  Que se cierren antes de la jornada no cuesta (ellos sacan +5,9/+7,2 %
+  en esas ventas). Esperado: E9 midio +0,12-0,18 M/semana con 4-8 M solo
+  en lo que nadie pelea; con ~10 M y ROI med +4 %, **+0,15-0,3
+  M/semana**. Tope por viaje 3 M (los de 1-3 M son su mejor tramo: +6-8 %
+  de ROI mediano, y los >6 M dan +1-2 %).
+- **R2. Los fichajes del once, entre los que SUBEN.** A igual puntos
+  esperados (E25/E16), elegir el que subio en el ultimo cambio: Luismi
+  gana +12 M latentes en titulares comprados asi; Pepe pierde 1,26 M.
+  Con un fichaje de ~3 M por semana, +3,5 % contra -0,4 % (E1) = **~+0,1
+  M/semana**, y sin vender titulares en dias (E14: -3,3 M).
+- **R3. A un manager no se le vende un jugador que sube; al Computer.**
+  Pollo hizo +3,55 M con dos que le vendio Pepe (Javi Hernandez y
+  Castrin). Una oferta de un rival se acepta solo si el precio no sube
+  y paga mas que el Computer. Evita perdidas, no suma por semana.
+- **R4 (guardia, no dinero). Saldo >= 0 antes de `roundStarted`**, con
+  la venta hecha la vispera o la manana de la jornada, nunca «a ultima
+  hora»: Luismi perdio 64 puntos y 1,92 M por vender un dia tarde.
+
+**Lo que NO copiar:** (a) la plantilla de 17-20 (el almacen de Pollo son
+36,7 M parados, -0,99 M latentes); (b) pelear las pujas de lo que sube
+(E9: x1,10 da ROI mediano -3,1 %); (c) llegar en rojo a una jornada;
+(d) viajes de > 6 M (ROI med +1-2 %: no compensan el riesgo con 0,4 M
+de caja); (e) vender fichajes del once a los dias (E14).
+
+**Lo que se aprende:**
+1. **La brecha es compraventa, no premios:** +32,5 M de Pollo en viajes
+   + latente (Luismi +30,7) contra -4,1 M de Pepe. Los premios estan empatados.
+2. **El 70-82 % de su P&L de viajes viene de comprar lo que subia el dia
+   antes** (Pollo +17,3 de 21,1; Luismi +11,1 de 15,8; el resto, sobre
+   todo viajes sin precio del dia de compra). E1 se confirma
+   con 30 dias mas de datos.
+3. **La deuda es su palanca:** -15 a -21 M a mitad de semana y >= 0 al
+   empezar la jornada, vendiendo en las ultimas 24 h sin perder ROI.
+4. **Con nuestro capital la brecha no se cierra:** R1 + R2 dan ~+0,25-0,4
+   M/semana contra ~+4-5 M/semana de revalorizacion de Pollo. Sirven para
+   dejar de perder (Pepe va -0,34 M/semana en viajes) y para que el
+   dinero que entre vaya a puntos; la liga se gana en el once (E25).
+
+**Limites:** `price_history` empieza el 16/08 (lo vendido antes se
+valora a precio de venta; el regalo de salida no se puede valorar el
+10/08); dias con medio catalogo (07-08/09, 22/09, 24-25/09): esos dias
+caen de las cuentas de precio; las fotos de plantillas de los rivales
+tienen hueco del 17/08 al 10/09 y no se usan: la plantilla en el tiempo
+sale del tablon (cuadra con el recuento de hoy). La caja de los rivales
+es reconstruida y no auditable (la de Pepe si). El «once» del almacen es
+por puntos de temporada, no el que alinearon. 8,4 semanas; los € por
+semana de R1/R2 son estimaciones apoyadas en E1/E9, no medidas con la
+restriccion de jornada simulada.
+
+**Veredicto: SE AGUANTA.** La brecha de patrimonio es compraventa de lo
+que sube (55 %) + titulares comprados subiendo (29 %) + regalo (16 %).
+R1-R4 pasan a «Listo para el plan» si el gestor las quiere; R4 y R3 son
+guardias baratas, R1 necesita la linea de credito con cierre forzado la
+vispera de cada jornada.
+
 ### E25 · 08/10/2026 08:58 de Madrid · Los equipazos: ¿aguanta el liderato contra Pollo17 y Luismi_Haz las 5 jornadas que vienen?
 
 (Pedido como «E13»; el numero ya estaba usado y va como E25.)
