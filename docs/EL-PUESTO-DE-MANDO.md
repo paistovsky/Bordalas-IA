@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 09/10/2026, 20:25 de Madrid (segunda mirada del cierre de la J8).
 
 ## El mandato
 
@@ -346,6 +346,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/10 20:15 (SEGUNDA MIRADA DEL CIERRE DE LA J8). EL ONCE ESTA BIEN.**
+  La vuelta de las 20:07 (#2121) salio verde y dejo el once 3-4-3 con 11
+  nombres, los 11 «ok» (Exposito y Roberto, 100 %; el mas dudoso, Diego
+  Rico, 50 %). Nada que hacer a mano. **Lo que paso esta tarde:** cinco
+  vueltas ROJAS seguidas (#2115 a #2119, 15:07 a 19:07): fallo la verja
+  en `test_la_orden_del_gestor_v1` (la orden caducaba hoy a las 15:00 y
+  una guardia usaba el reloj real, regla 23). Lo arreglo el chat del
+  dueno a las 20:00 (b11cb53c) y lanzo la #2120 a mano: verdes desde
+  ahi. Ningun cambio del once se perdio: la vuelta que lo congela es la
+  de las 20:07. **Leccion para manana:** una guardia que mira el reloj
+  real es una bomba de relojeria con fecha; buscar si queda alguna mas
+  (doctrina 50, regla 23) antes del proximo plazo.
 
 - **09/10 20:15 (chat del dueno). VERJA ROJA 5 VUELTAS (15:07-19:07).** La
   orden del gestor caducaba el 09/10 15:00 y dos guardias de
