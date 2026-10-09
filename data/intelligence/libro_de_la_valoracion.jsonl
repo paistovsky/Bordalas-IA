@@ -1148,3 +1148,7 @@
 {"dia":"2026-10-09","id":10155,"name":"Unai Núñez","value":0,"price":1650000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-09","id":33970,"name":"Rosier","value":0,"price":1130000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-09","id":34483,"name":"Pedro Díaz","value":0,"price":1120000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-09","id":43263,"name":"Jonathan David","value":10935436,"price":10750000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-09","id":30495,"name":"Moleiro","value":9246802,"price":9090000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-09","id":34469,"name":"Luka Sucic","value":5144309,"price":5050000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-09","id":24474,"name":"Robert Navarro","value":5025215,"price":4940000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
