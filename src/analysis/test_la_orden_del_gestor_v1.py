@@ -52,6 +52,11 @@ ORDEN = {
 }
 
 
+
+# La misma orden sin fecha de caducidad cercana, para las guardias que
+# usan el reloj real (el cliente de escritura y la pantalla).
+VIVA = {**ORDEN, "caduca": "2099-01-01T00:00:00+00:00"}
+
 def _decide(**kw):
     base = dict(
         mercado={ROBERTO: 8_380_000},
@@ -190,7 +195,7 @@ def test_no_se_publica_a_un_protegido() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         ruta = Path(tmp) / "orden.json"
         ruta.write_text(__import__("json").dumps(
-            {**ORDEN, "proteger": [{"player_id": YAMAL, "nombre": "Yamal"}]}
+            {**VIVA, "proteger": [{"player_id": YAMAL, "nombre": "Yamal"}]}
         ), encoding="utf-8")
         ruta_antes = orden_mod.RUTA
         orden_mod.RUTA = ruta
@@ -267,7 +272,9 @@ def test_la_pantalla_tampoco_anuncia_al_vetado() -> None:
     reales = (sub.plan_del_reset, sub.lectura_del_estado)
     with tempfile.TemporaryDirectory() as tmp:
         ruta = Path(tmp) / "orden.json"
-        ruta.write_text(__import__("json").dumps(ORDEN), encoding="utf-8")
+        # Con el reloj REAL (plan_desde_el_estado no recibe la hora): una
+        # orden de prueba que caducaba el 09/10 15:00 paro la verja ese dia.
+        ruta.write_text(__import__("json").dumps(VIVA), encoding="utf-8")
         ruta_antes = orden_mod.RUTA
         orden_mod.RUTA = ruta
         try:
