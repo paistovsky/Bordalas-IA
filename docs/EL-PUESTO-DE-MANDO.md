@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 09/10/2026, 12:50 de Madrid (turno del cierre de la J8).
 
 ## El mandato
 
@@ -344,6 +344,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/10 12:45 (TURNO DEL CIERRE DE LA J8).** (1) **Solvencia: +409.783,
+  comprometido 0: el plazo de las 15:00 se cumple sin hacer nada.** (2)
+  **Once:** 3-4-3 con 11 nombres, los 11 «ok» en el ciclo #2112 (Gulacsi;
+  Jonny, Chust, Diego Rico; Exposito, Olasagasti, Unai, Pablo Ibanez;
+  Yamal, Roberto, Jutgla). El mas dudoso, Diego Rico (50 % FF); sin
+  banquillo no hay relevo (punto 8 del plan, desde el 10/10). (3) Ciclos:
+  verdes (#2107 a #2112). (4) Pujas vivas: ninguna. (5) Segunda mirada
+  programada a las 20:15 (trig_015VK1RmFydKisGdCTXi5wfo), tras la vuelta
+  de las 20:07 que congela el once. E29: Luismi sigue en -2,74 M; si no
+  sale del rojo antes de las 15:00, no puntua la J8.
 
 - **09/10 07:15 (rafaga de la manana, DIA DE LA J8). Reset sin nada.**
   Ciclos: verdes (#2098 a #2107); hoy no hubo vuelta a las 06:22 (la red
