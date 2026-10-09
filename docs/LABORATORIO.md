@@ -69,6 +69,37 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E30 · 09/10/2026 17:20 de Madrid · El dia de la J8 en directo: E24 y E29 contra lo que ha pasado
+
+**Que es:** no es una medicion nueva; es contrastar dos experimentos con
+lo que ha pasado hoy. Datos: el tablon de hoy y el saldo de los 8 en las
+fotos de 16 ciclos (08/10 22:10 a 09/10 14:11 de Madrid).
+
+**1) El saldo antes de la J8 (E29):**
+
+    hora (Madrid)    Luismi_Haz    Pollo17      DiosMande
+    08/10 22:10      -6.350.412    -3.135.349   -9.510.925
+    08/10 23:10      -6.350.412    -3.135.349      +95.475
+    09/10 04:49      -2.742.812    -3.135.349      +95.475   (Luismi vende a Juan Iglesias, 3.607.600)
+    09/10 10:09      -2.742.812      +101.851      +95.475   (Pollo17 vende a Deossa, 3.237.200)
+    09/10 12:10      -2.742.812    +9.242.751      +95.475   (Pollo17 vende a Valverde, 9.140.900)
+    09/10 14:11      -2.742.812    +9.242.751      +95.475
+
+A las 14:11, Luismi sigue en rojo. Si llega asi a las 21:00, su J8 es
+cero (como la J6). Se vera al juzgar E23.
+
+**2) El lesionado que vende Pollo17 (E24):** Valverde, lesionado en el
+derbi del 21/09 (10,88 M), lo vende hoy, 18 dias despues, por 9.140.900;
+su precio de hoy, 8,66 M (-20 % en 18 dias, ~1,1 % al dia, dentro de lo
+que midio E24). Venderlo el dia de la lesion habria dado ~11 M: **esperar
+le ha costado ~1,9 M.** Es la cuenta de la llave de Yamal en un caso real.
+
+**Lo nuevo:** poco. Las dos mediciones se cumplen en vivo; Pollo17 tiene
+ahora +9,2 M de caja para la semana que viene (puja maxima mayor que la
+nuestra para los objetivos que salgan).
+
+**Veredicto: CONFIRMA E24 y E29**, sin nada nuevo que llevar al plan.
+
 ### E29 · 09/10/2026 11:20 de Madrid · ¿Quien empieza la J8 en rojo? (la regla de la liga, comprobada)
 
 **Por que:** la J8 empieza hoy a las 21:00. Si un manager la empieza con
