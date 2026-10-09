@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 08/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 09/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -344,6 +344,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/10 07:15 (rafaga de la manana, DIA DE LA J8). Reset sin nada.**
+  Ciclos: verdes (#2098 a #2107); hoy no hubo vuelta a las 06:22 (la red
+  parece apagada). Saldo +409.783 (positivo: el plazo de las 15:00 se
+  cumple), comprometido 0, plantilla 11, once 11. Mercado de hoy:
+  ninguno de la lista de objetivos. A las 12:45, turno del cierre.
 
 - **08/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2091 a #2098).
   Pepe: sin compras, ventas ni pujas; saldo +409.783, comprometido 0.
