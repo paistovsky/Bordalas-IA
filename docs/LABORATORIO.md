@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E29 · 09/10/2026 11:20 de Madrid · ¿Quien empieza la J8 en rojo? (la regla de la liga, comprobada)
+
+**Por que:** la J8 empieza hoy a las 21:00. Si un manager la empieza con
+saldo negativo, no puntua. **Codigo:** `lab/carrera/en_rojo.py`: suma los
+puntos de cada jornada del tablon (`roundFinished`) y la compara con la
+clasificacion de la foto del ciclo de las 11:10 de hoy.
+
+**La regla, comprobada:**
+- **La J1 no cuenta para nadie** (`splitRound: ignoreFirst` en el
+  tablon): para los 8, clasificacion = suma del tablon - J1, exacto.
+- **Luismi_Haz perdio entera la J6** (64 pts): 380 - 29 (J1) - 64 = 287,
+  su clasificacion. Es la unica jornada «sin premio» del tablon.
+
+**Saldo hoy a las 11:10:**
+
+    Pepe          +409.783      Pollo17       +101.851
+    Luismi_Haz  -2.742.812      DiosMande      +95.475
+    resto en verde (Prinzipote +5,2 M, Alvaro R. +15,1 M...)
+
+**Lo que se aprende:** Pollo17 (-8,8 M el 07/10) y DiosMande (-9,8 M) ya
+han salido del rojo. **Luismi sigue en -2,74 M** a 10 horas del primer
+partido. Si no vende antes, su J8 cuenta cero: su once era el mas fuerte
+de la liga (58 pts esperados, E23). Para Pepe no hay nada que hacer
+(estamos en verde); para la carrera es la noticia del dia, y la
+prediccion de E23 para Luismi se juzgara sabiendo esto.
+
+**Contra lo que hace Pepe:** la regla de la casa (nunca empezar una
+jornada en rojo; el plazo de las 15:00) es la buena: lo medido es que
+cuesta la jornada entera, ~45-60 puntos.
+
+**Veredicto: SE AGUANTA** (la regla esta comprobada con el tablon; lo de
+Luismi se vera esta noche).
+
 ### E28 · 08/10/2026 22:35 de Madrid · ¿Como hacen dinero Pollo17 y Luismi?
 
 **Por que:** patrimonio de hoy Pollo17 100,1 M, Luismi_Haz 92,6 M, Pepe
