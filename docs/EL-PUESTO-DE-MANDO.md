@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/10/2026, 12:50 de Madrid (turno del cierre de la J8).
+Actualizado: 09/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -329,7 +329,9 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   rutina de un solo disparo con hora (run_once_at) a la sesion fija.
   La sesion fija no puede mandar avisos al movil: su resumen queda en la
   sesion y en este documento.
-- La rutina «Pepe: el cierre de la jornada 8» (trig_01ANZwEgrZL4o5Fh84KEjZQj,
+- La rutina «Pepe: el cierre de la jornada 9» (trig_01PnAXQSyaryBqT7Yku9DAP3,
+  16/10 10:45 UTC) despierta la sesion fija. La de la J8
+  (trig_01ANZwEgrZL4o5Fh84KEjZQj,
   09/10 16:00 UTC) tambien despierta la sesion fija desde el 27/09. La vieja
   (sin repositorio) esta borrada.
 - **Permisos (27/09, ampliados a las 23:00):** `.claude/settings.json` deja
@@ -344,6 +346,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/10 14:15 (rafaga de la tarde, dia de la J8).** Ciclos: verdes
+  (#2111 a #2114). Saldo +409.783, comprometido 0: el plazo de las 15:00
+  se cumple. **Creado el turno del cierre de la J9**
+  (trig_01PnAXQSyaryBqT7Yku9DAP3, 16/10 12:45 de Madrid, a esta sesion;
+  primer partido 16/10 21:00 segun el calendario del 28/09). Su prompt
+  pide comprobar el calendario y crear el de la J10 (23/10). La segunda
+  mirada de hoy sigue a las 20:15.
 
 - **09/10 12:45 (TURNO DEL CIERRE DE LA J8).** (1) **Solvencia: +409.783,
   comprometido 0: el plazo de las 15:00 se cumple sin hacer nada.** (2)
