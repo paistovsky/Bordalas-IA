@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/10/2026, 20:25 de Madrid (segunda mirada del cierre de la J8).
+Actualizado: 09/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -346,6 +346,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/10 21:15 (rafaga de la noche, J8 en juego).** Ciclos: verdes
+  desde el arreglo (#2120 a #2122). Saldo +409.783, comprometido 0. Nada
+  construido (dia de partido). **Para la rafaga de las 07:15 del 10/10
+  (primer paso del dia):** 12 guardias leen el reloj real
+  (`datetime.now()`/`date.today()`/`time.time()`): competitive_transactions_v121,
+  dashboard_truth, el_carril_de_un_dia, el_escaparate,
+  el_reloj_de_las_guardias, el_viaje_al_computer, empezar_a_anotar,
+  la_plaza_y_el_cable, la_rendija, los_tres_arreglos,
+  los_tres_denominadores, marcador. Mirar cual depende de una FECHA
+  (como la de la orden de hoy) y no solo de medir tiempo; ojo, ya existe
+  `test_el_reloj_de_las_guardias_v1` (doctrina 84: ver que vigila antes
+  de construir). Despues, el punto 8 (banquillo) con el dinero de la J8.
 
 - **09/10 20:15 (SEGUNDA MIRADA DEL CIERRE DE LA J8). EL ONCE ESTA BIEN.**
   La vuelta de las 20:07 (#2121) salio verde y dejo el once 3-4-3 con 11
