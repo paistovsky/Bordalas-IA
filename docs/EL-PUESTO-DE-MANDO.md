@@ -347,6 +347,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **09/10 20:15 (chat del dueno). VERJA ROJA 5 VUELTAS (15:07-19:07).** La
+  orden del gestor caducaba el 09/10 15:00 y dos guardias de
+  test_la_orden_del_gestor_v1 usaban una orden de prueba con esa misma
+  fecha contra el reloj REAL: desde las 15:00 la verja paraba el ciclo.
+  Arreglo b11cb53c: orden renovada hasta el 30/11 (vacia; solo proteger
+  Yamal/Roberto/Gulacsi y conservar; fuera la red de Jutgla) y las dos
+  guardias con una orden sin caducidad cercana. Vuelta lanzada a mano
+  #37970217104 verde. Once de la J8 en Biwenger: 3-4-3 con 11, igual que el
+  recomendado. **Leccion: una fecha de caducidad en config no puede romper
+  la verja; antes de cada caducidad, renovar o retirar.**
+
 - **09/10 14:15 (rafaga de la tarde, dia de la J8).** Ciclos: verdes
   (#2111 a #2114). Saldo +409.783, comprometido 0: el plazo de las 15:00
   se cumple. **Creado el turno del cierre de la J9**
