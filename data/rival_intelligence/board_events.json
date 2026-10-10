@@ -175830,5 +175830,24 @@
         "name": "Jornada 8"
       }
     }
+  },
+  {
+    "event_id": "a7f5a0be5303f7258a07f1fe",
+    "date": 1791608723,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 31707,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1100001
+      }
+    ]
   }
 ]

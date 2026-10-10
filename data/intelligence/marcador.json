@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-10T04:52:36.230730",
+  "updated_at": "2026-10-10T07:18:40.302613",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -1653,6 +1653,221 @@
         "26271": 88,
         "29661": 33,
         "35678": 59,
+        "38433": 16
+      },
+      "once_alternativo": {
+        "formation": "3-4-3",
+        "players": [
+          38433,
+          1760,
+          1599,
+          5678,
+          29661,
+          1969,
+          14800,
+          19862,
+          26271,
+          35678,
+          3159
+        ],
+        "vara": "base"
+      },
+      "nombres": {
+        "1599": "Jonny",
+        "1760": "Chust",
+        "1969": "Unai López",
+        "3159": "Jutglà",
+        "5678": "Diego Rico",
+        "14800": "Pablo Ibáñez",
+        "19862": "Expósito",
+        "26271": "Yamal",
+        "29661": "Olasagasti",
+        "35678": "Roberto Fernández",
+        "38433": "Gulácsi"
+      },
+      "onces_por_vara": {
+        "base": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            1760,
+            1599,
+            5678,
+            29661,
+            1969,
+            14800,
+            19862,
+            26271,
+            35678,
+            3159
+          ]
+        },
+        "factores": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            1760,
+            1599,
+            5678,
+            29661,
+            1969,
+            14800,
+            19862,
+            26271,
+            35678,
+            3159
+          ]
+        },
+        "actual": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            1760,
+            1599,
+            5678,
+            19862,
+            29661,
+            14800,
+            1969,
+            26271,
+            35678,
+            3159
+          ]
+        }
+      }
+    },
+    "4906": {
+      "round_id": 4906,
+      "visto": "2026-10-10T07:18:40.302613",
+      "datos_de": "2026-10-10T07:18:34.249460+00:00",
+      "escrito_en": "2026-10-10T07:18:40.302613",
+      "clasificacion": [
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 323
+        },
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 320
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 287
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 281
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 258
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 253
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 246
+        },
+        {
+          "user_id": 14456960,
+          "name": "Alvaro Retamosa Sanguino",
+          "points": 198
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "3-4-3",
+        "players": [
+          38433,
+          1760,
+          1599,
+          5678,
+          19862,
+          29661,
+          14800,
+          1969,
+          26271,
+          35678,
+          3159
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny",
+          "position": 2
+        },
+        {
+          "id": 1760,
+          "name": "Chust",
+          "position": 2
+        },
+        {
+          "id": 1969,
+          "name": "Unai López",
+          "position": 3
+        },
+        {
+          "id": 3159,
+          "name": "Jutglà",
+          "position": 4
+        },
+        {
+          "id": 5678,
+          "name": "Diego Rico",
+          "position": 2
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 19862,
+          "name": "Expósito",
+          "position": 3
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 35678,
+          "name": "Roberto Fernández",
+          "position": 4
+        },
+        {
+          "id": 38433,
+          "name": "Gulácsi",
+          "position": 1
+        }
+      ],
+      "totales": {
+        "1599": 21,
+        "1760": 21,
+        "1969": 29,
+        "3159": 29,
+        "5678": 6,
+        "14800": 30,
+        "19862": 39,
+        "26271": 88,
+        "29661": 33,
+        "35678": 62,
         "38433": 16
       },
       "once_alternativo": {
