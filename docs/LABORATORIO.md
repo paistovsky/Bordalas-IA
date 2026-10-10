@@ -69,6 +69,36 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E31 · 10/10/2026 11:20 de Madrid · Como empezo la J8: Luismi en rojo por 57.812 y el once cerrado
+
+**Codigo:** `lab/carrera/arranque_j8.py` (fotos de 16 ciclos, del 09/10
+20:03 al 10/10 11:09 de Madrid; `league_center` y `rival_squads`).
+
+**1) Luismi_Haz empezo la J8 EN ROJO: -57.812.** Asi estaba en las vueltas
+de las 20:03, 20:09, 21:10 y siguientes hasta el reset; despues del reset
+de hoy, -1.157.813. Por la regla comprobada en E29 (Luismi perdio asi la
+J6 entera), **su J8 deberia contar cero**. Su once era el mas fuerte de
+la liga (58 pts esperados, E23). Se sabra al cerrar la J8.
+
+**2) Comprobacion de E27 (¿se cierra el once al empezar la jornada?):** con
+la foto refrescada de las 07:18 de hoy, el ultimo guardado de cada uno es
+anterior a las 21:00: Pollo17 09/10 20:06, Luismi 09/10 19:59, Pepe 02/10
+07:17, el resto de dias anteriores. **Nadie guardo despues del primer
+partido (8 de 8).** Encaja con que la liga lo bloquea, pero no lo prueba
+(no se ve a nadie intentandolo). Falta una prueba negativa: que en la J9
+el motor del once de Pepe intente guardar despues de las 21:00 y Biwenger
+lo rechace (o no).
+
+**3) Encontrado de paso:** `rival_squads[].lineup_date` venia CONGELADO
+desde el 18/09 (la fecha de la J7) en todas las fotos hasta el reset del
+10/10 07:18; los jugadores de cada plantilla si estaban al dia. Quien use
+esa fecha para algo (la hora del once de un rival) estaba leyendo la de
+la J7.
+
+**Veredicto:** (1) a confirmar con el cierre de la J8; (2) E27 sigue
+PENDIENTE de una prueba negativa; (3) aviso para el gestor, sin nada que
+construir.
+
 ### E30 · 09/10/2026 17:20 de Madrid · El dia de la J8 en directo: E24 y E29 contra lo que ha pasado
 
 **Que es:** no es una medicion nueva; es contrastar dos experimentos con
