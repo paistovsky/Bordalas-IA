@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 10/10/2026, 07:50 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -275,6 +275,11 @@ cualquier cambio grande ANTES de fusionarlo a main:
 - **Los interruptores nuevos nacen apagados** y se encienden de uno en uno,
   con marcha atras automatica si la vuelta siguiente sale roja.
 - **Nada de git add -A. git pull --no-rebase antes de empujar.**
+- **Antes de cada plazo con fecha** (caducidad de la orden, cierre de
+  jornada, cambio de hora), una verja con el reloj en esa fecha:
+  `RELOJ_FALSO=<fecha ISO con zona> PYTHONPATH=scripts/reloj_falso
+  python3 scripts/run_validation_gate.py`. El 09/10 una guardia con
+  fecha tumbo cinco vueltas seguidas.
 - **Ninguna guardia** lee estado de produccion, sale a la red, escribe en los
   libros, pasa con las manos vacias, mira el reloj del sistema ni depende de
   que BORDALAS_* haya en el entorno.
@@ -346,6 +351,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **10/10 07:15 (rafaga de la manana). EL RELOJ FALSO.** Ciclos: verdes
+  (#2122 a #2131). Reset sin nada; saldo +409.783 (el premio de la J8
+  llega al acabar la jornada), plantilla 11, once 11. **Hecho:** las
+  bombas con fecha (la verja roja del 09/10). Medido, no supuesto: (1)
+  las 12 guardias que leen el reloj real pasan con el reloj congelado el
+  10/10, 16/10, 01/11 y 31/12; (2) la verja ENTERA, con los interruptores
+  de produccion, 200/200 el 16/10 19:00, 23/10 18:30, 31/10 23:30 y 31/12
+  23:30 UTC; (3) el metodo pilla el fallo de verdad: el codigo de antes
+  del arreglo (b11cb53c^) con el reloj el 09/10 15:30 de Madrid FALLA en
+  `test_la_orden_del_gestor_v1`, y el 08/10 pasa. **Nueva herramienta:**
+  `scripts/reloj_falso/usercustomize.py` (sin RELOJ_FALSO no hace nada;
+  verja normal 200/200 con ella dentro). Uso en la regla de la casa de
+  abajo. **Siguiente: el punto 8 (el banquillo) cuando entre el premio
+  de la J8.**
 
 - **09/10 21:15 (rafaga de la noche, J8 en juego).** Ciclos: verdes
   desde el arreglo (#2120 a #2122). Saldo +409.783, comprometido 0. Nada
