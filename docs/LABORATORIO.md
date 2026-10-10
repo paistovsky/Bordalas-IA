@@ -71,7 +71,7 @@ datos y n, resultado, veredicto)
 
 ### E32 · 10/10/2026 17:20 de Madrid · E2 fuera de muestra: el partido del viernes de la J8
 
-**Por que:** E2 (28/09) vio, con una sola jornada (la J7), que los que no
+**Codigo:** `lab/precio/e2_fuera_de_muestra.py`. **Por que:** E2 (28/09) vio, con una sola jornada (la J7), que los que no
 venian subiendo y sacaban 4-5 puntos o mas arrancaban a subir (17-25 % en
 2 dias, contra el 1 %). Era una pista, no una regla. El partido del
 viernes 09/10 (el primero de la J8) es una prueba nueva que E2 no vio.
