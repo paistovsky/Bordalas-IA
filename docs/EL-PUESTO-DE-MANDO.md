@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/10/2026, 07:50 de Madrid (rafaga de las 07:15).
+Actualizado: 10/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **10/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2131 a #2138);
+  **canario del reloj falso superado** (la #2132 corrio sobre 61ff9b6e,
+  verde). Saldo +409.783, comprometido 0; sin compras ni ventas. Mercado
+  de hoy, defensas titulares: **Kike Salas (2,81 M, 90 %; 3,42 pts
+  esperados en E16)**, Djene (1,60 M, 90 %), Jorge Salinas (2,07 M, 70 %);
+  Puga 1,47 M pero 50 %. Ninguno cabe con 0,41 M: el punto 8 espera al
+  premio de la J8 (cuando acabe la jornada). E31: Luismi empezo la J8 en
+  rojo, su J8 deberia ser cero.
 
 - **10/10 07:15 (rafaga de la manana). EL RELOJ FALSO.** Ciclos: verdes
   (#2122 a #2131). Reset sin nada; saldo +409.783 (el premio de la J8
