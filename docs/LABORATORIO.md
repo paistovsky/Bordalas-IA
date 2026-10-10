@@ -69,6 +69,35 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E32 · 10/10/2026 17:20 de Madrid · E2 fuera de muestra: el partido del viernes de la J8
+
+**Por que:** E2 (28/09) vio, con una sola jornada (la J7), que los que no
+venian subiendo y sacaban 4-5 puntos o mas arrancaban a subir (17-25 % en
+2 dias, contra el 1 %). Era una pista, no una regla. El partido del
+viernes 09/10 (el primero de la J8) es una prueba nueva que E2 no vio.
+**Datos:** las fotos de los ciclos del 09/10 20:03 (antes del partido) y
+del 10/10 07:18 (despues del reset): 34 jugadores con un partido mas y su
+cambio de precio en el reset de hoy.
+
+    jugaron el viernes, 5+ pts, y NO venian subiendo    4/9 suben hoy (44 %)
+        Bryan Zaragoza (12 pts) +3,0 % · Adrian Nino (8) +4,8 % ·
+        Recio (7) +0,9 % · Fortuno (5) +11,8 %
+        no: Cabrera, Larrubia, El Hilali, Hartman, Dani Lorenzo, Dolan
+    jugaron, 4 pts o menos, y no venian subiendo         0/22
+    no jugaron (513)                                    63 suben (12 %), mediana -0,6 %
+
+**Lo que se aprende:** la pista de E2 aguanta y con mas fuerza en un dia
+(44 % contra 0 %), aunque con n=9. El arranque llega en el PRIMER reset
+despues del partido.
+
+**Para Pepe:** encaja con la rampa (E1): el que arranca hoy, mañana ya
+cumple «subio en el ultimo cambio» y entra en la subasta; no hace falta
+otra regla. Si se quisiera entrar un dia antes, la señal es «jugo y sacó
+5+ puntos ayer», pero n=9 no da para tocar nada.
+
+**Veredicto: CONFIRMA E2 (n pequeno).** Repetir con toda la J8 cuando
+cierre (y el reset del 11/10 dara el segundo dia).
+
 ### E31 · 10/10/2026 11:20 de Madrid · Como empezo la J8: Luismi en rojo por 57.812 y el once cerrado
 
 **Codigo:** `lab/carrera/arranque_j8.py` (fotos de 16 ciclos, del 09/10
