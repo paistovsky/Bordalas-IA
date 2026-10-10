@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 10/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **10/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2138 a #2145).
+  Saldo +409.783, comprometido 0; sin compras ni ventas. Laboratorio E32
+  (E2 fuera de muestra con el viernes de la J8: los de 5+ pts que no
+  subian, 4 de 10 suben al dia siguiente; los de 4 o menos, 0 de 22):
+  una medicion, nada que meter aun. Sigue esperando el premio de la J8
+  para el punto 8.
 
 - **10/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2131 a #2138);
   **canario del reloj falso superado** (la #2132 corrio sobre 61ff9b6e,
