@@ -79,7 +79,7 @@ viernes 09/10 (el primero de la J8) es una prueba nueva que E2 no vio.
 del 10/10 07:18 (despues del reset): 34 jugadores con un partido mas y su
 cambio de precio en el reset de hoy.
 
-    jugaron el viernes, 5+ pts, y NO venian subiendo    4/9 suben hoy (44 %)
+    jugaron el viernes, 5+ pts, y NO venian subiendo    4/10 suben hoy (40 %)
         Bryan Zaragoza (12 pts) +3,0 % · Adrian Nino (8) +4,8 % ·
         Recio (7) +0,9 % · Fortuno (5) +11,8 %
         no: Cabrera, Larrubia, El Hilali, Hartman, Dani Lorenzo, Dolan
@@ -87,13 +87,13 @@ cambio de precio en el reset de hoy.
     no jugaron (513)                                    63 suben (12 %), mediana -0,6 %
 
 **Lo que se aprende:** la pista de E2 aguanta y con mas fuerza en un dia
-(44 % contra 0 %), aunque con n=9. El arranque llega en el PRIMER reset
+(40 % contra 0 %), aunque con n=10. El arranque llega en el PRIMER reset
 despues del partido.
 
 **Para Pepe:** encaja con la rampa (E1): el que arranca hoy, mañana ya
 cumple «subio en el ultimo cambio» y entra en la subasta; no hace falta
 otra regla. Si se quisiera entrar un dia antes, la señal es «jugo y sacó
-5+ puntos ayer», pero n=9 no da para tocar nada.
+5+ puntos ayer», pero n=10 no da para tocar nada.
 
 **Veredicto: CONFIRMA E2 (n pequeno).** Repetir con toda la J8 cuando
 cierre (y el reset del 11/10 dara el segundo dia).
