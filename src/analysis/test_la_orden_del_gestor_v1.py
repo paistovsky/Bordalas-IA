@@ -396,7 +396,22 @@ def test_la_llave_de_yamal() -> None:
     assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", YAMAL)], a
 
 
+def test_varios_cambios_cada_uno_con_su_relevo() -> None:
+    A, B, X, Y = 501, 502, 601, 602
+    orden = {**ORDEN, "fichar": [], "vender_si_ficha": {"jugadores": [
+        {"player_id": X, "nombre": "X", "suelo": 100, "si_esta": A},
+        {"player_id": Y, "nombre": "Y", "suelo": 100, "si_esta": B}]}}
+    base = dict(mercado={}, nuestras_pujas={}, ofertas_del_computer={
+        X: {"offer_id": 1, "amount": 200}, Y: {"offer_id": 2, "amount": 200}},
+        en_venta={X, Y}, precios={}, maximo_de_puja=0)
+    a = orden_mod.decidir(orden, plantilla={X, Y, A}, **base)
+    assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", X)], a
+    a = orden_mod.decidir(orden, plantilla={X, Y}, **base)
+    assert a == [], "sin ningun relevo dentro no se vende nada"
+
+
 TESTS = [
+    test_varios_cambios_cada_uno_con_su_relevo,
     test_la_llave_de_yamal,
     test_los_viajes_cortos,
     test_se_vende_solo_con_el_relevo_dentro,

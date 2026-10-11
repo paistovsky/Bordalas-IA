@@ -211,7 +211,13 @@ def decidir(
     venta = orden.get("vender_si_ficha") or {}
     condicion = _int(venta.get("si_esta"))
 
-    if condicion and condicion in plantilla:
+    # VARIOS CAMBIOS A LA VEZ (11/10, el fichaje del dia): sin `si_esta`
+    # general, cada jugador manda con su propio relevo (`si_esta`).
+    todos_con_relevo = bool(venta.get("jugadores")) and all(
+        _int(j.get("si_esta")) for j in venta.get("jugadores") or []
+    )
+
+    if (condicion and condicion in plantilla) or (not condicion and todos_con_relevo):
         for j in venta.get("jugadores") or []:
             pid = _int(j.get("player_id"))
             nombre = str(j.get("nombre", ""))

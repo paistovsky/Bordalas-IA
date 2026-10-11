@@ -21,8 +21,8 @@ LA REGLA
     queda en positivo SIN contar premios: saldo - puja + lo que da la
     venta del que sale (al 95 % de su valor) >= 0. Puja: precio + 1 %
     (E9: sin pelear con Pollo17). El que sale solo se vende con el relevo
-    dentro (`si_esta`) y con suelo del 90 % de su valor. Uno al dia, y
-    nunca si la orden ya tiene un fichaje pendiente.
+    dentro (`si_esta`) y con suelo del 90 % de su valor. Hasta `MAXIMO_AL_DIA` cambios al dia que no se pisen, con la caja
+    acumulada siempre en positivo; cada salida con su propio relevo.
 
 USO
 
@@ -45,6 +45,7 @@ ORDEN = RAIZ / "config" / "la_orden_del_gestor.json"
 GANANCIA_MINIMA = 0.5
 TITULARIDAD_MINIMA = 60
 PARTIDOS_MINIMOS = 3
+MAXIMO_AL_DIA = 3
 INTOCABLES = {"yamal", "lamine yamal"}
 
 
@@ -63,13 +64,14 @@ def decidir(status: dict, orden: dict) -> dict:
     saldo = int(yo.get("balance") or 0)
     protegidos = {int(x["player_id"]) for x in orden.get("proteger") or []}
 
-    if orden.get("fichar"):
-        return {"accion": "NADA", "motivo": "YA_HAY_UN_FICHAJE_PENDIENTE"}
+    pendientes = {int(f["player_id"]) for f in orden.get("fichar") or []}
+    ya_salen = {int(j["player_id"]) for j in (orden.get("vender_si_ficha") or {}).get("jugadores") or []}
 
     nuestros = []
     for p in once:
         lp = liga.get(p["id"], {})
-        if str(p.get("name", "")).strip().lower() in INTOCABLES or p["id"] in protegidos:
+        if (str(p.get("name", "")).strip().lower() in INTOCABLES or p["id"] in protegidos
+                or p["id"] in ya_salen):
             continue
         e = _esperado(lp.get("tasa"), p.get("starter_probability"))
         if e is None:
@@ -80,7 +82,7 @@ def decidir(status: dict, orden: dict) -> dict:
     mejores = []
     for c in escaparate:
         lc = liga.get(c["id"], {})
-        if lc.get("de_quien") not in (None, "computer"):
+        if c["id"] in pendientes or lc.get("de_quien") not in (None, "computer"):
             continue
         if str(lc.get("status") or "ok").lower() != "ok":
             continue
@@ -104,25 +106,49 @@ def decidir(status: dict, orden: dict) -> dict:
                         "suelo": int(sale["valor"] * 0.90), "ganancia": round(ganancia, 2),
                         "caja_despues": caja})
 
-    validos = [m for m in mejores if m["ganancia"] >= GANANCIA_MINIMA and m["caja_despues"] >= 0]
-    if not validos:
+    # VARIOS (el dueño, 11/10: «el fichaje o los fichajes»): de mayor a menor
+    # ganancia, sin repetir quien entra ni quien sale, mientras la caja
+    # acumulada siga en positivo.
+    # La caja ya comprometida por fichajes pendientes de la orden: sus
+    # pujas salen y la venta de su relevo entra (al 95 % de su valor).
+    venta_pend = (orden.get("vender_si_ficha") or {}).get("jugadores") or []
+    caja = (saldo - sum(int(f.get("puja") or 0) for f in orden.get("fichar") or [])
+            + sum(int(int(j.get("suelo") or 0) / 0.9 * 0.95) for j in venta_pend))
+    elegidos, salen = [], set()
+    for m in sorted(mejores, key=lambda m: -m["ganancia"]):
+        if m["ganancia"] < GANANCIA_MINIMA or m["sale_id"] in salen:
+            continue
+        neto = m["caja_despues"] - saldo          # lo que mueve este cambio
+        if caja + neto < 0 or len(elegidos) >= MAXIMO_AL_DIA:
+            continue
+        caja += neto
+        salen.add(m["sale_id"])
+        elegidos.append({**m, "caja_despues": caja})
+    if not elegidos:
         top = sorted(mejores, key=lambda m: -m["ganancia"])[:3]
         return {"accion": "NADA", "motivo": "NINGUNO_MEJORA_EL_ONCE_CON_CAJA", "saldo": saldo,
                 "los_mejores": top}
-    m = max(validos, key=lambda m: m["ganancia"])
-    return {"accion": "FICHAR", "saldo": saldo, **m}
-
+    return {"accion": "FICHAR", "saldo": saldo, "cambios": elegidos}
 
 def escribir(orden: dict, d: dict) -> dict:
-    orden["fichar"] = [{"player_id": d["ficha_id"], "nombre": d["ficha"], "puja": d["puja"],
-                        "por_que": (f"El fichaje del dia: {d['esperado']} pts esperados por "
-                                    f"jornada contra {d['sale_esperado']} de {d['sale']} "
-                                    f"(+{d['ganancia']}); caja tras el cambio {d['caja_despues']}.")}]
-    orden["vender_si_ficha"] = {"si_esta": d["ficha_id"], "jugadores": [
-        {"player_id": d["sale_id"], "nombre": d["sale"], "suelo": d["suelo"]}]}
-    orden["conservar"] = [c for c in orden.get("conservar") or [] if c.get("player_id") != d["sale_id"]]
+    venta = orden.get("vender_si_ficha") or {}
+    general = venta.get("si_esta")
+    jugadores = [
+        {**j, "si_esta": j.get("si_esta") or general}
+        for j in venta.get("jugadores") or [] if j.get("si_esta") or general
+    ]
+    for c in d["cambios"]:
+        orden.setdefault("fichar", []).append({
+            "player_id": c["ficha_id"], "nombre": c["ficha"], "puja": c["puja"],
+            "por_que": (f"El fichaje del dia: {c['esperado']} pts esperados por jornada "
+                        f"contra {c['sale_esperado']} de {c['sale']} (+{c['ganancia']}); "
+                        f"caja tras el cambio {c['caja_despues']}.")})
+        jugadores.append({"player_id": c["sale_id"], "nombre": c["sale"],
+                          "suelo": c["suelo"], "si_esta": c["ficha_id"]})
+        orden["conservar"] = [x for x in orden.get("conservar") or []
+                              if x.get("player_id") != c["sale_id"]]
+    orden["vender_si_ficha"] = {"jugadores": jugadores}
     return orden
-
 
 def main() -> None:
     status = json.loads(Path(sys.argv[1]).read_text())
