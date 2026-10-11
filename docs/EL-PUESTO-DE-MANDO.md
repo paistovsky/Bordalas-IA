@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 11/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **11/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
+  (#2145 a #2154). **Racha cobrada: saldo +659.783** (de 409.783),
+  comprometido 0; plantilla 11, once 11. Defensas titulares en el
+  mercado: Kike Salas 2,81 M (90 %), Djene 1,59 M (90 %), Jorge Salinas
+  2,06 M (70 %), Recio 1,13 M (70 %). Aun no cabe ninguno: el punto 8
+  espera al premio de la J8 (la jornada acaba el lunes 12/10).
 
 - **10/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2138 a #2145).
   Saldo +409.783, comprometido 0; sin compras ni ventas. Laboratorio E32
