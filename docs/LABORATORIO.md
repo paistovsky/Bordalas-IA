@@ -69,6 +69,42 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E33 · 11/10/2026 11:20 de Madrid · E2 fuera de muestra, segunda prueba: los partidos del sabado de la J8
+
+**Codigo:** `lab/precio/e2_fuera_de_muestra.py` con la foto del 10/10 07:18
+(antes del sabado) y la del 11/10 07:19 (despues del reset de hoy).
+
+**Los del sabado (primer reset despues de su partido):**
+
+    jugaron, 5+ pts, NO venian subiendo     15/29 suben (52 %)
+        Kounde (13 pts) +3,1 % · Gordon (13) +0,7 % · Diomande (11) +0,7 % ·
+        Freeman (6) +1,2 % ... ; no suben: Bellingham, Pedri, Cucurella...
+    jugaron, 4 pts o menos, no subian        2/51 (4 %)
+    no jugaron (447)                         53 suben (12 %)
+
+**Los del viernes, segundo reset:** los 4 que arrancaron ayer siguen y
+suben MAS (Bryan Zaragoza +3,9 %, Adrian Nino +7,7 %, Recio +3,5 %,
+Fortuno +15,0 %), y arrancan dos mas (Cabrera +0,9 %, Hartman +1,1 %): **6
+de 10 en dos dias.**
+
+**Juntando viernes y sabado:** 5+ pts y no subian, **19/39 arrancan al
+dia siguiente (49 %)**; 4 o menos, **2/73 (3 %)**; no jugaron, 12 %. E2
+(con la J7) decia 17-25 % contra 1 %: la señal es la misma y mas fuerte.
+Y los que arrancan siguen (E1).
+
+**Lo que abre (sin medir aun en dinero):** la rampa de Pepe (E1) compra
+cuando el precio YA ha subido, un dia tarde. Los puntos del partido se
+saben la noche del partido; la puja de las 04:50 se resuelve en el reset
+que trae la primera subida. Pujar a las 04:50 por los del mercado del
+Computer que jugaron ayer y sacaron 5+ puntos cogeria ese primer dia
+(+0,2 a +11,8 %), con 1 de cada 2 que no arranca. Falta medir si sale a
+cuenta en dinero (los que no arrancan, ¿cuanto pierden?) y si el mercado
+del Computer saca jugadores asi el dia despues de su partido.
+
+**Veredicto: E2 CONFIRMADO fuera de muestra (n=39 y 73).** La idea de
+pujar por puntos antes de la subida queda PROMETEDORA, sin medir en
+dinero: se mide con la J8 entera (cierra hoy-mañana).
+
 ### E32 · 10/10/2026 17:20 de Madrid · E2 fuera de muestra: el partido del viernes de la J8
 
 **Codigo:** `lab/precio/e2_fuera_de_muestra.py`. **Por que:** E2 (28/09) vio, con una sola jornada (la J7), que los que no
