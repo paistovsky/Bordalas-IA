@@ -69,6 +69,35 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E34 · 11/10/2026 17:20 de Madrid · ¿Se puede pujar por puntos antes de la rampa? Casi nunca hay a quien
+
+**Por que:** E33 abrio la idea de pujar a las 04:50 por los que puntuan
+bien la vispera, un dia antes de que la rampa (E1) los vea subir. Pero eso
+solo sirve con un jugador que esta EN LA LISTA DEL COMPUTER el dia de su
+partido (la puja se resuelve en el reset que trae la primera subida).
+**Codigo:** `lab/precio/antes_de_la_rampa.py` (lista del Computer de un
+dia contra los puntos de ese dia y el cambio de precio del reset
+siguiente; fotos de los ciclos).
+
+    lista del 09/10 (partido del viernes): 20; jugaron 2; con 5+ puntos 1
+        Adrian Nino, 0,80 M, 8 pts -> +4,8 % y al dia siguiente +7,7 %
+    lista del 10/10 (partidos del sabado): 20; jugaron 5; con 5+ puntos 1
+        Mikautadze, 7,41 M, 5 pts -> -0,5 % (tit 40 %)
+
+**Lo que se aprende:** la lista del Computer esta llena de jugadores que
+no juegan (14-18 de 20 no jugaron ese dia). Candidatos para «pujar por
+puntos antes de la rampa»: **uno por dia de partido**, y de los dos, uno
+subio. La señal de E33 es buena, pero casi nunca coincide con un jugador
+que se pueda comprar ese dia.
+
+**Contra lo que hace Pepe:** la rampa (E1) ya coge a los que arrancan, con
+un dia de retraso. Lo que se perderia esperando es el primer dia de subida
+de ~1 jugador por dia de partido: poco.
+
+**Veredicto: NO COMPENSA construirlo por ahora** (n=2). Se mira otra vez
+con los partidos del domingo y el lunes (listas del 11 y 12/10) y, si en
+la J8 entera hay mas de 4-5 casos, se reabre.
+
 ### E33 · 11/10/2026 11:20 de Madrid · E2 fuera de muestra, segunda prueba: los partidos del sabado de la J8
 
 **Codigo:** `lab/precio/e2_fuera_de_muestra.py` con la foto del 10/10 07:18
