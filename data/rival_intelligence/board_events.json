@@ -180885,5 +180885,24 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "32c9dee1745530043842af1c",
+    "date": 1791694691,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
