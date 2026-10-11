@@ -352,6 +352,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **11/10 11:00 (chat del dueno). ERROR MIO: di a Diego Rico por puntuado
+  (0) cuando jugaba esa tarde, y puse a Olasagasti en la Real Sociedad (es
+  del Levante, juega el lunes).** El dueno: «estar siempre atento, sobre
+  todo cuando la jornada se esta jugando; empaparse de todo». Arreglo:
+  `scripts/la_jornada_en_vivo.py` (equipo de Biwenger -> partido del
+  calendario -> JUGADO/JUGANDOSE/FALTA + puntos de la jornada) y una rutina
+  en jornada (vie-lun 13:13, 17:13, 21:13) que lo pasa y mira noticias de
+  los 11 (lesiones, rojas, suspensiones). Rayo-Athletic de la J8:
+  suspendido por lanzamiento de objetos, se retoma en noviembre; cuenta con
+  el once de la jornada (el dueno: los aplazados dan igual salvo lesion).
+
 - **11/10 07:15 (rafaga de la manana). Reset sin nada.** Ciclos: verdes
   (#2145 a #2154). **Racha cobrada: saldo +659.783** (de 409.783),
   comprometido 0; plantilla 11, once 11. Defensas titulares en el
