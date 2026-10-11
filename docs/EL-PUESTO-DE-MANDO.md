@@ -352,6 +352,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **11/10 14:00 (chat del dueno). EL FICHAJE DEL DIA.** El dueno: «¿lo has
+  decidido porque te dije de mirar? Esto lo quiero todos los dias». Cierto:
+  las mejoras del once dependian de que el gestor mirase. Nuevo
+  `scripts/el_fichaje_del_dia.py`: puntos esperados (pts/partido x
+  titularidad) del mejor del Computer contra nuestro titular mas flojo de
+  su puesto; ficha si gana >= 0,5/jornada y la caja queda >= 0 sin contar
+  premios; puja precio +1 %; el que sale se vende con el relevo dentro y
+  suelo del 90 %. Probado con el mercado de hoy: elige solo Recio por Diego
+  Rico (+0,68/jornada). Rutina diaria 08:22 de Madrid (tras la vuelta de
+  las 07:15): lo pasa con `--escribir`, verja, push, y una linea al dueno.
+  Fase 2: meterlo en el ciclo de Pepe cuando lleve una semana acertando.
+
 - **11/10 13:00 (chat del dueno). Intel del dueno: Djene NO** («siempre le
   dan un 2 y muchas veces roja»; los datos lo confirman: 2,38 pts/partido
   en 8). El defensa del lunes (premio de la J8): **Kike Salas** (2,81 M,
