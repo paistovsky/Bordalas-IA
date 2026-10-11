@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 11/10/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **11/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2154 a #2161).
+  Saldo +659.783, comprometido 0. Revisada la orden del chat del dueno:
+  `fichar` Recio (41419) a 1.142.000; `vender_si_ficha` Diego Rico (suelo
+  500.000) con `si_esta` = Recio: Rico solo se vende con Recio dentro.
+  Cuentas: si se gana el 12/10 a las 07:00, -0,48 M hasta vender a Rico
+  (~0,5-0,55 M) y entra el premio de la J8: positivo de sobra antes del
+  plazo de la J9 (16/10 15:00). **Duda que dejo apuntada, sin tocar
+  nada:** la J8 sigue viva hasta el lunes por la noche (Levante de
+  Olasagasti); Rico ya jugo el sabado. Si Biwenger cuenta los puntos de
+  la jornada por la plantilla al CERRARLA y no al empezarla, vender a
+  Rico el lunes por la manana podria restarnos sus puntos de la J8.
+  Comprobar en el tablon/premio de la J8 si eso pasa (n=1), antes de
+  convertirlo en regla. El fichaje del dia (rutina 08:22) lo lleva el
+  chat del dueno; no lo duplico.
 
 - **11/10 14:00 (chat del dueno). EL FICHAJE DEL DIA.** El dueno: «¿lo has
   decidido porque te dije de mirar? Esto lo quiero todos los dias». Cierto:
