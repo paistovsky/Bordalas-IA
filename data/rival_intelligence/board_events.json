@@ -180904,5 +180904,43 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "af476a632f0ae6b2f0976597",
+    "date": 1791705465,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
+  },
+  {
+    "event_id": "a2fe66322c58ff264ad9049b",
+    "date": 1791705529,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 1613,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 5842300
+      }
+    ]
   }
 ]

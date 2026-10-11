@@ -2035992,6 +2035992,48 @@
       "direction_hit": null,
       "magnitude_error_percent": null,
       "scored_at": null
+    },
+    "1523|PRENSA_MARCA|3|2026-10-11": {
+      "player_id": "1523",
+      "player_name": "Iago Aspas",
+      "source": "PRENSA_MARCA",
+      "direction": "UP",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 1900000,
+      "predicted_at": "2026-10-11T08:10:00.268472+00:00",
+      "due_at": "2026-10-14T08:10:00.268472+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
+    },
+    "34479|PRENSA_MUNDO_DEPORTIVO|3|2026-10-11": {
+      "player_id": "34479",
+      "player_name": "Pépé",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 7580000,
+      "predicted_at": "2026-10-11T08:10:09.389155+00:00",
+      "due_at": "2026-10-14T08:10:09.389155+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
     }
   }
 }
