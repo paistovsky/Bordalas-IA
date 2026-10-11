@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/10/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 11/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **11/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2161 a #2168).
+  **Puja por Recio puesta: comprometido 1.142.000** (saldo +659.783); se
+  resuelve el 12/10 a las 07:00. La rafaga de las 07:15 del 12/10 mira:
+  si entro, que Diego Rico se venda (suelo 500.000) y el once siga con
+  11; y la duda de los puntos de Rico en la J8 (ver 11/10 14:15).
+  Laboratorio E34: pujar por puntos antes de la rampa casi nunca tiene
+  candidato (1 por dia de partido); nada que meter.
 
 - **11/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2154 a #2161).
   Saldo +659.783, comprometido 0. Revisada la orden del chat del dueno:
