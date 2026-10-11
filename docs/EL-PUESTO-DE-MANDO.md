@@ -352,6 +352,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **11/10 13:00 (chat del dueno). Intel del dueno: Djene NO** («siempre le
+  dan un 2 y muchas veces roja»; los datos lo confirman: 2,38 pts/partido
+  en 8). El defensa del lunes (premio de la J8): **Kike Salas** (2,81 M,
+  3,8/partido, 90 %) o, mas barato, **Recio** (1,13 M, 3,1/partido, 70 %),
+  por Diego Rico. Andres Martin (Racing, 3,15 M, 30 %, vuelve de lesion,
+  +0,3 %/dia): no, salvo que juegue y puntue esta noche. El dueno: si no
+  hay nadie para el XI o para aguantar y vender, no se ficha.
+
 - **11/10 11:00 (chat del dueno). ERROR MIO: di a Diego Rico por puntuado
   (0) cuando jugaba esa tarde, y puse a Olasagasti en la Real Sociedad (es
   del Levante, juega el lunes).** El dueno: «estar siempre atento, sobre
