@@ -399,6 +399,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
 
         from src.actions.la_orden_del_gestor import (
             _intocables, _pid, ejecutar, leer_la_foto, leer_la_orden, protegidos,
+            vetados,
         )
         from src.actions.los_chollos import (
             LIBRO as LIBRO_CHOLLOS, _puede_escribir, horas_a_la_jornada,
@@ -433,6 +434,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         pendientes = {_int(f.get("player_id")) for f in orden.get("fichar") or []}
         venta = (orden.get("vender_si_ficha") or {}).get("jugadores") or []
         pendientes |= {_int(j.get("player_id")) for j in venta}
+        pendientes |= vetados()                      # los `no_pujar` del gestor
 
         libro_ronda = _leer(LIBRO_RONDA, {})
         libro_chollos = _leer(LIBRO_CHOLLOS, {})
