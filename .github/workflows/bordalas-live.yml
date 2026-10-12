@@ -208,6 +208,18 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_RONDA_DE_LA_MANANA: "1"
 
+      # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
+      #   que habia jugadores para mejorar el XI y Pepe no ha hecho
+      #   nada»). Paso propio tras el panel, en cada vuelta: la
+      #   combinacion de cambios (misma posicion, hasta 3) que mas puntos
+      #   esperados suma, con deuda hasta -1 M a 64 h o mas de la jornada;
+      #   en rojo desde 88 h, cambia caro por barato antes que jugar con 0.
+      #   El que sale solo se vende con el relevo dentro. Verja 202/202;
+      #   paso 0 con 40; ensayo #38247206025 verde (NADA_QUE_HACER: la
+      #   caja de la J9 ya va en -6,1 M con Ivan, Gerard y Moi).
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_MEJORA_DEL_ONCE: "1"
+
       # Encendido 29/09 de Madrid. LA REVISION DE LAS PUJAS VIVAS.
       #
       #   En la ventana del reset retira nuestras pujas por jugadores que
