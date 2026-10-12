@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 12/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 12/10/2026, 14:35 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **12/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2177 a #2184).
+  **Canario de LA RONDA (BORDALAS_LA_RONDA_DE_LA_MANANA, encendida por el
+  chat del dueno a las 13:55, b3326521): la #2184 de las 14:07, verde.**
+  Aun sin pujas (comprometido 0, saldo +659.783): la ventana es la de
+  las 04:45. La orden lleva ademas Ivan Romero por Jutgla y Gerard
+  Martin por Diego Rico (precio +1 %). **Mi objecion, para que conste
+  (el dueno lo decidio y es su liga):** E14 midio que las compras
+  automaticas para revender perdieron -1,24 M; lo que gana (E1/E9) es la
+  rampa a precio +1 % sin pelear, y la ronda usa TODA la deuda con el
+  plazo de la J9 el 16/10 a las 15:00. Riesgo: llegar al jueves con
+  jugadores sin vender y la caja en rojo = cero en la J9 (lo que le paso
+  a Luismi). **Vigilo desde la rafaga de las 07:15 del 13/10:** que la
+  ronda compre solo lo que SUBE, lo que debe, y que el miercoles 15/10
+  por la noche este todo vendido o la caja en verde sin ello. Si el
+  jueves por la manana no cuadra, aviso al dueno y propongo apagarla.
 
 - **12/10 07:15 (rafaga de la manana). RECIO PERDIDO.** Ciclos: verdes
   (#2168 a #2177). Nuestra puja de 1.142.000 (precio +1 %) perdio contra
