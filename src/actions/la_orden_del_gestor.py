@@ -31,12 +31,15 @@ LAS GUARDIAS (12/10/2026)
     de un viernes lo vigila `decidir`, con lo que le pasa `correr`:
 
     1. EL RELOJ. A menos de `HORAS_SIN_FICHAR` de la jornada (o sin
-       calendario) no se pone ni se sube una puja de `fichar`. La que ya
-       este viva se deja como esta.
-    2. EL PARTE DEL RELEVO. Antes de aceptar la oferta o publicar al que
-       sale, su relevo (`si_esta`) tiene que estar en la plantilla Y sano:
-       `status` 'ok' en el catalogo de la foto. Duda, lesion, sancion o
-       sin saberlo: no se vende, y queda un NADA con el motivo.
+       calendario) no se pone ni se sube una puja de `fichar`, salvo la
+       que no necesita vender a nadie y la paga la caja. La que ya este
+       viva se deja como esta.
+    2. EL PARTE DEL RELEVO. Antes de aceptar la oferta por el que sale,
+       su relevo (`si_esta`) tiene que estar en la plantilla Y sano:
+       `status` 'ok' o 'warned' en el catalogo de la foto. Duda, lesion,
+       sancion o sin saberlo: no se cobra (publicar si), y queda un NADA
+       con el motivo. Salvo el ultimo recurso (`si_saldo_negativo`) y en
+       rojo a menos de `HORAS_ROJO`: ahi manda la caja.
     3. LA JORNADA EN CURSO. Con una jornada jugandose no se acepta
        ninguna oferta del Computer (la de `vender_si_ficha` ni la de un
        viaje). Publicar si se puede: la oferta queda lista para cuando
@@ -92,10 +95,14 @@ INTOCABLES = frozenset({"yamal", "lamine yamal"})
 #     ultimo.
 HORAS_SIN_FICHAR = 40
 
-# EL PARTE DEL RELEVO (12/10/2026): lo unico que el catalogo de Biwenger
-# da por bueno. Todo lo demas -'doubt', 'injured', 'sanctioned', sin
-# estado o sin ficha- deja al que sale en la plantilla.
-SANO = "ok"
+# EL PARTE DEL RELEVO (12/10/2026): lo que el catalogo de Biwenger da
+# por bueno. 'warned' (apercibido) juega (el_once_objetivo.py:216). Todo
+# lo demas -'doubt', 'injured', 'sanctioned', sin estado o sin ficha-
+# deja al que sale en la plantilla... salvo en rojo y a menos de
+# `HORAS_ROJO` de la jornada: ahi manda la caja («mejor un hueco que 0
+# puntos en la jornada»).
+SANOS = frozenset({"ok", "warned"})
+HORAS_ROJO = 24
 
 
 # LA LLAVE DE YAMAL (07/10/2026, decision del CEO con permiso del dueño:
@@ -236,7 +243,9 @@ def decidir(
         # EL RELOJ (12/10/2026): ganada en el ultimo reset antes del
         # partido, el que sale no cobra hasta despues del partido (ver
         # `HORAS_SIN_FICHAR`). Ni se pone ni se sube; la viva se queda.
-        if horas_jornada is None or horas_jornada < HORAS_SIN_FICHAR:
+        if (horas_jornada is None or horas_jornada < HORAS_SIN_FICHAR) and not _la_paga_la_caja(
+            orden, pid, puja, saldo, nuestras_pujas,
+        ):
             acciones.append({
                 "accion": "NADA", "player_id": pid,
                 "nombre": f.get("nombre"), "guardia": "EL_RELOJ",
@@ -324,20 +333,30 @@ def decidir(
             # un hueco en el once. Ivan Romero (relevo de Jutgla) juega la
             # J8 el 12/10 a las 21:00 y su puja se resuelve el 13/10 a las
             # 07:00; la revision de pujas se salta las de la orden.
-            if estados is not None:
+            #     Solo frena el COBRO: publicar no saca a nadie del once
+            #     y hace nacer la oferta del reset siguiente (si se
+            #     frenara, el que sale cobraria un reset tarde). Y no frena
+            #     el ultimo recurso (`si_saldo_negativo`) ni, en rojo a
+            #     menos de `HORAS_ROJO`, nada: un hueco cuesta un jugador;
+            #     empezar la jornada en rojo, el once entero.
+            parte_malo = None
+            if estados is not None and not j.get("si_saldo_negativo"):
                 quien = relevo or condicion
                 parte = str(estados.get(quien) or "").strip().lower() if quien else ""
-                if parte != SANO:
-                    acciones.append({
+                en_rojo_y_cerca = (
+                    saldo is not None and saldo < 0
+                    and horas_jornada is not None and horas_jornada < HORAS_ROJO
+                )
+                if parte not in SANOS and not en_rojo_y_cerca:
+                    parte_malo = {
                         "accion": "NADA", "player_id": pid, "nombre": nombre,
                         "guardia": "EL_PARTE_DEL_RELEVO", "relevo": quien,
                         "estado_del_relevo": parte or None,
                         "motivo": (
                             f"el relevo ({quien}) no esta sano "
-                            f"({parte or 'sin estado'}): no se vende"
+                            f"({parte or 'sin estado'}): no se cobra"
                         ),
-                    })
-                    continue
+                    }
 
             suelo = _int(j.get("suelo"), 0)
             oferta = ofertas_del_computer.get(pid)
@@ -348,6 +367,9 @@ def decidir(
                 # Rayo de Unai Lopez cierra la J9 el lunes 19/10 21:00).
                 if en_curso:
                     acciones.append(_no_se_cobra_en_jornada(pid, nombre))
+                    continue
+                if parte_malo:
+                    acciones.append(parte_malo)
                     continue
                 acciones.append({
                     "accion": "ACEPTAR_OFERTA_DEL_COMPUTER",
@@ -434,6 +456,31 @@ def decidir(
         })
 
     return acciones
+
+
+def _la_paga_la_caja(orden, pid, puja, saldo, nuestras_pujas) -> bool:
+    """
+    La puja de `fichar` que no necesita vender a nadie: ningun
+    `vender_si_ficha` espera a este jugador y el saldo, descontadas las
+    pujas vivas, la paga entera. Esa no tiene prisa por cobrar: el reloj
+    no la frena (el 30/09 se lleno asi una plantilla de 10). Nunca lanza.
+    """
+
+    try:
+        venta = orden.get("vender_si_ficha") or {}
+        if _int(venta.get("si_esta")) == pid:
+            return False
+        if any(_int(j.get("si_esta")) == pid for j in venta.get("jugadores") or []):
+            return False
+        if saldo is None or puja is None:
+            return False
+        vivas = sum(
+            _int((p or {}).get("amount"), 0) or 0
+            for q, p in (nuestras_pujas or {}).items() if q != pid
+        )
+        return saldo - vivas >= puja
+    except Exception:                               # noqa: BLE001
+        return False
 
 
 def _no_se_cobra_en_jornada(pid, nombre) -> dict:

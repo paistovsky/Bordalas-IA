@@ -456,6 +456,24 @@ def test_el_reloj_no_deja_fichar_tarde() -> None:
     # Sin pasarla (como antes de la guardia), no se mira.
     assert _tipos(_decide()) == [("PUJAR", ROBERTO)]
 
+    # La que no necesita vender a nadie y la paga la caja no tiene prisa
+    # por cobrar: el reloj no la frena (el 30/09 se lleno asi una
+    # plantilla de 10). Con un relevo que vender, o sin caja, si.
+    sola = {**ORDEN, "vender_si_ficha": {}}
+    a = orden_mod.decidir(sola, mercado={ROBERTO: 8_380_000}, nuestras_pujas={},
+                          plantilla={JUTGLA}, ofertas_del_computer={}, en_venta=set(),
+                          precios={}, maximo_de_puja=14_000_000, saldo=9_000_000,
+                          horas_jornada=20.0)
+    assert _tipos(a) == [("PUJAR", ROBERTO)], a
+    a = orden_mod.decidir(sola, mercado={ROBERTO: 8_380_000},
+                          nuestras_pujas={LEJEUNE: {"offer_id": 1, "amount": 1_000_000}},
+                          plantilla={JUTGLA}, ofertas_del_computer={}, en_venta=set(),
+                          precios={}, maximo_de_puja=14_000_000, saldo=9_000_000,
+                          horas_jornada=20.0)
+    assert ("NADA", ROBERTO) in _tipos(a), ("las pujas vivas cuentan", a)
+    assert _tipos(_decide(saldo=50_000_000, horas_jornada=20.0)) == [("NADA", ROBERTO)], \
+        "con un `vender_si_ficha` que espera a este fichaje, el reloj manda"
+
 
 def test_el_relevo_tiene_que_estar_sano() -> None:
     plantilla = {ROBERTO, JUTGLA, BLANCO, YAMAL}
@@ -465,9 +483,23 @@ def test_el_relevo_tiene_que_estar_sano() -> None:
                   {ROBERTO: "sanctioned"}, {ROBERTO: None}, {}):
         a = _decide(plantilla=plantilla, mercado={},
                     ofertas_del_computer=ofertas, estados=parte)
-        assert sorted(_tipos(a)) == sorted([("NADA", JUTGLA), ("NADA", BLANCO)]), (parte, a)
+        # Solo frena el cobro: publicar no saca a nadie del once.
+        assert sorted(_tipos(a)) == sorted([("NADA", JUTGLA), ("PONER_A_LA_VENTA", BLANCO)]), (parte, a)
         assert all(x["guardia"] == "EL_PARTE_DEL_RELEVO" and x["relevo"] == ROBERTO
-                   and x["motivo"] for x in a), a
+                   and x["motivo"] for x in a if x["accion"] == "NADA"), a
+
+    # Apercibido juega (el_once_objetivo.py:216): se cobra.
+    a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,
+                estados={ROBERTO: "warned"})
+    assert ("ACEPTAR_OFERTA_DEL_COMPUTER", JUTGLA) in _tipos(a), a
+
+    # En rojo y a menos de 24 h manda la caja: mejor un hueco que 0 puntos.
+    a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,
+                estados={ROBERTO: "doubt"}, saldo=-1, horas_jornada=14)
+    assert ("ACEPTAR_OFERTA_DEL_COMPUTER", JUTGLA) in _tipos(a), a
+    a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,
+                estados={ROBERTO: "doubt"}, saldo=-1, horas_jornada=30)
+    assert ("NADA", JUTGLA) in _tipos(a), a
 
     a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,
                 estados={ROBERTO: "ok"})
