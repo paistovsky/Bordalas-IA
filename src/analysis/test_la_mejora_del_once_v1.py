@@ -19,7 +19,7 @@ import sys
 import tempfile
 
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -28,9 +28,11 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from src.actions.la_mejora_del_once import (     # noqa: E402
-    ENV, ENV_CALENDARIO, GANANCIA_MINIMA, correr, decidir, el_calendario_activo,
-    el_contexto, el_plan_del_calendario, la_caja, la_caja_de_la_jornada,
-    las_probabilidades, lo_de_esta_vuelta, los_estados, xp_por_jornada,
+    ENV, ENV_CALENDARIO, GANANCIA_MINIMA, MARGEN_DEL_CALENDARIO, PEOR_FINANCIACION,
+    VUELTA_VIEJA_MINUTOS, correr, decidir, el_calendario_activo, el_contexto,
+    el_plan_del_calendario, es_de_esta_vuelta, la_caja, la_caja_de_la_jornada,
+    las_probabilidades, las_rondas_que_cuentan, lo_de_esta_vuelta, los_estados,
+    no_vende_a_uno_mejor, xp_por_jornada,
 )
 from src.analysis.el_calendario_de_puntos import contexto  # noqa: E402
 
@@ -42,15 +44,24 @@ ONCE = [
     {"id": 12, "name": "Yamal", "position": 4, "starter_probability": 90, "price": 25_000_000},
     {"id": 13, "name": "Protegido", "position": 3, "starter_probability": 50, "price": 1_000_000},
 ]
+#
+# `played` (los partidos de `todaLaLiga`, que siempre los trae) se añadió
+# el 12/10 para el filtro del inventario: el `decidir` de main (21e33c70)
+# no lo lee nunca de la liga, así que la huella de antes sigue siendo la
+# de main con estas mismas entradas.
 LIGA = {
-    10: {"tasa": 3.75, "price": 2_700_000, "de_quien": "nuestro", "position": 4},
-    11: {"tasa": 4.5, "price": 4_900_000, "de_quien": "nuestro", "position": 3},
-    12: {"tasa": 11.0, "price": 25_000_000, "de_quien": "nuestro", "position": 4},
-    13: {"tasa": 1.0, "price": 1_000_000, "de_quien": "nuestro", "position": 3},
-    20: {"tasa": 5.7, "status": "ok", "price": 3_700_000, "de_quien": "computer", "position": 4},
-    21: {"tasa": 3.8, "status": "ok", "price": 1_100_000, "de_quien": "computer", "position": 3},
-    22: {"tasa": 9.0, "status": "injured", "price": 1_000_000, "de_quien": "computer", "position": 4},
-    23: {"tasa": 9.0, "status": "ok", "price": 1_000_000, "de_quien": "computer", "position": 4},
+    10: {"tasa": 3.75, "price": 2_700_000, "de_quien": "nuestro", "position": 4, "played": 6},
+    11: {"tasa": 4.5, "price": 4_900_000, "de_quien": "nuestro", "position": 3, "played": 6},
+    12: {"tasa": 11.0, "price": 25_000_000, "de_quien": "nuestro", "position": 4, "played": 6},
+    13: {"tasa": 1.0, "price": 1_000_000, "de_quien": "nuestro", "position": 3, "played": 6},
+    20: {"tasa": 5.7, "status": "ok", "price": 3_700_000, "de_quien": "computer", "position": 4,
+         "played": 6},
+    21: {"tasa": 3.8, "status": "ok", "price": 1_100_000, "de_quien": "computer", "position": 3,
+         "played": 6},
+    22: {"tasa": 9.0, "status": "injured", "price": 1_000_000, "de_quien": "computer",
+         "position": 4, "played": 6},
+    23: {"tasa": 9.0, "status": "ok", "price": 1_000_000, "de_quien": "computer", "position": 4,
+         "played": 6},
 }
 
 
@@ -170,15 +181,20 @@ def test_la_caja():
 
 
 def test_nace_apagada_y_nunca_lanza():
-    os.environ.pop("BORDALAS_LA_MEJORA_DEL_ONCE", None)
-    assert correr(status={}, snapshot={}, v10={})["motivo"] == "APAGADA"
-    os.environ["BORDALAS_LA_MEJORA_DEL_ONCE"] = "1"
-    try:
-        r = correr(status={"lineup": None}, snapshot={"market": None}, v10={},
-                   libro_ruta=os.devnull + ".no")
+    with _interruptores({ENV: None}):
+        assert correr(status={}, snapshot={}, v10={})["motivo"] == "APAGADA"
+    # Encendida y con basura, nunca lanza. Todo dado (la orden, los
+    # libros, el reloj): no lee producción ni escribe fuera del temporal.
+    with tempfile.TemporaryDirectory() as tmp, \
+            _interruptores({ENV: "1", ENV_CALENDARIO: None}):
+        r = correr(status={"lineup": None}, snapshot={"market": None}, v10={}, ahora=AHORA,
+                   libro_ruta=os.path.join(tmp, "mejora.json"), calendario={},
+                   de_fuera={"orden": {}, "vetados": set(), "protegidos": set(),
+                             "libro_ronda": os.path.join(tmp, "ronda.json"),
+                             "libro_chollos": os.path.join(tmp, "chollos.json"),
+                             "horas_jornada": 100.0, "puede_escribir": True,
+                             "en_curso": False})
         assert r["motivo"] in {"NADA_QUE_HACER"} or r["motivo"].startswith("ERROR"), r
-    finally:
-        os.environ.pop("BORDALAS_LA_MEJORA_DEL_ONCE", None)
 
 
 # ============================================================
@@ -191,6 +207,8 @@ def test_nace_apagada_y_nunca_lanza():
 #
 #         equipo 12   J9 en casa del 1, J10 del 2, J11 del 3 (x0,846)
 #         equipo 13   J9-J11 en casa contra el 15, 16 y 17   (x1,102)
+#         equipo 4    J9-J11 en casa contra el 11, 10 y 8    (x1,102),
+#                     y del tramo 1-4 (el previo de arriba)
 #         equipo 14 y 18   no juegan esas rondas: NEUTRO (x1,0)
 
 AHORA = datetime(2026, 10, 13, 8, 0, tzinfo=timezone.utc)
@@ -207,11 +225,11 @@ def _partido(jornada, dia, casa, fuera):
 
 CALENDARIO = {"matchdays": [
     {"matchday": 9, "matches": [_partido(9, 16, 1, 12), _partido(9, 17, 13, 15),
-                                _partido(9, 18, 20, 19)]},
+                                _partido(9, 18, 20, 19), _partido(9, 17, 4, 11)]},
     {"matchday": 10, "matches": [_partido(10, 23, 2, 12), _partido(10, 24, 13, 16),
-                                 _partido(10, 25, 7, 8)]},
+                                 _partido(10, 25, 7, 8), _partido(10, 24, 4, 10)]},
     {"matchday": 11, "matches": [_partido(11, 30, 3, 12), _partido(11, 31, 13, 17),
-                                 _partido(11, 31, 9, 10)]},
+                                 _partido(11, 31, 9, 10), _partido(11, 30, 4, 8)]},
 ]}
 
 
@@ -230,6 +248,8 @@ MUNDO = {
     43: _ficha(43, "Maravilla", 14, 27, 3, "computer"),
     44: _ficha(44, "Fijo", 18, 56, 8, "nuestro"),
     45: _ficha(45, "Casero bueno", 13, 44, 8, "computer"),
+    46: _ficha(46, "Bueno de abajo", 12, 48, 8, "nuestro"),
+    47: _ficha(47, "De arriba", 4, 40, 8, "computer"),
     48: _ficha(48, "De la ronda", 15, 48, 8, "nuestro", precio=2_000_000),
     **{90 + r: _ficha(90 + r, f"Estrella {r}", r, 60, 8, "rival", precio=30_000_000)
        for r in range(1, 5)},
@@ -399,9 +419,16 @@ class _Escritor:
 
 
 def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=None,
-            libro_ronda=None, calendario=None):
+            libro_ronda=None, calendario=None, libro=None, ofertas=None, catalogo=None,
+            orden=None, saldo=500_000, horas=100.0):
     """`correr` con TODO dado: foto, panel, vuelta, calendario y lo que
-    si no se lee de producción. Los libros, en un directorio temporal."""
+    si no se lee de producción. Los libros, en un directorio temporal.
+
+        libro     el de la mejora (los cambios vivos) antes de la vuelta
+        ofertas   {id: importe} del Computer por los nuestros (offer_id
+                  = 900 + id)
+        catalogo  {id: status} del catálogo de la foto
+    """
     roster = {p: 80 for p in plantilla} if roster is None else roster
     status = {
         "todaLaLiga": {"players": list(MUNDO.values())},
@@ -414,9 +441,13 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
         "league": {"user": {"id": 7}},
         "market": {"sales": [{"player": {"id": p}, "user": None, "price": MUNDO[p]["price"]}
                              for p in escaparate],
-                   "offers": [],
-                   "status": {"maximumBid": 14_000_000, "balance": 500_000}},
+                   "offers": [{"id": 900 + p, "amount": importe, "status": "waiting",
+                               "requestedPlayers": [{"id": p}], "from": None}
+                              for p, importe in (ofertas or {}).items()],
+                   "status": {"maximumBid": 14_000_000, "balance": saldo}},
         "my_team": [{"id": p, "price": MUNDO[p]["price"]} for p in plantilla],
+        "catalog": {"data": {"players": {str(p): {"status": st}
+                                         for p, st in (catalogo or {}).items()}}},
     }
     escritor = _Escritor()
     interruptores = {ENV: "1", ENV_CALENDARIO: "1" if con_calendario else None}
@@ -424,13 +455,14 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
         rutas = {k: os.path.join(tmp, f"{k}.json") for k in ("mejora", "ronda", "chollos")}
         Path(rutas["ronda"]).write_text(json.dumps(libro_ronda or {}))
         Path(rutas["chollos"]).write_text("{}")
+        Path(rutas["mejora"]).write_text(json.dumps(libro or {}))
         s = correr(
             status=status, snapshot=snapshot, v10=v10 or {},
             escritor_factory=lambda: escritor, ahora=AHORA, libro_ruta=rutas["mejora"],
             calendario=CALENDARIO if calendario is None else calendario,
-            de_fuera={"orden": {}, "vetados": set(), "protegidos": set(),
+            de_fuera={"orden": orden or {}, "vetados": set(), "protegidos": set(),
                       "libro_ronda": rutas["ronda"], "libro_chollos": rutas["chollos"],
-                      "horas_jornada": 100.0, "puede_escribir": True, "en_curso": False},
+                      "horas_jornada": horas, "puede_escribir": True, "en_curso": False},
         )
         libros = {k: json.loads(Path(r).read_text()) for k, r in rutas.items()}
     return s, escritor, libros
@@ -677,7 +709,8 @@ def test_correr_con_lo_que_esta_vuelta_ya_hizo():
     # la ronda pujó por el 1462: Roberto no sale otra vez aunque el
     # calendario lo pida; lo cobrado está en la caja y lo pujado baja la
     # puja disponible.
-    v10 = {"orden_del_gestor": {"hechas": [
+    v10 = {"timestamp": _hace(5),
+           "orden_del_gestor": {"hechas": [
                {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": 40,
                 "importe": 2_900_000, "exito": True}]},
            "ronda": {"hechas": [
@@ -686,6 +719,263 @@ def test_correr_con_lo_que_esta_vuelta_ya_hizo():
     assert escritor.llamadas == [] and s["motivo"] == "NADA_QUE_HACER", s
     assert s["plan"]["caja"] == 500_000 + 2_900_000 - 77_070, s["plan"]
     assert s["plan"]["disponible"] == 14_000_000 - 1_101_000 - 1_000_000, s["plan"]
+
+
+# ============================================================
+# LO QUE PIDIÓ LA REVISIÓN (12/10/2026)
+# ============================================================
+
+def _hace(minutos):
+    """La hora del estado de la vuelta, `minutos` antes de `AHORA`."""
+    return (AHORA - timedelta(minutes=minutos)).isoformat()
+
+
+def test_el_del_inventario_pasa_los_filtros_del_computer():
+    # La reproducción de la revisión: un delantero de los chollos con 12
+    # puntos en UN partido y un 40 % de titularidad (4,8 por jornada)
+    # contra el Flojo del once (3,75 x 60 % = 2,25): +2,55. Se adoptaba
+    # y se vendía al titular. El mismo por el Computer, no entraba.
+    liga = {**LIGA, 30: {"tasa": 12.0, "points": 12, "played": 1, "status": "ok",
+                         "price": 1_000_000, "de_quien": "nuestro", "position": 4}}
+    f = _foto(plantilla={10, 11, 12, 13, 30})
+
+    def adopta(played=1, prob=40):
+        con_partidos = {**liga, 30: {**liga[30], "played": played}}
+        d = _d(liga=con_partidos, foto=f, escaparate=[], inventario={30},
+               probabilidades={30: prob})
+        return [(c["entra"], c["sale"]) for c in d["adoptar"]]
+
+    assert adopta() == []                                    # 1 partido y 40 %
+    assert adopta(played=1, prob=70) == []                   # pocos partidos
+    assert adopta(played=3, prob=40) == []                   # poca titularidad
+    assert adopta(played=3, prob=59) == []
+    assert adopta(played=3, prob="basura") == []             # nunca lanza
+    assert adopta(played=None, prob=70) == []                # sin partidos: no
+    assert adopta(played=3, prob=60) == [(30, 10)]           # como al del Computer
+    # El del Computer con lo mismo tampoco entraba.
+    esc = [{"id": 30, "name": "c30", "position": 4, "price": 1_000_000, "points": 12,
+            "played": 1, "starter_probability": 40}]
+    del_computer = {**liga, 30: {**liga[30], "de_quien": "computer"}}
+    assert _pujas(_d(liga=del_computer, escaparate=esc)) == []
+
+
+def test_el_margen_del_calendario_no_vende_a_uno_mejor():
+    # La reproducción de la revisión: el nuestro, del 11-20 (equipo 12),
+    # 6,0 por partido en 8 con el PEOR calendario; el del Computer, del
+    # top-4 (equipo 4), 5,0 en 8 con el MEJOR. El encogimiento (previo
+    # del 1-4 a 6,54 contra 4,17) y el calendario (1,102 / 0,846) se
+    # suman: +1,06 con el calendario, -0,8 con el `esperado`. No.
+    ctx = _ctx()
+    assert MARGEN_DEL_CALENDARIO == 0.5
+    assert _lo_que_hace(decidir(**_en_el_mundo([46], [47]))) == []           # apagado
+    d = decidir(**_en_el_mundo([46], [47], calendario_de_puntos=ctx))
+    assert _lo_que_hace(d) == [] and d["plan"]["calendario"]["frenados_por_el_margen"] == 1, d
+    sale = xp_por_jornada(ctx, MUNDO[46], 80)
+    entra = xp_por_jornada(ctx, MUNDO[47], 80)
+    assert round(entra["xp"] - sale["xp"], 2) == 1.06, (entra, sale)
+    # Con un 90 % los dos: +1,19 contra -0,9. Tampoco.
+    k = dict(once=[_nuestro(46, 90)], escaparate=[_del_computer(47, 90)])
+    assert _lo_que_hace(decidir(**_en_el_mundo([46], [47], calendario_de_puntos=ctx) | k)) == []
+    # Pero entre parecidos el calendario sí desempata: el del Computer al
+    # 90 % y el nuestro al 80 % (4,5 contra 4,8: -0,3 con el `esperado`).
+    d = decidir(**_en_el_mundo([46], [47], calendario_de_puntos=ctx)
+                | {"escaparate": [_del_computer(47, 90)]})
+    assert _lo_que_hace(d) == [("PUJAR", 47)], d
+    (c,) = d["plan"]["cambios"]
+    assert c["sin_calendario"] == -0.3 and c["puntos"] >= GANANCIA_MINIMA, c
+    # La regla, sola: la mejora con el margen; la que financia, con el
+    # límite de siempre (`PEOR_FINANCIACION`) también con el `esperado`.
+    assert not no_vende_a_uno_mejor({"puntos": 1.06, "sin_calendario": -0.8})
+    assert no_vende_a_uno_mejor({"puntos": 1.06, "sin_calendario": -MARGEN_DEL_CALENDARIO})
+    assert no_vende_a_uno_mejor({"puntos": -1.0, "sin_calendario": PEOR_FINANCIACION})
+    assert not no_vende_a_uno_mejor({"puntos": -1.0, "sin_calendario": PEOR_FINANCIACION - 0.1})
+    assert no_vende_a_uno_mejor({"puntos": 1.0})                     # sin calendario
+    for basura in (None, "x", {"sin_calendario": "x", "puntos": 1}, {"sin_calendario": 0}):
+        assert no_vende_a_uno_mejor(basura) is False, basura         # nunca lanza
+
+
+# Un calendario con el aplazado de la J6 (el 21/10, entre la J9 y la J10):
+# el 12 en casa contra el 13. Biwenger lo puntúa con el once de la J6.
+CALENDARIO_CON_APLAZADO = {"matchdays": CALENDARIO["matchdays"] + [
+    {"matchday": 6, "matches": [
+        {"matchday": 6, "kickoff": "2026-09-15T21:00:00+02:00",
+         "home": "Equipo 1", "away": "Equipo 2"},
+        {"matchday": 6, "kickoff": "2026-09-16T21:00:00+02:00",
+         "home": "Equipo 3", "away": "Equipo 5"},
+        {"matchday": 6, "kickoff": "2026-10-21T20:00:00+02:00",
+         "home": "Equipo 12", "away": "Equipo 13"},
+    ]},
+]}
+
+
+def test_solo_cuentan_las_rondas_principales():
+    # Con el aplazado como una de las tres, Roberto (equipo 12) saldría
+    # a 0,93 de factor y el Casero a 1,06: +0,49, no se cambiaría. Con
+    # las principales (J9, J10, J11), lo de siempre: 0,846 y 1,102.
+    status = {"league_center": {"laliga": {"standings": TABLA}},
+              "todaLaLiga": {"players": list(MUNDO.values())}}
+    ctx = el_contexto(status, CALENDARIO_CON_APLAZADO, AHORA)
+    assert [r["label"] for r in ctx["rondas"]] == ["Jornada 9", "Jornada 10", "Jornada 11"], ctx
+    s, escritor, _ = _correr([40], [41], [40], con_calendario=True,
+                             calendario=CALENDARIO_CON_APLAZADO)
+    assert s["plan"]["calendario"]["rondas"] == ["Jornada 9", "Jornada 10", "Jornada 11"], s
+    assert escritor.llamadas == [("PUJAR", 41, 3_030_000)], (s, escritor.llamadas)
+    (c,) = s["plan"]["cambios"]
+    assert c["factor_sale"] == 0.846 and c["factor_entra"] == 1.102, c
+    # Y aunque el contexto venga con el aplazado dentro (montado con
+    # todas las rondas), la mejora solo valora con las principales.
+    todas = contexto(status, CALENDARIO_CON_APLAZADO, AHORA, n=3)
+    assert [r["principal"] for r in todas["rondas"]] == [True, False, True]
+    assert [r["label"] for r in las_rondas_que_cuentan(todas)] == ["Jornada 9", "Jornada 10"]
+    assert xp_por_jornada(todas, MUNDO[40], 80)["factor"] == 0.846
+    assert las_rondas_que_cuentan(None) == [] and las_rondas_que_cuentan({"rondas": "x"}) == []
+    # El tablón lo cuenta bien: sin aplazados, y duro es top-6 o top-4
+    # por plantilla.
+    from src.telemetry.el_tablon import QUE_HACE
+
+    frase = QUE_HACE[ENV_CALENDARIO]
+    assert "aplazad" in frase and "seis primeros" in frase and "plantilla" in frase, frase
+
+
+def test_el_estado_de_otra_vuelta_no_se_cuenta():
+    v10 = {"orden_del_gestor": {"hechas": [
+        {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": 44, "importe": 2_900_000,
+         "exito": True},
+        {"accion": "PUJAR", "player_id": 45, "importe": 1_000_000, "exito": True}]}}
+    assert VUELTA_VIEJA_MINUTOS == 45
+    # De esta vuelta (hasta 45 min, o posterior): se cuenta.
+    for minutos in (0, 10, 45, -5):
+        esta = lo_de_esta_vuelta({**v10, "timestamp": _hace(minutos)}, AHORA)
+        assert esta["descartado"] is None and esta["cobros"] == {44: 2_900_000}, (minutos, esta)
+    # De otra (un 429 deja el de la anterior), sin hora o con hora rota: no.
+    for v in ({**v10, "timestamp": _hace(46)}, {**v10, "timestamp": _hace(60)}, v10,
+              {**v10, "timestamp": "ayer"}, {**v10, "timestamp": 7}):
+        esta = lo_de_esta_vuelta(v, AHORA)
+        assert esta["descartado"] and esta["cobros"] == {} and esta["pujas"] == {}, (v, esta)
+        assert esta["gastado"] == 0 and esta["ya_pujados"] == set()
+    assert "46 min" in es_de_esta_vuelta({"timestamp": _hace(46)}, AHORA)
+    assert es_de_esta_vuelta({"timestamp": "2026-10-13T07:30:00Z"}, AHORA) is None
+    assert es_de_esta_vuelta({"timestamp": "2026-10-13T07:30:00"}, AHORA) is None  # sin zona: UTC
+    assert es_de_esta_vuelta(None, AHORA) and es_de_esta_vuelta("x", None)
+    # Sin `ahora`, como antes (para quien no lo pase).
+    assert lo_de_esta_vuelta(v10)["cobros"] == {44: 2_900_000}
+    # En `correr`: el viejo no infla ni la caja ni el saldo.
+    viejo = {**v10, "timestamp": _hace(50)}
+    s, _, _ = _correr([40], [], [40, 44], con_calendario=False, v10=viejo)
+    assert s["plan"]["caja"] == 500_000 and "50 min" in s["v10_descartado"], s
+    assert s["plan"]["disponible"] == 14_000_000 - 1_000_000, s["plan"]
+    s, _, _ = _correr([40], [], [40, 44], con_calendario=False, v10={**v10, "timestamp": _hace(5)})
+    assert s["plan"]["caja"] == 500_000 + 2_900_000 - 1_000_000 and s["v10_descartado"] is None, s
+
+
+def test_lo_vendido_en_esta_vuelta_no_es_de_la_plantilla():
+    libro = {"20": {"sale": 10, "suelo": 2_430_000}}
+    f = _foto(plantilla={10, 11, 12, 13, 20},
+              ofertas_del_computer={10: {"offer_id": 7, "amount": 2_500_000}})
+    d = _d(libro=libro, foto=f, escaparate=[])
+    assert [a["accion"] for a in d["acciones"]] == ["ACEPTAR_OFERTA_DEL_COMPUTER"], d
+    # El que sale ya se vendió en esta vuelta: ni se cobra otra vez ni se
+    # publica; el cambio se suelta.
+    d = _d(libro=libro, foto=f, escaparate=[], vendidos={10})
+    assert d["acciones"] == [] and d["soltar"] == ["20"], d
+    # Se vendió su RELEVO: el que sale se queda (el once no se queda en 10).
+    d = _d(libro=libro, foto=f, escaparate=[], vendidos={20})
+    assert d["acciones"] == [] and d["soltar"] == ["20"], d
+    # Y el del inventario vendido no se adopta.
+    once = ONCE + [{"id": 23, "name": "c23", "position": 4, "starter_probability": 70}]
+    k = dict(foto=_foto(plantilla={10, 11, 12, 13, 23}), once=once, escaparate=[],
+             inventario={23})
+    assert _d(**k)["adoptar"] and _d(**k, vendidos={23})["adoptar"] == []
+
+
+def test_si_le_falta_el_xp_a_un_lado_los_dos_con_el_esperado():
+    # El nuestro sin puntos ni partidos en `todaLaLiga` (sin xP): antes
+    # se restaba su `esperado` crudo (3,0 x 0,8 = 2,4) del xP encogido
+    # del Casero (4,21): +1,81, dos varas. Ahora los dos lados con el
+    # `esperado`: 4,0 - 2,4 = +1,6.
+    ctx = _ctx()
+    sin_xp = {"id": 49, "name": "Sin partidos", "position": 4, "team_id": 12, "status": "ok",
+              "tasa": 3.0, "price": 3_000_000, "de_quien": "nuestro"}
+    k = _en_el_mundo([40], [41], calendario_de_puntos=ctx) | {
+        "liga": {**MUNDO, 49: sin_xp}, "foto": _foto(plantilla={49}),
+        "once": [{"id": 49, "name": "Sin partidos", "position": 4,
+                  "starter_probability": 80, "price": 3_000_000}]}
+    d = decidir(**k)
+    (c,) = d["plan"]["cambios"]
+    assert c["medida"] == "esperado" and c["xp_sale"] is None and c["xp_entra"] == 4.21, c
+    assert c["puntos"] == c["sin_calendario"] == 1.6, c
+    # Con los dos, la vara del calendario.
+    d = decidir(**_en_el_mundo([40], [41], calendario_de_puntos=ctx))
+    assert d["plan"]["cambios"][0]["medida"] == "calendario", d
+
+
+# Las guardias de `correr` (la revisión: estas mutaciones dejaban todo en
+# verde). La vuelta es de ahora mismo.
+
+def test_correr_pasa_el_parte_del_relevo():
+    # Cambio vivo: el Casero (41) ya está dentro y Roberto (40) tiene oferta
+    # por encima del suelo. El catálogo de la foto dice que el Casero está
+    # lesionado (`todaLaLiga` dice 'ok'): no se cobra; se publica.
+    k = dict(libro={"41": {"sale": 40, "suelo": 2_700_000}}, ofertas={40: 2_900_000})
+    s, escritor, libros = _correr([40], [], [40, 41], con_calendario=False,
+                                  catalogo={41: "injured"}, **k)
+    assert escritor.llamadas == [("PUBLICAR", 40, 3_000_000)], (s, escritor.llamadas)
+    assert s["plan"]["frenadas"][0]["relevo"] == 41 and libros["mejora"]["41"]["sale"] == 40, s
+    s, escritor, _ = _correr([40], [], [40, 41], con_calendario=False,
+                             catalogo={41: "ok"}, **k)
+    assert escritor.llamadas == [("ACEPTAR", 940)], escritor.llamadas
+
+
+def test_correr_no_cuenta_lo_que_esta_vuelta_ya_vendio():
+    # La ronda vendió en esta vuelta al 48 (la foto, de antes, aún lo
+    # tiene): ni se adopta ni cuenta como inventario; lo cobrado sí.
+    v10 = {"timestamp": _hace(5), "ronda": {"hechas": [
+        {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": 48, "importe": 2_100_000,
+         "exito": True}]}}
+    s, escritor, libros = _correr([40], [], [40, 48], con_calendario=False, v10=v10,
+                                  libro_ronda={"48": 2_000_000})
+    assert s["adoptados"] == [] and escritor.llamadas == [], s
+    assert s["plan"]["caja"] == 500_000 + 2_100_000, s["plan"]
+    # La orden vendió en esta vuelta a Roberto, el que salía por el Casero:
+    # ni se cobra otra vez, ni cuenta como venta pendiente; se suelta.
+    v10 = {"timestamp": _hace(5), "orden_del_gestor": {"hechas": [
+        {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": 40, "importe": 2_900_000,
+         "exito": True}]}}
+    s, escritor, libros = _correr([40], [], [40, 41], con_calendario=False, v10=v10,
+                                  libro={"41": {"sale": 40, "suelo": 2_700_000}},
+                                  ofertas={40: 2_900_000}, catalogo={41: "ok"})
+    assert escritor.llamadas == [] and libros["mejora"] == {}, (s, escritor.llamadas, libros)
+    assert s["plan"]["caja"] == 500_000 + 2_900_000, s["plan"]
+
+
+def test_correr_suma_lo_cobrado_al_saldo():
+    # En rojo (-500.000) a 10 h: el suelo del que sale bajaría a 0. Pero
+    # la orden ya cobró 1.000.000 en esta vuelta: el saldo es +500.000,
+    # el suelo se queda y la oferta de 2.000.000 no se acepta.
+    v10 = {"timestamp": _hace(5), "orden_del_gestor": {"hechas": [
+        {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": 44, "importe": 1_000_000,
+         "exito": True}]}}
+    k = dict(libro={"41": {"sale": 40, "suelo": 2_700_000}}, ofertas={40: 2_000_000},
+             catalogo={41: "ok"}, saldo=-500_000, horas=10.0)
+    s, escritor, _ = _correr([40], [], [40, 41, 44], con_calendario=False, v10=v10, **k)
+    assert escritor.llamadas == [("PUBLICAR", 40, 3_000_000)], (s, escritor.llamadas)
+    # Sin ese cobro, en rojo y a menos de 20 h: la que haya.
+    s, escritor, _ = _correr([40], [], [40, 41, 44], con_calendario=False, **k)
+    assert escritor.llamadas == [("ACEPTAR", 940)], escritor.llamadas
+
+
+def test_correr_cuenta_una_vez_la_puja_de_la_orden():
+    # La orden ficha al 45 por 3.000.000 y ya pujó en esta vuelta (la foto
+    # no tiene la puja): cuenta una vez, no la puja más el `fichar`.
+    orden = {"fichar": [{"player_id": 45, "puja": 3_000_000}]}
+    v10 = {"timestamp": _hace(5), "orden_del_gestor": {"hechas": [
+        {"accion": "PUJAR", "player_id": 45, "importe": 3_000_000, "exito": True}]}}
+    s, _, _ = _correr([40], [], [40], con_calendario=False, v10=v10, orden=orden)
+    assert s["plan"]["caja"] == 500_000 - 3_000_000, s["plan"]
+    assert s["plan"]["disponible"] == 14_000_000 - 3_000_000 - 1_000_000, s["plan"]
+    # Sin pujar aún: el `fichar` cuenta por su puja, como antes.
+    s, _, _ = _correr([40], [], [40], con_calendario=False, orden=orden)
+    assert s["plan"]["caja"] == 500_000 - 3_000_000, s["plan"]
 
 
 TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
@@ -706,7 +996,18 @@ TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_adopta_al_de_la_ronda_con_la_titularidad_de_la_plantilla,
          test_no_se_cobra_al_que_sale_si_el_relevo_no_esta_sano,
          test_la_caja_cuenta_lo_que_esta_vuelta_ya_hizo,
-         test_correr_con_lo_que_esta_vuelta_ya_hizo]
+         test_correr_con_lo_que_esta_vuelta_ya_hizo,
+         # Lo que pidió la revisión (12/10/2026).
+         test_el_del_inventario_pasa_los_filtros_del_computer,
+         test_el_margen_del_calendario_no_vende_a_uno_mejor,
+         test_solo_cuentan_las_rondas_principales,
+         test_el_estado_de_otra_vuelta_no_se_cuenta,
+         test_lo_vendido_en_esta_vuelta_no_es_de_la_plantilla,
+         test_si_le_falta_el_xp_a_un_lado_los_dos_con_el_esperado,
+         test_correr_pasa_el_parte_del_relevo,
+         test_correr_no_cuenta_lo_que_esta_vuelta_ya_vendio,
+         test_correr_suma_lo_cobrado_al_saldo,
+         test_correr_cuenta_una_vez_la_puja_de_la_orden]
 
 
 def main() -> None:

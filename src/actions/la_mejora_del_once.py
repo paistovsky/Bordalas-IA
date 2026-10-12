@@ -72,20 +72,31 @@ EL CALENDARIO (12/10/2026, `BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`)
 
     Es un DESEMPATE: el factor por partido va de 0,846 a 1,102, así que
     para un delantero de 5 puntos el calendario mueve ~1 punto por
-    jornada. `GANANCIA_MINIMA` sigue en puntos por jornada: un jugador
-    mucho mejor nunca se vende por un calendario.
+    jornada. `GANANCIA_MINIMA` sigue en puntos por jornada. Y una
+    guardia explícita: un cambio que con el `esperado` de siempre
+    (`sin_calendario`) pierde más de `MARGEN_DEL_CALENDARIO` por jornada
+    no se hace, por bueno que lo pinten el calendario y el tramo; uno
+    que solo financia (pierde a propósito para dar caja) no puede
+    perder con el `esperado` más que `PEOR_FINANCIACION`, como apagado.
+    Un jugador mucho mejor nunca se vende por un calendario.
 
     OJO, EL ENCOGIMIENTO TAMBIÉN MUEVE (k = 3 es juicio, no medida): con
     8 partidos el previo pesa un 27 %. Con el panel del 12/10 14:07,
     Yamal pasa de 10,57 a 8,68 puntos por jornada y Hugo Duro de 1,35 a
-    1,78; Roberto Fernández de 6,97 a 5,96 (factor 0,977). Y la J6
-    aplazada (Levante-Athletic, 21/10) es una de esas tres rondas: quien
-    no la juega cuenta neutro en ella.
+    1,78; Roberto Fernández de 6,97 a 5,96 (factor 0,977).
+
+    LAS RONDAS, SOLO LAS PRINCIPALES (la regla del dueño): un adelantado
+    o un aplazado (el Levante-Athletic de la J6, el 21/10) lo puntúa
+    Biwenger con el once que había al empezar SU jornada. No es una
+    ronda que se pueda planear: las tres son las tres próximas ventanas
+    principales (`proximas_rondas(..., solo_principales=True)`).
 
     El contexto (ids, duros, tramos, rondas) se monta UNA vez por vuelta
     en `correr`. Sin clasificación o sin calendario, el `esperado` de
     siempre, y el plan lo dice (`plan["calendario"]`). Cada cambio lleva
-    en el plan el xP y el factor medio de cada lado.
+    en el plan el xP y el factor medio de cada lado, y con qué vara se
+    midió (`medida`): si a un lado le falta el xP, los DOS lados van con
+    el `esperado` (nunca uno encogido contra otro crudo).
 
     Nace APAGADO. Apagado, todo es byte a byte lo de antes.
 
@@ -95,7 +106,11 @@ TRES ARREGLOS QUE VAN SIEMPRE (12/10/2026, el análisis del calendario)
        plantilla entera), no solo de `lineup.players`: `todaLaLiga` no
        la trae nunca, y adoptar a uno de la ronda o los chollos que no
        estaba en el once no funcionaba nunca. Quién puede SALIR sigue
-       siendo el once.
+       siendo el once. Y al de la ronda o los chollos se le pide LO
+       MISMO que al del Computer para entrar: sano, `PARTIDOS_MINIMOS`
+       partidos y `TITULARIDAD_MINIMA` de titularidad (los chollos
+       compran sin mirar los minutos: un 12 en un partido con un 40 %
+       no es un titular).
     2. EL PARTE DEL RELEVO (la misma regla que `la_orden_del_gestor`):
        para COBRAR al que sale, el que entra tiene que estar 'ok' o
        'warned' (catálogo de la foto o `todaLaLiga`). Publicar siempre
@@ -105,7 +120,11 @@ TRES ARREGLOS QUE VAN SIEMPRE (12/10/2026, el análisis del calendario)
        las pujas que ya puso, las de la orden enteras y las de la ronda
        y los chollos al 7 % (se revenden solas), y lo cobrado al
        Computer entra; el vendido ya no cuenta como venta pendiente ni
-       como inventario, ni puede salir otra vez.
+       como inventario, ni puede salir otra vez, ni es de la plantilla
+       para los cambios vivos (ni el que sale se cobra otra vez, ni se
+       cobra al que sale si el que se vendió es su relevo). Solo si el
+       estado de la vuelta es DE ESTA vuelta: con más de
+       `VUELTA_VIEJA_MINUTOS` (o sin hora), no se cuenta nada de él.
 
 QUE NO HACE
 
@@ -128,7 +147,7 @@ from __future__ import annotations
 import json
 import os
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from itertools import combinations
 from pathlib import Path
 
@@ -158,7 +177,20 @@ CANDIDATOS = 25                  # de cada lista, para la combinación
 
 # El horizonte del calendario: tres rondas (el de `el_calendario_de_puntos`,
 # HORIZONTE = 3). Se divide entre las rondas que cuenta: puntos por jornada.
+# Solo las PRINCIPALES: un aplazado se puntúa con el once de su jornada.
 RONDAS_DEL_CALENDARIO = 3
+
+# Lo más que el calendario (y el encogimiento) pueden darle la vuelta a la
+# vara de siempre: un cambio que con el `esperado` pierde más de esto por
+# jornada no se hace por el calendario. El laboratorio: en tres rondas el
+# calendario vale ~1,3 puntos por partido en los extremos; el ejemplo del
+# dueño es entre delanteros parecidos.
+MARGEN_DEL_CALENDARIO = 0.5
+
+# El estado de la vuelta (`v10_full_autonomous_status.json`) más viejo
+# que esto respecto a `ahora` es de OTRA vuelta (con un 429 la v10 no lo
+# escribe y se queda el de la anterior): no se cuenta.
+VUELTA_VIEJA_MINUTOS = 45
 
 # EL PARTE DEL RELEVO: los mismos que `la_orden_del_gestor.SANOS` y
 # `HORAS_ROJO` (12/10/2026). 'warned' (apercibido) juega.
@@ -247,8 +279,9 @@ def xp_por_jornada(ctx, ficha, prob):
                 contra el resto.
 
     None si no se puede: contexto no disponible, sin titularidad o sin
-    puntos y partidos (entonces manda el `esperado` de siempre). Pura,
-    nunca lanza.
+    puntos y partidos (entonces manda el `esperado` de siempre). Solo
+    cuentan las rondas PRINCIPALES (`las_rondas_que_cuentan`), venga
+    de donde venga el contexto. Pura, nunca lanza.
     """
     try:
         if not isinstance(ctx, dict) or not ctx.get("available"):
@@ -259,8 +292,9 @@ def xp_por_jornada(ctx, ficha, prob):
             return None
         from src.analysis.el_calendario_de_puntos import factor_medio, xp_jugador
 
-        rondas = [r for r in (ctx.get("rondas") or []) if isinstance(r, dict)]
-        cuantas = len(rondas[:RONDAS_DEL_CALENDARIO]) or RONDAS_DEL_CALENDARIO
+        rondas = las_rondas_que_cuentan(ctx)
+        cuantas = len(rondas) or RONDAS_DEL_CALENDARIO
+        ctx = {**ctx, "rondas": rondas}
         xp = xp_jugador(ctx, ficha, prob, n=RONDAS_DEL_CALENDARIO)
         if xp is None:
             return None
@@ -270,6 +304,54 @@ def xp_por_jornada(ctx, ficha, prob):
         return {"xp": float(xp) / cuantas, "factor": float(factor)}
     except Exception:                               # noqa: BLE001
         return None
+
+
+def las_rondas_que_cuentan(ctx) -> list:
+    """
+    Las rondas del contexto con las que se valora a un jugador: las
+    PRINCIPALES (la que no lo dice, también), las
+    `RONDAS_DEL_CALENDARIO` primeras. Un aplazado o un adelantado se
+    puntúa con el once de su jornada: no se planea (la regla del dueño,
+    12/10/2026). Pura, nunca lanza.
+    """
+    try:
+        rondas = ctx.get("rondas") if isinstance(ctx, dict) else None
+        if not isinstance(rondas, (list, tuple)):
+            return []
+        return [r for r in rondas
+                if isinstance(r, dict) and r.get("principal") is not False
+                ][:RONDAS_DEL_CALENDARIO]
+    except Exception:                               # noqa: BLE001
+        return []
+
+
+def no_vende_a_uno_mejor(cambio) -> bool:
+    """
+    LA GUARDIA DEL CALENDARIO: con el calendario, un cambio tiene que
+    valer también con la vara de siempre (`sin_calendario`, el
+    `esperado`):
+
+        el que cuenta como mejora (`puntos` >= `GANANCIA_MINIMA`) no
+        puede perder más de `MARGEN_DEL_CALENDARIO` por jornada con el
+        `esperado`: el calendario y el tramo desempatan, no venden a
+        uno claramente mejor;
+
+        el que solo financia (pierde a propósito para dar caja) no
+        puede perder con el `esperado` más que `PEOR_FINANCIACION`,
+        lo mismo que apagado.
+
+    Sin `sin_calendario` (sin calendario), vale. Pura, nunca lanza: con
+    basura, no.
+    """
+    try:
+        sin = cambio.get("sin_calendario")
+        if sin is None:
+            return True
+        if cambio["puntos"] >= GANANCIA_MINIMA:
+            return sin >= -MARGEN_DEL_CALENDARIO
+        return sin >= PEOR_FINANCIACION
+    except Exception:                               # noqa: BLE001
+        return False
 
 
 def el_plan_del_calendario(ctx) -> dict:
@@ -283,8 +365,7 @@ def el_plan_del_calendario(ctx) -> dict:
         if not usado:
             salida["motivo"] = f"sin calendario, el esperado de siempre: {salida['motivo']}"
         else:
-            salida["rondas"] = [r.get("label") for r in (ctx.get("rondas") or [])
-                                if isinstance(r, dict)][:RONDAS_DEL_CALENDARIO]
+            salida["rondas"] = [r.get("label") for r in las_rondas_que_cuentan(ctx)]
             salida["duros"] = sorted(d for d in (ctx.get("duros") or []) if d is not None)
         return salida
     except Exception as error:                      # noqa: BLE001
@@ -340,7 +421,7 @@ def decidir(
     pendientes=frozenset(), intocables=frozenset(), protegidos=frozenset(),
     ya_pujados=frozenset(), caja, horas_jornada, puede_escribir=True,
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
-    estados=None,
+    estados=None, vendidos=frozenset(),
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -371,16 +452,23 @@ def decidir(
                     PARTE DEL RELEVO. Para cobrar al que sale, el que
                     entra 'ok' o 'warned'; si no, se publica pero no se
                     cobra, salvo en rojo a menos de `HORAS_ROJO`.
+        vendidos    {id} que ESTA vuelta ya vendió (la foto es de antes):
+                    ya no son de la plantilla. El cambio vivo cuyo `sale`
+                    se vendió se suelta (ya vendido); el cuyo `entra` se
+                    vendió, también (sin relevo, el que sale se queda).
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
     plantilla = foto.get("plantilla") or set()
+    if vendidos:
+        plantilla = set(plantilla) - set(vendidos)
     ofertas = foto.get("ofertas_del_computer") or {}
     en_venta = foto.get("en_venta") or set()
     saldo = _int(foto.get("saldo"), 0) or 0
 
     # 5. SALIDA de los cambios vivos.
     saliendo = set()
+    # La plantilla ya sin lo que esta vuelta vendió (`vendidos`).
     for k, c in (libro or {}).items():
         entra, sale = _int(k), _int(c.get("sale"))
         if sale not in plantilla:
@@ -449,11 +537,17 @@ def decidir(
             return fila
         r = xp_por_jornada(ctx, ficha, prob)
         fila["plano"] = fila["esperado"]
+        fila["xp_por_jornada"] = None if r is None else r["xp"]
         fila["xp"] = None if r is None else round(r["xp"], 2)
         fila["factor"] = None if r is None else round(r["factor"], 3)
-        if r is not None:
-            fila["esperado"] = r["xp"]
         return fila
+
+    def _titular(prob):
+        # La titularidad mínima, como texto o número; con basura, no.
+        try:
+            return prob is not None and float(prob) >= TITULARIDAD_MINIMA
+        except (TypeError, ValueError):
+            return False
 
     def _prob_nuestra(pid, de_respaldo):
         prob = (probabilidades or {}).get(pid)
@@ -511,9 +605,17 @@ def decidir(
         lc = liga.get(pid) or {}
         if pid not in plantilla or str(lc.get("status") or "ok").lower() != "ok":
             continue
+        # Lo MISMO que al del Computer: `PARTIDOS_MINIMOS` partidos (los de
+        # `todaLaLiga`) y `TITULARIDAD_MINIMA`. Los chollos compran sin
+        # mirar los minutos: un 12 en un partido con un 40 % de
+        # titularidad no es un titular, y por él se vendía uno del once.
+        if (_int(lc.get("played"), 0) or 0) < PARTIDOS_MINIMOS:
+            continue
         # La titularidad de la plantilla entera (`roster.players`): el del
         # inventario casi nunca está en el once, y `todaLaLiga` no la trae.
         prob = _prob_nuestra(pid, prob_once.get(pid) or lc.get("starter_probability"))
+        if not _titular(prob):
+            continue
         e = esperado(lc.get("tasa"), prob)
         valor = _int(lc.get("price"), 0) or 0
         if e is None or not valor:
@@ -530,21 +632,36 @@ def decidir(
         for o in nuestros:
             if o["pos"] != e["pos"]:
                 continue
+            # Con el calendario, el xP por jornada de los DOS lados; si a
+            # uno le falta, el `esperado` de los dos (la misma vara).
+            con_xp = (ctx is not None and e["xp_por_jornada"] is not None
+                      and o["xp_por_jornada"] is not None)
+            puntos = (e["xp_por_jornada"] - o["xp_por_jornada"] if con_xp
+                      else e["esperado"] - o["esperado"])
             cambio = {
                 "entra": e["id"], "entra_nombre": e["nombre"], "sale": o["id"],
-                "sale_nombre": o["nombre"], "puntos": round(e["esperado"] - o["esperado"], 2),
+                "sale_nombre": o["nombre"], "puntos": round(puntos, 2),
                 "caja": int(o["valor"] * VENTA) - e["coste"], "puja": e["puja"],
                 "suelo": int(o["valor"] * SUELO), "ya_es_nuestro": e["ya_es_nuestro"],
             }
             if ctx is not None:
-                # Por qué: el xP de cada lado, su factor medio y lo que
-                # habría dicho el `esperado` de siempre.
+                # Por qué: el xP de cada lado, su factor medio, lo que
+                # habría dicho el `esperado` de siempre y con qué vara.
                 cambio.update({
                     "xp_entra": e["xp"], "xp_sale": o["xp"],
                     "factor_entra": e["factor"], "factor_sale": o["factor"],
                     "sin_calendario": round(e["plano"] - o["plano"], 2),
+                    "medida": "calendario" if con_xp else "esperado",
                 })
             cambios.append(cambio)
+
+    # LA GUARDIA DEL CALENDARIO: nunca vende a uno claramente mejor con la
+    # vara de siempre (`no_vende_a_uno_mejor`).
+    frenados_por_el_margen = 0
+    if ctx is not None:
+        validos = [c for c in cambios if no_vende_a_uno_mejor(c)]
+        frenados_por_el_margen = len(cambios) - len(validos)
+        cambios = validos
 
     minimo = -DEUDA_TOLERADA if horas_jornada >= HORAS_CON_DEUDA else 0
     disponible = (_int(foto.get("maximo_de_puja"), 0) or 0) - RESERVA
@@ -557,6 +674,8 @@ def decidir(
             "caja_despues": caja + sum(c["caja"] for c in elegidos)}
     if calendario_de_puntos is not None:
         plan["calendario"] = el_plan_del_calendario(calendario_de_puntos)
+        if ctx is not None:
+            plan["calendario"]["frenados_por_el_margen"] = frenados_por_el_margen
     if frenadas:
         plan["frenadas"] = frenadas
 
@@ -622,7 +741,36 @@ def la_caja(foto: dict, *, se_venden_solos=frozenset(), inventario_valor=0,
     return saldo - pujas + int(inventario_valor) + int(ventas_pendientes) + cobrado
 
 
-def lo_de_esta_vuelta(v10) -> dict:
+def es_de_esta_vuelta(v10, ahora) -> str | None:
+    """
+    None si el estado de la vuelta es de ESTA vuelta: su `timestamp` a
+    `VUELTA_VIEJA_MINUTOS` o menos antes de `ahora` (uno posterior,
+    también). Si no, el motivo para no contarlo.
+
+    Con un 429 la v10 sale con 0 sin escribir su estado, y la caché
+    devuelve el de la vuelta anterior: sus cobros (ya dentro del saldo
+    nuevo) se sumarían otra vez a la caja y al saldo, y un saldo inflado
+    apaga las reglas del rojo. Sin hora, no se sabe de qué vuelta es: no
+    se cuenta. Pura, nunca lanza.
+    """
+    try:
+        sello = (v10 or {}).get("timestamp") if isinstance(v10, dict) else None
+        if not sello:
+            return "el estado de la vuelta no trae hora"
+        cuando = datetime.fromisoformat(str(sello).replace("Z", "+00:00"))
+        if cuando.tzinfo is None:
+            cuando = cuando.replace(tzinfo=timezone.utc)
+        if ahora.tzinfo is None:
+            ahora = ahora.replace(tzinfo=timezone.utc)
+        if cuando < ahora - timedelta(minutes=VUELTA_VIEJA_MINUTOS):
+            minutos = int((ahora - cuando).total_seconds() // 60)
+            return f"el estado de la vuelta es de hace {minutos} min (de otra vuelta)"
+        return None
+    except Exception as error:                      # noqa: BLE001
+        return f"el estado de la vuelta no se puede fechar: {type(error).__name__}"
+
+
+def lo_de_esta_vuelta(v10, ahora=None) -> dict:
     """
     Lo que ESTA vuelta ya hizo antes que la mejora (la foto es de antes),
     de los bloques `orden_del_gestor`, `chollos` y `ronda` de
@@ -634,13 +782,22 @@ def lo_de_esta_vuelta(v10) -> dict:
         solas       {id} de las de la ronda y los chollos (se revenden
                     solas: cuentan al 7 % en la caja)
         cobros      {id: importe} de las ofertas del Computer aceptadas
+        descartado  None, o por qué no se ha contado nada
+
+    Con `ahora` (`correr` lo pasa siempre), solo si es de ESTA vuelta
+    (`es_de_esta_vuelta`); si no, todo vacío y `descartado` dice por qué.
 
     El 12/10 la orden pujó 3.777.000 por Iván Romero y 4.989.000 por
     Gerard Martín y la ronda 1.101.000 por el 1462 en la misma vuelta: la
     caja de la mejora solo veía `maximumBid` bajar. Pura, nunca lanza.
     """
-    salida = {"ya_pujados": set(), "gastado": 0, "pujas": {}, "solas": set(), "cobros": {}}
+    salida = {"ya_pujados": set(), "gastado": 0, "pujas": {}, "solas": set(), "cobros": {},
+              "descartado": None}
     try:
+        if ahora is not None:
+            salida["descartado"] = es_de_esta_vuelta(v10, ahora)
+            if salida["descartado"]:
+                return salida
         for bloque in ("orden_del_gestor", "chollos", "ronda"):
             for h in ((v10 or {}).get(bloque) or {}).get("hechas") or []:
                 if not isinstance(h, dict) or not h.get("exito"):
@@ -743,9 +900,11 @@ def los_estados(snapshot, liga) -> dict:
 def el_contexto(status, calendario, ahora) -> dict:
     """
     El `contexto` de `el_calendario_de_puntos`, UNA vez por vuelta, con
-    `RONDAS_DEL_CALENDARIO` rondas. `calendario`: un dict ya leído, o la
-    ruta (por defecto la de los chollos). Nunca lanza: si algo falla, un
-    contexto no disponible con el motivo, y la mejora usa el `esperado`.
+    las `RONDAS_DEL_CALENDARIO` próximas rondas PRINCIPALES (un aplazado
+    se puntúa con el once de su jornada: no se planea). `calendario`: un
+    dict ya leído, o la ruta (por defecto la de los chollos). Nunca
+    lanza: si algo falla, un contexto no disponible con el motivo, y la
+    mejora usa el `esperado`.
     """
     try:
         from src.analysis.el_calendario_de_puntos import contexto
@@ -754,7 +913,8 @@ def el_contexto(status, calendario, ahora) -> dict:
             from src.actions.los_chollos import CALENDARIO
 
             calendario = _leer(CALENDARIO if calendario is None else calendario, {})
-        return contexto(status, calendario, ahora, n=RONDAS_DEL_CALENDARIO)
+        return contexto(status, calendario, ahora, n=RONDAS_DEL_CALENDARIO,
+                        solo_principales=True)
     except Exception as error:                      # noqa: BLE001
         return {"available": False, "reason": f"{type(error).__name__}: {error}"}
 
@@ -792,7 +952,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
     """
 
     salida = {"activa": activa(), "motivo": None, "acciones": [], "hechas": [],
-              "adoptados": [], "plan": None}
+              "adoptados": [], "plan": None, "v10_descartado": None}
 
     try:
         if not salida["activa"]:
@@ -819,8 +979,10 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
 
         # Lo que esta misma vuelta ya hizo (la foto es de antes): lo
         # pujado baja `maximumBid` y no se vuelve a pujar; lo pujado y lo
-        # cobrado entran en la caja; lo vendido ya no sale otra vez.
-        esta_vuelta = lo_de_esta_vuelta(v10)
+        # cobrado entran en la caja; lo vendido ya no sale otra vez. Solo
+        # si el estado es de ESTA vuelta (con un 429 queda el de otra).
+        esta_vuelta = lo_de_esta_vuelta(v10, ahora)
+        salida["v10_descartado"] = esta_vuelta["descartado"]
         ya_pujados = esta_vuelta["ya_pujados"]
         vendidos = set(esta_vuelta["cobros"])
         foto["maximo_de_puja"] = ((_int(foto.get("maximo_de_puja"), 0) or 0)
@@ -877,6 +1039,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             calendario_de_puntos=ctx,
             probabilidades=las_probabilidades(status),
             estados=los_estados(snapshot, liga),
+            vendidos=vendidos,
         )
         salida["acciones"], salida["plan"] = d["acciones"], d["plan"]
 
@@ -941,7 +1104,12 @@ def main() -> int:
               f"caja {c['caja']:+,}{' (ya es nuestro)' if c['ya_es_nuestro'] else ''}")
         if "xp_entra" in c:
             print(f"      xP {c['xp_entra']} (x{c['factor_entra']}) por {c['xp_sale']} "
-                  f"(x{c['factor_sale']}); sin calendario {c['sin_calendario']:+}")
+                  f"(x{c['factor_sale']}); sin calendario {c['sin_calendario']:+}; "
+                  f"vara: {c.get('medida')}")
+    if (calendario or {}).get("frenados_por_el_margen"):
+        print(f"  frenados por el margen del calendario: {calendario['frenados_por_el_margen']}")
+    if r.get("v10_descartado"):
+        print(f"  lo de esta vuelta, sin contar: {r['v10_descartado']}")
     for f in plan.get("frenadas") or []:
         print(f"  frenada {f.get('guardia')} {f.get('player_id')}: {f.get('motivo')}")
     for a in r.get("acciones") or []:

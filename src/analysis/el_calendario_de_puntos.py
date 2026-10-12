@@ -706,12 +706,20 @@ def las_rondas(calendario) -> list:
         return []
 
 
-def proximas_rondas(calendario, ahora=None, n=HORIZONTE) -> list:
+def proximas_rondas(calendario, ahora=None, n=HORIZONTE, *, solo_principales=False) -> list:
     """
     Las `n` siguientes rondas que NO han empezado (primer partido
     despues de `ahora`), por hora. La que esta en curso no cuenta:
     su once ya esta cerrado. Sin `ahora`, el reloj (UTC); en los
     tests se pasa siempre.
+
+    `solo_principales` (12/10/2026, la regla del dueño): solo las
+    VENTANAS PRINCIPALES. Un adelantado o un aplazado (el
+    Levante-Athletic de la J6, el 21/10) Biwenger lo puntua con el
+    once que habia al empezar SU jornada: no es una ronda para la
+    que se pueda alinear a nadie, asi que no cuenta para valorar
+    jugadores ni para el once que se busca. Las `n` son entonces
+    `n` principales. Sin pasarlo, todas, como antes.
     """
     try:
         cuando = _cuando(ahora) if ahora is not None else datetime.now(timezone.utc)
@@ -721,6 +729,7 @@ def proximas_rondas(calendario, ahora=None, n=HORIZONTE) -> list:
         futuras = [
             r for r in las_rondas(calendario)
             if _inicio(r) is not None and _inicio(r) > cuando
+            and (not solo_principales or r.get("principal"))
         ]
         return futuras[:cuantas]
     except Exception:                               # noqa: BLE001
@@ -908,10 +917,12 @@ def tasa_encogida(points, played, tier, pos, k=K_ENCOGIMIENTO):
 # 7. EL CONTEXTO: una vez por vuelta
 # ============================================================
 
-def contexto(status, calendario, ahora=None, n=HORIZONTE) -> dict:
+def contexto(status, calendario, ahora=None, n=HORIZONTE, *, solo_principales=False) -> dict:
     """
     Todo lo que no depende del jugador, montado UNA vez por vuelta:
-    el mapa de ids, los duros, los tramos y las `n` proximas rondas.
+    el mapa de ids, los duros, los tramos y las `n` proximas rondas
+    (con `solo_principales`, las `n` proximas PRINCIPALES: ver
+    `proximas_rondas`).
 
     `status` es el de dashboard/data/status.json (o cualquier dict
     con `league_center.laliga.standings` y `todaLaLiga.players`).
@@ -939,7 +950,7 @@ def contexto(status, calendario, ahora=None, n=HORIZONTE) -> dict:
         valores = valor_de_plantilla(jugadores)
         duros = los_duros(clasificacion, valores)
         ids = los_ids(clasificacion, calendario)
-        rondas = proximas_rondas(calendario, ahora, n)
+        rondas = proximas_rondas(calendario, ahora, n, solo_principales=solo_principales)
         tramos = {}
         for fila in clasificacion:
             equipo = _int(fila.get("biwenger_team_id"))
