@@ -34,45 +34,89 @@ POR QUE EXISTE
 
 LA REGLA
 
-    1. CUANDO. La proxima ronda de Biwenger (`la_proxima_jornada`,
-       aplazados y adelantados como rondas aparte) empieza dentro de
-       `HORAS_CIERRE` (64 h), no hay ninguna jugandose y se puede
-       escribir (la zona de silencio de 04:45-07:00 solo deja a las
-       vueltas de 04:45, 04:50 y 07:15).
-    2. EL ONCE de esa ronda, con TODA la plantilla (lo de la ronda y
-       los chollos tambien es plantilla): xP de la ronda con el rival
-       delante (`el_calendario_de_puntos.xp_jugador`, tasa encogida
-       hacia su tramo y factores sede x rival). Formaciones, las de
-       `lineup_engine.FORMATIONS`. Yamal (los intocables de la orden)
-       entra siempre que este sano. Fuera los que no esten 'ok' o
-       'warned' y los que ya se van (su relevo de la orden o de la
+    1. CUANDO, y EL PLAZO DE LA CAJA. La proxima ronda de Biwenger de
+       CUALQUIER clase (`la_proxima_jornada`: un adelantado o un
+       aplazado que va aparte es su propia ronda, con su propio control
+       del saldo) empieza dentro de `HORAS_CIERRE` (64 h), no hay
+       ninguna jugandose y se puede escribir (la zona de silencio de
+       04:45-07:00 solo deja a las vueltas de 04:45, 04:50 y 07:15).
+       Esa ronda es el PLAZO: si la proxima es un aplazado (la J6
+       Levante-Athletic del 21/10), la caja tiene que estar en >= 0 a
+       SU hora, aunque el once se elija para la siguiente principal.
+    2. EL ONCE, el de la proxima ronda PRINCIPAL (`principal` en
+       `el_calendario_de_puntos.las_rondas`). Un aplazado ('Jornada 6
+       (aplazada)') lo puntua Biwenger con el once que habia cuando
+       empezo su jornada (la regla del dueño): no se elige once para el
+       ni pesa en el xP. El xP de la ronda del once y el de quedarse (3
+       rondas) salen SOLO de rondas principales. Con TODA la plantilla
+       (lo de la ronda y los chollos tambien es plantilla): xP con el
+       rival delante (`el_calendario_de_puntos.xp_jugador`, tasa
+       encogida hacia su tramo y factores sede x rival). Formaciones,
+       las de `lineup_engine.FORMATIONS`. Yamal (los intocables de la
+       orden) entra siempre que este sano. Fuera los que no esten 'ok'
+       o 'warned' y los que ya se van (su relevo de la orden o de la
        mejora ya esta dentro).
-    3. LA CAJA al empezar la ronda = saldo - TODAS nuestras pujas vivas
-       a su importe entero (cualquiera se puede ganar en el reset) - lo
-       pujado con exito en esta vuelta + lo cobrado en esta vuelta. Nada
-       mas: ni premio de la jornada ni ventas pendientes. Si da >= 0,
-       solo se publica (5) y se para.
+       Lo de la ronda o los chollos que entra en este once se ADOPTA:
+       sale de sus libros (los mismos ficheros y el mismo formato que
+       usa la adopcion de la mejora del once) y queda en el plan
+       (`adoptados`). Si no, la ronda lo malvenderia a menos de 20 h y
+       los chollos en cuanto cubriera su coste, y el once se quedaria
+       corto despues de que el cierre vendiera al banquillo contando
+       con el.
+    3. LA CAJA al empezar la ronda del plazo = saldo - TODAS nuestras
+       pujas vivas a su importe entero (cualquiera se puede ganar en el
+       reset) - lo pujado con exito en esta vuelta + lo cobrado en esta
+       vuelta. Nada mas: ni premio de la jornada ni ventas pendientes.
+       Si da >= 0, solo se publica (5) y se para.
     4. EN ROJO. Primero la palanca barata: a menos de `HORAS_SIN_TIEMPO`
        (40 h) se retiran las pujas vivas de la ronda y de los chollos
        (se resolverian en el ultimo reset, sin tiempo de revender), la
-       mas grande primero, hasta volver a >= 0. Si sigue en rojo, se
-       vende: candidatos = plantilla - el once - protegidos - los que
-       ya vende la orden (`vender_si_ficha`) o la mejora - lo vendido
-       en esta vuelta. Se elige lo que cubre el deficit (al 95 % de su
-       valor) perdiendo menos puntos de quedarse (xP de las 3 proximas
-       rondas): voraz por puntos por euro, luego se quita a quien
-       sobre (y si uno solo cubre perdiendo menos, ese). Si ni todos
-       cubren, se venden todos y FALTA con el importe (los cambios del
-       once son cosa de la mejora: aqui no se vende a nadie del once).
+       mas grande primero, hasta volver a >= 0. Nunca la de un
+       protegido, la de un `fichar` de la orden ni la del libro de la
+       mejora, aunque su clave siga en el libro de los chollos (la
+       orden la sustituye en el mismo jugador y a menos de 40 h ya no
+       la vuelve a poner). Si sigue en rojo, se vende: candidatos =
+       plantilla - el once - Yamal (por su nombre, siempre, este como
+       este la orden) - protegidos - los TITULARES DEL ONCE ESCRITO
+       (`status.lineup.players`) salvo que esten 'injured' o
+       'sanctioned' (fuera seguro: un 'doubt' del once no se vende
+       nunca, aunque el once del cierre lo siente) - los que ya vende
+       la orden (`vender_si_ficha`) o la mejora - lo vendido en esta
+       vuelta. Se elige lo que cubre el deficit (al 95 % de su valor)
+       perdiendo menos puntos de quedarse (xP de las 3 proximas rondas
+       principales): con hasta `EXACTO_HASTA` (15) candidatos, el
+       minimo EXACTO (todos los subconjuntos; a igual perdida, el que
+       menos se pasa); con mas, voraz por puntos por euro, luego se
+       quita a quien sobre (y si uno solo cubre perdiendo menos, ese).
+       Si ni todos cubren, se venden todos y FALTA con el importe (los
+       cambios del once son cosa de la mejora: aqui no se vende a nadie
+       del once).
     5. LAS ESCRITURAS. PONER_A_LA_VENTA a su valor a todo candidato que
-       no este publicado (no saca a nadie del once y hace nacer la
-       oferta del proximo reset). ACEPTAR_OFERTA_DEL_COMPUTER para los
-       elegidos si la oferta llega al 90 % de su valor, o la que haya a
-       menos de `HORAS_SOLVENCIA` (20 h). Nunca a uno del once, ni a un
-       protegido ni a un intocable. Una escritura por jugador y vuelta.
-    6. EL PLAN se publica en `data/trading/el_cierre.json` (la ronda, el
-       once, a quien se vende, el deficit, lo que falta, las pujas
-       retiradas y la hora), para que otros lo lean.
+       no este publicado, ni en la foto ni en esta vuelta (tampoco lo
+       que acaba de publicar el escaparate: su precio es suyo). No saca
+       a nadie del once y hace nacer la oferta del proximo reset.
+       ACEPTAR_OFERTA_DEL_COMPUTER para los elegidos si la oferta llega
+       al 90 % de su valor, o la que haya a menos de `HORAS_SOLVENCIA`
+       (20 h). Nunca a uno del once, ni a un titular escrito sano o en
+       duda, ni a un protegido, ni a Yamal. Una escritura por jugador y
+       vuelta.
+    6. EL PLAN se publica en `data/trading/el_cierre.json` (la ronda del
+       once, el plazo, el once, lo adoptado, a quien se vende, el
+       deficit, lo que falta, las pujas retiradas y la hora), para que
+       otros lo lean. Encendido, se publica SIEMPRE: fuera de la
+       ventana y tambien si algo falla (activo False y el error), para
+       que nadie lea uno viejo.
+
+LOS `conservar`
+
+    El modelo del dueño: «se vende a los que falten para estar en
+    positivo» (12/10), y publicar no es vender: «podemos estar en
+    negativo toda la semana mientras publiquemos a nuestros jugadores
+    para tener liquido». Un `conservar` se publica como cualquiera y
+    se le puede aceptar una oferta, pero SOLO si no es titular del once
+    escrito (la regla de los titulares de 4; la orden, que vende como
+    ultimo recurso, va por su cuenta). Lo que no se publica nunca son
+    los protegidos (`proteger` y `fichar`) y Yamal.
 
 QUE NO HACE
 
@@ -82,19 +126,26 @@ QUE NO HACE
 
     No cuenta como entrada el premio de la jornada ni lo que daran las
     ventas de la orden o de la mejora: al empezar la ronda solo vale
-    lo cobrado. No ve las pujas de la subasta del reset (no estan en el
-    estado de v10) ni lo que cobro el orquestador (su resultado no dice
-    de quien era la oferta): la foto de la vuelta siguiente lo trae.
+    lo cobrado.
 
-    No respeta `conservar` por ser `conservar`: la regla del
-    coordinador saca del reparto a los protegidos (`proteger` y
-    `fichar`), no a los de `conservar`. Un `conservar` que no entra en
-    el once de la ronda es candidato como cualquiera.
+    Lo escrito antes en la vuelta lo ve casi todo: las escrituras del
+    orquestador y del competitivo refrescan la foto
+    (`autopilot.refresh_snapshot`), las de compra y salida de v10 se
+    verifican con otra foto antes de la orden, el carril, los chollos y
+    la ronda, y las `hechas` de la orden, la ronda y los chollos, las
+    pujas del carril, las retiradas y lo que publico el escaparate
+    estan en el estado de v10. Las pujas de la mejora de esta vuelta
+    salen de su libro. Lo que puede faltar lo trae la foto de la vuelta
+    siguiente: una puja de la subasta del reset sin foto de
+    verificacion detras, y lo que la mejora cobro en esta vuelta (no
+    esta en el estado de v10; su jugador es de la mejora y el cierre no
+    lo toca, y la caja no cuenta ese dinero: peca de prudente).
 
-    Corre DESPUES del panel (necesita la titularidad), como paso propio
-    del workflow y detras de la mejora del once (sus pujas de la vuelta
-    salen de su libro): `python -m src.actions.el_cierre_de_la_jornada`.
-    Nace APAGADO: `BORDALAS_EL_CIERRE_DE_LA_JORNADA`. Nunca lanza.
+    Corre DESPUES del panel (necesita la titularidad y el once
+    escrito), como paso propio del workflow y detras de la mejora del
+    once (sus pujas de la vuelta salen de su libro):
+    `python -m src.actions.el_cierre_de_la_jornada`. Nace APAGADO:
+    `BORDALAS_EL_CIERRE_DE_LA_JORNADA`. Nunca lanza.
 """
 
 from __future__ import annotations
@@ -129,9 +180,21 @@ HORAS_SOLVENCIA = 20
 
 VENTA = 0.95                    # lo que se espera de la oferta del Computer
 SUELO = 0.90                    # lo minimo que se acepta antes de las 20 h
-HORIZONTE_DE_QUEDARSE = 3       # rondas que pesan para quedarse a alguien
+HORIZONTE_DE_QUEDARSE = 3       # rondas PRINCIPALES que pesan para quedarse a alguien
 SANOS = frozenset({"ok", "warned"})
 INTOCABLES = frozenset({"yamal", "lamine yamal"})   # = la_orden_del_gestor.INTOCABLES
+
+# Un titular del once escrito solo se puede vender si esta fuera seguro.
+# 'doubt' no lo esta: puede jugar, y venderlo deja el once en 10.
+FUERA_SEGURO = frozenset({"injured", "sanctioned"})
+
+# Hasta 15 candidatos se busca el reparto exacto (2^15 = 32.768
+# combinaciones, nada); con mas, el voraz.
+EXACTO_HASTA = 15
+
+# Las rondas que se piden al calendario para sacar de ellas las 3
+# principales: entre medias puede haber adelantados y aplazados.
+RONDAS_A_MIRAR = 12
 
 # Copia de `lineup_engine.FORMATIONS` por si no se puede importar.
 _FORMACIONES = {
@@ -253,15 +316,17 @@ def la_ventana(ahora, calendario=None) -> dict:
 
 
 def por_que_no(horas, en_curso, puede_escribir):
-    """None si el cierre toca en esta vuelta. Si no, el motivo."""
+    """None si el cierre toca en esta vuelta. Si no, el motivo. Sin
+    horas es SIN_CALENDARIO aunque `en_curso` diga True (`la_ventana`
+    y `jornada_en_curso` lo dicen por precaucion cuando no hay rondas)."""
     try:
         if not puede_escribir:
             return "ZONA_DE_SILENCIO"
-        if en_curso:
-            return "JORNADA_EN_CURSO"
         horas = _num(horas)
         if horas is None:
             return "SIN_CALENDARIO"
+        if en_curso:
+            return "JORNADA_EN_CURSO"
         if horas > HORAS_CIERRE or horas <= 0:
             return "FUERA_DE_LA_VENTANA"
         return None
@@ -339,16 +404,48 @@ def la_caja(saldo, pujas=None, vendidos=None) -> int:
 # 4. A QUIEN SE VENDE
 # ============================================================
 
+def _el_minimo_exacto(vendibles, deficit) -> list:
+    """
+    De `vendibles` (ya limpios y ordenados), el subconjunto que cubre
+    `deficit` perdiendo menos puntos de quedarse; a igual perdida, el
+    que menos se pasa del deficit; luego el de menos jugadores. Mira
+    las 2^n combinaciones (n <= `EXACTO_HASTA`), cada una sumando a la
+    de antes un solo jugador. [] si ninguna cubre.
+    """
+    n = len(vendibles)
+    cobros = [c["cobro"] for c in vendibles]
+    perdidas = [c["quedarse"] for c in vendibles]
+    sumas, pierde = [0] * (1 << n), [0.0] * (1 << n)
+    mejor, clave_mejor = 0, None
+    for mascara in range(1, 1 << n):
+        bajo = mascara & -mascara
+        i = bajo.bit_length() - 1
+        antes = mascara ^ bajo
+        sumas[mascara] = sumas[antes] + cobros[i]
+        pierde[mascara] = pierde[antes] + perdidas[i]
+        if sumas[mascara] < deficit:
+            continue
+        clave = (round(pierde[mascara], 9), sumas[mascara] - deficit,
+                 bin(mascara).count("1"), mascara)
+        if clave_mejor is None or clave < clave_mejor:
+            mejor, clave_mejor = mascara, clave
+    return [c for i, c in enumerate(vendibles) if mejor >> i & 1]
+
+
 def a_quien_vender(candidatos, deficit) -> tuple:
     """
     `(elegidos, falta)`. De `candidatos` ([{id, cobro, quedarse}]: lo que
     se espera cobrar y los puntos que se pierden), los que cubren
-    `deficit` perdiendo menos puntos: primero el que menos puntos pierde
-    por euro (a igual, el que menos pierde y el que mas cobra), hasta
-    cubrir; luego se quita, del que mas pierde al que menos, a quien no
-    haga falta; y si un solo jugador cubre perdiendo menos que todo eso,
-    solo el. Si ni todos cubren, todos y `falta` = lo que queda.
-    Pura; con basura, ([], deficit).
+    `deficit` perdiendo menos puntos.
+
+    Con hasta `EXACTO_HASTA` candidatos, el minimo EXACTO: de todas las
+    combinaciones que cubren, la que menos puntos pierde y, a igual, la
+    que menos se pasa del deficit. Con mas, el voraz: primero el que
+    menos puntos pierde por euro (a igual, el que menos pierde y el que
+    mas cobra), hasta cubrir; luego se quita, del que mas pierde al que
+    menos, a quien no haga falta; y si un solo jugador cubre perdiendo
+    menos que todo eso, solo el. Si ni todos cubren, todos y `falta` =
+    lo que queda. Pura; con basura, ([], deficit).
     """
 
     try:
@@ -365,6 +462,12 @@ def a_quien_vender(candidatos, deficit) -> tuple:
                               "quedarse": quedarse})
         vendibles.sort(key=lambda c: (c["quedarse"] / c["cobro"], c["quedarse"],
                                       -c["cobro"], c["id"]))
+
+        total = sum(c["cobro"] for c in vendibles)
+        if total < deficit:
+            return vendibles, deficit - total
+        if len(vendibles) <= EXACTO_HASTA:
+            return _el_minimo_exacto(vendibles, deficit), 0
 
         elegidos, suma = [], 0
         for c in vendibles:
@@ -410,11 +513,19 @@ def _xp(ctx, ficha, n) -> float:
         return 0.0
 
 
+def _la_ronda(r) -> dict | None:
+    if not isinstance(r, dict):
+        return None
+    return {"label": r.get("label"), "start": r.get("start"),
+            "principal": bool(r.get("principal"))}
+
+
 def decidir(
     *, plantilla, ctx, horas, en_curso=False, puede_escribir=True, saldo,
     pujas=None, vendidos=None, ofertas=None, en_venta=frozenset(),
     especulativas=frozenset(), intocables=INTOCABLES, protegidos=frozenset(),
-    no_vender=frozenset(), se_van=frozenset(),
+    no_vender=frozenset(), se_van=frozenset(), once_escrito=frozenset(),
+    no_retirar=frozenset(), inventario=frozenset(),
 ) -> dict:
     """
     Que hace el cierre en esta vuelta. Pura: ni red, ni disco, ni reloj.
@@ -423,28 +534,39 @@ def decidir(
                          price, status, starter_probability}] TODA la
                        plantilla (sin lo vendido en esta vuelta)
         ctx            `el_calendario_de_puntos.contexto` (rondas, duros,
-                       tramos, ids)
-        horas          horas al inicio de la proxima ronda
+                       tramos, ids). Sus rondas, de CUALQUIER clase: la
+                       primera es el plazo de la caja; el once y el xP
+                       salen solo de las principales
+        horas          horas al inicio de la proxima ronda (cualquiera)
         saldo          el saldo de la foto de la vuelta
         pujas          {player_id: {"offer_id", "amount"}} nuestras pujas
                        vivas, ya con lo pujado y retirado en esta vuelta
                        (lo de esta vuelta, con offer_id None)
         vendidos       {player_id: importe} cobrado en esta vuelta
         ofertas        {player_id: {"offer_id", "amount"}} del Computer
-        en_venta       publicados (la foto y esta vuelta)
+        en_venta       publicados (la foto, esta vuelta y el escaparate)
         especulativas  los de los libros de la ronda y los chollos
         protegidos     `proteger` y `fichar` de la orden: ni se publican
+                       ni se les retira la puja
         no_vender      los que vende la orden (`vender_si_ficha`) o la
                        mejora: suyos, no se tocan
         se_van         los de `no_vender` cuyo relevo ya esta dentro:
                        tampoco juegan
+        once_escrito   los titulares del once que hay escrito
+                       (`status.lineup.players`): no se venden ni se
+                       publican salvo que esten fuera seguro
+        no_retirar     pujas que no son del cierre (los `fichar` de la
+                       orden, las del libro de la mejora)
+        inventario     lo de la ronda y los chollos que es nuestro: si
+                       entra en el once, se adopta (`adoptar`)
     """
 
     salida = {
-        "activo": False, "motivo": None, "horas": None, "ronda": None,
+        "activo": False, "motivo": None, "horas": None, "ronda": None, "plazo": None,
         "once": {"formacion": None, "ids": [], "puntos": 0.0, "lleno": 0, "jugadores": []},
         "caja": None, "caja_tras_cancelar": None, "deficit": 0, "cancelar": [],
-        "vender": [], "falta": 0, "candidatos": [], "acciones": [],
+        "vender": [], "falta": 0, "candidatos": [], "acciones": [], "adoptar": [],
+        "titulares_que_no_se_venden": [],
     }
     try:
         salida["horas"] = _num(horas)
@@ -458,14 +580,24 @@ def decidir(
             salida["motivo"] = "SIN_SALDO"
             return salida
 
+        # Las rondas: la primera, de la clase que sea, es el plazo de la
+        # caja. El once es el de la primera PRINCIPAL y el xP (de la ronda
+        # y el de quedarse) sale solo de las principales: un aplazado se
+        # puntua con el once de cuando empezo su jornada.
         ctx = _dict(ctx)
         rondas = [r for r in (ctx.get("rondas") or []) if isinstance(r, dict)]
-        if rondas:
-            salida["ronda"] = {"label": rondas[0].get("label"), "start": rondas[0].get("start")}
+        principales = [r for r in rondas if r.get("principal")]
+        ctx = {**ctx, "rondas": principales}
+        salida["plazo"] = _la_ronda(rondas[0]) if rondas else None
+        salida["ronda"] = _la_ronda(principales[0]) if principales else None
 
+        # Yamal, por su nombre, nunca se publica ni se vende, este como
+        # este la orden (apagada, caducada o con `yamal_por_lesion`).
         intocables = {str(n).strip().lower() for n in (intocables or ())}
+        nunca = intocables | set(INTOCABLES)
         protegidos, no_vender, se_van = _ids(protegidos), _ids(no_vender), _ids(se_van)
-        especulativas = _ids(especulativas)
+        once_escrito, inventario = _ids(once_escrito), _ids(inventario)
+        especulativas = _ids(especulativas) - protegidos - _ids(no_retirar)
         vendidos = {_int(k): v for k, v in _dict(vendidos).items() if _int(k) is not None}
         ofertas = {_int(k): v for k, v in _dict(ofertas).items()
                    if _int(k) is not None and isinstance(v, dict)}
@@ -484,7 +616,7 @@ def decidir(
                            "quedarse": _xp(ctx, f, HORIZONTE_DE_QUEDARSE),
                            "valor": _int(f.get("price"), 0) or 0})
 
-        # 2. EL ONCE de la ronda.
+        # 2. EL ONCE de la ronda principal.
         pueden = [f for f in fichas
                   if str(f.get("status") or "").strip().lower() in SANOS
                   and f["id"] not in se_van]
@@ -496,6 +628,7 @@ def decidir(
              "position": por_id[pid].get("position"), "xp": round(por_id[pid]["xp"], 3)}
             for pid in once["ids"] if pid in por_id
         ]}
+        salida["adoptar"] = sorted(xi & inventario)
 
         # 3. LA CAJA.
         caja = la_caja(saldo, pujas, vendidos)
@@ -527,17 +660,22 @@ def decidir(
         deficit = max(0, -caja_tras)
         salida["deficit"] = deficit
 
-        # Los candidatos: fuera del once, ni intocables, ni protegidos,
-        # ni lo que vende otro.
-        candidatos = []
+        # Los candidatos: fuera del once, ni Yamal, ni protegidos, ni lo
+        # que vende otro, ni un titular del once escrito que pueda jugar.
+        candidatos, titulares = [], []
         for f in fichas:
             pid = f["id"]
-            if (pid in xi or _nombre(f) in intocables or pid in protegidos
+            if (pid in xi or _nombre(f) in nunca or pid in protegidos
                     or pid in no_vender):
+                continue
+            if (pid in once_escrito
+                    and str(f.get("status") or "").strip().lower() not in FUERA_SEGURO):
+                titulares.append(pid)
                 continue
             candidatos.append({"id": pid, "name": f.get("name"), "valor": f["valor"],
                                "cobro": int(f["valor"] * VENTA),
                                "quedarse": round(f["quedarse"], 3)})
+        salida["titulares_que_no_se_venden"] = sorted(titulares)
 
         elegidos, falta = a_quien_vender(candidatos, deficit)
         vender = {c["id"] for c in elegidos}
@@ -586,6 +724,7 @@ def decidir(
     except Exception as error:                      # noqa: BLE001
         salida["activo"] = False
         salida["acciones"] = []
+        salida["adoptar"] = []
         salida["motivo"] = f"ERROR: {type(error).__name__}: {error}"
         return salida
 
@@ -599,8 +738,10 @@ def lo_de_esta_vuelta(v10) -> dict:
     Lo que esta vuelta ya escribio antes del cierre, del estado de v10
     (`data/trading/v10_full_autonomous_status.json`): las `hechas` con
     exito de la orden, la ronda y los chollos, las `retiradas` de la
-    revision de pujas y las pujas del carril. La foto es de ANTES de
-    todo eso.
+    revision de pujas, las pujas del carril y lo que publico el
+    escaparate (`escaparate.listed`: su precio es suyo y es una
+    escritura de esta vuelta; el cierre no lo vuelve a publicar). La
+    foto es de ANTES de todo eso.
 
         pujas       {player_id: importe} pujado
         canceladas  {player_id} retirado
@@ -642,6 +783,13 @@ def lo_de_esta_vuelta(v10) -> dict:
                     pid = _int(b.get("player_id"))
                     if pid is not None and b.get("sent") and b.get("success") is not False:
                         vuelta["pujas"][pid] = _int(b.get("amount"), 0) or 0
+            if clave == "escaparate":
+                # En ensayo tampoco: lo que el escaparate quiere publicar
+                # lleva su precio, y el cierre no se lo pisa.
+                for fila in _lista(bloque.get("listed")):
+                    pid = _int(fila.get("player_id"))
+                    if pid is not None:
+                        vuelta["listados"].add(pid)
     except Exception:                               # noqa: BLE001
         pass
     return vuelta
@@ -798,52 +946,108 @@ def publicar(plan, ruta=None) -> bool:
         return False
 
 
-def _el_plan(d, ventana, ahora, hechas=()) -> dict:
-    d, ventana = _dict(d), _dict(ventana)
+def adoptar(ids, libros, rutas, escribir) -> list:
+    """
+    Saca de los libros de la ronda y los chollos a los de `ids` (lo de
+    su inventario que el cierre mete en su once), como la adopcion de
+    la mejora del once: los mismos ficheros y el mismo formato
+    (`json.dumps(libro, indent=2)`). Asi la ronda no lo malvende a
+    menos de 20 h ni los chollos lo venden al cubrir su coste.
+
+        libros    {"ronda", "chollos"} ya leidos (se tocan en sitio)
+        rutas     {"ronda", "chollos"} donde se escriben
+        escribir  {"ronda": bool, "chollos": bool}: solo se escribe el
+                  libro que se leyo de su fichero (o cuya ruta se dio)
+
+    Devuelve [{player_id, libro, importe, escrito}]. Nunca lanza.
+    """
+    adoptados = []
     try:
-        generado = ahora.isoformat()
+        ids, libros, rutas, escribir = _ids(ids), _dict(libros), _dict(rutas), _dict(escribir)
+        for nombre in ("ronda", "chollos"):
+            libro = libros.get(nombre)
+            if not isinstance(libro, dict):
+                continue
+            quitar = [k for k in list(libro) if _int(k) in ids]
+            if not quitar:
+                continue
+            fila = [{"player_id": _int(k), "libro": nombre, "importe": libro.pop(k)}
+                    for k in quitar]
+            escrito = False
+            if escribir.get(nombre) and rutas.get(nombre):
+                try:
+                    Path(rutas[nombre]).write_text(json.dumps(libro, indent=2) + "\n")
+                    escrito = True
+                except Exception:                   # noqa: BLE001
+                    escrito = False
+            adoptados.extend({**a, "escrito": escrito} for a in fila)
     except Exception:                               # noqa: BLE001
-        generado = None
-    return {
-        "version": 1,
-        "activo": bool(d.get("activo")),
-        "motivo": d.get("motivo"),
-        "ronda": d.get("ronda"),
-        "horas": d.get("horas") if d.get("horas") is not None else ventana.get("horas"),
-        "formacion": _dict(d.get("once")).get("formacion"),
-        "xi": list(_dict(d.get("once")).get("ids") or []),
-        "vender": list(d.get("vender") or []),
-        "cancelar": list(d.get("cancelar") or []),
-        "caja": d.get("caja"),
-        "caja_tras_cancelar": d.get("caja_tras_cancelar"),
-        "deficit": d.get("deficit") or 0,
-        "falta": d.get("falta") or 0,
-        "hechas": [{"accion": h.get("accion"), "player_id": h.get("player_id"),
-                    "exito": h.get("exito")} for h in _lista(hechas)],
-        "generated_at": generado,
-    }
+        pass
+    return adoptados
+
+
+def _el_plan(d, ventana, ahora, hechas=(), adoptados=()) -> dict:
+    try:
+        d, ventana = _dict(d), _dict(ventana)
+        try:
+            generado = ahora.isoformat()
+        except Exception:                           # noqa: BLE001
+            generado = None
+        return {
+            "version": 2,
+            "activo": bool(d.get("activo")),
+            "motivo": d.get("motivo"),
+            "ronda": d.get("ronda"),
+            "plazo": d.get("plazo"),
+            "horas": d.get("horas") if d.get("horas") is not None else ventana.get("horas"),
+            "formacion": _dict(d.get("once")).get("formacion"),
+            "xi": list(_dict(d.get("once")).get("ids") or []),
+            "adoptados": [{"player_id": a.get("player_id"), "libro": a.get("libro"),
+                           "escrito": a.get("escrito")} for a in _lista(adoptados)],
+            "titulares_que_no_se_venden": list(d.get("titulares_que_no_se_venden") or []),
+            "vender": list(d.get("vender") or []),
+            "cancelar": list(d.get("cancelar") or []),
+            "caja": d.get("caja"),
+            "caja_tras_cancelar": d.get("caja_tras_cancelar"),
+            "deficit": d.get("deficit") or 0,
+            "falta": d.get("falta") or 0,
+            "hechas": [{"accion": h.get("accion"), "player_id": h.get("player_id"),
+                        "exito": h.get("exito")} for h in _lista(hechas)],
+            "generated_at": generado,
+        }
+    except Exception as error:                      # noqa: BLE001
+        return {"version": 2, "activo": False,
+                "motivo": f"ERROR: {type(error).__name__}: {error}", "generated_at": None}
 
 
 def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
            orden_ruta=None, escritor_factory=None, ahora: datetime | None = None,
-           plan_ruta=None) -> dict:
+           plan_ruta=None, libros_rutas=None) -> dict:
     """
     El cierre, en esta vuelta. Nunca lanza.
 
     Lo que no se pasa se lee de produccion: `status` del panel, la
     ultima `data/snapshot_*.json`, el estado de v10, los libros de la
     ronda, los chollos y la mejora (`libros` = {"ronda", "chollos",
-    "mejora"}), el calendario de los chollos y la orden del gestor.
-    Apagado, no lee ni escribe nada.
+    "mejora"}, leidos de `libros_rutas` o de sus ficheros de siempre),
+    el calendario de los chollos y la orden del gestor. La adopcion
+    escribe el libro donde se leyo: si `libros` llega ya leido, solo en
+    la ruta que diga `libros_rutas`. Apagado, no lee ni escribe nada.
+    Encendido, publica el plan siempre, tambien si algo falla (activo
+    False y el error).
     """
 
     salida = {"activa": activa(), "motivo": None, "acciones": [], "hechas": [],
               "plan": None, "decision": None}
+    ventana = {}
 
     try:
         if not salida["activa"]:
             salida["motivo"] = "APAGADA"
             return salida
+
+        salida["adoptados"] = []
+        ahora = ahora or datetime.now(timezone.utc)
 
         from src.actions.la_orden_del_gestor import (
             _pid, ejecutar, leer_la_foto, leer_la_orden, leer_los_estados, protegidos,
@@ -855,7 +1059,6 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         )
         from src.analysis.el_calendario_de_puntos import contexto
 
-        ahora = ahora or datetime.now(timezone.utc)
         calendario = calendario if isinstance(calendario, dict) else _leer(
             CALENDARIO if calendario is None else calendario, {})
 
@@ -870,9 +1073,15 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         status = status if status is not None else _leer(STATUS, {})
         snapshot = snapshot if snapshot is not None else _la_ultima_foto()
         v10 = v10 if v10 is not None else _leer(V10, {})
+        dadas = _dict(libros_rutas)
+        rutas = {"ronda": dadas.get("ronda") or LIBRO_RONDA,
+                 "chollos": dadas.get("chollos") or LIBRO_CHOLLOS,
+                 "mejora": dadas.get("mejora") or LIBRO_MEJORA}
         if libros is None:
-            libros = {"ronda": _leer(LIBRO_RONDA, {}), "chollos": _leer(LIBRO_CHOLLOS, {}),
-                      "mejora": _leer(LIBRO_MEJORA, {})}
+            libros = {k: _leer(ruta, {}) for k, ruta in rutas.items()}
+            escribir = {k: True for k in rutas}
+        else:
+            escribir = {k: bool(dadas.get(k)) for k in rutas}
         libros = _dict(libros)
 
         yo = _pid(_dict(_dict(snapshot).get("league")).get("user"))
@@ -887,14 +1096,22 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         roster = _lista(_dict(_dict(status).get("roster")).get("players"))
         plantilla = set(foto["plantilla"]) or _ids(p.get("id") for p in roster)
         plantilla -= set(vuelta["vendidos"])
+        once_escrito = _ids(p.get("id") for p in
+                            _lista(_dict(_dict(status).get("lineup")).get("players")))
 
-        orden = leer_la_orden(orden_ruta) or {}
+        orden = _dict(leer_la_orden(orden_ruta))
         de_la_orden = la_orden(orden, plantilla, ahora)
         de_la_mejora = la_mejora(libros.get("mejora"), plantilla)
-        especulativas = (_ids(_dict(libros.get("ronda")).keys())
-                         | _ids(_dict(libros.get("chollos")).keys()))
+        de_la_ronda_y_los_chollos = (_ids(_dict(libros.get("ronda")).keys())
+                                     | _ids(_dict(libros.get("chollos")).keys()))
+        # Las pujas que no son del cierre aunque la clave siga en el libro
+        # de los chollos: los `fichar` de la orden (este o no viva) y las
+        # de la mejora.
+        no_retirar = (_ids(f.get("player_id") for f in _lista(orden.get("fichar")))
+                      | _ids(_dict(libros.get("mejora")).keys()))
 
-        ctx = contexto(status, calendario, ahora, HORIZONTE_DE_QUEDARSE)
+        # Rondas de sobra: `decidir` se queda con las principales.
+        ctx = contexto(status, calendario, ahora, RONDAS_A_MIRAR)
         d = decidir(
             plantilla=las_fichas(status, plantilla, leer_los_estados(snapshot), foto["precios"]),
             ctx=ctx, horas=ventana["horas"], en_curso=ventana["en_curso"],
@@ -902,13 +1119,20 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
             pujas=las_pujas_vivas(foto, vuelta, libros.get("mejora")),
             vendidos=vuelta["vendidos"], ofertas=foto["ofertas_del_computer"],
             en_venta=set(foto["en_venta"]) | vuelta["listados"],
-            especulativas=especulativas, intocables=de_la_orden["intocables"],
+            especulativas=de_la_ronda_y_los_chollos, intocables=de_la_orden["intocables"],
             protegidos=protegidos(orden_ruta, ahora),
             no_vender=de_la_orden["vende"] | de_la_mejora["vende"],
             se_van=de_la_orden["se_van"] | de_la_mejora["se_van"],
+            once_escrito=once_escrito, no_retirar=no_retirar,
+            inventario=de_la_ronda_y_los_chollos & plantilla,
         )
         salida["decision"] = d
         salida["acciones"] = d["acciones"]
+
+        # Lo de la ronda y los chollos que entra en el once, adoptado
+        # antes de escribir nada en Biwenger.
+        if d.get("activo") and d.get("adoptar"):
+            salida["adoptados"] = adoptar(d["adoptar"], libros, rutas, escribir)
 
         escrituras = [a for a in d["acciones"] if a.get("accion") != "NADA"]
         if escrituras:
@@ -918,12 +1142,18 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
                 escritor_factory = BiwengerWriteClient
             salida["hechas"] = ejecutar(escrituras, escritor_factory())
 
-        salida["plan"] = _el_plan(d, ventana, ahora, salida["hechas"])
+        salida["plan"] = _el_plan(d, ventana, ahora, salida["hechas"], salida["adoptados"])
         publicar(salida["plan"], plan_ruta)
         salida["motivo"] = d["motivo"]
 
     except Exception as error:                      # noqa: BLE001
         salida["motivo"] = f"ERROR: {type(error).__name__}: {error}"
+        # Que no quede el plan de otra vuelta como si valiera.
+        if salida["activa"]:
+            salida["plan"] = _el_plan({"motivo": salida["motivo"], "activo": False},
+                                      ventana, ahora, salida.get("hechas"),
+                                      salida.get("adoptados"))
+            publicar(salida["plan"], plan_ruta)
 
     return salida
 
@@ -943,8 +1173,11 @@ def el_parte(r) -> list:
         d = _dict(r.get("decision"))
         plan = _dict(r.get("plan"))
         ronda = _dict(plan.get("ronda") or d.get("ronda"))
+        plazo = _dict(plan.get("plazo") or d.get("plazo"))
         horas = plan.get("horas")
-        lineas.append(f"  {r.get('motivo')}  ronda {ronda.get('label')} ({ronda.get('start')})"
+        lineas.append(f"  {r.get('motivo')}  once para {ronda.get('label')} ({ronda.get('start')})"
+                      + (f"; caja en >= 0 para {plazo.get('label')} ({plazo.get('start')})"
+                         if plazo and plazo.get("label") != ronda.get("label") else "")
                       + (f", a {float(horas):.1f} h" if _num(horas) is not None else ""))
         if not d:
             return lineas
@@ -954,6 +1187,12 @@ def el_parte(r) -> list:
         for j in _lista(once.get("jugadores")):
             lineas.append(f"      {str(j.get('name'))[:24]:<24} pos {j.get('position')}  "
                           f"xP {j.get('xp')}")
+        for a in _lista(r.get("adoptados")):
+            lineas.append(f"  Adoptado del libro de {a.get('libro')}: {a.get('player_id')}"
+                          f"{'' if a.get('escrito') else ' (sin escribir el libro)'}")
+        if d.get("titulares_que_no_se_venden"):
+            lineas.append(f"  Titulares del once escrito que no se venden: "
+                          f"{d.get('titulares_que_no_se_venden')}")
         lineas.append(f"  Caja al empezar la ronda: {_euros(d.get('caja'))}"
                       f"  (saldo - pujas vivas enteras + cobrado en la vuelta)")
         if d.get("cancelar"):

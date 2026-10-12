@@ -26,8 +26,8 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from src.actions.el_cierre_de_la_jornada import (     # noqa: E402
-    ENV, a_quien_vender, correr, decidir, el_mejor_once, el_parte, la_caja,
-    la_ventana, las_fichas, las_pujas_vivas, lo_de_esta_vuelta, por_que_no,
+    ENV, a_quien_vender, adoptar, correr, decidir, el_mejor_once, el_parte, la_caja,
+    la_mejora, la_ventana, las_fichas, las_pujas_vivas, lo_de_esta_vuelta, por_que_no,
 )
 from src.analysis.el_calendario_de_puntos import contexto   # noqa: E402
 
@@ -473,6 +473,7 @@ def test_nunca_lanza_con_basura():
                 horas="z", saldo=object())
         assert el_mejor_once(basura)["ids"] == [] or basura == [1, 2]
         a_quien_vender(basura, basura)
+        adoptar(basura, basura, basura, basura)
         la_caja(basura, basura, basura)
         lo_de_esta_vuelta(basura)
         las_pujas_vivas(basura, basura, basura)
@@ -487,6 +488,357 @@ def test_nunca_lanza_con_basura():
                        orden_ruta=Path(carpeta) / "nada.json", escritor_factory=_Escritor,
                        ahora=AHORA, plan_ruta=Path(carpeta) / "plan.json")
             assert isinstance(r, dict) and r["motivo"], r
+    finally:
+        _entorno(**antes)
+
+
+# ------------------------------------------------------------------
+# LA REVISION DEL 12/10
+# ------------------------------------------------------------------
+
+def _foto_con(pujas=(), ofertas=(), saldo=1_000_000, plantilla=PLANTILLA):
+    """La foto con nuestras pujas [(offer_id, player_id, importe)] y las
+    ofertas del Computer [(offer_id, player_id, importe)]."""
+    foto = _la_foto()
+    foto["market"]["status"]["balance"] = saldo
+    foto["market"]["offers"] = (
+        [{"id": o, "status": "waiting", "amount": a, "requestedPlayers": [{"id": p}],
+          "from": {"id": 99}} for o, p, a in pujas]
+        + [{"id": o, "status": "waiting", "amount": a, "requestedPlayers": [{"id": p}],
+            "from": None} for o, p, a in ofertas])
+    foto["my_team"] = [{"id": p["id"], "price": p["price"]} for p in plantilla]
+    foto["catalog"] = {"data": {"players": {str(p["id"]): {"status": p["status"]}
+                                            for p in plantilla}}}
+    return foto
+
+
+def _status_con(plantilla=PLANTILLA, once_escrito=()):
+    roster = [{"id": p["id"], "name": p["name"], "position": p["position"],
+               "team_name": f"Equipo {p['team_id']}", "price": p["price"],
+               "points": p["points"], "played_home": 15, "played_away": 15,
+               "starter_probability": p["starter_probability"], "status": p["status"]}
+              for p in plantilla]
+    liga = ESTRELLAS + [{k: v for k, v in p.items() if k != "starter_probability"}
+                        for p in plantilla]
+    return {"league_center": {"laliga": {"standings": TABLA}},
+            "todaLaLiga": {"players": liga}, "roster": {"players": roster},
+            "libro_del_escaparate": {"players": []},
+            "lineup": {"players": [{"id": i} for i in sorted(once_escrito)]}}
+
+
+def test_un_titular_escrito_en_duda_no_se_vende():
+    # La reproduccion de la revision: plantilla de 11 justos (la de
+    # verdad), F1 'doubt' en el once escrito, 9 M de valor y una oferta
+    # de 8 M a las 15 h. El once del cierre lo sienta (no esta sano),
+    # pero no es candidato: ni se acepta ni se publica, y lo que falta
+    # se dice (FALTA).
+    once = [dict(p) for p in PLANTILLA if p["id"] in ONCE]
+    for p in once:
+        if p["id"] == 10:
+            p.update(status="doubt", price=9_000_000)
+    ofertas = {10: {"offer_id": 79, "amount": 8_000_000}}
+    d = _d(plantilla=once, horas=15, ofertas=ofertas, once_escrito=ONCE, protegidos=set())
+    assert 10 not in d["once"]["ids"] and d["once"]["lleno"] == 10, d["once"]
+    assert 10 not in {pid for _, pid in _acciones(d)}, d["acciones"]
+    assert d["vender"] == [] and d["falta"] == 4_000_000 and d["motivo"] == "FALTA", d
+    assert d["titulares_que_no_se_venden"] == [10], d
+    # Lesionado o sancionado (fuera seguro), si se puede vender.
+    for estado in ("injured", "sanctioned"):
+        fuera = [{**p, "status": estado} if p["id"] == 10 else p for p in once]
+        d = _d(plantilla=fuera, horas=15, ofertas=ofertas, once_escrito=ONCE,
+               protegidos=set())
+        assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 10)], (estado, d["acciones"])
+    # Y un titular escrito sano que el once del cierre sienta (F2 fuera
+    # contra un duro) tampoco se publica ni se vende.
+    d = _d(once_escrito=ONCE | {11}, ofertas={11: {"offer_id": 81, "amount": 3_100_000}},
+           horas=15)
+    assert 11 not in d["once"]["ids"] and 11 not in {pid for _, pid in _acciones(d)}, d
+    assert 11 in d["titulares_que_no_se_venden"]
+
+
+def test_los_conservar_se_publican_y_solo_se_venden_fuera_del_once_escrito():
+    # El modelo del dueño: publicar a los `conservar` esta bien (liquidez);
+    # aceptar, solo si no son titulares del once escrito.
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1"})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            orden = Path(carpeta) / "orden.json"
+            orden.write_text(json.dumps({
+                "caduca": "2026-11-30T23:59:00+01:00",
+                "proteger": [{"player_id": 9, "nombre": "Yamal"}],
+                "conservar": [{"player_id": 13, "nombre": "B1"},
+                              {"player_id": 11, "nombre": "F2"}],
+            }))
+            once = [dict(p) for p in PLANTILLA if p["id"] in ONCE | {11, 13}]
+            # Caja: 1 M - 5 M = -4 M. F2 (conservar, titular escrito, sano
+            # pero sentado por el calendario) no se toca; B1 (conservar,
+            # fuera del once escrito) se publica y, con oferta, se vende.
+            foto = _foto_con(pujas=[(9, 500, 5_000_000)],
+                             ofertas=[(77, 13, 3_700_000), (81, 11, 3_100_000)],
+                             plantilla=once)
+            _Escritor.creados, _Escritor.llamadas = 0, []
+            r = correr(status=_status_con(once, ONCE | {11}), snapshot=foto, v10={},
+                       libros={}, calendario=CAL, orden_ruta=orden,
+                       escritor_factory=_Escritor, ahora=AHORA,
+                       plan_ruta=Path(carpeta) / "plan.json")
+            d = r["decision"]
+            assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 13)], d["acciones"]
+            assert d["titulares_que_no_se_venden"] == [11], d
+            # En positivo, al `conservar` de fuera del once se le publica.
+            foto = _foto_con(saldo=10_000_000, plantilla=once)
+            r = correr(status=_status_con(once, ONCE), snapshot=foto, v10={}, libros={},
+                       calendario=CAL, orden_ruta=orden, escritor_factory=_Escritor,
+                       ahora=AHORA, plan_ruta=Path(carpeta) / "plan.json")
+            assert r["decision"]["motivo"] == "EN_POSITIVO"
+            assert sorted(_acciones(r["decision"])) == [("PONER_A_LA_VENTA", 11),
+                                                        ("PONER_A_LA_VENTA", 13)], r["decision"]
+    finally:
+        _entorno(**antes)
+
+
+def test_lo_de_la_ronda_y_los_chollos_que_entra_en_el_once_se_adopta():
+    # F3 (12) es de los chollos y entra en el once; B2 (14) es de la ronda
+    # y se queda en el banquillo; 700 es una puja viva de la ronda.
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            rutas = {k: Path(carpeta) / f"{k}.json" for k in ("ronda", "chollos", "mejora")}
+            rutas["ronda"].write_text(json.dumps({"14": 900_000, "700": 300_000}))
+            rutas["chollos"].write_text(json.dumps({"12": 2_500_000}))
+            rutas["mejora"].write_text(json.dumps({}))
+            plan = Path(carpeta) / "plan.json"
+            r = correr(status=_status_con(), snapshot=_foto_con(saldo=10_000_000), v10={},
+                       libros=None, libros_rutas=rutas, calendario=CAL,
+                       orden_ruta=Path(carpeta) / "no_hay_orden.json",
+                       escritor_factory=_Escritor, ahora=AHORA, plan_ruta=plan)
+            assert 12 in r["decision"]["once"]["ids"], r["decision"]["once"]
+            assert r["decision"]["adoptar"] == [12], r["decision"]
+            # Fuera de su libro, con el mismo formato; lo demas, igual.
+            assert rutas["chollos"].read_text() == json.dumps({}, indent=2) + "\n"
+            assert json.loads(rutas["ronda"].read_text()) == {"14": 900_000, "700": 300_000}
+            publicado = json.loads(plan.read_text())
+            assert publicado["adoptados"] == [
+                {"player_id": 12, "libro": "chollos", "escrito": True}], publicado
+            # Con los libros ya leidos y sin ruta, no se escribe nada (y
+            # los tests no tocan los de produccion).
+            r = correr(status=_status_con(), snapshot=_foto_con(saldo=10_000_000), v10={},
+                       libros={"ronda": {}, "chollos": {"12": 1}, "mejora": {}},
+                       calendario=CAL, orden_ruta=Path(carpeta) / "no_hay_orden.json",
+                       escritor_factory=_Escritor, ahora=AHORA, plan_ruta=plan)
+            assert r["adoptados"] == [{"player_id": 12, "libro": "chollos", "importe": 1,
+                                       "escrito": False}], r["adoptados"]
+    finally:
+        _entorno(**antes)
+
+
+def test_no_retira_las_pujas_de_la_orden_ni_las_de_la_mejora():
+    # 500: el `fichar` de la orden (su clave sigue en el libro de los
+    # chollos porque la orden la sustituyo); 600: la ronda; 601: la
+    # mejora. Solo la de la ronda es del cierre.
+    pujas = {500: {"offer_id": 9, "amount": 1_200_000},
+             600: {"offer_id": 61, "amount": 1_500_000},
+             601: {"offer_id": 62, "amount": 400_000}}
+    d = _d(horas=30, pujas=pujas, especulativas={500, 600, 601}, protegidos={9, 500},
+           no_retirar={601})
+    assert _acciones(d, "CANCELAR_PUJA") == [("CANCELAR_PUJA", 600)], d["acciones"]
+    # De punta a punta, con la orden APAGADA (protegidos vacio): el
+    # `fichar` sale del fichero de la orden y la de la mejora de su libro
+    # (las dos con la clave aun en el libro de los chollos).
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            orden = Path(carpeta) / "orden.json"
+            orden.write_text(json.dumps({"caduca": "2026-11-30T23:59:00+01:00",
+                                         "fichar": [{"player_id": 500, "puja": 1_200_000}]}))
+            jueves = datetime(2026, 10, 15, 5, 15, tzinfo=timezone.utc)   # a 37,75 h
+            foto = _foto_con(pujas=[(9, 500, 1_200_000), (61, 600, 1_500_000),
+                                    (62, 601, 400_000)])
+            r = correr(status=_status_con(), snapshot=foto, v10={},
+                       libros={"ronda": {"600": 1_500_000},
+                               "chollos": {"500": 1_200_000, "601": 400_000},
+                               "mejora": {"601": {"sale": 15, "puja": 400_000}}},
+                       calendario=CAL, orden_ruta=orden, escritor_factory=_Escritor,
+                       ahora=jueves, plan_ruta=Path(carpeta) / "plan.json")
+            assert _acciones(r["decision"], "CANCELAR_PUJA") == [("CANCELAR_PUJA", 600)], \
+                r["decision"]["acciones"]
+    finally:
+        _entorno(**antes)
+
+
+def test_a_quien_vender_busca_el_minimo_exacto():
+    # La de la revision: 4 M de deficit; uno de 9,5 M que pierde 12 o tres
+    # de 1,425 M que pierden 3 cada uno. Los tres (pierden 9).
+    grande = {"id": 1, "cobro": 9_500_000, "quedarse": 12.0}
+    chicos = [{"id": i, "cobro": 1_425_000, "quedarse": 3.0} for i in (2, 3, 4)]
+    elegidos, falta = a_quien_vender([grande] + chicos, 4_000_000)
+    assert sorted(x["id"] for x in elegidos) == [2, 3, 4] and falta == 0, elegidos
+    # A igual perdida, el que menos se pasa del deficit.
+    c = [{"id": 1, "cobro": 1_500_000, "quedarse": 2.0},
+         {"id": 2, "cobro": 1_100_000, "quedarse": 2.0}]
+    assert [x["id"] for x in a_quien_vender(c, 1_000_000)[0]] == [2]
+    # Con mas de 15 candidatos, el voraz de siempre.
+    relleno = [{"id": 100 + i, "cobro": 1_000_000, "quedarse": 100.0} for i in range(12)]
+    elegidos, falta = a_quien_vender([grande] + chicos + relleno, 4_000_000)
+    assert [x["id"] for x in elegidos] == [1] and falta == 0, elegidos
+
+
+def test_yamal_nunca_se_publica_ni_se_vende():
+    # Sin protegidos (orden apagada, caducada o rota) y aun sin la lista
+    # de intocables (`yamal_por_lesion`): Yamal, por su nombre, ni se
+    # publica ni se vende, aunque haga falta y haya oferta.
+    ofertas = {9: {"offer_id": 80, "amount": 30_000_000}}
+    for intocables in ({"yamal"}, set()):
+        for estado in ("ok", "injured"):
+            plantilla = [{**p, "status": estado} if p["id"] == 9 else p for p in PLANTILLA]
+            d = _d(plantilla=plantilla, protegidos=set(), intocables=intocables,
+                   ofertas=ofertas, horas=15, saldo=-30_000_000)
+            assert 9 not in {pid for _, pid in _acciones(d)}, (intocables, estado, d["acciones"])
+            assert 9 not in d["vender"] and 9 not in {c["id"] for c in d["candidatos"]}
+
+
+def test_lo_que_publico_el_escaparate_no_se_vuelve_a_publicar():
+    v10 = {"escaparate": {"listed": [{"player_id": 11, "listed_price": 3_450_000,
+                                      "sent": True, "success": True}]}}
+    assert lo_de_esta_vuelta(v10)["listados"] == {11}
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            r = correr(status=_status_con(), snapshot=_foto_con(saldo=10_000_000), v10=v10,
+                       libros={}, calendario=CAL, orden_ruta=Path(carpeta) / "nada.json",
+                       escritor_factory=_Escritor, ahora=AHORA,
+                       plan_ruta=Path(carpeta) / "plan.json")
+            publicados = {pid for _, pid in _acciones(r["decision"], "PONER_A_LA_VENTA")}
+            assert 11 not in publicados and 13 in publicados, r["decision"]["acciones"]
+    finally:
+        _entorno(**antes)
+
+
+def test_si_algo_falla_el_plan_viejo_no_se_queda():
+    class _Roto:
+        def __init__(self):
+            raise RuntimeError("login")
+
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            plan = Path(carpeta) / "el_cierre.json"
+            plan.write_text(json.dumps({"activo": True, "xi": [1], "vender": [13],
+                                        "generated_at": "2026-10-13T05:15:00+00:00"}))
+            r = correr(status=_status_con(), snapshot=_foto_con(), v10={}, libros={},
+                       calendario=CAL, orden_ruta=Path(carpeta) / "nada.json",
+                       escritor_factory=_Roto, ahora=AHORA, plan_ruta=plan)
+            assert r["motivo"].startswith("ERROR: RuntimeError"), r["motivo"]
+            publicado = json.loads(plan.read_text())
+            assert publicado["activo"] is False and publicado["motivo"] == r["motivo"], publicado
+            assert publicado["generated_at"] == AHORA.isoformat() and publicado["xi"] == []
+    finally:
+        _entorno(**antes)
+
+
+# Un aplazado de la J6 entre la J9 y la J10, como el Levante-Athletic
+# del 21/10: el 8 en casa contra un duro.
+CAL_CON_APLAZADO = {"matchdays": [
+    {"matchday": 6, "matches": [
+        _p(6, 2, 3, "2026-09-18T21:00:00+02:00"), _p(6, 4, 5, "2026-09-19T16:00:00+02:00"),
+        _p(6, 6, 7, "2026-09-20T18:30:00+02:00"), _p(6, 9, 10, "2026-09-21T21:00:00+02:00"),
+        _p(6, 8, 1, "2026-10-21T20:00:00+02:00"),
+    ]},
+] + CAL["matchdays"] + [
+    {"matchday": 12, "matches": [
+        _p(12, 9, 1, "2026-11-06T21:00:00+01:00"), _p(12, 2, 8, "2026-11-07T16:00:00+01:00"),
+        _p(12, 3, 10, "2026-11-07T18:30:00+01:00"), _p(12, 4, 7, "2026-11-08T14:00:00+01:00"),
+        _p(12, 5, 6, "2026-11-09T21:00:00+01:00"),
+    ]},
+]}
+
+
+def test_el_once_es_para_la_principal_y_la_caja_para_la_que_venga():
+    from src.analysis.el_calendario_de_puntos import xp_jugador
+
+    martes = datetime(2026, 10, 20, 10, 0, tzinfo=timezone.utc)    # J9 acabada
+    v = la_ventana(martes, CAL_CON_APLAZADO)
+    # El plazo es el aplazado (32 h): dentro de la ventana, aunque la J10
+    # este a 81 h.
+    assert abs(v["horas"] - 32.0) < 0.01 and por_que_no(**v) is None, v
+    ctx = contexto(STATUS, CAL_CON_APLAZADO, martes, 12)
+    assert not ctx["rondas"][0]["principal"]
+    d = _d(ctx=ctx, horas=v["horas"])
+    assert d["activo"] and d["deficit"] == 4_000_000 and d["vender"], d
+    assert d["plazo"]["label"] == "Jornada 6 (aplazada)", d["plazo"]
+    assert d["ronda"]["label"] == "Jornada 10" and d["ronda"]["principal"], d["ronda"]
+    # El xP del once es el de la J10, no el del aplazado.
+    f1 = next(p for p in PLANTILLA if p["id"] == 10)
+    principales = {**ctx, "rondas": [r for r in ctx["rondas"] if r["principal"]]}
+    de_la_j10 = xp_jugador(principales, f1, f1["starter_probability"], 1)
+    del_aplazado = xp_jugador(ctx, f1, f1["starter_probability"], 1)
+    assert abs(de_la_j10 - del_aplazado) > 0.01
+    xp = {j["id"]: j["xp"] for j in d["once"]["jugadores"]}
+    assert abs(xp[10] - round(de_la_j10, 3)) < 1e-9, (xp[10], de_la_j10, del_aplazado)
+    # Y de punta a punta, el plan lo dice.
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            plan = Path(carpeta) / "plan.json"
+            correr(status=_status_con(), snapshot=_foto_con(), v10={}, libros={},
+                   calendario=CAL_CON_APLAZADO, orden_ruta=Path(carpeta) / "nada.json",
+                   escritor_factory=_Escritor, ahora=martes, plan_ruta=plan)
+            publicado = json.loads(plan.read_text())
+            assert publicado["ronda"]["label"] == "Jornada 10", publicado
+            assert publicado["plazo"]["label"] == "Jornada 6 (aplazada)", publicado
+            assert abs(publicado["horas"] - 32.0) < 0.01 and publicado["activo"], publicado
+            # Quedarse pesa 3 rondas PRINCIPALES (J10, J11, J12), aunque el
+            # aplazado vaya delante: el contexto se pide con rondas de sobra.
+            r = correr(status=_status_con(), snapshot=_foto_con(), v10={}, libros={},
+                       calendario=CAL_CON_APLAZADO, orden_ruta=Path(carpeta) / "nada.json",
+                       escritor_factory=_Escritor, ahora=martes, plan_ruta=plan)
+            b1 = next(c for c in r["decision"]["candidatos"] if c["id"] == 13)
+            ficha = next(f for f in las_fichas(_status_con(), {13}))
+            tres = {**principales, "rondas": principales["rondas"][:3]}
+            assert [x["label"] for x in tres["rondas"]] == ["Jornada 10", "Jornada 11",
+                                                          "Jornada 12"], tres["rondas"]
+            assert b1["quedarse"] == round(xp_jugador(tres, ficha, None, 3), 3), b1
+            dos = {**principales, "rondas": principales["rondas"][:2]}
+            assert b1["quedarse"] != round(xp_jugador(dos, ficha, None, 3), 3), b1
+    finally:
+        _entorno(**antes)
+
+
+def test_sin_calendario_lo_dice():
+    v = la_ventana(AHORA, {})
+    assert v["horas"] is None and por_que_no(**v) == "SIN_CALENDARIO", v
+    antes = _entorno(**{ENV: "1"})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            r = correr(status=_status_con(), snapshot=_foto_con(), v10={}, libros={},
+                       calendario={}, orden_ruta=Path(carpeta) / "nada.json",
+                       escritor_factory=_Escritor, ahora=AHORA,
+                       plan_ruta=Path(carpeta) / "plan.json")
+            assert r["motivo"] == "SIN_CALENDARIO", r
+    finally:
+        _entorno(**antes)
+
+
+def test_los_que_se_van_y_los_de_la_mejora_no_cuentan():
+    # Los que ya se van (su relevo esta dentro) no entran en el once.
+    d = _d(se_van={10}, no_vender={10})
+    assert 10 not in d["once"]["ids"] and 10 not in {c["id"] for c in d["candidatos"]}, d
+    # El que sale por la mejora es suyo; si su relevo ya esta, se va.
+    m = la_mejora({"700": {"sale": 13, "puja": 300_000}, "14": {"sale": 15}}, {13, 14, 15})
+    assert m == {"vende": {13, 15}, "se_van": {15}}, m
+    # El estado es el del catalogo de la foto, aunque el panel diga otra cosa.
+    fichas = las_fichas(_status_con(), {10, 11}, estados={10: "injured"})
+    assert {f["id"]: f["status"] for f in fichas} == {10: "injured", 11: "ok"}, fichas
+    # De punta a punta: lo que vende la mejora ni se publica.
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            r = correr(status=_status_con(), snapshot=_foto_con(), v10={},
+                       libros={"ronda": {}, "chollos": {},
+                               "mejora": {"700": {"sale": 13, "puja": 300_000}}},
+                       calendario=CAL, orden_ruta=Path(carpeta) / "nada.json",
+                       escritor_factory=_Escritor, ahora=AHORA,
+                       plan_ruta=Path(carpeta) / "plan.json")
+            assert 13 not in {pid for _, pid in _acciones(r["decision"])}, r["decision"]
     finally:
         _entorno(**antes)
 
@@ -506,6 +858,17 @@ TESTS = [
     test_apagado_no_lee_ni_escribe_nada,
     test_encendido_de_punta_a_punta,
     test_nunca_lanza_con_basura,
+    test_un_titular_escrito_en_duda_no_se_vende,
+    test_los_conservar_se_publican_y_solo_se_venden_fuera_del_once_escrito,
+    test_lo_de_la_ronda_y_los_chollos_que_entra_en_el_once_se_adopta,
+    test_no_retira_las_pujas_de_la_orden_ni_las_de_la_mejora,
+    test_a_quien_vender_busca_el_minimo_exacto,
+    test_yamal_nunca_se_publica_ni_se_vende,
+    test_lo_que_publico_el_escaparate_no_se_vuelve_a_publicar,
+    test_si_algo_falla_el_plan_viejo_no_se_queda,
+    test_el_once_es_para_la_principal_y_la_caja_para_la_que_venga,
+    test_sin_calendario_lo_dice,
+    test_los_que_se_van_y_los_de_la_mejora_no_cuentan,
 ]
 
 
