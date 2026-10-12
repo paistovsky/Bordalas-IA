@@ -29,10 +29,11 @@ if str(RAIZ) not in sys.path:
 
 from src.actions.la_mejora_del_once import (     # noqa: E402
     ENV, ENV_CALENDARIO, GANANCIA_MINIMA, MARGEN_DEL_CALENDARIO, PEOR_FINANCIACION,
-    VUELTA_VIEJA_MINUTOS, correr, decidir, el_calendario_activo, el_contexto,
-    el_plan_del_calendario, es_de_esta_vuelta, la_caja, la_caja_de_la_jornada,
-    las_probabilidades, las_rondas_que_cuentan, lo_de_esta_vuelta, los_estados,
-    no_vende_a_uno_mejor, xp_por_jornada,
+    VUELTA_MEJORA, VUELTA_VIEJA_MINUTOS, correr, decidir, el_calendario_activo,
+    el_contexto, el_plan_del_calendario, es_de_esta_vuelta, escribir_la_vuelta, la_caja,
+    la_caja_de_la_jornada, las_probabilidades, las_rondas_que_cuentan,
+    las_ventas_de_la_orden, lo_de_esta_vuelta, los_estados, no_vende_a_uno_mejor,
+    xp_por_jornada,
 )
 from src.analysis.el_calendario_de_puntos import contexto  # noqa: E402
 
@@ -420,7 +421,7 @@ class _Escritor:
 
 def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=None,
             libro_ronda=None, calendario=None, libro=None, ofertas=None, catalogo=None,
-            orden=None, saldo=500_000, horas=100.0):
+            orden=None, saldo=500_000, horas=100.0, pujas=None):
     """`correr` con TODO dado: foto, panel, vuelta, calendario y lo que
     si no se lee de producción. Los libros, en un directorio temporal.
 
@@ -428,6 +429,10 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
         ofertas   {id: importe} del Computer por los nuestros (offer_id
                   = 900 + id)
         catalogo  {id: status} del catálogo de la foto
+        pujas     {id: importe} de nuestras pujas vivas (offer_id = 800 + id)
+
+    En `libros["vuelta"]`, lo que escribió `escribir_la_vuelta` (junto al
+    libro de la mejora, en el temporal), o None.
     """
     roster = {p: 80 for p in plantilla} if roster is None else roster
     status = {
@@ -443,7 +448,10 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
                              for p in escaparate],
                    "offers": [{"id": 900 + p, "amount": importe, "status": "waiting",
                                "requestedPlayers": [{"id": p}], "from": None}
-                              for p, importe in (ofertas or {}).items()],
+                              for p, importe in (ofertas or {}).items()]
+                             + [{"id": 800 + p, "amount": importe, "status": "waiting",
+                                 "requestedPlayers": [{"id": p}], "from": {"id": 7}}
+                                for p, importe in (pujas or {}).items()],
                    "status": {"maximumBid": 14_000_000, "balance": saldo}},
         "my_team": [{"id": p, "price": MUNDO[p]["price"]} for p in plantilla],
         "catalog": {"data": {"players": {str(p): {"status": st}
@@ -465,6 +473,8 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
                       "horas_jornada": horas, "puede_escribir": True, "en_curso": False},
         )
         libros = {k: json.loads(Path(r).read_text()) for k, r in rutas.items()}
+        vuelta = Path(tmp) / "la_mejora_vuelta.json"
+        libros["vuelta"] = json.loads(vuelta.read_text()) if vuelta.exists() else None
     return s, escritor, libros
 
 
@@ -676,8 +686,10 @@ def test_la_caja_cuenta_lo_que_esta_vuelta_ya_hizo():
     assert esta["solas"] == {1462, 555} and esta["cobros"] == {11: 2_500_000, 23: 1_050_000}
     assert lo_de_esta_vuelta(None)["pujas"] == {} and lo_de_esta_vuelta("x")["cobros"] == {}
 
-    # La foto (de antes) tenía la puja vieja de la orden por el 17937.
-    f = _foto(saldo=500_000, plantilla={10, 11, 23},
+    # La foto (de antes) tenía la puja vieja de la orden por el 17937. El
+    # 20 (el que entra por el 10) ya es nuestro, y el 11 se vende cuando
+    # llegue el 17937 (puja viva): las dos ventas siguen en pie (13/10).
+    f = _foto(saldo=500_000, plantilla={10, 11, 20, 23},
               nuestras_pujas={17937: {"offer_id": 1, "amount": 3_000_000}})
     assert la_caja(f) == 500_000 - 3_000_000                     # como antes
     # La de la orden entera (la nueva en lugar de la vieja), las de la
@@ -686,7 +698,8 @@ def test_la_caja_cuenta_lo_que_esta_vuelta_ya_hizo():
                                             + 2_500_000 + 1_050_000)
 
     liga = {10: {"price": 2_700_000}, 11: {"price": 4_900_000}, 23: {"price": 1_000_000}}
-    orden = {"vender_si_ficha": {"jugadores": [{"player_id": 11, "suelo": 4_410_000}]},
+    orden = {"vender_si_ficha": {"jugadores": [{"player_id": 11, "suelo": 4_410_000,
+                                                "si_esta": 17937}]},
              "fichar": [{"player_id": 17937, "puja": 3_777_000},
                         {"player_id": 99, "puja": 1_000_000}]}
     libro = {"20": {"sale": 10, "suelo": 2_430_000}}
@@ -1017,6 +1030,218 @@ def test_el_estado_de_otra_vuelta_por_su_run_id():
     assert lo_de_esta_vuelta({**v10, "timestamp": _hace(60), "run_id": None}, AHORA, "222")["cobros"] == {}
 
 
+# ============================================================
+# SIN FANTASMAS EN LA CAJA (13/10/2026)
+# ============================================================
+#
+#     La orden real del 12/10: Iván Romero (17937, puja 3.777.000) por
+#     Jutglà (3159, suelo 2.466.000) y Gerard Martín (34111, 4.989.000)
+#     por Diego Rico (5678, suelo 470.000); la ronda, Moi Gómez (1462,
+#     1.101.000; vale 1.090.000, al 95 %). Saldo del 12/10: 659.783. Los
+#     números son los de la revisión (j9-caja), con los precios de las
+#     17:07. Tras el reset del 13/10, ni Iván ni Gerard en el mercado del
+#     Computer (o son nuestros o se los llevó un rival).
+
+IVAN, GERARD, MOI, JUTGLA, RICO = 17937, 34111, 1462, 3159, 5678
+ORDEN_1210 = {
+    "fichar": [{"player_id": IVAN, "puja": 3_777_000},
+               {"player_id": GERARD, "puja": 4_989_000}],
+    "vender_si_ficha": {"jugadores": [
+        {"player_id": JUTGLA, "suelo": 2_466_000, "si_esta": IVAN},
+        {"player_id": RICO, "suelo": 470_000, "si_esta": GERARD}]},
+}
+EL_RESTO = {1760, 1599, 29661, 14800, 1969, 19862, 35678, 38433, 26271}
+MERCADO_1310 = {777: 1_000_000, 778: 2_000_000}
+# Lo que la revisión vio contar dos veces: (2.740.000 + 522.222) x 0,95.
+LAS_DOS_VENTAS = 3_099_110
+
+
+def _caja_1210(plantilla, saldo, *, pujas=None, mercado=None, esta_vuelta=None, libro=None,
+               liga=None):
+    f = _foto(plantilla=set(plantilla), saldo=saldo, nuestras_pujas=pujas or {},
+              mercado=MERCADO_1310 if mercado is None else mercado)
+    return la_caja_de_la_jornada(
+        f, liga=liga or {MOI: {"price": 1_090_000}}, orden=ORDEN_1210, libro=libro or {},
+        solos={MOI}, inventario={MOI} & set(plantilla), esta_vuelta=esta_vuelta)
+
+
+def test_la_venta_de_la_orden_no_cuenta_dos_veces():
+    # Lunes, con las tres pujas vivas: las dos ventas cuentan (sus relevos
+    # tienen puja viva), y las pujas también.
+    pujas = {IVAN: {"amount": 3_777_000}, GERARD: {"amount": 4_989_000},
+             MOI: {"amount": 1_101_000}}
+    lunes = _caja_1210(EL_RESTO | {JUTGLA, RICO}, 659_783, pujas=pujas,
+                       mercado={**MERCADO_1310, IVAN: 3_740_000, GERARD: 4_940_000,
+                                MOI: 1_090_000})
+    assert lunes == 659_783 - 3_777_000 - 4_989_000 - 77_070 + LAS_DOS_VENTAS, lunes
+    # Martes 07:15: las tres ganadas; la orden cobra a Jutglà y Rico en ESTA
+    # vuelta (la foto, de antes, aún los tiene). La cuenta ya era buena.
+    ganadas = EL_RESTO | {IVAN, GERARD, MOI}
+    esta = lo_de_esta_vuelta({"orden_del_gestor": {"hechas": [
+        {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": JUTGLA, "importe": 2_700_000,
+         "exito": True},
+        {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": RICO, "importe": 550_000,
+         "exito": True}]}})
+    real = -9_207_217 + 2_700_000 + 550_000 + int(1_090_000 * 0.95)
+    assert real == -4_921_717
+    assert _caja_1210(ganadas | {JUTGLA, RICO}, -9_207_217, esta_vuelta=esta) == real
+    # Martes 08:07, la vuelta siguiente: Jutglà y Rico ya no son nuestros y
+    # su dinero ya está en el saldo. Antes se sumaba otra vez (+3,1 M: la
+    # caja decía -1.822.607 y la mejora dejaba de buscar dinero).
+    caja = _caja_1210(ganadas, -5_957_217)
+    assert caja == real != real + LAS_DOS_VENTAS == -1_822_607, caja
+
+
+def test_la_venta_de_la_mejora_cuenta_una_vez():
+    # La mejora cambió al 40 (vale 3.000.000) por el 41.
+    libro = {"41": {"sale": 40, "suelo": 2_700_000}}
+    liga = {40: {"price": 3_000_000}, 41: {"price": 3_000_000}}
+    k = dict(liga=liga, orden={}, libro=libro, solos=set(), inventario=set())
+    # El 41 ya es nuestro y el 40 aún no se ha vendido: cuenta al 95 %.
+    assert la_caja_de_la_jornada(_foto(plantilla={40, 41}, saldo=100_000), **k) == (
+        100_000 + 2_850_000)
+    # La vuelta siguiente a cobrarlo (2.900.000, ya en el saldo): no se
+    # cuenta otra vez (antes, una vuelta con 2.850.000 que no existen).
+    f = _foto(plantilla={41}, saldo=3_000_000)
+    assert la_caja_de_la_jornada(f, **k) == 3_000_000
+    assert decidir(**_base(libro=libro, foto=f, escaparate=[]))["soltar"] == ["41"]
+    # El 41 con puja viva: cuenta la venta y la puja.
+    f = _foto(plantilla={40}, saldo=100_000, nuestras_pujas={41: {"amount": 3_030_000}})
+    assert la_caja_de_la_jornada(f, **k) == 100_000 - 3_030_000 + 2_850_000
+    # Puja por el 41 perdida: el 40 se queda; ni venta ni puja.
+    f = _foto(plantilla={40}, saldo=100_000)
+    assert la_caja_de_la_jornada(f, **k) == 100_000
+    assert decidir(**_base(libro=libro, foto=f, escaparate=[]))["soltar"] == ["41"]
+
+
+def test_las_pujas_perdidas_de_la_orden_no_restan():
+    # NINGUNA GANADA: ni Iván ni Gerard (se los llevó un rival: ni en la
+    # plantilla, ni con puja viva, ni en el mercado). La caja es el saldo;
+    # antes, -5.007.107 (8,77 M de pujas que no se harán y 3,1 M de ventas
+    # que no llegarán).
+    caja = _caja_1210(EL_RESTO | {JUTGLA, RICO}, 659_783)
+    assert caja == 659_783 != 659_783 - 3_777_000 - 4_989_000 + LAS_DOS_VENTAS, caja
+    # SOLO GERARD: Rico aún es nuestro (se vende), Jutglà no (sin Iván).
+    caja = _caja_1210(EL_RESTO | {JUTGLA, RICO, GERARD}, 659_783 - 4_989_000)
+    assert caja == 659_783 - 4_989_000 + int(int(470_000 / 0.9) * 0.95), caja
+    # ... y vendido Rico en una vuelta anterior (566.700 ya en el saldo).
+    assert _caja_1210(EL_RESTO | {JUTGLA, GERARD}, -3_762_517) == -3_762_517
+    # Iván aún en el mercado del Computer y sin puja: la orden puede volver
+    # a pujar y la puja se resta; la venta de Jutglà, hasta que haya puja.
+    con_ivan = {**MERCADO_1310, IVAN: 3_740_000}
+    assert _caja_1210(EL_RESTO | {JUTGLA}, 659_783, mercado=con_ivan) == 659_783 - 3_777_000
+    # La orden vuelve a pujar en ESTA vuelta: la puja una vez y la venta.
+    esta = lo_de_esta_vuelta({"orden_del_gestor": {"hechas": [
+        {"accion": "PUJAR", "player_id": IVAN, "importe": 3_777_000, "exito": True}]}})
+    assert _caja_1210(EL_RESTO | {JUTGLA}, 659_783, mercado=con_ivan, esta_vuelta=esta) == (
+        659_783 - 3_777_000 + int(int(2_466_000 / 0.9) * 0.95))
+    # Sin saber el mercado (vacío), las dos pujas se restan, como antes.
+    assert _caja_1210(EL_RESTO | {JUTGLA}, 659_783, mercado={}) == (
+        659_783 - 3_777_000 - 4_989_000)
+    # Las ventas que siguen en pie, a mano: con el mercado (para no tocar a
+    # nadie) vale también el relevo que sigue en él.
+    nuestros = EL_RESTO | {JUTGLA, RICO}
+    ids = [j["player_id"] for j in las_ventas_de_la_orden(
+        ORDEN_1210, plantilla=nuestros, pujadas=set(), mercado=MERCADO_1310)]
+    assert ids == [], ids
+    ids = [j["player_id"] for j in las_ventas_de_la_orden(
+        ORDEN_1210, plantilla=nuestros, pujadas=set(), mercado=con_ivan)]
+    assert ids == [JUTGLA], ids
+    assert [j["player_id"] for j in las_ventas_de_la_orden(
+        ORDEN_1210, plantilla=nuestros, pujadas=set())] == []
+    # El `si_esta` general también tiene que llegar (la orden pide los dos);
+    # sin ningún relevo, la orden no lo vende nunca.
+    general = {"vender_si_ficha": {"si_esta": GERARD, "jugadores": [
+        {"player_id": JUTGLA, "suelo": 1, "si_esta": IVAN}, {"player_id": RICO, "suelo": 1}]}}
+    assert [j["player_id"] for j in las_ventas_de_la_orden(
+        general, plantilla=nuestros | {IVAN}, pujadas=set())] == []
+    assert [j["player_id"] for j in las_ventas_de_la_orden(
+        general, plantilla=nuestros | {IVAN}, pujadas={GERARD})] == [JUTGLA, RICO]
+    sin_relevo = {"vender_si_ficha": {"jugadores": [{"player_id": RICO, "suelo": 1}]}}
+    assert las_ventas_de_la_orden(sin_relevo, plantilla=nuestros, pujadas=set(),
+                                  mercado={}) == []
+    for basura in (None, "x", {"vender_si_ficha": "x"}, {"vender_si_ficha": {"jugadores": [1]}}):
+        assert las_ventas_de_la_orden(basura, plantilla=None, pujadas=None, mercado=None) == []
+
+
+def test_perdido_el_relevo_el_que_vende_la_orden_vuelve_a_poder_cambiarse():
+    # Roberto (40) se vende cuando llegue el 17937, y la puja por el 17937
+    # se perdió (ni nuestro, ni puja viva, ni en el mercado). La Maravilla
+    # (43) lo mejora (+3,2): antes, Roberto quieto hasta el 30/11 y la caja
+    # con -3.777.000 + 2.565.000 que no existen.
+    orden = {"fichar": [{"player_id": 17937, "puja": 3_777_000}],
+             "vender_si_ficha": {"jugadores": [
+                 {"player_id": 40, "suelo": 2_430_000, "si_esta": 17937}]}}
+    s, escritor, _ = _correr([40], [43], [40], con_calendario=False, orden=orden)
+    assert escritor.llamadas == [("PUJAR", 43, 3_030_000)], (s, escritor.llamadas)
+    assert s["plan"]["caja"] == 500_000, s["plan"]
+    # Con la puja por el 17937 viva: quieto, y la caja con la puja y la venta.
+    s, escritor, _ = _correr([40], [43], [40], con_calendario=False, orden=orden,
+                             pujas={17937: 3_777_000})
+    assert escritor.llamadas == [] and s["plan"]["caja"] == 500_000 - 3_777_000 + 2_565_000, s
+    # El relevo aún en el mercado (la orden puede volver a pujar): quieto, y
+    # la mejora no puja por él.
+    orden_41 = {"fichar": [{"player_id": 41, "puja": 3_030_000}],
+                "vender_si_ficha": {"jugadores": [
+                    {"player_id": 40, "suelo": 2_430_000, "si_esta": 41}]}}
+    s, escritor, _ = _correr([40], [41, 43], [40], con_calendario=False, orden=orden_41)
+    assert escritor.llamadas == [] and s["plan"]["caja"] == 500_000 - 3_030_000, s
+    # El relevo ya es nuestro: la orden lo vende; quieto, y su venta cuenta.
+    orden_48 = {"vender_si_ficha": {"jugadores": [
+        {"player_id": 40, "suelo": 2_430_000, "si_esta": 48}]}}
+    s, escritor, _ = _correr([40], [43], [40, 48], con_calendario=False, orden=orden_48)
+    assert escritor.llamadas == [] and s["plan"]["caja"] == 500_000 + 2_565_000, s
+    # El que la orden ya vendió y vuelve al mercado del Computer no se
+    # vuelve a fichar (como antes), aunque su relevo se perdiera.
+    orden_43 = {"vender_si_ficha": {"jugadores": [
+        {"player_id": 43, "suelo": 2_430_000, "si_esta": 17937}]}}
+    s, escritor, _ = _correr([40], [43], [40], con_calendario=False, orden=orden_43)
+    assert escritor.llamadas == [] and s["plan"]["caja"] == 500_000, s
+
+
+def test_la_vuelta_de_la_mejora_para_el_cierre():
+    # Lo que la mejora mandó en esta vuelta, con el run_id, para el cierre.
+    assert VUELTA_MEJORA.name == "la_mejora_vuelta.json"
+    assert VUELTA_MEJORA.parent.name == "trading"
+    with _interruptores({"GITHUB_RUN_ID": "4242"}):
+        s, escritor, libros = _correr([40], [43], [40], con_calendario=False)
+    assert escritor.llamadas == [("PUJAR", 43, 3_030_000)], escritor.llamadas
+    vuelta = libros["vuelta"]
+    assert vuelta["run_id"] == "4242" and vuelta["generated_at"] == AHORA.isoformat(), vuelta
+    assert vuelta["hechas"] == json.loads(json.dumps(s["hechas"])) and len(vuelta["hechas"]) == 1
+    (h,) = vuelta["hechas"]
+    assert (h["accion"], h["player_id"], h["importe"], h["exito"]) == ("PUJAR", 43, 3_030_000,
+                                                                      True), h
+    # Sin nada que hacer, también: lista vacía. Sin run_id, null.
+    with _interruptores({"GITHUB_RUN_ID": None}):
+        s, escritor, libros = _correr([40], [], [40], con_calendario=False)
+    assert s["motivo"] == "NADA_QUE_HACER" and libros["vuelta"] == {
+        "run_id": None, "generated_at": AHORA.isoformat(), "hechas": []}, libros["vuelta"]
+    # Con la ruta dada, ahí; con basura (error dentro), también; apagada, no.
+    with tempfile.TemporaryDirectory() as tmp:
+        ruta = Path(tmp) / "otra" / "vuelta.json"
+        fuera = {"orden": {}, "vetados": set(), "protegidos": set(),
+                 "libro_ronda": os.path.join(tmp, "ronda.json"),
+                 "libro_chollos": os.path.join(tmp, "chollos.json"), "horas_jornada": 100.0,
+                 "puede_escribir": True, "en_curso": False}
+        with _interruptores({ENV: "1", ENV_CALENDARIO: None, "GITHUB_RUN_ID": "7"}):
+            r = correr(status={"lineup": 3}, snapshot={"market": None}, v10={}, ahora=AHORA,
+                       libro_ruta=os.path.join(tmp, "mejora.json"), calendario={},
+                       de_fuera=fuera, vuelta_ruta=ruta)
+        assert json.loads(ruta.read_text()) == {
+            "run_id": "7", "generated_at": AHORA.isoformat(), "hechas": []}, r
+        ruta.unlink()
+        with _interruptores({ENV: None}):
+            assert correr(status={}, snapshot={}, v10={}, vuelta_ruta=ruta)["motivo"] == "APAGADA"
+        assert not ruta.exists()
+        # Nunca lanza: una ruta que no se puede escribir, o basura dentro.
+        bloqueo = Path(tmp) / "fichero"
+        bloqueo.write_text("x")
+        assert escribir_la_vuelta([], bloqueo / "vuelta.json", AHORA) is False
+        assert escribir_la_vuelta([{"x": {1, 2}}], Path(tmp) / "v.json", "ayer") is True
+        assert escribir_la_vuelta("basura", Path(tmp) / "w.json", AHORA) is True
+        assert json.loads((Path(tmp) / "w.json").read_text())["hechas"] == []
+
 TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_cambia_caro_por_barato_para_fichar_mejor,
          test_en_rojo_vende_caro_y_ficha_barato_desde_las_88_horas,
@@ -1048,7 +1273,13 @@ TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_correr_pasa_el_parte_del_relevo,
          test_correr_no_cuenta_lo_que_esta_vuelta_ya_vendio,
          test_correr_suma_lo_cobrado_al_saldo,
-         test_correr_cuenta_una_vez_la_puja_de_la_orden]
+         test_correr_cuenta_una_vez_la_puja_de_la_orden,
+         # Sin fantasmas en la caja (13/10/2026).
+         test_la_venta_de_la_orden_no_cuenta_dos_veces,
+         test_la_venta_de_la_mejora_cuenta_una_vez,
+         test_las_pujas_perdidas_de_la_orden_no_restan,
+         test_perdido_el_relevo_el_que_vende_la_orden_vuelve_a_poder_cambiarse,
+         test_la_vuelta_de_la_mejora_para_el_cierre]
 
 
 def main() -> None:

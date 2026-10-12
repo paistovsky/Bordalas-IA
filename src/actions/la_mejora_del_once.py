@@ -126,6 +126,25 @@ TRES ARREGLOS QUE VAN SIEMPRE (12/10/2026, el análisis del calendario)
        estado de la vuelta es DE ESTA vuelta: con más de
        `VUELTA_VIEJA_MINUTOS` (o sin hora), no se cuenta nada de él.
 
+SIN FANTASMAS EN LA CAJA (13/10/2026)
+
+    La orden del gestor no cambia sola (vive hasta el 30/11): vendidos
+    Jutglà y Rico, se seguían contando como venta pendiente en cada
+    vuelta (+3,1 M que ya estaban en el saldo); perdida la puja por su
+    relevo, se contaba una venta que no llega nunca y se restaba una
+    puja que ya no existe, y los dos quedaban quietos para siempre.
+    Ahora (`las_ventas_de_la_orden`, `la_caja_de_la_jornada`): la venta
+    de la orden cuenta si el que sale aún es nuestro y su relevo está
+    dentro o con puja viva; la de la mejora, si el que sale aún es
+    nuestro y el que entra está dentro o con puja viva (lo que `decidir`
+    suelta, ahora antes de la caja); un `fichar` sin puja se resta solo
+    si sigue en el mercado del Computer. Y el que la orden vende queda
+    quieto (`pendientes`) solo si su relevo está dentro, con puja viva o
+    aún en el mercado.
+
+    Al final de cada vuelta encendida escribe `VUELTA_MEJORA` (run_id,
+    hora, las `hechas`): el cierre de la jornada corre después.
+
 QUE NO HACE
 
     No toca a Yamal (salvo su llave de lesión), ni a los `proteger` de la
@@ -156,6 +175,9 @@ ENV = "BORDALAS_LA_MEJORA_DEL_ONCE"
 ENV_CALENDARIO = "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA"     # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
+# Lo que hizo la mejora en ESTA vuelta (13/10/2026), para el cierre de la
+# jornada, que corre después: {"run_id", "generated_at", "hechas"}.
+VUELTA_MEJORA = RAIZ / "data" / "trading" / "la_mejora_vuelta.json"
 STATUS = RAIZ / "dashboard" / "data" / "status.json"
 V10 = RAIZ / "data" / "trading" / "v10_full_autonomous_status.json"
 
@@ -836,6 +858,44 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None) -> dict:
     return salida
 
 
+def las_ventas_de_la_orden(orden, *, plantilla, pujadas, mercado=None) -> list:
+    """
+    Los `vender_si_ficha` de la orden que SIGUEN EN PIE (13/10/2026): el
+    que sale aún es nuestro (`plantilla`, ya sin lo vendido en esta
+    vuelta) y su relevo (su `si_esta` y el general, si lo hay: la orden
+    pide los dos) está en la plantilla o tiene puja viva nuestra
+    (`pujadas`: las de la foto y las de esta vuelta). Con `mercado` (el
+    del Computer, para `pendientes`), vale también un relevo que sigue en
+    él (la orden puede volver a pujar); un mercado vacío es no saberlo, y
+    vale. Sin relevo, la orden no lo vende nunca.
+
+    El 13/10: vendidos Jutglà y Rico, la orden los sigue listando hasta el
+    30/11 y su venta se contaba otra vez en cada vuelta (+3,1 M que no
+    existen); perdida la puja por Iván Romero, Jutglà no se vende nunca y
+    se contaba igual. Pura, nunca lanza.
+    """
+    salida = []
+    try:
+        plantilla = set(plantilla or ())
+        pujadas = set(pujadas or ())
+        venta = (orden or {}).get("vender_si_ficha") or {}
+        general = _int(venta.get("si_esta"))
+
+        def _llega(relevo):
+            return (relevo in plantilla or relevo in pujadas
+                    or (mercado is not None and (not mercado or relevo in mercado)))
+
+        for j in venta.get("jugadores") or []:
+            if not isinstance(j, dict) or _int(j.get("player_id")) not in plantilla:
+                continue
+            relevos = {r for r in (general, _int(j.get("si_esta"))) if r is not None}
+            if relevos and all(_llega(r) for r in relevos):
+                salida.append(j)
+    except Exception:                               # noqa: BLE001
+        pass
+    return salida
+
+
 def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
                           esta_vuelta=None) -> int:
     """
@@ -847,18 +907,30 @@ def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
     Con `esta_vuelta`: lo vendido en esta vuelta YA es caja (entra por
     `cobros`) y no cuenta otra vez ni como venta pendiente ni como
     inventario; y un `fichar` que esta vuelta ya pujó cuenta por su puja,
-    no dos veces. Sin pasarlo, lo de antes. Pura.
+    no dos veces. Sin pasarlo, lo de antes.
+
+    SIN FANTASMAS (13/10/2026): una venta pendiente es solo la que sigue
+    en pie. La de la orden, si el que sale aún es nuestro y su relevo está
+    dentro o con puja viva (`las_ventas_de_la_orden`); la de la mejora, si
+    el que sale aún es nuestro y el que entra está dentro o con puja viva
+    (lo mismo que `decidir` suelta, ahora ANTES de la caja). Vendido en
+    una vuelta anterior, su dinero ya está en el saldo. Y un `fichar` sin
+    puja se resta solo si el jugador sigue en el mercado del Computer (la
+    orden puede volver a pujar): perdido ante un rival, ya no se paga. Un
+    mercado vacío es no saberlo: se resta, como antes. Pura.
     """
     esta = esta_vuelta or {}
     vendidos = set(esta.get("cobros") or {})
     pujadas = set(foto.get("nuestras_pujas") or {}) | set(esta.get("pujas") or {})
-    plantilla = foto.get("plantilla") or set()
+    plantilla = set(foto.get("plantilla") or set()) - vendidos
+    mercado = foto.get("mercado") or {}
     orden = orden or {}
-    venta = [j for j in (orden.get("vender_si_ficha") or {}).get("jugadores") or []
-             if _int(j.get("player_id")) not in vendidos]
+    venta = las_ventas_de_la_orden(orden, plantilla=plantilla, pujadas=pujadas)
     saliendo_valor = sum(
         _int((liga.get(_int(c.get("sale"))) or {}).get("price"), 0) or 0
-        for c in (libro or {}).values() if _int(c.get("sale")) not in vendidos
+        for k, c in (libro or {}).items()
+        if _int(c.get("sale")) in plantilla
+        and (_int(k) in plantilla or _int(k) in pujadas)
     )
     return la_caja(
         foto, se_venden_solos=solos,
@@ -868,7 +940,8 @@ def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
                                + saliendo_valor) * VENTA)
         - sum(_int(f.get("puja"), 0) or 0 for f in orden.get("fichar") or []
               if _int(f.get("player_id")) not in pujadas
-              and _int(f.get("player_id")) not in plantilla),
+              and _int(f.get("player_id")) not in plantilla
+              and (not mercado or _int(f.get("player_id")) in mercado)),
         esta_vuelta=esta_vuelta,
     )
 
@@ -953,9 +1026,35 @@ def _la_ultima_foto():
     return _leer(fotos[-1], {}) if fotos else {}
 
 
+def escribir_la_vuelta(hechas, ruta=None, ahora=None) -> bool:
+    """
+    LO QUE HIZO LA MEJORA EN ESTA VUELTA (13/10/2026), para el cierre de
+    la jornada, que corre después y no lo ve en la foto (es de antes):
+
+        {"run_id": GITHUB_RUN_ID, "generated_at": ISO UTC,
+         "hechas": las de `ejecutar`, tal cual (lista vacía si nada)}
+
+    `ruta`, por defecto `VUELTA_MEJORA`. True si se escribió. Nunca lanza.
+    """
+    try:
+        cuando = ahora if isinstance(ahora, datetime) else datetime.now(timezone.utc)
+        if cuando.tzinfo is None:
+            cuando = cuando.replace(tzinfo=timezone.utc)
+        datos = {"run_id": os.environ.get("GITHUB_RUN_ID"),
+                 "generated_at": cuando.astimezone(timezone.utc).isoformat(),
+                 "hechas": list(hechas) if isinstance(hechas, list) else []}
+        ruta = Path(ruta or VUELTA_MEJORA)
+        ruta.parent.mkdir(parents=True, exist_ok=True)
+        ruta.write_text(json.dumps(datos, indent=2, ensure_ascii=False, default=str) + "\n",
+                        encoding="utf-8")
+        return True
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
            ahora: datetime | None = None, libro_ruta=None, calendario=None,
-           de_fuera=None) -> dict:
+           de_fuera=None, vuelta_ruta=None) -> dict:
     """
     La mejora del once, en esta vuelta. Nunca lanza.
 
@@ -967,6 +1066,10 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
                     `libro_ronda` y `libro_chollos`, `horas_jornada`,
                     `puede_escribir`, `en_curso`). Lo que no trae, de
                     producción, como siempre.
+        vuelta_ruta dónde va `escribir_la_vuelta` (encendida, siempre,
+                    también con error). Por defecto `VUELTA_MEJORA`; con
+                    `libro_ruta` y sin esto, junto al libro (quien mueve
+                    el libro no escribe en producción).
     """
 
     salida = {"activa": activa(), "motivo": None, "acciones": [], "hechas": [],
@@ -1015,8 +1118,20 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
 
         orden = (fuera["orden"] if "orden" in fuera else leer_la_orden()) or {}
         pendientes = {_int(f.get("player_id")) for f in orden.get("fichar") or []}
+        # SIN FANTASMAS (13/10/2026): el que la orden vende y aún es
+        # nuestro queda quieto solo mientras su relevo está dentro, con
+        # puja viva o aún en el mercado del Computer. Perdido el relevo, la
+        # orden no lo vende nunca y vuelve a poder cambiarse. El que ya no
+        # es nuestro, como antes (no se vuelve a fichar).
+        nuestros_ahora = set(foto["plantilla"]) - vendidos
+        siguen = {_int(j.get("player_id")) for j in las_ventas_de_la_orden(
+            orden, plantilla=nuestros_ahora,
+            pujadas=set(foto.get("nuestras_pujas") or {}) | set(esta_vuelta["pujas"]),
+            mercado=foto.get("mercado") or {})}
         venta = (orden.get("vender_si_ficha") or {}).get("jugadores") or []
-        pendientes |= {_int(j.get("player_id")) for j in venta}
+        pendientes |= {_int(j.get("player_id")) for j in venta
+                       if _int(j.get("player_id")) not in nuestros_ahora
+                       or _int(j.get("player_id")) in siguen}
         # los `no_pujar` del gestor
         pendientes |= set(fuera["vetados"] if "vetados" in fuera else vetados())
         pendientes |= vendidos
@@ -1101,6 +1216,16 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
 
     except Exception as error:                      # noqa: BLE001
         salida["motivo"] = f"ERROR: {type(error).__name__}: {error}"
+
+    # Encendida, SIEMPRE (también con error o sin nada hecho): lo que esta
+    # vuelta mandó, para el cierre de la jornada.
+    try:
+        if salida["activa"]:
+            if vuelta_ruta is None and libro_ruta is not None:
+                vuelta_ruta = Path(libro_ruta).with_name(VUELTA_MEJORA.name)
+            escribir_la_vuelta(salida["hechas"], vuelta_ruta, ahora)
+    except Exception:                               # noqa: BLE001
+        pass
 
     return salida
 
