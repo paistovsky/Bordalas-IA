@@ -82,6 +82,21 @@ def test_revende_en_cuanto_hay_beneficio():
     assert _d(plantilla={2}, valores={2: 1}, minutos_al_reset=500) == []
 
 
+def test_con_la_jornada_en_curso_no_revende_solo_publica():
+    # Con una ronda jugándose (`la_proxima_jornada`), el que se vende deja
+    # de puntuar si su partido está por jugar: no se acepta, se publica.
+    k = dict(plantilla={1}, libro={"1": 899_000}, valores={1: 920_000},
+             ofertas_del_computer={1: {"offer_id": 7, "amount": 950_000}},
+             minutos_al_reset=500)
+    assert _d(**k, en_curso=True) == [{"accion": "PONER_A_LA_VENTA", "player_id": 1,
+                                       "precio": 920_000, "chollo": True}]
+    assert _d(**k, en_curso=True, en_venta={1}) == []
+    assert _d(**k)[0]["accion"] == "ACEPTAR_OFERTA_DEL_COMPUTER"
+    # Pujar sí puede (la última vuelta antes del reset).
+    assert _d(mercado={2: 890_000}, valores={2: 900_000}, minutos_al_reset=127,
+              en_curso=True)[0]["accion"] == "PUJAR"
+
+
 def test_nace_apagada_y_nunca_lanza():
     os.environ.pop("BORDALAS_LOS_CHOLLOS", None)
     assert correr({}, 10)["motivo"] == "APAGADA"
@@ -95,7 +110,9 @@ def test_nace_apagada_y_nunca_lanza():
 
 TESTS = [test_la_puja_nunca_pasa_del_valor, test_puja_por_moi_y_no_por_los_demas,
          test_solo_en_la_ultima_vuelta, test_cerca_de_la_jornada_solo_caja_propia,
-         test_revende_en_cuanto_hay_beneficio, test_nace_apagada_y_nunca_lanza]
+         test_revende_en_cuanto_hay_beneficio,
+         test_con_la_jornada_en_curso_no_revende_solo_publica,
+         test_nace_apagada_y_nunca_lanza]
 
 
 def main() -> None:

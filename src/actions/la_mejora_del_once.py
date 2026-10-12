@@ -329,25 +329,18 @@ def decidir(
 
 def jornada_en_curso(ahora: datetime, ruta=None) -> bool:
     """
-    Entre el primer partido de una jornada y 3 h después del último. Los
-    aplazados (más de 5 días después del primero) no alargan la jornada:
-    el de la J6 Levante-Athletic se juega el 21/10.
+    Entre el primer partido de una ronda de Biwenger y 3 h después del
+    último. Las rondas las da `la_proxima_jornada`: los partidos fuera de
+    la ventana de su jornada (adelantados y aplazados) son rondas aparte.
+    Antes se cortaba a 5 días del PRIMER partido, y con el adelantado de
+    la J6 (03/09) el grueso del 15-17/09 no contaba como jornada en curso;
+    el aplazado Levante-Athletic del 21/10 cuenta como la suya.
     """
     try:
-        from datetime import timedelta
-
         from src.actions.los_chollos import CALENDARIO
+        from src.analysis.la_proxima_jornada import jornada_en_curso as _en_curso
 
-        d = json.loads(Path(ruta or CALENDARIO).read_text())
-        for j in d.get("matchdays") or []:
-            ko = sorted(datetime.fromisoformat(m["kickoff"]) for m in j.get("matches") or []
-                        if m.get("kickoff"))
-            if not ko:
-                continue
-            ko = [k for k in ko if k <= ko[0] + timedelta(days=5)]
-            if ko[0] <= ahora <= ko[-1] + timedelta(hours=3):
-                return True
-        return False
+        return bool(_en_curso(ahora, CALENDARIO if ruta is None else ruta))
     except Exception:                               # noqa: BLE001
         return True                                 # sin saberlo, no se vende
 
