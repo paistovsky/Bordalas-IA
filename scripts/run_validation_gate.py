@@ -208,6 +208,8 @@ TESTS = [
     "src.analysis.test_el_calendario_de_puntos_v1",
     "src.analysis.test_la_proxima_jornada_v1",
     "src.analysis.test_la_ranura_no_se_tira_v1",
+    "src.analysis.test_el_once_mira_el_calendario_v1",
+    "src.analysis.test_el_cierre_de_la_jornada_v1",
 
     # El dia despues de las seis compras del 21/09: cerrar la
     # reventa sin cerrar la compra para quedarse, y que el tope

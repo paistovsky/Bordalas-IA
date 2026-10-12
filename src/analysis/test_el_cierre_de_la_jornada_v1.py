@@ -423,7 +423,7 @@ def test_encendido_de_punta_a_punta():
             }))
             plan = Path(carpeta) / "el_cierre.json"
             # En esta vuelta: la ronda pujó 0,3 M y la orden cobró a B2 (0,9 M).
-            v10 = {"ronda": {"hechas": [{"accion": "PUJAR", "player_id": 700,
+            v10 = {"timestamp": AHORA.isoformat(), "ronda": {"hechas": [{"accion": "PUJAR", "player_id": 700,
                                          "importe": 300_000, "exito": True}]},
                    "orden_del_gestor": {"hechas": [{"accion": "ACEPTAR_OFERTA_DEL_COMPUTER",
                                                     "player_id": 14, "importe": 900_000,
@@ -704,7 +704,7 @@ def test_yamal_nunca_se_publica_ni_se_vende():
 
 
 def test_lo_que_publico_el_escaparate_no_se_vuelve_a_publicar():
-    v10 = {"escaparate": {"listed": [{"player_id": 11, "listed_price": 3_450_000,
+    v10 = {"timestamp": AHORA.isoformat(), "escaparate": {"listed": [{"player_id": 11, "listed_price": 3_450_000,
                                       "sent": True, "success": True}]}}
     assert lo_de_esta_vuelta(v10)["listados"] == {11}
     # En seco (ESCAPARATE_APAGADO=1: sent False) no cuenta: no hay precio
@@ -722,6 +722,17 @@ def test_lo_que_publico_el_escaparate_no_se_vuelve_a_publicar():
                        plan_ruta=Path(carpeta) / "plan.json")
             publicados = {pid for _, pid in _acciones(r["decision"], "PONER_A_LA_VENTA")}
             assert 11 not in publicados and 13 in publicados, r["decision"]["acciones"]
+            # El estado de OTRA vuelta (hace 2 h, o con otro run_id) no
+            # cuenta: la cache lo trae cuando esta no lo escribe (429).
+            from datetime import timedelta as _td
+            viejo = {**v10, "timestamp": (AHORA - _td(hours=2)).isoformat()}
+            r = correr(status=_status_con(), snapshot=_foto_con(saldo=10_000_000), v10=viejo,
+                       libros={}, calendario=CAL, orden_ruta=Path(carpeta) / "nada.json",
+                       escritor_factory=_Escritor, ahora=AHORA,
+                       plan_ruta=Path(carpeta) / "plan.json")
+            assert r.get("v10_descartado"), r
+            publicados = {pid for _, pid in _acciones(r["decision"], "PONER_A_LA_VENTA")}
+            assert 11 in publicados, r["decision"]["acciones"]
     finally:
         _entorno(**antes)
 

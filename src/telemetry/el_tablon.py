@@ -213,6 +213,11 @@ QUE_HACE = {
         "Para revender, solo compra jugadores cuyo precio está subiendo.",
     "BORDALAS_EL_ONCE_UNA_VEZ":
         "Calcula el mejor once una vez por vuelta y lo recuerda (más rápido).",
+    "BORDALAS_EL_CIERRE_DE_LA_JORNADA":
+        "Desde 64 h antes de cada jornada elige el mejor once con el calendario "
+        "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "
+        "del once escrito) hasta quedar en positivo; publica a los que se pueden "
+        "vender para que llegue la oferta del Computer.",
     "BORDALAS_EL_CALENDARIO_EN_EL_ONCE":
         "Al elegir el once mira el partido de la próxima ronda: en casa contra "
         "uno que no es de los de arriba suma; fuera, o contra uno de arriba, "

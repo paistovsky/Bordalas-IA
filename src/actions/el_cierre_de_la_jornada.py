@@ -1108,7 +1108,14 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
             publicar(salida["plan"], plan_ruta)
             return salida
         foto = leer_la_foto(snapshot, yo)
-        vuelta = lo_de_esta_vuelta(v10)
+        # Solo lo de ESTA vuelta: con un 429 la cache trae el estado de la
+        # anterior, y sus cobros (ya en el saldo) contarian dos veces. La
+        # misma prueba que la mejora del once (run_id; si no, la hora).
+        from src.actions.la_mejora_del_once import es_de_esta_vuelta
+
+        salida["v10_descartado"] = es_de_esta_vuelta(
+            v10, ahora, os.environ.get("GITHUB_RUN_ID"))
+        vuelta = lo_de_esta_vuelta({} if salida["v10_descartado"] else v10)
 
         roster = _lista(_dict(_dict(status).get("roster")).get("players"))
         plantilla = set(foto["plantilla"]) or _ids(p.get("id") for p in roster)
