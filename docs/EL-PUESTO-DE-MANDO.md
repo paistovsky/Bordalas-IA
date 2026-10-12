@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 12/10/2026, 14:35 de Madrid (rafaga de las 14:15).
+Actualizado: 12/10/2026, 21:30 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **12/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2184 a #2191),
+  tambien tras las olas 1 y 2 del chat del dueno. Comprometido
+  **9.867.000** (Ivan Romero, Gerard Martin, Moi Gomez; se resuelven el
+  13/10 07:00), saldo +659.783, puja maxima que queda 4,77 M. E36 lo
+  mide: **si entra Gerard Martin, sin el cierre no llegamos en verde a la
+  J9 (-2,4 a -3,4 M)**. El plan del chat del dueno lo cubre (encender el
+  cierre el martes por la noche, antes de su ventana del miercoles 05:00).
+  **Lo que vigilo yo:** (1) 07:15 del 13/10: que entro y que la caja de
+  la J9 con ventas previstas cuadra; (2) que el cierre se encienda el
+  martes y su canario salga verde; (3) jueves 07:15: si la caja de la J9
+  no esta en verde con lo ya vendido, aviso al dueno con el numero y a
+  quien vender. Turno del cierre de la J9: 16/10 12:45 (creado).
 
 - **12/10 20:45 (chat del dueno). OLA 2 Y ARREGLOS ANTES DEL RESET.**
   Subido (verja 208/208; ensayos #38275852357 y #38290081550 verdes, sin
