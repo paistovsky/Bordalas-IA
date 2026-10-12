@@ -184390,5 +184390,105 @@
         "amount": 5842300
       }
     ]
+  },
+  {
+    "event_id": "bb23f812395170f2affe1fda",
+    "date": 1791779579,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 32440,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 8952600
+      }
+    ]
+  },
+  {
+    "event_id": "9fa0027065445d73b7589eb3",
+    "date": 1791781531,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 8555,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 14007000,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 12721000
+          },
+          {
+            "user": {
+              "id": 14151726,
+              "name": "DiosMande a Rodri al Palancas",
+              "icon": "i/u/14151726.png"
+            },
+            "amount": 12495475
+          }
+        ]
+      },
+      {
+        "player": 41419,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1313000,
+        "bids": [
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 1229190
+          },
+          {
+            "user": {
+              "id": 14175949,
+              "name": "Pepe Bordalás",
+              "icon": "i/u/14175949.png"
+            },
+            "amount": 1142000
+          }
+        ]
+      },
+      {
+        "player": 4753,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3151000
+      },
+      {
+        "player": 26048,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 4320001
+      }
+    ]
   }
 ]

@@ -1528,11 +1528,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-10-11T13:09:50+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "LOST",
+   "resolved_at": "2026-10-12T05:18:29.584622+00:00",
+   "winning_amount": 1313000,
+   "margin": 171000,
+   "event_id": "9fa0027065445d73b7589eb3",
    "recorded_by": "TABLON"
   }
  }

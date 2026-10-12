@@ -2721,7 +2721,7 @@
         "3159": {
           "player_name": "Jutglà",
           "team": "Celta",
-          "appearances_at_prediction": 7,
+          "appearances_at_prediction": 8,
           "sources": {
             "FUTBOLFANTASY": 80.0
           },
@@ -2742,7 +2742,7 @@
         "9065": {
           "player_name": "Ximo Navarro",
           "team": "Deportivo",
-          "appearances_at_prediction": 6,
+          "appearances_at_prediction": 7,
           "sources": {},
           "consensus": "UNCERTAIN",
           "consensus_probability": 50.0
@@ -2750,7 +2750,7 @@
         "17482": {
           "player_name": "Dituro",
           "team": "Elche",
-          "appearances_at_prediction": 7,
+          "appearances_at_prediction": 8,
           "sources": {},
           "consensus": "UNCERTAIN",
           "consensus_probability": 50.0
