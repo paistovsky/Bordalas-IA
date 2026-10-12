@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 12/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **12/10 07:15 (rafaga de la manana). RECIO PERDIDO.** Ciclos: verdes
+  (#2168 a #2177). Nuestra puja de 1.142.000 (precio +1 %) perdio contra
+  **1.313.000 (+16 %)**: la tercera vez que un rival paga bastante mas en
+  un jugador que sube (E9: Pollo17 puja en el 75 % de los que suben).
+  Diego Rico sigue (no se vende: la orden lo ata a Recio), la duda de sus
+  puntos de la J8 ya no aplica. Saldo +659.783, comprometido 0, plantilla
+  11, once 11. **Para el chat del dueno / el fichaje del dia:** el +1 %
+  sirve contra empates, no contra un rival que quiere al jugador; con
+  defensas titulares que suben, contar con perder salvo que nadie mas
+  puje.
 
 - **11/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2161 a #2168).
   **Puja por Recio puesta: comprometido 1.142.000** (saldo +659.783); se
