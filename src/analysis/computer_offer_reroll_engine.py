@@ -1474,12 +1474,18 @@ def find_offer_by_id(
 def revalidate_reroll_offer(
     snapshot: dict,
     offer_id: int,
+    quien_los_vende: dict | None = None,
 ) -> dict:
     """
     Recalcula todo el Reroll Engine con un snapshot fresco y
     devuelve una autorizacion estricta.
 
     Esta funcion NO escribe en Biwenger.
+
+    EL REROLL RESPETA A LOS DEMAS (12/10/2026): nunca autoriza el
+    reroll de una oferta por un jugador que otro modulo va a vender
+    (`src/analysis/los_que_otros_venden.py`), con los libros de este
+    momento. `quien_los_vende` es para las pruebas; None = se leen.
     """
     board = build_computer_offer_reroll_board(
         snapshot=snapshot,
@@ -1500,6 +1506,49 @@ def revalidate_reroll_offer(
             ),
             "offer": None,
             "board": board,
+        }
+
+    try:
+        from src.analysis.los_que_otros_venden import (
+            los_de_la_oferta,
+            quien_los_vende as _quien,
+        )
+
+        if quien_los_vende is None:
+            quien_los_vende = _quien()
+
+        quien = {
+            int(pid): list(modulos or [])
+            for pid, modulos in (quien_los_vende or {}).items()
+        }
+        suyos = sorted(los_de_la_oferta(offer) & set(quien))
+
+    except Exception as error:                      # noqa: BLE001
+        # Sin saber quien vende a quien no se tira ninguna oferta.
+        return {
+            "authorized": False,
+            "status": "LO_VENDE_OTRO_MODULO_SIN_LEER",
+            "reason": (
+                "No se pudo comprobar si otro modulo vende a este "
+                f"jugador: {type(error).__name__}: {error}"
+            ),
+            "offer": offer,
+            "board": board,
+        }
+
+    if suyos:
+        modulos = sorted({m for pid in suyos for m in quien[pid]})
+        return {
+            "authorized": False,
+            "status": "LO_VENDE_OTRO_MODULO",
+            "reason": (
+                f"Otro modulo ({', '.join(modulos)}) va a vender a "
+                f"{', '.join(str(p) for p in suyos)}: su oferta no se "
+                "rerollea."
+            ),
+            "offer": offer,
+            "board": board,
+            "modulos": modulos,
         }
 
     if offer.get("action") != "REROLL_CANDIDATE":
