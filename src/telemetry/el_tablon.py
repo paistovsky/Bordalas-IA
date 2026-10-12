@@ -196,8 +196,13 @@ QUE_HACE = {
         "Puja por debajo de su valor por los del Computer que ya valen más de "
         "lo que piden, y los revende en cuanto hay beneficio (detrás de todo).",
     "BORDALAS_LA_RONDA_DE_LA_MANANA":
-        "Cada mañana puja (precio + 1 %) por los del Computer que suben, están "
-        "bien y juegan, y se los revende al Computer antes de la jornada.",
+        "En cada vuelta puja (precio + 1 %) por los del Computer que suben, están "
+        "bien y juegan, con toda la deuda, y se los revende al Computer antes de "
+        "la jornada.",
+    "BORDALAS_LA_MEJORA_DEL_ONCE":
+        "En cada vuelta busca los cambios que más puntos suman al once (con deuda "
+        "entre jornadas), puja por el que entra y vende al que sale cuando llega "
+        "su relevo; en rojo, cambia caro por barato antes que jugar con 0.",
     "BORDALAS_COMPRA_SOLO_SI_SUBE":
         "Para revender, solo compra jugadores cuyo precio está subiendo.",
     "BORDALAS_EL_ONCE_UNA_VEZ":

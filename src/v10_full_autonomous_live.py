@@ -1487,7 +1487,7 @@ def run_full_autonomous_cycle() -> dict:
     #
     #     Detras de los chollos: compra al Computer a quien sube (E1) a
     #     precio + 1 % (E9) y se lo revende antes de la jornada (E28).
-    #     Solo en la ultima vuelta antes del reset. APAGADA:
+    #     En CADA vuelta fuera de la zona de silencio. APAGADA:
     #     `BORDALAS_LA_RONDA_DE_LA_MANANA`. Nunca lanza.
     from src.actions.la_ronda_de_la_manana import correr as _la_ronda
 

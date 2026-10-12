@@ -474,6 +474,14 @@ jobs:
           test -f dashboard/data/status.json
           ls -lh data/trading/v10_full_autonomous_status.json
           ls -lh dashboard/data/status.json
+
+      # LA MEJORA DEL ONCE (12/10/2026). Despues del panel, que es quien
+      #   sabe la titularidad. APAGADA: `BORDALAS_LA_MEJORA_DEL_ONCE`.
+      #   Nunca rompe la vuelta.
+      - name: La mejora del once
+        shell: bash
+        run: |
+          python -m src.actions.la_mejora_del_once || true
       - name: Update Cloudflare dashboard
         shell: bash
         run: |

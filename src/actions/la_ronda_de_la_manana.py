@@ -22,10 +22,12 @@ LA REGLA
     2. Cuánto: precio + 1 % redondeado a miles (E9: sin pelear la
        subasta). Como mucho `TOPE_POR_VIAJE` por jugador; todo lo de la
        ronda (pujas vivas + lo comprado, a lo pagado) como mucho
-       `TOPE_TOTAL`; y nunca más que `maximumBid` - `RESERVA`.
-    3. Cuándo: en la última vuelta antes del reset, como los chollos, y
-       solo si la jornada está a `HORAS_SIN_COMPRAR` o más. Sin
-       calendario, no compra.
+       `TOPE_TOTAL` (sin tope: «se ejecuta toda la deuda»); y nunca más
+       que `maximumBid` - `RESERVA` (que ya descuenta las pujas vivas).
+    3. Cuándo: en CADA vuelta (el dueño, 12/10: «revisión cada ciclo,
+       que para eso está 24/7») salvo en la zona de silencio, y solo si
+       la jornada está a `HORAS_SIN_COMPRAR` o más. Sin calendario, no
+       compra.
     4. Salida (solo lo del libro y lo que tenemos): se publica a su valor;
        se acepta la oferta del Computer con beneficio (pagado + 1 %); el
        primer día que baja (E3), a pagado - 2 %; a menos de
