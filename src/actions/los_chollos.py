@@ -17,7 +17,9 @@ LA REGLA (la del dueño, 02/10)
     2. Cuánto: siempre, aunque haya más pujas, entre lo que pide y lo que
        vale, nunca por encima de su valor: valor - 1.000 € (o a mitad de
        camino si el hueco es menor de 2.000 €).
-    3. Después: se revende al Computer en cuanto ofrezca más de lo pagado.
+    3. Después: se revende al Computer en cuanto ofrezca más de lo pagado,
+       salvo con una ronda jugándose (`la_proxima_jornada.jornada_en_curso`,
+       12/10): entonces solo se publica.
     4. Prioridad: detrás de las pujas normales. Solo puja en la última
        vuelta antes del reset (las pujas normales ya están puestas) y con
        lo que quede de `maximumBid` menos `RESERVA`.
@@ -88,20 +90,19 @@ def la_puja(pide: int, vale: int) -> int | None:
 
 
 def horas_a_la_jornada(ahora: datetime, ruta: Path | str | None = None):
-    """Horas hasta el primer partido futuro del calendario. None si no se sabe."""
+    """
+    Horas hasta el próximo cierre: el inicio de la próxima ronda de
+    Biwenger que no ha empezado. None si no se sabe.
+
+    Antes era el `first_kickoff` futuro más cercano, y el de la J6 era el
+    adelantado del 03/09: el arranque del 15/09 no lo vio. Ahora lo dice
+    `la_proxima_jornada` (aplazados y adelantados, rondas aparte; el
+    Levante-Athletic del 21/10 incluido).
+    """
     try:
-        d = json.loads(Path(ruta or CALENDARIO).read_text())
-        futuros = []
-        for j in d.get("matchdays") or []:
-            k = j.get("first_kickoff")
-            if not k:
-                continue
-            t = datetime.fromisoformat(k)
-            if t > ahora:
-                futuros.append(t)
-        if not futuros:
-            return None
-        return (min(futuros) - ahora).total_seconds() / 3600
+        from src.analysis.la_proxima_jornada import horas_al_proximo_cierre
+
+        return horas_al_proximo_cierre(ahora, CALENDARIO if ruta is None else ruta)
     except Exception:                               # noqa: BLE001
         return None
 
@@ -110,18 +111,27 @@ def decidir(
     *, mercado, valores, estados, nuestras_pujas, plantilla,
     ofertas_del_computer, en_venta, maximo_de_puja, saldo,
     minutos_al_reset, horas_jornada, libro, puede_escribir=True,
+    en_curso=False,
 ) -> list:
-    """Qué hacer con los chollos. Pura."""
+    """
+    Qué hacer con los chollos. Pura.
+
+        en_curso    hay una ronda jugándose (`la_proxima_jornada`): no se
+                    acepta ninguna oferta (el que se vende deja de
+                    puntuar para nosotros si su partido está por jugar);
+                    publicar sí se puede.
+    """
 
     acciones = []
 
-    # 3. REVENDER lo comprado como chollo.
+    # 3. REVENDER lo comprado como chollo (con jornada en curso, solo
+    # publicar).
     for pid, pagado in (libro or {}).items():
         pid = _int(pid)
         if pid not in plantilla:
             continue
         oferta = ofertas_del_computer.get(pid)
-        if oferta and _int(oferta.get("amount"), 0) > _int(pagado, 0):
+        if oferta and not en_curso and _int(oferta.get("amount"), 0) > _int(pagado, 0):
             acciones.append({
                 "accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": pid,
                 "offer_id": _int(oferta.get("offer_id")),
@@ -207,6 +217,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
         from src.actions.la_orden_del_gestor import (
             _pid, ejecutar, leer_la_foto, vetados,
         )
+        from src.analysis.la_proxima_jornada import jornada_en_curso
 
         ahora = ahora or datetime.now(timezone.utc)
         snapshot = (cycle or {}).get("snapshot") or {}
@@ -233,6 +244,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             saldo=foto["saldo"], minutos_al_reset=minutos_al_reset,
             horas_jornada=horas_a_la_jornada(ahora), libro=libro,
             puede_escribir=_puede_escribir(ahora),
+            en_curso=jornada_en_curso(ahora, CALENDARIO),
         )
         salida["acciones"] = acciones
 

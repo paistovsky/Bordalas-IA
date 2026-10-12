@@ -16,9 +16,11 @@ LA REGLA
     1. A quién: del Computer, no nuestro, sin puja nuestra, no vetado ni
        protegido por el gestor, estado «ok» (las noticias solo como
        guardia, E4: ni lesionados, ni dudas, ni sancionados, ni lo que no
-       se sepa), subiendo (`priceIncrement` > 0, E1) y que juega y puntúa
-       (3 partidos o más y 3 puntos por partido o más). Primero el que
-       más sube en proporción a su precio.
+       se sepa), subiendo de verdad (`priceIncrement` de al menos la
+       `la_subida_minima` de su tramo de precio, E1 y la medida del 12/10:
+       un tic de +10.000 no basta) y que juega y puntúa (3 partidos o más
+       y 3 puntos por partido o más). Primero el que más sube en
+       proporción a su precio.
     2. Cuánto: precio + 1 % redondeado a miles (E9: sin pelear la
        subasta). Como mucho `TOPE_POR_VIAJE` por jugador; todo lo de la
        ronda (pujas vivas + lo comprado, a lo pagado) como mucho
@@ -33,7 +35,12 @@ LA REGLA
        primer día que baja (E3), a pagado - 2 %; a menos de
        `HORAS_LIQUIDAR` de la jornada, a pagado - 7 %; a menos de
        `HORAS_SOLVENCIA`, lo que ofrezca (en rojo al empezar la jornada
-       se hacen 0 puntos).
+       se hacen 0 puntos). Con una ronda jugándose
+       (`la_proxima_jornada.jornada_en_curso`) no se acepta ninguna
+       oferta, solo se publica: el que se vende con su partido por jugar
+       deja de puntuar para nosotros. Las horas a la jornada cuentan
+       hasta el próximo cierre de Biwenger, aplazados incluidos (el
+       Levante-Athletic de la J6, el 21/10).
 
 QUE NO HACE
 
@@ -46,13 +53,14 @@ QUE NO HACE
 from __future__ import annotations
 
 import json
+import math
 import os
 
 from datetime import datetime, timezone
 from pathlib import Path
 
 from src.actions.los_chollos import (
-    MINUTOS_ULTIMA_VUELTA, _int, _puede_escribir, horas_a_la_jornada,
+    CALENDARIO, MINUTOS_ULTIMA_VUELTA, _int, _puede_escribir, horas_a_la_jornada,
 )
 
 
@@ -72,6 +80,23 @@ LIQUIDA = 0.93                  # cerca de la jornada
 PUNTOS_POR_PARTIDO = 3.0
 PARTIDOS_MINIMOS = 3
 
+# LA SUBIDA MÍNIMA (12/10/2026). Medido sobre
+# data/autopilot/price_history.json (n = 7.286 días-jugador, 398 jugadores,
+# 55 días, estable en las dos mitades): de 1 M para arriba, un solo tic de
+# +10.000 sigue subiendo solo el 70,5 % de las veces (n = 1.154) y a 7
+# días la mediana es -0,95 %; +20.000 sigue el 90,5 % (+1,9 %), +30-50 mil
+# el 97,4 %. Dentro de cada tramo de precio, el tercio de abajo por % de
+# subida sigue el 77-82 % y el de arriba el 96-100 %: los cortes por
+# tramo son de esa misma medida. Se sigue ordenando por sube/precio (E1,
+# n = 191 viajes; E28).
+#   (hasta este precio, sin incluir; % del precio; mínimo en euros)
+TRAMOS_DE_SUBIDA = (
+    (1_000_000, 0.031, 0),
+    (3_000_000, 0.011, 20_000),
+    (6_000_000, 0.005, 20_000),
+    (None, 0.0045, 20_000),
+)
+
 
 def activa() -> bool:
     try:
@@ -83,6 +108,25 @@ def activa() -> bool:
 def la_puja(precio: int) -> int:
     """Precio + 1 %, redondeado a miles (E9)."""
     return int(round(precio * SUBE, -3))
+
+
+def la_subida_minima(precio) -> int | None:
+    """
+    Lo mínimo que tiene que subir hoy (`priceIncrement`) un jugador de
+    este precio para que la ronda puje: el % de su tramo, y nunca menos
+    de 20.000 € de 1 M para arriba (`TRAMOS_DE_SUBIDA`). None si no hay
+    precio (sin precio no se puja).
+    """
+    try:
+        precio = _int(precio, 0) or 0
+        if precio <= 0:
+            return None
+        for hasta, pct, minimo in TRAMOS_DE_SUBIDA:
+            if hasta is None or precio < hasta:
+                return max(int(minimo), math.ceil(round(precio * pct, 6)))
+        return None
+    except Exception:                               # noqa: BLE001
+        return None
 
 
 def el_suelo(pagado: int, incremento, horas_jornada) -> int:
@@ -109,13 +153,15 @@ def juega(ficha: dict) -> bool:
 def decidir(
     *, mercado, fichas, nuestras_pujas, plantilla, ofertas_del_computer,
     en_venta, maximo_de_puja, minutos_al_reset, horas_jornada, libro,
-    protegidos=frozenset(), puede_escribir=True,
+    protegidos=frozenset(), puede_escribir=True, en_curso=False,
 ) -> list:
     """Qué hace la ronda en esta vuelta. Pura.
 
         fichas   {player_id: ficha del catálogo} (price, priceIncrement,
                  status, points, playedHome, playedAway)
         libro    {"player_id": lo pagado} de lo comprado por la ronda
+        en_curso hay una ronda de Biwenger jugándose: no se acepta
+                 ninguna oferta (publicar sí)
     """
 
     acciones = []
@@ -129,7 +175,7 @@ def decidir(
         ficha = fichas.get(pid) or {}
         suelo = el_suelo(pagado, ficha.get("priceIncrement"), horas_jornada)
         oferta = ofertas_del_computer.get(pid)
-        if oferta and (_int(oferta.get("amount"), 0) or 0) >= suelo:
+        if oferta and not en_curso and (_int(oferta.get("amount"), 0) or 0) >= suelo:
             acciones.append({
                 "accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": pid,
                 "offer_id": _int(oferta.get("offer_id")),
@@ -161,7 +207,9 @@ def decidir(
             expuesto += _int(pagado, 0) or 0
     disponible = (_int(maximo_de_puja, 0) or 0) - RESERVA
 
-    # 1. Los que suben, están bien y juegan; el que más sube primero.
+    # 1. Los que suben de verdad, están bien y juegan; el que más sube
+    # (en proporción a su precio) primero. La subida mínima va por el
+    # valor de hoy (la ficha; si no, lo que pide).
     candidatos = []
     for pid, precio in mercado.items():
         ficha = fichas.get(pid) or {}
@@ -170,7 +218,8 @@ def decidir(
         if str(ficha.get("status") or "").lower() != "ok":
             continue
         sube = _int(ficha.get("priceIncrement"), 0) or 0
-        if sube <= 0 or not juega(ficha):
+        minima = la_subida_minima(_int(ficha.get("price")) or precio)
+        if sube <= 0 or minima is None or sube < minima or not juega(ficha):
             continue
         candidatos.append((sube / precio, pid, precio, sube))
 
@@ -209,6 +258,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
         from src.actions.la_orden_del_gestor import (
             _pid, ejecutar, leer_la_foto, protegidos, vetados,
         )
+        from src.analysis.la_proxima_jornada import jornada_en_curso
 
         ahora = ahora or datetime.now(timezone.utc)
         snapshot = (cycle or {}).get("snapshot") or {}
@@ -234,6 +284,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             minutos_al_reset=minutos_al_reset,
             horas_jornada=horas_a_la_jornada(ahora), libro=libro,
             protegidos=protegidos(), puede_escribir=_puede_escribir(ahora),
+            en_curso=jornada_en_curso(ahora, CALENDARIO),
         )
         salida["acciones"] = acciones
 

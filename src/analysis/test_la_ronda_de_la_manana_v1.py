@@ -16,7 +16,7 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from src.actions.la_ronda_de_la_manana import (     # noqa: E402
-    correr, decidir, la_puja,
+    correr, decidir, la_puja, la_subida_minima,
 )
 
 
@@ -54,10 +54,11 @@ def test_solo_puja_por_quien_sube_esta_bien_y_juega():
 
 
 def test_nunca_pasa_de_los_topes():
-    f = {i: _f(precio=2_500_000, sube=10_000 + i) for i in range(1, 6)}
+    # 2,5 M: la subida mínima es el 1,1 % (27.500); suben 30.001-30.005.
+    f = {i: _f(precio=2_500_000, sube=30_000 + i) for i in range(1, 6)}
     m = {i: 2_500_000 for i in range(1, 6)}
-    # Más de 3 M por jugador: nada.
-    assert _d(mercado={7: 3_000_000}, fichas={7: _f(precio=3_000_000)}) == []
+    # Más de 3 M por jugador: nada (aunque suba de sobra).
+    assert _d(mercado={7: 3_000_000}, fichas={7: _f(precio=3_000_000, sube=100_000)}) == []
     # Toda la deuda (el dueño, 12/10): con 20 M de puja caben los cinco.
     assert len(_pujas(_d(mercado=m, fichas=f))) == 5
     # Con 8 M de puja (7 M usables): caben dos de 2,525 M.
@@ -133,6 +134,56 @@ def test_no_toca_protegidos_ni_a_quien_no_compro():
               nuestras_pujas={2: {"offer_id": 1, "amount": 1_010_000}}) == []
 
 
+def test_la_subida_minima_por_tramo():
+    # La medida del 12/10 (price_history, n = 7.286): de 1 M para arriba un
+    # tic de +10.000 sigue solo el 70,5 %; +20.000, el 90,5 %.
+    assert la_subida_minima(500_000) == 15_500            # < 1 M: 3,1 %
+    assert la_subida_minima(999_999) == 31_000
+    assert la_subida_minima(1_000_000) == 20_000          # 1-3 M: máx(20.000, 1,1 %)
+    assert la_subida_minima(2_000_000) == 22_000
+    assert la_subida_minima(3_000_000) == 20_000          # 3-6 M: máx(20.000, 0,5 %)
+    assert la_subida_minima(5_000_000) == 25_000
+    assert la_subida_minima(6_000_000) == 27_000          # > 6 M: máx(20.000, 0,45 %)
+    assert la_subida_minima(None) is None and la_subida_minima(0) is None
+    assert la_subida_minima("x") is None
+
+    def pujas(precio, sube):
+        return _pujas(_d(mercado={1: precio}, fichas={1: _f(precio=precio, sube=sube)}))
+
+    assert pujas(1_000_000, 10_000) == []                 # un tic: no
+    assert pujas(1_000_000, 19_999) == []
+    assert pujas(1_000_000, 20_000) == [(1, 1_010_000)]
+    assert pujas(500_000, 15_499) == []
+    assert pujas(500_000, 15_500) == [(1, 505_000)]
+    assert pujas(2_000_000, 21_999) == []
+    assert pujas(2_000_000, 22_000) == [(1, 2_020_000)]
+    # El tramo va por el valor de hoy (la ficha), no por lo que pide.
+    a = _d(mercado={1: 990_000}, fichas={1: _f(precio=1_010_000, sube=20_000)})
+    assert _pujas(a) == [(1, 1_000_000)]
+    # Se sigue ordenando por sube/precio: 500 mil +4 % antes que 1 M +3 %.
+    a = _d(mercado={1: 1_000_000, 2: 500_000},
+           fichas={1: _f(sube=30_000), 2: _f(precio=500_000, sube=20_000)})
+    assert [p for p, _ in _pujas(a)] == [2, 1]
+
+
+def test_con_la_jornada_en_curso_no_acepta_solo_publica():
+    # Con una ronda jugándose, el que se vende deja de puntuar: ni con
+    # beneficio ni a menos de 20 h se acepta. Publicar sí.
+    for horas in (100, 19, None):
+        a = _salida(en_curso=True, horas_jornada=horas,
+                    ofertas_del_computer=_oferta(2_000_000))
+        assert a == [{"accion": "PONER_A_LA_VENTA", "player_id": 1,
+                      "precio": 1_050_000, "ronda": True}], a
+        assert _salida(en_curso=True, horas_jornada=horas, en_venta={1},
+                       ofertas_del_computer=_oferta(2_000_000)) == []
+    # Sin jornada en curso, como siempre.
+    assert _salida(ofertas_del_computer=_oferta(2_000_000))[0][
+        "accion"] == "ACEPTAR_OFERTA_DEL_COMPUTER"
+    # Comprar sí puede (lejos del próximo cierre).
+    assert _pujas(_d(mercado={2: 1_000_000}, fichas={2: _f()}, en_curso=True)) == [
+        (2, 1_010_000)]
+
+
 def test_nace_apagada_y_nunca_lanza():
     os.environ.pop("BORDALAS_LA_RONDA_DE_LA_MANANA", None)
     assert correr({}, 10)["motivo"] == "APAGADA"
@@ -152,7 +203,9 @@ def test_nace_apagada_y_nunca_lanza():
 TESTS = [test_solo_puja_por_quien_sube_esta_bien_y_juega, test_nunca_pasa_de_los_topes,
          test_solo_en_la_ultima_vuelta_y_lejos_de_la_jornada,
          test_vende_con_beneficio_o_lo_publica, test_el_primer_dia_que_baja_y_la_liquidacion,
-         test_no_toca_protegidos_ni_a_quien_no_compro, test_nace_apagada_y_nunca_lanza]
+         test_no_toca_protegidos_ni_a_quien_no_compro, test_la_subida_minima_por_tramo,
+         test_con_la_jornada_en_curso_no_acepta_solo_publica,
+         test_nace_apagada_y_nunca_lanza]
 
 
 def main() -> None:
