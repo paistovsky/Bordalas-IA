@@ -69,6 +69,44 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E35 · 12/10/2026 11:20 de Madrid · La J8 a medias: lo que va contra lo que predijo E23
+
+**Que es:** la J8 aun no ha cerrado (4 equipos juegan hoy, lunes). Avance
+de E23 con la foto del ciclo de las 11:10 de hoy contra la de antes del
+primer partido. **Codigo:** `lab/predicciones/j8_parcial.py` (el once
+guardado de cada uno, `is_starter`; titulares cuyo equipo aun no ha
+jugado = «le faltan»). El juicio final, con `j8.py --juzgar` al cerrar.
+
+    manager          once   lleva   le faltan   E23 esperaba
+    Alvaro R.         11      51        1         24,9
+    Pollo17           11      48        3         46,1
+    Mex               11      46        2         29,0
+    DiosMande         11      39        1         (sin once valido)
+    Pepe              11      38        2         48,1
+    Manzagool         11      37        3         36,5
+    Luismi_Haz        10      30        3         58,1  (once de 10 y empezo en rojo: E31)
+    Prinzipote        11      26        2         27,2
+
+**Pepe, jugador a jugador (9 de 11 ya jugaron):** Chust 8 (esperado 2,4),
+Pablo Ibanez 6 (3,4), Gulacsi 6 (4,3), Yamal 6 (11,3), Jonny 4 (2,5),
+Exposito 4 (4,0), Roberto 3 (7,6), Jutgla 1 (2,9), **Diego Rico 0: no
+jugo** (50 % de titularidad: el unico por debajo del 70 %, E17/E23). Los
+9: 38 reales contra 39,8 esperados. Faltan Olasagasti y Unai (hoy).
+
+**Lo que va diciendo:**
+1. Para el once de Pepe, la vara acierta en el total (38 contra 39,8) y
+   falla jugador a jugador (Yamal -5, Chust +6): lo normal con una
+   jornada.
+2. **Pollo17 va 10 por delante en la J8** con un partido mas pendiente.
+   Si lo mantiene, nos pasa en la general (323 contra 320 antes de la J8).
+3. **Luismi** guardo un once de 10 y, por E31, deberia contar cero.
+4. La vara se equivoca mucho con los de abajo (Alvaro, Mex): con una
+   jornada no se puede decir si es la vara o la suerte.
+5. **Diego Rico, el unico <70 %, no jugo**: lo que E12/E16 avisaban
+   (el defensa de recambio sigue pendiente).
+
+**Veredicto: PENDIENTE** del cierre de la J8.
+
 ### E34 · 11/10/2026 17:20 de Madrid · ¿Se puede pujar por puntos antes de la rampa? Casi nunca hay a quien
 
 **Por que:** E33 abrio la idea de pujar a las 04:50 por los que puntuan
