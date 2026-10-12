@@ -352,6 +352,36 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **12/10 16:20 (chat del dueno). EL CALENDARIO, OLA 1 EN PRODUCCION.** El
+  dueno: «fichas jugadores mejores cada dia y gente que va a subir; antes
+  de la jornada se mira el calendario, se decide el mejor XI y se vende a
+  los que falten para estar en positivo… mejor tener jugadores de los
+  equipos de arriba». Medido (laboratorio, n=564 actuaciones J7-J8 con la
+  tabla de ANTES de cada partido): casa x1,06 / fuera x0,94 (porteros 1,0),
+  rival del top 6 x0,90, resto x1,04; la fuerza del propio equipo ya esta
+  en sus puntos por partido (no se multiplica: solo como prior para los de
+  pocos partidos). El calendario es un desempate (-15 %/+10 % en 3
+  partidos), no una razon para vender a un crack. Nuestro once viene de
+  equipos de media 11,2 en la tabla (1 del top 6, Yamal); el de Pollo de
+  6,7 (7 del top 6), el de Luismi de 8,8. **Subido a main (verja 205/205),
+  dentro de modulos ya encendidos:** (1) `el_calendario_de_puntos` (puro,
+  aun sin uso); (2) `la_proxima_jornada`: rondas como las de Biwenger
+  (aplazados y adelantados son ronda propia: el Levante-Athletic del 21/10
+  cuenta), y ni la ronda ni los chollos cobran con jornada jugandose; la
+  ronda ya no compra subidas minimas (n=7.286: +10.000 sigue subiendo el
+  70 %, +20.000 el 90 %); (3) la orden con reloj (no puja a menos de 40 h
+  salvo lo que paga la caja) y parte del relevo (no cobra al que sale si
+  el que entra esta lesionado o en duda; en rojo a <24 h, si); (4) la
+  ranura del ciclo ya no se tira: llevaba 10 dias gastando su unica
+  escritura en intentar publicar a Yamal (protegido) — 36 FAILED en el
+  log. **Orden:** Roberto y Gulacsi pasan de `proteger` a `conservar`
+  (solo Yamal intocable): la mejora del once puede cambiarlos si suma.
+  **Ola 2 en marcha (nace apagada):** el calendario dentro de la mejora
+  del once (`BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`) y de la alineacion
+  (`BORDALAS_EL_CALENDARIO_EN_EL_ONCE`), y el cierre de la jornada
+  (`BORDALAS_EL_CIERRE_DE_LA_JORNADA`: mejor XI con calendario y vender lo
+  que sobre hasta >= 0). Regla: nada se enciende jueves ni viernes.
+
 - **12/10 14:20 (chat del dueno). PEPE DEJA DE DORMIR: REVISION EN CADA
   VUELTA, CON DEUDA.** El dueno: «Pepe esta dormido… se compra, se ejecuta
   toda la deuda, se aguanta y se vende mas caro o se mejora el XI; revision
