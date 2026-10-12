@@ -352,6 +352,34 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **12/10 20:45 (chat del dueno). OLA 2 Y ARREGLOS ANTES DEL RESET.**
+  Subido (verja 208/208; ensayos #38275852357 y #38290081550 verdes, sin
+  errores): (1) **apagados**, el calendario en la mejora
+  (`BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`: xP de las 3 proximas jornadas
+  PRINCIPALES -el aplazado Levante-Athletic del 21/10 se juega con el once
+  de la J6 y no cuenta-, encoge a los de pocos partidos hacia su tramo, y
+  nunca vende a uno 0,5 pts mejor por calendario; en el ensayo frena 5
+  cambios asi), el calendario en el once que se escribe
+  (`BORDALAS_EL_CALENDARIO_EN_EL_ONCE`: NO se enciende antes de la J9,
+  con el las protecciones de venta mirarian otro once) y el cierre de la
+  jornada (`BORDALAS_EL_CIERRE_DE_LA_JORNADA`: paso propio DESPUES de la
+  mejora; desde 64 h antes elige el mejor once y vende lo que sobra hasta
+  >= 0; nunca a un titular del once escrito). (2) **Dentro de lo
+  encendido**, lo que encontro la revision de todo junto (4 lentes y un
+  esceptico por hallazgo): la caja de la mejora contaba dos veces las
+  ventas ya cobradas de la orden (+3,1 M falsos el martes: habria dejado
+  la J9 en rojo) y restaba pujas perdidas; la orden retira la puja de un
+  fichaje lesionado/en duda/sancionado; el reroll del orquestador ya no
+  rechaza ofertas que la ronda, los chollos, la mejora, la orden o el
+  cierre van a cobrar; el ciclo apunta su run_id y los pasos de despues
+  solo cuentan lo de su vuelta. **Ojo esta noche:** el catalogo de
+  Biwenger esta en cache hasta el reset: si Ivan Romero se lesiona en el
+  Levante-Sevilla, la retirada automatica no lo ve; hay un turno a las
+  23:15 para meterlo en `no_pujar` a mano. **Plan:** martes tras el reset,
+  encender el calendario en la mejora; martes noche, el cierre (antes de
+  que abra su ventana el miercoles 05:00). Nada se enciende jueves ni
+  viernes.
+
 - **12/10 16:20 (chat del dueno). EL CALENDARIO, OLA 1 EN PRODUCCION.** El
   dueno: «fichas jugadores mejores cada dia y gente que va a subir; antes
   de la jornada se mira el calendario, se decide el mejor XI y se vende a
