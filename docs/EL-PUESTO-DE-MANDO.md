@@ -352,6 +352,39 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **12/10 14:20 (chat del dueno). PEPE DEJA DE DORMIR: REVISION EN CADA
+  VUELTA, CON DEUDA.** El dueno: «Pepe esta dormido… se compra, se ejecuta
+  toda la deuda, se aguanta y se vende mas caro o se mejora el XI; revision
+  cada ciclo, que para eso esta 24/7» y «no se trata de ejecutar mis ordenes
+  al pie de la letra, se trata de que entiendas como funciona el juego».
+  Tenia razon y la causa era nuestra: la reventa cabia en la caja libre
+  (casi nunca hay), el fichaje del dia exigia caja >= 0 SIN deuda (tiro a
+  Ivan Romero por 520.000 € y a Gerard por 3,8 M) y lo decidia una rutina
+  fuera de Pepe una vez al dia. Pollo17 vale 100 M y Luismi 93 M; nosotros
+  56 M: les sacamos 3 puntos con medio equipo de valor.
+  **Encendidos dos interruptores** (verja 202/202, paso 0 con 40):
+  `BORDALAS_LA_RONDA_DE_LA_MANANA` (ensayo #38245120244): en cada vuelta
+  fuera de la zona de silencio puja precio +1 % por los del Computer que
+  suben, sanos y que juegan; hasta 3 M por jugador y hasta maximumBid - 1 M
+  (maximumBid ya descuenta las pujas vivas); no compra a menos de 40 h de la
+  jornada; vende con beneficio, el primer dia que baja a -2 %, a 36 h a -7 %
+  y a 20 h lo que haya. `BORDALAS_LA_MEJORA_DEL_ONCE` (ensayo #38247206025):
+  paso propio tras el panel; en cada vuelta la combinacion de cambios (misma
+  posicion, hasta 3) que mas puntos esperados suma, pudiendo cambiar caro
+  por barato para pagar al bueno; caja de la jornada >= -1 M a 64 h o mas,
+  >= 0 despues; en rojo desde 88 h, la combinacion que menos puntos pierde;
+  el que sale solo se vende con el relevo dentro (desde el 90 %), nunca con
+  la jornada jugandose; si la ronda compro a alguien que mejora el once, se
+  lo queda el once. **Vuelta de las 14:07, real:** Ivan Romero 3.777.000,
+  Gerard Martin 4.989.000 (orden) y Moi Gomez 1.101.000 (ronda), las tres
+  con 200. Se resuelven el 13/10 a las 07:00. **Caja de la J9** (16/10
+  21:00) si entra todo: ~-6,1 M antes de ventas; con Jutgla, Diego Rico y
+  Moi vendidos y el premio de la J8 queda ~-3,5 M: la mejora del once lo
+  ataca sola desde el 13/10 05:00 (88 h); la rutina del 14/10 06:40
+  vigila. La rutina de las 08:22 ya no decide fichajes: supervisa lo que
+  hizo Pepe y las noticias de sus pujas. Apagada la rutina obsoleta
+  «Encender los chollos tras la J8».
+
 - **12/10 07:15 (rafaga de la manana). RECIO PERDIDO.** Ciclos: verdes
   (#2168 a #2177). Nuestra puja de 1.142.000 (precio +1 %) perdio contra
   **1.313.000 (+16 %)**: la tercera vez que un rival paga bastante mas en
