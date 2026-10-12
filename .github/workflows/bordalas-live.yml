@@ -195,6 +195,19 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LOS_CHOLLOS: "1"
 
+      # Encendido 12/10 de Madrid. LA RONDA (regla del dueno: «revision
+      #   cada ciclo; se compra, se ejecuta toda la deuda, se aguanta y se
+      #   vende mas caro»; laboratorio E1, E3, E9, E28). En CADA vuelta
+      #   fuera de la zona de silencio puja precio + 1 % por los del
+      #   Computer que suben, sanos y que juegan (3+ partidos, 3+ pts por
+      #   partido); hasta 3 M por jugador y hasta maximumBid - 1 M (que ya
+      #   descuenta las pujas vivas). No compra a menos de 40 h de la
+      #   jornada; vende con beneficio, el primer dia que baja a -2 %, a
+      #   36 h a -7 % y a 20 h a lo que ofrezcan. Verja 201/201; paso 0
+      #   con 39; ensayo #38245120244 verde (puja Moi Gomez 1.101.000).
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_RONDA_DE_LA_MANANA: "1"
+
       # Encendido 29/09 de Madrid. LA REVISION DE LAS PUJAS VIVAS.
       #
       #   En la ventana del reset retira nuestras pujas por jugadores que
