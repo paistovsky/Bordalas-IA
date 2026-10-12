@@ -69,6 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E36 · 12/10/2026 17:20 de Madrid · Si se ganan las pujas de mañana, ¿llega Pepe en verde a la J9?
+
+**El caso:** hoy se ha encendido «la ronda» (compra lo que sube «con toda
+la deuda») y la orden puja por dos fichajes para el once. Pujas vivas
+para el reset del 13/10 07:00: **Ivan Romero 3.777.000** (por Jutgla),
+**Gerard Martin 4.989.000** (por Diego Rico) y **Moi Gomez 1.101.000**
+(ronda). Comprometido 9.867.000 con un saldo de 659.783. La J9 empieza el
+16/10 a las 21:00 y quien empieza en rojo no puntua (E29).
+**Codigo:** `lab/caja/cuentas_j9.py` (foto del ciclo de las 17:10 de hoy;
+premio de la J8 a 30.000 EUR por punto, E16, con ~46 pts; ventas de la
+orden al precio de hoy + 1 %, E22; Moi revendido a lo que costo).
+
+    gana                                   saldo antes de la J9
+    Romero + Gerard Martin (+ Moi)            ~ -3,42 M
+    Gerard Martin (+ Moi)                     ~ -2,41 M
+    Romero (+ Moi)                            ~ +1,03 M
+    ninguna                                   ~ +2,04 M
+
+**Lo que se aprende:** **Gerard Martin es el que no cabe.** Con el, aun
+vendiendo a Jutgla y a Diego Rico y cobrando la J8, faltan 2,4-3,4 M. Y la
+regla de la casa (E14) no deja revender a Gerard ni a Romero antes de
+jugar. Para salir del rojo antes del 16/10 habria que vender a otro
+titular (Exposito, Olasagasti, Unai...), y entonces el once se queda en 10
+o hay que fichar otro. Los tres caminos cuestan puntos.
+
+**Sobre la ronda (E8/E9 con su caja):** con un tope de 3 M por jugador,
+pujando a precio + 1 %, la ronda gana de mediana **+0,13 M por semana** con
+4 M de caja... y lo mismo con 8, 13 o 20 M: lo que la limita no es la
+deuda sino que solo hay ~1,7 subastas por semana que nadie pelea. **La
+deuda extra no le da nada y si le quita sitio a la caja de la J9.**
+
+**Veredicto: AVISO URGENTE para el gestor** (pasa a «Listo para el
+plan»). No es un error de codigo: es una cuenta.
+
 ### E35 · 12/10/2026 11:20 de Madrid · La J8 a medias: lo que va contra lo que predijo E23
 
 **Que es:** la J8 aun no ha cerrado (4 equipos juegan hoy, lunes). Avance
@@ -1718,6 +1752,18 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E36, 12/10 17:20) URGENTE ANTES DEL RESET DEL 13/10: si se gana la
+  puja por Gerard Martin (4.989.000), Pepe no llega en verde a la J9.**
+  Cuenta con la foto de las 17:10: saldo 659.783, comprometido 9.867.000;
+  con Romero + Gerard (+ Moi), aun vendiendo Jutgla y Diego Rico y
+  cobrando la J8 (~1,38 M), queda ~-3,4 M; solo con Gerard, ~-2,4 M; con
+  Romero sin Gerard, ~+1,0 M. Gerard y Romero no se pueden revender antes
+  de jugar (regla de la casa, E14): el agujero lo tendria que tapar otro
+  titular. Opciones para el gestor: retirar la puja por Gerard antes de
+  las 04:45, o decidir YA a quien se venderia (y con que relevo) para
+  estar en verde el 16/10 antes de las 21:00. Y la ronda: su deuda no le
+  suma (E9: la limita la oferta, no la caja); que no cuente la deuda de
+  la J9.
 - **(E26, 08/10) Quitar de la lista de objetivos de E25 a Miguel Roman y a
   Koski (lesionados hoy), y pasar la lista por el estado del dia antes de
   cada puja** (`lab/objetivos/revisa.py`, o la misma regla dentro de la
