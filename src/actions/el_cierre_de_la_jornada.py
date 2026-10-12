@@ -62,7 +62,16 @@ LA REGLA
        (`adoptados`). Si no, la ronda lo malvenderia a menos de 20 h y
        los chollos en cuanto cubriera su coste, y el once se quedaria
        corto despues de que el cierre vendiera al banquillo contando
-       con el.
+       con el. PERO (13/10/2026) solo si la caja al empezar la ronda,
+       tras las pujas retiradas y las ventas elegidas (4), queda en
+       >= 0, y si el jugador esta TAMBIEN en el once escrito
+       (`status.lineup.players`). Porque el adoptado ya no lo vende
+       nadie (el cierre no vende a nadie de su once) y al titular
+       escrito al que desplaza tampoco: con la caja en rojo, su coste se
+       quedaba dentro y la ronda empezaba en rojo (0 puntos para el once
+       entero). Si no se cumple, no se adopta (la ronda o los chollos lo
+       siguen vendiendo como tenian pensado) y el plan dice por que
+       (`no_adoptados`).
     3. LA CAJA al empezar la ronda del plazo = saldo - TODAS nuestras
        pujas vivas a su importe entero (cualquiera se puede ganar en el
        reset) - lo pujado con exito en esta vuelta + lo cobrado en esta
@@ -82,7 +91,11 @@ LA REGLA
        'sanctioned' (fuera seguro: un 'doubt' del once no se vende
        nunca, aunque el once del cierre lo siente) - los que ya vende
        la orden (`vender_si_ficha`) o la mejora - lo vendido en esta
-       vuelta. Se elige lo que cubre el deficit (al 95 % de su valor)
+       vuelta. Los de la orden o la mejora son suyos SOLO mientras su
+       relevo llega (13/10/2026): esta en la plantilla, tiene puja viva
+       nuestra o (la orden) sigue en el mercado del Computer. Perdida
+       la puja por el relevo, nadie los vende y vuelven a ser del
+       cierre. Se elige lo que cubre el deficit (al 95 % de su valor)
        perdiendo menos puntos de quedarse (xP de las 3 proximas rondas
        principales): con hasta `EXACTO_HASTA` (15) candidatos, el
        minimo EXACTO (todos los subconjuntos; a igual perdida, el que
@@ -130,7 +143,8 @@ QUE NO HACE
     en el cliente de escritura. La ronda y los chollos ya no lo venden;
     los vendedores del orquestador que no leen `el_cierre.json`, si
     podrian aceptar su oferta (el mismo hueco que la adopcion de la
-    mejora del once).
+    mejora del once). Con la caja proyectada en rojo, o fuera del once
+    escrito, no se adopta a nadie (2).
 
     No cuenta como entrada el premio de la jornada ni lo que daran las
     ventas de la orden o de la mejora: al empezar la ronda solo vale
@@ -142,16 +156,20 @@ QUE NO HACE
     verifican con otra foto antes de la orden, el carril, los chollos y
     la ronda, y las `hechas` de la orden, la ronda y los chollos, las
     pujas del carril, las retiradas y lo que publico el escaparate
-    estan en el estado de v10. Las pujas de la mejora de esta vuelta
-    salen de su libro. Lo que puede faltar lo trae la foto de la vuelta
-    siguiente: una puja de la subasta del reset sin foto de
-    verificacion detras, y lo que la mejora cobro en esta vuelta (no
-    esta en el estado de v10; su jugador es de la mejora y el cierre no
-    lo toca, y la caja no cuenta ese dinero: peca de prudente).
+    estan en el estado de v10. Lo que la mejora del once pujo, cobro y
+    publico en esta vuelta sale de SU fichero de la vuelta
+    (`VUELTA_MEJORA`: {run_id, generated_at, hechas}, 13/10/2026) y
+    cuenta como las `hechas` de v10, solo si es de ESTA vuelta (el
+    mismo `GITHUB_RUN_ID`; si falta alguno de los dos, escrito a
+    `VUELTA_VIEJA_MINUTOS` o menos de ahora). El libro de la mejora ya
+    no da pujas: una puja perdida en el reset no cuenta nunca. Lo que
+    puede faltar lo trae la foto de la vuelta siguiente: una puja de la
+    subasta del reset sin foto de verificacion detras.
 
     Corre DESPUES del panel (necesita la titularidad y el once
-    escrito), como paso propio del workflow y detras de la mejora del
-    once (sus pujas de la vuelta salen de su libro):
+    escrito), como paso propio del workflow y DESPUES de la mejora del
+    once (lo que pujo y cobro sale de su fichero de la vuelta, y su
+    libro ya esta limpio de pujas perdidas):
     `python -m src.actions.el_cierre_de_la_jornada`. Nace APAGADO:
     `BORDALAS_EL_CIERRE_DE_LA_JORNADA`. Nunca lanza.
 """
@@ -168,6 +186,15 @@ from pathlib import Path
 ENV = "BORDALAS_EL_CIERRE_DE_LA_JORNADA"
 RAIZ = Path(__file__).parents[2]
 PLAN = RAIZ / "data" / "trading" / "el_cierre.json"
+
+# Lo que hizo la mejora del once en ESTA vuelta (13/10/2026): lo escribe
+# ella al acabar, encendida, siempre (= `la_mejora_del_once.VUELTA_MEJORA`):
+# {"run_id": GITHUB_RUN_ID, "generated_at": ISO UTC, "hechas": [...]}.
+VUELTA_MEJORA = RAIZ / "data" / "trading" / "la_mejora_vuelta.json"
+
+# Sin run_id que casar, la vuelta de la mejora vale si se escribio a
+# 45 min o menos de ahora (= `la_mejora_del_once.VUELTA_VIEJA_MINUTOS`).
+VUELTA_VIEJA_MINUTOS = 45
 
 # Desde cuando se cierra: 64 h, las mismas que `HORAS_CON_DEUDA` de la
 # mejora del once. Para un partido del viernes a las 21:00 es el martes
@@ -566,7 +593,9 @@ def decidir(
         no_retirar     pujas que no son del cierre (los `fichar` de la
                        orden, las del libro de la mejora)
         inventario     lo de la ronda y los chollos que es nuestro: si
-                       entra en el once, se adopta (`adoptar`)
+                       entra en el once, se adopta (`adoptar`) solo con
+                       la caja proyectada en >= 0 y si esta tambien en
+                       `once_escrito`; si no, `no_adoptados` y por que
     """
 
     salida = {
@@ -574,7 +603,7 @@ def decidir(
         "once": {"formacion": None, "ids": [], "puntos": 0.0, "lleno": 0, "jugadores": []},
         "caja": None, "caja_tras_cancelar": None, "deficit": 0, "cancelar": [],
         "vender": [], "falta": 0, "candidatos": [], "acciones": [], "adoptar": [],
-        "titulares_que_no_se_venden": [],
+        "no_adoptados": [], "caja_proyectada": None, "titulares_que_no_se_venden": [],
     }
     try:
         salida["horas"] = _num(horas)
@@ -636,7 +665,6 @@ def decidir(
              "position": por_id[pid].get("position"), "xp": round(por_id[pid]["xp"], 3)}
             for pid in once["ids"] if pid in por_id
         ]}
-        salida["adoptar"] = sorted(xi & inventario)
 
         # 3. LA CAJA.
         caja = la_caja(saldo, pujas, vendidos)
@@ -695,6 +723,30 @@ def decidir(
         salida["vender"] = [c["id"] for c in elegidos]
         salida["falta"] = falta
         salida["candidatos"] = [{**c, "elegido": c["id"] in vender} for c in candidatos]
+
+        # LA ADOPCION (13/10/2026), despues de la caja y las ventas. El
+        # adoptado sale de los libros de la ronda y los chollos (ya no lo
+        # venden) y el cierre no vende a nadie de su once; si el once
+        # escrito sigue con el titular al que desplaza, tampoco se vende a
+        # ese: su coste se queda en la caja. Solo con la caja al empezar la
+        # ronda (tras retirar pujas y con las ventas elegidas cobradas) en
+        # >= 0 y con el jugador tambien en el once escrito. Si no, la
+        # ronda o los chollos lo siguen vendiendo como tenian pensado.
+        proyectada = caja_tras + sum(c["cobro"] for c in elegidos)
+        salida["caja_proyectada"] = proyectada
+        adoptar, no_adoptados = [], []
+        for pid in sorted(xi & inventario):
+            if proyectada < 0:
+                no_adoptados.append({"player_id": pid, "motivo": (
+                    f"la caja al empezar la ronda queda en {proyectada} con lo que se "
+                    "vende: su libro lo sigue vendiendo")})
+            elif pid not in once_escrito:
+                no_adoptados.append({"player_id": pid, "motivo": (
+                    "no esta en el once escrito: su libro lo sigue vendiendo")})
+            else:
+                adoptar.append(pid)
+        salida["adoptar"] = adoptar
+        salida["no_adoptados"] = no_adoptados
 
         # 5. LAS ESCRITURAS: una por jugador. Cobrar a los elegidos;
         # publicar a todo candidato que no lo este.
@@ -812,16 +864,20 @@ def lo_de_esta_vuelta(v10) -> dict:
     return vuelta
 
 
-def las_pujas_vivas(foto, vuelta, libro_mejora=None) -> dict:
+def las_pujas_vivas(foto, vuelta) -> dict:
     """
     Nuestras pujas al empezar la ronda: las de la foto, con lo pujado y
-    lo retirado en esta vuelta encima, y las de la mejora del once que
-    la foto no ve (en su libro, ni en la plantilla ni en la foto). Lo de
-    esta vuelta va sin `offer_id`: no se sabe y no se retira. Nunca lanza.
+    lo retirado en esta vuelta encima (`vuelta`: lo de v10 y lo de la
+    mejora del once, de su fichero de la vuelta). Lo de esta vuelta va
+    sin `offer_id`: no se sabe y no se retira.
+
+    El libro de la mejora ya no se mira (13/10/2026): lo que no esta en
+    la foto ni en la plantilla es, casi siempre, una puja PERDIDA en el
+    reset que la mejora aun no habia soltado, y contarla vendia al
+    banquillo por un dinero que no se debe. Nunca lanza.
     """
     try:
         foto, vuelta = _dict(foto), _dict(vuelta)
-        plantilla = _ids(foto.get("plantilla"))
         pujas = {}
         for pid, p in _dict(foto.get("nuestras_pujas")).items():
             if _int(pid) is not None:
@@ -831,13 +887,47 @@ def las_pujas_vivas(foto, vuelta, libro_mejora=None) -> dict:
             pujas[_int(pid)] = {"offer_id": None, "amount": _int(importe, 0) or 0}
         for pid in vuelta.get("canceladas") or ():
             pujas.pop(_int(pid), None)
-        for entra, c in _dict(libro_mejora).items():
-            entra, puja = _int(entra), _int(_dict(c).get("puja"), 0) or 0
-            if entra is not None and puja > 0 and entra not in plantilla and entra not in pujas:
-                pujas[entra] = {"offer_id": None, "amount": puja}
         return pujas
     except Exception:                               # noqa: BLE001
         return {}
+
+
+def la_vuelta_de_la_mejora(datos, ahora, run_id=None) -> tuple:
+    """
+    `(hechas, descartado)`: las `hechas` de la mejora del once en ESTA
+    vuelta, de su fichero (`VUELTA_MEJORA`: {run_id, generated_at,
+    hechas}), y None; o `([], motivo)` si no son de esta vuelta.
+
+    Valen si su `run_id` es el de esta vuelta (`GITHUB_RUN_ID`); si
+    falta alguno de los dos, si su `generated_at` esta a
+    `VUELTA_VIEJA_MINUTOS` o menos de `ahora`. Las de otra vuelta ya
+    estan en la foto (o se perdieron en el reset): contarlas otra vez
+    restaria pujas que no existen y sumaria cobros que ya estan en el
+    saldo. Pura, nunca lanza.
+    """
+    try:
+        if not isinstance(datos, dict) or not datos:
+            return [], "no hay vuelta de la mejora"
+        suyo = datos.get("run_id")
+        if run_id and suyo:
+            if str(suyo) != str(run_id):
+                return [], f"la vuelta de la mejora es de otra vuelta (run {suyo}, esta {run_id})"
+            return _lista(datos.get("hechas")), None
+        sello = datos.get("generated_at")
+        if not sello:
+            return [], "la vuelta de la mejora no trae hora"
+        cuando = datetime.fromisoformat(str(sello).replace("Z", "+00:00"))
+        if cuando.tzinfo is None:
+            cuando = cuando.replace(tzinfo=timezone.utc)
+        if ahora.tzinfo is None:
+            ahora = ahora.replace(tzinfo=timezone.utc)
+        minutos = (ahora - cuando).total_seconds() / 60
+        if abs(minutos) > VUELTA_VIEJA_MINUTOS:
+            return [], (f"la vuelta de la mejora es de hace {int(minutos)} min "
+                        "(de otra vuelta)")
+        return _lista(datos.get("hechas")), None
+    except Exception as error:                      # noqa: BLE001
+        return [], f"la vuelta de la mejora no se puede fechar: {type(error).__name__}"
 
 
 def las_fichas(status, ids, estados=None, precios=None) -> list:
@@ -892,12 +982,22 @@ def las_fichas(status, ids, estados=None, precios=None) -> list:
         return []
 
 
-def la_orden(orden, plantilla, ahora) -> dict:
+def la_orden(orden, plantilla, ahora, pujas=None, mercado=None) -> dict:
     """
     Lo que pesa de la orden del gestor, si esta viva (encendida, sin
     caducar, valida): sus intocables y a quien vende (`vender_si_ficha`),
     con los que ya se van (su relevo esta dentro). Apagada o muerta,
-    Yamal sigue intocable y no vende a nadie. Nunca lanza.
+    Yamal sigue intocable y no vende a nadie.
+
+    SOLO MIENTRAS SU RELEVO LLEGA (13/10/2026): un `vender_si_ficha` es de
+    la orden (`vende`) si su relevo (su `si_esta` y el general, si lo
+    hay: la orden pide los dos) esta en la plantilla, tiene puja viva
+    nuestra (`pujas`: las de la foto y las de esta vuelta) o sigue en el
+    mercado del Computer (`mercado`: la orden puede volver a pujar; vacio
+    o sin pasar es no saberlo, y vale). Perdida la puja por el relevo ante
+    un rival, la orden no lo vende nunca (vive hasta el 30/11): dejarlo
+    en `no_vender` lo congelaba. Sin relevo, la orden no lo vende. Nunca
+    lanza.
     """
     salida = {"intocables": INTOCABLES, "vende": set(), "se_van": set()}
     try:
@@ -907,30 +1007,45 @@ def la_orden(orden, plantilla, ahora) -> dict:
             return salida
         salida["intocables"] = _intocables(orden)
         plantilla = _ids(plantilla)
+        pujas = _ids(pujas.keys() if isinstance(pujas, dict) else pujas)
+        mercado = _ids(mercado.keys() if isinstance(mercado, dict) else mercado)
+
+        def _llega(relevo):
+            return relevo in plantilla or relevo in pujas or not mercado or relevo in mercado
+
         venta = _dict(orden.get("vender_si_ficha"))
         general = _int(venta.get("si_esta"))
         for j in _lista(venta.get("jugadores")):
             pid = _int(j.get("player_id"))
             if pid is None:
                 continue
+            relevos = {r for r in (general, _int(j.get("si_esta"))) if r is not None}
+            if not relevos or not all(_llega(r) for r in relevos):
+                continue
             salida["vende"].add(pid)
-            relevo = _int(j.get("si_esta")) or general
-            if relevo and relevo in plantilla:
+            if all(r in plantilla for r in relevos):
                 salida["se_van"].add(pid)
     except Exception:                               # noqa: BLE001
         pass
     return salida
 
 
-def la_mejora(libro_mejora, plantilla) -> dict:
+def la_mejora(libro_mejora, plantilla, pujas=None) -> dict:
     """Los que salen por la mejora del once (`sale` de su libro), y los
-    que ya se van (el que entra ya esta en la plantilla). Nunca lanza."""
+    que ya se van (el que entra ya esta en la plantilla). Con `pujas`
+    (nuestras pujas vivas, 13/10/2026), el cambio cuenta solo si el que
+    entra esta en la plantilla o tiene puja viva: el de una puja perdida
+    no es de nadie. Nunca lanza."""
     salida = {"vende": set(), "se_van": set()}
     try:
         plantilla = _ids(plantilla)
+        vivas = None if pujas is None else _ids(
+            pujas.keys() if isinstance(pujas, dict) else pujas)
         for entra, c in _dict(libro_mejora).items():
             sale = _int(_dict(c).get("sale"))
             if sale is None:
+                continue
+            if vivas is not None and _int(entra) not in plantilla and _int(entra) not in vivas:
                 continue
             salida["vende"].add(sale)
             if _int(entra) in plantilla:
@@ -1003,7 +1118,7 @@ def adoptar(ids, libros, rutas, escribir) -> list:
     return adoptados
 
 
-def _el_plan(d, ventana, ahora, hechas=(), adoptados=()) -> dict:
+def _el_plan(d, ventana, ahora, hechas=(), adoptados=(), mejora_descartada=None) -> dict:
     try:
         d, ventana = _dict(d), _dict(ventana)
         try:
@@ -1021,15 +1136,19 @@ def _el_plan(d, ventana, ahora, hechas=(), adoptados=()) -> dict:
             "xi": list(_dict(d.get("once")).get("ids") or []),
             "adoptados": [{"player_id": a.get("player_id"), "libro": a.get("libro"),
                            "escrito": a.get("escrito")} for a in _lista(adoptados)],
+            "no_adoptados": [{"player_id": a.get("player_id"), "motivo": a.get("motivo")}
+                             for a in _lista(d.get("no_adoptados"))],
             "titulares_que_no_se_venden": list(d.get("titulares_que_no_se_venden") or []),
             "vender": list(d.get("vender") or []),
             "cancelar": list(d.get("cancelar") or []),
             "caja": d.get("caja"),
             "caja_tras_cancelar": d.get("caja_tras_cancelar"),
+            "caja_proyectada": d.get("caja_proyectada"),
             "deficit": d.get("deficit") or 0,
             "falta": d.get("falta") or 0,
             "hechas": [{"accion": h.get("accion"), "player_id": h.get("player_id"),
                         "exito": h.get("exito")} for h in _lista(hechas)],
+            "vuelta_mejora_descartada": mejora_descartada,
             "generated_at": generado,
         }
     except Exception as error:                      # noqa: BLE001
@@ -1045,9 +1164,11 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
 
     Lo que no se pasa se lee de produccion: `status` del panel, la
     ultima `data/snapshot_*.json`, el estado de v10, los libros de la
-    ronda, los chollos y la mejora (`libros` = {"ronda", "chollos",
-    "mejora"}, leidos de `libros_rutas` o de sus ficheros de siempre),
-    el calendario de los chollos y la orden del gestor. La adopcion
+    ronda, los chollos y la mejora y lo que la mejora hizo en esta
+    vuelta (`libros` = {"ronda", "chollos", "mejora", "vuelta_mejora"},
+    leidos de `libros_rutas` o de sus ficheros de siempre; la vuelta de
+    la mejora, de `VUELTA_MEJORA`), el calendario de los chollos y la
+    orden del gestor. La adopcion
     escribe el libro donde se leyo: si `libros` llega ya leido, solo en
     la ruta que diga `libros_rutas`. Apagado, no lee ni escribe nada.
     Encendido, publica el plan siempre, tambien si algo falla (activo
@@ -1093,7 +1214,8 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         dadas = _dict(libros_rutas)
         rutas = {"ronda": dadas.get("ronda") or LIBRO_RONDA,
                  "chollos": dadas.get("chollos") or LIBRO_CHOLLOS,
-                 "mejora": dadas.get("mejora") or LIBRO_MEJORA}
+                 "mejora": dadas.get("mejora") or LIBRO_MEJORA,
+                 "vuelta_mejora": dadas.get("vuelta_mejora") or VUELTA_MEJORA}
         if libros is None:
             libros = {k: _leer(ruta, {}) for k, ruta in rutas.items()}
             escribir = {k: True for k in rutas}
@@ -1113,19 +1235,28 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         # misma prueba que la mejora del once (run_id; si no, la hora).
         from src.actions.la_mejora_del_once import es_de_esta_vuelta
 
-        salida["v10_descartado"] = es_de_esta_vuelta(
-            v10, ahora, os.environ.get("GITHUB_RUN_ID"))
-        vuelta = lo_de_esta_vuelta({} if salida["v10_descartado"] else v10)
+        run_id = os.environ.get("GITHUB_RUN_ID")
+        salida["v10_descartado"] = es_de_esta_vuelta(v10, ahora, run_id)
+        # La mejora del once corre ANTES (13/10/2026): lo que pujo, cobro y
+        # publico en esta vuelta, de su fichero, como un bloque mas de v10
+        # y detras de todos (escribio despues). Solo si es de esta vuelta.
+        hechas_mejora, salida["vuelta_mejora_descartada"] = la_vuelta_de_la_mejora(
+            libros.get("vuelta_mejora"), ahora, run_id)
+        de_la_vuelta = {} if salida["v10_descartado"] else dict(_dict(v10))
+        de_la_vuelta.pop("la_mejora_del_once", None)
+        de_la_vuelta["la_mejora_del_once"] = {"hechas": hechas_mejora}
+        vuelta = lo_de_esta_vuelta(de_la_vuelta)
 
         roster = _lista(_dict(_dict(status).get("roster")).get("players"))
         plantilla = set(foto["plantilla"]) or _ids(p.get("id") for p in roster)
         plantilla -= set(vuelta["vendidos"])
         once_escrito = _ids(p.get("id") for p in
                             _lista(_dict(_dict(status).get("lineup")).get("players")))
+        pujas = las_pujas_vivas(foto, vuelta)
 
         orden = _dict(leer_la_orden(orden_ruta))
-        de_la_orden = la_orden(orden, plantilla, ahora)
-        de_la_mejora = la_mejora(libros.get("mejora"), plantilla)
+        de_la_orden = la_orden(orden, plantilla, ahora, pujas, foto.get("mercado"))
+        de_la_mejora = la_mejora(libros.get("mejora"), plantilla, pujas)
         de_la_ronda_y_los_chollos = (_ids(_dict(libros.get("ronda")).keys())
                                      | _ids(_dict(libros.get("chollos")).keys()))
         # Las pujas que no son del cierre aunque la clave siga en el libro
@@ -1140,7 +1271,7 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
             plantilla=las_fichas(status, plantilla, leer_los_estados(snapshot), foto["precios"]),
             ctx=ctx, horas=ventana["horas"], en_curso=ventana["en_curso"],
             puede_escribir=ventana["puede_escribir"], saldo=foto["saldo"],
-            pujas=las_pujas_vivas(foto, vuelta, libros.get("mejora")),
+            pujas=pujas,
             vendidos=vuelta["vendidos"], ofertas=foto["ofertas_del_computer"],
             en_venta=set(foto["en_venta"]) | vuelta["listados"],
             especulativas=de_la_ronda_y_los_chollos, intocables=de_la_orden["intocables"],
@@ -1166,7 +1297,8 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
                 escritor_factory = BiwengerWriteClient
             salida["hechas"] = ejecutar(escrituras, escritor_factory())
 
-        salida["plan"] = _el_plan(d, ventana, ahora, salida["hechas"], salida["adoptados"])
+        salida["plan"] = _el_plan(d, ventana, ahora, salida["hechas"], salida["adoptados"],
+                                  salida.get("vuelta_mejora_descartada"))
         publicar(salida["plan"], plan_ruta)
         salida["motivo"] = d["motivo"]
 
@@ -1214,6 +1346,10 @@ def el_parte(r) -> list:
         for a in _lista(r.get("adoptados")):
             lineas.append(f"  Adoptado del libro de {a.get('libro')}: {a.get('player_id')}"
                           f"{'' if a.get('escrito') else ' (sin escribir el libro)'}")
+        for a in _lista(d.get("no_adoptados")):
+            lineas.append(f"  No se adopta a {a.get('player_id')}: {a.get('motivo')}")
+        if r.get("vuelta_mejora_descartada"):
+            lineas.append(f"  Sin la vuelta de la mejora: {r.get('vuelta_mejora_descartada')}")
         if d.get("titulares_que_no_se_venden"):
             lineas.append(f"  Titulares del once escrito que no se venden: "
                           f"{d.get('titulares_que_no_se_venden')}")
