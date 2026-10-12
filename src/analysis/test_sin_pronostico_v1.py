@@ -83,6 +83,13 @@ sys.path.insert(0, ".")
 #     porque esta escrito entero mas abajo, en «0 bis».
 os.environ.pop("BORDALAS_CALIDAD_ETIQUETA", None)
 
+# EL CALENDARIO DEL ONCE TAMPOCO (12/10/2026). Puesto, `prepare_players`
+# lee el calendario y la clasificacion del disco
+# (`el_once_mira_el_calendario`): esta guardia pasaria a leer `data/`.
+# Medido con la verja y los dos ficheros de CI: era la UNICA guardia
+# nueva que el vigilante apuntaba con el interruptor puesto.
+os.environ.pop("BORDALAS_EL_CALENDARIO_EN_EL_ONCE", None)
+
 from src.analysis.lineup_engine import (  # noqa: E402
     suelo_sin_pronostico,
     banquillo_con_motivo,
