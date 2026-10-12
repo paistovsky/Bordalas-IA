@@ -195,6 +195,9 @@ QUE_HACE = {
     "BORDALAS_LOS_CHOLLOS":
         "Puja por debajo de su valor por los del Computer que ya valen más de "
         "lo que piden, y los revende en cuanto hay beneficio (detrás de todo).",
+    "BORDALAS_LA_RONDA_DE_LA_MANANA":
+        "Cada mañana puja (precio + 1 %) por los del Computer que suben, están "
+        "bien y juegan, y se los revende al Computer antes de la jornada.",
     "BORDALAS_COMPRA_SOLO_SI_SUBE":
         "Para revender, solo compra jugadores cuyo precio está subiendo.",
     "BORDALAS_EL_ONCE_UNA_VEZ":

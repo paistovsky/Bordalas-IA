@@ -1481,6 +1481,22 @@ def run_full_autonomous_cycle() -> dict:
         f"{[(a.get('accion'), a.get('player_id'), a.get('importe')) for a in chollos.get('acciones') or []]}"
     )
 
+    # ==========================================================
+    # 6) LA RONDA DE LA MAÑANA (12/10/2026)
+    # ==========================================================
+    #
+    #     Detras de los chollos: compra al Computer a quien sube (E1) a
+    #     precio + 1 % (E9) y se lo revende antes de la jornada (E28).
+    #     Solo en la ultima vuelta antes del reset. APAGADA:
+    #     `BORDALAS_LA_RONDA_DE_LA_MANANA`. Nunca lanza.
+    from src.actions.la_ronda_de_la_manana import correr as _la_ronda
+
+    ronda = _la_ronda(cycle, _min_reset)
+    print(
+        f"La ronda de la mañana: {ronda.get('motivo')} "
+        f"{[(a.get('accion'), a.get('player_id'), a.get('importe')) for a in ronda.get('acciones') or []]}"
+    )
+
     payload = {
         "version": "V10.13.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1511,6 +1527,7 @@ def run_full_autonomous_cycle() -> dict:
         "orden_del_gestor": orden_del_gestor,
         "revision_de_pujas": revision_de_pujas,
         "chollos": chollos,
+        "ronda": ronda,
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
