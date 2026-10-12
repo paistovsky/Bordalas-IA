@@ -1008,14 +1008,37 @@ def compare_with_live(
 # ============================================================
 
 
+def _el_once_mira_el_calendario() -> bool:
+    """
+    Si el once QUE SE ESCRIBE mira el partido de la proxima ronda
+    (`BORDALAS_EL_CALENDARIO_EN_EL_ONCE`). Nunca lanza: si no se puede
+    saber, no.
+    """
+
+    try:
+        from src.analysis.el_once_mira_el_calendario import activa
+
+        return bool(activa())
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def build_lineup_monitor_state(
     snapshot: dict,
     persist: bool = False,
 ) -> dict:
 
+    # EL CALENDARIO, SOLO AQUI (12/10/2026)
+    #
+    #     Este es el once que acaba en SAVE_LINEUP. Es el UNICO que
+    #     pide el partido de la proxima ronda: los que valoran (venta,
+    #     liquidez, deuda segura, fichajes) llaman a `build_lineup`
+    #     sin el. Con el interruptor apagado, la llamada de siempre.
     lineup = (
         build_lineup(
-            snapshot
+            snapshot,
+            con_calendario=_el_once_mira_el_calendario(),
         )
     )
 

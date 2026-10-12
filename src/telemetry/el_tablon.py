@@ -213,6 +213,11 @@ QUE_HACE = {
         "Para revender, solo compra jugadores cuyo precio está subiendo.",
     "BORDALAS_EL_ONCE_UNA_VEZ":
         "Calcula el mejor once una vez por vuelta y lo recuerda (más rápido).",
+    "BORDALAS_EL_CALENDARIO_EN_EL_ONCE":
+        "Al elegir el once mira el partido de la próxima ronda: en casa contra "
+        "uno que no es de los de arriba suma; fuera, o contra uno de arriba, "
+        "resta un poco (desempata entre parecidos; si su equipo no juega esa "
+        "ronda, ni suma ni resta).",
     "BORDALAS_JORNADAS_POR_SU_FECHA":
         "Cuenta las jornadas por la fecha de los partidos, no por Biwenger.",
     "BORDALAS_LA_MONEDA_DE_LA_LIGA":

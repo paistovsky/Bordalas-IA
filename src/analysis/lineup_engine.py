@@ -902,7 +902,55 @@ def prepare_players(
     snapshot: dict,
     lineup_intelligence: dict | None = None,
     starter_intelligence: dict | None = None,
+    con_calendario: bool = False,
+    ahora=None,
+    calendario: dict | None = None,
+    clasificacion=None,
 ) -> list[dict]:
+    """
+    Una ficha por jugador de la plantilla, con el score que ordena el
+    once.
+
+    `con_calendario` pide el calendario del once
+    (`el_once_mira_el_calendario`, interruptor
+    `BORDALAS_EL_CALENDARIO_EN_EL_ONCE`). Por defecto NO: quien valora
+    -venta, liquidez, deuda segura, fichajes- ve la vara cruda. Solo
+    el once que se escribe (`lineup_monitor`) lo pide, y aun asi con
+    el interruptor apagado no se mira nada.
+
+    `ahora`, `calendario` y `clasificacion` son SOLO para ese
+    calendario. En produccion no llega ninguno -la hora del reloj y
+    los ficheros de la vuelta- y las guardias los pasan.
+    """
+
+    # EL CALENDARIO DEL ONCE (12/10/2026)
+    #
+    #     Una vez por llamada -y por dentro una vez por vuelta-: los
+    #     partidos de cada equipo en la proxima ronda principal. None
+    #     sin `con_calendario` o con el interruptor apagado, y entonces
+    #     todo lo de abajo es lo de siempre, byte a byte
+    #     (`test_el_once_mira_el_calendario_v1`). Si algo fallase aqui,
+    #     tambien None: el once de siempre.
+    calendario_del_once = None
+
+    if con_calendario:
+
+        try:
+            from src.analysis.el_once_mira_el_calendario import (
+                para_el_jugador,
+                para_el_once,
+                vara_del_once as _vara_del_once,
+            )
+
+            calendario_del_once = para_el_once(
+                snapshot,
+                ahora=ahora,
+                calendario=calendario,
+                clasificacion=clasificacion,
+            )
+
+        except Exception:                           # noqa: BLE001
+            calendario_del_once = None
 
     if lineup_intelligence is None:
 
@@ -1053,7 +1101,33 @@ def prepare_players(
             or 0.0
         )
 
+        # EL PARTIDO DE LA PROXIMA RONDA (12/10/2026)
+        #
+        #     Con el interruptor puesto: la suma de SEDE x RIVAL de
+        #     sus partidos en la ronda (1,0 si no juega). Si el
+        #     calendario lo sabe, el +5 de casa de arriba NO se suma:
+        #     la sede ya va en el multiplicador (1,06 / 0,94, medido
+        #     n = 268 / 272) y contarla dos veces seria inventar.
+        #     Si no sabe nada, el jugador se queda como hoy.
+        partido_del_once = None
+
+        if calendario_del_once is not None:
+
+            partido_del_once = para_el_jugador(
+                calendario_del_once,
+                player.get("teamID", player.get("team_id")),
+                player.get("position"),
+            )
+
+            if partido_del_once["con_calendario"]:
+                home_away_adjustment = 0.0
+
         expected_value = 0.0
+
+        # Lo que el calendario multiplico de verdad. Sin vara (sin
+        # pronostico, no alineable) no hay nada que multiplicar: 1,0.
+        multiplicador_aplicado = 1.0
+        calendario_aplicado = False
 
         # Se enciende solo en la rama de abajo: eligible y sin una
         # sola fuente que diga si juega. Un no alineable NO es un
@@ -1155,8 +1229,33 @@ def prepare_players(
                     }),
                 )
 
+                # EL CALENDARIO ENTRA AQUI, Y SOLO AQUI (12/10/2026)
+                #
+                #     Sobre la vara que ELIGE, no dentro de
+                #     `weekly_expected_value`: esa se publica y se
+                #     mide cruda (docstring de arriba), y la ficha
+                #     sigue llevandola cruda. Apagado, la vara del
+                #     once ES `expected_value`: la misma cuenta de
+                #     siempre.
+                vara_del_once = expected_value
+
+                if partido_del_once is not None:
+
+                    multiplicador_aplicado = partido_del_once[
+                        "multiplicador"
+                    ]
+
+                    calendario_aplicado = True
+
+                    # Con vara negativa el partido no puede darle
+                    # la vuelta: x0,846 no la acerca a cero.
+                    vara_del_once = _vara_del_once(
+                        expected_value,
+                        multiplicador_aplicado,
+                    )
+
                 final_score = (
-                    expected_value
+                    vara_del_once
                     * ESCALA_DE_LA_VARA
 
                     + starter_coverage
@@ -1343,7 +1442,10 @@ def prepare_players(
                 # Lo que ordena el once. Viaja hasta el dashboard
                 # para que se pueda ver POR QUE entra cada uno,
                 # que es la cuarta decision del plan: todo lo que
-                # entra tiene que verse.
+                # entra tiene que verse. En el once que se escribe
+                # con el calendario puesto, lo que ordena es esta
+                # vara con `fixture_multiplier` dentro (va en la
+                # ficha y en el banquillo); aqui sigue la cruda.
                 "weekly_expected_value":
                     expected_value,
 
@@ -1417,6 +1519,14 @@ def prepare_players(
 
                         "penalty":
                             penalty_adjustment,
+
+                        # Solo con el interruptor puesto: apagado,
+                        # los componentes son los de siempre.
+                        **_lo_del_calendario(
+                            partido_del_once,
+                            multiplicador_aplicado,
+                            calendario_aplicado,
+                        ),
                     },
 
                 "lineup_score":
@@ -1444,10 +1554,60 @@ def prepare_players(
                     )
                     if (dios_forzado and lineup_eligible)
                     else final_score,
+
+                # EL PARTIDO, PARA EL PANEL Y EL LOG (12/10/2026)
+                #
+                #     `fixture_multiplier` es lo que se multiplico de
+                #     verdad (1,0 sin vara) y `fixture_reason` el por
+                #     que, en una linea. Solo con el interruptor
+                #     puesto: apagado, la ficha es la de siempre.
+                **_lo_del_calendario(
+                    partido_del_once,
+                    multiplicador_aplicado,
+                    calendario_aplicado,
+                ),
             }
         )
 
     return players
+
+
+def _lo_del_calendario(
+    partido_del_once: dict | None,
+    multiplicador_aplicado: float,
+    calendario_aplicado: bool,
+) -> dict:
+    """
+    `{"fixture_multiplier", "fixture_reason"}` del calendario del
+    once, o `{}` con el interruptor apagado (la ficha de siempre).
+
+    Si el calendario dijo algo pero no habia vara que multiplicar
+    -sin pronostico, no alineable- el motivo lo dice: el partido se
+    ve, pero no entro en el score. Nunca lanza.
+    """
+
+    if partido_del_once is None:
+        return {}
+
+    try:
+        motivo = str(partido_del_once.get("motivo") or "")
+
+        if (
+            partido_del_once.get("con_calendario")
+            and not calendario_aplicado
+        ):
+            motivo = f"{motivo} (sin vara: no se aplica)"
+
+        return {
+            "fixture_multiplier": float(multiplicador_aplicado),
+            "fixture_reason": motivo,
+        }
+
+    except Exception:                               # noqa: BLE001
+        return {
+            "fixture_multiplier": 1.0,
+            "fixture_reason": "neutro",
+        }
 
 
 # ============================================================
@@ -1993,6 +2153,29 @@ def banquillo_con_motivo(
                 "weekly_value_delta": _resta(
                     "weekly_expected_value"
                 ),
+
+                # EL PARTIDO, CUANDO LO HAY (12/10/2026). Con el
+                # calendario del once, un PUNTUA_MENOS puede venir
+                # con `weekly_value_delta` positivo: lo que lo
+                # explica es su partido y el del titular. Sin
+                # calendario, la fila es la de siempre.
+                **(
+                    {
+                        "fixture_multiplier": player.get(
+                            "fixture_multiplier"
+                        ),
+                        "fixture_reason": player.get(
+                            "fixture_reason"
+                        ),
+                        "compared_to_fixture_multiplier": (
+                            rival.get("fixture_multiplier")
+                            if rival
+                            else None
+                        ),
+                    }
+                    if "fixture_multiplier" in player
+                    else {}
+                ),
             }
         )
 
@@ -2010,7 +2193,18 @@ def banquillo_con_motivo(
 def build_lineup(
     snapshot: dict,
     lineup_intelligence: dict | None = None,
+    con_calendario: bool = False,
 ) -> dict:
+    """
+    El mejor once de la plantilla.
+
+    `con_calendario=True` SOLO para el once que se escribe en Biwenger
+    (`lineup_monitor.build_lineup_monitor_state`, con el interruptor
+    `BORDALAS_EL_CALENDARIO_EN_EL_ONCE` puesto): el partido de la
+    proxima ronda desempata. Todos los demas -venta, liquidez, deuda
+    segura, fichajes, orden de venta- llaman sin el y ven el once y el
+    `lineup_score` de siempre, interruptor puesto o no.
+    """
 
     if lineup_intelligence is None:
 
@@ -2036,6 +2230,9 @@ def build_lineup(
 
             starter_intelligence=
                 starter_intelligence,
+
+            con_calendario=
+                con_calendario,
         )
     )
 
@@ -2304,7 +2501,7 @@ def build_lineup(
     )
 
 
-    return {
+    salida = {
         "position_policy":
             POSITION_POLICY,
 
@@ -2476,3 +2673,56 @@ def build_lineup(
             ],
         },
     }
+
+    # EL PARTIDO DE CADA UNO, EN EL ONCE QUE SE ESCRIBE (12/10/2026)
+    #
+    #     Solo con `con_calendario` y el interruptor puesto (si no,
+    #     ninguna ficha trae `fixture_multiplier` y la salida es la de
+    #     siempre). Para leer en el log y en el estado de la vuelta
+    #     por que entra uno y no otro.
+    if con_calendario:
+
+        partidos = _el_partido_de_cada_uno(
+            players,
+            best_lineup,
+        )
+
+        if partidos:
+            salida["fixture_multipliers"] = partidos
+
+    return salida
+
+
+def _el_partido_de_cada_uno(
+    players: list[dict],
+    selected: list[dict],
+) -> list[dict]:
+    """
+    `[{id, name, position, in_lineup, fixture_multiplier,
+    fixture_reason}]` de las fichas que traen el calendario del once,
+    en el orden de la plantilla. Vacio si ninguna lo trae. Nunca
+    lanza.
+    """
+
+    try:
+        elegidos = {
+            safe_player_id(player)
+            for player in (selected or [])
+        }
+
+        return [
+            {
+                "id": safe_player_id(player),
+                "name": player.get("name"),
+                "position": player.get("position"),
+                "in_lineup": safe_player_id(player) in elegidos,
+                "fixture_multiplier": player.get("fixture_multiplier"),
+                "fixture_reason": player.get("fixture_reason"),
+            }
+            for player in (players or [])
+            if isinstance(player, dict)
+            and "fixture_multiplier" in player
+        ]
+
+    except Exception:                               # noqa: BLE001
+        return []
