@@ -465,6 +465,86 @@ def los_que_se_pueden_publicar(
         }
 
 
+def los_que_se_pueden_rerollear(
+    reroll_candidates: list[dict] | None,
+    quien_los_vende: dict | None = None,
+) -> dict:
+    """
+    Los candidatos a reroll sin las ofertas de jugadores que otro
+    modulo va a vender.
+
+    EL REROLL RESPETA A LOS DEMAS (12/10/2026)
+
+        El reroll (670) gana la escritura de la vuelta y tiraba ofertas
+        que la ronda, los chollos, la mejora, la orden del gestor o el
+        cierre iban a cobrar en esa misma vuelta. Ver
+        `src/analysis/los_que_otros_venden.py`.
+
+    `quien_los_vende` ({player_id: [modulos]}) es para las pruebas; en
+    produccion va a None y se leen los libros. No toca prioridades ni
+    umbrales: el resto de candidatos sale en el mismo orden.
+
+    Nunca lanza. Si algo falla, ningun candidato: un reroll es una
+    mejora que puede esperar a la vuelta siguiente; una oferta tirada
+    que otro iba a cobrar no vuelve. El executor lo vuelve a mirar en
+    `revalidate_reroll_offer`.
+    """
+
+    try:
+        lista = list(reroll_candidates or [])
+
+        if not lista:
+            return {"reroll_candidates": [], "no_se_rerollean": []}
+
+        from src.analysis.los_que_otros_venden import (
+            los_de_la_oferta,
+            quien_los_vende as _quien,
+        )
+
+        if quien_los_vende is None:
+            quien_los_vende = _quien()
+
+        quien = {
+            int(pid): list(modulos or [])
+            for pid, modulos in (quien_los_vende or {}).items()
+        }
+
+        quedan, fuera = [], []
+
+        for oferta in lista:
+            suyos = sorted(los_de_la_oferta(oferta) & set(quien))
+
+            if not suyos:
+                quedan.append(oferta)
+                continue
+
+            fuera.append(
+                {
+                    "offer_id": oferta.get("offer_id"),
+                    "player_ids": suyos,
+                    "names": [
+                        p.get("name")
+                        for p in (oferta.get("players") or [])
+                        if isinstance(p, dict)
+                    ],
+                    "amount": oferta.get("amount"),
+                    "motivo": "LO_VENDE_OTRO_MODULO",
+                    "modulos": sorted(
+                        {m for pid in suyos for m in quien[pid]}
+                    ),
+                }
+            )
+
+        return {"reroll_candidates": quedan, "no_se_rerollean": fuera}
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "reroll_candidates": [],
+            "no_se_rerollean": [],
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+
 def hours_remaining(
     seconds: int | None,
 ) -> float | None:
@@ -2362,13 +2442,19 @@ def build_global_decision_uncached(
     #   al Orchestrator y a la telemetria.
     # ========================================================
 
-    reroll_candidates = (
+    # EL REROLL RESPETA A LOS DEMAS (12/10/2026). Fuera las ofertas
+    # de jugadores que la ronda, los chollos, la mejora, la orden o el
+    # cierre van a vender: el reroll se comia la escritura y tiraba la
+    # oferta que ellos iban a cobrar. Ver `los_que_se_pueden_rerollear`.
+    rerolleables = los_que_se_pueden_rerollear(
         offer_reroll.get(
             "reroll_candidates",
             [],
         )
         or []
     )
+
+    reroll_candidates = rerolleables["reroll_candidates"]
 
     if (
         reroll_candidates
@@ -3495,6 +3581,14 @@ def build_global_decision_uncached(
 
             "offer_reroll":
                 offer_reroll,
+
+            # Las ofertas que no se rerollean porque otro modulo va a
+            # vender a su jugador, y quien.
+            "no_se_rerollean":
+                rerolleables.get(
+                    "no_se_rerollean",
+                    [],
+                ),
 
             "accept_expiry_safety":
                 accept_expiry_safety,
