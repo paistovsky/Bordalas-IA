@@ -26,8 +26,9 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from src.actions.el_cierre_de_la_jornada import (     # noqa: E402
-    ENV, a_quien_vender, adoptar, correr, decidir, el_mejor_once, el_parte, la_caja,
-    la_mejora, la_ventana, las_fichas, las_pujas_vivas, lo_de_esta_vuelta, por_que_no,
+    ENV, VUELTA_MEJORA, a_quien_vender, adoptar, correr, decidir, el_mejor_once, el_parte,
+    la_caja, la_mejora, la_orden, la_ventana, la_vuelta_de_la_mejora, las_fichas,
+    las_pujas_vivas, lo_de_esta_vuelta, por_que_no,
 )
 from src.analysis.el_calendario_de_puntos import contexto   # noqa: E402
 
@@ -282,10 +283,15 @@ def test_la_caja_cuenta_las_pujas_enteras_y_la_vuelta():
                                 "success": True}]}}
     vuelta = lo_de_esta_vuelta(v10)
     assert vuelta["vendidos"] == {2: 900_000} and vuelta["listados"] == {1}, vuelta
-    # La mejora pujó en esta vuelta por 54 (la foto no lo ve); 1 ya es nuestro.
-    pujas = las_pujas_vivas(foto, vuelta, {"54": {"sale": 1, "puja": 400_000}, "1": {"sale": 2}})
-    assert {k: v["amount"] for k, v in pujas.items()} == {50: 1_500_000, 53: 300_000, 54: 400_000}
+    pujas = las_pujas_vivas(foto, vuelta)
+    assert {k: v["amount"] for k, v in pujas.items()} == {50: 1_500_000, 53: 300_000}
     assert pujas[50]["offer_id"] is None             # la de esta vuelta no se sabe retirar
+    # La mejora pujó en esta vuelta por 54 (la foto no lo ve): llega por
+    # su fichero de la vuelta, como un bloque más (13/10/2026).
+    v10["la_mejora_del_once"] = {"hechas": [
+        {"accion": "PUJAR", "player_id": 54, "importe": 400_000, "exito": True}]}
+    pujas = las_pujas_vivas(foto, lo_de_esta_vuelta(v10))
+    assert {k: v["amount"] for k, v in pujas.items()} == {50: 1_500_000, 53: 300_000, 54: 400_000}
 
 
 def test_retira_lo_especulativo_a_menos_de_40_horas():
@@ -476,7 +482,10 @@ def test_nunca_lanza_con_basura():
         adoptar(basura, basura, basura, basura)
         la_caja(basura, basura, basura)
         lo_de_esta_vuelta(basura)
-        las_pujas_vivas(basura, basura, basura)
+        las_pujas_vivas(basura, basura)
+        assert la_vuelta_de_la_mejora(basura, basura, basura)[0] == []
+        la_orden(basura, basura, basura, basura, basura)
+        la_mejora(basura, basura, basura)
         las_fichas(basura, basura, basura, basura)
         por_que_no(basura, basura, basura)
         el_parte(basura)
@@ -613,8 +622,11 @@ def test_lo_de_la_ronda_y_los_chollos_que_entra_en_el_once_se_adopta():
             rutas["ronda"].write_text(json.dumps({"14": 900_000, "700": 300_000}))
             rutas["chollos"].write_text(json.dumps({"12": 2_500_000}))
             rutas["mejora"].write_text(json.dumps({}))
+            rutas["vuelta_mejora"] = Path(carpeta) / "la_mejora_vuelta.json"
             plan = Path(carpeta) / "plan.json"
-            r = correr(status=_status_con(), snapshot=_foto_con(saldo=10_000_000), v10={},
+            # En positivo y F3 tambien en el once escrito (13/10/2026).
+            r = correr(status=_status_con(once_escrito=ONCE),
+                       snapshot=_foto_con(saldo=10_000_000), v10={},
                        libros=None, libros_rutas=rutas, calendario=CAL,
                        orden_ruta=Path(carpeta) / "no_hay_orden.json",
                        escritor_factory=_Escritor, ahora=AHORA, plan_ruta=plan)
@@ -628,7 +640,8 @@ def test_lo_de_la_ronda_y_los_chollos_que_entra_en_el_once_se_adopta():
                 {"player_id": 12, "libro": "chollos", "escrito": True}], publicado
             # Con los libros ya leidos y sin ruta, no se escribe nada (y
             # los tests no tocan los de produccion).
-            r = correr(status=_status_con(), snapshot=_foto_con(saldo=10_000_000), v10={},
+            r = correr(status=_status_con(once_escrito=ONCE),
+                       snapshot=_foto_con(saldo=10_000_000), v10={},
                        libros={"ronda": {}, "chollos": {"12": 1}, "mejora": {}},
                        calendario=CAL, orden_ruta=Path(carpeta) / "no_hay_orden.json",
                        escritor_factory=_Escritor, ahora=AHORA, plan_ruta=plan)
@@ -849,20 +862,265 @@ def test_los_que_se_van_y_los_de_la_mejora_no_cuentan():
     # El que sale por la mejora es suyo; si su relevo ya esta, se va.
     m = la_mejora({"700": {"sale": 13, "puja": 300_000}, "14": {"sale": 15}}, {13, 14, 15})
     assert m == {"vende": {13, 15}, "se_van": {15}}, m
+    # Con las pujas vivas (13/10/2026): la de 700, viva, cuenta; perdida, no.
+    m = la_mejora({"700": {"sale": 13, "puja": 300_000}, "14": {"sale": 15}}, {13, 14, 15},
+                  {700: {"offer_id": None, "amount": 300_000}})
+    assert m == {"vende": {13, 15}, "se_van": {15}}, m
+    m = la_mejora({"700": {"sale": 13, "puja": 300_000}, "14": {"sale": 15}}, {13, 14, 15}, {})
+    assert m == {"vende": {15}, "se_van": {15}}, m
     # El estado es el del catalogo de la foto, aunque el panel diga otra cosa.
     fichas = las_fichas(_status_con(), {10, 11}, estados={10: "injured"})
     assert {f["id"]: f["status"] for f in fichas} == {10: "injured", 11: "ok"}, fichas
-    # De punta a punta: lo que vende la mejora ni se publica.
+    # De punta a punta: lo que vende la mejora ni se publica (su puja por
+    # 700 sigue viva en la foto).
     antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
-            r = correr(status=_status_con(), snapshot=_foto_con(), v10={},
+            r = correr(status=_status_con(),
+                       snapshot=_foto_con(pujas=[(9, 500, 5_000_000), (70, 700, 300_000)]),
+                       v10={},
                        libros={"ronda": {}, "chollos": {},
                                "mejora": {"700": {"sale": 13, "puja": 300_000}}},
                        calendario=CAL, orden_ruta=Path(carpeta) / "nada.json",
                        escritor_factory=_Escritor, ahora=AHORA,
                        plan_ruta=Path(carpeta) / "plan.json")
             assert 13 not in {pid for _, pid in _acciones(r["decision"])}, r["decision"]
+    finally:
+        _entorno(**antes)
+
+
+# ------------------------------------------------------------------
+# LA REVISION DEL 13/10 (antes de encenderlo)
+# ------------------------------------------------------------------
+
+def test_solo_se_adopta_en_positivo_y_si_esta_en_el_once_escrito():
+    # F3 (12) es de los chollos y entra en el once del cierre. Adoptado,
+    # nadie lo vende (el cierre no vende a nadie de su once) ni vende al
+    # titular escrito al que desplaza: su coste se queda en la caja.
+    d = _d(saldo=10_000_000, inventario={12}, once_escrito=ONCE)
+    assert d["adoptar"] == [12] and d["no_adoptados"] == [], d
+    # No esta en el once escrito: el titular escrito sigue jugando y nadie
+    # lo vende; los chollos lo siguen vendiendo.
+    d = _d(saldo=10_000_000, inventario={12}, once_escrito=(ONCE - {12}) | {11})
+    assert 12 in d["once"]["ids"] and d["adoptar"] == [], d
+    assert [a["player_id"] for a in d["no_adoptados"]] == [12], d["no_adoptados"]
+    assert "once escrito" in d["no_adoptados"][0]["motivo"], d["no_adoptados"]
+    # Sin once escrito en el panel, tampoco.
+    assert _d(saldo=10_000_000, inventario={12})["adoptar"] == []
+    # En rojo, pero las ventas elegidas lo cubren (-4 M; B1 y B3): se adopta.
+    d = _d(inventario={12}, once_escrito=ONCE)
+    assert d["deficit"] == 4_000_000 and d["falta"] == 0, d
+    assert d["caja_proyectada"] == -4_000_000 + _cobro(13) + _cobro(15) >= 0, d
+    assert d["adoptar"] == [12], d
+    # FALTA (ni todo el banquillo llega): no se adopta; la ronda o los
+    # chollos lo malvenden a menos de 20 h si hace falta.
+    d = _d(saldo=0, pujas={500: {"offer_id": 9, "amount": 20_000_000}}, inventario={12},
+           once_escrito=ONCE)
+    assert d["motivo"] == "FALTA" and d["caja_proyectada"] == -d["falta"] < 0, d
+    assert d["adoptar"] == [] and [a["player_id"] for a in d["no_adoptados"]] == [12], d
+    assert "caja" in d["no_adoptados"][0]["motivo"], d["no_adoptados"]
+    # De punta a punta: en FALTA el libro de los chollos no se toca y el
+    # plan dice por que.
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "GITHUB_RUN_ID": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            rutas = {k: Path(carpeta) / f"{k}.json"
+                     for k in ("ronda", "chollos", "mejora", "vuelta_mejora")}
+            rutas["ronda"].write_text(json.dumps({}))
+            rutas["chollos"].write_text('{"12": 2500000}')
+            rutas["mejora"].write_text(json.dumps({}))
+            plan = Path(carpeta) / "plan.json"
+            r = correr(status=_status_con(once_escrito=ONCE),
+                       snapshot=_foto_con(saldo=0, pujas=[(9, 500, 20_000_000)]), v10={},
+                       libros=None, libros_rutas=rutas, calendario=CAL,
+                       orden_ruta=Path(carpeta) / "no_hay_orden.json",
+                       escritor_factory=_Escritor, ahora=AHORA, plan_ruta=plan)
+            assert r["decision"]["motivo"] == "FALTA", r["decision"]
+            assert 12 in r["decision"]["once"]["ids"] and r["adoptados"] == [], r
+            assert rutas["chollos"].read_text() == '{"12": 2500000}'
+            publicado = json.loads(plan.read_text())
+            assert publicado["adoptados"] == [] and publicado["caja_proyectada"] < 0, publicado
+            assert [a["player_id"] for a in publicado["no_adoptados"]] == [12], publicado
+            assert any("No se adopta a 12" in linea for linea in el_parte(r)), el_parte(r)
+    finally:
+        _entorno(**antes)
+
+
+def test_la_vuelta_de_la_mejora_solo_si_es_de_esta_vuelta():
+    from datetime import timedelta as _td
+
+    from src.actions import la_mejora_del_once
+
+    # El mismo fichero que escribe la mejora (el interfaz compartido).
+    assert VUELTA_MEJORA.parts[-3:] == ("data", "trading", "la_mejora_vuelta.json")
+    assert getattr(la_mejora_del_once, "VUELTA_MEJORA", VUELTA_MEJORA) == VUELTA_MEJORA
+    hechas = [{"accion": "PUJAR", "player_id": 54, "importe": 400_000, "exito": True}]
+    hace = lambda **k: (AHORA - _td(**k)).isoformat()             # noqa: E731
+    # Con run_id en los dos, manda el run_id (aunque sea de hace 3 h).
+    datos = {"run_id": "77", "generated_at": hace(hours=3), "hechas": hechas}
+    assert la_vuelta_de_la_mejora(datos, AHORA, "77") == (hechas, None)
+    h, motivo = la_vuelta_de_la_mejora({**datos, "generated_at": hace(minutes=1)}, AHORA, "78")
+    assert h == [] and "otra vuelta" in motivo, motivo
+    # Sin run_id en alguno de los dos: la hora, a 45 min o menos.
+    for suyo, nuestro in ((None, "78"), ("77", None), (None, None)):
+        reciente = {"run_id": suyo, "generated_at": hace(minutes=30), "hechas": hechas}
+        assert la_vuelta_de_la_mejora(reciente, AHORA, nuestro) == (hechas, None)
+        vieja = {**reciente, "generated_at": hace(minutes=50)}
+        h, motivo = la_vuelta_de_la_mejora(vieja, AHORA, nuestro)
+        assert h == [] and "hace 50 min" in motivo, motivo
+    assert la_vuelta_de_la_mejora({"hechas": hechas}, AHORA, None)[0] == []
+    assert la_vuelta_de_la_mejora({}, AHORA, "77")[0] == []
+
+
+def test_el_cierre_corre_despues_de_la_mejora_y_cuenta_su_vuelta_no_su_libro():
+    from datetime import timedelta as _td
+
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "GITHUB_RUN_ID": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            def _correr(libro_mejora, vuelta_mejora):
+                return correr(status=_status_con(), snapshot=_foto_con(saldo=1_000_000), v10={},
+                              libros={"ronda": {}, "chollos": {}, "mejora": libro_mejora,
+                                      "vuelta_mejora": vuelta_mejora},
+                              calendario=CAL, orden_ruta=Path(carpeta) / "nada.json",
+                              escritor_factory=_Escritor, ahora=AHORA,
+                              plan_ruta=Path(carpeta) / "plan.json")
+
+            # Una puja de la mejora PERDIDA en el reset (su libro aun la
+            # tiene, ni en la foto ni en la plantilla): no cuenta. Antes la
+            # caja restaba 2 M que no se deben y vendia al banquillo.
+            perdida = {"99999": {"sale": 13, "puja": 2_000_000}}
+            r = _correr(perdida, {})
+            d = r["decision"]
+            assert d["caja"] == 1_000_000 and d["motivo"] == "EN_POSITIVO", d
+            assert _acciones(d, "ACEPTAR_OFERTA_DEL_COMPUTER") == [], d["acciones"]
+            # Y su `sale` ya no es de la mejora: se publica como banquillo.
+            assert ("PONER_A_LA_VENTA", 13) in _acciones(d), d["acciones"]
+
+            # Lo que la mejora hizo en ESTA vuelta (corre antes): pujó 2 M por
+            # 54 y cobró 0,9 M por B2 (14); la puja fallida no cuenta.
+            hechas = [
+                {"accion": "PUJAR", "player_id": 54, "importe": 2_000_000, "sale": 13,
+                 "exito": True},
+                {"accion": "PUJAR", "player_id": 55, "importe": 5_000_000, "exito": False},
+                {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": 14, "offer_id": 5,
+                 "importe": 900_000, "exito": True},
+            ]
+            libro = {"54": {"sale": 13, "puja": 2_000_000}}
+            _entorno(GITHUB_RUN_ID="4242")
+            r = _correr(libro, {"run_id": "4242", "generated_at": AHORA.isoformat(),
+                                "hechas": hechas})
+            d = r["decision"]
+            assert r["vuelta_mejora_descartada"] is None, r
+            # 1 M - 2 M + 0,9 M
+            assert d["caja"] == -100_000, d
+            tocados = {pid for _, pid in _acciones(d)}
+            assert 14 not in tocados and 13 not in tocados, d["acciones"]   # vendido / de la mejora
+            assert 14 not in {c["id"] for c in d["candidatos"]}, d["candidatos"]
+            assert json.loads((Path(carpeta) / "plan.json").read_text())[
+                "vuelta_mejora_descartada"] is None
+
+            # La de OTRA vuelta (otro run_id) no cuenta: ya esta en la foto
+            # o se perdio en el reset.
+            r = _correr(libro, {"run_id": "4241", "generated_at": AHORA.isoformat(),
+                                "hechas": hechas})
+            assert r["decision"]["caja"] == 1_000_000, r["decision"]
+            assert "otra vuelta" in r["vuelta_mejora_descartada"], r
+            # Sin run_id, por la hora: de hace 10 min si; de hace 2 h, no.
+            _entorno(GITHUB_RUN_ID=None)
+            r = _correr(libro, {"run_id": None,
+                                "generated_at": (AHORA - _td(minutes=10)).isoformat(),
+                                "hechas": hechas})
+            assert r["decision"]["caja"] == -100_000, r["decision"]
+            r = _correr(libro, {"run_id": None,
+                                "generated_at": (AHORA - _td(hours=2)).isoformat(),
+                                "hechas": hechas})
+            assert r["decision"]["caja"] == 1_000_000, r["decision"]
+    finally:
+        _entorno(**antes)
+
+
+_ORDEN_CON_RELEVO = {
+    "caduca": "2026-11-30T23:59:00+01:00",
+    "fichar": [{"player_id": 500, "nombre": "Relevo", "puja": 3_000_000}],
+    "proteger": [{"player_id": 9, "nombre": "Yamal"}],
+    "vender_si_ficha": {"jugadores": [
+        {"player_id": 13, "nombre": "B1", "suelo": 1, "si_esta": 500}]},
+}
+
+
+def test_lo_que_vende_la_orden_solo_cuenta_si_su_relevo_llega():
+    antes = _entorno(**{"BORDALAS_LA_ORDEN_DEL_GESTOR": "1"})
+    try:
+        orden = _ORDEN_CON_RELEVO
+        plantilla = {p["id"] for p in PLANTILLA}
+        viva = {500: {"offer_id": 9, "amount": 3_000_000}}
+        # Perdida la puja por el relevo (ni dentro, ni puja viva, y un
+        # rival se lo llevo del mercado): la orden no lo vende nunca.
+        o = la_orden(orden, plantilla, AHORA, pujas={}, mercado={777: 1_000_000})
+        assert o["vende"] == set() and o["se_van"] == set(), o
+        # Con puja viva, aun en el mercado o sin saber el mercado: suyo, y
+        # aun juega.
+        for pujas, mercado in ((viva, {777: 1}), ({}, {500: 3_000_000}), ({}, {})):
+            o = la_orden(orden, plantilla, AHORA, pujas=pujas, mercado=mercado)
+            assert o["vende"] == {13} and o["se_van"] == set(), (pujas, mercado, o)
+        # El relevo ya es nuestro: se va.
+        o = la_orden(orden, plantilla | {500}, AHORA, pujas={}, mercado={777: 1})
+        assert o["vende"] == {13} and o["se_van"] == {13}, o
+        # Sin relevo, la orden no lo vende.
+        sin = {**orden, "vender_si_ficha": {"jugadores": [
+            {"player_id": 13, "nombre": "B1", "suelo": 1}]}}
+        assert la_orden(sin, plantilla, AHORA, pujas={}, mercado={})["vende"] == set()
+        # Con relevo general y propio, la orden pide los dos.
+        dos = {**orden, "vender_si_ficha": {"si_esta": 501, "jugadores": [
+            {"player_id": 13, "nombre": "B1", "suelo": 1, "si_esta": 500}]}}
+        o = la_orden(dos, plantilla | {500}, AHORA, pujas={}, mercado={777: 1})
+        assert o["vende"] == set(), o
+        o = la_orden(dos, plantilla | {500, 501}, AHORA, pujas={}, mercado={777: 1})
+        assert o["vende"] == {13} and o["se_van"] == {13}, o
+    finally:
+        _entorno(**antes)
+
+
+def test_de_punta_a_punta_la_puja_perdida_de_la_orden_no_congela_ni_resta():
+    # B1 (13) lo vende la orden cuando llegue 500. En rojo (-3 M) y con
+    # una oferta del Computer por B1 del 92,5 %.
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1", "GITHUB_RUN_ID": None})
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            orden = Path(carpeta) / "orden.json"
+            orden.write_text(json.dumps(_ORDEN_CON_RELEVO))
+
+            def _correr(pujas, mercado, v10=None):
+                foto = _foto_con(saldo=-3_000_000, pujas=pujas, ofertas=[(77, 13, 3_700_000)])
+                foto["market"]["sales"] = [{"player": {"id": p}, "user": None, "price": 1_000_000}
+                                           for p in mercado]
+                return correr(status=_status_con(), snapshot=foto, v10=v10 or {},
+                              libros={"ronda": {}, "chollos": {}, "mejora": {}},
+                              calendario=CAL, orden_ruta=orden, escritor_factory=_Escritor,
+                              ahora=AHORA, plan_ruta=Path(carpeta) / "plan.json")
+
+            # PERDIDA: 500 no esta en la foto ni en el mercado (un rival se lo
+            # llevo). El `fichar` no resta y B1 vuelve a ser del cierre: se
+            # cobra su oferta.
+            d = _correr([], [777])["decision"]
+            assert d["caja"] == -3_000_000, d
+            assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 13) in _acciones(d), d["acciones"]
+            # VIVA: la puja resta entera y B1 es de la orden: ni se toca.
+            d = _correr([(9, 500, 3_000_000)], [777])["decision"]
+            assert d["caja"] == -6_000_000, d
+            assert 13 not in {pid for _, pid in _acciones(d)}, d["acciones"]
+            # PUJADA EN ESTA VUELTA por la orden (la foto es de antes): resta.
+            v10 = {"timestamp": AHORA.isoformat(), "orden_del_gestor": {"hechas": [
+                {"accion": "PUJAR", "player_id": 500, "importe": 3_000_000, "exito": True}]}}
+            d = _correr([], [777], v10)["decision"]
+            assert d["caja"] == -6_000_000, d
+            assert 13 not in {pid for _, pid in _acciones(d)}, d["acciones"]
+            # AUN EN EL MERCADO sin puja (la orden puede volver a pujar): B1
+            # sigue siendo de la orden; la caja solo cuenta pujas de verdad.
+            d = _correr([], [777, 500])["decision"]
+            assert d["caja"] == -3_000_000, d
+            assert 13 not in {pid for _, pid in _acciones(d)}, d["acciones"]
     finally:
         _entorno(**antes)
 
@@ -893,6 +1151,11 @@ TESTS = [
     test_el_once_es_para_la_principal_y_la_caja_para_la_que_venga,
     test_sin_calendario_lo_dice,
     test_los_que_se_van_y_los_de_la_mejora_no_cuentan,
+    test_solo_se_adopta_en_positivo_y_si_esta_en_el_once_escrito,
+    test_la_vuelta_de_la_mejora_solo_si_es_de_esta_vuelta,
+    test_el_cierre_corre_despues_de_la_mejora_y_cuenta_su_vuelta_no_su_libro,
+    test_lo_que_vende_la_orden_solo_cuenta_si_su_relevo_llega,
+    test_de_punta_a_punta_la_puja_perdida_de_la_orden_no_congela_ni_resta,
 ]
 
 
