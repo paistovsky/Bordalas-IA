@@ -38,14 +38,6 @@
     {
       "player_id": 26271,
       "nombre": "Yamal"
-    },
-    {
-      "player_id": 35678,
-      "nombre": "Roberto Fernández"
-    },
-    {
-      "player_id": 38433,
-      "nombre": "Gulácsi"
     }
   ],
   "conservar": [
@@ -72,6 +64,16 @@
     {
       "player_id": 19862,
       "nombre": "Expósito"
+    },
+    {
+      "player_id": 35678,
+      "nombre": "Roberto Fernández",
+      "por_que": "12/10, el dueño: «si Roberto Fernández… juega en casa del Barça, Atleti y Real Madrid, es mejor venderle y poner a otro con mejor calendario». Deja de ser intocable: lo puede cambiar la mejora del once (misma posición, más puntos esperados); los vendedores de liquidez de siempre siguen sin tocarlo (conservar)."
+    },
+    {
+      "player_id": 38433,
+      "nombre": "Gulácsi",
+      "por_que": "12/10, el dueño: «si Roberto Fernández… juega en casa del Barça, Atleti y Real Madrid, es mejor venderle y poner a otro con mejor calendario». Deja de ser intocable: lo puede cambiar la mejora del once (misma posición, más puntos esperados); los vendedores de liquidez de siempre siguen sin tocarlo (conservar)."
     }
   ],
   "viajes": {
