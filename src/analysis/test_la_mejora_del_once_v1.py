@@ -828,6 +828,7 @@ def test_solo_cuentan_las_rondas_principales():
     assert [r["principal"] for r in todas["rondas"]] == [True, False, True]
     assert [r["label"] for r in las_rondas_que_cuentan(todas)] == ["Jornada 9", "Jornada 10"]
     assert xp_por_jornada(todas, MUNDO[40], 80)["factor"] == 0.846
+    assert xp_por_jornada(todas, MUNDO[40], 80)["xp"] == xp_por_jornada(ctx, MUNDO[40], 80)["xp"]
     assert las_rondas_que_cuentan(None) == [] and las_rondas_que_cuentan({"rondas": "x"}) == []
     # El tablón lo cuenta bien: sin aplazados, y duro es top-6 o top-4
     # por plantilla.
@@ -978,12 +979,52 @@ def test_correr_cuenta_una_vez_la_puja_de_la_orden():
     assert s["plan"]["caja"] == 500_000 - 3_000_000, s["plan"]
 
 
+def test_el_frenado_por_el_margen_sigue_financiando():
+    # La segunda revisión: en rojo, un cambio que el margen frena como
+    # MEJORA (+1,06 con el calendario, -0,8 con el `esperado`) se tiraba
+    # entero, y apagado ese mismo cambio SÍ financiaba (-0,8 >= -1,5 y da
+    # caja). Ahora se vuelve a medir con el `esperado` y financia: el
+    # encendido nunca deja la jornada en rojo donde el apagado no.
+    ctx = _ctx()
+    mundo = {**MUNDO, 46: {**MUNDO[46], "price": 6_000_000}, 47: {**MUNDO[47], "price": 2_000_000}}
+    k = dict(once=[{**_nuestro(46), "price": 6_000_000}], liga=mundo,
+             escaparate=[{**_del_computer(47), "price": 2_000_000}],
+             caja=-2_000_000, horas_jornada=70)
+    apagado = decidir(**_en_el_mundo([46], [47]) | k)
+    assert _lo_que_hace(apagado) == [("PUJAR", 47)] and apagado["plan"]["deficit"], apagado
+    encendido = decidir(**_en_el_mundo([46], [47], calendario_de_puntos=ctx) | k)
+    assert _lo_que_hace(encendido) == [("PUJAR", 47)], encendido
+    (c,) = encendido["plan"]["cambios"]
+    assert c["puntos"] == c["sin_calendario"] == -0.8 and c["medida"].startswith("esperado"), c
+    assert encendido["plan"]["calendario"]["frenados_por_el_margen"] == 1, encendido
+    # Fuera del rojo, el frenado no compra nada (financiar sin falta no).
+    assert _lo_que_hace(decidir(**_en_el_mundo([46], [47], calendario_de_puntos=ctx)
+                                | {**k, "caja": 500_000})) == []
+
+
+def test_el_estado_de_otra_vuelta_por_su_run_id():
+    # Las vueltas de las 04:45 y 04:50 van seguidas: a 5 minutos la hora
+    # no las distingue. Con el `run_id` de GitHub en los dos, manda él.
+    v10 = {"timestamp": _hace(5), "run_id": "111", "orden_del_gestor": {"hechas": [
+        {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": 44, "importe": 2_900_000,
+         "exito": True}]}}
+    assert lo_de_esta_vuelta(v10, AHORA, "111")["cobros"] == {44: 2_900_000}
+    otra = lo_de_esta_vuelta(v10, AHORA, "222")
+    assert otra["cobros"] == {} and "otra vuelta" in otra["descartado"], otra
+    # Sin run_id en uno de los dos, la hora (como antes).
+    assert lo_de_esta_vuelta({**v10, "run_id": None}, AHORA, "222")["cobros"] == {44: 2_900_000}
+    assert lo_de_esta_vuelta(v10, AHORA, None)["cobros"] == {44: 2_900_000}
+    assert lo_de_esta_vuelta({**v10, "timestamp": _hace(60), "run_id": None}, AHORA, "222")["cobros"] == {}
+
+
 TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_cambia_caro_por_barato_para_fichar_mejor,
          test_en_rojo_vende_caro_y_ficha_barato_desde_las_88_horas,
          test_solo_en_su_hora, test_el_que_sale_solo_se_vende_con_el_relevo_dentro,
          test_se_queda_lo_que_compro_la_ronda_si_mejora_el_once, test_la_caja,
          test_nace_apagada_y_nunca_lanza,
+         test_el_frenado_por_el_margen_sigue_financiando,
+         test_el_estado_de_otra_vuelta_por_su_run_id,
          # El calendario (12/10/2026, `BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`).
          test_apagado_es_byte_a_byte_lo_de_antes,
          test_apagado_correr_ni_mira_el_calendario,

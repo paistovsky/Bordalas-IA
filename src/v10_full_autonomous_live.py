@@ -1500,6 +1500,10 @@ def run_full_autonomous_cycle() -> dict:
     payload = {
         "version": "V10.13.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        # De que vuelta es (12/10/2026): los pasos de despues (la mejora
+        # del once, el cierre) solo cuentan lo de ESTA vuelta; la cache
+        # puede traer el estado de la anterior si esta no lo escribe.
+        "run_id": os.environ.get("GITHUB_RUN_ID"),
         "full_autonomous_live": True,
         "write_used": write_used,
         "action_taken": action_taken,

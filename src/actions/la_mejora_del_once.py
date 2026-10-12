@@ -657,10 +657,21 @@ def decidir(
 
     # LA GUARDIA DEL CALENDARIO: nunca vende a uno claramente mejor con la
     # vara de siempre (`no_vende_a_uno_mejor`).
+    #     El frenado por el margen no se tira: se vuelve a medir con la
+    #     vara de siempre (`puntos` = `sin_calendario`) y, si apagado
+    #     valdria para financiar (en rojo, caro por barato), sigue
+    #     valiendo para eso. Encendido nunca financia peor que apagado.
     frenados_por_el_margen = 0
     if ctx is not None:
-        validos = [c for c in cambios if no_vende_a_uno_mejor(c)]
-        frenados_por_el_margen = len(cambios) - len(validos)
+        validos = []
+        for c in cambios:
+            if no_vende_a_uno_mejor(c):
+                validos.append(c)
+                continue
+            frenados_por_el_margen += 1
+            sin = c.get("sin_calendario")
+            if sin is not None and sin >= PEOR_FINANCIACION:
+                validos.append({**c, "puntos": sin, "medida": "esperado (frenado por el margen)"})
         cambios = validos
 
     minimo = -DEUDA_TOLERADA if horas_jornada >= HORAS_CON_DEUDA else 0
@@ -741,11 +752,13 @@ def la_caja(foto: dict, *, se_venden_solos=frozenset(), inventario_valor=0,
     return saldo - pujas + int(inventario_valor) + int(ventas_pendientes) + cobrado
 
 
-def es_de_esta_vuelta(v10, ahora) -> str | None:
+def es_de_esta_vuelta(v10, ahora, run_id=None) -> str | None:
     """
-    None si el estado de la vuelta es de ESTA vuelta: su `timestamp` a
-    `VUELTA_VIEJA_MINUTOS` o menos antes de `ahora` (uno posterior,
-    también). Si no, el motivo para no contarlo.
+    None si el estado de la vuelta es de ESTA vuelta: si los dos traen el
+    `run_id` de GitHub, tiene que ser el mismo (las vueltas de las 04:45
+    y 04:50 van seguidas: a 5 minutos, la hora no las distingue); si no,
+    su `timestamp` a `VUELTA_VIEJA_MINUTOS` o menos antes de `ahora` (uno
+    posterior, también). Si no, el motivo para no contarlo.
 
     Con un 429 la v10 sale con 0 sin escribir su estado, y la caché
     devuelve el de la vuelta anterior: sus cobros (ya dentro del saldo
@@ -754,6 +767,11 @@ def es_de_esta_vuelta(v10, ahora) -> str | None:
     se cuenta. Pura, nunca lanza.
     """
     try:
+        suyo = (v10 or {}).get("run_id") if isinstance(v10, dict) else None
+        if run_id and suyo:
+            if str(suyo) != str(run_id):
+                return f"el estado de la vuelta es de otra vuelta (run {suyo}, esta {run_id})"
+            return None
         sello = (v10 or {}).get("timestamp") if isinstance(v10, dict) else None
         if not sello:
             return "el estado de la vuelta no trae hora"
@@ -770,7 +788,7 @@ def es_de_esta_vuelta(v10, ahora) -> str | None:
         return f"el estado de la vuelta no se puede fechar: {type(error).__name__}"
 
 
-def lo_de_esta_vuelta(v10, ahora=None) -> dict:
+def lo_de_esta_vuelta(v10, ahora=None, run_id=None) -> dict:
     """
     Lo que ESTA vuelta ya hizo antes que la mejora (la foto es de antes),
     de los bloques `orden_del_gestor`, `chollos` y `ronda` de
@@ -795,7 +813,7 @@ def lo_de_esta_vuelta(v10, ahora=None) -> dict:
               "descartado": None}
     try:
         if ahora is not None:
-            salida["descartado"] = es_de_esta_vuelta(v10, ahora)
+            salida["descartado"] = es_de_esta_vuelta(v10, ahora, run_id)
             if salida["descartado"]:
                 return salida
         for bloque in ("orden_del_gestor", "chollos", "ronda"):
@@ -981,7 +999,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         # pujado baja `maximumBid` y no se vuelve a pujar; lo pujado y lo
         # cobrado entran en la caja; lo vendido ya no sale otra vez. Solo
         # si el estado es de ESTA vuelta (con un 429 queda el de otra).
-        esta_vuelta = lo_de_esta_vuelta(v10, ahora)
+        esta_vuelta = lo_de_esta_vuelta(v10, ahora, os.environ.get("GITHUB_RUN_ID"))
         salida["v10_descartado"] = esta_vuelta["descartado"]
         ya_pujados = esta_vuelta["ya_pujados"]
         vendidos = set(esta_vuelta["cobros"])
