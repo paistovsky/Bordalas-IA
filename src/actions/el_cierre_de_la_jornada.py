@@ -122,7 +122,15 @@ QUE NO HACE
 
     No compra, no sube pujas, no pone el once (SAVE_LINEUP es del
     orquestador) y no vende a nadie del once: si el banquillo no llega,
-    lo dice (FALTA) y lo arregla la mejora o el dueño.
+    lo dice (FALTA) y lo arregla la mejora o el dueño. Sin once escrito
+    en el panel, el que esta en duda (o sin estado) tampoco se vende.
+
+    El adoptado de la ronda o los chollos (en su once) sale de sus
+    libros, pero SIGUE PUBLICADO: Biwenger no tiene «quitar de la venta»
+    en el cliente de escritura. La ronda y los chollos ya no lo venden;
+    los vendedores del orquestador que no leen `el_cierre.json`, si
+    podrian aceptar su oferta (el mismo hueco que la adopcion de la
+    mejora del once).
 
     No cuenta como entrada el premio de la jornada ni lo que daran las
     ventas de la orden o de la mejora: al empezar la ronda solo vale
@@ -668,8 +676,13 @@ def decidir(
             if (pid in xi or _nombre(f) in nunca or pid in protegidos
                     or pid in no_vender):
                 continue
-            if (pid in once_escrito
-                    and str(f.get("status") or "").strip().lower() not in FUERA_SEGURO):
+            estado = str(f.get("status") or "").strip().lower()
+            if pid in once_escrito and estado not in FUERA_SEGURO:
+                titulares.append(pid)
+                continue
+            # Sin once escrito en el panel no se sabe quien es titular: el
+            # que esta en duda (o sin estado) puede serlo, y no se vende.
+            if not once_escrito and estado not in FUERA_SEGURO | {"ok", "warned"}:
                 titulares.append(pid)
                 continue
             candidatos.append({"id": pid, "name": f.get("name"), "valor": f["valor"],
@@ -786,9 +799,13 @@ def lo_de_esta_vuelta(v10) -> dict:
             if clave == "escaparate":
                 # En ensayo tampoco: lo que el escaparate quiere publicar
                 # lleva su precio, y el cierre no se lo pisa.
+                # Solo lo que de verdad se envio: con el escaparate
+                # apagado (ESCAPARATE_APAGADO=1) la fila llega en seco
+                # (sent False) y no hay precio que respetar.
                 for fila in _lista(bloque.get("listed")):
                     pid = _int(fila.get("player_id"))
-                    if pid is not None:
+                    if (pid is not None and fila.get("sent")
+                            and fila.get("success") is not False):
                         vuelta["listados"].add(pid)
     except Exception:                               # noqa: BLE001
         pass

@@ -554,6 +554,13 @@ def test_un_titular_escrito_en_duda_no_se_vende():
            horas=15)
     assert 11 not in d["once"]["ids"] and 11 not in {pid for _, pid in _acciones(d)}, d
     assert 11 in d["titulares_que_no_se_venden"]
+    # Sin once escrito en el panel (segunda revision): el que esta en duda
+    # puede ser titular y tampoco se vende; el lesionado, si.
+    d = _d(plantilla=once, horas=15, ofertas=ofertas, once_escrito=set(), protegidos=set())
+    assert 10 not in {pid for _, pid in _acciones(d)} and 10 in d["titulares_que_no_se_venden"], d
+    fuera = [{**p, "status": "injured"} if p["id"] == 10 else p for p in once]
+    d = _d(plantilla=fuera, horas=15, ofertas=ofertas, once_escrito=set(), protegidos=set())
+    assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 10)], d["acciones"]
 
 
 def test_los_conservar_se_publican_y_solo_se_venden_fuera_del_once_escrito():
@@ -700,6 +707,12 @@ def test_lo_que_publico_el_escaparate_no_se_vuelve_a_publicar():
     v10 = {"escaparate": {"listed": [{"player_id": 11, "listed_price": 3_450_000,
                                       "sent": True, "success": True}]}}
     assert lo_de_esta_vuelta(v10)["listados"] == {11}
+    # En seco (ESCAPARATE_APAGADO=1: sent False) no cuenta: no hay precio
+    # que respetar y el cierre lo publica si le toca.
+    seco = {"escaparate": {"listed": [{"player_id": 11, "live": False, "sent": False}]}}
+    assert lo_de_esta_vuelta(seco)["listados"] == set()
+    fallido = {"escaparate": {"listed": [{"player_id": 11, "sent": True, "success": False}]}}
+    assert lo_de_esta_vuelta(fallido)["listados"] == set()
     antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
