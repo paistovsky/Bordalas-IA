@@ -362,6 +362,109 @@ def offers_to_collect(
     )
 
 
+def los_que_se_pueden_publicar(
+    to_list: list[dict] | None,
+    ids_protegidos: set | frozenset | None = None,
+) -> dict:
+    """
+    `to_list` sin los jugadores que el escritor se niega a publicar.
+
+    POR QUE EXISTE (LA RANURA NO SE TIRA, 12/10/2026)
+
+        El orquestador tiene UNA escritura por vuelta. Del 02/10
+        14:09 al 12/10 13:09 el autopilot_log apunta 36 veces
+        «FAILED Publicacion de Yamal»: LIST_FOR_LIQUIDITY publicaba
+        `to_list[0]`, que era Yamal, y `list_player_for_sale` lo
+        frena (PROTEGIDO_POR_LA_ORDEN_DEL_GESTOR). La vuelta se
+        quedaba sin su escritura y Olasagasti, el siguiente sin
+        publicar, no salia nunca: sin publicar no hay oferta del
+        Computer.
+
+        Y con saldo negativo la solvencia gana a SAVE_LINEUP (960
+        contra 935 desde el viernes 08:45, 1100 contra 1000 en
+        HARD_SAFETY): una publicacion que el escritor va a rechazar
+        se come las ultimas escrituras del once.
+
+    LA REGLA
+
+        Fuera de la cola los que devuelve
+        `la_orden_del_gestor.protegidos()` (`proteger` + `fichar` de
+        la orden viva), que es EXACTAMENTE la puerta que cierra
+        `write_client.list_player_for_sale`. La misma funcion, no una
+        copia: si mañana cambia la puerta, cambia esto. El siguiente
+        sin proteger pasa a ser el primero; si no queda ninguno, no
+        hay candidata de publicar.
+
+        `ids_protegidos` es para las pruebas; en produccion va a
+        None y se lee la orden.
+
+    QUE NO HACE
+
+        No toca prioridades, ni el orden del resto de la cola, ni el
+        precio. No aplica la regla de los intocables por nombre: el
+        escritor no la aplica al publicar, y Yamal ya va en
+        `proteger`. Con la orden apagada o caducada `protegidos()`
+        es vacio y la cola sale como entra.
+
+        Nunca lanza: si algo falla devuelve la cola tal cual, que es
+        lo que habia (y el escritor sigue frenando).
+    """
+
+    try:
+        cola = list(to_list or [])
+
+        if ids_protegidos is None:
+            from src.actions.la_orden_del_gestor import protegidos
+
+            ids_protegidos = protegidos()
+
+        vetados = {
+            int(pid)
+            for pid in (ids_protegidos or ())
+            if pid is not None
+        }
+
+        if not vetados:
+            return {
+                "to_list": cola,
+                "no_se_publican": [],
+            }
+
+        quedan = []
+        fuera = []
+
+        for jugador in cola:
+            try:
+                pid = int(
+                    (jugador or {}).get("id")
+                )
+            except (TypeError, ValueError, AttributeError):
+                pid = None
+
+            if pid is not None and pid in vetados:
+                fuera.append(
+                    {
+                        "id": pid,
+                        "name": jugador.get("name"),
+                        "motivo": "PROTEGIDO_POR_LA_ORDEN_DEL_GESTOR",
+                    }
+                )
+            else:
+                quedan.append(jugador)
+
+        return {
+            "to_list": quedan,
+            "no_se_publican": fuera,
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        return {
+            "to_list": to_list or [],
+            "no_se_publican": [],
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+
 def hours_remaining(
     seconds: int | None,
 ) -> float | None:
@@ -1481,6 +1584,18 @@ def build_global_decision_uncached(
         )
         or []
     )
+
+    # LA RANURA NO SE TIRA (12/10/2026). Las dos publicaciones de
+    # liquidez -la del saldo negativo y la de mantenimiento- leen
+    # este `to_list`. Fuera los que el escritor se niega a publicar
+    # (36 «FAILED Publicacion de Yamal» del 02/10 al 12/10): si no,
+    # la unica escritura de la vuelta se tira. Ver
+    # `los_que_se_pueden_publicar`.
+    publicables = los_que_se_pueden_publicar(
+        to_list
+    )
+
+    to_list = publicables["to_list"]
 
     candidates = []
 
@@ -3363,6 +3478,14 @@ def build_global_decision_uncached(
 
             "liquidity":
                 liquidity,
+
+            # A quien se ha dejado sin publicar y por que. Un filtro
+            # que no se puede mirar es un filtro que nadie revisa.
+            "no_se_publican":
+                publicables.get(
+                    "no_se_publican",
+                    [],
+                ),
 
             "offers":
                 offers,

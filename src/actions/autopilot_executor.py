@@ -257,6 +257,165 @@ def build_noop_result(
     }
 
 
+def resultado_de_publicar(
+    action: str | None,
+    player: dict | None,
+    result: dict | None,
+) -> dict:
+    """
+    Lo que devuelve LIST_FOR_LIQUIDITY con lo que contesto el
+    escritor.
+
+    POR QUE EXISTE (LA RANURA NO SE TIRA, 12/10/2026)
+
+        `list_player_for_sale` frena a los protegidos de la orden
+        del gestor ANTES de enviar nada (`sent: False`, `blocked:
+        PROTEGIDO_POR_LA_ORDEN_DEL_GESTOR`). Aqui se devolvia
+        `write_performed: True` igual, y el ciclo daba por gastada
+        su unica escritura: 36 «FAILED Publicacion de Yamal» del
+        02/10 al 12/10 en el autopilot_log, y en cada una el
+        competitivo (autopilot.py, «una sola escritura por ciclo») y
+        V10 (`_write_used`) se quedaban sin turno.
+
+    LA REGLA
+
+        `write_performed` significa «se envio una escritura»
+        (dashboard_state, 19/08): por eso vale True aunque Biwenger
+        conteste con error, y eso no se toca. Lo que el escritor
+        frena con `blocked` no ha salido hacia Biwenger: no es una
+        escritura. Sale `write_performed: False`, status BLOCKED,
+        success False. Asi el backoff no castiga lo que no se
+        intento (`register_action_outcome` solo cuenta escrituras
+        reales) y el resto del ciclo puede escribir.
+
+    QUE NO HACE
+
+        Un FAILED con la peticion enviada (HTTP 4xx/5xx) sigue
+        siendo escritura. El ensayo (`BORDALAS_ENSAYO`, `sent:
+        False` sin `blocked`) tampoco cambia: en produccion esa
+        peticion SI se habria enviado, y el ensayo tiene que ver la
+        misma vuelta. Nunca lanza.
+    """
+
+    try:
+        jugador = player or {}
+        respuesta = result if isinstance(result, dict) else {}
+
+        exito = bool(
+            respuesta.get(
+                "success",
+                False,
+            )
+        )
+
+        frenada = (
+            respuesta.get("blocked")
+            if not respuesta.get("sent")
+            else None
+        )
+
+        if frenada:
+            return {
+                "action":
+                    action,
+
+                "status":
+                    "BLOCKED",
+
+                "reason": (
+                    f"Publicacion de {jugador.get('name')} frenada "
+                    f"por el escritor ({frenada}): no ha salido "
+                    "nada hacia Biwenger."
+                ),
+
+                "write_performed":
+                    False,
+
+                "success":
+                    False,
+
+                "blocked":
+                    frenada,
+
+                "http_status":
+                    None,
+
+                "response":
+                    None,
+
+                "player":
+                    player,
+            }
+
+        return {
+            "action":
+                action,
+
+            "status":
+                (
+                    "LISTED"
+                    if exito
+                    else "FAILED"
+                ),
+
+            "reason":
+                (
+                    f"Publicacion de "
+                    f"{jugador.get('name')}."
+                ),
+
+            "write_performed":
+                True,
+
+            "success":
+                exito,
+
+            "http_status":
+                respuesta.get(
+                    "http_status"
+                ),
+
+            "response":
+                respuesta.get(
+                    "response"
+                ),
+
+            "player":
+                player,
+        }
+
+    except Exception as error:                      # noqa: BLE001
+        # Lo de antes: si no se sabe que paso, se cuenta como
+        # escritura y no se manda otra en la vuelta.
+        return {
+            "action":
+                action,
+
+            "status":
+                "FAILED",
+
+            "reason": (
+                f"Publicacion: no se pudo leer la respuesta "
+                f"({type(error).__name__}: {error})."
+            ),
+
+            "write_performed":
+                True,
+
+            "success":
+                False,
+
+            "http_status":
+                None,
+
+            "response":
+                None,
+
+            "player":
+                player,
+        }
+
+
 def _jornada_para_el_desvio(snapshot, decision) -> int | None:
     """
     La jornada que siembra el desvio de puja.
@@ -552,49 +711,16 @@ def execute_autopilot_decision(
             )
         )
 
-        return {
-            "action":
+        return resultado_de_publicar(
+            action=
                 action,
 
-            "status":
-                (
-                    "LISTED"
-                    if result.get(
-                        "success"
-                    )
-                    else "FAILED"
-                ),
-
-            "reason":
-                (
-                    f"Publicacion de "
-                    f"{player.get('name')}."
-                ),
-
-            "write_performed":
-                True,
-
-            "success":
-                bool(
-                    result.get(
-                        "success",
-                        False,
-                    )
-                ),
-
-            "http_status":
-                result.get(
-                    "http_status"
-                ),
-
-            "response":
-                result.get(
-                    "response"
-                ),
-
-            "player":
+            player=
                 player,
-        }
+
+            result=
+                result,
+        )
 
     # ========================================================
     # ACEPTAR OFERTA PARA SOLVENCIA
