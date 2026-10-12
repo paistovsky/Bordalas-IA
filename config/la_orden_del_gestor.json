@@ -9,6 +9,12 @@
       "nombre": "Iván Romero",
       "puja": 3777000,
       "por_que": "12/10: DEL del Levante, 5,67 pts/partido, 70 % titular (FF), sube (+160.000 en 6 dias). Esperado 3,97/jornada contra 2,25 de Jutgla. Caja: 0,66 - 3,78 + venta de Jutgla (~2,6) + premio J8 (esta noche, ~1,3) > 0 antes de la J9 (16/10)."
+    },
+    {
+      "player_id": 34111,
+      "nombre": "Gerard Martín",
+      "puja": 4989000,
+      "por_que": "12/10, por indicacion del dueño: DEF del Barça, 5,29 pts/partido, 60 % titular; 3,17/jornada esperados contra 0,9 de Diego Rico. Caja: hay que volver a >= 0 antes del 16/10 15:00 (J9) vendiendo el 14-15/10."
     }
   ],
   "no_pujar": [],
@@ -19,6 +25,12 @@
         "nombre": "Jutglà",
         "suelo": 2466000,
         "si_esta": 17937
+      },
+      {
+        "player_id": 5678,
+        "nombre": "Diego Rico",
+        "suelo": 470000,
+        "si_esta": 34111
       }
     ]
   },
@@ -60,10 +72,6 @@
     {
       "player_id": 19862,
       "nombre": "Expósito"
-    },
-    {
-      "player_id": 5678,
-      "nombre": "Diego Rico"
     }
   ],
   "viajes": {
