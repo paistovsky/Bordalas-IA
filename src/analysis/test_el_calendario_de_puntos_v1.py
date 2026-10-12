@@ -362,6 +362,33 @@ def test_las_proximas_por_reloj():
     assert proximas_rondas(cal, AHORA, 0) == []
 
 
+def test_solo_las_principales():
+    # La regla del dueño (12/10/2026): el aplazado del 21/10 lo puntua
+    # Biwenger con el once de la J6, asi que no es ronda que planear.
+    # Con `solo_principales`, las tres son la J9, la J10 y la J11.
+    cal = _calendario()
+    assert [r["label"] for r in proximas_rondas(cal, AHORA, 3, solo_principales=True)] == [
+        "Jornada 9", "Jornada 10", "Jornada 11"]
+    assert all(r["principal"] for r in proximas_rondas(cal, AHORA, 10, solo_principales=True))
+    # Empezada la J9: quedan dos principales (los de la J11 en noviembre y
+    # diciembre son aplazados), no se rellena con aplazados.
+    assert [r["label"] for r in proximas_rondas(
+        cal, "2026-10-17T12:00:00+02:00", 3, solo_principales=True)] == ["Jornada 10", "Jornada 11"]
+    # El adelantado de la J6 (03/09) tampoco.
+    assert [r["label"] for r in proximas_rondas(
+        cal, "2026-09-01T00:00:00+02:00", 3, solo_principales=True)] == [
+        "Jornada 5", "Jornada 6", "Jornada 7"]
+    # Sin pedirlo, como antes.
+    assert [r["label"] for r in proximas_rondas(cal, AHORA, 3)][1] == "Jornada 6 (aplazada)"
+    # Y el contexto lo pasa.
+    status = {"league_center": {"laliga": {"standings": CLASIFICACION}}}
+    assert [r["label"] for r in contexto(status, cal, AHORA, 3, solo_principales=True)["rondas"]] == [
+        "Jornada 9", "Jornada 10", "Jornada 11"]
+    assert [r["label"] for r in contexto(status, cal, AHORA, 3)["rondas"]] == [
+        "Jornada 9", "Jornada 6 (aplazada)", "Jornada 10"]
+    assert proximas_rondas("basura", AHORA, 3, solo_principales=True) == []
+
+
 # ------------------------------------------------------------
 # 5. El xP: neutro sin partido, y el horizonte
 # ------------------------------------------------------------
@@ -551,7 +578,8 @@ def test_nunca_lanza_con_basura():
 TESTS = [test_los_factores, test_casan_los_veinte_del_calendario_real,
          test_casan_con_otros_nombres_sin_subcadenas, test_los_duros_y_sus_desempates,
          test_el_valor_de_plantilla, test_las_rondas_parten_el_adelantado_y_el_aplazado,
-         test_las_proximas_por_reloj, test_neutro_si_no_juega_y_suma_si_juega_dos,
+         test_las_proximas_por_reloj, test_solo_las_principales,
+         test_neutro_si_no_juega_y_suma_si_juega_dos,
          test_el_horizonte_y_el_factor_medio, test_el_encogimiento_hacia_el_tramo,
          test_el_contexto_y_el_xp_del_jugador, test_nunca_lanza_con_basura]
 

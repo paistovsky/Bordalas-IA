@@ -203,6 +203,12 @@ QUE_HACE = {
         "En cada vuelta busca los cambios que más puntos suman al once (con deuda "
         "entre jornadas), puja por el que entra y vende al que sale cuando llega "
         "su relevo; en rojo, cambia caro por barato antes que jugar con 0.",
+    "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA":
+        "La mejora del once mira las tres próximas jornadas, sin los partidos "
+        "aplazados (en casa o fuera, y si el rival es duro: de los seis "
+        "primeros de la tabla o de los cuatro con la plantilla más cara) y "
+        "encoge a los de pocos partidos; es un desempate: nunca vende a uno "
+        "mucho mejor por un calendario.",
     "BORDALAS_COMPRA_SOLO_SI_SUBE":
         "Para revender, solo compra jugadores cuyo precio está subiendo.",
     "BORDALAS_EL_ONCE_UNA_VEZ":
