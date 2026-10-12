@@ -926,11 +926,17 @@ def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
     mercado = foto.get("mercado") or {}
     orden = orden or {}
     venta = las_ventas_de_la_orden(orden, plantilla=plantilla, pujadas=pujadas)
+    # Un mismo jugador no se vende dos veces: si la orden ya cuenta su
+    # venta, la del libro no suma (tercera revision: la orden vuelve a
+    # pujar por un relevo perdido y la mejora ya lo habia cambiado).
+    de_la_orden = {_int(j.get("player_id")) for j in venta}
     saliendo_valor = sum(
-        _int((liga.get(_int(c.get("sale"))) or {}).get("price"), 0) or 0
-        for k, c in (libro or {}).items()
-        if _int(c.get("sale")) in plantilla
-        and (_int(k) in plantilla or _int(k) in pujadas)
+        _int((liga.get(s) or {}).get("price"), 0) or 0
+        for s in {
+            _int(c.get("sale")) for k, c in (libro or {}).items()
+            if _int(c.get("sale")) in plantilla
+            and (_int(k) in plantilla or _int(k) in pujadas)
+        } - de_la_orden
     )
     return la_caja(
         foto, se_venden_solos=solos,

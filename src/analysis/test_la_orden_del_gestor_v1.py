@@ -784,6 +784,14 @@ def test_en_rojo_no_se_cobra_si_el_relevo_no_juega() -> None:
         assert nada["guardia"] == "EL_PARTE_DEL_RELEVO" and nada["relevo"] == ROBERTO, nada
         assert "hueco" in nada["motivo"] and "rojo" in nada["motivo"], nada
 
+    # Si el que sale TAMPOCO juega (lesionado o sancionado), venderlo no
+    # cuesta a nadie que juegue: manda la caja (tercera revision).
+    for suyo in ("injured", "sanctioned"):
+        a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,
+                    estados={ROBERTO: "injured", JUTGLA: suyo}, saldo=-1_820_000,
+                    horas_jornada=23.9)
+        assert ("ACEPTAR_OFERTA_DEL_COMPUTER", JUTGLA) in _tipos(a), (suyo, a)
+
     # En duda o sin estado puede jugar: manda la caja.
     for estados in ({ROBERTO: "doubt"}, {ROBERTO: None}, {}):
         a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,

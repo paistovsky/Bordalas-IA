@@ -907,11 +907,15 @@ def test_solo_se_adopta_en_positivo_y_si_esta_en_el_once_escrito():
     assert "once escrito" in d["no_adoptados"][0]["motivo"], d["no_adoptados"]
     # Sin once escrito en el panel, tampoco.
     assert _d(saldo=10_000_000, inventario={12})["adoptar"] == []
-    # En rojo, pero las ventas elegidas lo cubren (-4 M; B1 y B3): se adopta.
+    # En rojo aunque las ventas elegidas lo cubran (-4 M; B1 y B3): NO se
+    # adopta (tercera revision). Esas ventas aun no se han cobrado -desde
+    # el 90 %, a menos de 20 h a lo que sea- y adoptar no tiene vuelta
+    # atras: solo con la caja YA en positivo.
     d = _d(inventario={12}, once_escrito=ONCE)
     assert d["deficit"] == 4_000_000 and d["falta"] == 0, d
     assert d["caja_proyectada"] == -4_000_000 + _cobro(13) + _cobro(15) >= 0, d
-    assert d["adoptar"] == [12], d
+    assert d["adoptar"] == [] and [a["player_id"] for a in d["no_adoptados"]] == [12], d
+    assert "aun no se ha cobrado" in d["no_adoptados"][0]["motivo"], d["no_adoptados"]
     # FALTA (ni todo el banquillo llega): no se adopta; la ronda o los
     # chollos lo malvenden a menos de 20 h si hace falta.
     d = _d(saldo=0, pujas={500: {"offer_id": 9, "amount": 20_000_000}}, inventario={12},

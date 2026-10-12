@@ -732,14 +732,18 @@ def decidir(
         # ronda (tras retirar pujas y con las ventas elegidas cobradas) en
         # >= 0 y con el jugador tambien en el once escrito. Si no, la
         # ronda o los chollos lo siguen vendiendo como tenian pensado.
+        #     (Tercera revision: las ventas elegidas aun no se han cobrado
+        #     -se aceptan desde el 90 %, a menos de 20 h a lo que sea, y
+        #     los precios se mueven en cada reset-, y adoptar no tiene
+        #     vuelta atras. Se adopta solo con la caja YA en positivo.)
         proyectada = caja_tras + sum(c["cobro"] for c in elegidos)
         salida["caja_proyectada"] = proyectada
         adoptar, no_adoptados = [], []
         for pid in sorted(xi & inventario):
-            if proyectada < 0:
+            if caja_tras < 0:
                 no_adoptados.append({"player_id": pid, "motivo": (
-                    f"la caja al empezar la ronda queda en {proyectada} con lo que se "
-                    "vende: su libro lo sigue vendiendo")})
+                    f"la caja al empezar la ronda esta en {caja_tras} sin contar lo que "
+                    "aun no se ha cobrado: su libro lo sigue vendiendo")})
             elif pid not in once_escrito:
                 no_adoptados.append({"player_id": pid, "motivo": (
                     "no esta en el once escrito: su libro lo sigue vendiendo")})

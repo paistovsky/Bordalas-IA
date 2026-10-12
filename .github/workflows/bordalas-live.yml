@@ -487,21 +487,24 @@ jobs:
           ls -lh data/trading/v10_full_autonomous_status.json
           ls -lh dashboard/data/status.json
 
-      # EL CIERRE DE LA JORNADA (12/10/2026). Antes de la mejora: decide el
-      #   mejor once de la proxima ronda y vende lo que sobre hasta >= 0.
+      # LA MEJORA DEL ONCE (12/10/2026). Despues del panel, que es quien
+      #   sabe la titularidad. APAGADA: `BORDALAS_LA_MEJORA_DEL_ONCE`.
+      #   Nunca rompe la vuelta. Deja lo que hizo en
+      #   data/trading/la_mejora_vuelta.json para el cierre.
+      - name: La mejora del once
+        shell: bash
+        run: |
+          python -m src.actions.la_mejora_del_once || true
+
+      # EL CIERRE DE LA JORNADA (12/10/2026). DESPUES de la mejora (13/10:
+      #   antes contaba como vivas las pujas que la mejora perdio en el
+      #   reset y no veia lo que la mejora cobraba): decide el mejor once
+      #   de la proxima ronda y vende lo que sobre hasta >= 0.
       #   APAGADO: `BORDALAS_EL_CIERRE_DE_LA_JORNADA`. Nunca rompe la vuelta.
       - name: El cierre de la jornada
         shell: bash
         run: |
           python -m src.actions.el_cierre_de_la_jornada || true
-
-      # LA MEJORA DEL ONCE (12/10/2026). Despues del panel, que es quien
-      #   sabe la titularidad. APAGADA: `BORDALAS_LA_MEJORA_DEL_ONCE`.
-      #   Nunca rompe la vuelta.
-      - name: La mejora del once
-        shell: bash
-        run: |
-          python -m src.actions.la_mejora_del_once || true
       - name: Update Cloudflare dashboard
         shell: bash
         run: |

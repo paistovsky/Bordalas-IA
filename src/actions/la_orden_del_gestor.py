@@ -438,7 +438,11 @@ def decidir(
                 # jugar (duda, sin estado). Lesionado o sancionado no
                 # juega seguro: vender al que sale deja 10 que juegan.
                 # Eso lo decide el gestor, no la red (13/10/2026).
-                elif parte in FUERA:
+                elif parte in FUERA and str(
+                    (estados or {}).get(pid) or ""
+                ).strip().lower() not in FUERA:
+                    # (Si el que sale tampoco juega, venderlo no cuesta a
+                    # nadie que juegue: manda la caja.)
                     parte_malo = {
                         "accion": "NADA", "player_id": pid, "nombre": nombre,
                         "guardia": "EL_PARTE_DEL_RELEVO", "relevo": quien,

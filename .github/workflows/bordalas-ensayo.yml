@@ -140,19 +140,19 @@ jobs:
         run: |
           python -m src.telemetry.build_dashboard || true
 
-      - name: El cierre de la jornada (ENSAYO, sin escribir)
-        if: always()
-        shell: bash
-        run: |
-          test "$BORDALAS_ENSAYO" = "1" || (echo "Sin candado no se corre" && exit 1)
-          python -m src.actions.el_cierre_de_la_jornada || true
-
       - name: La mejora del once (ENSAYO, sin escribir)
         if: always()
         shell: bash
         run: |
           test "$BORDALAS_ENSAYO" = "1" || (echo "Sin candado no se corre" && exit 1)
           python -m src.actions.la_mejora_del_once || true
+
+      - name: El cierre de la jornada (ENSAYO, sin escribir)
+        if: always()
+        shell: bash
+        run: |
+          test "$BORDALAS_ENSAYO" = "1" || (echo "Sin candado no se corre" && exit 1)
+          python -m src.actions.el_cierre_de_la_jornada || true
 
       - name: Lo que habria escrito
         if: always()
