@@ -12,11 +12,22 @@ QUE SE COMPRUEBA
     2. PUESTO, entre dos delanteros con la misma base, el que juega en
        casa contra uno del resto queda por encima del que va al campo
        de un top-6. Y la busqueda del once lo pone a el.
-    3. El que no juega en la ronda sale NEUTRO (1,0), nunca cero.
+    3. El que no juega en la ronda sale NEUTRO (1,0), nunca cero. La
+       ronda objetivo es la proxima PRINCIPAL: el aplazado no lo es.
     4. Basura o falta de datos: neutro y los scores de hoy. Nunca lanza.
     5. Los factores se calculan UNA vez por vuelta (memoria).
     6. El +5 de casa no se suma cuando la sede ya va en el
        multiplicador; el bono del Dios sigue intacto.
+    7. SOLO el once que se escribe (`con_calendario`, desde
+       `lineup_monitor`) mira el calendario: `build_lineup` y
+       `prepare_players` de los que valoran salen igual que apagado.
+    8. Una vara negativa no mejora con un partido malo; un partido
+       repetido cuenta una vez; una clasificacion de hace mas de 7
+       dias no decide; un rival duro solo por valor de plantilla es
+       duro; un nombre sin casar en la ronda deja neutro al que no
+       sale; la memoria de la vuelta distingue catalogos.
+    9. El camino de produccion: los dos ficheros del disco (en una
+       carpeta temporal) y el reloj (suplantado).
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -345,7 +356,8 @@ COMPONENTES_DE_MAIN = {
     "starter_source_coverage", "home_away", "penalty",
 }
 
-DATOS = dict(ahora=AHORA, calendario=_calendario(), clasificacion=CLASIFICACION)
+DATOS = dict(con_calendario=True, ahora=AHORA, calendario=_calendario(),
+             clasificacion=CLASIFICACION)
 
 
 # ============================================================
@@ -356,8 +368,8 @@ def test_apagado_el_once_es_el_de_hoy():
     with _Interruptor(False):
         for nombre, foto in (("foto", _foto()), ("foto con catalogo", _foto(True))):
             salida = prepare_players(foto, INTELIGENCIA_VACIA, TABLERO)
-            assert _huella(salida) == HUELLA_DE_MAIN[nombre], nombre
             fichas = {p["name"]: p for p in salida}
+            # Primero lo que dice QUE se movio; la huella, la ultima.
             for jugador, score in SCORES_DE_MAIN.items():
                 assert fichas[jugador]["lineup_score"] == score, (jugador, fichas[jugador]["lineup_score"])
             for jugador, vara in VARA_DE_MAIN.items():
@@ -366,28 +378,36 @@ def test_apagado_el_once_es_el_de_hoy():
                 assert "fixture_multiplier" not in p and "fixture_reason" not in p, p["name"]
                 assert set(p["lineup_score_components"]) == COMPONENTES_DE_MAIN, p["name"]
             assert fichas["Delantero del Villarreal"]["home_away_adjustment"] == 5.0
+            assert _huella(salida) == HUELLA_DE_MAIN[nombre], nombre
 
 
 def test_apagado_ni_se_mira_el_calendario():
     """Apagado, el calendario que se le pase no cambia nada y ni se
-    llega a montar: `del_ciclo` no se llama."""
+    llega a montar: `del_ciclo` no se llama. Y PUESTO, quien no pide
+    `con_calendario` (los que valoran) tampoco lo monta."""
     llamadas = []
     original = once_cal.del_ciclo
 
     def _espia(*args, **kwargs):
         llamadas.append(1)
-        raise AssertionError("apagado no se monta el calendario")
+        raise AssertionError("sin pedirlo no se monta el calendario")
 
-    with _Interruptor(False):
+    sin_pedirlo = {k: v for k, v in DATOS.items() if k != "con_calendario"}
+    salidas = []
+    try:
         once_cal.del_ciclo = _espia
-        try:
-            salida = prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO, **DATOS)
-            assert once_cal.para_el_once(_foto(), **DATOS) is None
-        finally:
-            once_cal.del_ciclo = original
-        assert llamadas == []
+        with _Interruptor(False):
+            salidas.append(prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO, **DATOS))
+            assert once_cal.para_el_once(_foto(), **sin_pedirlo) is None
+        with _Interruptor(True):
+            salidas.append(prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO, **sin_pedirlo))
+            salidas.append(prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO))
+    finally:
+        once_cal.del_ciclo = original
+    assert llamadas == []
+    assert once_cal.cuenta()["calculos"] == 0
+    for salida in salidas:
         assert _huella(salida) == HUELLA_DE_MAIN["foto"]
-        assert once_cal.cuenta()["calculos"] == 0
 
 
 # ============================================================
@@ -463,37 +483,61 @@ def test_el_que_no_juega_sale_neutro():
         # Ni un punto movido: el Athletic no tenia +5 que quitar.
         assert medio["lineup_score"] == SCORES_DE_MAIN["Medio del Athletic"]
 
-        # Empezada la J9, la proxima ronda es el APLAZADO de la J6
-        # (Levante-Athletic, 21/10): ahora juega el Athletic y el
-        # Villarreal no.
-        tras = _preparar(ahora=TRAS_EL_CIERRE_J9, calendario=_calendario(),
-                         clasificacion=CLASIFICACION)
-    assert "Jornada 6 (aplazada)" in tras["Medio del Athletic"]["fixture_reason"]
-    assert _cerca(tras["Medio del Athletic"]["fixture_multiplier"], 0.94 * 1.04)
-    for nombre in ("Delantero del Villarreal", "Portero del Villarreal", "Yamal"):
-        assert tras[nombre]["fixture_multiplier"] == 1.0, nombre
-        assert "no juega en esta ronda" in tras[nombre]["fixture_reason"], nombre
-    # Neutro es la vara de siempre: el del Villarreal pierde solo su +5
-    # (la sede ya la dice el calendario, y en esta ronda no juega).
-    assert tras["Delantero del Villarreal"]["lineup_score"] == SCORES_DE_MAIN["Delantero del Villarreal"] - 5.0
-    assert all(p["fixture_multiplier"] > 0 for p in tras.values())
+        # Empezada la J9, la proxima ronda PRINCIPAL es la J10. El
+        # APLAZADO de la J6 (Levante-Athletic, 21/10) cae antes, pero
+        # se puntua con el once de la J6: no es ronda objetivo (el
+        # dueño, 12/10). Ni justo tras la J9, ni la vispera del
+        # aplazado, ni con el aplazado ya empezado.
+        tras = {}
+        for momento in (TRAS_EL_CIERRE_J9, "2026-10-21T12:00:00+02:00",
+                        "2026-10-21T20:30:00+02:00"):
+            tras[momento] = _preparar(con_calendario=True, ahora=momento,
+                                      calendario=_calendario(), clasificacion=CLASIFICACION)
+    for momento, fichas in tras.items():
+        for p in fichas.values():
+            assert "aplazada" not in p["fixture_reason"], (momento, p["fixture_reason"])
+        # J10: Athletic-Getafe (14.º, resto) en casa.
+        assert "Jornada 10" in fichas["Medio del Athletic"]["fixture_reason"], momento
+        assert _cerca(fichas["Medio del Athletic"]["fixture_multiplier"], 1.06 * 1.04), momento
+        # Barça-Madrid (4.º, duro) en casa.
+        assert _cerca(fichas["Yamal"]["fixture_multiplier"], 1.06 * 0.90), momento
+        for nombre in ("Delantero del Villarreal", "Portero del Villarreal"):
+            assert fichas[nombre]["fixture_multiplier"] == 1.0, (momento, nombre)
+            assert "no juega en esta ronda" in fichas[nombre]["fixture_reason"], (momento, nombre)
+        # Neutro es la vara de siempre: el del Villarreal pierde solo
+        # su +5 (la sede ya la dice el calendario, y en esta ronda no
+        # juega).
+        assert fichas["Delantero del Villarreal"]["lineup_score"] == SCORES_DE_MAIN["Delantero del Villarreal"] - 5.0
+        assert all(p["fixture_multiplier"] > 0 for p in fichas.values())
+    # Y la pura dice lo mismo.
+    assert los_factores(_calendario(), CLASIFICACION, "2026-10-21T12:00:00+02:00")["ronda"]["label"] == "Jornada 10"
 
 
-def test_dos_partidos_en_la_ronda_suman():
-    """Si su equipo juega dos veces en la ronda, dos sumandos."""
+def test_un_partido_repetido_cuenta_una_vez():
+    """
+    Una ronda es una jornada y en una jornada cada equipo juega una
+    vez. Un partido duplicado en el calendario (mismo local, visitante
+    y hora) no suma dos veces, y un equipo que saliese dos veces en la
+    jornada se queda con el primero: nunca ~2,0 por un dato repetido.
+    """
     calendario = _calendario()
     calendario["matchdays"].append({"matchday": 12, "matches": [
+        _p(12, "Villarreal CF", "Elche CF", "2026-12-01T21:00:00+01:00"),
         _p(12, "Villarreal CF", "Elche CF", "2026-12-01T21:00:00+01:00"),
         _p(12, "Getafe CF", "Villarreal CF", "2026-12-03T21:00:00+01:00"),
         _p(12, "Real Madrid", "Celta", "2026-12-02T21:00:00+01:00"),
     ]})
     factores = los_factores(calendario, CLASIFICACION, "2026-11-20T12:00:00+01:00")
     assert factores["ronda"]["label"] == "Jornada 12", factores["ronda"]
-    doble = para_el_jugador(factores, 19, 4)
-    assert _cerca(doble["multiplicador"], 1.06 * 1.04 + 0.94 * 1.04)
-    assert len(doble["partidos"]) == 2 and doble["con_calendario"] is True
-    # El portero: sin sede, el rival si.
-    assert _cerca(para_el_jugador(factores, 19, 1)["multiplicador"], 1.04 + 1.04)
+    uno = para_el_jugador(factores, 19, 4)
+    assert _cerca(uno["multiplicador"], 1.06 * 1.04), uno
+    assert len(uno["partidos"]) == 1 and uno["con_calendario"] is True
+    assert uno["partidos"][0]["rival"] == "Elche CF"
+    # El Elche, una vez (fuera en Villarreal), y el Getafe tambien una.
+    assert _cerca(para_el_jugador(factores, 75, 4)["multiplicador"], 0.94 * 1.04)
+    assert len(para_el_jugador(factores, 8, 4)["partidos"]) == 1
+    # El portero: sin sede, el rival si; una vez.
+    assert _cerca(para_el_jugador(factores, 19, 1)["multiplicador"], 1.04)
 
 
 # ============================================================
@@ -535,7 +579,7 @@ def test_la_cache_del_panel_sin_ids_casa_con_el_catalogo():
 
     with _Interruptor(True):
         con_tabla = _preparar(foto, **DATOS)
-        con_cache = _preparar(foto, ahora=AHORA, calendario=_calendario(),
+        con_cache = _preparar(foto, con_calendario=True, ahora=AHORA, calendario=_calendario(),
                               clasificacion=CLASIFICACION_DE_LA_CACHE)
     for nombre in SCORES_DE_MAIN:
         assert con_cache[nombre]["fixture_multiplier"] == con_tabla[nombre]["fixture_multiplier"], nombre
@@ -583,7 +627,8 @@ BASURA = [
 def test_basura_y_falta_de_datos_dan_el_once_de_hoy():
     for datos in BASURA:
         with _Interruptor(True):
-            salida = prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO, **datos)
+            salida = prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO,
+                                     con_calendario=True, **datos)
         assert all(p["fixture_multiplier"] == 1.0 for p in salida), datos
         assert all(p["fixture_reason"].startswith("neutro") for p in salida), (
             datos, [p["fixture_reason"] for p in salida])
@@ -637,6 +682,7 @@ def test_una_vez_por_vuelta():
                 # `competitive_offer_portfolio_engine`) y el reloj
                 # que avanza dentro de la misma ronda.
                 prepare_players(copy.deepcopy(foto), INTELIGENCIA_VACIA, TABLERO,
+                                con_calendario=True,
                                 ahora=f"2026-10-12T14:{9 + minuto:02d}:00+02:00",
                                 calendario=_calendario(), clasificacion=CLASIFICACION)
             assert len(calculos) == 1, calculos
@@ -646,12 +692,23 @@ def test_una_vez_por_vuelta():
             # Otra ronda (la J9 ya empezo): otra cuenta, una sola vez.
             for _ in range(3):
                 prepare_players(copy.deepcopy(foto), INTELIGENCIA_VACIA, TABLERO,
+                                con_calendario=True,
                                 ahora=TRAS_EL_CIERRE_J9, calendario=_calendario(),
                                 clasificacion=CLASIFICACION)
             assert len(calculos) == 2, calculos
 
+            # El aplazado de la J6 empieza (21/10 20:00) y la ronda
+            # objetivo sigue siendo la J10: ni otra clave ni otra
+            # cuenta.
+            for momento in ("2026-10-21T19:59:00+02:00", "2026-10-21T20:01:00+02:00"):
+                prepare_players(copy.deepcopy(foto), INTELIGENCIA_VACIA, TABLERO,
+                                con_calendario=True, ahora=momento,
+                                calendario=_calendario(), clasificacion=CLASIFICACION)
+            assert len(calculos) == 2, calculos
+
             # Otra clasificacion (otra vuelta): otra cuenta.
             prepare_players(copy.deepcopy(foto), INTELIGENCIA_VACIA, TABLERO,
+                            con_calendario=True,
                             ahora=TRAS_EL_CIERRE_J9, calendario=_calendario(),
                             clasificacion=CLASIFICACION_DE_LA_CACHE)
             assert len(calculos) == 3, calculos
@@ -676,10 +733,10 @@ def test_la_memoria_del_once_no_se_queda_vieja():
             apagado = prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO)
         with _Interruptor(True):
             j9 = prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO, **DATOS)
-            aplazado = prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO,
-                                       ahora=TRAS_EL_CIERRE_J9, calendario=_calendario(),
-                                       clasificacion=CLASIFICACION)
-        for jugadores in (apagado, j9, aplazado):
+            j10 = prepare_players(_foto(), INTELIGENCIA_VACIA, TABLERO, con_calendario=True,
+                                  ahora=TRAS_EL_CIERRE_J9, calendario=_calendario(),
+                                  clasificacion=CLASIFICACION)
+        for jugadores in (apagado, j9, j10):
             una_vez.buscar(jugadores, hueco, False, search_best_lineup_for_formation)
         assert una_vez.cuenta()["fallos"] == 3 and una_vez.cuenta()["aciertos"] == 0
         # La misma entrada otra vez: esa si se recuerda.
@@ -693,13 +750,462 @@ def test_la_memoria_del_once_no_se_queda_vieja():
             os.environ[una_vez.ENV] = antes
 
 
+# ============================================================
+# 8. LA VARA NEGATIVA, EL RIVAL CARO, EL NOMBRE SIN CASAR, LA
+#    MEMORIA POR CATALOGO Y LA CLASIFICACION CADUCADA
+# ============================================================
+
+def _defensa_en_negativo(pid, nombre, equipo):
+    """Un defensa con puntos negativos y sin temporada pasada: su vara
+    sale por debajo de cero (`calidad_para_la_vara`)."""
+    return {**_jugador(pid, nombre, 2, equipo), "points": -10, "pointsLastSeason": 0}
+
+
+def test_la_vara_negativa_no_mejora_con_un_partido_malo():
+    """
+    El caso del revisor: dos defensas con la misma vara NEGATIVA. El
+    del Villarreal juega en casa contra el Elche (x1,102); el del
+    Sevilla, en el Bernabeu (x0,846). Multiplicar sin mas acercaba a
+    cero al del Sevilla y lo subia por encima del otro. Ahora el
+    partido malo hunde y el bueno acerca a cero.
+    """
+    casa = _defensa_en_negativo(9101, "Defensa del Villarreal", 19)
+    fuera = _defensa_en_negativo(9102, "Defensa del Sevilla", 17)
+    foto = {**_foto(), "my_team": [dict(casa), dict(fuera)]}
+    tablero = {"players": TABLERO["players"] + [_fila(9101, 70.0), _fila(9102, 70.0)]}
+
+    with _Interruptor(False):
+        apagado = {p["name"]: p for p in prepare_players(foto, INTELIGENCIA_VACIA, tablero)}
+    with _Interruptor(True):
+        puesto = {p["name"]: p for p in prepare_players(foto, INTELIGENCIA_VACIA, tablero, **DATOS)}
+
+    vara = apagado["Defensa del Villarreal"]["weekly_expected_value"]
+    assert vara < 0 and vara == apagado["Defensa del Sevilla"]["weekly_expected_value"], vara
+    # Apagado solo los separa el +5 de casa.
+    assert apagado["Defensa del Villarreal"]["lineup_score"] - apagado["Defensa del Sevilla"]["lineup_score"] == 5.0
+
+    for nombre, mult, cinco in (("Defensa del Villarreal", 1.06 * 1.04, 5.0),
+                                ("Defensa del Sevilla", 0.94 * 0.90, 0.0)):
+        ficha = puesto[nombre]
+        assert _cerca(ficha["fixture_multiplier"], mult), (nombre, ficha["fixture_multiplier"])
+        esperado = apagado[nombre]["lineup_score"] - cinco + abs(vara) * (mult - 1.0) * ESCALA_DE_LA_VARA
+        assert _cerca(ficha["lineup_score"], esperado, 1e-4), (nombre, ficha["lineup_score"], esperado)
+
+    # El partido bueno sube, el malo baja, y el orden NO se invierte.
+    assert puesto["Defensa del Villarreal"]["lineup_score"] > apagado["Defensa del Villarreal"]["lineup_score"] - 5.0
+    assert puesto["Defensa del Sevilla"]["lineup_score"] < apagado["Defensa del Sevilla"]["lineup_score"]
+    assert puesto["Defensa del Villarreal"]["lineup_score"] > puesto["Defensa del Sevilla"]["lineup_score"]
+
+    # La pura: positiva multiplica, negativa se mueve con el partido.
+    assert once_cal.vara_del_once(0.5, 0.846) == 0.5 * 0.846
+    assert _cerca(once_cal.vara_del_once(-0.1, 0.846), -0.1154)
+    assert _cerca(once_cal.vara_del_once(-0.1, 1.1024), -0.08976)
+    assert once_cal.vara_del_once(0.0, 0.846) == 0.0
+
+
+def _calendario_j9(*partidos):
+    """Una J9 a medida (ventana del 16 al 19/10) y la J10 de siempre."""
+    calendario = _calendario()
+    for jornada in calendario["matchdays"]:
+        if jornada["matchday"] == 9:
+            jornada["matches"] = [
+                _p(9, casa, fuera, hora) for casa, fuera, hora in partidos
+            ]
+            jornada["first_kickoff"] = min(m["kickoff"] for m in jornada["matches"])
+    return calendario
+
+
+def _foto_con_valores(caros):
+    """La foto con catalogo completo y el valor de plantilla a mano."""
+    foto = _foto(True)
+    for ident in NOMBRES_DE_BIWENGER:
+        foto["catalog"]["data"]["players"][str(80_000 + ident)]["price"] = caros.get(ident, 30_000_000)
+    return foto
+
+
+# El Valencia (19.º por puntos) con la plantilla mas cara de la liga:
+# duro SOLO por valor.
+CAROS_CON_VALENCIA = {18: 300_000_000, 3: 165_800_000, 15: 133_400_000, 2: 94_400_000}
+CAROS_DE_VERDAD = {3: 165_800_000, 15: 133_400_000, 2: 94_400_000, 87: 78_200_000}
+
+J9_CONTRA_EL_VALENCIA = (
+    ("Villarreal CF", "Valencia CF", "2026-10-17T16:15:00+02:00"),
+    ("Real Madrid", "Sevilla FC", "2026-10-18T21:00:00+02:00"),
+    ("Real Betis", "FC Barcelona", "2026-10-17T18:30:00+02:00"),
+)
+
+
+def test_un_duro_solo_por_valor_es_duro():
+    """
+    El top-4 por valor de plantilla entra en los duros aunque no este
+    en el top-6 por puntos. Por el camino de la vuelta: el catalogo de
+    la foto -> `valores_del_catalogo` -> `los_duros`.
+    """
+    calendario = _calendario_j9(*J9_CONTRA_EL_VALENCIA)
+    with _Interruptor(True):
+        caro = _preparar(_foto_con_valores(CAROS_CON_VALENCIA), con_calendario=True, ahora=AHORA,
+                         calendario=calendario, clasificacion=CLASIFICACION)
+        normal = _preparar(_foto_con_valores(CAROS_DE_VERDAD), con_calendario=True, ahora=AHORA,
+                           calendario=calendario, clasificacion=CLASIFICACION)
+    assert _cerca(caro["Delantero del Villarreal"]["fixture_multiplier"], 1.06 * 0.90), caro["Delantero del Villarreal"]["fixture_reason"]
+    assert "vs Valencia CF (duro)" in caro["Delantero del Villarreal"]["fixture_reason"]
+    assert _cerca(normal["Delantero del Villarreal"]["fixture_multiplier"], 1.06 * 1.04)
+    assert "vs Valencia CF (resto)" in normal["Delantero del Villarreal"]["fixture_reason"]
+
+    factores = los_factores(calendario, CLASIFICACION, AHORA,
+                            valores=valores_del_catalogo(_foto_con_valores(CAROS_CON_VALENCIA)))
+    assert 18 in factores["duros"] and 18 not in los_factores(calendario, CLASIFICACION, AHORA)["duros"]
+
+
+def test_un_nombre_sin_casar_en_la_ronda_deja_neutro_al_que_no_sale():
+    """
+    Si un nombre del calendario de ESTA ronda no casa con nadie, no se
+    puede decir de ningun equipo ausente que «no juega»: podria ser el.
+    Ese jugador se queda EXACTAMENTE como hoy (con su +5).
+    """
+    calendario = _calendario_j9(
+        ("Equipo Fantasma", "Real Sociedad", "2026-10-17T14:00:00+02:00"),
+        ("Real Madrid", "Sevilla FC", "2026-10-18T21:00:00+02:00"),
+        ("Real Betis", "FC Barcelona", "2026-10-17T18:30:00+02:00"),
+    )
+    factores = los_factores(calendario, CLASIFICACION, AHORA)
+    assert factores["available"] and factores["sin_casar"] == ["Equipo Fantasma"]
+    assert factores["ronda_completa"] is False
+    villarreal = para_el_jugador(factores, 19, 4)
+    assert villarreal["con_calendario"] is False and villarreal["multiplicador"] == 1.0
+    assert "sin casar" in villarreal["motivo"]
+    # Los que si salen, con su partido.
+    assert _cerca(para_el_jugador(factores, 17, 4)["multiplicador"], 0.94 * 0.90)
+
+    with _Interruptor(True):
+        fichas = _preparar(con_calendario=True, ahora=AHORA, calendario=calendario,
+                           clasificacion=CLASIFICACION)
+    for nombre in ("Delantero del Villarreal", "Portero del Villarreal", "Medio del Athletic"):
+        assert fichas[nombre]["fixture_multiplier"] == 1.0, nombre
+        assert fichas[nombre]["lineup_score"] == SCORES_DE_MAIN[nombre], (nombre, fichas[nombre]["lineup_score"])
+    assert fichas["Delantero del Villarreal"]["home_away_adjustment"] == 5.0
+
+
+def test_la_memoria_de_la_vuelta_distingue_catalogos():
+    """
+    Mismo calendario, misma clasificacion, misma hora; otro catalogo
+    (otro valor de plantilla): otra respuesta, no la recordada.
+    """
+    calendario = _calendario_j9(*J9_CONTRA_EL_VALENCIA)
+    with _Interruptor(True):
+        normal = del_ciclo(_foto_con_valores(CAROS_DE_VERDAD), ahora=AHORA,
+                           calendario=calendario, clasificacion=CLASIFICACION)
+        caro = del_ciclo(_foto_con_valores(CAROS_CON_VALENCIA), ahora=AHORA,
+                         calendario=calendario, clasificacion=CLASIFICACION)
+        assert once_cal.cuenta()["calculos"] == 2 and once_cal.cuenta()["aciertos"] == 0
+        # El mismo catalogo otra vez: ese si se recuerda.
+        otra_vez = del_ciclo(_foto_con_valores(CAROS_CON_VALENCIA), ahora=AHORA,
+                             calendario=calendario, clasificacion=CLASIFICACION)
+        assert once_cal.cuenta()["aciertos"] == 1
+    assert 18 not in normal["duros"]
+    assert 18 in caro["duros"] and otra_vez["duros"] == caro["duros"]
+
+
+def _con_fecha(segundos_antes, campo="fetched_at_unix"):
+    """La cache del panel bajada `segundos_antes` de AHORA."""
+    from datetime import datetime
+
+    bajada = datetime.fromisoformat(AHORA).timestamp() - segundos_antes
+    valor = int(bajada) if campo == "fetched_at_unix" else (
+        datetime.fromtimestamp(bajada, tz=datetime.fromisoformat(AHORA).tzinfo).isoformat()
+    )
+    return {**CLASIFICACION_DE_LA_CACHE, campo: valor}
+
+
+DIA = 24 * 3600
+
+
+def test_una_clasificacion_de_hace_mas_de_una_semana_no_decide():
+    foto = _foto(True)
+    with _Interruptor(True):
+        fresca = _preparar(foto, con_calendario=True, ahora=AHORA, calendario=_calendario(),
+                           clasificacion=_con_fecha(6 * DIA))
+        for campo in ("fetched_at_unix", "fetched_at"):
+            vieja = _preparar(foto, con_calendario=True, ahora=AHORA, calendario=_calendario(),
+                              clasificacion=_con_fecha(8 * DIA, campo))
+            for nombre in SCORES_DE_MAIN:
+                assert vieja[nombre]["fixture_multiplier"] == 1.0, (campo, nombre)
+                assert "caducada" in vieja[nombre]["fixture_reason"], (campo, vieja[nombre]["fixture_reason"])
+                # Neutro es el de hoy, +5 incluido.
+                assert vieja[nombre]["lineup_score"] == SCORES_DE_MAIN[nombre], (campo, nombre)
+    assert _cerca(fresca["Delantero del Villarreal"]["fixture_multiplier"], 1.06 * 1.04)
+
+    # La misma tabla, la misma ronda, dos horas despues: deja de valer.
+    # La memoria de la vuelta no puede servir la respuesta de antes.
+    casi = _con_fecha(7 * DIA - 3600)
+    with _Interruptor(True):
+        antes = del_ciclo(foto, ahora=AHORA, calendario=_calendario(), clasificacion=casi)
+        despues = del_ciclo(foto, ahora="2026-10-12T16:09:00+02:00", calendario=_calendario(),
+                            clasificacion=casi)
+    assert antes["available"] is True
+    assert despues["available"] is False and "caducada" in despues["reason"], despues["reason"]
+
+    # Sin fecha (una lista, o la cache sin sello) no se puede decir: vale.
+    assert once_cal.caducada(CLASIFICACION, AHORA) is False
+    assert once_cal.caducada(CLASIFICACION_DE_LA_CACHE, AHORA) is False
+    for basura in (None, 7, "x", {"fetched_at_unix": "x"}, {"fetched_at": 3}):
+        assert once_cal.caducada(basura, AHORA) is False
+        assert once_cal.caducada(_con_fecha(8 * DIA), basura) is False
+
+
+# ============================================================
+# 9. EL CAMINO DE PRODUCCION: el disco y el reloj (suplantados)
+# ============================================================
+
+class _Produccion:
+    """
+    Lo que la vuelta lee sola, en una carpeta temporal: el calendario
+    y la cache de la clasificacion del panel, el reloj, y el tablero
+    de FF y la inteligencia del once que `build_lineup` pide por su
+    cuenta. Nada de `data/`. Todo vuelve a su sitio al salir.
+    """
+
+    def __init__(self, calendario=None, clasificacion=None, ahora=AHORA, tablero=None):
+        self.calendario = _calendario() if calendario is None else calendario
+        self.clasificacion = (
+            {**CLASIFICACION_DE_LA_CACHE,
+             "fetched_at_unix": int(once_cal._momento(ahora).timestamp()) - 3600}
+            if clasificacion is None else clasificacion
+        )
+        self.ahora = ahora
+        self.tablero = TABLERO if tablero is None else tablero
+
+    def escribir(self, ruta, contenido):
+        import json
+
+        Path(ruta).write_text(json.dumps(contenido, ensure_ascii=False), encoding="utf-8")
+
+    def __enter__(self):
+        import tempfile
+
+        from src.analysis import lineup_engine
+
+        self._carpeta = tempfile.TemporaryDirectory()
+        raiz = Path(self._carpeta.name)
+        self.ruta_calendario = raiz / "laliga_calendar.json"
+        self.ruta_clasificacion = raiz / "laliga_standings.json"
+        self.escribir(self.ruta_calendario, self.calendario)
+        self.escribir(self.ruta_clasificacion, self.clasificacion)
+
+        momento = once_cal._momento(self.ahora)
+        self._antes = (
+            once_cal.CALENDARIO, once_cal.CLASIFICACION, once_cal._reloj,
+            lineup_engine.build_starter_intelligence_for_snapshot,
+            lineup_engine.build_lineup_intelligence,
+        )
+        once_cal.CALENDARIO = self.ruta_calendario
+        once_cal.CLASIFICACION = self.ruta_clasificacion
+        once_cal._reloj = lambda: momento
+        tablero = self.tablero
+        lineup_engine.build_starter_intelligence_for_snapshot = lambda snapshot: tablero
+        lineup_engine.build_lineup_intelligence = lambda snapshot: INTELIGENCIA_VACIA
+        once_cal.olvidar()
+        return self
+
+    def __exit__(self, *_):
+        from src.analysis import lineup_engine
+
+        (once_cal.CALENDARIO, once_cal.CLASIFICACION, once_cal._reloj,
+         lineup_engine.build_starter_intelligence_for_snapshot,
+         lineup_engine.build_lineup_intelligence) = self._antes
+        once_cal.olvidar()
+        self._carpeta.cleanup()
+        return False
+
+
+def test_el_disco_se_lee_una_vez_por_version():
+    foto = _foto(True)
+    with _Interruptor(True), _Produccion() as prod:
+        primera = del_ciclo(foto)
+        segunda = del_ciclo(foto)
+        assert primera["available"] is True, primera["reason"]
+        assert primera["ronda"]["label"] == "Jornada 9"
+        assert segunda is primera
+        assert once_cal.cuenta()["calculos"] == 1 and once_cal.cuenta()["aciertos"] == 1
+        assert set(once_cal._DISCO) == {str(prod.ruta_calendario), str(prod.ruta_clasificacion)}
+
+        # Sin `ahora` y sin datos: el reloj y los ficheros, y la misma
+        # respuesta que inyectandolos.
+        inyectado = los_factores(prod.calendario, prod.clasificacion, AHORA,
+                                 equipos_del_catalogo(foto), valores_del_catalogo(foto))
+        assert primera["equipos"] == inyectado["equipos"] and primera["duros"] == inyectado["duros"]
+
+        # Otra version de la clasificacion (otra vuelta): se relee y
+        # se recalcula.
+        otra = {**prod.clasificacion, "standings": prod.clasificacion["standings"][:-1]}
+        prod.escribir(prod.ruta_clasificacion, otra)
+        del_ciclo(foto)
+        assert once_cal.cuenta()["calculos"] == 2
+
+        # Una clasificacion caducada en el disco: neutro.
+        prod.escribir(prod.ruta_clasificacion, {**otra, "fetched_at_unix": 1})
+        assert "caducada" in del_ciclo(foto)["reason"]
+
+        # Sin calendario en el disco: neutro, nunca lanza.
+        prod.ruta_calendario.unlink()
+        assert del_ciclo(foto)["available"] is False
+
+
+# EL BANCO DEL ONCE ENTERO: un portero y cuatro delanteros para tres
+# huecos. Los dos del Athletic (no juega la J9) entran siempre; el
+# tercero lo deciden el del Sevilla (diez millones mas caro) y el del
+# Villarreal.
+DEL_ATHLETIC_1 = {**_jugador(9011, "Delantero del Athletic 1", 4, 1), "points": 80}
+DEL_ATHLETIC_2 = {**_jugador(9012, "Delantero del Athletic 2", 4, 1), "points": 80}
+DEL_SEVILLA_CARO = {**DEL_FUERA, "price": DEL_FUERA["price"] + 10_000_000}
+
+TABLERO_DEL_ONCE = {"players": TABLERO["players"] + [_fila(9011, 95.0), _fila(9012, 95.0)]}
+
+
+def _foto_del_once():
+    return {**_foto(), "my_team": [dict(j) for j in (
+        PORTERO, DEL_ATHLETIC_1, DEL_ATHLETIC_2, DEL_SEVILLA_CARO, DEL_CASA)]}
+
+
+def _nombres(once) -> list:
+    return sorted(p["name"] for p in once["selected"])
+
+
+EL_ONCE_DE_SIEMPRE = sorted(["Portero del Villarreal", "Delantero del Athletic 1",
+                             "Delantero del Athletic 2", "Delantero del Sevilla"])
+EL_ONCE_CON_CALENDARIO = sorted(["Portero del Villarreal", "Delantero del Athletic 1",
+                                 "Delantero del Athletic 2", "Delantero del Villarreal"])
+
+
+def test_solo_el_once_que_se_escribe_mira_el_calendario():
+    """
+    El HALLAZGO GORDO del revisor. Con el interruptor puesto, el once
+    que VALORA (venta, liquidez, deuda segura, fichajes, orden de
+    venta: `build_lineup(foto)` y `prepare_players(foto)` a secas) es
+    el de apagado, byte a byte, `lineup_score` incluido. Solo el que
+    pide `con_calendario` -el de `lineup_monitor`- ordena por el
+    partido, y lo cuenta en su salida.
+    """
+    from src.analysis.lineup_engine import build_lineup
+
+    with _Produccion(tablero=TABLERO_DEL_ONCE):
+        with _Interruptor(False):
+            valora_apagado = build_lineup(_foto_del_once())
+            escribe_apagado = build_lineup(_foto_del_once(), con_calendario=True)
+            fichas_apagado = prepare_players(_foto_del_once(), INTELIGENCIA_VACIA, TABLERO_DEL_ONCE)
+        with _Interruptor(True):
+            valora = build_lineup(_foto_del_once())
+            fichas = prepare_players(_foto_del_once(), INTELIGENCIA_VACIA, TABLERO_DEL_ONCE)
+            escribe = build_lineup(_foto_del_once(), con_calendario=True)
+
+    # Apagado, pedirlo o no da lo mismo.
+    assert _nombres(valora_apagado) == _nombres(escribe_apagado) == EL_ONCE_DE_SIEMPRE
+    assert _huella(escribe_apagado) == _huella(valora_apagado)
+
+    # Puesto, el que valora es el de siempre.
+    assert _nombres(valora) == EL_ONCE_DE_SIEMPRE
+    assert valora["lineup_score"] == valora_apagado["lineup_score"]
+    assert "fixture_multipliers" not in valora
+    for p in valora["selected"] + fichas:
+        assert "fixture_multiplier" not in p, p["name"]
+    for fila in valora["bench"]:
+        assert "fixture_multiplier" not in fila, fila["name"]
+    assert _huella(fichas) == _huella(fichas_apagado)
+    assert _huella(valora) == _huella(valora_apagado)
+
+    # Y el que se escribe, por el partido.
+    assert _nombres(escribe) == EL_ONCE_CON_CALENDARIO
+    elegido = next(p for p in escribe["selected"] if p["name"] == "Delantero del Villarreal")
+    assert _cerca(elegido["fixture_multiplier"], 1.06 * 1.04)
+    assert escribe["lineup_score"] != valora["lineup_score"]
+
+    # LO CUENTA: en cada ficha, en el banquillo y en un bloque propio.
+    banco = {f["name"]: f for f in escribe["bench"]}
+    sevilla = banco["Delantero del Sevilla"]
+    assert sevilla["reason"] == "PUNTUA_MENOS"
+    assert _cerca(sevilla["fixture_multiplier"], 0.94 * 0.90)
+    assert "fuera vs Real Madrid (duro)" in sevilla["fixture_reason"]
+    assert sevilla["compared_to_fixture_multiplier"] is not None
+    partidos = {f["name"]: f for f in escribe["fixture_multipliers"]}
+    assert set(partidos) == {p["name"] for p in _foto_del_once()["my_team"]}
+    assert partidos["Delantero del Villarreal"]["in_lineup"] is True
+    assert partidos["Delantero del Sevilla"]["in_lineup"] is False
+    assert _cerca(partidos["Delantero del Sevilla"]["fixture_multiplier"], 0.94 * 0.90)
+    assert "Jornada 9" in partidos["Delantero del Villarreal"]["fixture_reason"]
+
+
+def test_la_memoria_del_once_distingue_al_que_valora_del_que_escribe():
+    """
+    Con `el_once_se_busca_una_vez` puesto, el once que se escribe y el
+    que valora no se pisan en la memoria, en ningun orden: la entrada
+    del que escribe lleva el partido dentro y es otra.
+    """
+    from src.analysis import el_once_se_busca_una_vez as una_vez
+    from src.analysis.lineup_engine import build_lineup
+
+    antes = os.environ.get(una_vez.ENV)
+    os.environ[una_vez.ENV] = "1"
+    try:
+        with _Produccion(tablero=TABLERO_DEL_ONCE), _Interruptor(True):
+            for orden in ((True, False), (False, True)):
+                una_vez.olvidar()
+                salidas = {flag: build_lineup(_foto_del_once(), con_calendario=flag) for flag in orden}
+                assert _nombres(salidas[True]) == EL_ONCE_CON_CALENDARIO, orden
+                assert _nombres(salidas[False]) == EL_ONCE_DE_SIEMPRE, orden
+                assert una_vez.cuenta()["fallos"] >= 2, (orden, una_vez.cuenta())
+                # La misma pregunta otra vez: recordada, y la misma.
+                fallos = una_vez.cuenta()["fallos"]
+                assert _nombres(build_lineup(_foto_del_once())) == EL_ONCE_DE_SIEMPRE
+                assert una_vez.cuenta()["fallos"] == fallos and una_vez.cuenta()["aciertos"] > 0
+    finally:
+        una_vez.olvidar()
+        if antes is None:
+            os.environ.pop(una_vez.ENV, None)
+        else:
+            os.environ[una_vez.ENV] = antes
+
+
+def test_el_monitor_pide_el_calendario_solo_con_el_interruptor():
+    """
+    `build_lineup_monitor_state` -el once que lleva SAVE_LINEUP- es el
+    unico que pide `con_calendario`, y solo con el interruptor puesto.
+    """
+    from src.analysis import lineup_engine, lineup_monitor
+
+    pedidos = []
+
+    def _espia(snapshot, *args, **kwargs):
+        pedidos.append(kwargs.get("con_calendario"))
+        return lineup_engine.build_lineup(snapshot, *args, **kwargs)
+
+    original_build = lineup_monitor.build_lineup
+    original_estado = lineup_monitor.load_lineup_monitor_state
+    lineup_monitor.build_lineup = _espia
+    lineup_monitor.load_lineup_monitor_state = lambda: None
+    try:
+        with _Produccion(tablero=TABLERO_DEL_ONCE):
+            with _Interruptor(False):
+                apagado = lineup_monitor.build_lineup_monitor_state(_foto_del_once(), persist=False)
+            with _Interruptor(True):
+                puesto = lineup_monitor.build_lineup_monitor_state(_foto_del_once(), persist=False)
+    finally:
+        lineup_monitor.build_lineup = original_build
+        lineup_monitor.load_lineup_monitor_state = original_estado
+
+    assert pedidos == [False, True], pedidos
+    assert _nombres(apagado["lineup"]) == EL_ONCE_DE_SIEMPRE
+    assert "fixture_multipliers" not in apagado["lineup"]
+    assert _nombres(puesto["lineup"]) == EL_ONCE_CON_CALENDARIO
+    assert puesto["lineup"]["fixture_multipliers"]
+
+
 TESTS = [
     test_apagado_el_once_es_el_de_hoy,
     test_apagado_ni_se_mira_el_calendario,
     test_puesto_el_de_casa_contra_el_resto_pasa_por_delante,
     test_la_busqueda_del_once_lo_pone_a_el,
     test_el_que_no_juega_sale_neutro,
-    test_dos_partidos_en_la_ronda_suman,
+    test_un_partido_repetido_cuenta_una_vez,
     test_el_mas_cinco_no_se_cuenta_dos_veces_y_el_dios_sigue,
     test_la_cache_del_panel_sin_ids_casa_con_el_catalogo,
     test_una_fila_sin_casar_no_cambia_los_duros,
@@ -707,6 +1213,15 @@ TESTS = [
     test_nunca_lanza,
     test_una_vez_por_vuelta,
     test_la_memoria_del_once_no_se_queda_vieja,
+    test_la_vara_negativa_no_mejora_con_un_partido_malo,
+    test_un_duro_solo_por_valor_es_duro,
+    test_un_nombre_sin_casar_en_la_ronda_deja_neutro_al_que_no_sale,
+    test_la_memoria_de_la_vuelta_distingue_catalogos,
+    test_una_clasificacion_de_hace_mas_de_una_semana_no_decide,
+    test_el_disco_se_lee_una_vez_por_version,
+    test_solo_el_once_que_se_escribe_mira_el_calendario,
+    test_la_memoria_del_once_distingue_al_que_valora_del_que_escribe,
+    test_el_monitor_pide_el_calendario_solo_con_el_interruptor,
 ]
 
 

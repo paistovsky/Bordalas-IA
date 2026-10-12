@@ -24,14 +24,20 @@ POR QUE EXISTE
 
 LA REGLA
 
-    1. La ronda objetivo es la proxima que NO ha empezado
-       (`el_calendario_de_puntos.proximas_rondas(calendario, ahora,
-       1)`), con las rondas a lo Biwenger: el adelantado y el aplazado
-       van aparte, con su propio cierre.
+    1. La ronda objetivo es la proxima ronda PRINCIPAL que NO ha
+       empezado (`el_calendario_de_puntos.proximas_rondas`, filtrada
+       por `principal`). El aplazado y el adelantado NO son ronda
+       objetivo: la regla del dueño (12/10) es que Biwenger puntua el
+       aplazado con el once que habia cuando empezo SU jornada. El
+       Levante-Athletic de la J6 del 21/10 cae entre la J9 y la J10,
+       pero el once que se escribe esa semana es el de la J10.
 
-    2. El multiplicador de un jugador es la SUMA, sobre los partidos
-       de su equipo en esa ronda, de `factor(pos, en_casa,
-       rival_duro)`. Dos partidos en la ronda, dos sumandos.
+    2. El multiplicador de un jugador es `factor(pos, en_casa,
+       rival_duro)` de SU partido en esa ronda. Una ronda es una sola
+       jornada y en una jornada cada equipo juega una vez: un partido
+       repetido en el calendario cuenta una vez, y si un equipo
+       saliese dos veces en la jornada se queda el primero (por hora).
+       Nunca 2,0 por un dato duplicado.
 
     3. Si su equipo NO juega en esa ronda: 1,0, NEUTRO. Nunca cero.
        El dueño: un aplazado se juega despues CON EL ONCE PUESTO EN
@@ -40,10 +46,26 @@ LA REGLA
     4. Duro = `el_calendario_de_puntos.los_duros(clasificacion,
        valor de plantilla)`: top-6 por puntos por partido, UNION
        top-4 por valor de plantilla (los 15 mas caros del catalogo).
+       Una clasificacion bajada hace mas de `CADUCIDAD` (7 dias,
+       `fetched_at_unix` o `fetched_at` de la cache del panel) no
+       decide nada: neutro, como sin clasificacion.
 
     5. Entra en `lineup_engine.prepare_players` justo DESPUES de
        `weekly_expected_value` (que sigue cruda: se publica y se mide
-       sin correccion) y ANTES de `final_score`: vara x multiplicador.
+       sin correccion) y ANTES de `final_score`. Con vara positiva,
+       vara x multiplicador. Con vara NEGATIVA, vara + |vara| x
+       (multiplicador - 1): un partido malo la hunde mas y uno bueno
+       la acerca a cero, nunca al reves (`vara_del_once`).
+
+    5 bis. SOLO EL ONCE QUE SE ESCRIBE. `prepare_players` y
+       `build_lineup` llevan `con_calendario=False` por defecto: la
+       venta, la liquidez, la deuda segura, el tablero de fichajes,
+       el orden de venta y el valor deportivo del once
+       (`lineup_score_sporting`) siguen con la vara cruda. Solo
+       `lineup_monitor.build_lineup_monitor_state` -el once que lleva
+       SAVE_LINEUP- pide `con_calendario=True`, y solo con el
+       interruptor puesto. Un desempate de una ronda no puede decidir
+       una venta para siempre.
 
     6. Con el interruptor puesto y el partido sabido, el +5 de casa
        NO se suma: la sede ya va dentro del multiplicador y contarla
@@ -74,13 +96,20 @@ UNA VEZ POR VUELTA
     (`lineup_score`, `fixture_multiplier`). Si el factor cambiase, la
     entrada seria otra y se buscaria otra vez.
 
-    Y DENTRO DE UNA VUELTA EL FACTOR ES CONSTANTE. Solo cambia si
-    cambia el calendario, la clasificacion (la cache del panel: se
-    escribe DESPUES de la vuelta, en `build_dashboard`) o la ronda
-    objetivo. La ronda solo cambia cuando empieza su primer partido, y
-    desde T-15 el once esta cerrado (ROUND_LOCKED,
-    matchday_calendar_engine.py:716-797): una vuelta que cruzase un
-    primer partido no puede escribir el once de esa ronda.
+    DENTRO DE UNA VUELTA EL FACTOR CASI SIEMPRE ES CONSTANTE. Solo
+    cambia si cambia el calendario, la clasificacion (la cache del
+    panel: se escribe DESPUES de la vuelta, en `build_dashboard`) o la
+    ronda objetivo, y la ronda objetivo solo cambia cuando empieza el
+    primer partido de una ronda PRINCIPAL. NO es una garantia de que
+    eso caiga dentro de ROUND_LOCKED: `matchday_calendar_engine` agrupa
+    jornadas enteras por su primer partido, adelantado incluido, y
+    aqui se mira la ventana principal. Con un partido adelantado los
+    dos motores pueden discrepar de ronda entre el adelantado y la
+    ventana principal (de horas a dias), y una
+    vuelta que cruce el primer partido de una ronda principal puede
+    ver dos factores. La memoria del once sigue siendo correcta
+    (recuerda por contenido); lo que no se promete es que dos
+    llamadas de la misma vuelta coincidan en ese borde.
 
 QUE NO HACE
 
@@ -91,8 +120,10 @@ QUE NO HACE
 
     No cambia `weekly_expected_value` ni el bono del Dios. No mide la
     rotacion por rival (la titularidad es la de FF). No decide compras
-    ni ventas, aunque `lineup_score_sporting` lo hereda: quien valore
-    la venta de un titular con el once vera su partido.
+    ni ventas: quien valora (venta, liquidez, deuda segura, fichajes,
+    orden de venta) llama a `build_lineup`/`prepare_players` sin
+    `con_calendario` y ve el once de siempre, con su
+    `lineup_score_sporting` crudo (hay guardia).
 
     Con el interruptor APAGADO no se lee nada ni se toca nada: el once
     es el de siempre, byte a byte (hay guardia).
@@ -114,7 +145,7 @@ import json
 import os
 
 from collections import OrderedDict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -135,6 +166,12 @@ CALENDARIO = RAIZ / "data" / "calendar" / "laliga_calendar.json"
 CLASIFICACION = RAIZ / "data" / "league_center" / "laliga_standings.json"
 
 NEUTRO = 1.0
+
+# Una clasificacion mas vieja que esto no decide quien es duro. La
+# cache del panel caduca a las 6 h (league_center.py:18), pero si
+# LaLiga falla se sigue sirviendo la ultima; una semana es una jornada
+# entera sin refrescar.
+CADUCIDAD = timedelta(days=7)
 
 # Cuantas combinaciones (calendario, clasificacion, catalogo, ronda)
 # se recuerdan. En una vuelta hay una, o dos si la foto se rehace y
@@ -206,6 +243,64 @@ def _momento(valor):
     if cuando.tzinfo is None:
         return cuando.replace(tzinfo=timezone.utc)
     return cuando
+
+
+def _reloj():
+    """La hora de la vuelta (UTC). Las guardias la suplantan."""
+    return datetime.now(timezone.utc)
+
+
+def _bajada(clasificacion):
+    """
+    Cuando se bajo la clasificacion de la cache del panel:
+    `fetched_at_unix` (epoch) o, si no, `fetched_at` (ISO; sin zona,
+    UTC, que es la hora de CI). None si no lo dice: una lista suelta
+    o una fila con ids no trae fecha. Nunca lanza.
+    """
+    try:
+        if not isinstance(clasificacion, dict):
+            return None
+        epoch = clasificacion.get("fetched_at_unix")
+        if isinstance(epoch, (int, float)) and not isinstance(epoch, bool) and epoch > 0:
+            return datetime.fromtimestamp(float(epoch), tz=timezone.utc)
+        return _momento(clasificacion.get("fetched_at"))
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def caducada(clasificacion, ahora) -> bool:
+    """
+    True si la clasificacion dice cuando se bajo y fue hace mas de
+    `CADUCIDAD`. Sin fecha, o sin `ahora`, no se puede decir: False
+    (lo de siempre). Nunca lanza.
+    """
+    try:
+        momento = _momento(ahora)
+        bajada = _bajada(clasificacion)
+        if momento is None or bajada is None:
+            return False
+        return (momento - bajada) > CADUCIDAD
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def vara_del_once(vara, multiplicador):
+    """
+    La vara con el partido dentro, sin que el signo la de la vuelta.
+
+    Con vara positiva, vara x multiplicador. Con vara NEGATIVA (un
+    jugador con puntos negativos esta temporada) multiplicar la
+    acercaria a cero con un partido MALO: x0,846 hace -0,10 -> -0,085
+    y lo sube por encima del que juega en casa contra el colista.
+    Asi que se mueve en la direccion del partido: vara + |vara| x
+    (multiplicador - 1). Nunca lanza: con basura, la vara tal cual.
+    """
+    try:
+        if vara >= 0:
+            return vara * multiplicador
+        return vara + abs(vara) * (multiplicador - 1.0)
+    except Exception:                               # noqa: BLE001
+        return vara
 
 
 def _huella(objeto):
@@ -355,10 +450,28 @@ def _vacio(motivo) -> dict:
     }
 
 
+def _la_proxima_principal(calendario, momento):
+    """
+    La proxima ronda PRINCIPAL que no ha empezado, o None. El
+    aplazado y el adelantado se saltan: se puntuan con el once de su
+    jornada (decision del dueño, 12/10). Se filtra aqui, sobre
+    `proximas_rondas`, para no tocar `el_calendario_de_puntos`.
+    """
+    try:
+        from src.analysis.el_calendario_de_puntos import proximas_rondas
+
+        for ronda in proximas_rondas(calendario, momento, 10_000):
+            if isinstance(ronda, dict) and ronda.get("principal") is True:
+                return ronda
+        return None
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def los_factores(calendario, clasificacion, ahora, equipos=None, valores=None) -> dict:
     """
-    Los partidos de cada equipo en la proxima ronda que no ha
-    empezado, con la sede y si el rival es duro:
+    Los partidos de cada equipo en la proxima ronda PRINCIPAL que no
+    ha empezado, con la sede y si el rival es duro:
 
         {"available", "ronda": {label, matchday, principal, start},
          "equipos": {team_id: [{en_casa, rival, rival_id, rival_duro}]},
@@ -372,13 +485,20 @@ def los_factores(calendario, clasificacion, ahora, equipos=None, valores=None) -
     el valor de plantilla por equipo. Nunca lanza.
     """
     try:
-        from src.analysis.el_calendario_de_puntos import (
-            los_duros, los_ids, proximas_rondas,
-        )
+        from src.analysis.el_calendario_de_puntos import los_duros, los_ids
 
         momento = _momento(ahora)
         if momento is None:
             return _vacio("sin hora de referencia")
+
+        # UNA TABLA DE HACE UNA SEMANA NO DICE QUIEN ES DURO. Si LaLiga
+        # lleva dias fallando, el panel sigue sirviendo la ultima.
+        if caducada(clasificacion, momento):
+            return _vacio(
+                f"clasificacion de LaLiga caducada (bajada el "
+                f"{_bajada(clasificacion).isoformat()}, mas de "
+                f"{CADUCIDAD.days} dias)"
+            )
 
         filas = con_ids(clasificacion, equipos)
         if not filas:
@@ -403,10 +523,9 @@ def los_factores(calendario, clasificacion, ahora, equipos=None, valores=None) -
                 fila["biwenger_team_id"] = -(indice + 1)
                 sin_id.append(str(fila.get("team") or "?"))
 
-        rondas = proximas_rondas(calendario, momento, 1)
-        if not rondas:
-            return _vacio("sin proxima ronda en el calendario")
-        ronda = rondas[0]
+        ronda = _la_proxima_principal(calendario, momento)
+        if not ronda:
+            return _vacio("sin proxima ronda principal en el calendario")
 
         ids = los_ids(filas, calendario)
         duros = los_duros(filas, valores if isinstance(valores, dict) else None)
@@ -414,11 +533,20 @@ def los_factores(calendario, clasificacion, ahora, equipos=None, valores=None) -
         por_equipo: dict = {}
         sin_casar = set()
 
+        # UN PARTIDO POR EQUIPO Y JORNADA. Una ronda es una jornada y
+        # en una jornada cada equipo juega una vez: un equipo que
+        # saliese dos veces (el mismo partido duplicado en el
+        # calendario, o dos rivales) se queda con el primero, por
+        # hora. Sumar los dos daria ~2,0: +600.000 de score por un
+        # dato repetido.
+        jornada_de = {}
+
         for partido in (ronda.get("matches") or []):
             if not isinstance(partido, dict):
                 continue
             nombre_casa = str(partido.get("home") or "").strip()
             nombre_fuera = str(partido.get("away") or "").strip()
+            jornada = _int(partido.get("matchday"), _int(ronda.get("matchday")))
             casa = _int(ids.get(nombre_casa))
             fuera = _int(ids.get(nombre_fuera))
             for nombre, ident in ((nombre_casa, casa), (nombre_fuera, fuera)):
@@ -430,6 +558,9 @@ def los_factores(calendario, clasificacion, ahora, equipos=None, valores=None) -
             ):
                 if not ident:
                     continue
+                if jornada in jornada_de.setdefault(ident, set()):
+                    continue
+                jornada_de[ident].add(jornada)
                 # Rival sin id o sin lista de duros: no se sabe (1,0
                 # en esa parte del factor), no se adivina.
                 rival_duro = (rival_id in duros) if (rival_id and duros) else None
@@ -568,8 +699,9 @@ def para_el_jugador(factores, team_id, posicion) -> dict:
 # ============================================================
 
 def _la_ronda_objetivo(calendario, huella, momento):
-    """`(inicio, etiqueta)` de la proxima ronda, con las rondas
-    del calendario montadas una vez por huella. None si no hay."""
+    """`(inicio, etiqueta)` de la proxima ronda PRINCIPAL, con las
+    rondas del calendario montadas una vez por huella. None si no
+    hay. La misma que elige `los_factores`: el aplazado no cuenta."""
     try:
         from src.analysis.el_calendario_de_puntos import las_rondas
 
@@ -577,6 +709,8 @@ def _la_ronda_objetivo(calendario, huella, momento):
         if rondas is None:
             rondas = []
             for r in las_rondas(calendario):
+                if not isinstance(r, dict) or r.get("principal") is not True:
+                    continue
                 inicio = _momento(r.get("start"))
                 if inicio is not None:
                     rondas.append((inicio, r.get("label")))
@@ -602,11 +736,11 @@ def del_ciclo(snapshot, ahora=None, calendario=None, clasificacion=None) -> dict
     abre nada.
 
     La clave es (calendario, clasificacion, equipos y valor del
-    catalogo, ronda objetivo): con la misma entrada, la misma
-    respuesta sin recalcular. Nunca lanza.
+    catalogo, ronda objetivo, clasificacion caducada): con la misma
+    entrada, la misma respuesta sin recalcular. Nunca lanza.
     """
     try:
-        momento = _momento(ahora if ahora is not None else datetime.now(timezone.utc))
+        momento = _momento(ahora if ahora is not None else _reloj())
         if momento is None:
             return _vacio("sin hora de referencia")
 
@@ -626,8 +760,12 @@ def del_ciclo(snapshot, ahora=None, calendario=None, clasificacion=None) -> dict
 
         ronda = _la_ronda_objetivo(calendario, huella_calendario, momento)
 
+        # La misma tabla deja de valer al cumplir la semana: eso
+        # tambien va en la clave.
+        vieja = caducada(clasificacion, momento)
+
         clave = (
-            (huella_calendario, huella_clasificacion, huella_catalogo, ronda)
+            (huella_calendario, huella_clasificacion, huella_catalogo, ronda, vieja)
             if None not in (huella_calendario, huella_clasificacion, huella_catalogo)
             else None
         )
