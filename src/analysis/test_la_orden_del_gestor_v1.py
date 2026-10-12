@@ -17,6 +17,12 @@ QUE SE PRUEBA (29/09/2026)
        jornada jugandose no se acepta ninguna oferta del Computer. Y
        `correr` las pasa de verdad (calendario y catalogo de prueba, con
        la hora puesta a mano).
+    8. EL PARTE DEL FICHAJE (13/10/2026): el de `fichar` lesionado, en
+       duda o sancionado no se puja, y la puja viva se retira UNA vez y
+       no se vuelve a poner; sin estado, la viva se queda pero no se
+       pone ni se sube. Y en rojo a menos de 24 h, con el relevo
+       lesionado o sancionado, no se cobra al que sale (con duda o sin
+       estado, si).
 
     Sin red, sin login y sin disco de produccion.
 """
@@ -701,7 +707,188 @@ def test_el_reloj_y_el_parte_nunca_lanzan() -> None:
     assert orden_mod.leer_los_estados(f) == {IVAN: "doubt"}
 
 
+# ============================================================
+# EL PARTE DEL FICHAJE (13/10/2026)
+# ============================================================
+#
+#     Ivan Romero juega la J8 el 12/10 a las 21:00 y su puja (3.777.000)
+#     se resuelve el 13/10 a las 07:00. Ganado lesionado, nadie lo puede
+#     vender (`protegidos`) ni cambiar: un hueco hasta el 30/11.
+
+def test_el_parte_del_fichaje() -> None:
+    viva = {ROBERTO: {"offer_id": 9, "amount": 8_800_000}}
+    baja = {ROBERTO: {"offer_id": 9, "amount": 8_000_000}}
+
+    for parte in ("injured", "doubt", "sanctioned", "Injured "):
+        # La viva, a su importe o por debajo: se retira, una vez, y no
+        # se pone otra.
+        for pujas in (viva, baja):
+            a = _decide(nuestras_pujas=pujas, estados={ROBERTO: parte})
+            assert _tipos(a) == [("CANCELAR_PUJA", ROBERTO)], (parte, a)
+            assert a[0]["offer_id"] == 9 and a[0]["nombre"] == "Roberto", a
+            assert a[0]["guardia"] == "EL_PARTE_DEL_FICHAJE" and a[0]["motivo"], a
+
+        # Sin puja viva: ni se pone.
+        a = _decide(estados={ROBERTO: parte})
+        assert _tipos(a) == [("NADA", ROBERTO)], (parte, a)
+        assert a[0]["guardia"] == "EL_PARTE_DEL_FICHAJE" and a[0]["motivo"], a
+
+    # Le gana al reloj: a 30 h la viva de un lesionado tambien se retira.
+    a = _decide(nuestras_pujas=viva, estados={ROBERTO: "injured"}, horas_jornada=30.0)
+    assert _tipos(a) == [("CANCELAR_PUJA", ROBERTO)], a
+
+    # Y aunque la venta del Computer ya no salga en la foto.
+    a = _decide(nuestras_pujas=viva, estados={ROBERTO: "injured"}, mercado={})
+    assert _tipos(a) == [("CANCELAR_PUJA", ROBERTO)], a
+
+    # Si tambien esta en `no_pujar`, una sola escritura.
+    orden = {**ORDEN, "no_pujar": [{"player_id": ROBERTO, "nombre": "Roberto"}]}
+    a = orden_mod.decidir(orden, mercado={ROBERTO: 8_380_000}, nuestras_pujas=viva,
+                          plantilla={JUTGLA}, ofertas_del_computer={}, en_venta=set(),
+                          precios={}, maximo_de_puja=14_000_000,
+                          estados={ROBERTO: "injured"})
+    assert _tipos(a) == [("CANCELAR_PUJA", ROBERTO)], a
+
+    # Sano o apercibido: como siempre.
+    for parte in ("ok", "warned", "OK"):
+        assert _tipos(_decide(estados={ROBERTO: parte})) == [("PUJAR", ROBERTO)], parte
+        assert _decide(nuestras_pujas=viva, estados={ROBERTO: parte}) == [], parte
+
+    # Sin estado: la viva se queda (ni se retira ni se sube), y no se
+    # pone una nueva.
+    for estados in ({}, {ROBERTO: None}, {ROBERTO: "raro"}):
+        assert _decide(nuestras_pujas=viva, estados=estados) == [], estados
+        for pujas in ({}, baja):
+            a = _decide(nuestras_pujas=pujas, estados=estados)
+            assert _tipos(a) == [("NADA", ROBERTO)], (estados, a)
+            assert a[0]["guardia"] == "EL_PARTE_DEL_FICHAJE", a
+
+    # Ya en la plantilla, el parte del fichaje no pinta nada aqui.
+    a = _decide(plantilla={ROBERTO, JUTGLA, BLANCO, YAMAL}, mercado={},
+                estados={ROBERTO: "injured", JUTGLA: "ok"})
+    assert not [x for x in a if x.get("guardia") == "EL_PARTE_DEL_FICHAJE"], a
+
+
+def test_en_rojo_no_se_cobra_si_el_relevo_no_juega() -> None:
+    plantilla = {ROBERTO, JUTGLA, BLANCO, YAMAL}
+    ofertas = {JUTGLA: {"offer_id": 71, "amount": 3_050_000}}
+
+    # Lesionado o sancionado no juega seguro: vender a Jutgla deja 10.
+    for parte in ("injured", "sanctioned", "Sanctioned"):
+        a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,
+                    estados={ROBERTO: parte}, saldo=-1_820_000, horas_jornada=23.9)
+        assert sorted(_tipos(a)) == sorted([
+            ("NADA", JUTGLA), ("PONER_A_LA_VENTA", BLANCO),
+        ]), (parte, a)
+        nada = [x for x in a if x["accion"] == "NADA"][0]
+        assert nada["guardia"] == "EL_PARTE_DEL_RELEVO" and nada["relevo"] == ROBERTO, nada
+        assert "hueco" in nada["motivo"] and "rojo" in nada["motivo"], nada
+
+    # En duda o sin estado puede jugar: manda la caja.
+    for estados in ({ROBERTO: "doubt"}, {ROBERTO: None}, {}):
+        a = _decide(plantilla=plantilla, mercado={}, ofertas_del_computer=ofertas,
+                    estados=estados, saldo=-1_820_000, horas_jornada=23.9)
+        assert ("ACEPTAR_OFERTA_DEL_COMPUTER", JUTGLA) in _tipos(a), (estados, a)
+
+    # El ultimo recurso (`si_saldo_negativo`) no mira el parte: igual.
+    orden = {**ORDEN, "vender_si_ficha": {"si_esta": ROBERTO, "jugadores": [
+        {"player_id": JUTGLA, "nombre": "Jutgla", "suelo": 2_900_000,
+         "si_saldo_negativo": True}]}}
+    a = orden_mod.decidir(orden, mercado={}, nuestras_pujas={}, plantilla=plantilla,
+                          ofertas_del_computer=ofertas, en_venta={JUTGLA},
+                          precios={}, maximo_de_puja=0, saldo=-1, horas_jornada=10,
+                          estados={ROBERTO: "injured"})
+    assert _tipos(a) == [("ACEPTAR_OFERTA_DEL_COMPUTER", JUTGLA)], a
+
+
+def test_correr_retira_la_puja_del_fichaje_lesionado() -> None:
+    orden = {
+        "caduca": "2026-11-30T23:59:00+01:00",
+        "fichar": [{"player_id": IVAN, "nombre": "Ivan Romero", "puja": 3_777_000}],
+        "vender_si_ficha": {"jugadores": [
+            {"player_id": JUTGLA, "nombre": "Jutgla", "suelo": 2_466_000, "si_esta": IVAN},
+        ]},
+    }
+    PUJA_VIVA = 91
+
+    def foto(*, puja_viva, parte_de_ivan, ivan_dentro=False, saldo=None):
+        s = _la_foto(ivan_dentro=ivan_dentro, parte_de_ivan=parte_de_ivan)
+        if puja_viva:
+            s["market"]["offers"].append({
+                "id": PUJA_VIVA, "status": "waiting", "amount": 3_777_000,
+                "from": {"id": YO}, "requestedPlayers": [{"id": IVAN}],
+            })
+        if saldo is not None:
+            s["market"]["status"]["balance"] = saldo
+        return s
+
+    antes = os.environ.get(orden_mod.ENV)
+    with tempfile.TemporaryDirectory() as tmp:
+        ruta = Path(tmp) / "orden.json"
+        ruta.write_text(json.dumps(orden), encoding="utf-8")
+        calendario = Path(tmp) / "calendario.json"
+        calendario.write_text(json.dumps(CALENDARIO_J9), encoding="utf-8")
+
+        def vuelta(ahora, snapshot):
+            escritores = []
+
+            def fabrica():
+                escritores.append(_Escritor())
+                return escritores[-1]
+
+            s = orden_mod.correr({"snapshot": snapshot}, escritor_factory=fabrica,
+                                 ruta=ruta, ahora=ahora, calendario=calendario)
+            return s, (escritores[0].log if escritores else None)
+
+        try:
+            os.environ[orden_mod.ENV] = "1"
+            # Martes 13/10, vuelta de las 04:50 de Madrid (02:50 UTC).
+            a_las_0450 = datetime(2026, 10, 13, 2, 50, tzinfo=timezone.utc)
+
+            # Ivan sano y la puja viva a su importe: ni se toca.
+            s, log = vuelta(a_las_0450, foto(puja_viva=True, parte_de_ivan="ok"))
+            assert log is None and s["motivo"] == "NADA_QUE_HACER", (s, log)
+
+            # Lesionado: se retira la viva, y solo eso.
+            s, log = vuelta(a_las_0450, foto(puja_viva=True, parte_de_ivan="injured"))
+            assert log == [("cancel", PUJA_VIVA)], (s, log)
+            assert s["hechas"][0]["guardia"] == "EL_PARTE_DEL_FICHAJE", s
+
+            # La vuelta siguiente, ya sin puja viva: ni se retira otra vez
+            # ni se vuelve a poner.
+            s, log = vuelta(a_las_0450, foto(puja_viva=False, parte_de_ivan="injured"))
+            assert log is None and s["motivo"] == "NADA_QUE_HACER", (s, log)
+            assert [(a["accion"], a["guardia"]) for a in s["acciones"]] == [
+                ("NADA", "EL_PARTE_DEL_FICHAJE")], s
+
+            # Sin catalogo (sin estado): tampoco se pone una nueva.
+            sin_catalogo = foto(puja_viva=False, parte_de_ivan="ok")
+            sin_catalogo.pop("catalog")
+            s, log = vuelta(a_las_0450, sin_catalogo)
+            assert log is None and s["motivo"] == "NADA_QUE_HACER", (s, log)
+
+            # Jueves 15/10 21:07 (19:07 UTC, a 23,9 h de la J9), en rojo y
+            # con Ivan ya dentro pero lesionado: Jutgla no se cobra.
+            jueves = datetime(2026, 10, 15, 19, 7, tzinfo=timezone.utc)
+            s, log = vuelta(jueves, foto(puja_viva=False, parte_de_ivan="injured",
+                                         ivan_dentro=True, saldo=-1_820_000))
+            assert log is None and s["motivo"] == "NADA_QUE_HACER", (s, log)
+            assert 23 < s["reloj"]["horas_jornada"] < 24, s["reloj"]
+            # En duda, si: manda la caja.
+            s, log = vuelta(jueves, foto(puja_viva=False, parte_de_ivan="doubt",
+                                         ivan_dentro=True, saldo=-1_820_000))
+            assert log == [("accept", 81)], (s, log)
+        finally:
+            if antes is None:
+                os.environ.pop(orden_mod.ENV, None)
+            else:
+                os.environ[orden_mod.ENV] = antes
+
+
 TESTS = [
+    test_el_parte_del_fichaje,
+    test_en_rojo_no_se_cobra_si_el_relevo_no_juega,
+    test_correr_retira_la_puja_del_fichaje_lesionado,
     test_el_reloj_no_deja_fichar_tarde,
     test_el_relevo_tiene_que_estar_sano,
     test_no_se_cobra_con_la_jornada_jugandose,

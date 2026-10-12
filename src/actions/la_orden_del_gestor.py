@@ -39,11 +39,20 @@ LAS GUARDIAS (12/10/2026)
        `status` 'ok' o 'warned' en el catalogo de la foto. Duda, lesion,
        sancion o sin saberlo: no se cobra (publicar si), y queda un NADA
        con el motivo. Salvo el ultimo recurso (`si_saldo_negativo`) y en
-       rojo a menos de `HORAS_ROJO`: ahi manda la caja.
+       rojo a menos de `HORAS_ROJO`: ahi manda la caja... si el relevo
+       esta en duda o sin saberlo. Lesionado o sancionado (`FUERA`) no
+       juega seguro: vender al que sale dejaria 10 y no se cobra; queda
+       un NADA para que el gestor elija entre el hueco y el rojo.
     3. LA JORNADA EN CURSO. Con una jornada jugandose no se acepta
        ninguna oferta del Computer (la de `vender_si_ficha` ni la de un
        viaje). Publicar si se puede: la oferta queda lista para cuando
        acabe.
+    4. EL PARTE DEL FICHAJE (13/10/2026). El de `fichar` lesionado, en
+       duda o sancionado en el catalogo (`NO_SE_FICHA`): no se puja, y
+       la puja viva se retira (CANCELAR_PUJA). Ganado, nadie lo puede
+       vender (`protegidos`) y la mejora no lo cambia: un hueco hasta
+       el 30/11. Sin estado: la viva se queda como esta, pero no se
+       pone ni se sube.
 
 QUE NO HACE
 
@@ -51,8 +60,9 @@ QUE NO HACE
     no vende a nadie que no este en la orden, no toca a Yamal (se
     rechaza la orden entera si lo nombra), no puja por encima de
     `maximumBid`. Una escritura por jugador y vuelta como mucho. No
-    retira la puja viva de `fichar` cuando el reloj ya no deja subirla,
-    ni quita de la venta al que sale si su relevo cae lesionado.
+    retira la puja viva de `fichar` cuando el reloj ya no deja subirla
+    (si cuando su jugador cae lesionado), ni quita de la venta al que
+    sale si su relevo cae lesionado.
 
     Nace APAGADA: `BORDALAS_LA_ORDEN_DEL_GESTOR`. Nunca lanza.
 """
@@ -103,6 +113,14 @@ HORAS_SIN_FICHAR = 40
 # puntos en la jornada»).
 SANOS = frozenset({"ok", "warned"})
 HORAS_ROJO = 24
+
+# Los que seguro no juegan: con el relevo asi, ni en rojo a menos de
+# `HORAS_ROJO` se vende al que sale (dejaria 10 que juegan).
+FUERA = frozenset({"injured", "sanctioned"})
+
+# EL PARTE DEL FICHAJE (13/10/2026): los de la revision de las pujas
+# vivas (`la_revision_de_pujas.MALOS`), que se salta las de la orden.
+NO_SE_FICHA = frozenset({"injured", "doubt", "sanctioned"})
 
 
 # LA LLAVE DE YAMAL (07/10/2026, decision del CEO con permiso del dueño:
@@ -220,22 +238,79 @@ def decidir(
         horas_jornada  horas hasta la proxima jornada; None = no se sabe
                        y no se puja. Sin pasarla (`inf`), no se mira.
         estados        {player_id: status del catalogo}; el relevo tiene
-                       que estar 'ok'. Sin pasarlo (None), no se mira.
+                       que estar 'ok', y el de `fichar` tambien para
+                       pujar por el. Sin pasarlo (None), no se mira.
         en_curso       hay una jornada jugandose: no se acepta ninguna
                        oferta del Computer.
     """
 
     acciones = []
+    retiradas = set()
 
     # 1. FICHAR
     for f in orden.get("fichar") or []:
         pid = _int(f.get("player_id"))
         puja = _int(f.get("puja"))
 
-        if pid in plantilla or pid not in mercado:
+        if pid in plantilla:
             continue
 
         ya = nuestras_pujas.get(pid)
+
+        # EL PARTE DEL FICHAJE (13/10/2026): Ivan Romero juega la J8 el
+        # 12/10 a las 21:00 y su puja se resuelve el 13/10 a las 07:00;
+        # la revision de pujas se salta las de la orden. Ganado lesionado,
+        # nadie lo puede vender (`protegidos`) ni cambiar: un hueco en un
+        # once de 11 justos. Lesionado, en duda o sancionado: no se puja
+        # y la viva se retira. Sin estado: la viva se queda, pero no se
+        # pone ni se sube.
+        if estados is not None:
+            parte = str(estados.get(pid) or "").strip().lower()
+            if parte in NO_SE_FICHA:
+                oferta_viva = _int((ya or {}).get("offer_id"))
+                if oferta_viva:
+                    retiradas.add(pid)
+                    acciones.append({
+                        "accion": "CANCELAR_PUJA", "player_id": pid,
+                        "nombre": f.get("nombre"), "offer_id": oferta_viva,
+                        "guardia": "EL_PARTE_DEL_FICHAJE",
+                        "estado_del_fichaje": parte,
+                        "motivo": (
+                            f"el fichaje esta '{parte}' en el catalogo: se "
+                            "retira la puja viva (ganado, nadie lo podria "
+                            "vender ni cambiar)"
+                        ),
+                    })
+                elif pid in mercado:
+                    acciones.append({
+                        "accion": "NADA", "player_id": pid,
+                        "nombre": f.get("nombre"),
+                        "guardia": "EL_PARTE_DEL_FICHAJE",
+                        "estado_del_fichaje": parte,
+                        "motivo": (
+                            f"el fichaje esta '{parte}' en el catalogo: "
+                            "no se puja"
+                        ),
+                    })
+                continue
+            if (
+                parte not in SANOS and pid in mercado
+                and not (ya and _int(ya.get("amount"), 0) >= puja)
+            ):
+                acciones.append({
+                    "accion": "NADA", "player_id": pid,
+                    "nombre": f.get("nombre"),
+                    "guardia": "EL_PARTE_DEL_FICHAJE",
+                    "estado_del_fichaje": parte or None,
+                    "motivo": (
+                        "el fichaje no tiene estado en el catalogo: no se "
+                        "pone ni se sube la puja (la viva se queda)"
+                    ),
+                })
+                continue
+
+        if pid not in mercado:
+            continue
 
         if ya and _int(ya.get("amount"), 0) >= puja:
             continue
@@ -286,7 +361,8 @@ def decidir(
         pid = _int(n.get("player_id"))
         ya = nuestras_pujas.get(pid)
 
-        if ya and _int(ya.get("offer_id")):
+        if ya and _int(ya.get("offer_id")) and pid not in retiradas:
+            retiradas.add(pid)
             acciones.append({
                 "accion": "CANCELAR_PUJA", "player_id": pid,
                 "nombre": n.get("nombre"),
@@ -338,7 +414,8 @@ def decidir(
             #     frenara, el que sale cobraria un reset tarde). Y no frena
             #     el ultimo recurso (`si_saldo_negativo`) ni, en rojo a
             #     menos de `HORAS_ROJO`, nada: un hueco cuesta un jugador;
-            #     empezar la jornada en rojo, el once entero.
+            #     empezar la jornada en rojo, el once entero. Salvo con
+            #     el relevo `FUERA` (13/10/2026): ver abajo.
             parte_malo = None
             if estados is not None and not j.get("si_saldo_negativo"):
                 quien = relevo or condicion
@@ -355,6 +432,24 @@ def decidir(
                         "motivo": (
                             f"el relevo ({quien}) no esta sano "
                             f"({parte or 'sin estado'}): no se cobra"
+                        ),
+                    }
+                # En rojo y cerca, la caja manda solo si el relevo PUEDE
+                # jugar (duda, sin estado). Lesionado o sancionado no
+                # juega seguro: vender al que sale deja 10 que juegan.
+                # Eso lo decide el gestor, no la red (13/10/2026).
+                elif parte in FUERA:
+                    parte_malo = {
+                        "accion": "NADA", "player_id": pid, "nombre": nombre,
+                        "guardia": "EL_PARTE_DEL_RELEVO", "relevo": quien,
+                        "estado_del_relevo": parte,
+                        "motivo": (
+                            f"en rojo ({saldo}) a {horas_jornada:.1f} h de "
+                            f"la jornada, pero el relevo ({quien}) esta "
+                            f"'{parte}' y no jugara: cobrar a {nombre} deja "
+                            "un hueco en el once (10 que juegan); no "
+                            "cobrarlo deja la jornada en rojo (0 puntos). "
+                            "No se cobra: decide el gestor"
                         ),
                     }
 
