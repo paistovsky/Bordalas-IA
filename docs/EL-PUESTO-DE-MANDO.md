@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/10/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 13/10/2026, 21:30 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **13/10 21:15 (rafaga de la noche). AVISO PARA LA J9.** Ciclos: verdes
+  (#2207 a #2214). Puja viva por Luismi Cruz (3.252.000), saldo
+  +659.783. **E38 corrige mi cuenta de las 14:15:** la oferta del
+  Computer por Jutgla puede ser de 2,51 M (peor caso), no 2,9 M. Si entra
+  Cruz: 659.783 - 3.252.000 + 2.510.000 = **-82.217 el jueves** salvo que
+  el premio de la J8 entre antes. **BORDALAS_EL_CIERRE_DE_LA_JORNADA
+  sigue APAGADO** (el plan del chat del dueno era encenderlo esta noche,
+  antes de su ventana del miercoles 05:00). No lo enciendo yo: es su
+  pieza y esta en marcha; dos manos a la vez en lo mismo es el error de
+  Maffeo. **Si mañana a las 07:15 entro Cruz y el cierre sigue apagado,
+  aviso al dueno con el numero** (y propongo encenderlo con su verja,
+  paso 0, ensayo y canario, o vender otro no titular).
 
 - **13/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2200 a #2207).
   **Canario del calendario en la mejora** (encendido 08:57, 3d2fe880):
