@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **13/10 21:40. ENCENDIDO EL CIERRE DE LA JORNADA**
+  (`BORDALAS_EL_CIERRE_DE_LA_JORNADA`, commit 900d6dda). Todas las vueltas
+  del dia verdes con el calendario en la mejora. Verja 208/208; paso 0 con
+  44; ensayo #38454935628 verde (fuera de su ventana a 71,5 h). Abre su
+  ventana el miercoles 14/10 a las 05:00. **Caja de la J9:** saldo 659.783,
+  puja viva por Luismi Cruz 3.252.000 (se resuelve el miercoles 07:00). Si
+  entra: -2,59 M hasta cobrar a Jutgla (~2,4-2,6 M, el jueves 07:15) =>
+  entre -0,16 M y -0,03 M; con el minimo en 0 desde las 64 h, la mejora en
+  modo rojo buscara el cambio que lo cubra (caro por barato) antes del
+  jueves 05:00. **El premio de la J8 aun no ha llegado** (saldo y puntos
+  sin moverse): el Rayo-Athletic aplazado puede tener la J8 abierta; no se
+  cuenta con el. La rutina del miercoles 06:40 vigila.
+
 - **13/10 21:15 (rafaga de la noche). AVISO PARA LA J9.** Ciclos: verdes
   (#2207 a #2214). Puja viva por Luismi Cruz (3.252.000), saldo
   +659.783. **E38 corrige mi cuenta de las 14:15:** la oferta del
