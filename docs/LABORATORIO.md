@@ -69,6 +69,42 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E38 · 13/10/2026 17:20 de Madrid · ¿Cuando llega la oferta del Computer por Jutgla, y a cuanto?
+
+**El caso:** la cuenta de la J9 del gestor (rafaga de las 14:15) da
+~+0,3 M si entra Luismi Cruz el 14/10 y se vende a Jutgla «a ~2,9 M», y
+avisa: «si Jutgla se vende por debajo del 90 % o tarda, rojo el jueves».
+**Datos:** `data/solvency/censo_de_ofertas.jsonl` (las ofertas del Computer
+que Pepe tiene vivas cada noche, 29 noches del 15/09 al 13/10, 156 ofertas)
+cruzadas con el historial de precios.
+**Codigo:** `lab/ofertas/cuando_llega.py`.
+
+**Lo que se aprende:**
+- **Por debajo del 90 % no ha pasado nunca.** Oferta / precio: minimo
+  0,951, p10 0,966, mediana 1,007, maximo 1,049 (n = 156). Las de Jutgla
+  (11 noches), entre 0,960 y 1,048.
+- **Pero el precio no es 2,9 M: hoy es 2.700.000** y baja ~1 % al dia
+  desde el 21/09 (3,20 M). El 16/10 rondara 2,64 M. Venta probable
+  ~2,66-2,69 M; la peor vista (0,951), ~2,51 M. Es decir, **entre 0,2 y
+  0,4 M menos que la cuenta del gestor**: el «+0,3 M» queda entre +0,1 y
+  -0,1 M antes del premio de la J8.
+- **Las ofertas llegan cada dos noches.** Desde el 04/10 el Computer
+  ofrece por los jugadores de Pepe las noches de fecha par (6 ofertas, a
+  las ~02:10 de Madrid) y las impares solo queda una (Chust). Una oferta
+  sigue viva al menos 12 h (la del 24/09 12:10 seguia a las 00:14). Para
+  la J9 hay **dos ventanas: 14/10 ~02:10 y 16/10 ~02:10**, las dos antes
+  del cierre del 16/10 a las 21:00. «Tarda» no deja a Pepe sin vender;
+  lo que puede pasar es que la del 14/10 llegue antes de saber si Cruz es
+  nuestro (07:00) y caduque, y haya que esperar a la del 16/10.
+
+**Limites:** 10 noches de alternancia; si el Computer cambia de ritmo, la
+ventana del 16/10 puede no existir. No se sabe si el premio de la J8 se
+cobra antes del 16/10 (la J8 aun no esta cerrada en los libros).
+
+**Veredicto: AVISO para la cuenta de la J9, no regla nueva.** Contar a
+Jutgla a 2,51 M (peor caso) y no a 2,9 M; con eso la J9 esta en verde
+solo si el premio de la J8 entra antes del jueves.
+
 ### E37 · 13/10/2026 11:16 de Madrid · ¿Cuanto hay que pujar para ganar, y compensa la «puja fuerte»?
 
 **El caso:** las cuatro ultimas pujas a precio + 1 % se perdieron (los
@@ -1799,6 +1835,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E38, 13/10 17:20) Cuenta de la J9 con Luismi Cruz: contar la venta de
+  Jutgla a 2,51 M (peor caso), no a 2,9 M.** Su precio hoy es 2.700.000 y
+  baja ~1 % al dia; el Computer ofrece entre 0,951 y 1,049 del precio
+  (n = 156, nunca por debajo del 90 %). Ofertas cada dos noches (fechas
+  pares, ~02:10 de Madrid): ventanas 14/10 y 16/10, ambas antes del
+  cierre. Si la del 14/10 llega antes de las 07:00 y Cruz entra, venderla
+  ese dia; si no, la del 16/10. Sin el premio de la J8 cobrado, la caja
+  queda entre +0,1 y -0,1 M.
 - **(E37, 13/10 11:16) Encender la «puja fuerte» (BORDALAS_LA_MEJORA_PUJA_FUERTE)
   solo para fichajes del once, y solo si el sobrecoste cabe en la caja de
   la jornada siguiente.** Con el tablon (105 subastas con pelea): a +1 %
