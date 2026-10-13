@@ -220,6 +220,18 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_MEJORA_DEL_ONCE: "1"
 
+      # Encendido 13/10 de Madrid. EL CALENDARIO EN LA MEJORA DEL ONCE (el
+      #   dueno, 12/10: «antes de la jornada se mira el calendario… mejor
+      #   jugadores de los equipos de arriba»). La mejora valora cada cambio
+      #   con el xP de las 3 proximas jornadas PRINCIPALES (sin aplazados):
+      #   casa 1,06 / fuera 0,94, rival del top 6 0,90 / resto 1,04 (lab,
+      #   n=564) y encoge a los de pocos partidos hacia su tramo. Nunca vende
+      #   a uno 0,5 pts mejor por calendario; en rojo financia igual que sin
+      #   el. Verja 208/208; paso 0 con 44; ensayos #38275852357,
+      #   #38290081550 y #38358298552 verdes (NADA_QUE_HACER, 1 frenado).
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_EL_CALENDARIO_EN_LA_MEJORA: "1"
+
       # Encendido 29/09 de Madrid. LA REVISION DE LAS PUJAS VIVAS.
       #
       #   En la ventana del reset retira nuestras pujas por jugadores que

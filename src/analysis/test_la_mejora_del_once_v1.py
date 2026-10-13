@@ -28,7 +28,7 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from src.actions.la_mejora_del_once import (     # noqa: E402
-    ENV, ENV_CALENDARIO, GANANCIA_MINIMA, MARGEN_DEL_CALENDARIO, PEOR_FINANCIACION,
+    ENV, ENV_CALENDARIO, ENV_PUJA_FUERTE, GANANCIA_MINIMA, MARGEN_DEL_CALENDARIO, PEOR_FINANCIACION,
     VUELTA_MEJORA, VUELTA_VIEJA_MINUTOS, correr, decidir, el_calendario_activo,
     el_contexto, el_plan_del_calendario, es_de_esta_vuelta, escribir_la_vuelta, la_caja,
     la_caja_de_la_jornada, las_probabilidades, las_rondas_que_cuentan,
@@ -187,7 +187,7 @@ def test_nace_apagada_y_nunca_lanza():
     # Encendida y con basura, nunca lanza. Todo dado (la orden, los
     # libros, el reloj): no lee producción ni escribe fuera del temporal.
     with tempfile.TemporaryDirectory() as tmp, \
-            _interruptores({ENV: "1", ENV_CALENDARIO: None}):
+            _interruptores({ENV: "1", ENV_CALENDARIO: None, ENV_PUJA_FUERTE: None}):
         r = correr(status={"lineup": None}, snapshot={"market": None}, v10={}, ahora=AHORA,
                    libro_ruta=os.path.join(tmp, "mejora.json"), calendario={},
                    de_fuera={"orden": {}, "vetados": set(), "protegidos": set(),
@@ -458,7 +458,8 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
                                          for p, st in (catalogo or {}).items()}}},
     }
     escritor = _Escritor()
-    interruptores = {ENV: "1", ENV_CALENDARIO: "1" if con_calendario else None}
+    interruptores = {ENV: "1", ENV_CALENDARIO: "1" if con_calendario else None,
+                     ENV_PUJA_FUERTE: None}
     with tempfile.TemporaryDirectory() as tmp, _interruptores(interruptores):
         rutas = {k: os.path.join(tmp, f"{k}.json") for k in ("mejora", "ronda", "chollos")}
         Path(rutas["ronda"]).write_text(json.dumps(libro_ronda or {}))
@@ -1224,7 +1225,7 @@ def test_la_vuelta_de_la_mejora_para_el_cierre():
                  "libro_ronda": os.path.join(tmp, "ronda.json"),
                  "libro_chollos": os.path.join(tmp, "chollos.json"), "horas_jornada": 100.0,
                  "puede_escribir": True, "en_curso": False}
-        with _interruptores({ENV: "1", ENV_CALENDARIO: None, "GITHUB_RUN_ID": "7"}):
+        with _interruptores({ENV: "1", ENV_CALENDARIO: None, ENV_PUJA_FUERTE: None, "GITHUB_RUN_ID": "7"}):
             r = correr(status={"lineup": 3}, snapshot={"market": None}, v10={}, ahora=AHORA,
                        libro_ruta=os.path.join(tmp, "mejora.json"), calendario={},
                        de_fuera=fuera, vuelta_ruta=ruta)
