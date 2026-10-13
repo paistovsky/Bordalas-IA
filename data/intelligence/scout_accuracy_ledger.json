@@ -1990583,13 +1990583,13 @@
       "price_at_prediction": 1900000,
       "predicted_at": "2026-10-10T19:09:37.781560+00:00",
       "due_at": "2026-10-13T19:09:37.781560+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 1880000,
+      "actual_direction": "DOWN",
+      "actual_percent": -1.053,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-13T19:10:26.957541+00:00"
     },
     "32020|PRENSA_MUNDO_DEPORTIVO|3|2026-10-10": {
       "player_id": "32020",
@@ -1990604,13 +1990604,13 @@
       "price_at_prediction": 2610000,
       "predicted_at": "2026-10-10T19:09:45.279338+00:00",
       "due_at": "2026-10-13T19:09:45.279338+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 2360000,
+      "actual_direction": "DOWN",
+      "actual_percent": -9.579,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-13T19:10:26.957541+00:00"
     },
     "34479|PRENSA_MUNDO_DEPORTIVO|3|2026-10-10": {
       "player_id": "34479",
@@ -1990625,13 +1990625,13 @@
       "price_at_prediction": 7660000,
       "predicted_at": "2026-10-10T19:09:39.909067+00:00",
       "due_at": "2026-10-13T19:09:39.909067+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 7130000,
+      "actual_direction": "DOWN",
+      "actual_percent": -6.919,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-13T19:10:26.957541+00:00"
     },
     "742|FUTBOLFANTASY|1|2026-10-11": {
       "player_id": "742",
