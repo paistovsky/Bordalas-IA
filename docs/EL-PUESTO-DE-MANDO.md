@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 12/10/2026, 21:30 de Madrid (rafaga de las 21:15).
+Actualizado: 13/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **13/10 07:15 (rafaga de la manana). LAS TRES PUJAS PERDIDAS.** Ciclos:
+  verdes (#2191 a #2200). Ivan Romero 3.777.000 contra 4.001.000 (+6 %),
+  Gerard Martin 4.989.000 contra 5.771.000 (+16 %), Moi Gomez 1.101.000
+  contra 1.107.000 (+0,5 %: por 6.000). Con Recio ayer, **cuatro de
+  cuatro perdidas a precio +1 %** en jugadores que suben. Saldo
+  +659.783, comprometido 0, plantilla 11, once 11: el riesgo de la J9
+  desaparece por ahora. **Para el chat del dueno (dato, no orden):** con
+  rivales en caja, el +1 % solo gana cuando nadie mas puja (E9: un 25-30 %
+  de las subastas de los que suben); la ronda y la orden van a seguir
+  perdiendo lo disputado. Medir el margen que hubiera ganado cada una
+  (aqui: +6,4 %, +15,7 %, +0,6 %, +15 %) antes de subir la puja, y nunca
+  subirla sin la cuenta de la J9 delante.
 
 - **12/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2184 a #2191),
   tambien tras las olas 1 y 2 del chat del dueno. Comprometido
