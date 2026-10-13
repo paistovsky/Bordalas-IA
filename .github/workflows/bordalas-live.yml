@@ -232,6 +232,21 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_EL_CALENDARIO_EN_LA_MEJORA: "1"
 
+      # Encendido 13/10 noche de Madrid. EL CIERRE DE LA JORNADA (el dueno,
+      #   12/10: «antes del inicio de jornada se mira el calendario, se
+      #   decide el mejor XI y se vende a los que falten para estar en
+      #   positivo»). Paso propio DESPUES de la mejora. Desde 64 h antes de
+      #   la ronda elige el mejor once con el calendario y, si la caja al
+      #   empezar la ronda no llega a 0, vende a los que sobran (nunca a un
+      #   titular del once escrito, ni a Yamal, ni a protegidos); publica a
+      #   los vendibles para que llegue la oferta del Computer; a <40 h
+      #   retira pujas de la ronda/chollos que no se podrian pagar. Si el
+      #   banquillo no llega, dice FALTA (lo arregla la mejora). Verja
+      #   208/208; paso 0 con 44; ensayos #38275852357, #38290081550 y
+      #   #38454935628 verdes (FUERA_DE_LA_VENTANA a 71,5 h).
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_EL_CIERRE_DE_LA_JORNADA: "1"
+
       # Encendido 29/09 de Madrid. LA REVISION DE LAS PUJAS VIVAS.
       #
       #   En la ventana del reset retira nuestras pujas por jugadores que
