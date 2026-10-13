@@ -352,6 +352,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **13/10 08:30 (supervision de la manana).** Reset: las tres pujas
+  PERDIDAS — Ivan Romero y Moi Gomez para Pollo17, Gerard Martin para
+  Luismi_Haz (otra vez el +1 % no basta contra un rival que quiere al
+  jugador: 59 ganadas / 14 perdidas, nos ganan por 200.000 de mediana).
+  **Pepe solo, a las 07:15:** la mejora del once puja 3.252.000 por Luismi
+  Cruz (Deportivo, DEL, 5,0 pts/partido, 90 % titular, J9 en casa contra
+  el Levante) por Jutgla: +2,25 pts por jornada, caja de la J9 -687.000
+  (dentro del -1 M). Orden limpiada (fichar y vender_si_ficha vacios;
+  Jutgla y Diego Rico a `conservar`). Caja de la J9 si entra Luismi Cruz y
+  se cobra Jutgla: ~0 antes del premio de la J8. Ciclos de la noche y de
+  la manana verdes. Pendiente de pensar: pujar mas que +1 % cuando la
+  mejora del once gana mucho (un +2 pts por jornada vale ~60.000 EUR de
+  premio por jornada que queda).
+
 - **13/10 07:15 (rafaga de la manana). LAS TRES PUJAS PERDIDAS.** Ciclos:
   verdes (#2191 a #2200). Ivan Romero 3.777.000 contra 4.001.000 (+6 %),
   Gerard Martin 4.989.000 contra 5.771.000 (+16 %), Moi Gomez 1.101.000
