@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 13/10/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **13/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2200 a #2207).
+  **Canario del calendario en la mejora** (encendido 08:57, 3d2fe880):
+  verdes las seis vueltas siguientes. Puja viva de Pepe (la mejora):
+  Luismi Cruz por Jutgla, **comprometido 3.252.000**; saldo +659.783.
+  **Cuenta de la J9 si entra Cruz** (14/10 07:00): -2,59 M hasta vender
+  a Jutgla (precio ~2,9 M, publicado a 3,51 M): queda ~+0,3 M. **En verde
+  pero justo**: si Jutgla se vende por debajo del 90 % o tarda, rojo el
+  jueves. Lo miro el 14/10 a las 07:15 y el 15/10 a las 21:15. E37 (la
+  puja fuerte): gana solo para fichajes del once y si cabe en la cuenta
+  de la J9; sigue apagada, bien.
 
 - **13/10 09:20. ENCENDIDO EL CALENDARIO EN LA MEJORA DEL ONCE**
   (`BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`, commit 3d2fe880). Verja 208/208;
