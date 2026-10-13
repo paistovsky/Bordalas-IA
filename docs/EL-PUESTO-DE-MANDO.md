@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **13/10 09:20. ENCENDIDO EL CALENDARIO EN LA MEJORA DEL ONCE**
+  (`BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`, commit 3d2fe880). Verja 208/208;
+  paso 0 con 44 (el primero salio ROJO: las guardias de `correr` no
+  fijaban la puja fuerte y con todos los interruptores puestos se caian;
+  arreglado); ensayo #38358298552 verde. Primera vuelta en produccion
+  (09:07, #38360682968): verde, la mejora con calendario de las J9, J10 y
+  J11, 6 rivales duros, NADA_QUE_HACER con la caja de la J9 en -27.217 (la
+  puja por Luismi Cruz y la venta de Jutgla dentro), 1 cambio frenado por
+  el margen. Subida APAGADA la puja fuerte (`BORDALAS_LA_MEJORA_PUJA_FUERTE`:
+  +4 % por punto por jornada, hasta +12 %, solo para lo que mejora el
+  once). Siguiente: el cierre de la jornada (martes noche) y la puja fuerte
+  (cuando el cierre lleve un dia en verde).
+
 - **13/10 08:30 (supervision de la manana).** Reset: las tres pujas
   PERDIDAS — Ivan Romero y Moi Gomez para Pollo17, Gerard Martin para
   Luismi_Haz (otra vez el +1 % no basta contra un rival que quiere al
