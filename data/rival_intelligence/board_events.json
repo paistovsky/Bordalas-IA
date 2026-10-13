@@ -185591,5 +185591,24 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "3f840ddb7d9235f337c4acbc",
+    "date": 1791881338,
+    "type": "playerMovements",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "type": "join",
+        "player": 1683,
+        "team": {
+          "id": 8,
+          "name": "Getafe",
+          "slug": "getafe"
+        }
+      }
+    ]
   }
 ]
