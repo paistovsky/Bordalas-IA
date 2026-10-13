@@ -69,6 +69,53 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E37 · 13/10/2026 11:16 de Madrid · ¿Cuanto hay que pujar para ganar, y compensa la «puja fuerte»?
+
+**El caso:** las cuatro ultimas pujas a precio + 1 % se perdieron (los
+ganadores pagaron +6,4 %, +15,7 %, +0,6 % y +15 %). El gestor ha dejado
+construida y APAGADA la «puja fuerte» (+4 % por cada punto por jornada que
+el fichaje suma al once, hasta +12 %) y pide la cuenta antes de subirla.
+**Datos:** el tablon, 230 subastas del Computer con precio del dia antes
+(105 con pelea, es decir, con mas de un pujador). Para cada una, la puja
+que habia que superar es la del ganador.
+**Codigo:** `lab/subasta/cuanto_pujar.py`.
+
+    puja = precio x (1+k)   se gana:  todas | con pelea | pelea y sube | pelea, 3 M o mas
+    k =  1 % (Pepe hoy)                43 % |    12 %   |     9 %      |     16 %
+    k =  5 %                           61 % |    34 %   |    31 %      |     32 %
+    k =  8 %                           73 % |    51 %   |    49 %      |     58 %
+    k = 12 % (tope puja fuerte)        83 % |    68 %   |    65 %      |     76 %
+    k = 20 %                           90 % |    83 %   |    82 %      |     92 %
+
+**Lo que se aprende:**
+- **A +1 % Pepe solo gana lo que nadie quiere** (12 % de las subastas con
+  pelea; 9 % si el jugador sube). Es lo que E9 ya decia y lo que han
+  confirmado las cuatro derrotas seguidas. A +12 % se ganan 2 de cada 3
+  con pelea, y 3 de cada 4 de los de 3 M o mas. De las cuatro perdidas,
+  con +12 % se habrian ganado dos (Romero y Moi).
+- **La cuenta en puntos sale con mucho margen.** Pujar +12 % en vez de
+  +1 % sobre un jugador de 3 M cuesta 330.000 EUR mas (550.000 sobre 5 M),
+  y ese dinero se pierde (al vender se cobra el precio, no lo pagado). Un
+  fichaje que sume 1 punto por jornada durante las 29 que quedan son ~29
+  puntos y 870.000 EUR de premio (E16). Aunque la estimacion de «puntos
+  que suma» es ruidosa (E7, Spearman ~0,36) y se parta por la mitad,
+  compensa. La regla del gestor (+4 % por punto) es prudente: el punto de
+  equilibrio esta muy por encima del 12 %.
+- **El limite no son los puntos, es la caja** (E36): ese sobrecoste se
+  paga entero antes de la siguiente jornada y empezar en rojo es jornada
+  a cero (E29). Y no vale para la reventa: E9 ya midio que pujar fuerte
+  para revender pierde dinero (ROI mediano -3,1 % a x1,10).
+
+**Limites:** no se sabe si los rivales subirian sus pujas si Pepe sube la
+suya (el tablon es lo que hicieron sin Pepe fuerte). n = 105 con pelea.
+El valor de «puntos que suma» es la vara del gestor, no la de este
+experimento.
+
+**Veredicto: GANA, con condicion** (pasa a «Listo para el plan»):
+encender la puja fuerte SOLO para fichajes del once (nunca para la ronda
+ni para reventa) y solo si el sobrecoste cabe en la cuenta de la jornada
+siguiente (saldo en verde antes del cierre, la cuenta de E36).
+
 ### E36 · 12/10/2026 17:20 de Madrid · Si se ganan las pujas de mañana, ¿llega Pepe en verde a la J9?
 
 **El caso:** hoy se ha encendido «la ronda» (compra lo que sube «con toda
@@ -1752,6 +1799,15 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E37, 13/10 11:16) Encender la «puja fuerte» (BORDALAS_LA_MEJORA_PUJA_FUERTE)
+  solo para fichajes del once, y solo si el sobrecoste cabe en la caja de
+  la jornada siguiente.** Con el tablon (105 subastas con pelea): a +1 %
+  se gana el 12 %; a +8 %, la mitad; a +12 %, el 68 % (76 % en jugadores
+  de 3 M o mas). Pagar +11 % de mas sobre 3-5 M cuesta 330-550 mil EUR;
+  un punto por jornada en lo que queda de liga vale ~870 mil de premio y
+  ~29 puntos. Nunca para la ronda ni para reventa (E9: pierde dinero).
+  Antes de cada puja fuerte: la cuenta de E36 (`lab/caja/cuentas_j9.py`)
+  con la puja ganada, en verde antes del cierre.
 - **(E36, 12/10 17:20) URGENTE ANTES DEL RESET DEL 13/10: si se gana la
   puja por Gerard Martin (4.989.000), Pepe no llega en verde a la J9.**
   Cuenta con la foto de las 17:10: saldo 659.783, comprometido 9.867.000;
