@@ -213,6 +213,10 @@ QUE_HACE = {
         "Para revender, solo compra jugadores cuyo precio está subiendo.",
     "BORDALAS_EL_ONCE_UNA_VEZ":
         "Calcula el mejor once una vez por vuelta y lo recuerda (más rápido).",
+    "BORDALAS_LA_MEJORA_PUJA_FUERTE":
+        "Cuando un fichaje mejora el once, puja más que el precio + 1 %: un 4 % "
+        "más por cada punto por jornada que suma (hasta un 12 %), porque un "
+        "punto por jornada vale más que lo que se paga de más.",
     "BORDALAS_EL_CIERRE_DE_LA_JORNADA":
         "Desde 64 h antes de cada jornada elige el mejor once con el calendario "
         "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "

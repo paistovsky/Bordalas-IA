@@ -1242,6 +1242,36 @@ def test_la_vuelta_de_la_mejora_para_el_cierre():
         assert escribir_la_vuelta("basura", Path(tmp) / "w.json", AHORA) is True
         assert json.loads((Path(tmp) / "w.json").read_text())["hechas"] == []
 
+def test_la_puja_fuerte_para_lo_que_mejora_el_once():
+    # El reset del 13/10: tres de tres perdidas a +1 %. Con el interruptor,
+    # la mejora que suma +1,74 (20 por Flojo) puja +1 % + 4 % por punto
+    # (hasta +12 %): 3,7 M x 1,0796 -> 3.995.000; la caja del cambio cuenta
+    # esa puja. Apagado, lo de siempre (+1 %).
+    from src.actions.la_mejora_del_once import (
+        PRIMA_MAXIMA, PRIMA_POR_PUNTO, con_puja_fuerte, la_puja_fuerte)
+    apagado = _d()
+    assert [a["importe"] for a in apagado["acciones"]] == [3_737_000], apagado
+    fuerte = _d(puja_fuerte=True)
+    (a,) = [x for x in fuerte["acciones"] if x["accion"] == "PUJAR"]
+    assert a["importe"] == la_puja_fuerte(3_700_000, 1.74) == 3_995_000, a
+    (c,) = fuerte["plan"]["cambios"]
+    assert c["caja"] == int(2_700_000 * 0.95) - 3_995_000 and c["prima"] == round(3_995_000 / 3_700_000 - 1, 4), c
+    # Tope: nunca mas de +1 % + `PRIMA_MAXIMA`; con basura, la de siempre.
+    assert la_puja_fuerte(1_000_000, 9) == int(round(1_000_000 * (1.01 + PRIMA_MAXIMA), -3))
+    assert la_puja_fuerte(1_000_000, -3) == 1_010_000
+    assert la_puja_fuerte(1_000_000, "x") == 1_010_000 and PRIMA_POR_PUNTO == 0.04
+    # Lo que solo financia (pierde puntos) y lo que ya es nuestro, igual.
+    financia = {"puntos": -0.9, "puja": 1_111_000, "caja": 3_500_000, "ya_es_nuestro": False}
+    assert con_puja_fuerte(financia, 1_100_000) == financia
+    nuestro = {"puntos": 2.0, "puja": 0, "caja": 100, "ya_es_nuestro": True}
+    assert con_puja_fuerte(nuestro, 1_000_000) == nuestro
+    # Si la puja fuerte ya no cabe en la caja, no se puja (la caja manda):
+    # a menos de 64 h, minimo 0; con +1 % entraba justo, con +8 % no.
+    k = dict(caja=1_200_000, horas_jornada=50)
+    assert [x["player_id"] for x in _d(**k)["acciones"]] == [20]
+    assert _d(**k, puja_fuerte=True)["acciones"] == []
+
+
 TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_cambia_caro_por_barato_para_fichar_mejor,
          test_en_rojo_vende_caro_y_ficha_barato_desde_las_88_horas,
@@ -1249,6 +1279,7 @@ TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_se_queda_lo_que_compro_la_ronda_si_mejora_el_once, test_la_caja,
          test_nace_apagada_y_nunca_lanza,
          test_el_frenado_por_el_margen_sigue_financiando,
+         test_la_puja_fuerte_para_lo_que_mejora_el_once,
          test_el_estado_de_otra_vuelta_por_su_run_id,
          # El calendario (12/10/2026, `BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`).
          test_apagado_es_byte_a_byte_lo_de_antes,

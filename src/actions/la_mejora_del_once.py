@@ -173,6 +173,7 @@ from pathlib import Path
 
 ENV = "BORDALAS_LA_MEJORA_DEL_ONCE"
 ENV_CALENDARIO = "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA"     # nace APAGADO
+ENV_PUJA_FUERTE = "BORDALAS_LA_MEJORA_PUJA_FUERTE"          # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
 # Lo que hizo la mejora en ESTA vuelta (13/10/2026), para el cierre de la
@@ -228,6 +229,59 @@ def activa() -> bool:
         return str(os.environ.get(ENV, "")).strip().lower() in {"1", "true", "si", "yes"}
     except Exception:                               # noqa: BLE001
         return False
+
+
+# LA PUJA FUERTE (13/10/2026). El reset del 13/10: las tres pujas a
+# precio + 1 % (E9), perdidas -Ivan Romero y Moi Gomez para Pollo17,
+# Gerard Martin para Luismi_Haz-; el libro: 59 ganadas y 14 perdidas, nos
+# ganan por 200.000 de mediana. E9 es para revender (el margen manda);
+# para el ONCE manda el punto: 1 punto por jornada son ~30.000 EUR de
+# premio por cada jornada que queda (29), y lo pagado de mas vuelve en
+# buena parte en el valor del jugador. Con el interruptor, la puja de un
+# cambio que MEJORA (>= `GANANCIA_MINIMA`) sube `PRIMA_POR_PUNTO` por punto
+# por jornada, hasta `PRIMA_MAXIMA` encima del +1 %: +2,25 pts -> +10 %.
+# Los que solo financian siguen a +1 %. La caja del cambio cuenta la puja
+# de verdad. Nace APAGADA.
+PRIMA_POR_PUNTO = 0.04
+PRIMA_MAXIMA = 0.12
+
+
+def la_puja_fuerte_activa() -> bool:
+    """`BORDALAS_LA_MEJORA_PUJA_FUERTE`, leído como `activa`. Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_PUJA_FUERTE, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def la_puja_fuerte(precio, puntos) -> int:
+    """Precio x (1 % + `PRIMA_POR_PUNTO` por punto, hasta `PRIMA_MAXIMA`),
+    a miles. Con basura, la de siempre. Pura, nunca lanza."""
+    try:
+        prima = min(PRIMA_MAXIMA, PRIMA_POR_PUNTO * max(0.0, float(puntos)))
+        return int(round(int(precio) * (SUBE + prima), -3))
+    except Exception:                               # noqa: BLE001
+        try:
+            return la_puja(int(precio))
+        except Exception:                           # noqa: BLE001
+            return 0
+
+
+def con_puja_fuerte(cambio: dict, precio) -> dict:
+    """El cambio con la puja fuerte, si mejora y hay que pujar; si no, tal
+    cual. La caja del cambio pasa a contar la puja nueva. Pura."""
+    try:
+        if (cambio.get("ya_es_nuestro") or not precio
+                or cambio.get("puntos") is None or cambio["puntos"] < GANANCIA_MINIMA):
+            return cambio
+        puja = la_puja_fuerte(precio, cambio["puntos"])
+        if puja <= (cambio.get("puja") or 0):
+            return cambio
+        return {**cambio, "caja": cambio["caja"] + (cambio.get("puja") or 0) - puja,
+                "puja": puja, "prima": round(puja / int(precio) - 1, 4)}
+    except Exception:                               # noqa: BLE001
+        return cambio
 
 
 def el_calendario_activo() -> bool:
@@ -443,7 +497,7 @@ def decidir(
     pendientes=frozenset(), intocables=frozenset(), protegidos=frozenset(),
     ya_pujados=frozenset(), caja, horas_jornada, puede_escribir=True,
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
-    estados=None, vendidos=frozenset(),
+    estados=None, vendidos=frozenset(), puja_fuerte=None,
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -620,7 +674,7 @@ def decidir(
         entran.append(_con_calendario(
             {"id": pid, "nombre": c.get("name"), "pos": c.get("position"),
              "esperado": e, "puja": la_puja(precio), "coste": la_puja(precio),
-             "ya_es_nuestro": False},
+             "ya_es_nuestro": False, "precio": precio},
             la_ficha(lc, c.get("position"), respaldo=c), prob))
     prob_once = {_int(p.get("id")): p.get("starter_probability") for p in once}
     for pid in inventario:
@@ -695,6 +749,12 @@ def decidir(
             if sin is not None and sin >= PEOR_FINANCIACION:
                 validos.append({**c, "puntos": sin, "medida": "esperado (frenado por el margen)"})
         cambios = validos
+
+    # LA PUJA FUERTE (con su interruptor): la mejora de verdad puja mas
+    # que +1 %, y su caja lo cuenta antes de elegir la combinacion.
+    if puja_fuerte:
+        precios = {e["id"]: e.get("precio") for e in entran}
+        cambios = [con_puja_fuerte(c, precios.get(c["entra"])) for c in cambios]
 
     minimo = -DEUDA_TOLERADA if horas_jornada >= HORAS_CON_DEUDA else 0
     disponible = (_int(foto.get("maximo_de_puja"), 0) or 0) - RESERVA
@@ -1175,7 +1235,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
                             else _puede_escribir(ahora)),
             en_curso=(fuera["en_curso"] if "en_curso" in fuera
                       else jornada_en_curso(ahora)),
-            calendario_de_puntos=ctx,
+            calendario_de_puntos=ctx, puja_fuerte=la_puja_fuerte_activa(),
             probabilidades=las_probabilidades(status),
             estados=los_estados(snapshot, liga),
             vendidos=vendidos,
