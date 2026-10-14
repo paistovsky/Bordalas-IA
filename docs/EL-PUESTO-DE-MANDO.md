@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/10/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 14/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **14/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2230 a #2237).
+  Saldo +236.683, puja viva por Lemar 3.767.000 (jueves 07:00). E40
+  tranquiliza: en 7 de 7 noches pares hubo oferta del Computer por
+  Exposito a las 07:15; la cuenta del jueves se sostiene. Nada mas.
+  Manana (15/10) no hay reset que resolver; jueves 07:15 y 12:45, el
+  cierre de la J9.
 
 - **14/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2223 a #2230).
   Jutgla vendido (2.828.900), saldo **+236.683**, puja viva por Lemar
