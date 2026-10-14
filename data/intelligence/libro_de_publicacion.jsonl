@@ -67,6 +67,6 @@
 {"player_id": 5678, "player_name": "Diego Rico", "first_listed_at": "2026-10-04T05:19:13.326370+00:00", "last_seen": "2026-10-14T09:09:05.901107+00:00", "price_at_listing": 550000, "listed_price": 660000}
 {"player_id": 14800, "player_name": "Pablo Ibáñez", "first_listed_at": "2026-10-10T05:18:43.660042+00:00", "last_seen": "2026-10-14T06:09:58.138975+00:00", "price_at_listing": 2180000, "listed_price": 2870000}
 {"player_id": 1760, "player_name": "Chust", "first_listed_at": "2026-10-14T05:18:24.571429+00:00", "last_seen": "2026-10-14T05:18:24.571429+00:00", "price_at_listing": 1560000, "listed_price": 2200000}
-{"player_id": 29661, "player_name": "Olasagasti", "first_listed_at": "2026-10-14T05:18:24.571429+00:00", "last_seen": "2026-10-14T10:09:06.755139+00:00", "price_at_listing": 2900000, "listed_price": 3470000}
-{"player_id": 35678, "player_name": "Roberto Fernández", "first_listed_at": "2026-10-14T05:18:24.571429+00:00", "last_seen": "2026-10-14T10:09:06.755139+00:00", "price_at_listing": 9040000, "listed_price": 10950000}
-{"player_id": 38433, "player_name": "Gulácsi", "first_listed_at": "2026-10-14T06:09:58.138975+00:00", "last_seen": "2026-10-14T10:09:06.755139+00:00", "price_at_listing": 2380000, "listed_price": 2780000}
+{"player_id": 29661, "player_name": "Olasagasti", "first_listed_at": "2026-10-14T05:18:24.571429+00:00", "last_seen": "2026-10-14T11:10:27.196358+00:00", "price_at_listing": 2900000, "listed_price": 3470000}
+{"player_id": 35678, "player_name": "Roberto Fernández", "first_listed_at": "2026-10-14T05:18:24.571429+00:00", "last_seen": "2026-10-14T11:10:27.196358+00:00", "price_at_listing": 9040000, "listed_price": 10950000}
+{"player_id": 38433, "player_name": "Gulácsi", "first_listed_at": "2026-10-14T06:09:58.138975+00:00", "last_seen": "2026-10-14T11:10:27.196358+00:00", "price_at_listing": 2380000, "listed_price": 2780000}
