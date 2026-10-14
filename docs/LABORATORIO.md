@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E39 · 14/10/2026 11:25 de Madrid · E37 contra las pujas reales de Pepe
+### E39 · 14/10/2026 11:16 de Madrid · E37 contra las pujas reales de Pepe
 
 **Hipotesis:** lo que E37 midio en el tablon (a +1 % solo se gana lo que
 nadie pelea; a +12 %, dos de cada tres con pelea) vale tambien para las
@@ -1865,7 +1865,7 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
-- **(E39, 14/10 11:25) Confirma E37 con las pujas de Pepe; y el contador
+- **(E39, 14/10 11:16) Confirma E37 con las pujas de Pepe; y el contador
   de pujas ganadas engaña.** De 1 M o mas desde el 25/09 Pepe ha ganado 5
   y perdido 8 (no «59 / 14»: el libro repite filas y cuenta pujas de
   150.000). De las 11 perdidas con importe ganador, a +12 % se habrian
