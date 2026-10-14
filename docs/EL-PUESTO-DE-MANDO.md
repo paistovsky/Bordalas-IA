@@ -352,6 +352,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **14/10 10:15. UBUNTU 26.04, PROBADO.** GitHub pasa `ubuntu-latest` a
+  Ubuntu 26.04 desde el 19/10. Ensayo #38532152205 en `runs-on:
+  ubuntu-26.04` (imagen 20260927.149.1, CPython 3.13.15): verja 208/208,
+  ciclo en seco, panel, mejora y cierre sin un solo error de Python. No hace
+  falta fijar `ubuntu-24.04`. La rama `prueba/ubuntu-26` sigue en GitHub
+  (el proxy no deja borrar ramas); es inofensiva y el dueño puede borrarla.
+
 - **14/10 09:30 (plan de caja de la J9). UN RIESGO GORDO, CORTADO.** La
   mejora habia pujado por Lemar (por Exposito: DA caja, +0,84 M) y, contando
   con ese dinero, por Pablo Ramon (por Diego Rico: QUITA 1,0 M). Las dos se
