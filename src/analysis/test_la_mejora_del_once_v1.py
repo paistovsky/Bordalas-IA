@@ -109,10 +109,14 @@ def test_mejora_con_deuda_y_sin_tocar_intocables():
 
 
 def test_cambia_caro_por_barato_para_fichar_mejor():
-    # Sin caja para 20, pero 21 por Caro da 3,5 M y pierde 0,94: la
-    # combinación suma +0,80 y deja la caja en positivo.
+    # Sin caja para 20, 21 por Caro da 3,5 M y pierde 0,94: juntas suman
+    # +0,80 y la caja ESPERADA queda en positivo... pero las dos pujas se
+    # resuelven a la vez: si se gana 20 y se pierde 21, la jornada empieza
+    # en rojo. EL PEOR CASO (14/10/2026): no se hace en la misma vuelta.
     d = _d(escaparate=[_c(20), _c(21)], caja=-1_500_000)
-    assert sorted(_pujas(d)) == [(20, 10), (21, 11)], d
+    assert _pujas(d) == [], d
+    # Con la caja ya cobrada (el caro ya vendido), si: 20 solo.
+    assert _pujas(_d(escaparate=[_c(20)], caja=500_000)) == [(20, 10)]
     # Pero no se vende caro por barato por gusto.
     assert _pujas(_d(escaparate=[_c(21)])) == []
 
@@ -324,11 +328,15 @@ def ESCENARIOS_APAGADO():
     ]
 
 
-HUELLA_DE_ANTES = "e757dffb1205f3f47be4774143f46dc4d42893eeb3d9b7ef4ea7228d9da3dd54"
+# 14/10/2026, EL PEOR CASO (siempre, con o sin calendario): el tercer
+# escenario era la combinacion arriesgada -un cambio que da caja (21 por
+# Caro) pagando otro que la quita (20 por Flojo)-; ya no se hace. La
+# huella de 21e33c70 era e757dffb...dd54.
+HUELLA_DE_ANTES = "2916391c72568205ac0295b653d129bb0dd51d6dffa4a601417e0b3db7e4ad70"
 
 # Lo mismo, legible: lo que se manda y lo que se adopta en cada escenario.
 LO_DE_ANTES = [
-    [("PUJAR", 20)], [("PUJAR", 23)], [("PUJAR", 20), ("PUJAR", 21)], [("PUJAR", 21)],
+    [("PUJAR", 20)], [("PUJAR", 23)], [], [("PUJAR", 21)],
     [("PUJAR", 20)], [("ACEPTAR_OFERTA_DEL_COMPUTER", 10)],
     [("ACEPTAR_OFERTA_DEL_COMPUTER", 10)], [], [("ADOPTAR", 23)], [], [], [],
     [("PUJAR", 43)], [],
@@ -709,7 +717,12 @@ def test_la_caja_cuenta_lo_que_esta_vuelta_ya_hizo():
     antes = la_caja(
         f, se_venden_solos={23}, inventario_valor=int(1_000_000 * 0.95),
         ventas_pendientes=int((int(4_410_000 / 0.9) + 2_700_000) * 0.95) - 1_000_000)
-    assert la_caja_de_la_jornada(f, **k) == antes == 4_670_000, antes
+    assert antes == 4_670_000, antes
+    # EL PEOR CASO (14/10): la venta del 11 solo llega si se GANA la puja
+    # por su relevo (17937, viva por 3.000.000): cuenta como mucho eso. Su
+    # cambio da caja (4.655.000 contra 3.000.000) y no puede pagar otros:
+    # si se pierde, ni sale el 11 ni se paga el 17937.
+    assert la_caja_de_la_jornada(f, **k) == antes - (int(4_900_000 * 0.95) - 3_000_000) == 3_015_000
     # Con ella: el 11 (vendido por la orden) y el 23 (por la ronda) ya no
     # son ventas pendientes ni inventario: son caja. El 17937 cuenta una
     # vez, por su puja nueva.
@@ -1273,6 +1286,30 @@ def test_la_puja_fuerte_para_lo_que_mejora_el_once():
     assert _d(**k, puja_fuerte=True)["acciones"] == []
 
 
+def test_un_cambio_que_da_caja_no_paga_otro_que_la_quita():
+    # El 14/10: la mejora pujo por Lemar (3.767.000) por Exposito (4,85 M:
+    # da caja) y despues por Pablo Ramon (1.464.000) por Diego Rico (0,49 M:
+    # la quita), contando con cobrar a Exposito. Si se gana Pablo y se
+    # pierde Lemar, la J9 empezaba en -0,7 M. En el peor caso, el que da
+    # caja vale 0 y el que la quita, lo que quita.
+    liga = {19862: {"price": 4_850_000}, 5678: {"price": 490_000}}
+    vivas = {11196: {"offer_id": 1, "amount": 3_767_000}}
+    f = _foto(saldo=236_683, plantilla={19862, 5678}, nuestras_pujas=vivas)
+    libro = {"11196": {"sale": 19862}}
+    caja = la_caja_de_la_jornada(f, liga=liga, orden={}, libro=libro, solos=set(), inventario=set())
+    assert caja == 236_683, caja                      # Lemar: ni suma ni resta
+    # Con la puja por Pablo Ramon tambien viva: lo que quita, entero.
+    vivas2 = {**vivas, 35408: {"offer_id": 2, "amount": 1_464_000}}
+    f2 = _foto(saldo=236_683, plantilla={19862, 5678}, nuestras_pujas=vivas2)
+    libro2 = {**libro, "35408": {"sale": 5678}}
+    caja2 = la_caja_de_la_jornada(f2, liga=liga, orden={}, libro=libro2, solos=set(), inventario=set())
+    assert caja2 == 236_683 - 1_464_000 + int(490_000 * 0.95) < 0, caja2
+    # Ya dentro el relevo, la venta cuenta entera (esa ya no depende de nada).
+    f3 = _foto(saldo=236_683 - 3_767_000, plantilla={19862, 5678, 11196})
+    caja3 = la_caja_de_la_jornada(f3, liga=liga, orden={}, libro=libro, solos=set(), inventario=set())
+    assert caja3 == 236_683 - 3_767_000 + int(4_850_000 * 0.95), caja3
+
+
 TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_cambia_caro_por_barato_para_fichar_mejor,
          test_en_rojo_vende_caro_y_ficha_barato_desde_las_88_horas,
@@ -1281,6 +1318,7 @@ TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_nace_apagada_y_nunca_lanza,
          test_el_frenado_por_el_margen_sigue_financiando,
          test_la_puja_fuerte_para_lo_que_mejora_el_once,
+         test_un_cambio_que_da_caja_no_paga_otro_que_la_quita,
          test_el_estado_de_otra_vuelta_por_su_run_id,
          # El calendario (12/10/2026, `BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`).
          test_apagado_es_byte_a_byte_lo_de_antes,

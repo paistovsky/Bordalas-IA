@@ -482,7 +482,23 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
             puntos = sum(c["puntos"] for c in combo)
             if not deficit and puntos < GANANCIA_MINIMA:
                 continue
-            if caja + sum(c["caja"] for c in combo) < minimo_de_caja:
+            # EL PEOR CASO (14/10/2026): las pujas de la combinacion se
+            # resuelven a la vez y cada una puede perderse. Un cambio que da
+            # caja no puede pagar a otro que la quita: si se pierde el
+            # primero y se gana el segundo, la jornada empieza en rojo (lo
+            # del 14/10: Lemar por Exposito pagaba a Pablo Ramon por Diego
+            # Rico). Fuera del rojo, los que dan caja no cuentan (como si se
+            # perdieran) y los que la quitan, enteros. En rojo solo valen
+            # cambios que dan caja (ni uno que la quite). Lo que ya es
+            # nuestro (adoptar) no depende de nadie: cuenta como es.
+            def _seguro(c):
+                return c["caja"] if c.get("ya_es_nuestro") else min(0, c["caja"])
+            if deficit:
+                if any(c["caja"] < 0 and not c.get("ya_es_nuestro") for c in combo):
+                    continue
+                if caja + sum(c["caja"] for c in combo) < minimo_de_caja:
+                    continue
+            elif caja + sum(_seguro(c) for c in combo) < minimo_de_caja:
                 continue
             if sum(c["puja"] for c in combo) > disponible:
                 continue
@@ -986,24 +1002,53 @@ def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
     mercado = foto.get("mercado") or {}
     orden = orden or {}
     venta = las_ventas_de_la_orden(orden, plantilla=plantilla, pujadas=pujadas)
+
+    # EL PEOR CASO (14/10/2026). Las pujas vivas se resuelven a la vez y
+    # cada una puede ganarse o perderse. La venta del que sale solo llega
+    # si se GANA la de su relevo; la puja se resta entera. Un cambio que da
+    # caja (Lemar por Exposito: -3,77 M + 4,6 M) no puede pagar otro que la
+    # quita (Pablo Ramon por Diego Rico: -1,46 M + 0,47 M): si se gana el
+    # segundo y se pierde el primero, la J9 empezaba en -0,7 M. Asi que la
+    # venta cuyo relevo aun no es nuestro cuenta, como mucho, lo que cuesta
+    # su relevo: el cambio que da caja vale 0 (como si se perdiera) y el
+    # que la quita, lo que quita (como si se ganara).
+    pujas_vivas = {}
+    for q, puja in (foto.get("nuestras_pujas") or {}).items():
+        pujas_vivas[_int(q)] = _int((puja or {}).get("amount"), 0) or 0
+    for q, importe in (esta.get("pujas") or {}).items():
+        pujas_vivas[_int(q)] = _int(importe, 0) or 0
+
+    def _hasta_su_relevo(cobro, relevos):
+        por_llegar = [r for r in relevos if r is not None and r not in plantilla]
+        if not por_llegar:
+            return cobro
+        return min(cobro, sum(pujas_vivas.get(r, 0) for r in por_llegar))
+
+    general = _int(((orden or {}).get("vender_si_ficha") or {}).get("si_esta"))
+    de_la_orden_euros = sum(
+        _hasta_su_relevo(int(int((_int(j.get("suelo"), 0) or 0) / SUELO) * VENTA),
+                         {general, _int(j.get("si_esta"))})
+        for j in venta
+    )
     # Un mismo jugador no se vende dos veces: si la orden ya cuenta su
     # venta, la del libro no suma (tercera revision: la orden vuelve a
     # pujar por un relevo perdido y la mejora ya lo habia cambiado).
     de_la_orden = {_int(j.get("player_id")) for j in venta}
-    saliendo_valor = sum(
-        _int((liga.get(s) or {}).get("price"), 0) or 0
-        for s in {
-            _int(c.get("sale")) for k, c in (libro or {}).items()
-            if _int(c.get("sale")) in plantilla
-            and (_int(k) in plantilla or _int(k) in pujadas)
-        } - de_la_orden
-    )
+    por_el_que_sale = {}
+    for k, c in (libro or {}).items():
+        sale, entra = _int(c.get("sale")), _int(k)
+        if sale not in plantilla or sale in de_la_orden:
+            continue
+        if not (entra in plantilla or entra in pujadas):
+            continue
+        cobro = _hasta_su_relevo(
+            int((_int((liga.get(sale) or {}).get("price"), 0) or 0) * VENTA), {entra})
+        por_el_que_sale[sale] = max(por_el_que_sale.get(sale, 0), cobro)
     return la_caja(
         foto, se_venden_solos=solos,
         inventario_valor=int(sum(_int((liga.get(p) or {}).get("price"), 0) or 0
                                  for p in inventario if p not in vendidos) * VENTA),
-        ventas_pendientes=int((sum(int((_int(j.get("suelo"), 0) or 0) / SUELO) for j in venta)
-                               + saliendo_valor) * VENTA)
+        ventas_pendientes=de_la_orden_euros + sum(por_el_que_sale.values())
         - sum(_int(f.get("puja"), 0) or 0 for f in orden.get("fichar") or []
               if _int(f.get("player_id")) not in pujadas
               and _int(f.get("player_id")) not in plantilla
