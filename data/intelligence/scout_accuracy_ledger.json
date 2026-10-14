@@ -2036048,13 +2036048,13 @@
       "price_at_prediction": 190000,
       "predicted_at": "2026-10-11T21:09:38.688127+00:00",
       "due_at": "2026-10-14T21:09:38.688127+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 610000,
+      "actual_direction": "UP",
+      "actual_percent": 221.053,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-14T21:10:13.765647+00:00"
     },
     "36538|PRENSA_MARCA|3|2026-10-11": {
       "player_id": "36538",
@@ -2036069,13 +2036069,13 @@
       "price_at_prediction": 430000,
       "predicted_at": "2026-10-11T21:09:35.244499+00:00",
       "due_at": "2026-10-14T21:09:35.244499+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 370000,
+      "actual_direction": "DOWN",
+      "actual_percent": -13.953,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-14T21:10:13.765647+00:00"
     },
     "8555|PRENSA_MUNDO_DEPORTIVO|3|2026-10-11": {
       "player_id": "8555",
@@ -2036090,13 +2036090,13 @@
       "price_at_prediction": 11340000,
       "predicted_at": "2026-10-11T21:09:48.819801+00:00",
       "due_at": "2026-10-14T21:09:48.819801+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 11730000,
+      "actual_direction": "UP",
+      "actual_percent": 3.439,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-14T21:10:13.765647+00:00"
     },
     "742|FUTBOLFANTASY|1|2026-10-12": {
       "player_id": "742",
