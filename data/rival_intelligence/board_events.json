@@ -186349,5 +186349,42 @@
         }
       }
     ]
+  },
+  {
+    "event_id": "086e748f5bc59190b8f2f56d",
+    "date": 1791954183,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 30081,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 8385000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 7407000
+          }
+        ]
+      },
+      {
+        "player": 25777,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 3252000
+      }
+    ]
   }
 ]

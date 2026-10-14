@@ -1616,11 +1616,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-10-13T05:19:02+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "WON",
+   "resolved_at": "2026-10-14T05:18:13.098466+00:00",
+   "winning_amount": 3252000,
+   "margin": 0,
+   "event_id": "086e748f5bc59190b8f2f56d",
    "recorded_by": "TABLON"
   }
  }
