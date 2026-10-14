@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 14/10/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **14/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2223 a #2230).
+  Jutgla vendido (2.828.900), saldo **+236.683**, puja viva por Lemar
+  **3.767.000** (se resuelve el jueves 16/10 07:00). Revisada la cuenta
+  del chat del dueno: si entra Lemar, -3,53 M a las 07:00 hasta cobrar a
+  Exposito (oferta del Computer ~4,68 M) => ~+1,1 M; hay 8 vueltas
+  (07:18 a 14:07) antes del plazo de las 15:00. Si no entra, +236.683.
+  Cuadra. **Un hueco que sigo:** el premio de la J8 no ha entrado y la
+  J8 acabo el lunes; si el jueves a las 07:15 el Computer no ofrece por
+  Exposito, el cierre debe vender a otro no titular antes de las 15:00:
+  lo mira el turno del cierre de la J9 (12:45) con tiempo.
 
 - **14/10 10:15. UBUNTU 26.04, PROBADO.** GitHub pasa `ubuntu-latest` a
   Ubuntu 26.04 desde el 19/10. Ensayo #38532152205 en `runs-on:
