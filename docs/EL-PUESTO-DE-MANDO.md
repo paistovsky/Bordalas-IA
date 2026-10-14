@@ -352,6 +352,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **14/10 09:30 (plan de caja de la J9). UN RIESGO GORDO, CORTADO.** La
+  mejora habia pujado por Lemar (por Exposito: DA caja, +0,84 M) y, contando
+  con ese dinero, por Pablo Ramon (por Diego Rico: QUITA 1,0 M). Las dos se
+  resuelven a la vez el jueves 07:00: si se ganaba Pablo y se perdia Lemar,
+  la J9 empezaba en -0,7 M (0 puntos) y ya sin tiempo (a <40 h no se
+  compra). **Hecho:** Pablo Ramon a `no_pujar` (la orden retiro la puja,
+  204) y la mejora pasa a contar la caja en el PEOR caso (dde2ec85): la
+  venta cuyo relevo aun no es nuestro vale como mucho lo que cuesta el
+  relevo; en una combinacion nueva, fuera del rojo, lo que da caja no
+  cuenta y lo que la quita, entero; en rojo, solo cambios que dan caja.
+  Y una puja retirada en la misma vuelta ya no cuenta como viva
+  (be822d4b). **J9 ahora:** saldo 236.683; puja viva Lemar 3.767.000. Si
+  entra: se cobra a Exposito (oferta del Computer ~4,68 M) => ~+1,1 M; si
+  no, +236.683. Positiva en los dos casos.
+
 - **14/10 08:40 (supervision de la manana). PEPE SOLO, TODO EL CICLO.**
   Reset: **Luismi Cruz GANADO** (3.252.000). 07:15, la mejora: cobra a
   Jutgla (2.828.900, por encima de su valor) y puja 3.767.000 por Lemar
