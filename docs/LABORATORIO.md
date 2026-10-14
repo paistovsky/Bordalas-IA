@@ -69,6 +69,43 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E40 · 14/10/2026 17:16 de Madrid · ¿Cuanto vive una oferta del Computer? (el jueves de Exposito)
+
+**El caso:** si el jueves 16/10 a las 07:00 entra Lemar, Pepe queda en
+-3,53 M y tiene que cobrar a Exposito (~4,68 M) antes de las 15:00. El
+gestor teme que «el jueves a las 07:15 el Computer no ofrezca por
+Exposito». E38 vio que las ofertas llegan las noches de fecha par (~02:10
+de Madrid); el 14/10 se cumplio (9 ofertas, Jutgla vendido a las 07:18 a
+la oferta de las 02:11). Falta saber si una oferta de las 02:10 sigue viva
+despues del reset de las 07:00.
+**Datos:** las 37 ventas de Pepe al Computer desde el 15/09 (tablon)
+cruzadas con el censo de ofertas de cada noche (30 noches).
+**Codigo:** `lab/ofertas/vida_de_la_oferta.py`.
+
+**Lo que se aprende:**
+- **Una oferta vive ~1 dia.** 23 de las 37 ventas cobran el importe exacto
+  de una oferta censada: 17 la de esa noche y 6 la de la noche anterior.
+  Se han cobrado ofertas hasta **26,9 h** despues del censo, y 16 de ellas
+  despues del reset de las 07:00. Ninguna mas alla de ~27 h.
+- **Tambien nacen ofertas a las 07:00.** El 30/09 y el 02/10, a las 07:18,
+  Pepe cobro ofertas que no estaban en el censo de las 02:10 (4.076.200
+  el 02/10): el Computer ofrece tambien con el reset, no solo de noche.
+- **Para el jueves:** el 16/10 es noche par. La oferta por Exposito de
+  las ~02:10 seguira viva de las 07:15 a las 15:00 (8 vueltas), y si no
+  la hubiera, puede nacer otra con el reset. El 12/10 ofrecio 4.806.000
+  por el. **Exposito ha tenido oferta las 7 noches pares desde el 02/10**
+  (de 4.680.400 a 5.102.200) y ninguna impar. El riesgo de quedarse sin
+  oferta es bajo.
+
+**Limites:** el censo es una foto por noche: no se ve cuando nace cada
+oferta ni cuando muere exactamente. 14 ventas no cuadran con ningun censo
+(ofertas nacidas entre fotos). El ritmo de noches pares es de 11 noches.
+
+**Veredicto: TRANQUILIZA, no hay regla nueva.** La cuenta del gestor para
+el jueves (cobrar a Exposito entre las 07:15 y las 15:00) se sostiene. La
+red de vender a otro no titular solo haria falta si a las 07:15 no hay
+NINGUNA oferta por Exposito, cosa que no ha pasado en 7 noches pares.
+
 ### E39 · 14/10/2026 11:16 de Madrid · E37 contra las pujas reales de Pepe
 
 **Hipotesis:** lo que E37 midio en el tablon (a +1 % solo se gana lo que
