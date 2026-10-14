@@ -1310,6 +1310,19 @@ def test_un_cambio_que_da_caja_no_paga_otro_que_la_quita():
     assert caja3 == 236_683 - 3_767_000 + int(4_850_000 * 0.95), caja3
 
 
+def test_lo_retirado_en_esta_vuelta_no_es_puja_viva():
+    # 14/10: la orden retiro la puja de Pablo Ramon (35408) en la vuelta y
+    # la mejora la seguia restando de la foto (de antes): -761.817 en vez de
+    # +236.683. Ahora lo retirado sale de las pujas vivas.
+    v10 = {"timestamp": AHORA.isoformat(), "orden_del_gestor": {"hechas": [
+        {"accion": "CANCELAR_PUJA", "player_id": 35408, "exito": True}]}}
+    esta = lo_de_esta_vuelta(v10, AHORA)
+    assert esta["canceladas"] == {35408} and esta["pujas"] == {}, esta
+    fallida = lo_de_esta_vuelta({"timestamp": AHORA.isoformat(), "orden_del_gestor": {"hechas": [
+        {"accion": "CANCELAR_PUJA", "player_id": 35408, "exito": False}]}}, AHORA)
+    assert fallida["canceladas"] == set()
+
+
 TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_cambia_caro_por_barato_para_fichar_mejor,
          test_en_rojo_vende_caro_y_ficha_barato_desde_las_88_horas,
@@ -1319,6 +1332,7 @@ TESTS = [test_mejora_con_deuda_y_sin_tocar_intocables,
          test_el_frenado_por_el_margen_sigue_financiando,
          test_la_puja_fuerte_para_lo_que_mejora_el_once,
          test_un_cambio_que_da_caja_no_paga_otro_que_la_quita,
+         test_lo_retirado_en_esta_vuelta_no_es_puja_viva,
          test_el_estado_de_otra_vuelta_por_su_run_id,
          # El calendario (12/10/2026, `BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`).
          test_apagado_es_byte_a_byte_lo_de_antes,

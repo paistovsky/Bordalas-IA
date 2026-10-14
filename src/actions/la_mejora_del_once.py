@@ -908,6 +908,7 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None) -> dict:
     caja de la mejora solo veía `maximumBid` bajar. Pura, nunca lanza.
     """
     salida = {"ya_pujados": set(), "gastado": 0, "pujas": {}, "solas": set(), "cobros": {},
+              "canceladas": set(),
               "descartado": None}
     try:
         if ahora is not None:
@@ -929,6 +930,11 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None) -> dict:
                             salida["solas"].add(pid)
                 elif h.get("accion") == "ACEPTAR_OFERTA_DEL_COMPUTER" and pid is not None:
                     salida["cobros"][pid] = salida["cobros"].get(pid, 0) + importe
+                elif h.get("accion") == "CANCELAR_PUJA" and pid is not None:
+                    # (14/10: la orden retiro la de Pablo Ramon y la mejora
+                    # la seguia restando de la foto, que es de antes.)
+                    salida["canceladas"].add(pid)
+                    salida["pujas"].pop(pid, None)
     except Exception:                               # noqa: BLE001
         pass
     return salida
@@ -1217,6 +1223,11 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         salida["v10_descartado"] = esta_vuelta["descartado"]
         ya_pujados = esta_vuelta["ya_pujados"]
         vendidos = set(esta_vuelta["cobros"])
+        # Lo retirado en esta vuelta ya no es una puja viva (la foto es de
+        # antes): ni se resta de la caja ni bloquea a nadie.
+        foto["nuestras_pujas"] = {
+            q: v for q, v in (foto.get("nuestras_pujas") or {}).items()
+            if _int(q) not in esta_vuelta.get("canceladas", set())}
         foto["maximo_de_puja"] = ((_int(foto.get("maximo_de_puja"), 0) or 0)
                                   - esta_vuelta["gastado"])
 
