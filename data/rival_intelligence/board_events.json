@@ -186405,5 +186405,39 @@
         "amount": 2828900
       }
     ]
+  },
+  {
+    "event_id": "8d9552f56606f9474f2a6979",
+    "date": 1791965896,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 10158,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 1954500
+      },
+      {
+        "player": 10155,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 1536900
+      },
+      {
+        "player": 36538,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 417900
+      }
+    ]
   }
 ]
