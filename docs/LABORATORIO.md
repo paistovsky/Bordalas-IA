@@ -69,6 +69,36 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E39 · 14/10/2026 11:25 de Madrid · E37 contra las pujas reales de Pepe
+
+**Hipotesis:** lo que E37 midio en el tablon (a +1 % solo se gana lo que
+nadie pelea; a +12 %, dos de cada tres con pelea) vale tambien para las
+pujas de Pepe. Y el «59 ganadas / 14 perdidas» del puesto de mando (13/10)
+dice que Pepe gana casi siempre: ¿es verdad?
+**Datos:** `data/trading/bid_outcome_ledger.json`, 76 filas (60 ganadas,
+14 perdidas, 2 pendientes: Lemar y Pablo Ramon).
+**Codigo:** `lab/subasta/las_pujas_de_pepe.py`.
+
+**Lo que se aprende:**
+- **El 59/14 engaña.** El libro repite la misma puja en varias vueltas
+  (Maffeo 11 veces, Boyomo 6 el 18/09) y mezcla compras de 150.000 que
+  nadie quiere. Pujas distintas: 47 ganadas y 14 perdidas. **De 1 M o mas
+  desde el 25/09: 5 ganadas y 8 perdidas.** Las 5 ganadas son las que
+  nadie peleo (Blanco +0,2 %, Zubeldia, Gulacsi, Luismi Cruz a +1 %) mas
+  Roberto Fernandez, pagando +6,8 %.
+- **Las perdidas, con lo que pago el ganador** (n = 11): +0,0, +1,6, +2,6,
+  +7,0, +7,5, +8,5, +8,8, +10,4, +16,2, +16,8 y +41,2 %. **A +1 % se habria
+  ganado 1; a +5 %, 3; a +8 %, 5; a +12 %, 8 de 11.** Coincide con E37
+  (68 % a +12 % en el tablon): la puja fuerte habria ganado la mayoria de
+  lo que Pepe ha perdido.
+
+**Limites:** n = 11 perdidas con importe; tres perdidas (Caceres, Sotelo,
+Carmona) sin importe ganador. No se sabe si los rivales habrian subido.
+
+**Veredicto: CONFIRMA E37** con los datos de Pepe. Y para el gestor: la
+vara de «cuanto gana Pepe sus pujas» tiene que contar pujas distintas y
+de 1 M o mas; con esa vara, hoy pierde 8 de 13.
+
 ### E38 · 13/10/2026 17:20 de Madrid · ¿Cuando llega la oferta del Computer por Jutgla, y a cuanto?
 
 **El caso:** la cuenta de la J9 del gestor (rafaga de las 14:15) da
@@ -1835,6 +1865,12 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E39, 14/10 11:25) Confirma E37 con las pujas de Pepe; y el contador
+  de pujas ganadas engaña.** De 1 M o mas desde el 25/09 Pepe ha ganado 5
+  y perdido 8 (no «59 / 14»: el libro repite filas y cuenta pujas de
+  150.000). De las 11 perdidas con importe ganador, a +12 % se habrian
+  ganado 8. La puja fuerte (solo once y con la caja de la jornada en
+  verde, E37/E38) es lo que falta para que la mejora del once fiche.
 - **(E38, 13/10 17:20) Cuenta de la J9 con Luismi Cruz: contar la venta de
   Jutgla a 2,51 M (peor caso), no a 2,9 M.** Su precio hoy es 2.700.000 y
   baja ~1 % al dia; el Computer ofrece entre 0,951 y 1,049 del precio
