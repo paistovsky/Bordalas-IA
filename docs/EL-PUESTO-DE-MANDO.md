@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/10/2026, 21:30 de Madrid (rafaga de las 21:15).
+Actualizado: 14/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **14/10 07:15 (rafaga de la manana). LUISMI CRUZ ES NUESTRO**
+  (3.252.000, sin pelea). Ciclos: verdes (#2214 a #2223); **el cierre ya
+  esta encendido** (linea 248 del workflow; lo hizo el chat del dueno
+  anoche) y las vueltas siguen verdes. **Saldo -2.592.217**, plantilla
+  12; el once ya lleva a Cruz y no a Jutgla. Jutgla sigue publicado (a
+  3,51 M); falta la oferta del Computer (E38: peor caso 2,51 M). El
+  premio de la J8 aun no ha entrado. **Cuenta del jueves 15:00:** con
+  Jutgla a 2,51 M, -82.217; con el premio, verde. Si no llega ninguno de
+  los dos, el cierre debe vender a otro no titular. **Vigilo:** 14:15 y
+  21:15 de hoy y 07:15 del 15/10; si el miercoles a las 21:15 sigue en
+  rojo sin venta en marcha, aviso al dueno con el numero.
 
 - **13/10 21:40. ENCENDIDO EL CIERRE DE LA JORNADA**
   (`BORDALAS_EL_CIERRE_DE_LA_JORNADA`, commit 900d6dda). Todas las vueltas
