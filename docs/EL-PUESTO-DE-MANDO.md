@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **14/10 08:40 (supervision de la manana). PEPE SOLO, TODO EL CICLO.**
+  Reset: **Luismi Cruz GANADO** (3.252.000). 07:15, la mejora: cobra a
+  Jutgla (2.828.900, por encima de su valor) y puja 3.767.000 por Lemar
+  (Elche, MED, 6,4 pts/partido, 70 %) por Exposito (+0,3 pts por jornada con
+  calendario, +0,58 sin el; caja +840.500). 08:07: puja 1.464.000 por Pablo
+  Ramon (Racing, DEF, 70 %) por Diego Rico (+1,47 pts por jornada). Los dos
+  sanos en FutbolFantasy. Caja de la J9 segun la mejora: +78.683 si entran
+  los dos y se cobran Exposito y Diego Rico (ya publicados: oferta del
+  Computer el jueves 07:00). El cierre (encendido, ventana abierta) dice
+  FALTA porque cuenta solo lo cobrado y no hay banquillo: ruido esperado,
+  no actua sobre el once. Orden: nada que limpiar salvo Jutgla de
+  `conservar`. Saldo 236.683; el premio de la J8 sigue sin llegar.
+
 - **14/10 07:15 (rafaga de la manana). LUISMI CRUZ ES NUESTRO**
   (3.252.000, sin pelea). Ciclos: verdes (#2214 a #2223); **el cierre ya
   esta encendido** (linea 248 del workflow; lo hizo el chat del dueno
