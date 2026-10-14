@@ -41,7 +41,7 @@ concurrency:
 jobs:
   ensayo:
     name: Ensayo de Pepe (sin escribir)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
 
     env:
