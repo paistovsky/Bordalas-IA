@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 15/10/2026, 14:20 de Madrid (rafaga de las 14:15).
+Actualizado: 15/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **15/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2253 a #2260).
+  Saldo +236.683 a las 21:10, 0 pujas vivas: la caja de la J9 esta en
+  verde incluso en el peor caso (no hay nada que pueda restar antes del
+  plazo de manana 15:00). No hace falta avisar al dueno. Manana, viernes,
+  no se enciende nada: 12:45 el turno del cierre de la J9.
 
 - **15/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2246 a #2253).
   Confirmo la supervision de las 08:25: Lemar perdido, saldo +236.683, 0
