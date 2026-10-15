@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **15/10 08:25 (supervision tras el reset).** Lemar PERDIDO: otro pago
+  4.107.000 frente a nuestros 3.767.000 (+340.000). Exposito se queda (su
+  venta solo iba si entraba Lemar) y su publicacion se renovo a las 07:18
+  (204). Saldo **+236.683**, 0 pujas vivas, 11 en plantilla: la J9 (vie
+  16/10 21:00) empieza en positivo. El cierre: EN_POSITIVO, once 3-4-3 de
+  40,3 xP (lo flojo, Diego Rico, 0,96 xP). La mejora y la ronda, nada:
+  estamos a <40 h y no se compra; los cambios que habia (Pablo Ramon o Jon
+  Martin por Rico) quitan 0,96 y 2,36 M que la caja no tiene. El miercoles
+  la ronda no compro a nadie (20 en el mercado del Computer; ninguno subia
+  lo bastante y jugaba); su bloque no guarda por que descarta a cada uno:
+  hueco de telemetria. Orden del gestor: nada resuelto que limpiar; Pablo
+  Ramon sigue en `no_pujar` hasta que acabe la J9.
+
 - **15/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2238 a #2245;
   #2246 en marcha). Saldo +236.683, puja viva por Lemar 3.767.000 (unica
   comprometida; se resuelve el jueves 07:00). El premio de la J8 sigue sin
