@@ -69,6 +69,44 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E42 · 15/10/2026 17:16 de Madrid · El reloj de las ofertas del Computer (corrige E38/E40)
+
+**El caso:** E40 tranquilizo al gestor con que «el 16/10 es noche par» y
+habria oferta por Exposito. Pero la puja por Lemar se resolvio el
+**jueves 15/10** a las 07:00 (no el 16), y el censo de las 02:10 del 15/10
+solo tenia una oferta (Chust). Si se hubiera ganado Lemar, ¿habia con que
+cobrar a Exposito?
+**Datos:** `dashboard/data/status.json` de 5 vueltas de hoy (07:19, 08:11,
+09:11, 13:11 y 17:10 de Madrid; artefactos bordalas-live-diagnostics),
+10 ofertas por foto, con sus horas hasta caducar.
+**Codigo:** `lab/ofertas/reloj_de_ofertas.py`.
+
+**Lo que se aprende:**
+- **SI la habia.** A las 07:19 de hoy Pepe tenia 10 ofertas del Computer,
+  entre ellas **Exposito 4.663.800** (-3,4 %). Nueve caducaban a la vez,
+  en **47,7 h**: nacieron con el reset de las 07:00 de hoy y viven 48 h.
+  La de Chust, en 23,7 h: va en el otro turno.
+- **El reloj de verdad:** el Computer renueva las ofertas de los
+  publicados **cada 48 h, con el reset de las 07:00** (ahora los dias
+  impares: 13, 15, 17...) y cada oferta vive 48 h. Las «noches pares» de
+  E38/E40 eran un efecto de la foto: el censo de las 02:10 solo ve el
+  lote del dia anterior en su segunda noche. Las ventas cobradas «hasta
+  27 h despues del censo» de E40 cuadran: 19 h de vida antes del censo +
+  27 = 46 h.
+- **Para Pepe:** un jugador publicado tiene siempre una oferta viva del
+  Computer; el dia de renovacion, la vieja muere a las 07:00 y la nueva
+  nace con el reset. Esperar «a la siguiente oferta» (E22) es esperar
+  48 h, no 24.
+
+**Limites:** un solo dia de fotos con caducidad (5 fotos, 10 ofertas); si
+el Computer cambia de fase, el dia de renovacion cambia. No se ve si
+renueva tambien a un jugador recien publicado fuera de su turno.
+
+**Veredicto: CORRIGE E38/E40** (la conclusion para el jueves se sostenia,
+el porque no). Para el gestor: contar con una oferta viva por cada
+publicado a cualquier hora, renovada cada 48 h a las 07:00; y E22
+(esperar si la oferta es mala) cuesta dos dias, no uno.
+
 ### E41 · 15/10/2026 11:16 de Madrid · ¿Se sabe antes de pujar si habra pelea?
 
 **El caso:** Lemar, perdido esta manana: el ganador pago 4.107.000 frente a
@@ -136,6 +174,10 @@ cruzadas con el censo de ofertas de cada noche (30 noches).
 **Limites:** el censo es una foto por noche: no se ve cuando nace cada
 oferta ni cuando muere exactamente. 14 ventas no cuadran con ningun censo
 (ofertas nacidas entre fotos). El ritmo de noches pares es de 11 noches.
+
+**(Nota del 15/10: E42 corrige el porque. La puja se resolvia el jueves
+15/10, noche impar; si habia oferta por Exposito, pero porque las ofertas
+nacen con el reset de las 07:00 cada 48 h y viven 48 h.)**
 
 **Veredicto: TRANQUILIZA, no hay regla nueva.** La cuenta del gestor para
 el jueves (cobrar a Exposito entre las 07:15 y las 15:00) se sostiene. La
