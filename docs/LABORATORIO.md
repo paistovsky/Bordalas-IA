@@ -69,6 +69,42 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E41 · 15/10/2026 11:16 de Madrid · ¿Se sabe antes de pujar si habra pelea?
+
+**El caso:** Lemar, perdido esta manana: el ganador pago 4.107.000 frente a
+los 3.767.000 de Pepe (+10,1 % sobre el precio contra nuestro +1 %). La
+puja fuerte de E37 (+12 %) tira un 11 % en las subastas que nadie pelea.
+**Hipotesis:** lo que Pepe ve la vispera (si el precio subio) dice si
+habra pelea y cuanto pagara el ganador.
+**Datos:** tablon, 228 subastas del Computer con precio (106 con pelea);
+y las 15 pujas de Pepe de 1 M o mas desde el 25/09.
+**Codigo:** `lab/subasta/donde_hay_pelea.py`.
+
+    precio la vispera     n   con pelea   paga el ganador   se gana a +1 % / +5 % / +12 %
+    no subio             96     13 %          +2,6 %              65 % /  84 % /  97 %
+    subio < 2 %          85     64 %          +7,2 %              41 % /  58 % /  88 %
+    subio >= 2 %         47     83 %         +16,2 %               2 % /  17 % /  43 %
+
+(«paga el ganador»: mediana en las que tuvieron pelea.) El precio del
+jugador apenas separa (43-55 % de pelea de 0,5 M para arriba).
+
+**Con las pujas de Pepe, cuadra entero:** las 9 perdidas tenian el precio
+subiendo la vispera (Iglesias, Correia, Akhomach, Fofana, Recio, Romero,
+Moi, Gerard, Lemar: de +0,5 % a +8,9 %). Las ganadas baratas (Blanco,
+Zubeldia, Gulacsi, Luismi Cruz) tenian el precio bajando. La unica ganada
+subiendo, Roberto Fernandez, costo +6,8 %.
+
+**Lo que se aprende:** la pelea se ve venir. Los rivales (y la rampa de
+Pepe, E1) van a por los que suben; los que bajan no los quiere nadie.
+Pujar igual (+1 %) a todos es tirar las peleas que importan; pujar +12 %
+a todos es tirar dinero en las que nadie pelea.
+
+**Limites:** n = 47 en «subio >= 2 %». La regla mira solo el precio de
+la vispera; no sabe a quien quiere cada rival (E11).
+
+**Veredicto: GANA** (pasa a «Listo para el plan»): la prima de la puja,
+segun la vispera, en vez de un +1 % fijo o un +12 % fijo.
+
 ### E40 · 14/10/2026 17:16 de Madrid · ¿Cuanto vive una oferta del Computer? (el jueves de Exposito)
 
 **El caso:** si el jueves 16/10 a las 07:00 entra Lemar, Pepe queda en
@@ -1902,6 +1938,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E41, 15/10 11:16) La puja del once segun el precio de la vispera**
+  (afina E37/E39). Si el precio no subio: +3 % (se gana el 80 %; nadie
+  pelea). Si subio menos de un 2 %: la puja fuerte, +8 a +12 % (76-88 %).
+  Si subio un 2 % o mas: el ganador paga +16 % de mediana; ni el +12 %
+  gana la mitad: pujar solo si el cambio en el once vale ese +16 %, si no,
+  buscar otro que no suba. Las 9 pujas que Pepe ha perdido desde el 25/09
+  subian la vispera; las que gano barato, bajaban. Siempre con la caja de
+  la jornada en verde (E36/E38).
 - **(E39, 14/10 11:16) Confirma E37 con las pujas de Pepe; y el contador
   de pujas ganadas engaña.** De 1 M o mas desde el 25/09 Pepe ha ganado 5
   y perdido 8 (no «59 / 14»: el libro repite filas y cuenta pujas de
