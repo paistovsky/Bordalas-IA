@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 15/10/2026, 07:20 de Madrid (rafaga de las 07:15).
+Actualizado: 15/10/2026, 14:20 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **15/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2246 a #2253).
+  Confirmo la supervision de las 08:25: Lemar perdido, saldo +236.683, 0
+  pujas vivas, la J9 (vie 16/10 21:00) empieza en positivo. **Correccion
+  mia:** a las 07:15 escribi «se resuelve el jueves 07:00» y «manana se
+  cierra»; hoy 15/10 ES jueves y la puja ya se habia resuelto (mire la
+  bitacora del saldo de las 04:53, anterior al reset). Leccion: tras las
+  07:00, mirar la vuelta de las 07:15 antes de dar una puja por viva.
+  Jueves: no se enciende nada. Turno del cierre de la J9 manana 12:45.
 
 - **15/10 08:25 (supervision tras el reset).** Lemar PERDIDO: otro pago
   4.107.000 frente a nuestros 3.767.000 (+340.000). Exposito se queda (su
