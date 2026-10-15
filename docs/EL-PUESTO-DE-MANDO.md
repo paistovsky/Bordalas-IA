@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 15/10/2026, 07:20 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **15/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2238 a #2245;
+  #2246 en marcha). Saldo +236.683, puja viva por Lemar 3.767.000 (unica
+  comprometida; se resuelve el jueves 07:00). El premio de la J8 sigue sin
+  entrar. Turno del cierre de la J9 confirmado (16/10 12:45). No enciendo
+  nada: manana se cierra jornada. Esta noche (21:15) repaso la caja de la
+  J9 en el peor caso.
 
 - **14/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2230 a #2237).
   Saldo +236.683, puja viva por Lemar 3.767.000 (jueves 07:00). E40
