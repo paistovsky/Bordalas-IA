@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 16/10/2026, 20:20 de Madrid (segunda mirada al cierre de la J9).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **16/10 20:15 (segunda mirada al cierre de la J9).** Ciclos: verdes
+  (#2276 a #2282; la de las 20:07, #2282, verde). Saldo +486.683, 0 pujas:
+  solvente. Once (artefacto de #2282): 3-4-3, 11 jugables, los 11 «ok».
+  **Mala noticia:** Olasagasti baja a **0 %** de titular (a las 12:07, 90 %)
+  y Luismi Cruz sube a 100 %: juegan los dos hoy a las 21:00 y con las
+  alineaciones ya publicadas parece que Olasagasti sale suplente. No hay
+  recambio (11 en plantilla), asi que no hay nada que hacer a mano: si no
+  entra desde el banquillo, puntua 0. Diego Rico sigue en 30 %. **Leccion
+  para la J10:** con 11 justos, dos dudas nos cuestan dos huecos; el
+  banquillo (punto 8) es lo primero cuando haya caja.
 
 - **16/10 14:15 (rafaga de la tarde, dia del cierre de la J9).** Ciclos:
   verdes (#2274 a #2276). Saldo +486.683 a las 14:10, 0 pujas: el plazo de
