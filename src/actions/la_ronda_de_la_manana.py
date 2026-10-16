@@ -48,6 +48,10 @@ QUE NO HACE
     valor: ver LA PUERTA), no sube pujas, no vende a nadie que no haya
     comprado ella (lo apunta en `LIBRO`) ni a un protegido del gestor.
 
+    Con `ENV_CARTERA` (LA CARTERA, 16/10) cambian 2, 3 y 4: puja para
+    ganar a los que suben, cerca de la jornada compra solo con caja, y
+    aguanta lo que sube en vez de revenderlo antes de la jornada.
+
     Nace APAGADA: `BORDALAS_LA_RONDA_DE_LA_MANANA`. Nunca lanza.
 """
 
@@ -159,6 +163,97 @@ def los_de_managers(de_managers, fichas, veto=frozenset()) -> tuple:
     return piden, vendedores
 
 
+# LA CARTERA (16/10/2026)
+#
+#     El dueño, 16/10 noche: «Hazlo ya. Que se revaloricen, la misma
+#     estrategia que ellos». Medido sobre el tablón (10/08 a 16/10, 855
+#     eventos): Pollo17 pasó de 52,9 M a 103,3 M y +46,1 M son la subida de
+#     precio de una plantilla de ~20 jugadores que compra cuando suben y
+#     AGUANTA (sus viajes de más de 7 días: n=32, +18,68 M, el 86 %; los de
+#     3 días o menos, +1,03 M). Pepe, revendiendo antes de cada jornada:
+#     n=42, -2,84 M. Y las subastas de los que suben tienen rival: la liga
+#     las gana a +8,1 % de mediana (+7,2 % si sube 0,5-2 %, +10,4 % si 2-4 %,
+#     +20,9 % si más), Pollo17 a +7,4 %; a +1 % perdimos las 20.
+#
+#     Con `ENV_CARTERA` la ronda:
+#       1. AGUANTA mientras sube (`priceIncrement` > 0): publicado, para
+#          que llegue la oferta del Computer, pero no se cobra. Deja de
+#          subir (0): se vende con beneficio (pagado + 1 %). Baja: se vende
+#          a lo que ofrezca el Computer desde el 97 % de su valor (el que
+#          cae sigue cayendo: 90,7 %). Sin liquidar por la jornada: la
+#          caja de la jornada la cuadra `el_cierre_de_la_jornada`, que
+#          vende lo justo de lo que no juega.
+#       2. PUJA PARA GANAR en el Computer: precio + la prima de su subida
+#          (`PRIMAS_DE_LA_CARTERA`), terminada en 9.000 (Pollo17 termina en
+#          7.000: 78 de sus 85 pujas ganadas). A los managers, lo que piden
+#          + 1 % (no es una subasta).
+#       3. Cerca de la jornada (menos de `HORAS_SIN_COMPRAR`) compra solo
+#          lo que paga la caja (saldo - pujas vivas): se empieza la jornada
+#          en positivo (Pollo17, 11 de 11).
+#       4. Como mucho `MAXIMO_EN_PLANTILLA` entre plantilla y pujas vivas.
+#     Nace APAGADA: `ENV_CARTERA`.
+ENV_CARTERA = "BORDALAS_LA_CARTERA"
+MAXIMO_EN_PLANTILLA = 20
+VENDE_SI_BAJA = 0.97
+#   (subida del día hasta este %, sin incluir; prima sobre el precio)
+PRIMAS_DE_LA_CARTERA = (
+    (0.01, 0.03),
+    (0.02, 0.06),
+    (0.04, 0.09),
+    (None, 0.12),
+)
+
+
+def la_cartera_activa() -> bool:
+    try:
+        return str(os.environ.get(ENV_CARTERA, "")).strip().lower() in {"1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def la_puja_de_la_cartera(precio, sube) -> int:
+    """
+    Lo que se puja en el Computer por uno que sube: precio + la prima de
+    su subida del día, bajado a la decena de mil y terminado en 9.000;
+    nunca menos que `la_puja`. Con basura, `la_puja`. Nunca lanza.
+    """
+
+    try:
+        precio = _int(precio, 0) or 0
+        if precio <= 0:
+            return la_puja(precio)
+        pct = (_int(sube, 0) or 0) / precio
+        prima = PRIMAS_DE_LA_CARTERA[-1][1]
+        for hasta, p in PRIMAS_DE_LA_CARTERA:
+            if hasta is None or pct < hasta:
+                prima = p
+                break
+        puja = int(precio * (1 + prima)) // 10_000 * 10_000 + 9_000
+        return max(puja, la_puja(precio))
+    except Exception:                               # noqa: BLE001
+        return la_puja(precio)
+
+
+def el_suelo_de_la_cartera(pagado, incremento, valor):
+    """
+    Lo mínimo que se acepta del Computer por uno de la cartera; None si
+    sube (se aguanta). Pura. Nunca lanza (con basura, None: se aguanta).
+    """
+
+    try:
+        sube = _int(incremento, 0) or 0
+        if sube > 0:
+            return None
+        if sube == 0:
+            return int((_int(pagado, 0) or 0) * SUBE)
+        valor = _int(valor, 0) or 0
+        if valor <= 0:
+            return None
+        return int(valor * VENDE_SI_BAJA)
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def la_puja(precio: int) -> int:
     """Precio + 1 %, redondeado a miles (E9)."""
     return int(round(precio * SUBE, -3))
@@ -208,6 +303,7 @@ def decidir(
     *, mercado, fichas, nuestras_pujas, plantilla, ofertas_del_computer,
     en_venta, maximo_de_puja, minutos_al_reset, horas_jornada, libro,
     protegidos=frozenset(), puede_escribir=True, en_curso=False,
+    cartera=False, saldo=None, de_managers=frozenset(),
 ) -> list:
     """Qué hace la ronda en esta vuelta. Pura.
 
@@ -216,6 +312,10 @@ def decidir(
         libro    {"player_id": lo pagado} de lo comprado por la ronda
         en_curso hay una ronda de Biwenger jugándose: no se acepta
                  ninguna oferta (publicar sí)
+        cartera  LA CARTERA (`ENV_CARTERA`): aguanta lo que sube, puja para
+                 ganar y cerca de la jornada solo con lo que paga `saldo`
+        de_managers  los del `mercado` que vende un manager (la puerta):
+                 a esos, lo que piden + 1 %
     """
 
     acciones = []
@@ -227,9 +327,16 @@ def decidir(
         if pid not in plantilla or pid in protegidos or pagado <= 0:
             continue
         ficha = fichas.get(pid) or {}
-        suelo = el_suelo(pagado, ficha.get("priceIncrement"), horas_jornada)
+        if cartera:
+            # LA CARTERA: mientras sube, se aguanta (suelo None); la caja
+            # de la jornada no la cuadra la ronda sino el cierre.
+            suelo = el_suelo_de_la_cartera(
+                pagado, ficha.get("priceIncrement"), ficha.get("price"))
+        else:
+            suelo = el_suelo(pagado, ficha.get("priceIncrement"), horas_jornada)
         oferta = ofertas_del_computer.get(pid)
-        if oferta and not en_curso and (_int(oferta.get("amount"), 0) or 0) >= suelo:
+        if (suelo is not None and oferta and not en_curso
+                and (_int(oferta.get("amount"), 0) or 0) >= suelo):
             acciones.append({
                 "accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": pid,
                 "offer_id": _int(oferta.get("offer_id")),
@@ -244,12 +351,27 @@ def decidir(
 
     # 3. EN CADA VUELTA (el dueño, 12/10: «revisión cada ciclo, que para
     # eso está 24/7»), salvo en la zona de silencio, y lejos de la jornada.
-    if (
-        not puede_escribir
-        or horas_jornada is None
-        or horas_jornada < HORAS_SIN_COMPRAR
-    ):
+    if not puede_escribir or horas_jornada is None:
         return acciones
+
+    # LA CARTERA, cerca de la jornada: solo lo que paga la caja (saldo -
+    # todas las pujas vivas), para empezarla en positivo. Sin cartera (o
+    # sin saldo), como siempre: nada.
+    caja_libre = None
+    if horas_jornada < HORAS_SIN_COMPRAR:
+        if not cartera or _int(saldo) is None:
+            return acciones
+        caja_libre = _int(saldo) - sum(
+            _int((p or {}).get("amount"), 0) or 0 for p in (nuestras_pujas or {}).values())
+        if caja_libre <= 0:
+            return acciones
+
+    # LA CARTERA: como mucho `MAXIMO_EN_PLANTILLA` entre plantilla y pujas.
+    hueco = None
+    if cartera:
+        hueco = MAXIMO_EN_PLANTILLA - len(plantilla or ()) - len(nuestras_pujas or {})
+        if hueco <= 0:
+            return acciones
 
     # 2. Lo que ya lleva la ronda: pujas vivas + lo comprado, a lo pagado.
     expuesto = 0
@@ -278,11 +400,22 @@ def decidir(
         candidatos.append((sube / precio, pid, precio, sube))
 
     for _, pid, precio, sube in sorted(candidatos, reverse=True):
-        puja = la_puja(precio)
+        if cartera and pid not in de_managers:
+            puja = la_puja_de_la_cartera(precio, sube)
+        else:
+            puja = la_puja(precio)
         if puja > TOPE_POR_VIAJE or (TOPE_TOTAL is not None and expuesto + puja > TOPE_TOTAL) or puja > disponible:
             continue
+        if caja_libre is not None and puja > caja_libre:
+            continue
+        if hueco is not None and hueco <= 0:
+            break
         expuesto += puja
         disponible -= puja
+        if caja_libre is not None:
+            caja_libre -= puja
+        if hueco is not None:
+            hueco -= 1
         acciones.append({
             "accion": "PUJAR", "player_id": pid, "importe": puja,
             "pide": precio, "sube": sube, "sustituye": None, "ronda": True,
@@ -350,7 +483,13 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             horas_jornada=horas_a_la_jornada(ahora), libro=libro,
             protegidos=protegidos(), puede_escribir=_puede_escribir(ahora),
             en_curso=jornada_en_curso(ahora, CALENDARIO),
+            cartera=la_cartera_activa(), saldo=foto.get("saldo"),
+            de_managers=frozenset(vendedores),
         )
+        if la_cartera_activa():
+            salida["cartera"] = {"activa": True, "saldo": foto.get("saldo"),
+                                 "en_plantilla": len(foto["plantilla"]),
+                                 "pujas_vivas": len(foto["nuestras_pujas"])}
         for a in acciones:
             pid = _int(a.get("player_id"))
             if a.get("accion") == "PUJAR" and pid in vendedores:
