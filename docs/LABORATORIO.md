@@ -69,6 +69,46 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E44 · 16/10/2026 17:18 de Madrid · ¿Acierta la valoracion de Pepe?
+
+**Hipotesis:** el «value» que el motor de pujas da a cada jugador del
+mercado (lo que cree que vale) anuncia si su precio va a subir. Si no,
+pujar por «value > precio» es pujar a ciegas.
+**Datos:** `data/intelligence/libro_de_la_valoracion.jsonl` (23/09-16/10),
+729 filas jugador-dia con value, precio y precio 7 dias despues. Un mismo
+jugador sale varios dias: las filas no son independientes.
+**Codigo:** `lab/valoracion/acierta.py`. Vara de comparacion: «subio
+ayer» (la inercia de E1/E2).
+
+    vara                          n    precio a 7 dias (mediana)   suben
+    value > precio + 3 %         156          +1,0 %                53 %
+    value entre -3 y +3 %        407          +2,9 %                65 %
+    value < precio - 3 %         166          -6,3 %                 3 %
+    subio ayer                   480          +3,8 %                72 %
+    no subio ayer                249          -6,0 %                 3 %
+      subio y value > +3 %       104          +9,4 %                78 %
+      NO subio y value > +3 %     52          -5,8 %                 2 %
+
+**Lo que se aprende:**
+- **La inercia predice mucho mejor que el value** (Spearman con el precio
+  a 7 dias: 0,65 frente a 0,38). Con el value solo, «vale mas de lo que
+  cuesta» acierta menos que «vale lo que cuesta».
+- **El value si añade algo DENTRO de los que suben:** entre los que
+  subieron ayer, los que Pepe valora por encima suben +9,4 % en una
+  semana, frente a +3,3 %. Fuera de ellos, nada: de 52 que no subian y
+  Pepe valoraba un 3 % por encima, subio 1.
+- Los «XI_UPGRADE» bien valorados bajan (-5,3 % a 7 dias): normal, se
+  compran por puntos (E14/E16), no para revender.
+
+**Limites:** 3 semanas; filas repetidas del mismo jugador; el libro solo
+tiene el mercado del Computer y de rivales que Pepe miro.
+
+**Veredicto: CONFIRMA la rampa (E1) y ordena las dos varas.** Para
+revender: primero que suba (la rampa), despues el value para elegir entre
+los que suben. Un value alto en uno que no sube no es una compra. Nada
+nuevo que construir si la rampa ya filtra antes de mirar el value; si en
+algun camino de especulacion el value decide solo, eso hay que cerrarlo.
+
 ### E43 · 16/10/2026 11:16 de Madrid · ¿Cuando paga Biwenger el premio de la J8?
 
 **El caso:** la J8 acabo el lunes 12/10 y el viernes 16/10 su premio sigue
