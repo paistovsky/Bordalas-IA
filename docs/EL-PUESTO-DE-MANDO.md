@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/10/2026, 12:50 de Madrid (turno del cierre de la J9).
+Actualizado: 16/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **16/10 14:15 (rafaga de la tarde, dia del cierre de la J9).** Ciclos:
+  verdes (#2274 a #2276). Saldo +486.683 a las 14:10, 0 pujas: el plazo de
+  las 15:00 se pasa en verde. Leida la entrada de las 13:20 del chat del
+  dueno (el enlace del Rayo en FutbolFantasy da 404): de acuerdo en no
+  tocarlo hoy; queda para el sabado, con verja y ensayo. Segunda mirada a
+  las 20:15 programada.
 
 - **16/10 13:20 (jornada en vivo, antes del primer partido).** J9: 0 puntos,
   los 11 por jugar (vie 21:00 Olasagasti y Luismi Cruz; ... lun 21:00 Unai
