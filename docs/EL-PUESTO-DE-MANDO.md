@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/10 22:50. EL DUENO: «¿No se puja por nadie?».** Cierto: 0 pujas
+  desde el jueves 07:00. De jueves 05:00 a la J9 (21:00) no se compra a
+  proposito; desde las 21:00 si, y a las 21:07 la ronda y la mejora no
+  encontraron nada: en el mercado del Computer solo suben Ayoze (+10.000)
+  y Sergi Cardona (+20.000), por debajo del minimo; los cambios del once
+  que quedan (Bartra, Betis, rotacion 50 %, cae 25 dias; Mojica, en duda)
+  no pasan. Pablo Ramon ya no esta en el mercado. **Lo que suben estan en
+  las listas de los managers** y esa compra esta cerrada desde septiembre
+  (pedian +14,5 % y se perdia). Hoy hay dos a precio de mercado y subiendo
+  ~4 %/dia: **Alvaro Nunez** (Celta, DEF, 70 %, 5 pts/partido; Manzagool
+  pide 1.080.000, vale 1.070.000) y **Freeman** (Villarreal, DEF, 70 %;
+  pide 1.992.000, vale 2.000.000); las dos listas acaban el sabado ~07:12.
+  Propuesto al dueno: pujar por Nunez desde la app (Pepe no puede).
+  **Para el sabado:** abrir la compra a managers SOLO a precio de mercado
+  (pide <= valor +3 %), que suba y que juegue; nace apagada, protocolo
+  completo. La medicion de septiembre ya decia que ese caso (n=10) era el
+  unico en verde (+2,6 %).
+
 - **16/10 21:15 (rafaga de la noche; la J9 ya ha empezado).** Ciclos:
   verdes (#2281 a #2283, la de las 21:07 tambien). Saldo +486.683, 0
   pujas. Nada que tocar en viernes. **Para manana sabado (por orden):**
