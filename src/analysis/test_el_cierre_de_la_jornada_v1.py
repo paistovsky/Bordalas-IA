@@ -416,7 +416,7 @@ def test_apagado_no_lee_ni_escribe_nada():
 
 
 def test_encendido_de_punta_a_punta():
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1"})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1", "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             orden = Path(carpeta) / "orden.json"
@@ -575,7 +575,7 @@ def test_un_titular_escrito_en_duda_no_se_vende():
 def test_los_conservar_se_publican_y_solo_se_venden_fuera_del_once_escrito():
     # El modelo del dueño: publicar a los `conservar` esta bien (liquidez);
     # aceptar, solo si no son titulares del once escrito.
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1"})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1", "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             orden = Path(carpeta) / "orden.json"
@@ -615,7 +615,7 @@ def test_los_conservar_se_publican_y_solo_se_venden_fuera_del_once_escrito():
 def test_lo_de_la_ronda_y_los_chollos_que_entra_en_el_once_se_adopta():
     # F3 (12) es de los chollos y entra en el once; B2 (14) es de la ronda
     # y se queda en el banquillo; 700 es una puja viva de la ronda.
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             rutas = {k: Path(carpeta) / f"{k}.json" for k in ("ronda", "chollos", "mejora")}
@@ -664,7 +664,7 @@ def test_no_retira_las_pujas_de_la_orden_ni_las_de_la_mejora():
     # De punta a punta, con la orden APAGADA (protegidos vacio): el
     # `fichar` sale del fichero de la orden y la de la mejora de su libro
     # (las dos con la clave aun en el libro de los chollos).
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             orden = Path(carpeta) / "orden.json"
@@ -726,7 +726,7 @@ def test_lo_que_publico_el_escaparate_no_se_vuelve_a_publicar():
     assert lo_de_esta_vuelta(seco)["listados"] == set()
     fallido = {"escaparate": {"listed": [{"player_id": 11, "sent": True, "success": False}]}}
     assert lo_de_esta_vuelta(fallido)["listados"] == set()
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             r = correr(status=_status_con(), snapshot=_foto_con(saldo=10_000_000), v10=v10,
@@ -755,7 +755,7 @@ def test_si_algo_falla_el_plan_viejo_no_se_queda():
         def __init__(self):
             raise RuntimeError("login")
 
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             plan = Path(carpeta) / "el_cierre.json"
@@ -812,7 +812,7 @@ def test_el_once_es_para_la_principal_y_la_caja_para_la_que_venga():
     xp = {j["id"]: j["xp"] for j in d["once"]["jugadores"]}
     assert abs(xp[10] - round(de_la_j10, 3)) < 1e-9, (xp[10], de_la_j10, del_aplazado)
     # Y de punta a punta, el plan lo dice.
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             plan = Path(carpeta) / "plan.json"
@@ -873,7 +873,7 @@ def test_los_que_se_van_y_los_de_la_mejora_no_cuentan():
     assert {f["id"]: f["status"] for f in fichas} == {10: "injured", 11: "ok"}, fichas
     # De punta a punta: lo que vende la mejora ni se publica (su puja por
     # 700 sigue viva en la foto).
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             r = correr(status=_status_con(),
@@ -925,7 +925,7 @@ def test_solo_se_adopta_en_positivo_y_si_esta_en_el_once_escrito():
     assert "caja" in d["no_adoptados"][0]["motivo"], d["no_adoptados"]
     # De punta a punta: en FALTA el libro de los chollos no se toca y el
     # plan dice por que.
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "GITHUB_RUN_ID": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None, "GITHUB_RUN_ID": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             rutas = {k: Path(carpeta) / f"{k}.json"
@@ -979,7 +979,7 @@ def test_la_vuelta_de_la_mejora_solo_si_es_de_esta_vuelta():
 def test_el_cierre_corre_despues_de_la_mejora_y_cuenta_su_vuelta_no_su_libro():
     from datetime import timedelta as _td
 
-    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "GITHUB_RUN_ID": None})
+    antes = _entorno(**{ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": None, "BORDALAS_LA_CARTERA": None, "GITHUB_RUN_ID": None})
     try:
         with tempfile.TemporaryDirectory() as carpeta:
             def _correr(libro_mejora, vuelta_mejora):

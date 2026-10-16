@@ -4,8 +4,8 @@ LA CARTERA (16/10/2026). Guardias de `BORDALAS_LA_CARTERA` en
 
     1. Puja para ganar: precio + la prima de su tramo, terminada en 9.000.
     2. Aguanta lo que sube; el primer día que no sube, vende.
-    3. Cerca de la jornada, solo lo que paga la caja.
-    4. Como mucho `MAXIMO_EN_PLANTILLA`.
+    3. Cerca de la jornada no compra (como siempre).
+    4. Como mucho `MAXIMO_EN_PLANTILLA` y `TOPE_POR_VIAJE_CARTERA`.
     5. A los managers, lo que piden + 1 %; sin cartera, todo como antes.
     6. Nace apagada.
 """
@@ -40,7 +40,6 @@ def _d(**k):
         mercado={}, fichas={}, nuestras_pujas={}, plantilla=set(),
         ofertas_del_computer={}, en_venta=set(), maximo_de_puja=20_000_000,
         minutos_al_reset=127, horas_jornada=100, libro={}, cartera=True,
-        saldo=500_000,
     )
     base.update(k)
     return decidir(**base)
@@ -72,7 +71,9 @@ def test_el_suelo_de_la_cartera():
     assert el_suelo_de_la_cartera(1_000_000, 0, 1_200_000) == 1_164_000
     assert el_suelo_de_la_cartera(1_000_000, -10_000, 1_200_000) == 1_164_000
     assert el_suelo_de_la_cartera(1_000_000, -10_000, 0) is None
-    assert el_suelo_de_la_cartera("x", "y", "z") is None or True   # nunca lanza
+    # Sin saber si sube (ni dato ni basura): se aguanta.
+    assert el_suelo_de_la_cartera(1_000_000, None, 1_200_000) is None
+    assert el_suelo_de_la_cartera("x", "y", "z") is None
 
 
 def test_aguanta_lo_que_sube_y_vende_lo_que_se_para_o_baja():
@@ -105,26 +106,33 @@ def test_aguanta_lo_que_sube_y_vende_lo_que_se_para_o_baja():
     assert 1 in _por(a, "ACEPTAR_OFERTA_DEL_COMPUTER"), a
 
 
-def test_cerca_de_la_jornada_solo_con_caja():
+def test_cerca_de_la_jornada_no_compra_y_lejos_si_con_deuda():
     mercado = {1: 1_000_000, 2: 1_000_000, 3: 1_000_000}
     fichas = {1: _f(1_000_000, sube=50_000), 2: _f(1_000_000, sube=45_000),
               3: _f(1_000_000, sube=40_000)}
-    vivas = {9: {"offer_id": 99, "amount": 400_000}}
-    # A 30 h, saldo 2.700.000 - 400.000 vivas = 2.300.000: caben dos de
-    # 1.059.000 (precio + 5 %) y el tercero ya no.
-    a = _d(mercado=mercado, fichas=fichas, nuestras_pujas=vivas, horas_jornada=30,
-           saldo=2_700_000)
-    assert sorted(_por(a, "PUJAR")) == [1, 2], a
-    # Sin caja, nada.
-    a = _d(mercado=mercado, fichas=fichas, nuestras_pujas=vivas, horas_jornada=30,
-           saldo=300_000)
-    assert not _por(a, "PUJAR"), a
-    # Sin cartera, a menos de 40 h nada, como siempre.
-    a = _d(mercado=mercado, fichas=fichas, horas_jornada=30, saldo=9_000_000, cartera=False)
-    assert not _por(a, "PUJAR"), a
-    # Lejos de la jornada, con deuda: los tres.
-    a = _d(mercado=mercado, fichas=fichas, horas_jornada=100, saldo=-3_000_000)
+    # A 30 h, ni con cartera ni sin ella.
+    assert not _por(_d(mercado=mercado, fichas=fichas, horas_jornada=30), "PUJAR")
+    assert not _por(_d(mercado=mercado, fichas=fichas, horas_jornada=30, cartera=False), "PUJAR")
+    # Lejos de la jornada, con deuda (maximumBid manda): los tres.
+    a = _d(mercado=mercado, fichas=fichas, horas_jornada=100, maximo_de_puja=5_000_000)
     assert sorted(_por(a, "PUJAR")) == [1, 2, 3], a
+
+
+def test_el_tope_de_la_cartera():
+    # 2,9 M: a precio + 5 % se pasaria de 3 M; con la cartera el tope es 6 M.
+    a = _por(_d(mercado={1: 2_900_000}, fichas={1: _f(2_900_000, sube=40_000)}), "PUJAR")
+    assert a[1]["importe"] == la_puja_de_la_cartera(2_900_000), a
+    # 4,69 M: con la cartera se puja (+1 %); sin ella, pasa del tope de 3 M.
+    a = _por(_d(mercado={1: 4_690_000}, fichas={1: _f(4_690_000, sube=30_000)}), "PUJAR")
+    assert a[1]["importe"] == 4_739_000, a
+    assert not _por(_d(mercado={1: 4_690_000}, fichas={1: _f(4_690_000, sube=30_000)},
+                       cartera=False), "PUJAR")
+    # 5.941.000: a + 1 % son 6.000.000 justos; terminada en 9.000 se pasaria
+    # (6.009.000): se queda en el tope.
+    a = _por(_d(mercado={1: 5_941_000}, fichas={1: _f(5_941_000, sube=40_000)}), "PUJAR")
+    assert a[1]["importe"] == ronda.TOPE_POR_VIAJE_CARTERA, a
+    # Por encima del tope, nada.
+    assert not _por(_d(mercado={1: 6_500_000}, fichas={1: _f(6_500_000, sube=40_000)}), "PUJAR")
 
 
 def test_como_mucho_veinte():
@@ -148,6 +156,55 @@ def test_a_los_managers_lo_que_piden_y_sin_cartera_como_antes():
     assert a[1]["importe"] == a[2]["importe"] == la_puja(1_000_000), a
 
 
+def test_en_rojo_el_cierre_vende_lo_de_la_cartera_que_no_puede_adoptar():
+    # El cierre en rojo (-4 M) con F3 (12), de la ronda, en su once y sin
+    # estar en el once escrito: sin la cartera, «su libro lo sigue
+    # vendiendo»; con ella nadie lo venderia, asi que el once se hace sin
+    # el y pasa a candidato.
+    import src.analysis.test_el_cierre_de_la_jornada_v1 as c
+    escrito = (c.ONCE - {12}) | {11}
+    d = c._d(inventario={12}, once_escrito=escrito)
+    assert 12 in d["once"]["ids"] and 12 not in [x["id"] for x in d["candidatos"]], d
+    d = c._d(inventario={12}, once_escrito=escrito, cartera=True)
+    assert 12 not in d["once"]["ids"] and d["once"].get("sin_la_cartera"), d["once"]
+    assert 12 in [x["id"] for x in d["candidatos"]], d["candidatos"]
+    # En positivo, con la cartera, se adopta como siempre.
+    d = c._d(saldo=10_000_000, inventario={12}, once_escrito=c.ONCE, cartera=True)
+    assert d["adoptar"] == [12] and not d["once"].get("sin_la_cartera"), d
+
+
+def test_la_mejora_cuenta_entera_la_puja_de_la_cartera():
+    from src.actions.la_mejora_del_once import lo_de_esta_vuelta
+    v10 = {"ronda": {"hechas": [{"accion": "PUJAR", "player_id": 7, "importe": 1_009_000,
+                                 "exito": True}]},
+           "chollos": {"hechas": [{"accion": "PUJAR", "player_id": 8, "importe": 500_000,
+                                   "exito": True}]}}
+    assert lo_de_esta_vuelta(v10)["solas"] == {7, 8}
+    assert lo_de_esta_vuelta(v10, cartera=True)["solas"] == {8}
+    assert lo_de_esta_vuelta(v10, cartera=True)["pujas"] == {7: 1_009_000, 8: 500_000}
+
+
+def test_el_motor_viejo_no_vende_lo_que_aguanta():
+    import json
+    import tempfile
+    viejo = os.environ.pop(ronda.ENV_CARTERA, None)
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            libro = Path(d) / "la_ronda.json"
+            libro.write_text(json.dumps({"123": 1_009_000, "x": 5}))
+            assert ronda.los_que_aguanta(libro) == set()
+            os.environ[ronda.ENV_CARTERA] = "1"
+            assert ronda.los_que_aguanta(libro) == {123}
+            assert ronda.los_que_aguanta(Path(d) / "no_existe.json") == set()
+        # Las dos puertas del motor viejo que aceptan ofertas lo miran.
+        texto = (RAIZ / "src" / "actions" / "autopilot_executor.py").read_text()
+        assert texto.count("_conservados() | _aguanta()") == 2
+    finally:
+        os.environ.pop(ronda.ENV_CARTERA, None)
+        if viejo is not None:
+            os.environ[ronda.ENV_CARTERA] = viejo
+
+
 def test_nace_apagada():
     viejo = os.environ.pop(ronda.ENV_CARTERA, None)
     try:
@@ -164,9 +221,13 @@ TESTS = [
     test_puja_para_ganar_terminada_en_9000,
     test_el_suelo_de_la_cartera,
     test_aguanta_lo_que_sube_y_vende_lo_que_se_para_o_baja,
-    test_cerca_de_la_jornada_solo_con_caja,
+    test_cerca_de_la_jornada_no_compra_y_lejos_si_con_deuda,
+    test_el_tope_de_la_cartera,
     test_como_mucho_veinte,
     test_a_los_managers_lo_que_piden_y_sin_cartera_como_antes,
+    test_en_rojo_el_cierre_vende_lo_de_la_cartera_que_no_puede_adoptar,
+    test_la_mejora_cuenta_entera_la_puja_de_la_cartera,
+    test_el_motor_viejo_no_vende_lo_que_aguanta,
     test_nace_apagada,
 ]
 

@@ -886,7 +886,7 @@ def es_de_esta_vuelta(v10, ahora, run_id=None) -> str | None:
         return f"el estado de la vuelta no se puede fechar: {type(error).__name__}"
 
 
-def lo_de_esta_vuelta(v10, ahora=None, run_id=None) -> dict:
+def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False) -> dict:
     """
     Lo que ESTA vuelta ya hizo antes que la mejora (la foto es de antes),
     de los bloques `orden_del_gestor`, `chollos` y `ronda` de
@@ -926,7 +926,9 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None) -> dict:
                     salida["gastado"] += importe
                     if pid is not None:
                         salida["pujas"][pid] = importe
-                        if bloque != "orden_del_gestor":
+                        # Con LA CARTERA (16/10) la ronda ya no revende
+                        # sola: su puja cuenta entera, como la de la orden.
+                        if bloque == "chollos" or (bloque == "ronda" and not cartera):
                             salida["solas"].add(pid)
                 elif h.get("accion") == "ACEPTAR_OFERTA_DEL_COMPUTER" and pid is not None:
                     salida["cobros"][pid] = salida["cobros"].get(pid, 0) + importe
@@ -1219,7 +1221,10 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         # pujado baja `maximumBid` y no se vuelve a pujar; lo pujado y lo
         # cobrado entran en la caja; lo vendido ya no sale otra vez. Solo
         # si el estado es de ESTA vuelta (con un 429 queda el de otra).
-        esta_vuelta = lo_de_esta_vuelta(v10, ahora, os.environ.get("GITHUB_RUN_ID"))
+        from src.actions.la_ronda_de_la_manana import la_cartera_activa
+        cartera = la_cartera_activa()
+        esta_vuelta = lo_de_esta_vuelta(v10, ahora, os.environ.get("GITHUB_RUN_ID"),
+                                        cartera=cartera)
         salida["v10_descartado"] = esta_vuelta["descartado"]
         ya_pujados = esta_vuelta["ya_pujados"]
         vendidos = set(esta_vuelta["cobros"])
@@ -1262,8 +1267,13 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         ruta_chollos = fuera.get("libro_chollos") or LIBRO_CHOLLOS
         libro_ronda = _leer(ruta_ronda, {})
         libro_chollos = _leer(ruta_chollos, {})
-        solos = {_int(k) for k in list(libro_ronda) + list(libro_chollos)}
-        inventario = {p for p in solos if p in foto["plantilla"] and p not in vendidos}
+        libros = {_int(k) for k in list(libro_ronda) + list(libro_chollos)}
+        inventario = {p for p in libros if p in foto["plantilla"] and p not in vendidos}
+        # LA CARTERA (16/10/2026): lo que puja la ronda ya no se revende
+        # solo antes de la jornada; su puja viva cuenta entera. Lo que ya
+        # es nuestro sigue contando como inventario: si hace falta, el
+        # cierre lo vende antes de la jornada.
+        solos = ({_int(k) for k in libro_chollos} if cartera else libros)
 
         libro = _leer(libro_ruta or LIBRO, {})
         caja = la_caja_de_la_jornada(

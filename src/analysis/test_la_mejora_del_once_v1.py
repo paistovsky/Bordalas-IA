@@ -191,7 +191,7 @@ def test_nace_apagada_y_nunca_lanza():
     # Encendida y con basura, nunca lanza. Todo dado (la orden, los
     # libros, el reloj): no lee producción ni escribe fuera del temporal.
     with tempfile.TemporaryDirectory() as tmp, \
-            _interruptores({ENV: "1", ENV_CALENDARIO: None, ENV_PUJA_FUERTE: None}):
+            _interruptores({ENV: "1", ENV_CALENDARIO: None, ENV_PUJA_FUERTE: None, "BORDALAS_LA_CARTERA": None}):
         r = correr(status={"lineup": None}, snapshot={"market": None}, v10={}, ahora=AHORA,
                    libro_ruta=os.path.join(tmp, "mejora.json"), calendario={},
                    de_fuera={"orden": {}, "vetados": set(), "protegidos": set(),
@@ -467,7 +467,7 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
     }
     escritor = _Escritor()
     interruptores = {ENV: "1", ENV_CALENDARIO: "1" if con_calendario else None,
-                     ENV_PUJA_FUERTE: None}
+                     ENV_PUJA_FUERTE: None, "BORDALAS_LA_CARTERA": None}
     with tempfile.TemporaryDirectory() as tmp, _interruptores(interruptores):
         rutas = {k: os.path.join(tmp, f"{k}.json") for k in ("mejora", "ronda", "chollos")}
         Path(rutas["ronda"]).write_text(json.dumps(libro_ronda or {}))
@@ -1238,7 +1238,7 @@ def test_la_vuelta_de_la_mejora_para_el_cierre():
                  "libro_ronda": os.path.join(tmp, "ronda.json"),
                  "libro_chollos": os.path.join(tmp, "chollos.json"), "horas_jornada": 100.0,
                  "puede_escribir": True, "en_curso": False}
-        with _interruptores({ENV: "1", ENV_CALENDARIO: None, ENV_PUJA_FUERTE: None, "GITHUB_RUN_ID": "7"}):
+        with _interruptores({ENV: "1", ENV_CALENDARIO: None, ENV_PUJA_FUERTE: None, "BORDALAS_LA_CARTERA": None, "GITHUB_RUN_ID": "7"}):
             r = correr(status={"lineup": 3}, snapshot={"market": None}, v10={}, ahora=AHORA,
                        libro_ruta=os.path.join(tmp, "mejora.json"), calendario={},
                        de_fuera=fuera, vuelta_ruta=ruta)

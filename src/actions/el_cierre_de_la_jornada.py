@@ -560,7 +560,7 @@ def decidir(
     pujas=None, vendidos=None, ofertas=None, en_venta=frozenset(),
     especulativas=frozenset(), intocables=INTOCABLES, protegidos=frozenset(),
     no_vender=frozenset(), se_van=frozenset(), once_escrito=frozenset(),
-    no_retirar=frozenset(), inventario=frozenset(),
+    no_retirar=frozenset(), inventario=frozenset(), cartera=False,
 ) -> dict:
     """
     Que hace el cierre en esta vuelta. Pura: ni red, ni disco, ni reloj.
@@ -596,6 +596,10 @@ def decidir(
                        entra en el once, se adopta (`adoptar`) solo con
                        la caja proyectada en >= 0 y si esta tambien en
                        `once_escrito`; si no, `no_adoptados` y por que
+        cartera        LA CARTERA de la ronda (16/10/2026): la ronda ya no
+                       vende antes de la jornada lo que sube; en rojo, lo
+                       del `inventario` no entra en el once y se puede
+                       vender como cualquier suplente
     """
 
     salida = {
@@ -695,6 +699,22 @@ def decidir(
         salida["caja_tras_cancelar"] = caja_tras
         deficit = max(0, -caja_tras)
         salida["deficit"] = deficit
+
+        # LA CARTERA (16/10/2026). Sin ella, el de la ronda que entra en el
+        # once y no se adopta lo vende su libro antes de la jornada. Con
+        # ella, la ronda lo aguanta mientras sube: en rojo, el once se hace
+        # sin el inventario y el inventario pasa a candidato (si no, nadie
+        # lo venderia y la jornada empezaria en rojo).
+        if cartera and deficit > 0 and (xi & inventario):
+            once = el_mejor_once([f for f in pueden if f["id"] not in inventario],
+                                 intocables)
+            xi = set(once["ids"])
+            salida["once"] = {**once, "sin_la_cartera": True, "jugadores": [
+                {"id": pid, "name": por_id[pid].get("name"),
+                 "position": por_id[pid].get("position"),
+                 "xp": round(por_id[pid]["xp"], 3)}
+                for pid in once["ids"] if pid in por_id
+            ]}
 
         # Los candidatos: fuera del once, ni Yamal, ni protegidos, ni lo
         # que vende otro, ni un titular del once escrito que pueda jugar.
@@ -801,6 +821,15 @@ def decidir(
 # ============================================================
 # 6. DE LOS FICHEROS DE LA VUELTA A LO QUE `decidir` ENTIENDE
 # ============================================================
+
+def _la_cartera() -> bool:
+    """`la_ronda_de_la_manana.la_cartera_activa`, sin lanzar nunca."""
+    try:
+        from src.actions.la_ronda_de_la_manana import la_cartera_activa
+        return la_cartera_activa()
+    except Exception:                               # noqa: BLE001
+        return False
+
 
 def lo_de_esta_vuelta(v10) -> dict:
     """
@@ -1284,6 +1313,7 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
             se_van=de_la_orden["se_van"] | de_la_mejora["se_van"],
             once_escrito=once_escrito, no_retirar=no_retirar,
             inventario=de_la_ronda_y_los_chollos & plantilla,
+            cartera=_la_cartera(),
         )
         salida["decision"] = d
         salida["acciones"] = d["acciones"]
