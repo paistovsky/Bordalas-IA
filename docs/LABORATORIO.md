@@ -69,6 +69,47 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E43 · 16/10/2026 11:16 de Madrid · ¿Cuando paga Biwenger el premio de la J8?
+
+**El caso:** la J8 acabo el lunes 12/10 y el viernes 16/10 su premio sigue
+sin entrar (Pepe sigue con 323 puntos y 7 jornadas contadas). El gestor
+sospecha del Rayo-Athletic.
+**Datos:** los «roundFinished» del tablon (J1-J7) contra el calendario de
+los ciclos (`data/calendar/laliga_calendar.json` del artefacto de las
+11:10 de hoy); y los partidos jugados de cada jugador (foto de hoy contra
+`puntos_por_jornada.jsonl` de la J7).
+**Codigo:** `lab/carrera/cuando_se_cobra.py`.
+
+**Lo que se aprende:**
+- **Biwenger paga 13-18 h despues del ultimo partido del bloque** (J1-J5
+  y J7, 6 de 6; el martes por la tarde si la jornada acaba el lunes).
+  Cuando habia partidos descolgados, partio la jornada y pago igual: la J1
+  (cuatro partidos una semana despues, «Jornada 1 (aplazada)» cobrada
+  aparte el 28/08) y la J6 (Levante-Athletic movido al 21/10, cobrada el
+  18/09 sin el).
+- **La J8 es la primera vez que espera.** El Rayo-Athletic (10/10) NO se
+  jugo: los 27 jugadores del Athletic y los 29 del Rayo siguen con los
+  mismos partidos que tras la J7; el resto de equipos, 52-71 % con un
+  partido mas. Esta vez Biwenger no ha partido la jornada: el premio
+  llegara cuando se juegue ese partido, o cuando decida partirla. **No hay
+  fecha.** Pepe tiene a Unai Lopez (Rayo): sus puntos de la J8 tambien
+  esperan.
+- **El calendario de Pepe no lo sabe:** `laliga_calendar.json` sigue
+  dando el Rayo-Athletic como jugado el 10/10 14:00 y no tiene fecha
+  nueva. El Athletic arrastra dos aplazados (este y el Levante-Athletic
+  del 21/10): cuando se encajen, el Rayo y el Athletic tendran semanas de
+  dos partidos que la mejora con calendario no ve.
+
+**Limites:** 7 jornadas; no se sabe por que esta vez Biwenger no parte la
+jornada. Los ids de equipo (1 = Athletic, 70 = Rayo) se han sacado de
+los nombres de sus jugadores.
+
+**Veredicto: AVISO, no regla.** Para la caja: el premio de la J8 (~1,1-
+1,4 M) no se cuenta hasta ver su «roundFinished» (el gestor ya lo hace
+asi). Para la mejora con calendario (pasa a «Listo para el plan»): un
+partido con fecha pasada y sin jugadores con un partido mas es un
+aplazado; y una semana con dos partidos vale doble.
+
 ### E42 · 15/10/2026 17:16 de Madrid · El reloj de las ofertas del Computer (corrige E38/E40)
 
 **El caso:** E40 tranquilizo al gestor con que «el 16/10 es noche par» y
@@ -1980,6 +2021,16 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E43, 16/10 11:16) El calendario de la mejora tiene que ver los
+  aplazados.** El Rayo-Athletic de la J8 (10/10) no se jugo y
+  `laliga_calendar.json` lo da por jugado, sin fecha nueva. Regla: si un
+  partido tiene fecha pasada y ningun jugador de los dos equipos tiene un
+  partido mas, es un aplazado; cuando aparezca su fecha nueva, esa ronda
+  vale dos partidos para esos equipos (Rayo y Athletic; el Athletic
+  ademas juega el Levante-Athletic de la J6 el 21/10). Y el premio de una
+  jornada con un aplazado pendiente no se cuenta hasta su «roundFinished»
+  (la J8 lleva 4 dias sin pagarse; las J1 y J6 se partieron y se pagaron
+  en 13 h).
 - **(E41, 15/10 11:16) La puja del once segun el precio de la vispera**
   (afina E37/E39). Si el precio no subio: +3 % (se gana el 80 %; nadie
   pelea). Si subio menos de un 2 %: la puja fuerte, +8 a +12 % (76-88 %).
