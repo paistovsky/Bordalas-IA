@@ -352,6 +352,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/10 08:25 (supervision, dia de la J9).** Saldo **+486.683**, 0
+  pujas vivas, 11 en plantilla: la J9 (hoy 21:00) empieza en positivo. Los
+  +250.000 de medianoche NO son el premio de la J8 (seguimos con 323 puntos
+  y 7 jornadas contadas): son la racha diaria, que paso de 4 a 0 a la vez
+  (el modulo dice «cobrada: no», asi que la pago Biwenger sola). El cierre:
+  EN_POSITIVO, 3-4-3 de 40,3 xP; Diego Rico sale SUPLENTE (72 %) y no hay
+  otro defensa: con 3 DEF el 3-4-3 es la unica formacion posible. La
+  mejora, la ronda y los chollos, nada (a <40 h no se compra). Orden del
+  gestor: nada que limpiar. **Para despues de la J9 (no en viernes):**
+  (a) el sabado, quitar a Pablo Ramon de `no_pujar`; (b) el peor caso de
+  la mejora es muy estricto lejos de la jornada: Bartra (tasa 6,6) por
+  Rico (+3,6 por partido, -2,77 M) no cabe en -1 M de deuda, y con 11 en
+  plantilla no hay banquillo que vender. Pensar si a >=88 h la venta de un
+  jugador con oferta del Computer en mano debe contar (se cobra al
+  momento).
+
 - **16/10 07:15 (rafaga de la manana, dia del cierre de la J9).** Ciclos:
   verdes (#2260 a #2268; #2269 en marcha). Saldo **+486.683** (04:52): entro
   +250.000 redondos entre las 00:10 y las 01:09 de hoy, sin compra ni venta
