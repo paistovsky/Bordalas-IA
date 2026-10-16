@@ -200,10 +200,10 @@ QUE_HACE = {
         "bien y juegan, con toda la deuda, y se los revende al Computer antes de "
         "la jornada.",
     "BORDALAS_LA_CARTERA":
-        "La ronda compra a los que suben pujando para ganar (precio + 3 a 12 % "
-        "según lo que suben) y los AGUANTA mientras sigan subiendo, como Pollo17; "
-        "los vende cuando dejan de subir. Antes de cada jornada el cierre vende "
-        "solo lo justo para empezar en positivo.",
+        "La ronda compra a los que suben pujando para ganar (precio + 12 % por "
+        "debajo de 1 M, + 5 % de 1 a 3 M, + 1 % por encima) y los AGUANTA mientras "
+        "sigan subiendo, como Pollo17; los vende el primer día que no suben. "
+        "Antes de cada jornada el cierre vende solo lo justo para empezar en positivo.",
     "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO":
         "La ronda también puja por los que venden otros managers, pero solo si "
         "piden su valor (como mucho un 3 % más), suben y juegan; la puja va a "

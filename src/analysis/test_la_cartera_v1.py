@@ -2,8 +2,8 @@
 LA CARTERA (16/10/2026). Guardias de `BORDALAS_LA_CARTERA` en
 `src/actions/la_ronda_de_la_manana.py`.
 
-    1. Puja para ganar: precio + la prima de su subida, terminada en 9.000.
-    2. Aguanta lo que sube; vende lo que se para (con beneficio) o baja.
+    1. Puja para ganar: precio + la prima de su tramo, terminada en 9.000.
+    2. Aguanta lo que sube; el primer día que no sube, vende.
     3. Cerca de la jornada, solo lo que paga la caja.
     4. Como mucho `MAXIMO_EN_PLANTILLA`.
     5. A los managers, lo que piden + 1 %; sin cartera, todo como antes.
@@ -51,12 +51,12 @@ def _por(a, accion):
 
 
 def test_puja_para_ganar_terminada_en_9000():
-    # +4 % al día: +12 %.
-    assert la_puja_de_la_cartera(2_000_000, 80_000) == 2_249_000
-    # +2 a 4 %: +9 %; +1 a 2 %: +6 %; menos de +1 %: +3 %.
-    assert la_puja_de_la_cartera(2_000_000, 50_000) == 2_189_000
-    assert la_puja_de_la_cartera(2_000_000, 30_000) == 2_129_000
-    assert la_puja_de_la_cartera(2_000_000, 10_000) == 2_069_000
+    # Por debajo de 1 M, +12 %; de 1 a 3 M, +5 %; por encima, +1 %.
+    assert la_puja_de_la_cartera(900_000, 40_000) == 1_009_000
+    assert la_puja_de_la_cartera(2_000_000, 80_000) == 2_109_000
+    assert la_puja_de_la_cartera(4_690_000, 10_000) == 4_739_000
+    # La subida del día no cambia la prima.
+    assert la_puja_de_la_cartera(2_000_000, 10_000) == 2_109_000
     # Termina en 9.000 y nunca por debajo de precio + 1 %.
     for precio, sube in ((1_234_567, 20_000), (450_000, 40_000), (9_870_000, 50_000)):
         p = la_puja_de_la_cartera(precio, sube)
@@ -68,7 +68,8 @@ def test_puja_para_ganar_terminada_en_9000():
 
 def test_el_suelo_de_la_cartera():
     assert el_suelo_de_la_cartera(1_000_000, 10_000, 1_200_000) is None
-    assert el_suelo_de_la_cartera(1_000_000, 0, 1_200_000) == 1_010_000
+    # El primer día que no sube (0 o baja): desde el 97 % de su valor.
+    assert el_suelo_de_la_cartera(1_000_000, 0, 1_200_000) == 1_164_000
     assert el_suelo_de_la_cartera(1_000_000, -10_000, 1_200_000) == 1_164_000
     assert el_suelo_de_la_cartera(1_000_000, -10_000, 0) is None
     assert el_suelo_de_la_cartera("x", "y", "z") is None or True   # nunca lanza
@@ -88,7 +89,7 @@ def test_aguanta_lo_que_sube_y_vende_lo_que_se_para_o_baja():
     cobra = _por(a, "ACEPTAR_OFERTA_DEL_COMPUTER")
     # 1 sube: se aguanta aunque la oferta deje +50 %.
     assert 1 not in cobra, a
-    # 2 se para con beneficio: se vende; 4 se para sin beneficio: se aguanta.
+    # 2 se para y le ofrecen su valor: se vende; a 4 le ofrecen el 77 %: no.
     assert 2 in cobra and 4 not in cobra, a
     # 3 baja: se vende desde el 97 % de su valor (873.000), aunque pierda.
     assert 3 in cobra and cobra[3]["suelo"] == 873_000, a
@@ -110,7 +111,7 @@ def test_cerca_de_la_jornada_solo_con_caja():
               3: _f(1_000_000, sube=40_000)}
     vivas = {9: {"offer_id": 99, "amount": 400_000}}
     # A 30 h, saldo 2.700.000 - 400.000 vivas = 2.300.000: caben dos de
-    # 1.129.000 (precio + 12 %) y el tercero ya no.
+    # 1.059.000 (precio + 5 %) y el tercero ya no.
     a = _d(mercado=mercado, fichas=fichas, nuestras_pujas=vivas, horas_jornada=30,
            saldo=2_700_000)
     assert sorted(_por(a, "PUJAR")) == [1, 2], a

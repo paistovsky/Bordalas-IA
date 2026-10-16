@@ -177,16 +177,20 @@ def los_de_managers(de_managers, fichas, veto=frozenset()) -> tuple:
 #
 #     Con `ENV_CARTERA` la ronda:
 #       1. AGUANTA mientras sube (`priceIncrement` > 0): publicado, para
-#          que llegue la oferta del Computer, pero no se cobra. Deja de
-#          subir (0): se vende con beneficio (pagado + 1 %). Baja: se vende
-#          a lo que ofrezca el Computer desde el 97 % de su valor (el que
-#          cae sigue cayendo: 90,7 %). Sin liquidar por la jornada: la
-#          caja de la jornada la cuadra `el_cierre_de_la_jornada`, que
-#          vende lo justo de lo que no juega.
-#       2. PUJA PARA GANAR en el Computer: precio + la prima de su subida
-#          (`PRIMAS_DE_LA_CARTERA`), terminada en 9.000 (Pollo17 termina en
-#          7.000: 78 de sus 85 pujas ganadas). A los managers, lo que piden
-#          + 1 % (no es una subasta).
+#          que llegue la oferta del Computer, pero no se cobra. El primer
+#          día que no sube se vende a lo que ofrezca el Computer desde el
+#          97 % de su valor (simulado sobre todas las señales: +4,8 % de
+#          mediana por viaje frente a +1,9 % revendiendo antes de la
+#          jornada; Pollo17 vende en un día de bajada en 47 de 64). Sin
+#          liquidar por la jornada: la caja de la jornada la cuadra
+#          `el_cierre_de_la_jornada`, que vende lo justo de lo que no juega.
+#       2. PUJA PARA GANAR en el Computer, con la prima de su TRAMO DE
+#          PRECIO (`PRIMAS_DE_LA_CARTERA`): en los baratos la prima se
+#          recupera (por debajo de 1 M, +33 % a 7 días en las señales; de 1
+#          a 3 M, +9,5 %) y en los caros no (con +10 %, -4,2 % de 3 a 6 M):
+#          ahí, +1 %. Terminada en 9.000 (Pollo17 termina en 7.000: 142 de
+#          sus 150 pujas). A los managers, lo que piden + 1 % (no es una
+#          subasta).
 #       3. Cerca de la jornada (menos de `HORAS_SIN_COMPRAR`) compra solo
 #          lo que paga la caja (saldo - pujas vivas): se empieza la jornada
 #          en positivo (Pollo17, 11 de 11).
@@ -195,12 +199,11 @@ def los_de_managers(de_managers, fichas, veto=frozenset()) -> tuple:
 ENV_CARTERA = "BORDALAS_LA_CARTERA"
 MAXIMO_EN_PLANTILLA = 20
 VENDE_SI_BAJA = 0.97
-#   (subida del día hasta este %, sin incluir; prima sobre el precio)
+#   (hasta este precio, sin incluir; prima sobre el precio)
 PRIMAS_DE_LA_CARTERA = (
-    (0.01, 0.03),
-    (0.02, 0.06),
-    (0.04, 0.09),
-    (None, 0.12),
+    (1_000_000, 0.12),
+    (3_000_000, 0.05),
+    (None, 0.01),
 )
 
 
@@ -211,10 +214,10 @@ def la_cartera_activa() -> bool:
         return False
 
 
-def la_puja_de_la_cartera(precio, sube) -> int:
+def la_puja_de_la_cartera(precio, sube=None) -> int:
     """
     Lo que se puja en el Computer por uno que sube: precio + la prima de
-    su subida del día, bajado a la decena de mil y terminado en 9.000;
+    su tramo de precio, bajado a la decena de mil y terminado en 9.000;
     nunca menos que `la_puja`. Con basura, `la_puja`. Nunca lanza.
     """
 
@@ -222,10 +225,9 @@ def la_puja_de_la_cartera(precio, sube) -> int:
         precio = _int(precio, 0) or 0
         if precio <= 0:
             return la_puja(precio)
-        pct = (_int(sube, 0) or 0) / precio
         prima = PRIMAS_DE_LA_CARTERA[-1][1]
         for hasta, p in PRIMAS_DE_LA_CARTERA:
-            if hasta is None or pct < hasta:
+            if hasta is None or precio < hasta:
                 prima = p
                 break
         puja = int(precio * (1 + prima)) // 10_000 * 10_000 + 9_000
@@ -244,8 +246,6 @@ def el_suelo_de_la_cartera(pagado, incremento, valor):
         sube = _int(incremento, 0) or 0
         if sube > 0:
             return None
-        if sube == 0:
-            return int((_int(pagado, 0) or 0) * SUBE)
         valor = _int(valor, 0) or 0
         if valor <= 0:
             return None
