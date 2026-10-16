@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/10/2026, 20:20 de Madrid (segunda mirada al cierre de la J9).
+Actualizado: 16/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **16/10 21:15 (rafaga de la noche; la J9 ya ha empezado).** Ciclos:
+  verdes (#2281 a #2283, la de las 21:07 tambien). Saldo +486.683, 0
+  pujas. Nada que tocar en viernes. **Para manana sabado (por orden):**
+  (a) el enlace del Rayo en FutbolFantasy (`rayo` -> `rayo-vallecano`),
+  con verja y ensayo; (b) quitar a Pablo Ramon de `no_pujar`; (c) el
+  banquillo (punto 8), empezando por un defensa, si la caja lo permite.
 
 - **16/10 20:15 (segunda mirada al cierre de la J9).** Ciclos: verdes
   (#2276 a #2282; la de las 20:07, #2282, verde). Saldo +486.683, 0 pujas:
