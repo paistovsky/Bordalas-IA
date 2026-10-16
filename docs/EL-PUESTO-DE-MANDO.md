@@ -352,6 +352,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/10 13:20 (jornada en vivo, antes del primer partido).** J9: 0 puntos,
+  los 11 por jugar (vie 21:00 Olasagasti y Luismi Cruz; ... lun 21:00 Unai
+  Lopez). FutbolFantasy: 10 de 11 en su once probable sin lesion; Diego
+  Rico fuera del once (30 %), sano. Gulacsi se perdio el Villarreal-Napoles
+  por un atraco en su casa; el 15/10 volvio al grupo y «se apunta al
+  Elche» (60 %). **Fallo encontrado (no se toca en viernes):**
+  `FF_TEAM_SLUGS` en `src/intelligence/multisource_starter_v112.py` manda
+  al Rayo a `/laliga/equipos/rayo`, que da 404; la buena es
+  `rayo-vallecano`. La fuente FF no ve a Unai Lopez.
+
 - **16/10 12:45 (TURNO DEL CIERRE DE LA J9).** Calendario sin cambios (J9
   hoy 21:00, J10 jue 23/10 21:00). (1) Solvencia: saldo **+486.683** a las
   12:10, 0 pujas vivas: verde para las 15:00 pase lo que pase. (2) Once
