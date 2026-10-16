@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 15/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 16/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **16/10 07:15 (rafaga de la manana, dia del cierre de la J9).** Ciclos:
+  verdes (#2260 a #2268; #2269 en marcha). Saldo **+486.683** (04:52): entro
+  +250.000 redondos entre las 00:10 y las 01:09 de hoy, sin compra ni venta
+  y 0 pujas: lo mas probable es el premio de la J8 (sin confirmar en el
+  libro). Plantilla 11, once de 11 en el marcador de la J9. Caja en verde
+  para el plazo de las 15:00 pase lo que pase. Viernes: no se enciende
+  nada. 12:45, el turno del cierre de la J9.
 
 - **15/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2253 a #2260).
   Saldo +236.683 a las 21:10, 0 pujas vivas: la caja de la J9 esta en
