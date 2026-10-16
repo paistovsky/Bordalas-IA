@@ -739,6 +739,26 @@ def decidir(
         salida["titulares_que_no_se_venden"] = sorted(titulares)
 
         elegidos, falta = a_quien_vender(candidatos, deficit)
+
+        # LA CARTERA, EL ULTIMO RECURSO (revision del 16/10/2026). Si aun
+        # falta, lo de la cartera que el panel alineo (once escrito) pasa a
+        # candidato: la ronda lo aguanta mientras sube y nadie mas lo vende.
+        # Un hueco cuesta un jugador; empezar en rojo, el once entero.
+        if cartera and falta > 0:
+            extra = []
+            for pid in titulares:
+                f = por_id.get(pid)
+                if pid in inventario and f is not None:
+                    extra.append({"id": pid, "name": f.get("name"), "valor": f["valor"],
+                                  "cobro": int(f["valor"] * VENTA),
+                                  "quedarse": round(f["quedarse"], 3)})
+            if extra:
+                ids = {c["id"] for c in extra}
+                candidatos = candidatos + extra
+                titulares = [t for t in titulares if t not in ids]
+                salida["titulares_que_no_se_venden"] = sorted(titulares)
+                salida["ultimo_recurso"] = sorted(ids)
+                elegidos, falta = a_quien_vender(candidatos, deficit)
         vender = {c["id"] for c in elegidos}
         salida["vender"] = [c["id"] for c in elegidos]
         salida["falta"] = falta

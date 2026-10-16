@@ -199,9 +199,20 @@ def los_de_managers(de_managers, fichas, veto=frozenset()) -> tuple:
 #          pujado en la misma vuelta).
 #       4. Como mucho `MAXIMO_EN_PLANTILLA` entre plantilla y pujas vivas;
 #          la prima nunca saca de `TOPE_POR_VIAJE` a quien cabe a + 1 %.
+#       5. EL COLCHÓN (revisión del 16/10): la deuda no la limita
+#          `maximumBid` (13-17 M) sino lo que se puede devolver antes de la
+#          jornada. Cada puja tiene que caber en: saldo - TODAS las pujas
+#          vivas + `LIQUIDA_CARTERA` x (valor de lo que la ronda tiene y de
+#          lo que puja) >= 0. Si hubiera que venderlo todo al 92 % de su
+#          valor, se empieza la jornada en positivo.
+#       6. La prima solo a `HORAS_PRIMA` o más de la jornada: lo que se
+#          gana después de eso se revende al día siguiente (sin tiempo de
+#          que la subida pague la prima); ahí, precio + 1 %.
 #     Nace APAGADA: `ENV_CARTERA`.
 ENV_CARTERA = "BORDALAS_LA_CARTERA"
 MAXIMO_EN_PLANTILLA = 20
+LIQUIDA_CARTERA = 0.92          # a lo que se cuenta lo de la cartera si hubiera que venderlo ya
+HORAS_PRIMA = 64
 VENDE_SI_BAJA = 0.97
 #   (hasta este precio, sin incluir; prima sobre el precio)
 PRIMAS_DE_LA_CARTERA = (
@@ -322,7 +333,7 @@ def decidir(
     *, mercado, fichas, nuestras_pujas, plantilla, ofertas_del_computer,
     en_venta, maximo_de_puja, minutos_al_reset, horas_jornada, libro,
     protegidos=frozenset(), puede_escribir=True, en_curso=False,
-    cartera=False, de_managers=frozenset(),
+    cartera=False, de_managers=frozenset(), saldo=None,
 ) -> list:
     """Qué hace la ronda en esta vuelta. Pura.
 
@@ -335,6 +346,7 @@ def decidir(
                  para ganar
         de_managers  los del `mercado` que vende un manager (la puerta):
                  a esos, lo que piden + 1 %
+        saldo    el de la foto: con la cartera, sin saldo no se compra
     """
 
     acciones = []
@@ -377,11 +389,21 @@ def decidir(
     ):
         return acciones
 
-    # LA CARTERA: como mucho `MAXIMO_EN_PLANTILLA` entre plantilla y pujas.
-    hueco = None
+    # LA CARTERA: como mucho `MAXIMO_EN_PLANTILLA` entre plantilla y pujas,
+    # y EL COLCHÓN: saldo - todas las pujas vivas + lo que daría vender ya
+    # lo de la ronda (lo que tiene y lo que puja) al `LIQUIDA_CARTERA`.
+    hueco = colchon = None
     if cartera:
         hueco = MAXIMO_EN_PLANTILLA - len(plantilla or ()) - len(nuestras_pujas or {})
-        if hueco <= 0:
+        if hueco <= 0 or _int(saldo) is None:
+            return acciones
+        colchon = _int(saldo) - sum(
+            _int((p or {}).get("amount"), 0) or 0 for p in (nuestras_pujas or {}).values())
+        for pid in (libro or {}):
+            pid = _int(pid)
+            if pid in plantilla or pid in nuestras_pujas:
+                colchon += LIQUIDA_CARTERA * (_int((fichas.get(pid) or {}).get("price"), 0) or 0)
+        if colchon <= 0:
             return acciones
 
     # 2. Lo que ya lleva la ronda: pujas vivas + lo comprado, a lo pagado.
@@ -413,13 +435,20 @@ def decidir(
     tope = TOPE_POR_VIAJE
     for _, pid, precio, sube in sorted(candidatos, reverse=True):
         puja = la_puja(precio)
-        if cartera and pid not in de_managers and puja <= tope:
+        if (cartera and pid not in de_managers and puja <= tope
+                and horas_jornada >= HORAS_PRIMA):
             # La prima nunca deja fuera a uno que cabe a precio + 1 %.
             puja = min(la_puja_de_la_cartera(precio, sube), tope)
         if puja > tope or (TOPE_TOTAL is not None and expuesto + puja > TOPE_TOTAL) or puja > disponible:
             continue
         if hueco is not None and hueco <= 0:
             break
+        if colchon is not None:
+            valor = _int((fichas.get(pid) or {}).get("price"), 0) or precio
+            coste = puja - LIQUIDA_CARTERA * valor
+            if colchon - coste < 0:
+                continue
+            colchon -= coste
         expuesto += puja
         disponible -= puja
         if hueco is not None:
@@ -492,6 +521,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             protegidos=protegidos(), puede_escribir=_puede_escribir(ahora),
             en_curso=jornada_en_curso(ahora, CALENDARIO),
             cartera=la_cartera_activa(), de_managers=frozenset(vendedores),
+            saldo=foto.get("saldo"),
         )
         if la_cartera_activa():
             salida["cartera"] = {"activa": True, "saldo": foto.get("saldo"),

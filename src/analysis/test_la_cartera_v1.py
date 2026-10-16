@@ -40,6 +40,7 @@ def _d(**k):
         mercado={}, fichas={}, nuestras_pujas={}, plantilla=set(),
         ofertas_del_computer={}, en_venta=set(), maximo_de_puja=20_000_000,
         minutos_al_reset=127, horas_jornada=100, libro={}, cartera=True,
+        saldo=5_000_000,
     )
     base.update(k)
     return decidir(**base)
@@ -129,6 +130,36 @@ def test_el_tope_de_la_cartera():
                            cartera=cartera), "PUJAR")
 
 
+def test_el_colchon():
+    mercado = {1: 1_000_000, 2: 1_000_000, 3: 1_000_000}
+    fichas = {p: _f(1_000_000, sube=40_000) for p in mercado}
+    # Saldo 300.000, sin pujas: cada una (1.049.000) cuesta de colchón
+    # 1.049.000 - 0,92 x 1.000.000 = 129.000; caben dos.
+    a = _d(mercado=mercado, fichas=fichas, saldo=300_000)
+    assert len(_por(a, "PUJAR")) == 2, a
+    # Hoy (16/10): saldo 486.683; vivas Cardona 919.000 (de otro) y
+    # Freeman 2.012.000 (de la ronda, vale 2.000.000): colchón -604.317.
+    fichas[9] = _f(2_000_000, sube=80_000)
+    a = _d(mercado=mercado, fichas=fichas, saldo=486_683, libro={"9": 2_012_000},
+           nuestras_pujas={9: {"offer_id": 1, "amount": 2_012_000},
+                           8: {"offer_id": 2, "amount": 919_000}})
+    assert not _por(a, "PUJAR"), a
+    # Lo que la ronda ya tiene cuenta al 92 %: con Freeman dentro y sin
+    # pujas, el colchón es 486.683 + 1.840.000.
+    a = _d(mercado=mercado, fichas=fichas, saldo=486_683 - 2_012_000, libro={"9": 2_012_000},
+           plantilla={9})
+    assert len(_por(a, "PUJAR")) == 2, a
+    # Sin saldo, la cartera no compra.
+    assert not _por(_d(mercado=mercado, fichas=fichas, saldo=None), "PUJAR")
+
+
+def test_la_prima_solo_lejos_de_la_jornada():
+    mercado = {1: 1_000_000}
+    fichas = {1: _f(1_000_000, sube=40_000)}
+    assert _por(_d(mercado=mercado, fichas=fichas, horas_jornada=70), "PUJAR")[1]["importe"] == 1_049_000
+    assert _por(_d(mercado=mercado, fichas=fichas, horas_jornada=50), "PUJAR")[1]["importe"] == la_puja(1_000_000)
+
+
 def test_como_mucho_veinte():
     mercado = {1: 1_000_000, 2: 1_000_000, 3: 1_000_000}
     fichas = {p: _f(1_000_000, sube=40_000) for p in mercado}
@@ -162,6 +193,16 @@ def test_en_rojo_el_cierre_vende_lo_de_la_cartera_que_no_puede_adoptar():
     d = c._d(inventario={12}, once_escrito=escrito, cartera=True)
     assert 12 not in d["once"]["ids"] and d["once"].get("sin_la_cartera"), d["once"]
     assert 12 in [x["id"] for x in d["candidatos"]], d["candidatos"]
+    # FALTA aunque se venda todo el banquillo, con F3 (12) de la cartera
+    # alineado en el once escrito: sin la cartera nadie lo vende; con ella,
+    # es el ultimo recurso.
+    rojo = dict(saldo=0, pujas={500: {"offer_id": 9, "amount": 20_000_000}},
+                inventario={12}, once_escrito=c.ONCE)
+    d = c._d(**rojo)
+    assert d["motivo"] == "FALTA" and 12 not in d["vender"], d
+    d = c._d(cartera=True, **rojo)
+    assert d.get("ultimo_recurso") == [12] and 12 in d["vender"], d
+    assert 12 not in d["titulares_que_no_se_venden"], d
     # En positivo, con la cartera, se adopta como siempre.
     d = c._d(saldo=10_000_000, inventario={12}, once_escrito=c.ONCE, cartera=True)
     assert d["adoptar"] == [12] and not d["once"].get("sin_la_cartera"), d
@@ -217,6 +258,8 @@ TESTS = [
     test_aguanta_lo_que_sube_y_vende_lo_que_se_para_o_baja,
     test_cerca_de_la_jornada_no_compra_y_lejos_si_con_deuda,
     test_el_tope_de_la_cartera,
+    test_el_colchon,
+    test_la_prima_solo_lejos_de_la_jornada,
     test_como_mucho_veinte,
     test_a_los_managers_lo_que_piden_y_sin_cartera_como_antes,
     test_en_rojo_el_cierre_vende_lo_de_la_cartera_que_no_puede_adoptar,
