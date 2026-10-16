@@ -219,6 +219,22 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO: "1"
 
+      # Encendido 17/10 de Madrid, de madrugada, por orden del dueno («Hazlo
+      #   ya. Que se revaloricen, la misma estrategia que ellos»). LA CARTERA
+      #   (laboratorio de la noche: +46,1 M de los +50,4 M de Pollo17 son
+      #   revalorizacion de lo que compra subiendo y aguanta). La ronda
+      #   aguanta lo que sube y lo vende el primer dia que no sube (desde el
+      #   97 % del valor); prima por tramo (+12 % <1 M, +4 % 1-3 M) solo a
+      #   64 h o mas, en 9.000; max 20 jugadores; EL COLCHON (saldo - pujas
+      #   vivas + 0,92 x lo de la ronda >= 0); el motor viejo no vende lo que
+      #   aguanta; el cierre en rojo vende la cartera (la alineada, como
+      #   ultimo recurso); la mejora cuenta enteras sus pujas. Revisada por 3
+      #   lupas y 12 verificaciones. Verja 210/210 con los de produccion y con
+      #   el nuevo; paso 0 con 46; ensayo #38974987328 verde (NADA: colchon
+      #   agotado con 3 pujas vivas).
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_CARTERA: "1"
+
       # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
       #   que habia jugadores para mejorar el XI y Pepe no ha hecho
       #   nada»). Paso propio tras el panel, en cada vuelta: la
