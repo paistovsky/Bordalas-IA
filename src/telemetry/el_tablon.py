@@ -201,9 +201,11 @@ QUE_HACE = {
         "la jornada.",
     "BORDALAS_LA_CARTERA":
         "La ronda compra a los que suben pujando para ganar (precio + 12 % por "
-        "debajo de 1 M, + 5 % de 1 a 3 M, + 1 % por encima) y los AGUANTA mientras "
-        "sigan subiendo, como Pollo17; los vende el primer día que no suben. "
-        "Antes de cada jornada el cierre vende solo lo justo para empezar en positivo.",
+        "debajo de 1 M y + 4 % de 1 a 3 M, solo a 64 h o más de la jornada) y los "
+        "AGUANTA mientras siguen subiendo, como Pollo17; el primer día que no suben "
+        "los vende desde el 97 % de su valor, aunque pierda la prima. Cada compra "
+        "cabe en el colchón (vendiéndolo todo al 92 % se empieza la jornada en "
+        "positivo) y antes de cada jornada el cierre vende solo lo justo.",
     "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO":
         "La ronda también puja por los que venden otros managers, pero solo si "
         "piden su valor (como mucho un 3 % más), suben y juegan; la puja va a "
