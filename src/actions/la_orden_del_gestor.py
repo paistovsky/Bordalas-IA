@@ -658,9 +658,15 @@ def ejecutar(acciones: list, escritor) -> list:
         r = None
         try:
             if a["accion"] == "PUJAR":
+                # La puja a un jugador de otro manager va a su nombre
+                # (`vendedor`); la del Computer, como siempre, sin el.
+                a_quien = (
+                    {"seller_user_id": _int(a["vendedor"])}
+                    if a.get("vendedor") else {}
+                )
                 r = escritor.place_bid(
                     player_id=a["player_id"], amount=a["importe"],
-                    execute=True,
+                    execute=True, **a_quien,
                 )
                 vieja = _int((a.get("sustituye") or {}).get("offer_id"))
                 if vieja and r.get("sent"):
@@ -674,7 +680,7 @@ def ejecutar(acciones: list, escritor) -> list:
                         escritor.cancel_bid(offer_id=vieja, execute=True)
                         r = escritor.place_bid(
                             player_id=a["player_id"], amount=a["importe"],
-                            execute=True,
+                            execute=True, **a_quien,
                         )
             elif a["accion"] == "CANCELAR_PUJA":
                 r = escritor.cancel_bid(offer_id=a["offer_id"], execute=True)
@@ -729,6 +735,7 @@ def leer_la_foto(snapshot: dict | None, yo: int | None) -> dict:
     market = s.get("market") or {}
 
     mercado, en_venta, precios = {}, set(), {}
+    de_managers = {}
 
     for venta in market.get("sales") or []:
         pid = _pid(venta.get("player"))
@@ -739,6 +746,11 @@ def leer_la_foto(snapshot: dict | None, yo: int | None) -> dict:
             mercado[pid] = _int(venta.get("price"), 0)
         elif yo is not None and _pid(user) == yo:
             en_venta.add(pid)
+        elif _pid(user) is not None:
+            # Lo que vende otro manager: lo que pide y a quien se le puja
+            # (16/10/2026, `la_ronda_de_la_manana.los_de_managers`).
+            de_managers[pid] = {"precio": _int(venta.get("price"), 0),
+                                "vendedor": _pid(user)}
 
     nuestras_pujas, recibidas = {}, {}
 
@@ -771,6 +783,7 @@ def leer_la_foto(snapshot: dict | None, yo: int | None) -> dict:
         "plantilla": plantilla,
         "ofertas_del_computer": recibidas,
         "en_venta": en_venta,
+        "de_managers": de_managers,
         "precios": precios,
         "maximo_de_puja": _int((market.get("status") or {}).get("maximumBid")),
         "saldo": _int((market.get("status") or {}).get("balance")),
@@ -815,6 +828,9 @@ def correr(
             return salida
 
         foto = leer_la_foto(snapshot, yo)
+        # La orden solo ficha del Computer: lo de los managers es de la
+        # puerta de la ronda (16/10/2026) y `decidir` no lo conoce.
+        foto.pop("de_managers", None)
         reloj = el_reloj(ahora, calendario)
         salida["reloj"] = reloj
         acciones = decidir(

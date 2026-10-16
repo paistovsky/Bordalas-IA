@@ -44,7 +44,8 @@ LA REGLA
 
 QUE NO HACE
 
-    No compra a rivales, no sube pujas, no vende a nadie que no haya
+    No compra a rivales (salvo, con `ENV_PUERTA`, a los que piden su
+    valor: ver LA PUERTA), no sube pujas, no vende a nadie que no haya
     comprado ella (lo apunta en `LIBRO`) ni a un protegido del gestor.
 
     Nace APAGADA: `BORDALAS_LA_RONDA_DE_LA_MANANA`. Nunca lanza.
@@ -103,6 +104,59 @@ def activa() -> bool:
         return str(os.environ.get(ENV, "")).strip().lower() in {"1", "true", "si", "yes"}
     except Exception:                               # noqa: BLE001
         return False
+
+
+# LA PUERTA, A PRECIO DE MERCADO (16/10/2026)
+#
+#     El dueño, 16/10 noche: «Pollo nos sigue ganando pujas… sigue
+#     distanciándose en patrimonio… ponlo en marcha ya». Lo que sube ese
+#     día no estaba en el Computer: estaba en las listas de los managers
+#     (Álvaro Núñez +3,7 %/día pidiendo 1.080.000 por 1.070.000 de valor;
+#     Freeman +4 %/día pidiendo 1.992.000 por 2.000.000). La puerta se
+#     cerró en septiembre con datos (EL-PUESTO-DE-MANDO: pedían +14,5 % de
+#     media y salía -13,2 %); el ÚNICO grupo en verde era el de los que
+#     piden su valor (+-3 %: n=10, +2,6 %). Se abre solo para ese grupo:
+#     piden como mucho su valor + `PRIMA_DEL_MANAGER`, y pasan las mismas
+#     reglas de la ronda (sube de verdad, está bien, juega). La puja va a
+#     nombre del vendedor (`vendedor`); el resto, igual que con el
+#     Computer. Nace APAGADA: `ENV_PUERTA`.
+ENV_PUERTA = "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO"
+PRIMA_DEL_MANAGER = 0.03
+
+
+def la_puerta_abierta() -> bool:
+    try:
+        return str(os.environ.get(ENV_PUERTA, "")).strip().lower() in {"1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def los_de_managers(de_managers, fichas, veto=frozenset()) -> tuple:
+    """
+    De lo que venden los managers, lo que piden a su precio de mercado
+    (como mucho su valor + `PRIMA_DEL_MANAGER`): ({pid: lo que piden},
+    {pid: vendedor}). El valor es el de la ficha del catálogo; sin valor
+    o sin vendedor, fuera. Pura. Nunca lanza.
+    """
+
+    piden, vendedores = {}, {}
+    try:
+        for pid, v in (de_managers or {}).items():
+            pid = _int(pid)
+            if pid is None or pid in (veto or ()) or not isinstance(v, dict):
+                continue
+            pide = _int(v.get("precio"), 0) or 0
+            valor = _int((fichas.get(pid) or {}).get("price"), 0) or 0
+            vendedor = _int(v.get("vendedor"))
+            if pide <= 0 or valor <= 0 or vendedor is None:
+                continue
+            if pide > valor * (1 + PRIMA_DEL_MANAGER):
+                continue
+            piden[pid] = pide
+            vendedores[pid] = vendedor
+    except Exception:                               # noqa: BLE001
+        return {}, {}
+    return piden, vendedores
 
 
 def la_puja(precio: int) -> int:
@@ -275,6 +329,17 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
         veto = vetados()
         mercado = {p: v for p, v in foto["mercado"].items() if p not in veto}
 
+        # LA PUERTA (16/10/2026): con el interruptor, los de los managers
+        # que piden su valor entran al mismo mercado (lo que piden hace de
+        # precio) y se apunta a quién se le puja.
+        vendedores = {}
+        if la_puerta_abierta():
+            piden, vendedores = los_de_managers(
+                foto.get("de_managers"), fichas, veto)
+            for pid, pide in piden.items():
+                mercado.setdefault(pid, pide)
+            salida["puerta"] = {"abierta": True, "a_precio_de_mercado": sorted(piden)}
+
         libro = leer_libro(libro_ruta)
         acciones = decidir(
             mercado=mercado, fichas=fichas,
@@ -286,6 +351,10 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             protegidos=protegidos(), puede_escribir=_puede_escribir(ahora),
             en_curso=jornada_en_curso(ahora, CALENDARIO),
         )
+        for a in acciones:
+            pid = _int(a.get("player_id"))
+            if a.get("accion") == "PUJAR" and pid in vendedores:
+                a["vendedor"] = vendedores[pid]
         salida["acciones"] = acciones
 
         if not acciones:

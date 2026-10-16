@@ -199,6 +199,10 @@ QUE_HACE = {
         "En cada vuelta puja (precio + 1 %) por los del Computer que suben, están "
         "bien y juegan, con toda la deuda, y se los revende al Computer antes de "
         "la jornada.",
+    "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO":
+        "La ronda también puja por los que venden otros managers, pero solo si "
+        "piden su valor (como mucho un 3 % más), suben y juegan; la puja va a "
+        "nombre del que lo vende.",
     "BORDALAS_LA_MEJORA_DEL_ONCE":
         "En cada vuelta busca los cambios que más puntos suman al once (con deuda "
         "entre jornadas), puja por el que entra y vende al que sale cuando llega "
