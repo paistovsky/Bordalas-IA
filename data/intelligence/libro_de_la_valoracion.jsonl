@@ -1525,3 +1525,17 @@
 {"dia":"2026-10-15","id":30495,"name":"Moleiro","value":9599740,"price":9430000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
 {"dia":"2026-10-15","id":30789,"name":"Giuliano Simeone","value":6321780,"price":6210000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
 {"dia":"2026-10-15","id":34469,"name":"Luka Sucic","value":5324140,"price":5230000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":17756,"name":"Camello","value":12648979,"price":12410000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":18398,"name":"Budimir","value":8232750,"price":12350000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":17687,"name":"Kang-in Lee","value":5743237,"price":9580000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":34111,"name":"Gerard Martín","value":5130720,"price":5040000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":6837,"name":"Soler","value":4947480,"price":4860000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":11,"name":"David Soria","value":4769415,"price":5670000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":31027,"name":"Arda Güler","value":4561920,"price":14980000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":19441,"name":"Pedri","value":4521150,"price":14650000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":8695,"name":"Areso","value":2616260,"price":2570000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":41419,"name":"Recio","value":1423017,"price":1340000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":31707,"name":"Álvaro Carreras","value":1119800,"price":1100000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":31475,"name":"Zakharyan","value":489632,"price":390000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-15","id":31468,"name":"Hugo González","value":0,"price":2270000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-15","id":35308,"name":"Córdoba","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
