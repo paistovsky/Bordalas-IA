@@ -208,6 +208,17 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_RONDA_DE_LA_MANANA: "1"
 
+      # Encendido 16/10 de Madrid, viernes por la noche, por orden del
+      #   dueno («ponlo en marcha ya»: Pollo17 nos gana las pujas y se
+      #   distancia en patrimonio). LA PUERTA A PRECIO DE MERCADO: la ronda
+      #   tambien puja por los que venden otros managers, solo si piden su
+      #   valor (+3 % como mucho), suben y juegan; la puja va a nombre del
+      #   vendedor. Verja 209/209 con los de produccion y con el nuevo;
+      #   paso 0 con 45; ensayo #38969326126 verde (pujaria por
+      #   Freeman 2.012.000 y Alvaro Nunez 1.091.000, a Manzagool).
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO: "1"
+
       # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
       #   que habia jugadores para mejorar el XI y Pepe no ha hecho
       #   nada»). Paso propio tras el panel, en cada vuelta: la
