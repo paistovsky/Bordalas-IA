@@ -352,6 +352,34 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/10 23:00 a 17/10 01:00. EL DUENO: «Pollo nos gana… ponlo en marcha
+  ya… la misma estrategia que ellos… el laboratorio a probar y probar».**
+  Diagnostico verificado (workflow de 4 analistas + verificador): de los
+  +50,4 M de Pollo17 desde el 18/08, +46,1 M son revalorizacion de ~20
+  jugadores comprados cuando suben y AGUANTADOS (viajes >7 dias: +18,68 M);
+  los nuestros, revendidos antes de cada jornada: -2,84 M. Subastas con
+  rival: la liga gana a +8,1 % de mediana; a +1 % perdimos las 20. Si un
+  precio sube hoy, manana sube el 89,9 %. Premios iguales (9,7 vs 9,9 M).
+  **Hecho esta noche:**
+  1. `BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO` ENCENDIDA (42ee30de): la ronda
+     puja por los de los managers que piden su valor (+3 % max), suben y
+     juegan. 00:07: ofertas a Manzagool por Freeman 2.012.000 y Alvaro
+     Nunez 1.091.000 (200).
+  2. `BORDALAS_LA_CARTERA` construida (23d652fd..64299fea), revisada por 3
+     lupas + verificacion: aguanta lo que sube, vende el primer dia que no
+     sube (>=97 % del valor), prima por tramo verificada (+12 % <1 M, +4 %
+     1-3 M) solo a >=64 h, terminada en 9.000, max 20 jugadores, EL
+     COLCHON (saldo - pujas vivas + 0,92 x lo de la ronda >= 0), el motor
+     viejo no vende lo que aguanta, el cierre en rojo vende la cartera (y
+     como ultimo recurso la alineada). Se enciende tras el ensayo.
+  3. Laboratorio lanzado (wf_cf56a431-a90): panel diario comun + 8 modelos
+     (cuando/a quien fichan Pollo y Luismi, que sube, noticias y calendario,
+     puja optima, simulador con grid search, Luismi vs Pollo, puntos vs
+     patrimonio) + 2 verificadores + estratega.
+  **Pendiente (orden del plan verificado):** puja al alza en la mejora del
+  once (+1 % + 4 %/punto, techo 10 %, solo si sube); el aplazado de la J6
+  (21/10) se trata como plazo de caja: verificar en Biwenger.
+
 - **16/10 22:50. EL DUENO: «¿No se puja por nadie?».** Cierto: 0 pujas
   desde el jueves 07:00. De jueves 05:00 a la J9 (21:00) no se compra a
   proposito; desde las 21:00 si, y a las 21:07 la ronda y la mejora no
