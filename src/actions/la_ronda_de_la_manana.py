@@ -185,29 +185,28 @@ def los_de_managers(de_managers, fichas, veto=frozenset()) -> tuple:
 #          liquidar por la jornada: la caja de la jornada la cuadra
 #          `el_cierre_de_la_jornada`, que vende lo justo de lo que no juega.
 #       2. PUJA PARA GANAR en el Computer, con la prima de su TRAMO DE
-#          PRECIO (`PRIMAS_DE_LA_CARTERA`): en los baratos la prima se
-#          recupera (por debajo de 1 M, +33 % a 7 días en las señales; de 1
-#          a 3 M, +9,5 %) y en los caros no (con +10 %, -4,2 % de 3 a 6 M):
-#          ahí, +1 %. Terminada en 9.000 (Pollo17 termina en 7.000: 142 de
-#          sus 150 pujas). A los managers, lo que piden + 1 % (no es una
-#          subasta).
+#          PRECIO (`PRIMAS_DE_LA_CARTERA`), la que se recupera en las
+#          subastas reales al alza (verificado, n=108, 21/08-16/10): por
+#          debajo de 1 M, +12 % da +6,3 % a 7 días; de 1 a 3 M, +4 % da
+#          +2,5 % (+8 % ya da -0,6 % y +10 %, -2,8 %); de 3 M para arriba
+#          ni +4 % se recupera, y la ronda no pasa de `TOPE_POR_VIAJE`.
+#          Terminada en 9.000 (Pollo17 termina en 7.000: 79 de sus 85
+#          ganadas). A los managers, lo que piden + 1 % (no es subasta).
 #       3. Cerca de la jornada (menos de `HORAS_SIN_COMPRAR`) no compra,
 #          como siempre: lo que se gana en el último reset no se puede
 #          vender antes de empezarla (revisión del 16/10: comprar ahí «con
 #          caja» gastaba dos veces la caja que los chollos ya habían
 #          pujado en la misma vuelta).
-#       4. Como mucho `MAXIMO_EN_PLANTILLA` entre plantilla y pujas vivas,
-#          y hasta `TOPE_POR_VIAJE_CARTERA` por jugador (Pollo17 compra a
-#          3,49 M de mediana; con 3 M el tramo de los caros no existía).
+#       4. Como mucho `MAXIMO_EN_PLANTILLA` entre plantilla y pujas vivas;
+#          la prima nunca saca de `TOPE_POR_VIAJE` a quien cabe a + 1 %.
 #     Nace APAGADA: `ENV_CARTERA`.
 ENV_CARTERA = "BORDALAS_LA_CARTERA"
 MAXIMO_EN_PLANTILLA = 20
-TOPE_POR_VIAJE_CARTERA = 6_000_000
 VENDE_SI_BAJA = 0.97
 #   (hasta este precio, sin incluir; prima sobre el precio)
 PRIMAS_DE_LA_CARTERA = (
     (1_000_000, 0.12),
-    (3_000_000, 0.05),
+    (3_000_000, 0.04),
     (None, 0.01),
 )
 
@@ -411,7 +410,7 @@ def decidir(
             continue
         candidatos.append((sube / precio, pid, precio, sube))
 
-    tope = TOPE_POR_VIAJE_CARTERA if cartera else TOPE_POR_VIAJE
+    tope = TOPE_POR_VIAJE
     for _, pid, precio, sube in sorted(candidatos, reverse=True):
         puja = la_puja(precio)
         if cartera and pid not in de_managers and puja <= tope:

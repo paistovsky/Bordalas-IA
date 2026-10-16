@@ -5,7 +5,7 @@ LA CARTERA (16/10/2026). Guardias de `BORDALAS_LA_CARTERA` en
     1. Puja para ganar: precio + la prima de su tramo, terminada en 9.000.
     2. Aguanta lo que sube; el primer día que no sube, vende.
     3. Cerca de la jornada no compra (como siempre).
-    4. Como mucho `MAXIMO_EN_PLANTILLA` y `TOPE_POR_VIAJE_CARTERA`.
+    4. Como mucho `MAXIMO_EN_PLANTILLA`; la prima no saca del tope.
     5. A los managers, lo que piden + 1 %; sin cartera, todo como antes.
     6. Nace apagada.
 """
@@ -50,12 +50,12 @@ def _por(a, accion):
 
 
 def test_puja_para_ganar_terminada_en_9000():
-    # Por debajo de 1 M, +12 %; de 1 a 3 M, +5 %; por encima, +1 %.
+    # Por debajo de 1 M, +12 %; de 1 a 3 M, +4 %; por encima, +1 %.
     assert la_puja_de_la_cartera(900_000, 40_000) == 1_009_000
-    assert la_puja_de_la_cartera(2_000_000, 80_000) == 2_109_000
+    assert la_puja_de_la_cartera(2_000_000, 80_000) == 2_089_000
     assert la_puja_de_la_cartera(4_690_000, 10_000) == 4_739_000
     # La subida del día no cambia la prima.
-    assert la_puja_de_la_cartera(2_000_000, 10_000) == 2_109_000
+    assert la_puja_de_la_cartera(2_000_000, 10_000) == 2_089_000
     # Termina en 9.000 y nunca por debajo de precio + 1 %.
     for precio, sube in ((1_234_567, 20_000), (450_000, 40_000), (9_870_000, 50_000)):
         p = la_puja_de_la_cartera(precio, sube)
@@ -119,20 +119,14 @@ def test_cerca_de_la_jornada_no_compra_y_lejos_si_con_deuda():
 
 
 def test_el_tope_de_la_cartera():
-    # 2,9 M: a precio + 5 % se pasaria de 3 M; con la cartera el tope es 6 M.
+    # 2,9 M: a + 4 % (3.019.000) se pasaria de 3 M; cabe a + 1 % (2.929.000),
+    # asi que se puja el tope.
     a = _por(_d(mercado={1: 2_900_000}, fichas={1: _f(2_900_000, sube=40_000)}), "PUJAR")
-    assert a[1]["importe"] == la_puja_de_la_cartera(2_900_000), a
-    # 4,69 M: con la cartera se puja (+1 %); sin ella, pasa del tope de 3 M.
-    a = _por(_d(mercado={1: 4_690_000}, fichas={1: _f(4_690_000, sube=30_000)}), "PUJAR")
-    assert a[1]["importe"] == 4_739_000, a
-    assert not _por(_d(mercado={1: 4_690_000}, fichas={1: _f(4_690_000, sube=30_000)},
-                       cartera=False), "PUJAR")
-    # 5.941.000: a + 1 % son 6.000.000 justos; terminada en 9.000 se pasaria
-    # (6.009.000): se queda en el tope.
-    a = _por(_d(mercado={1: 5_941_000}, fichas={1: _f(5_941_000, sube=40_000)}), "PUJAR")
-    assert a[1]["importe"] == ronda.TOPE_POR_VIAJE_CARTERA, a
-    # Por encima del tope, nada.
-    assert not _por(_d(mercado={1: 6_500_000}, fichas={1: _f(6_500_000, sube=40_000)}), "PUJAR")
+    assert a[1]["importe"] == ronda.TOPE_POR_VIAJE, a
+    # 4,69 M: ni con la cartera ni sin ella (pasa del tope de 3 M).
+    for cartera in (True, False):
+        assert not _por(_d(mercado={1: 4_690_000}, fichas={1: _f(4_690_000, sube=30_000)},
+                           cartera=cartera), "PUJAR")
 
 
 def test_como_mucho_veinte():
