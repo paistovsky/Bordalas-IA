@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **17/10 tarde (laboratorio de rivales, segunda vuelta): LA ROTACION.**
+  Nuestra plantilla (12, 57,1 M; Yamal 25,4 M) pierde ~140k/dia (Roberto
+  -80k, Exposito -40k, Luismi Cruz -40k, Unai -30k, Jonny -20k, Rico
+  -10k); Pollo17 gana ~1 M/dia aguantando 19 que suben. Laboratorio
+  (`scratchpad/lab_rotacion/INFORME.md`): cambiar al que lleva 2 dias sin
+  subir por uno de su posicion que sube y puntua igual o mas da ~+30k/dia
+  (un 20 % de la deriva), con datos finos (31 dias, 1 jornada puntuada, 6
+  cambios) y Roberto no rotable a tolerancia 0. Construida apagada
+  (`BORDALAS_LA_ROTACION`, c061b59a): 2 por ventana y por semana, caja de
+  todos los motores, vende al que sale cuando el otro ya llego, rehace el
+  once sin hueco, nada con la ronda jugandose, el aplazado del 21/10 es
+  ronda propia. Revision adversarial: 22 hallazgos confirmados y
+  arreglados; verja 216/216. El ensayo ahora corre tambien el parte y la
+  rotacion (2a89c7db). Primer dia en que puede pujar: lun 19/10 (se
+  resuelve el 20/10, J9 ya acabada). **La jornada en vivo** cuenta el once
+  que empezo (59f53d5a): daba 12 puntos de J9 contando a Cardona; son 5.
+
 - **17/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2292 a #2299).
   Saldo **-432.317**, comprometido 0 (la puja del motor viejo por Manu
   Sanchez ya no cuenta: la orden la retiro). **Decision del gestor sobre
