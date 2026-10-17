@@ -213,6 +213,9 @@ TESTS = [
     "src.analysis.test_el_reroll_respeta_a_los_demas_v1",
     "src.analysis.test_la_puerta_a_precio_de_mercado_v1",
     "src.analysis.test_la_cartera_v1",
+    # El marcador de la carrera: patrimonio dia a dia desde el tablon,
+    # la semana contra no hacer nada y el once por precio. Solo lee.
+    "src.analysis.test_el_marcador_de_la_carrera_v1",
     "src.analysis.test_la_mejora_solo_si_sube_v1",
     "src.analysis.test_la_puja_en_9900_v1",
 
