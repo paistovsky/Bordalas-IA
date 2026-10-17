@@ -254,6 +254,15 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_PUJA_EN_9900: "1"
 
+      # Encendido 17/10 de Madrid. UN SOLO COLCHON (laboratorio de rivales):
+      #   el motor viejo pujo 1.778.494 por Manu Sanchez con la caja en
+      #   -432.317 (su presupuesto autoriza deuda y no ve la cartera). Con
+      #   la cartera, su puja tiene que caber en el colchon de la ronda y
+      #   cuenta entera. Verja 215/215 con los de produccion y con el
+      #   nuevo; paso 0 con 50; ensayo #39021140487 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_UN_SOLO_COLCHON: "1"
+
       # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
       #   que habia jugadores para mejorar el XI y Pepe no ha hecho
       #   nada»). Paso propio tras el panel, en cada vuelta: la
