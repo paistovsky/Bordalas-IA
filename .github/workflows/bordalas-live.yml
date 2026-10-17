@@ -246,6 +246,14 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_MEJORA_SOLO_SI_SUBE: "1"
 
+      # Encendido 17/10 de Madrid. LA PUJA EN 9.900 (laboratorio, paso 3):
+      #   la puja de quien entra en el once termina en 9.900 (ninguna de las
+      #   186 pujas rivales mas altas acaba entre 9.901 y 9.999; Pollo17
+      #   termina en 7.000). Verja 212/212 con los de produccion y con el
+      #   nuevo; paso 0 con 48; ensayo #39017130896 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_PUJA_EN_9900: "1"
+
       # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
       #   que habia jugadores para mejorar el XI y Pepe no ha hecho
       #   nada»). Paso propio tras el panel, en cada vuelta: la
