@@ -352,6 +352,30 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **17/10 03:00. EL LABORATORIO DE LA REVALORIZACION (wf_cf56a431-a90).**
+  Panel diario comun (33.563 filas, 628 jugadores, 18/08-16/10; cuadra al
+  euro) + 8 modelos + 2 verificadores + estratega. Lo CONFIRMADO:
+  (1) el que no sube hoy sube manana el 2,4 % (551/23.301); el que sube,
+  el 91,8 %. En la lista del Computer, el que no sube pierde -5,9 % a 7
+  dias (n=369); las 34 compras nuestras asi, -4,44 M (Luismi Cruz, 14/10,
+  la mejora, tras 16 dias bajando). (2) La salida de la cartera (primer
+  dia que no sube) sobre nuestras 46 compras: +2,19 M. (3) Terminacion en
+  9.900: 24 de 109 subastas al alza con rival frente a 6. (4) Desde
+  mediados de septiembre la prima ya no paga: Pollo17 se queda en -1,2 %
+  en octubre; la deuda alta no rinde (10 % = 25 % en el simulador).
+  (5) Puntos: +0,43 pts/jornada por millon de XI (error 0,20, n=51); el
+  XI de Pollo vale 78,3 M y el nuestro 56,3 M. (6) FutbolFantasy a 1 dia
+  copia el cambio de hoy (97,4 %): no sirve como senal. (7) Luismi
+  empezo la J6 aplazada en -2,87 M: 64 puntos y ~1,92 M perdidos.
+  **Orden de construccion:** 1 la mejora solo si sube (hecho 17/10,
+  97fe9bbd, ensayo y encendido); 2 el marcador semanal de la carrera; 3
+  terminacion 9.900 tambien en la mejora; 4 vender por parte malo o <=0
+  puntos; 5 prima de 1-3 M segun la subida (tras 2 semanas de marcador);
+  6 la puerta a +2 % con registro de aceptaciones; 7 dos suplentes con
+  premios (con datos de J10-J11). **No:** comprar nunca lo que no sube;
+  primas >4 % en >=3 M; aflojar el colchon; plazos fijos de venta; usar FF
+  como senal; vender a Yamal.
+
 - **16/10 23:00 a 17/10 01:00. EL DUENO: «Pollo nos gana… ponlo en marcha
   ya… la misma estrategia que ellos… el laboratorio a probar y probar».**
   Diagnostico verificado (workflow de 4 analistas + verificador): de los
