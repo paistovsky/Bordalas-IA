@@ -352,6 +352,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **17/10 09:00. CORRECCION DEL DUENO (regla basica, no olvidarla): en esta
+  liga, UNA VEZ EMPEZADA LA JORNADA NO SE ADMITEN CAMBIOS DE ALINEACION.** El
+  once de la jornada es el que hay al empezar su primer partido. Lo que Pepe
+  guarde despues vale para la siguiente. Consecuencias: (1) no vender durante
+  la jornada a nadie del once con el que empezo (aunque sea suplente para la
+  siguiente); (2) fichar durante la jornada solo sirve para la siguiente.
+  Hoy: Cardona (ganado en el reset, puja del dueno) es del once de la J10;
+  Diego Rico juega la J9 y vuelve a `conservar` hasta el lunes.
+
 - **17/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2284 a #2291;
   #2292 en marcha). **Hecho:** el enlace del Rayo en FutbolFantasy
   (`FF_TEAM_SLUGS`: `rayo` -> `rayo-vallecano`; comprobado a mano: /rayo

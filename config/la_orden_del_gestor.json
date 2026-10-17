@@ -52,7 +52,12 @@
     {
       "player_id": 30493,
       "nombre": "Sergi Cardona",
-      "por_que": "17/10, el gestor: ganado en el reset del 17/10 (919.000, puja del dueño desde la app) y ya titular en lugar de Diego Rico (70 % frente a 30 %). No se vende para liquidez."
+      "por_que": "17/10, el gestor: ganado en el reset del 17/10 (919.000, puja del dueno desde la app). Titular del once de la J10 en lugar de Diego Rico (70 % frente a 30 %); la J9 se juega con el once del viernes. No se vende para liquidez."
+    },
+    {
+      "player_id": 5678,
+      "nombre": "Diego Rico",
+      "por_que": "17/10, el gestor: esta en el once de la J9, que quedo cerrado al empezar la jornada (en esta liga no se admiten cambios una vez empezada). No se vende hasta que acabe la J9 (lunes 19/10); despues, es la venta que devuelve la caja a positivo."
     }
   ],
   "viajes": {
