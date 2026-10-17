@@ -637,6 +637,26 @@ def decidir(
     return acciones
 
 
+def limpiar_el_libro(libro, foto, snapshot) -> dict:
+    """
+    El libro sin lo que ni es nuestro ni tiene puja viva (una puja perdida,
+    o el manager que retiro al jugador: Freeman y Alvaro Nunez seguian
+    apuntados el 17/10 sin ser nada nuestro). Solo con una foto fiable:
+    plantilla con alguien y las ofertas del mercado leidas; si no, el libro
+    tal cual (una foto rota no borra lo que la cartera aguanta). Pura.
+    """
+
+    libro = dict(libro or {})
+    try:
+        ofertas = ((snapshot or {}).get("market") or {}).get("offers")
+        if not foto.get("plantilla") or not isinstance(ofertas, list):
+            return libro
+        return {k: v for k, v in libro.items()
+                if _int(k) in foto["plantilla"] or _int(k) in (foto.get("nuestras_pujas") or {})}
+    except Exception:                               # noqa: BLE001
+        return libro
+
+
 def leer_libro(ruta: Path | str | None = None) -> dict:
     try:
         return json.loads(Path(ruta or LIBRO).read_text())
@@ -711,6 +731,18 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
 
         if not acciones:
             salida["motivo"] = "NADA_QUE_HACER"
+            # Tambien sin nada que hacer se limpia el libro (17/10/2026):
+            # antes solo se limpiaba al ejecutar, y lo que la ronda no
+            # pudo comprar se quedaba apuntado como suyo.
+            limpio = limpiar_el_libro(libro, foto, snapshot)
+            if limpio != libro:
+                try:
+                    ruta = Path(libro_ruta or LIBRO)
+                    ruta.parent.mkdir(parents=True, exist_ok=True)
+                    ruta.write_text(json.dumps(limpio, indent=2) + "\n")
+                    salida["libro_limpiado"] = sorted(set(libro) - set(limpio))
+                except Exception:                   # noqa: BLE001
+                    pass
             return salida
 
         if escritor_factory is None:
@@ -728,9 +760,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
         # El libro, como el de los chollos: lo pujado queda apuntado para
         # revenderlo si se gana; lo vendido sale; lo que ni es nuestro ni
         # tiene puja viva se limpia solo.
-        for pid in list(libro):
-            if _int(pid) not in foto["plantilla"] and _int(pid) not in foto["nuestras_pujas"]:
-                libro.pop(pid, None)
+        libro = limpiar_el_libro(libro, foto, snapshot)
         for h in hechas:
             pid = str(h.get("player_id"))
             if h.get("accion") == "PUJAR" and h.get("exito"):

@@ -242,6 +242,45 @@ def test_el_motor_viejo_no_vende_lo_que_aguanta():
             os.environ[ronda.ENV_CARTERA] = viejo
 
 
+def test_el_libro_se_limpia_tambien_sin_nada_que_hacer():
+    import json
+    import tempfile
+    from datetime import datetime, timezone
+    foto = {"plantilla": {10}, "nuestras_pujas": {20: {"amount": 1}}}
+    libro = {"10": 1_009_900, "20": 2_089_900, "39901": 2_012_000, "37719": 1_091_000}
+    bien = {"market": {"offers": []}}
+    assert ronda.limpiar_el_libro(libro, foto, bien) == {"10": 1_009_900, "20": 2_089_900}
+    # Una foto rota no borra lo que la cartera aguanta.
+    assert ronda.limpiar_el_libro(libro, {"plantilla": set(), "nuestras_pujas": {}}, bien) == libro
+    assert ronda.limpiar_el_libro(libro, foto, {"market": {}}) == libro
+    assert ronda.limpiar_el_libro(libro, foto, None) == libro
+    # correr, con la cartera y el colchon en negativo (nada que hacer):
+    # Freeman y Alvaro Nunez salen del libro; el de la plantilla se queda.
+    claves = ("BORDALAS_LA_RONDA_DE_LA_MANANA", ronda.ENV_CARTERA, ronda.ENV_PUERTA)
+    viejos = {k: os.environ.pop(k, None) for k in claves}
+    try:
+        os.environ["BORDALAS_LA_RONDA_DE_LA_MANANA"] = "1"
+        os.environ[ronda.ENV_CARTERA] = "1"
+        snapshot = {"league": {"user": {"id": 77}},
+                    "market": {"status": {"balance": -432_317, "maximumBid": 12_000_000},
+                               "sales": [], "offers": []},
+                    "my_team": [{"id": 10, "price": 1_000_000}],
+                    "catalog": {"data": {"players": {}}}}
+        with tempfile.TemporaryDirectory() as d:
+            ruta = Path(d) / "la_ronda.json"
+            ruta.write_text(json.dumps({"10": 1_009_900, "39901": 2_012_000, "37719": 1_091_000}))
+            r = ronda.correr({"snapshot": snapshot}, 600, libro_ruta=ruta,
+                             ahora=datetime(2026, 10, 17, 20, 10, tzinfo=timezone.utc))
+            assert r["motivo"] == "NADA_QUE_HACER", r
+            assert json.loads(ruta.read_text()) == {"10": 1_009_900}
+            assert r.get("libro_limpiado") == ["37719", "39901"]
+    finally:
+        for k, v in viejos.items():
+            os.environ.pop(k, None)
+            if v is not None:
+                os.environ[k] = v
+
+
 def test_nace_apagada():
     viejo = os.environ.pop(ronda.ENV_CARTERA, None)
     try:
@@ -267,6 +306,7 @@ TESTS = [
     test_en_rojo_el_cierre_vende_lo_de_la_cartera_que_no_puede_adoptar,
     test_la_mejora_cuenta_entera_la_puja_de_la_cartera,
     test_el_motor_viejo_no_vende_lo_que_aguanta,
+    test_el_libro_se_limpia_tambien_sin_nada_que_hacer,
     test_nace_apagada,
 ]
 
