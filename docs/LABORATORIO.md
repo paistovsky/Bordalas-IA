@@ -69,6 +69,57 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E46 · 17/10/2026 17:19 de Madrid · La rotacion con la prima de verdad
+
+**El caso:** hoy se ha construido, apagada, «la rotacion»
+(`BORDALAS_LA_ROTACION`): cambia al que lleva 2 dias sin subir por uno de
+su posicion, del mercado, que sube; puja con la prima de la cartera por
+precio (+12 % por debajo de 1 M, +4 % de 1 a 3 M, +1 % por encima). E41
+dice que los que suben son justo los que tienen pelea. ¿Sigue ganando el
+cambio pagando lo que hay que pagar para ganarlos?
+**Datos:** el escaparate real de cada dia (`libro_del_escaparate.jsonl`,
+31 dias, 20 del Computer al dia): 77 candidatos que subian; el historial
+de precios para el viaje (vender al Computer el primer dia que no sube,
+a precio x 1,007, E38) y para la deriva del que se deja (todos los que
+llevan 2 dias sin subir, n de miles).
+**Codigo:** `lab/rotacion/con_prima.py`.
+
+    deriva del que lleva 2 dias sin subir: -0,7 % al dia (-3,5 % a 5 dias, -4,8 % a 7)
+
+    prima fija   subio <2 % (n=35)            subio >=2 % (n=13)
+                 se gana  cambio a 5 d        se gana  cambio a 8 d
+    +1 %          41 %      +5,8 %             2 %      +18,3 %
+    +5 %          58 %      +1,9 %            17 %      +13,9 %
+    +8 %          76 %      -0,8 %            28 %      +10,9 %
+    +12 %         88 %      -4,2 %            43 %       +7,1 %
+
+    con las primas de la cartera por precio: positivo en las 5 casillas
+    (<2 %: +2,9 % / +4,6 % / +3,5 %; >=2 %: +15,8 % / +15,0 %; n de 3 a 21)
+
+(«cambio» = viaje del que entra - deriva del que sale, en % del precio,
+contando solo las pujas que se ganan.)
+
+**Lo que se aprende:**
+- **La rotacion aguanta con la prima real.** La prima por precio de la
+  cartera la deja en positivo en todos los tramos: el +12 % solo se paga
+  por debajo de 1 M, donde los que suben suben mucho en %.
+- **Lo que no hay que hacer: una prima fija alta para todos.** A +12 %,
+  un jugador que sube poco (<2 %) da -4,2 %; pasa a perder a partir de
+  +8 %. Lo confirma el propio modulo (con la puja fuerte, -3,8 %).
+- **Casi todo lo da vender al que cae** (deriva -0,7 % al dia, lo mismo
+  que mide el modulo, -6,1 % a 7 dias). Comprar al que sube añade poco y
+  depende de ganar la subasta: a +1-4 % por uno que sube >=2 % se gana
+  1 de cada 6-50 veces.
+
+**Limites:** n pequeño en el tramo >=2 % (13); el «se gana» viene del
+tablon (E41), no de pujas de Pepe; no mide la maldicion del ganador (si
+lo que se gana es lo que nadie mas queria, puede salir peor). La deriva
+es la mediana de todo el universo, no la de la plantilla de Pepe.
+
+**Veredicto: SE AGUANTA la rotacion como esta construida** (prima por
+precio, nunca la puja fuerte). Nada nuevo para el plan; para cuando se
+encienda: no subirle la prima a los de 1 M o mas que suben poco.
+
 ### E45 · 17/10/2026 11:15 de Madrid · El Levante-Athletic del 21/10: ¿plazo de caja?
 
 **El caso:** el puesto de mando tiene abierta la duda de si el aplazado de
