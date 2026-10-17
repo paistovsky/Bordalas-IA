@@ -367,9 +367,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   con el colchon de la cartera en negativo: no mejora el once (3,5
   pts/partido, como Jonny y Chust) y dejaria la caja en -2,21 M antes del
   aplazado del 21/10. Vetado en `no_pujar`; la orden retira la puja en el
-  siguiente ciclo, antes del reset del domingo. **Siguiente:** un solo
-  colchon (el motor viejo pasa por la misma cuenta que la cartera o se
-  calla con ella encendida).
+  siguiente ciclo, antes del reset del domingo. **Un solo colchon,
+  ENCENDIDO** (`BORDALAS_UN_SOLO_COLCHON`, 50890424): con la cartera, lo
+  que puja el motor viejo tiene que caber en el colchon de la ronda y
+  cuenta entero. Verja 215/215, paso 0 con 50, ensayo #39021140487 verde.
 
 - **17/10 09:00. CORRECCION DEL DUENO (regla basica, no olvidarla): en esta
   liga, UNA VEZ EMPEZADA LA JORNADA NO SE ADMITEN CAMBIOS DE ALINEACION.** El
