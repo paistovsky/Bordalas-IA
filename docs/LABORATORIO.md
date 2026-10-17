@@ -69,6 +69,49 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E45 · 17/10/2026 11:15 de Madrid · El Levante-Athletic del 21/10: ¿plazo de caja?
+
+**El caso:** el puesto de mando tiene abierta la duda de si el aplazado de
+la J6 (Levante-Athletic, martes 21/10 20:00) es una ronda propia que
+empieza ese dia, con su propio «quien empieza en rojo no puntua». Pepe
+esta hoy en **-432.317** (tras ganar a Cardona).
+**Datos:** las rondas del tablon (roundStarted/roundFinished de J1 y J6,
+con sus ids) y la foto del ciclo de las 11:10 de hoy (plantilla, saldo,
+ofertas del Computer).
+**Codigo:** `lab/carrera/aplazado_j6.py`.
+
+**Lo que dice el tablon:**
+
+    15/08 roundStarted  Jornada 1 (4899)        20/08 roundFinished (4899)
+    25/08 roundStarted  Jornada 1 aplazada (4937) 28/08 roundFinished (4937)
+    03/09 roundStarted  Jornada 6 (4904)        ... NUNCA terminada
+    15/09 roundStarted  Jornada 6 aplazada (5125) 18/09 roundFinished (5125)
+
+- **Cada parte es una ronda con su propio comienzo** (y su propio rojo:
+  Luismi perdio los 64 de la 5125, E29). Eso esta medido.
+- **Lo nuevo:** la ronda 4904 («Jornada 6», empezo el 03/09 con el Real
+  Sociedad-Celta) **sigue abierta seis semanas despues**. Lo mas probable
+  es que el Levante-Athletic sea el partido que le falta: entonces su once
+  y su control del rojo fueron el 03/09, y el 21/10 NO seria un plazo
+  nuevo. Es la misma pinta que la J8 (4906): empezada, sin terminar, a la
+  espera del Rayo-Athletic (E43). Pero no esta probado: Biwenger tambien
+  podria abrir una «parte 3» el 21/10.
+- **Lo que se juega Pepe:** solo **Olasagasti** (Levante) juega ese
+  partido. En el peor caso (ronda nueva y Pepe en rojo) se pierden sus
+  puntos de un partido (~4-6 pts, ~150.000 de premio).
+- **Taparlo es barato:** la oferta del Computer por **Diego Rico es de
+  468.100** (viva hasta el 19/10 07:00 y renovada ese dia, E42) y deja el
+  saldo en +35.783. Rico juega la J9 (lunes) y no puede venderse antes
+  (regla del dueno del 17/10); la J10 (jue 23/10, plazo 15:00) obliga a
+  estar en verde de todos modos.
+
+**Veredicto: AVISO.** Tratar el 21/10 20:00 como plazo de caja (lo que ya
+decide el gestor) cuesta casi nada: vender a Rico (o a quien toque) el
+lunes 20/10 tras su partido adelanta lo que la J10 ya exige. Se sabra
+cual de las dos es mirando el tablon el 21/10: si aparece un
+«roundStarted» nuevo a las 18:00 UTC, es ronda propia; si no, y la 4904
+termina despues, el aplazado iba con el once del 03/09.
+
 ### E44 · 16/10/2026 17:18 de Madrid · ¿Acierta la valoracion de Pepe?
 
 **Hipotesis:** el «value» que el motor de pujas da a cada jugador del
