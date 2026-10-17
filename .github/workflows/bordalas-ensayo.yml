@@ -154,6 +154,25 @@ jobs:
           test "$BORDALAS_ENSAYO" = "1" || (echo "Sin candado no se corre" && exit 1)
           python -m src.actions.el_cierre_de_la_jornada || true
 
+      # Los dos pasos que van detras del cierre en produccion (17/10/2026:
+      # sin ellos, un ensayo con `BORDALAS_EL_PARTE_VENDE` o
+      # `BORDALAS_LA_ROTACION` no probaba nada de lo suyo).
+      - name: El parte vende (ENSAYO, sin escribir)
+        if: always()
+        shell: bash
+        run: |
+          test "$BORDALAS_ENSAYO" = "1" || (echo "Sin candado no se corre" && exit 1)
+          python -m src.actions.el_parte_vende || true
+
+      - name: La rotacion (ENSAYO, sin escribir)
+        if: always()
+        shell: bash
+        run: |
+          test "$BORDALAS_ENSAYO" = "1" || (echo "Sin candado no se corre" && exit 1)
+          mkdir -p data/ensayo
+          python -m src.actions.la_rotacion > data/ensayo/la_rotacion.txt 2>&1 || true
+          cat data/ensayo/la_rotacion.txt
+
       - name: Lo que habria escrito
         if: always()
         shell: bash
@@ -177,6 +196,9 @@ jobs:
             data/autopilot/autopilot_log.jsonl
             data/trading/v10_full_autonomous_status.json
             data/trading/v10_production_status.json
+            data/trading/la_rotacion.json
+            data/trading/la_rotacion.jsonl
+            data/trading/el_parte_vuelta.json
             data/intelligence/
             dashboard/data/status.json
           if-no-files-found: ignore
