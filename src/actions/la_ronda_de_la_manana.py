@@ -124,8 +124,15 @@ def activa() -> bool:
 #     reglas de la ronda (sube de verdad, está bien, juega). La puja va a
 #     nombre del vendedor (`vendedor`); el resto, igual que con el
 #     Computer. Nace APAGADA: `ENV_PUERTA`.
+#
+#     17/10 (laboratorio verificado): solo si piden como mucho su valor
+#     + 2 % (si sube y pide <= 2 %: +9,2 % de media con la salida de la
+#     cartera, n=36; pidiendo 10-20 %, -14,9 %). Y cada oferta se apunta
+#     en `LIBRO_PUERTA`: se gane o no (eso lo dice el libro de pujas), hay
+#     que saber cuantas acepta cada manager antes de darla por buena.
 ENV_PUERTA = "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO"
-PRIMA_DEL_MANAGER = 0.03
+PRIMA_DEL_MANAGER = 0.02
+LIBRO_PUERTA = RAIZ / "data" / "trading" / "la_puerta.jsonl"
 
 
 def la_puerta_abierta() -> bool:
@@ -289,6 +296,47 @@ def el_suelo_de_la_cartera(pagado, incremento, valor):
         return int(valor * VENDE_SI_BAJA)
     except Exception:                               # noqa: BLE001
         return None
+
+
+def en_9900(importe) -> int:
+    """
+    El primer importe que termina en 9.900 y no baja de `importe` (el
+    laboratorio del 17/10: ninguna de las 186 pujas rivales mas altas
+    acaba entre 9.901 y 9.999). Con basura, `importe` tal cual. Pura.
+    """
+    try:
+        base = int(importe)
+        r = base // 10_000 * 10_000 + 9_900
+        return r if r >= base else r + 10_000
+    except Exception:                               # noqa: BLE001
+        return importe
+
+
+def apuntar_la_puerta(hechas, vendedores, piden, fichas, ruta=None, ahora=None) -> int:
+    """
+    Apunta en `LIBRO_PUERTA` cada oferta a un manager que salio bien
+    (`exito`). Devuelve cuantas. Nunca lanza.
+    """
+    try:
+        filas = []
+        cuando = (ahora or datetime.now(timezone.utc)).isoformat()
+        for h in hechas or []:
+            pid = _int(h.get("player_id"))
+            if h.get("accion") != "PUJAR" or not h.get("exito") or pid not in (vendedores or {}):
+                continue
+            f = (fichas or {}).get(pid) or {}
+            filas.append({"at": cuando, "player_id": pid, "vendedor": vendedores[pid],
+                          "pide": (piden or {}).get(pid), "valor": _int(f.get("price")),
+                          "sube": _int(f.get("priceIncrement")), "oferta": _int(h.get("importe"))})
+        if filas:
+            ruta = Path(ruta or LIBRO_PUERTA)
+            ruta.parent.mkdir(parents=True, exist_ok=True)
+            with ruta.open("a", encoding="utf-8") as fh:
+                for f in filas:
+                    fh.write(json.dumps(f, ensure_ascii=False) + "\n")
+        return len(filas)
+    except Exception:                               # noqa: BLE001
+        return 0
 
 
 def la_puja(precio: int) -> int:
@@ -509,7 +557,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
         # LA PUERTA (16/10/2026): con el interruptor, los de los managers
         # que piden su valor entran al mismo mercado (lo que piden hace de
         # precio) y se apunta a quién se le puja.
-        vendedores = {}
+        vendedores, piden = {}, {}
         if la_puerta_abierta():
             piden, vendedores = los_de_managers(
                 foto.get("de_managers"), fichas, veto)
@@ -551,6 +599,10 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
 
         hechas = ejecutar(acciones, escritor_factory())
         salida["hechas"] = hechas
+        if vendedores:
+            salida["puerta_apuntadas"] = apuntar_la_puerta(
+                hechas, vendedores, piden, fichas, ahora=ahora,
+                ruta=(Path(libro_ruta).parent / "la_puerta.jsonl") if libro_ruta else None)
 
         # El libro, como el de los chollos: lo pujado queda apuntado para
         # revenderlo si se gana; lo vendido sale; lo que ni es nuestro ni

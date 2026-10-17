@@ -89,6 +89,7 @@ data/
 !/data/trading/libro_de_renovaciones.jsonl
 !/data/trading/libro_del_carril.jsonl
 !/data/trading/position_ledger.json
+!/data/trading/la_puerta.jsonl
 !/data/trading/libro_del_escaparate.jsonl
 !/data/trading/libro_de_viajes.jsonl
 !/data/trading/libro_de_escaparate.jsonl

@@ -199,6 +199,9 @@ QUE_HACE = {
         "En cada vuelta puja (precio + 1 %) por los del Computer que suben, están "
         "bien y juegan, con toda la deuda, y se los revende al Computer antes de "
         "la jornada.",
+    "BORDALAS_LA_PUJA_EN_9900":
+        "La puja de la mejora del once termina en 9.900 (gana los empates: ninguna "
+        "puja rival de las 186 más altas acaba entre 9.901 y 9.999).",
     "BORDALAS_LA_MEJORA_SOLO_SI_SUBE":
         "La mejora del once solo ficha del Computer a quien sube hoy de verdad (la "
         "subida mínima de su tramo); al que baja solo para tapar un hueco "
@@ -212,8 +215,8 @@ QUE_HACE = {
         "positivo) y antes de cada jornada el cierre vende solo lo justo.",
     "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO":
         "La ronda también puja por los que venden otros managers, pero solo si "
-        "piden su valor (como mucho un 3 % más), suben y juegan; la puja va a "
-        "nombre del que lo vende.",
+        "piden su valor (como mucho un 2 % más), suben y juegan; la puja va a "
+        "nombre del que lo vende y cada oferta se apunta para medir cuántas aceptan.",
     "BORDALAS_LA_MEJORA_DEL_ONCE":
         "En cada vuelta busca los cambios que más puntos suman al once (con deuda "
         "entre jornadas), puja por el que entra y vende al que sale cuando llega "

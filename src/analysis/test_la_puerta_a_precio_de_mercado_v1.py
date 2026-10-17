@@ -5,7 +5,7 @@ LA PUERTA, A PRECIO DE MERCADO (16/10/2026). Guardias de
 `src/actions/la_orden_del_gestor.py`).
 
     1. La foto separa lo que venden los managers (lo que piden y quién).
-    2. Solo entran los que piden su valor (como mucho + 3 %).
+    2. Solo entran los que piden su valor (como mucho + 2 % desde el 17/10).
     3. La puja va a nombre del vendedor; la del Computer, como siempre.
     4. Con la puerta, la ronda puja por el del manager; sin ella, no.
     5. Nace apagada.
@@ -80,14 +80,14 @@ def test_solo_entran_los_que_piden_su_valor():
               4: {}, 5: {"price": 1_000_000}, 6: {"price": 1_000_000}}
     de = {
         1: {"precio": 1_000_000, "vendedor": 7},     # su valor: entra
-        2: {"precio": 1_030_000, "vendedor": 7},     # +3 %: entra
-        3: {"precio": 1_031_000, "vendedor": 7},     # +3,1 %: fuera
+        2: {"precio": 1_020_000, "vendedor": 7},     # +2 %: entra
+        3: {"precio": 1_021_000, "vendedor": 7},     # +2,1 %: fuera
         4: {"precio": 900_000, "vendedor": 7},       # sin valor: fuera
         5: {"precio": 900_000, "vendedor": None},    # sin vendedor: fuera
         6: {"precio": 900_000, "vendedor": 7},       # vetado: fuera
     }
     piden, vendedores = ronda.los_de_managers(de, fichas, veto={6})
-    assert piden == {1: 1_000_000, 2: 1_030_000}, piden
+    assert piden == {1: 1_000_000, 2: 1_020_000}, piden
     assert vendedores == {1: 7, 2: 7}, vendedores
     assert ronda.los_de_managers("basura", None) == ({}, {})
     assert ronda.los_de_managers({1: "x"}, fichas) == ({}, {})
@@ -146,6 +146,8 @@ def _correr(puerta: bool):
             r = ronda.correr({"snapshot": _snapshot()}, 120,
                              escritor_factory=lambda: e,
                              libro_ruta=Path(d) / "la_ronda.json")
+            puerta = Path(d) / "la_puerta.jsonl"
+            r["_puerta"] = (puerta.read_text().splitlines() if puerta.exists() else [])
         return r, e
     finally:
         ronda.horas_a_la_jornada, ronda._puede_escribir, proxima.jornada_en_curso = viejos
@@ -169,6 +171,13 @@ def test_con_la_puerta_puja_por_el_del_manager_y_sin_ella_no():
     assert e.pujas == [(NUNEZ, ronda.la_puja(1_080_000), MANZAGOOL)], e.pujas
     assert r["puerta"] == {"abierta": True, "a_precio_de_mercado": [NUNEZ]}, r["puerta"]
     assert r["acciones"][0]["vendedor"] == MANZAGOOL, r["acciones"]
+    # Y la oferta queda apuntada en el libro de la puerta (en la carpeta
+    # del libro de la ronda: nunca en el de verdad).
+    import json as _json
+    assert r["puerta_apuntadas"] == 1 and len(r["_puerta"]) == 1, r
+    fila = _json.loads(r["_puerta"][0])
+    assert (fila["player_id"], fila["vendedor"], fila["pide"], fila["oferta"]) == (
+        NUNEZ, MANZAGOOL, 1_080_000, ronda.la_puja(1_080_000)), fila
 
 
 def test_nace_apagada():

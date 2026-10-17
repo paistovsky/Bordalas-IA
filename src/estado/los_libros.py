@@ -239,6 +239,21 @@ LIBROS = (
         ),
     },
     {
+        "ruta": "data/trading/la_puerta.jsonl",
+        "que_es": (
+            "Una linea por oferta de la ronda a un manager (la "
+            "puerta a precio de mercado): jugador, vendedor, lo que "
+            "pedia, su valor, la subida del dia y lo que se ofrecio."
+        ),
+        "por_que_no_se_reconstruye": (
+            "El tablon solo publica las compras entre managers que "
+            "se cierran: las ofertas rechazadas o caducadas no dejan "
+            "rastro. Sin ellas no se sabe cuantas acepta cada "
+            "manager (laboratorio del 17/10: medirlo antes de dar "
+            "la puerta por buena)."
+        ),
+    },
+    {
         "ruta": "data/trading/libro_del_escaparate.jsonl",
         "que_es": (
             "Los veinte del escaparate del Computer en cada "

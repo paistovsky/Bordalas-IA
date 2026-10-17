@@ -175,6 +175,7 @@ ENV = "BORDALAS_LA_MEJORA_DEL_ONCE"
 ENV_CALENDARIO = "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA"     # nace APAGADO
 ENV_PUJA_FUERTE = "BORDALAS_LA_MEJORA_PUJA_FUERTE"          # nace APAGADO
 ENV_SOLO_SI_SUBE = "BORDALAS_LA_MEJORA_SOLO_SI_SUBE"        # nace APAGADO
+ENV_PUJA_EN_9900 = "BORDALAS_LA_PUJA_EN_9900"               # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
 # Lo que hizo la mejora en ESTA vuelta (13/10/2026), para el cierre de la
@@ -284,6 +285,17 @@ def sube_de_verdad(ficha, precio=None) -> bool:
             sube = _int(f.get("priceIncrement"))
         minima = la_subida_minima(_int(f.get("price")) or _int(precio))
         return sube is not None and minima is not None and sube > 0 and sube >= minima
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def la_puja_en_9900_activa() -> bool:
+    """`BORDALAS_LA_PUJA_EN_9900` (17/10, laboratorio: la puja del once
+    terminada en 9.900 gana los empates; ver `la_ronda_de_la_manana.
+    en_9900`). Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_PUJA_EN_9900, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
     except Exception:                               # noqa: BLE001
         return False
 
@@ -556,6 +568,7 @@ def decidir(
     ya_pujados=frozenset(), caja, horas_jornada, puede_escribir=True,
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
     estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
+    en_9900=False,
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -593,6 +606,8 @@ def decidir(
         solo_si_sube  SOLO SI SUBE (17/10): del Computer solo entra el que
                     sube hoy de verdad (`sube_de_verdad`), salvo para tapar
                     un hueco (el que sale fuera o con poca titularidad)
+        en_9900     LA PUJA EN 9.900 (17/10): la puja del que entra termina
+                    en 9.900 (`la_ronda_de_la_manana.en_9900`)
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -739,9 +754,13 @@ def decidir(
             continue
         if e is None or not precio:
             continue
+        puja = la_puja(precio)
+        if en_9900:
+            from src.actions.la_ronda_de_la_manana import en_9900 as _en_9900
+            puja = _en_9900(puja)
         entran.append(_con_calendario(
             {"id": pid, "nombre": c.get("name"), "pos": c.get("position"),
-             "esperado": e, "puja": la_puja(precio), "coste": la_puja(precio),
+             "esperado": e, "puja": puja, "coste": puja,
              "ya_es_nuestro": False, "precio": precio,
              "sube": sube_de_verdad(lc, precio)},
             la_ficha(lc, c.get("position"), respaldo=c), prob))
@@ -1364,6 +1383,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
                       else jornada_en_curso(ahora)),
             calendario_de_puntos=ctx, puja_fuerte=la_puja_fuerte_activa(),
             solo_si_sube=la_mejora_solo_si_sube_activa(),
+            en_9900=la_puja_en_9900_activa(),
             probabilidades=las_probabilidades(status),
             estados=los_estados(snapshot, liga),
             vendidos=vendidos,
