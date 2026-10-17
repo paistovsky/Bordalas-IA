@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 17/10/2026, 07:45 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **17/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2284 a #2291;
+  #2292 en marcha). **Hecho:** el enlace del Rayo en FutbolFantasy
+  (`FF_TEAM_SLUGS`: `rayo` -> `rayo-vallecano`; comprobado a mano: /rayo
+  404, /rayo-vallecano 200). Sin interruptor, sin paso 0. Verja 211/211,
+  ensayo #39005792044 verde en `arreglo/rayo-ff`, fusionado (d76c0f8c).
+  **Pujas de la noche (reset 07:00):** Sergi Cardona GANADA (919.000);
+  Alvaro Nunez (1.091.000) y Freeman (2.012.000) PERDIDAS. Saldo a las
+  07:19: **-432.317**, 0 pujas vivas. La J10 (jue 23/10 21:00, plazo
+  15:00) queda lejos y la cartera vende el primer dia que no sube, pero
+  **sigue abierta la duda del aplazado de la J6 (21/10)** que el chat del
+  dueno apunto como posible plazo de caja: hay que verificarlo antes del
+  martes. No toco a Pablo Ramon en `no_pujar` (ya no esta en el mercado; lo
+  dejo al chat del dueno, que lleva la cartera, para no ser dos manos).
 
 - **17/10 03:00. EL LABORATORIO DE LA REVALORIZACION (wf_cf56a431-a90).**
   Panel diario comun (33.563 filas, 628 jugadores, 18/08-16/10; cuadra al
