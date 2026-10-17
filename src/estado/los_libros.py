@@ -482,6 +482,8 @@ NO_SON_LIBROS = (
         "fallida)",
     ),
     ("data/trading/v10_production_status.json", "estado de la vuelta"),
+    ("data/trading/la_rotacion_vuelta.txt", "lo que dijo la rotacion en la vuelta, para el artefacto"),
+    ("data/trading/el_parte_vuelta.json", "lo que mando el parte en la vuelta, para la rotacion"),
 
     (
         "data/autopilot/action_failure_backoff.json",
