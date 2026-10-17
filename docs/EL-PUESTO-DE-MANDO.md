@@ -352,6 +352,27 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **17/10 noche (laboratorio de rivales, tercera vuelta).** Rivales: nadie
+  compro ni vendio desde la manana. Pollo17 en 7 dias: 4 compras al
+  Computer, todas subiendo, prima media +16,7 % (Diomande 14,0 M a +23,5 %,
+  ahora -1,9 M); 3 ventas al Computer el primer dia que no subian (-1,09 M
+  realizado). Su patrimonio +2,98 M en 7 dias, casi todo revalorizacion; la
+  distancia con nosotros paso de 44,7 a 47,5 M. Puntos con la J9 en vivo:
+  Pepe 323, Pollo 320. Luismi (-4,16 M de caja) perdio los 64 puntos de la
+  J6 aplazada por empezarla en negativo. Manzagool republico 11 a +20 %.
+  Nuestras tacticas: la cartera y la puerta, 0 pujas (colchon <= 0 desde el
+  reset del 17/10); la mejora solo si sube, 0 candidatos validos; un solo
+  colchon paro 8 pujas del motor viejo (1.778.494, Manu Sanchez vetado).
+  **Aplicado:** la rotacion ENCENDIDA (e144fd3e; NADA con la J9 jugandose);
+  el motor viejo respeta los vetados de la orden en el orquestador y el
+  executor (40a66164) y trae `BORDALAS_EL_MOTOR_VIEJO_SOLO_SI_SUBE` apagado
+  (lo que pujo por jugadores que bajaban: -716k, n=3; subiendo: +1,18 M,
+  n=4); el artefacto lleva la rotacion, la cartera y el plan del cierre.
+  **Caja del 21/10 20:00 (aplazado, juega Olasagasti):** -432.317; vendiendo
+  a Rico (oferta ~468k, desde el 20/10 07:00) queda entre -24k y +36k; la
+  racha (+250k, ~21/10 00:10) y el premio de la J9 la cubririan. Revisar el
+  martes por la manana.
+
 - **17/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2299 a #2306).
   Saldo -432.317, 0 comprometido. El chat del dueno encendio la rotacion
   (e144fd3e): es el septimo interruptor en ~20 h; lo dejo apuntado, el
