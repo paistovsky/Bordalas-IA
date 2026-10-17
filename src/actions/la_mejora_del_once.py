@@ -1465,6 +1465,8 @@ def main() -> int:
                   f"vara: {c.get('medida')}")
     if (calendario or {}).get("frenados_por_el_margen"):
         print(f"  frenados por el margen del calendario: {calendario['frenados_por_el_margen']}")
+    if plan.get("sin_subir"):
+        print(f"  frenados por no subir (solo si sube): {plan['sin_subir']}")
     if r.get("v10_descartado"):
         print(f"  lo de esta vuelta, sin contar: {r['v10_descartado']}")
     for f in plan.get("frenadas") or []:
