@@ -216,6 +216,10 @@ TESTS = [
     # El marcador de la carrera: patrimonio dia a dia desde el tablon,
     # la semana contra no hacer nada y el once por precio. Solo lee.
     "src.analysis.test_el_marcador_de_la_carrera_v1",
+    # El parte vende (paso 4 del laboratorio): el suplente en duda,
+    # lesionado o sancionado se publica y se vende desde el 95 % de su
+    # valor; nunca uno del once escrito ni con la ronda jugandose. Apagado.
+    "src.analysis.test_el_parte_vende_v1",
     "src.analysis.test_la_mejora_solo_si_sube_v1",
     "src.analysis.test_la_puja_en_9900_v1",
 

@@ -240,6 +240,12 @@ QUE_HACE = {
         "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "
         "del once escrito) hasta quedar en positivo; publica a los que se pueden "
         "vender para que llegue la oferta del Computer.",
+    "BORDALAS_EL_PARTE_VENDE":
+        "Vende a los suplentes que Biwenger da en duda, lesionados o sancionados "
+        "(caen un 3-5 % en la semana): los publica a su valor y acepta la oferta "
+        "del Computer desde el 95 %. Nunca a uno del once escrito, ni a Yamal, ni "
+        "a los protegidos o `conservar` del gestor, ni a lo que aguanta la "
+        "cartera, ni con una ronda jugándose.",
     "BORDALAS_EL_CALENDARIO_EN_EL_ONCE":
         "Al elegir el once mira el partido de la próxima ronda: en casa contra "
         "uno que no es de los de arriba suma; fuera, o contra uno de arriba, "
