@@ -352,13 +352,33 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **17/10 11:00 (el laboratorio de rivales, primera vuelta).** Lo que han
+  hecho: **Pollo17**, 0 compraventas y +1,97 M en dos dias (18 de sus 19
+  jugadores suben): gana aguantando, no operando. **Luismi** ficho a Raba a
+  +43,6 % (cohete barato) y va a -4,16 M de caja. **Manzagool** retiro sus
+  ventas tras nuestras ofertas. **DiosMande** puso 12 a precio fijo; Cristian
+  Romero y Veiga por debajo de valor, pero el tope de 3 M por viaje los deja
+  fuera. Aplicado hoy: la puja en 9.900 en la mejora (ON, 6a4fd722), la
+  puerta a +2 % con libro (ON), el marcador de la carrera (solo lectura),
+  el parte vende (construido, OFF). **Dos correcciones:** (1) la puja de
+  Cardona la hizo la mejora del once (corrida 38952525724, 16/10 21:10), no
+  el dueno; corregido tambien en la orden. (2) el motor viejo (AUTOPILOT V3,
+  ACQUISITION_BOARD, XI_UPGRADE) pujo 1.778.494 por Manu Sanchez (+7,8 %)
+  con el colchon de la cartera en negativo: no mejora el once (3,5
+  pts/partido, como Jonny y Chust) y dejaria la caja en -2,21 M antes del
+  aplazado del 21/10. Vetado en `no_pujar`; la orden retira la puja en el
+  siguiente ciclo, antes del reset del domingo. **Siguiente:** un solo
+  colchon (el motor viejo pasa por la misma cuenta que la cartera o se
+  calla con ella encendida).
+
 - **17/10 09:00. CORRECCION DEL DUENO (regla basica, no olvidarla): en esta
   liga, UNA VEZ EMPEZADA LA JORNADA NO SE ADMITEN CAMBIOS DE ALINEACION.** El
   once de la jornada es el que hay al empezar su primer partido. Lo que Pepe
   guarde despues vale para la siguiente. Consecuencias: (1) no vender durante
   la jornada a nadie del once con el que empezo (aunque sea suplente para la
   siguiente); (2) fichar durante la jornada solo sirve para la siguiente.
-  Hoy: Cardona (ganado en el reset, puja del dueno) es del once de la J10;
+  Hoy: Cardona (ganado en el reset; la puja era de la mejora del once, no
+  del dueno: ver la entrada de las 11:00) es del once de la J10;
   Diego Rico juega la J9 y vuelve a `conservar` hasta el lunes.
 
 - **17/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2284 a #2291;
