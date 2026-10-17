@@ -199,6 +199,10 @@ QUE_HACE = {
         "En cada vuelta puja (precio + 1 %) por los del Computer que suben, están "
         "bien y juegan, con toda la deuda, y se los revende al Computer antes de "
         "la jornada.",
+    "BORDALAS_LA_MEJORA_SOLO_SI_SUBE":
+        "La mejora del once solo ficha del Computer a quien sube hoy de verdad (la "
+        "subida mínima de su tramo); al que baja solo para tapar un hueco "
+        "(titular lesionado, sancionado o con menos del 50 % de titularidad).",
     "BORDALAS_LA_CARTERA":
         "La ronda compra a los que suben pujando para ganar (precio + 12 % por "
         "debajo de 1 M y + 4 % de 1 a 3 M, solo a 64 h o más de la jornada) y los "

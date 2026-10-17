@@ -174,6 +174,7 @@ from pathlib import Path
 ENV = "BORDALAS_LA_MEJORA_DEL_ONCE"
 ENV_CALENDARIO = "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA"     # nace APAGADO
 ENV_PUJA_FUERTE = "BORDALAS_LA_MEJORA_PUJA_FUERTE"          # nace APAGADO
+ENV_SOLO_SI_SUBE = "BORDALAS_LA_MEJORA_SOLO_SI_SUBE"        # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
 # Lo que hizo la mejora en ESTA vuelta (13/10/2026), para el cierre de la
@@ -244,6 +245,47 @@ def activa() -> bool:
 # de verdad. Nace APAGADA.
 PRIMA_POR_PUNTO = 0.04
 PRIMA_MAXIMA = 0.12
+
+
+# SOLO SI SUBE (17/10/2026, laboratorio de la revalorización). La mejora
+# no miraba el precio: el 14/10 metió a Luismi Cruz (3.252.000) tras 16
+# días seguidos bajando. Verificado (price_history, 18/08-16/10): el que
+# no sube hoy sube mañana el 2,4 % de las veces (551/23.301); en la lista
+# del Computer, del 17/09 al 08/10, pierde -5,9 % de mediana a 7 días
+# (n=369, igual en las dos mitades); las 34 compras de Pepe así, -4,44 M.
+# Con el interruptor, el que entra del Computer tiene que subir hoy al
+# menos la subida mínima de su tramo (la de la ronda). Única excepción:
+# tapar un hueco de verdad (el que sale lesionado, sancionado o con menos
+# de `TITULARIDAD_HUECO` de titularidad); ahí, a precio + 1 % como siempre.
+TITULARIDAD_HUECO = 50
+FUERA_DEL_ONCE = {"injured", "sanctioned"}
+
+
+def la_mejora_solo_si_sube_activa() -> bool:
+    """`BORDALAS_LA_MEJORA_SOLO_SI_SUBE`, leído como `activa`. Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_SOLO_SI_SUBE, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def sube_de_verdad(ficha, precio=None) -> bool:
+    """
+    El de `ficha` (`todaLaLiga`: price, price_increment) sube hoy al menos
+    la subida mínima de su tramo de precio (`la_ronda_de_la_manana.
+    la_subida_minima`). Sin dato, no. Pura, nunca lanza.
+    """
+    try:
+        from src.actions.la_ronda_de_la_manana import la_subida_minima
+        f = ficha or {}
+        sube = _int(f.get("price_increment"))
+        if sube is None:
+            sube = _int(f.get("priceIncrement"))
+        minima = la_subida_minima(_int(f.get("price")) or _int(precio))
+        return sube is not None and minima is not None and sube > 0 and sube >= minima
+    except Exception:                               # noqa: BLE001
+        return False
 
 
 def la_puja_fuerte_activa() -> bool:
@@ -513,7 +555,7 @@ def decidir(
     pendientes=frozenset(), intocables=frozenset(), protegidos=frozenset(),
     ya_pujados=frozenset(), caja, horas_jornada, puede_escribir=True,
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
-    estados=None, vendidos=frozenset(), puja_fuerte=None,
+    estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -548,6 +590,9 @@ def decidir(
                     ya no son de la plantilla. El cambio vivo cuyo `sale`
                     se vendió se suelta (ya vendido); el cuyo `entra` se
                     vendió, también (sin relevo, el que sale se queda).
+        solo_si_sube  SOLO SI SUBE (17/10): del Computer solo entra el que
+                    sube hoy de verdad (`sube_de_verdad`), salvo para tapar
+                    un hueco (el que sale fuera o con poca titularidad)
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -659,9 +704,16 @@ def decidir(
         if e is None:
             continue
         valor = _int(p.get("price")) or _int((liga.get(pid) or {}).get("price"), 0) or 0
+        estado = str((estados or {}).get(pid) or (liga.get(pid) or {}).get("status")
+                     or "ok").strip().lower()
+        try:
+            hueco = estado in FUERA_DEL_ONCE or (prob is not None
+                                                  and float(prob) < TITULARIDAD_HUECO)
+        except (TypeError, ValueError):
+            hueco = estado in FUERA_DEL_ONCE
         nuestros.append(_con_calendario(
             {"id": pid, "nombre": p.get("name"), "pos": p.get("position"),
-             "esperado": e, "valor": valor},
+             "esperado": e, "valor": valor, "hueco": hueco},
             la_ficha(liga.get(pid), p.get("position")), prob))
 
     # Quién puede entrar: el Computer de hoy, y lo que ya tienen la ronda
@@ -690,7 +742,8 @@ def decidir(
         entran.append(_con_calendario(
             {"id": pid, "nombre": c.get("name"), "pos": c.get("position"),
              "esperado": e, "puja": la_puja(precio), "coste": la_puja(precio),
-             "ya_es_nuestro": False, "precio": precio},
+             "ya_es_nuestro": False, "precio": precio,
+             "sube": sube_de_verdad(lc, precio)},
             la_ficha(lc, c.get("position"), respaldo=c), prob))
     prob_once = {_int(p.get("id")): p.get("starter_probability") for p in once}
     for pid in inventario:
@@ -720,9 +773,15 @@ def decidir(
             la_ficha(lc, lc.get("position")), prob))
 
     cambios = []
+    sin_subir = 0
     for e in entran:
         for o in nuestros:
             if o["pos"] != e["pos"]:
+                continue
+            # SOLO SI SUBE: el del Computer que no sube solo tapa huecos.
+            if (solo_si_sube and not e["ya_es_nuestro"] and not e.get("sube")
+                    and not o.get("hueco")):
+                sin_subir += 1
                 continue
             # Con el calendario, el xP por jornada de los DOS lados; si a
             # uno le falta, el `esperado` de los dos (la misma vara).
@@ -787,6 +846,8 @@ def decidir(
             plan["calendario"]["frenados_por_el_margen"] = frenados_por_el_margen
     if frenadas:
         plan["frenadas"] = frenadas
+    if solo_si_sube:
+        plan["sin_subir"] = sin_subir
 
     for c in elegidos:
         if c["ya_es_nuestro"]:
@@ -1302,6 +1363,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             en_curso=(fuera["en_curso"] if "en_curso" in fuera
                       else jornada_en_curso(ahora)),
             calendario_de_puntos=ctx, puja_fuerte=la_puja_fuerte_activa(),
+            solo_si_sube=la_mejora_solo_si_sube_activa(),
             probabilidades=las_probabilidades(status),
             estados=los_estados(snapshot, liga),
             vendidos=vendidos,

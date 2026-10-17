@@ -190,8 +190,9 @@ def los_de_managers(de_managers, fichas, veto=frozenset()) -> tuple:
 #          debajo de 1 M, +12 % da +6,3 % a 7 días; de 1 a 3 M, +4 % da
 #          +2,5 % (+8 % ya da -0,6 % y +10 %, -2,8 %); de 3 M para arriba
 #          ni +4 % se recupera, y la ronda no pasa de `TOPE_POR_VIAJE`.
-#          Terminada en 9.000 (Pollo17 termina en 7.000: 79 de sus 85
-#          ganadas). A los managers, lo que piden + 1 % (no es subasta).
+#          Terminada en 9.900 (`TERMINACION`; Pollo17 termina en 7.000:
+#          79 de sus 85 ganadas). A los managers, lo que piden + 1 % (no
+#          es subasta).
 #       3. Cerca de la jornada (menos de `HORAS_SIN_COMPRAR`) no compra,
 #          como siempre: lo que se gana en el último reset no se puede
 #          vender antes de empezarla (revisión del 16/10: comprar ahí «con
@@ -213,6 +214,12 @@ ENV_CARTERA = "BORDALAS_LA_CARTERA"
 MAXIMO_EN_PLANTILLA = 20
 LIQUIDA_CARTERA = 0.92          # a lo que se cuenta lo de la cartera si hubiera que venderlo ya
 HORAS_PRIMA = 64
+# LA TERMINACIÓN (17/10, laboratorio verificado): en 9.900, no en 9.000.
+# De las 186 pujas rivales más altas ninguna acaba entre 9.901 y 9.999, y
+# 12 de 404 visibles acaban entre 9.001 y 9.900 (Manzagool 9.180/9.190,
+# DiosMande 9.009/9.099). En las 109 subastas al alza con rival: con el
+# precio exacto se ganan 6, con 9.900 se ganan 24.
+TERMINACION = 9_900
 VENDE_SI_BAJA = 0.97
 #   (hasta este precio, sin incluir; prima sobre el precio)
 PRIMAS_DE_LA_CARTERA = (
@@ -247,7 +254,7 @@ def los_que_aguanta(libro_ruta=None) -> set:
 def la_puja_de_la_cartera(precio, sube=None) -> int:
     """
     Lo que se puja en el Computer por uno que sube: precio + la prima de
-    su tramo de precio, bajado a la decena de mil y terminado en 9.000;
+    su tramo de precio, bajado a la decena de mil y terminado en 9.900;
     nunca menos que `la_puja`. Con basura, `la_puja`. Nunca lanza.
     """
 
@@ -260,7 +267,7 @@ def la_puja_de_la_cartera(precio, sube=None) -> int:
             if hasta is None or precio < hasta:
                 prima = p
                 break
-        puja = int(precio * (1 + prima)) // 10_000 * 10_000 + 9_000
+        puja = int(precio * (1 + prima)) // 10_000 * 10_000 + TERMINACION
         return max(puja, la_puja(precio))
     except Exception:                               # noqa: BLE001
         return la_puja(precio)

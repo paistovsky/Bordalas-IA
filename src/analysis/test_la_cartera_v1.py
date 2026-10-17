@@ -2,7 +2,7 @@
 LA CARTERA (16/10/2026). Guardias de `BORDALAS_LA_CARTERA` en
 `src/actions/la_ronda_de_la_manana.py`.
 
-    1. Puja para ganar: precio + la prima de su tramo, terminada en 9.000.
+    1. Puja para ganar: precio + la prima de su tramo, terminada en 9.900.
     2. Aguanta lo que sube; el primer día que no sube, vende.
     3. Cerca de la jornada no compra (como siempre).
     4. Como mucho `MAXIMO_EN_PLANTILLA`; la prima no saca del tope.
@@ -52,15 +52,15 @@ def _por(a, accion):
 
 def test_puja_para_ganar_terminada_en_9000():
     # Por debajo de 1 M, +12 %; de 1 a 3 M, +4 %; por encima, +1 %.
-    assert la_puja_de_la_cartera(900_000, 40_000) == 1_009_000
-    assert la_puja_de_la_cartera(2_000_000, 80_000) == 2_089_000
-    assert la_puja_de_la_cartera(4_690_000, 10_000) == 4_739_000
+    assert la_puja_de_la_cartera(900_000, 40_000) == 1_009_900
+    assert la_puja_de_la_cartera(2_000_000, 80_000) == 2_089_900
+    assert la_puja_de_la_cartera(4_690_000, 10_000) == 4_739_900
     # La subida del día no cambia la prima.
-    assert la_puja_de_la_cartera(2_000_000, 10_000) == 2_089_000
-    # Termina en 9.000 y nunca por debajo de precio + 1 %.
+    assert la_puja_de_la_cartera(2_000_000, 10_000) == 2_089_900
+    # Termina en 9.900 y nunca por debajo de precio + 1 %.
     for precio, sube in ((1_234_567, 20_000), (450_000, 40_000), (9_870_000, 50_000)):
         p = la_puja_de_la_cartera(precio, sube)
-        assert p % 10_000 == 9_000 and p >= la_puja(precio), (precio, sube, p)
+        assert p % 10_000 == 9_900 and p >= la_puja(precio), (precio, sube, p)
     # Con basura, la de siempre.
     assert la_puja_de_la_cartera("x", None) == la_puja(0)
     assert la_puja_de_la_cartera(1_000_000, "x") == la_puja_de_la_cartera(1_000_000, 0)
@@ -120,7 +120,7 @@ def test_cerca_de_la_jornada_no_compra_y_lejos_si_con_deuda():
 
 
 def test_el_tope_de_la_cartera():
-    # 2,9 M: a + 4 % (3.019.000) se pasaria de 3 M; cabe a + 1 % (2.929.000),
+    # 2,9 M: a + 4 % (3.019.900) se pasaria de 3 M; cabe a + 1 % (2.929.000),
     # asi que se puja el tope.
     a = _por(_d(mercado={1: 2_900_000}, fichas={1: _f(2_900_000, sube=40_000)}), "PUJAR")
     assert a[1]["importe"] == ronda.TOPE_POR_VIAJE, a
@@ -133,8 +133,8 @@ def test_el_tope_de_la_cartera():
 def test_el_colchon():
     mercado = {1: 1_000_000, 2: 1_000_000, 3: 1_000_000}
     fichas = {p: _f(1_000_000, sube=40_000) for p in mercado}
-    # Saldo 300.000, sin pujas: cada una (1.049.000) cuesta de colchón
-    # 1.049.000 - 0,92 x 1.000.000 = 129.000; caben dos.
+    # Saldo 300.000, sin pujas: cada una (1.049.900) cuesta de colchón
+    # 1.049.900 - 0,92 x 1.000.000 = 129.900; caben dos.
     a = _d(mercado=mercado, fichas=fichas, saldo=300_000)
     assert len(_por(a, "PUJAR")) == 2, a
     # Hoy (16/10): saldo 486.683; vivas Cardona 919.000 (de otro) y
@@ -156,7 +156,7 @@ def test_el_colchon():
 def test_la_prima_solo_lejos_de_la_jornada():
     mercado = {1: 1_000_000}
     fichas = {1: _f(1_000_000, sube=40_000)}
-    assert _por(_d(mercado=mercado, fichas=fichas, horas_jornada=70), "PUJAR")[1]["importe"] == 1_049_000
+    assert _por(_d(mercado=mercado, fichas=fichas, horas_jornada=70), "PUJAR")[1]["importe"] == 1_049_900
     assert _por(_d(mercado=mercado, fichas=fichas, horas_jornada=50), "PUJAR")[1]["importe"] == la_puja(1_000_000)
 
 
@@ -210,13 +210,13 @@ def test_en_rojo_el_cierre_vende_lo_de_la_cartera_que_no_puede_adoptar():
 
 def test_la_mejora_cuenta_entera_la_puja_de_la_cartera():
     from src.actions.la_mejora_del_once import lo_de_esta_vuelta
-    v10 = {"ronda": {"hechas": [{"accion": "PUJAR", "player_id": 7, "importe": 1_009_000,
+    v10 = {"ronda": {"hechas": [{"accion": "PUJAR", "player_id": 7, "importe": 1_009_900,
                                  "exito": True}]},
            "chollos": {"hechas": [{"accion": "PUJAR", "player_id": 8, "importe": 500_000,
                                    "exito": True}]}}
     assert lo_de_esta_vuelta(v10)["solas"] == {7, 8}
     assert lo_de_esta_vuelta(v10, cartera=True)["solas"] == {8}
-    assert lo_de_esta_vuelta(v10, cartera=True)["pujas"] == {7: 1_009_000, 8: 500_000}
+    assert lo_de_esta_vuelta(v10, cartera=True)["pujas"] == {7: 1_009_900, 8: 500_000}
 
 
 def test_el_motor_viejo_no_vende_lo_que_aguanta():
@@ -226,7 +226,7 @@ def test_el_motor_viejo_no_vende_lo_que_aguanta():
     try:
         with tempfile.TemporaryDirectory() as d:
             libro = Path(d) / "la_ronda.json"
-            libro.write_text(json.dumps({"123": 1_009_000, "x": 5}))
+            libro.write_text(json.dumps({"123": 1_009_900, "x": 5}))
             assert ronda.los_que_aguanta(libro) == set()
             os.environ[ronda.ENV_CARTERA] = "1"
             assert ronda.los_que_aguanta(libro) == {123}

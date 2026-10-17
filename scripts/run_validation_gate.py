@@ -213,6 +213,7 @@ TESTS = [
     "src.analysis.test_el_reroll_respeta_a_los_demas_v1",
     "src.analysis.test_la_puerta_a_precio_de_mercado_v1",
     "src.analysis.test_la_cartera_v1",
+    "src.analysis.test_la_mejora_solo_si_sube_v1",
 
     # El dia despues de las seis compras del 21/09: cerrar la
     # reventa sin cerrar la compra para quedarse, y que el tope
