@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/10/2026, 07:45 de Madrid (rafaga de las 07:15).
+Actualizado: 17/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **17/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2292 a #2299).
+  Saldo **-432.317**, comprometido 0 (la puja del motor viejo por Manu
+  Sanchez ya no cuenta: la orden la retiro). **Decision del gestor sobre
+  E45:** el aplazado de la J6 (mar 21/10 20:00) SE TRATA COMO PLAZO DE
+  CAJA: positivo el martes a las 14:00. Creado el turno de ese dia (mar
+  21/10 12:45, trig_01Jn67Ptjd3PqbSftxpM9jLK); el de la J10 sigue (jue
+  23/10 12:45). Hay que recuperar ~0,45 M antes del martes: la cartera
+  vende el primer dia que no sube; si el lunes 20/10 a las 21:15 sigue en
+  rojo sin venta en marcha, aviso al dueno con a quien vender. **Lo debato
+  (regla del dueno):** en ~14 h se han encendido seis interruptores (la
+  puerta, la cartera, la mejora solo si sube, el 9.900 en la mejora, la
+  puerta a +2 %, un solo colchon). Cada uno paso su verja y su ensayo,
+  pero con seis a la vez, si algo sale mal no sabremos cual fue. Propongo
+  parar de encender hasta ver dos o tres vueltas de reset (dom y lun
+  07:00) y mirar que hizo cada uno.
 
 - **17/10 11:00 (el laboratorio de rivales, primera vuelta).** Lo que han
   hecho: **Pollo17**, 0 compraventas y +1,97 M en dos dias (18 de sus 19
