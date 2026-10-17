@@ -1,7 +1,7 @@
 {
  "version": 1,
- "cuando": "2026-10-16T22:18:35+00:00",
- "segundos": 99.4,
+ "cuando": "2026-10-17T00:14:27+00:00",
+ "segundos": 97.2,
  "maquina": "Linux x86_64",
  "probados": [
   "BORDALAS_BID_SALT",
@@ -22,6 +22,7 @@
   "BORDALAS_LA_CARTERA",
   "BORDALAS_LA_MEJORA_DEL_ONCE",
   "BORDALAS_LA_MEJORA_PUJA_FUERTE",
+  "BORDALAS_LA_MEJORA_SOLO_SI_SUBE",
   "BORDALAS_LA_MONEDA_DE_LA_LIGA",
   "BORDALAS_LA_ORDEN_DEL_GESTOR",
   "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO",
@@ -51,5 +52,5 @@
   "BORDALAS_VARA_PLANA",
   "BORDALAS_VIGILA_DATA"
  ],
- "huella": "cd0ff20b05d7ca5454fdbf7bf607f52a367be9cf261aac9262b20bfc3a7d2d81"
+ "huella": "a5f84d0eab7388b9d678bae4b5ef9cc1bc1dc0c408c27569327136139bd2cb94"
 }

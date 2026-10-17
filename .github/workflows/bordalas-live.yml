@@ -235,6 +235,17 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_CARTERA: "1"
 
+      # Encendido 17/10 de Madrid (madrugada). LA MEJORA SOLO SI SUBE
+      #   (laboratorio de la revalorizacion, verificado): el que no sube hoy
+      #   sube manana el 2,4 % y pierde -5,9 % a 7 dias (n=369); la mejora
+      #   no miraba el precio (Luismi Cruz, 14/10). Del Computer solo entra
+      #   quien sube la minima de su tramo, salvo para tapar un hueco (el
+      #   que sale lesionado, sancionado o <50 % titular). Verja 211/211 con
+      #   los de produccion y con el nuevo; paso 0 con 47; ensayo
+      #   #38985462260 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_MEJORA_SOLO_SI_SUBE: "1"
+
       # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
       #   que habia jugadores para mejorar el XI y Pepe no ha hecho
       #   nada»). Paso propio tras el panel, en cada vuelta: la
