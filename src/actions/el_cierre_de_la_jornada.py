@@ -585,7 +585,8 @@ def decidir(
                        ni se les retira la puja
         no_vender      los que vende la orden (`vender_si_ficha`) o la
                        mejora: suyos, no se tocan
-        se_van         los de `no_vender` cuyo relevo ya esta dentro:
+        se_van         los de `no_vender` cuyo relevo ya esta dentro, y
+                       los que salen de una pareja ganada de la rotacion:
                        tampoco juegan
         once_escrito   los titulares del once que hay escrito
                        (`status.lineup.players`): no se venden ni se
@@ -1221,7 +1222,10 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
     vuelta (`libros` = {"ronda", "chollos", "mejora", "vuelta_mejora"},
     leidos de `libros_rutas` o de sus ficheros de siempre; la vuelta de
     la mejora, de `VUELTA_MEJORA`), el calendario de los chollos y la
-    orden del gestor. La adopcion
+    orden del gestor. Las parejas de la rotacion, de su libro de
+    produccion solo si no se pasan ni `libros` ni `libros_rutas` (si no,
+    de `libros["rotacion"]` o `libros_rutas["rotacion"]`, o ninguna). La
+    adopcion
     escribe el libro donde se leyo: si `libros` llega ya leido, solo en
     la ruta que diga `libros_rutas`. Apagado, no lee ni escribe nada.
     Encendido, publica el plan siempre, tambien si algo falla (activo
@@ -1269,6 +1273,7 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
                  "chollos": dadas.get("chollos") or LIBRO_CHOLLOS,
                  "mejora": dadas.get("mejora") or LIBRO_MEJORA,
                  "vuelta_mejora": dadas.get("vuelta_mejora") or VUELTA_MEJORA}
+        de_produccion = libros is None
         if libros is None:
             libros = {k: _leer(ruta, {}) for k, ruta in rutas.items()}
             escribir = {k: True for k in rutas}
@@ -1310,6 +1315,20 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         orden = _dict(leer_la_orden(orden_ruta))
         de_la_orden = la_orden(orden, plantilla, ahora, pujas, foto.get("mercado"))
         de_la_mejora = la_mejora(libros.get("mejora"), plantilla, pujas)
+        # LA ROTACION (17/10/2026): el que sale de una pareja ganada (su
+        # relevo ya esta dentro) tampoco juega; fuera del once del cierre
+        # (si sobra, lo puede vender: es lo que quiere la rotacion).
+        # Apagada, nadie. Con `libros` dados (las guardias), solo el de
+        # `libros["rotacion"]`; con `libros_rutas`, solo el de su ruta
+        # (quien mueve los libros no lee el de produccion).
+        from src.actions.la_rotacion import las_parejas_abiertas
+
+        if not de_produccion:
+            de_la_rotacion = las_parejas_abiertas(libro=_dict(libros.get("rotacion")))
+        elif dadas and not dadas.get("rotacion"):
+            de_la_rotacion = las_parejas_abiertas(libro={})
+        else:
+            de_la_rotacion = las_parejas_abiertas(dadas.get("rotacion"))
         de_la_ronda_y_los_chollos = (_ids(_dict(libros.get("ronda")).keys())
                                      | _ids(_dict(libros.get("chollos")).keys()))
         # Las pujas que no son del cierre aunque la clave siga en el libro
@@ -1330,7 +1349,8 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
             especulativas=de_la_ronda_y_los_chollos, intocables=de_la_orden["intocables"],
             protegidos=protegidos(orden_ruta, ahora),
             no_vender=de_la_orden["vende"] | de_la_mejora["vende"],
-            se_van=de_la_orden["se_van"] | de_la_mejora["se_van"],
+            se_van=(de_la_orden["se_van"] | de_la_mejora["se_van"]
+                    | de_la_rotacion["se_van"]),
             once_escrito=once_escrito, no_retirar=no_retirar,
             inventario=de_la_ronda_y_los_chollos & plantilla,
             cartera=_la_cartera(),

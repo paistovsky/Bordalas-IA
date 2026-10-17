@@ -1263,8 +1263,9 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         de_fuera    para las guardias: lo que si no se lee de producción
                     (`orden`, `vetados`, `protegidos`, las rutas
                     `libro_ronda` y `libro_chollos`, `horas_jornada`,
-                    `puede_escribir`, `en_curso`). Lo que no trae, de
-                    producción, como siempre.
+                    `puede_escribir`, `en_curso`, `rotando`: los ids de
+                    las parejas abiertas de la rotación). Lo que no trae,
+                    de producción, como siempre.
         vuelta_ruta dónde va `escribir_la_vuelta` (encendida, siempre,
                     también con error). Por defecto `VUELTA_MEJORA`; con
                     `libro_ruta` y sin esto, junto al libro (quien mueve
@@ -1342,6 +1343,19 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         # los `no_pujar` del gestor
         pendientes |= set(fuera["vetados"] if "vetados" in fuera else vetados())
         pendientes |= vendidos
+        # LA ROTACION (17/10/2026): ni el que sale de una de sus parejas
+        # abiertas (su relevo ya esta pujado o dentro: otro relevo seria
+        # una segunda compra contando la misma venta) ni el que entra.
+        # Apagada, nadie. Quien mueve el libro no lee el de produccion.
+        if "rotando" in fuera:
+            rotando = set(fuera["rotando"] or ())
+        else:
+            from src.actions.la_rotacion import LIBRO as LIBRO_ROTACION, las_parejas_abiertas
+
+            abiertas = las_parejas_abiertas(
+                Path(libro_ruta).with_name(LIBRO_ROTACION.name) if libro_ruta else None)
+            rotando = abiertas["salen"] | abiertas["entran"]
+        pendientes |= rotando
 
         ruta_ronda = fuera.get("libro_ronda") or LIBRO_RONDA
         ruta_chollos = fuera.get("libro_chollos") or LIBRO_CHOLLOS

@@ -429,7 +429,8 @@ class _Escritor:
 
 def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=None,
             libro_ronda=None, calendario=None, libro=None, ofertas=None, catalogo=None,
-            orden=None, saldo=500_000, horas=100.0, pujas=None):
+            orden=None, saldo=500_000, horas=100.0, pujas=None, rotando=None,
+            rotacion=None):
     """`correr` con TODO dado: foto, panel, vuelta, calendario y lo que
     si no se lee de producción. Los libros, en un directorio temporal.
 
@@ -438,6 +439,10 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
                   = 900 + id)
         catalogo  {id: status} del catálogo de la foto
         pujas     {id: importe} de nuestras pujas vivas (offer_id = 800 + id)
+        rotando   los ids de las parejas abiertas de la rotacion, dados
+                  (`de_fuera["rotando"]`); None = de su libro
+        rotacion  el libro de la rotacion, junto al de la mejora en el
+                  temporal (lo lee `correr` si no hay `rotando`)
 
     En `libros["vuelta"]`, lo que escribió `escribir_la_vuelta` (junto al
     libro de la mejora, en el temporal), o None.
@@ -473,13 +478,18 @@ def _correr(once, escaparate, plantilla, *, con_calendario, roster=None, v10=Non
         Path(rutas["ronda"]).write_text(json.dumps(libro_ronda or {}))
         Path(rutas["chollos"]).write_text("{}")
         Path(rutas["mejora"]).write_text(json.dumps(libro or {}))
+        if rotacion is not None:
+            (Path(tmp) / "la_rotacion.json").write_text(json.dumps(rotacion))
+        fuera = {"orden": orden or {}, "vetados": set(), "protegidos": set(),
+                 "libro_ronda": rutas["ronda"], "libro_chollos": rutas["chollos"],
+                 "horas_jornada": horas, "puede_escribir": True, "en_curso": False}
+        if rotando is not None:
+            fuera["rotando"] = rotando
         s = correr(
             status=status, snapshot=snapshot, v10=v10 or {},
             escritor_factory=lambda: escritor, ahora=AHORA, libro_ruta=rutas["mejora"],
             calendario=CALENDARIO if calendario is None else calendario,
-            de_fuera={"orden": orden or {}, "vetados": set(), "protegidos": set(),
-                      "libro_ronda": rutas["ronda"], "libro_chollos": rutas["chollos"],
-                      "horas_jornada": horas, "puede_escribir": True, "en_curso": False},
+            de_fuera=fuera,
         )
         libros = {k: json.loads(Path(r).read_text()) for k, r in rutas.items()}
         vuelta = Path(tmp) / "la_mejora_vuelta.json"

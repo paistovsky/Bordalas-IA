@@ -251,6 +251,13 @@ QUE_HACE = {
         "del Computer desde el 95 %. Nunca a uno del once escrito, ni a Yamal, ni "
         "a los protegidos o `conservar` del gestor, ni a lo que aguanta la "
         "cartera, ni con una ronda jugándose.",
+    "BORDALAS_LA_ROTACION":
+        "Cambia a uno de la plantilla que lleva dos días sin subir por uno de su "
+        "posición que sube en el Computer y puntúa lo mismo o más (como mucho 2 "
+        "por semana y entre jornada y jornada, y solo si la caja aguanta). Al que "
+        "sale lo vende cuando el otro ya ha llegado, desde el 99 % de su valor, y "
+        "si era titular pone al nuevo en su sitio del once. Nunca con una ronda "
+        "jugándose.",
     "BORDALAS_EL_CALENDARIO_EN_EL_ONCE":
         "Al elegir el once mira el partido de la próxima ronda: en casa contra "
         "uno que no es de los de arriba suma; fuera, o contra uno de arriba, "

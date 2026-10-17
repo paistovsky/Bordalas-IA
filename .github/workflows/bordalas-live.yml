@@ -596,6 +596,16 @@ jobs:
         shell: bash
         run: |
           python -m src.actions.el_parte_vende || true
+      # LA ROTACION (17/10/2026, laboratorio de la rotacion). DESPUES del
+      #   parte: cambia al que lleva 2 dias sin subir por uno de su posicion
+      #   que sube y puntua igual o mas (2 por ventana y por semana, con la
+      #   caja de todos los motores); vende al que sale cuando el otro ya
+      #   llego, sin dejar hueco en el once ni con la ronda jugandose.
+      #   APAGADA: `BORDALAS_LA_ROTACION`. Nunca rompe la vuelta.
+      - name: La rotacion
+        shell: bash
+        run: |
+          python -m src.actions.la_rotacion || true
       - name: Update Cloudflare dashboard
         shell: bash
         run: |

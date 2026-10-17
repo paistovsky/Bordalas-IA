@@ -231,9 +231,11 @@ def test_el_motor_viejo_no_vende_lo_que_aguanta():
             os.environ[ronda.ENV_CARTERA] = "1"
             assert ronda.los_que_aguanta(libro) == {123}
             assert ronda.los_que_aguanta(Path(d) / "no_existe.json") == set()
-        # Las dos puertas del motor viejo que aceptan ofertas lo miran.
+        # Las dos puertas del motor viejo que aceptan ofertas lo miran (y,
+        # desde el 17/10, tambien a los que rota la rotacion).
         texto = (RAIZ / "src" / "actions" / "autopilot_executor.py").read_text()
         assert texto.count("_conservados() | _aguanta()") == 2
+        assert texto.count("_conservados() | _aguanta() | _rota()") == 2
     finally:
         os.environ.pop(ronda.ENV_CARTERA, None)
         if viejo is not None:

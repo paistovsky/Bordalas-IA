@@ -29,6 +29,11 @@ LA REGLA
         el cierre      `vender` y `candidatos` de
                        `data/trading/el_cierre.json` si su `generated_at`
                        es de las ultimas `HORAS_DEL_CIERRE`
+        la rotacion    (17/10/2026) los que salen de sus parejas abiertas
+                       (`la_rotacion.las_parejas_abiertas`: con la puja
+                       viva o ya ganada), solo con `BORDALAS_LA_ROTACION`.
+                       En prisa los vende desde el 95 %: un reroll a -2 %
+                       le tiraba la oferta que iba a aceptar
 
     El orquestador saca a esos jugadores de los candidatos a reroll (y
     lo publica en `no_se_rerollean`) y `revalidate_reroll_offer` lo
@@ -67,6 +72,7 @@ _LIBROS = (
     ("chollos", "src.actions.los_chollos", "LIBRO"),
     ("mejora", "src.actions.la_mejora_del_once", "LIBRO"),
     ("cierre", "src.actions.el_cierre_de_la_jornada", "PLAN"),
+    ("rotacion", "src.actions.la_rotacion", "LIBRO"),
 )
 
 
@@ -138,7 +144,7 @@ def _de_la_orden(ruta, ahora) -> set:
     return {i for i in (_int(j) for j in jugadores) if i is not None}
 
 
-def _del_cierre(plan, ahora) -> set:
+def _del_cierre(plan, ahora, claves=("vender", "candidatos")) -> set:
     if not isinstance(plan, dict):
         return set()
     generado = _cuando(plan.get("generated_at"))
@@ -148,11 +154,33 @@ def _del_cierre(plan, ahora) -> set:
     if edad > timedelta(hours=HORAS_DEL_CIERRE) or edad < -timedelta(minutes=MINUTOS_POR_DELANTE):
         return set()
     ids = set()
-    for clave in ("vender", "candidatos"):
+    for clave in claves:
         lista = plan.get(clave)
         if isinstance(lista, list):
             ids.update(i for i in (_int(x) for x in lista) if i is not None)
     return ids
+
+
+def lo_que_vende_el_cierre(plan, ahora=None) -> set:
+    """
+    Solo lo que el cierre YA eligio vender (`vender` de su plan, si es
+    de las ultimas `HORAS_DEL_CIERRE`), sin sus `candidatos` (todo el
+    banquillo). Para la rotacion: el cierre ya cuenta con ese dinero.
+    Nunca lanza.
+    """
+    try:
+        ahora = ahora or datetime.now(timezone.utc)
+        if ahora.tzinfo is None:
+            ahora = ahora.replace(tzinfo=timezone.utc)
+        return _del_cierre(plan, ahora, ("vender",))
+    except Exception:                               # noqa: BLE001
+        return set()
+
+
+def _de_la_rotacion(ruta) -> set:
+    from src.actions.la_rotacion import las_parejas_abiertas
+
+    return set(las_parejas_abiertas(ruta)["salen"])
 
 
 def quien_los_vende(rutas: dict | None = None, ahora: datetime | None = None) -> dict:
@@ -175,6 +203,7 @@ def quien_los_vende(rutas: dict | None = None, ahora: datetime | None = None) ->
             ("LA_MEJORA", lambda: _de_la_mejora(_leer(rutas["mejora"])) if rutas.get("mejora") else set()),
             ("LA_ORDEN_DEL_GESTOR", lambda: _de_la_orden(rutas.get("orden"), ahora)),
             ("EL_CIERRE", lambda: _del_cierre(_leer(rutas["cierre"]), ahora) if rutas.get("cierre") else set()),
+            ("LA_ROTACION", lambda: _de_la_rotacion(rutas["rotacion"]) if rutas.get("rotacion") else set()),
         )
         for nombre, leer in fuentes:
             try:

@@ -64,6 +64,16 @@ QUE NO HACE
     (necesita el once escrito del panel y lo que el cierre ya cobro y
     publico en esta vuelta): `python -m src.actions.el_parte_vende`.
     Nace APAGADO: `BORDALAS_EL_PARTE_VENDE`. Nunca lanza.
+
+LO QUE DEJA PARA LA ROTACION (17/10/2026)
+
+    La rotacion corre DESPUES y lee la foto de antes: sin esto no veia
+    lo que el parte acababa de vender o publicar (emparejaba al que ya
+    no estaba, o vendia al que salia con el que entro ya vendido).
+    Encendido, `main` deja lo que mando en `VUELTA_PARTE`, con la forma
+    del fichero de la vuelta de la mejora ({run_id, generated_at,
+    hechas}: `la_mejora_del_once.escribir_la_vuelta`). `correr` no
+    escribe nada (las guardias no tocan produccion).
 """
 
 from __future__ import annotations
@@ -76,6 +86,10 @@ from pathlib import Path
 
 
 ENV = "BORDALAS_EL_PARTE_VENDE"
+RAIZ = Path(__file__).parents[2]
+
+# Lo que mando en esta vuelta, para la rotacion (que corre despues).
+VUELTA_PARTE = RAIZ / "data" / "trading" / "el_parte_vuelta.json"
 
 # Lo que dice el parte del catalogo de Biwenger para vender.
 MALOS = frozenset({"doubt", "injured", "sanctioned"})
@@ -541,6 +555,15 @@ def el_parte(r) -> list:
 
 def main() -> int:
     r = correr()
+    # Encendido, SIEMPRE (tambien sin nada hecho): lo de esta vuelta, para
+    # la rotacion. Apagado no se escribe (la rotacion no lo echa de menos).
+    try:
+        if r.get("activa"):
+            from src.actions.la_mejora_del_once import escribir_la_vuelta
+
+            escribir_la_vuelta(r.get("hechas") or [], VUELTA_PARTE)
+    except Exception:                               # noqa: BLE001
+        pass
     print("=" * 100)
     print("EL PARTE VENDE")
     print("=" * 100)

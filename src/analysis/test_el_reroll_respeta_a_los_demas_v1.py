@@ -118,6 +118,7 @@ def _libros(carpeta: Path, **contenido) -> dict:
         "mejora": carpeta / "la_mejora.json",
         "cierre": carpeta / "el_cierre.json",
         "orden": carpeta / "la_orden_del_gestor.json",
+        "rotacion": carpeta / "la_rotacion.json",
     }
     for nombre, datos in contenido.items():
         texto = datos if isinstance(datos, str) else json.dumps(datos)
@@ -488,7 +489,8 @@ def test_nunca_lanza():
 
         # Rutas y relojes raros (todas dadas: nada de produccion).
         raras = {"ronda": 5, "chollos": None, "mejora": [],
-                 "cierre": object(), "orden": carpeta / "no_existe.json"}
+                 "cierre": object(), "orden": carpeta / "no_existe.json",
+                 "rotacion": object()}
         assert los_que_otros_venden(raras, AHORA) == set()
         assert isinstance(los_que_otros_venden(rutas, "no es una fecha"), set)
         assert isinstance(los_que_otros_venden(rutas, datetime(2026, 10, 12)), set)
