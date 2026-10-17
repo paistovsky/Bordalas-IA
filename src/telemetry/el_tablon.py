@@ -240,6 +240,10 @@ QUE_HACE = {
         "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "
         "del once escrito) hasta quedar en positivo; publica a los que se pueden "
         "vender para que llegue la oferta del Computer.",
+    "BORDALAS_EL_MOTOR_VIEJO_SOLO_SI_SUBE":
+        "El motor viejo (mejoras del once del tablero) solo puja por el que sube "
+        "de verdad hoy, con la misma vara que la mejora: lo que bajaba el día de "
+        "la puja dejó pérdidas.",
     "BORDALAS_UN_SOLO_COLCHON":
         "Con la cartera encendida, lo que puja el motor viejo (mejoras del once y "
         "especulación del tablero) tiene que caber en el mismo colchón que la "

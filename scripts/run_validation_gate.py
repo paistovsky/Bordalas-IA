@@ -225,6 +225,9 @@ TESTS = [
     # Un solo colchon: con la cartera, lo que puja el motor viejo tiene
     # que caber en el colchon de la ronda, y cuenta entero. Apagado.
     "src.analysis.test_un_solo_colchon_v1",
+    # El motor viejo: no puja a los vetados de la orden y, con su
+    # interruptor, solo por el que sube. Apagado.
+    "src.analysis.test_el_motor_viejo_v1",
     # La jornada en vivo: cuenta el once que empezo la jornada (el del
     # marcador de antes), no el lineup de ahora.
     "src.analysis.test_la_jornada_en_vivo_v1",
