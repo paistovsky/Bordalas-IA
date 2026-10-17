@@ -263,6 +263,18 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_UN_SOLO_COLCHON: "1"
 
+      # Encendido 17/10 de Madrid (noche). LA ROTACION (laboratorio de
+      #   rivales): cambia al que lleva 2 dias sin subir por uno de su
+      #   posicion que sube y puntua igual o mas; 2 por ventana y semana,
+      #   caja de todos los motores, vende al que sale cuando el otro ya
+      #   llego, sin hueco en el once ni con la ronda jugandose. Revision
+      #   adversarial (22 hallazgos arreglados); verja 217/217 con los de
+      #   produccion y con el nuevo; paso 0 con 51; ensayo #39032541463
+      #   verde (5 que caen, NADA con la J9 jugandose). No puede pujar
+      #   antes del lun 19/10 07:15.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_ROTACION: "1"
+
       # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
       #   que habia jugadores para mejorar el XI y Pepe no ha hecho
       #   nada»). Paso propio tras el panel, en cada vuelta: la
