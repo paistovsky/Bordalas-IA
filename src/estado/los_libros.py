@@ -254,6 +254,23 @@ LIBROS = (
         ),
     },
     {
+        "ruta": "data/trading/la_rotacion.jsonl",
+        "que_es": (
+            "Una linea por cada cosa que pasa en la rotacion: la puja "
+            "por el que entra (y por quien sale), si se gano o se "
+            "perdio, el once que se reescribio, la publicacion y la "
+            "venta del que sale."
+        ),
+        "por_que_no_se_reconstruye": (
+            "El tablon dice que se compro y que se vendio, no que una "
+            "compra y una venta eran la misma pareja, ni las pujas "
+            "perdidas. Sin esto no se puede medir la rotacion contra "
+            "el laboratorio del 17/10 (datos finos: 6 cambios), y el "
+            "estado de las parejas (`la_rotacion.json`, en la cache) "
+            "sale de aqui."
+        ),
+    },
+    {
         "ruta": "data/trading/libro_del_escaparate.jsonl",
         "que_es": (
             "Los veinte del escaparate del Computer en cada "
@@ -454,6 +471,11 @@ NO_SON_LIBROS = (
     ),
     ("data/rival_intelligence/profiles_cache.json", "cache de perfiles"),
     ("data/trading/v10_full_autonomous_status.json", "estado de la vuelta"),
+    (
+        "data/trading/la_rotacion.json",
+        "el estado de las parejas de la rotacion; vive en la cache de "
+        "data/trading y se rehace del libro `la_rotacion.jsonl`",
+    ),
     ("data/trading/v10_production_status.json", "estado de la vuelta"),
 
     (

@@ -225,6 +225,10 @@ TESTS = [
     # Un solo colchon: con la cartera, lo que puja el motor viejo tiene
     # que caber en el colchon de la ronda, y cuenta entero. Apagado.
     "src.analysis.test_un_solo_colchon_v1",
+    # La rotacion (laboratorio del 17/10): el que lleva 2 dias sin subir
+    # por uno de su posicion que sube y puntua igual o mas; se vende
+    # cuando el otro llego, sin hueco en el once ni ronda jugandose. Apagada.
+    "src.analysis.test_la_rotacion_v1",
 
     # El dia despues de las seis compras del 21/09: cerrar la
     # reventa sin cerrar la compra para quedarse, y que el tope

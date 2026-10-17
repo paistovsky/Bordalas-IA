@@ -770,8 +770,11 @@ def execute_autopilot_decision(
         # vende Pepe por su cuenta. Solo la propia orden los vende.
         # LA CARTERA (16/10/2026): lo que aguanta la ronda tampoco; la caja
         # de la jornada la cuadra el cierre.
+        # LA ROTACION (17/10/2026): ni el que sale de una pareja con la puja
+        # viva (hasta saber si llega el que entra).
         from src.actions.la_orden_del_gestor import conservados as _conservados
         from src.actions.la_ronda_de_la_manana import los_que_aguanta as _aguanta
+        from src.actions.la_rotacion import los_que_rota as _rota
 
         if (
             offer.get(
@@ -779,7 +782,7 @@ def execute_autopilot_decision(
             )
             == "NEVER_AUTO_SELL"
             or (offer.get("player_id") is not None
-                and int(offer.get("player_id")) in (_conservados() | _aguanta()))
+                and int(offer.get("player_id")) in (_conservados() | _aguanta() | _rota()))
         ):
 
             return {
@@ -1083,16 +1086,18 @@ def execute_autopilot_decision(
         )
 
         # LA ORDEN DEL GESTOR (29/09/2026): `conservar`. Y LA CARTERA
-        # (16/10/2026): lo que aguanta la ronda.
+        # (16/10/2026): lo que aguanta la ronda. Y LA ROTACION (17/10/2026):
+        # el que sale de una pareja con la puja viva.
         from src.actions.la_orden_del_gestor import conservados as _conservados
         from src.actions.la_ronda_de_la_manana import los_que_aguanta as _aguanta
+        from src.actions.la_rotacion import los_que_rota as _rota
 
         if (
             offer_id is None
             or
             player_id is None
             or
-            int(player_id) in (_conservados() | _aguanta())
+            int(player_id) in (_conservados() | _aguanta() | _rota())
         ):
 
             return {
