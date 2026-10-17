@@ -2235023,13 +2235023,13 @@
       "price_at_prediction": 2770000,
       "predicted_at": "2026-10-16T12:10:16.645425+00:00",
       "due_at": "2026-10-17T12:10:16.645425+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
-      "magnitude_error_percent": null,
-      "scored_at": null
+      "outcome": "MISS",
+      "price_at_outcome": 2760000,
+      "actual_direction": "DOWN",
+      "actual_percent": -0.361,
+      "direction_hit": false,
+      "magnitude_error_percent": 0.723,
+      "scored_at": "2026-10-17T13:09:24.003308+00:00"
     },
     "24576|FUTBOLFANTASY|3|2026-10-16": {
       "player_id": "24576",
