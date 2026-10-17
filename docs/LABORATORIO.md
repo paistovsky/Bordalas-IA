@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E46 · 17/10/2026 17:19 de Madrid · La rotacion con la prima de verdad
+### E46 · 17/10/2026 17:15 de Madrid · La rotacion con la prima de verdad
 
 **El caso:** hoy se ha construido, apagada, «la rotacion»
 (`BORDALAS_LA_ROTACION`): cambia al que lleva 2 dias sin subir por uno de
