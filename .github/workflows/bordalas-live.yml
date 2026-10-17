@@ -578,6 +578,15 @@ jobs:
         shell: bash
         run: |
           python -m src.actions.el_cierre_de_la_jornada || true
+      # EL PARTE VENDE (17/10/2026, paso 4 del laboratorio). DESPUES del
+      #   cierre: vende al suplente en duda, lesionado o sancionado desde el
+      #   95 % de su valor (lo publica si no lo esta); nunca uno del once
+      #   escrito, ni con la ronda jugandose. APAGADO:
+      #   `BORDALAS_EL_PARTE_VENDE`. Nunca rompe la vuelta.
+      - name: El parte vende
+        shell: bash
+        run: |
+          python -m src.actions.el_parte_vende || true
       - name: Update Cloudflare dashboard
         shell: bash
         run: |
