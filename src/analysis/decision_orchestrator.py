@@ -3009,6 +3009,23 @@ def build_global_decision_uncached(
         # un conjunto vacio de pujas vivas no autoriza a repetir
         # (doctrina 24). El respaldo prefiere no operar a operar
         # a ciegas.
+        # LA ORDEN DEL GESTOR (17/10/2026): los `no_pujar` ni se eligen.
+        # Antes solo los paraba el executor, y el ciclo volvia a elegir
+        # al vetado cada hora (Manu Sanchez): una vuelta perdida sin
+        # pasar al siguiente. Con la orden apagada, vacio.
+        try:
+            from src.actions.la_orden_del_gestor import vetados as _vetados
+
+            no_se_pujan = set(_vetados())
+        except Exception:                           # noqa: BLE001
+            no_se_pujan = set()
+
+        executable_buys = [
+            player
+            for player in executable_buys
+            if int(player.get("id") or 0) not in no_se_pujan
+        ]
+
         pendientes_legacy = (
             [
                 player
@@ -3066,7 +3083,7 @@ def build_global_decision_uncached(
         mejor = (
             best_acquisition_target(
                 acquisition_board,
-                exclude_ids=ya_pujados,
+                exclude_ids=set(ya_pujados) | no_se_pujan,
             )
             if lo_puesto_se_sabe
             else None

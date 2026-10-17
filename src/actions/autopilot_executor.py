@@ -1774,6 +1774,38 @@ def execute_autopilot_decision(
                 success=False,
             )
 
+        # LA ORDEN DEL GESTOR (17/10/2026): los `no_pujar` tampoco los
+        # puja esta rama. `vetados` se escribio para que la subasta y el
+        # carril ni lo intenten y esta se quedo fuera: tras vetar a Manu
+        # Sanchez volvio a pujar por el cada hora, y solo la paro el
+        # colchon. Con la orden apagada, `vetados` viene vacio.
+        from src.actions.la_orden_del_gestor import vetados as _vetados
+
+        try:
+            requested_player_id = int(requested_player_id)
+        except (TypeError, ValueError, OverflowError):
+
+            return build_noop_result(
+                decision=decision,
+                status="INVALID_SPECULATION_PLAYER",
+                reason=(
+                    "Compra especulativa bloqueada: "
+                    "el player_id no vale."
+                ),
+                success=False,
+            )
+
+        if requested_player_id in _vetados():
+
+            return build_noop_result(
+                decision=decision,
+                status="SPECULATION_VETADA_POR_LA_ORDEN",
+                reason=(
+                    "La orden del gestor lo tiene en `no_pujar`."
+                ),
+                success=True,
+            )
+
         # ----------------------------------------------------
         # READ-BEFORE-WRITE
         # ----------------------------------------------------
@@ -2413,8 +2445,30 @@ def execute_autopilot_decision(
         # tiene que caber en el colchon de la cartera, y cuenta entera.
         from src.actions.la_ronda_de_la_manana import (
             cabe_en_el_colchon,
+            la_puerta_de_sube,
             un_solo_colchon_activo,
         )
+
+        # SOLO SI SUBE (17/10/2026): con `BORDALAS_EL_MOTOR_VIEJO_SOLO_SI_SUBE`,
+        # solo por el que sube de verdad hoy en la foto fresca (la vara de
+        # la mejora). Lo que bajaba el dia de la puja dejo -716.045.
+        no_sube = la_puerta_de_sube(fresh_snapshot, requested_player_id)
+
+        if no_sube is not None:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status=no_sube,
+                    reason=(
+                        "No sube de verdad hoy: el motor viejo solo "
+                        "puja por el que sube."
+                    ),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+            }
 
         if un_solo_colchon_activo():
 

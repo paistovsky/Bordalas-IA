@@ -317,6 +317,58 @@ def un_solo_colchon_activo() -> bool:
         return False
 
 
+# EL MOTOR VIEJO, SOLO SI SUBE (17/10/2026, laboratorio de rivales). Lo que
+# pujo esa rama desde el 21/08 por jugadores que bajaban el dia de la puja
+# dejo -716.045 (Ibanez, Ruben Garcia, Blanco); lo que subia, +1.180.507
+# (n=7, poco). Su freno de precio exime la via del once. Con esto, puja
+# solo por el que sube de verdad (`la_mejora_del_once.sube_de_verdad`, la
+# misma vara que la mejora). Nace APAGADO.
+ENV_MOTOR_VIEJO_SOLO_SI_SUBE = "BORDALAS_EL_MOTOR_VIEJO_SOLO_SI_SUBE"
+
+
+def el_motor_viejo_solo_si_sube_activo() -> bool:
+    try:
+        return str(os.environ.get(ENV_MOTOR_VIEJO_SOLO_SI_SUBE, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def sube_en_la_foto(snapshot, player_id) -> bool:
+    """
+    ¿Sube de verdad hoy, segun el catalogo de la foto? Sin ficha o sin
+    dato, no. Nunca lanza.
+    """
+
+    try:
+        from src.actions.la_mejora_del_once import sube_de_verdad
+
+        catalogo = ((((snapshot or {}).get("catalog") or {}).get("data") or {})
+                    .get("players")) or {}
+        if isinstance(catalogo, list):
+            catalogo = {str((f or {}).get("id")): f for f in catalogo if isinstance(f, dict)}
+        ficha = catalogo.get(str(_int(player_id)))
+        return isinstance(ficha, dict) and sube_de_verdad(ficha)
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def la_puerta_de_sube(snapshot, player_id) -> str | None:
+    """
+    La puerta del motor viejo: None si deja pujar; `SPECULATION_NO_SUBE`
+    si `ENV_MOTOR_VIEJO_SOLO_SI_SUBE` esta encendido y el jugador no sube
+    de verdad en la foto (sin dato, no sube). Apagado, siempre None.
+    Nunca lanza.
+    """
+
+    try:
+        if not el_motor_viejo_solo_si_sube_activo():
+            return None
+        return None if sube_en_la_foto(snapshot, player_id) else "SPECULATION_NO_SUBE"
+    except Exception:                               # noqa: BLE001
+        return "SPECULATION_NO_SUBE"
+
+
 def el_colchon(saldo, nuestras_pujas, libro, plantilla, fichas):
     """
     Saldo - TODAS las pujas vivas + `LIQUIDA_CARTERA` x el valor de lo de
