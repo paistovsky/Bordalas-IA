@@ -3123,7 +3123,7 @@
         "9065": {
           "player_name": "Ximo Navarro",
           "team": "Deportivo",
-          "appearances_at_prediction": 7,
+          "appearances_at_prediction": 8,
           "sources": {},
           "consensus": "UNCERTAIN",
           "consensus_probability": 50.0
@@ -3160,7 +3160,7 @@
         "29661": {
           "player_name": "Olasagasti",
           "team": "Levante",
-          "appearances_at_prediction": 7,
+          "appearances_at_prediction": 8,
           "sources": {
             "ANALITICA_FANTASY": 70.0
           },

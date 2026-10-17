@@ -190578,5 +190578,43 @@
         "name": "Jornada 9"
       }
     }
+  },
+  {
+    "event_id": "5fc7cb95c5b62001ab53f304",
+    "date": 1792213538,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 30493,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 919000,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 912000
+          }
+        ]
+      },
+      {
+        "player": 2001,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 4695000
+      }
+    ]
   }
 ]
