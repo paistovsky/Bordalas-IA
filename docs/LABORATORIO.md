@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E45 · 17/10/2026 11:19 de Madrid · El Levante-Athletic del 21/10: ¿plazo de caja?
+### E45 · 17/10/2026 11:15 de Madrid · El Levante-Athletic del 21/10: ¿plazo de caja?
 
 **El caso:** el puesto de mando tiene abierta la duda de si el aplazado de
 la J6 (Levante-Athletic, martes 21/10 20:00) es una ronda propia que
