@@ -53,9 +53,37 @@ def _mismo_equipo(a: str, b: str) -> bool:
     return bool(ka and kb) and (ka in kb or kb in ka)
 
 
+def el_once_que_empezo(previo: dict | None, status: dict) -> list | None:
+    """
+    El once que cuenta (17/10/2026): una vez empezada la jornada no se
+    admiten cambios, asi que es el `mi_once` de la ultima jornada del
+    marcador de ANTES de empezar, no el `lineup` de ahora (que ya puede
+    ser el de la siguiente: el 17/10 contaba los 7 puntos de temporada
+    de Sergi Cardona, fichado con la J9 empezada). Con las fichas de la
+    plantilla de ahora; el que ya no esta, con su nombre del marcador.
+    None si el marcador no lo trae.
+    """
+    try:
+        js = (previo or {}).get("jornadas") or {}
+        entrada = js[list(js)[-1]] if js else {}
+        ids = [str(i) for i in ((entrada.get("mi_once") or {}).get("players") or [])]
+        if len(ids) != 11:
+            return None
+        fichas = {}
+        for p in ((status.get("roster") or {}).get("players") or []) + \
+                 ((status.get("lineup") or {}).get("players") or []):
+            fichas.setdefault(str(p.get("id")), p)
+        nombres = entrada.get("nombres") or {}
+        return [fichas.get(i) or {"id": int(i), "name": nombres.get(i, i), "team_name": "?"}
+                for i in ids]
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def la_jornada(status: dict, calendario: dict, ahora: datetime,
                previo: dict | None = None, marcador: dict | None = None) -> dict:
-    once = [p for p in (status.get("lineup") or {}).get("players") or []]
+    once = (el_once_que_empezo(previo, status)
+            or [p for p in (status.get("lineup") or {}).get("players") or []])
     # La jornada en curso: la que tiene partidos alrededor de ahora.
     jornada = None
     for m in calendario.get("matchdays") or []:
