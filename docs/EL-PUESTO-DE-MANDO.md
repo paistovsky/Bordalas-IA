@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 17/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **17/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2299 a #2306).
+  Saldo -432.317, 0 comprometido. El chat del dueno encendio la rotacion
+  (e144fd3e): es el septimo interruptor en ~20 h; lo dejo apuntado, el
+  dueno decide. **Lo que miro por el plazo del martes 21/10 14:00:** la
+  rotacion puede pujar el lunes 19/10 (se resuelve el 20/10 07:00) y vende
+  al que sale cuando el otro ya llego; si esa venta va al Computer, el
+  dinero entra el 21/10 hacia las 07:00, antes del plazo, pero justo. El
+  lunes 21:15 compruebo que el saldo del peor caso del martes 07:00 llega
+  a positivo; si no, aviso al dueno con a quien vender.
 
 - **17/10 tarde (laboratorio de rivales, segunda vuelta): LA ROTACION.**
   Nuestra plantilla (12, 57,1 M; Yamal 25,4 M) pierde ~140k/dia (Roberto
