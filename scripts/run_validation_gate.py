@@ -222,6 +222,9 @@ TESTS = [
     "src.analysis.test_el_parte_vende_v1",
     "src.analysis.test_la_mejora_solo_si_sube_v1",
     "src.analysis.test_la_puja_en_9900_v1",
+    # Un solo colchon: con la cartera, lo que puja el motor viejo tiene
+    # que caber en el colchon de la ronda, y cuenta entero. Apagado.
+    "src.analysis.test_un_solo_colchon_v1",
 
     # El dia despues de las seis compras del 21/09: cerrar la
     # reventa sin cerrar la compra para quedarse, y que el tope

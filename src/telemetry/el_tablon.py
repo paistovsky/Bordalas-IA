@@ -240,6 +240,11 @@ QUE_HACE = {
         "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "
         "del once escrito) hasta quedar en positivo; publica a los que se pueden "
         "vender para que llegue la oferta del Computer.",
+    "BORDALAS_UN_SOLO_COLCHON":
+        "Con la cartera encendida, lo que puja el motor viejo (mejoras del once y "
+        "especulación del tablero) tiene que caber en el mismo colchón que la "
+        "ronda: saldo menos todas las pujas vivas más el 92 % de lo de la cartera. "
+        "Lo suyo cuenta entero; si no cabe, no puja.",
     "BORDALAS_EL_PARTE_VENDE":
         "Vende a los suplentes que Biwenger da en duda, lesionados o sancionados "
         "(caen un 3-5 % en la semana): los publica a su valor y acepta la oferta "

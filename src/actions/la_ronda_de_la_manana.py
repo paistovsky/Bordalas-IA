@@ -298,6 +298,80 @@ def el_suelo_de_la_cartera(pagado, incremento, valor):
         return None
 
 
+# UN SOLO COLCHÓN (17/10/2026). El motor viejo (AUTOPILOT V3,
+# ACQUISITION_BOARD, XI_UPGRADE) pujó 1.778.494 por Manu Sánchez con la
+# caja en -432.317: su presupuesto autoriza deuda hasta `MAX_SAFE_DEBT` y
+# no ve las pujas de la ronda, los chollos ni la mejora. Con la cartera
+# encendida, lo que puja el motor viejo pasa por EL COLCHÓN de la ronda,
+# y cuenta entero: no entra en el libro, así que la cartera no lo
+# liquida. Nace APAGADO: `ENV_UN_SOLO_COLCHON` (y sin la cartera no hace
+# nada).
+ENV_UN_SOLO_COLCHON = "BORDALAS_UN_SOLO_COLCHON"
+
+
+def un_solo_colchon_activo() -> bool:
+    try:
+        return la_cartera_activa() and str(
+            os.environ.get(ENV_UN_SOLO_COLCHON, "")).strip().lower() in {"1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def el_colchon(saldo, nuestras_pujas, libro, plantilla, fichas):
+    """
+    Saldo - TODAS las pujas vivas + `LIQUIDA_CARTERA` x el valor de lo de
+    la ronda (en plantilla o con puja viva). None sin saldo. Pura.
+    """
+
+    if _int(saldo) is None:
+        return None
+    nuestras_pujas = nuestras_pujas or {}
+    plantilla = plantilla or ()
+    colchon = _int(saldo) - sum(
+        _int((p or {}).get("amount"), 0) or 0 for p in nuestras_pujas.values())
+    for pid in (libro or {}):
+        pid = _int(pid)
+        if pid in plantilla or pid in nuestras_pujas:
+            colchon += LIQUIDA_CARTERA * (_int((fichas.get(pid) or {}).get("price"), 0) or 0)
+    return colchon
+
+
+def cabe_en_el_colchon(snapshot, player_id, importe, libro_ruta=None) -> dict:
+    """
+    Para el motor viejo: ¿cabe esta puja en el colchón de la cartera?
+    Cuenta entera (colchón - importe >= 0); si ya pujábamos por él, la
+    puja vieja deja de contar (la nueva la sustituye). Sin saldo o con
+    basura, no cabe. Nunca lanza.
+    """
+
+    salida = {"cabe": False, "colchon": None, "importe": _int(importe, 0) or 0}
+    try:
+        from src.actions.la_orden_del_gestor import _pid, leer_la_foto
+
+        s = snapshot or {}
+        foto = leer_la_foto(s, _pid((s.get("league") or {}).get("user")))
+        catalogo = (((s.get("catalog") or {}).get("data") or {}).get("players")) or {}
+        if isinstance(catalogo, list):
+            catalogo = {(f or {}).get("id"): f for f in catalogo if isinstance(f, dict)}
+        fichas = {}
+        for k, f in catalogo.items():
+            if _int(k) is not None and isinstance(f, dict):
+                fichas[_int(k)] = f
+        for pid, precio in (foto.get("precios") or {}).items():
+            fichas.setdefault(pid, {"price": precio})
+        pujas = {p: v for p, v in (foto.get("nuestras_pujas") or {}).items()
+                 if p != _int(player_id)}
+        colchon = el_colchon(foto.get("saldo"), pujas, leer_libro(libro_ruta),
+                             foto.get("plantilla"), fichas)
+        if colchon is None:
+            return salida
+        salida["colchon"] = int(colchon)
+        salida["cabe"] = salida["importe"] > 0 and colchon - salida["importe"] >= 0
+        return salida
+    except Exception:                               # noqa: BLE001
+        return salida
+
+
 def en_9900(importe) -> int:
     """
     El primer importe que termina en 9.900 y no baja de `importe` (el
@@ -452,12 +526,7 @@ def decidir(
         hueco = MAXIMO_EN_PLANTILLA - len(plantilla or ()) - len(nuestras_pujas or {})
         if hueco <= 0 or _int(saldo) is None:
             return acciones
-        colchon = _int(saldo) - sum(
-            _int((p or {}).get("amount"), 0) or 0 for p in (nuestras_pujas or {}).values())
-        for pid in (libro or {}):
-            pid = _int(pid)
-            if pid in plantilla or pid in nuestras_pujas:
-                colchon += LIQUIDA_CARTERA * (_int((fichas.get(pid) or {}).get("price"), 0) or 0)
+        colchon = el_colchon(saldo, nuestras_pujas, libro, plantilla, fichas)
         if colchon <= 0:
             return acciones
 

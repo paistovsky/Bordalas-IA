@@ -2401,6 +2401,43 @@ def execute_autopilot_decision(
 
         bid_amount = int(desvio["bid"])
 
+        # UN SOLO COLCHON (17/10/2026). Este presupuesto autoriza deuda
+        # hasta MAX_SAFE_DEBT y no ve las pujas de la ronda, los chollos
+        # ni la mejora: pujo 1.778.494 por Manu Sanchez con la caja en
+        # -432.317. Con la cartera y `BORDALAS_UN_SOLO_COLCHON`, la puja
+        # tiene que caber en el colchon de la cartera, y cuenta entera.
+        from src.actions.la_ronda_de_la_manana import (
+            cabe_en_el_colchon,
+            un_solo_colchon_activo,
+        )
+
+        if un_solo_colchon_activo():
+
+            colchon = cabe_en_el_colchon(
+                fresh_snapshot,
+                requested_player_id,
+                bid_amount,
+            )
+
+            if not colchon["cabe"]:
+
+                return {
+                    **build_noop_result(
+                        decision=decision,
+                        status="SPECULATION_SIN_COLCHON",
+                        reason=(
+                            f"La puja de {bid_amount:,} EUR no cabe "
+                            f"en el colchon de la cartera "
+                            f"({colchon['colchon']})."
+                        ).replace(",", "."),
+                        success=True,
+                    ),
+                    "revalidation_snapshot":
+                        fresh_snapshot_file,
+                    "colchon":
+                        colchon,
+                }
+
         seller = (
             fresh_sale.get(
                 "user",
