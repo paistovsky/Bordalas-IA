@@ -2308320,6 +2308320,48 @@
       "direction_hit": null,
       "magnitude_error_percent": null,
       "scored_at": null
+    },
+    "20|PRENSA_MUNDO_DEPORTIVO|3|2026-10-18": {
+      "player_id": "20",
+      "player_name": "Eric García",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 5690000,
+      "predicted_at": "2026-10-18T20:10:03.861584+00:00",
+      "due_at": "2026-10-21T20:10:03.861584+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
+    },
+    "429|PRENSA_MUNDO_DEPORTIVO|3|2026-10-18": {
+      "player_id": "429",
+      "player_name": "Rodri",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 16370000,
+      "predicted_at": "2026-10-18T20:10:05.540088+00:00",
+      "due_at": "2026-10-21T20:10:05.540088+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
     }
   }
 }
