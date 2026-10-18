@@ -173,6 +173,16 @@ jobs:
           python -m src.actions.la_rotacion > data/ensayo/la_rotacion.txt 2>&1 || true
           cat data/ensayo/la_rotacion.txt
 
+      # El informe de la mañana (18/10/2026): no escribe en Biwenger, solo su
+      # libro, que aqui se queda en el runner y viaja en el artefacto
+      # (data/intelligence/). Sin `BORDALAS_EL_INFORME_DE_LA_MANANA` no hace nada.
+      - name: El informe de la manana (ENSAYO, solo observa)
+        if: always()
+        shell: bash
+        run: |
+          test "$BORDALAS_ENSAYO" = "1" || (echo "Sin candado no se corre" && exit 1)
+          python -m src.intelligence.el_informe_de_la_manana || true
+
       - name: Lo que habria escrito
         if: always()
         shell: bash

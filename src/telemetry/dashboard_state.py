@@ -5351,6 +5351,29 @@ def build_dashboard_state() -> dict:
             ),
         }
 
+    # EL INFORME DE LA MAÑANA (18/10/2026)
+    #
+    #     Las dos notas —sube y puntua— de los nuevos del mercado del
+    #     ultimo dia apuntado. Solo LEE su libro: lo escribe su propio
+    #     paso del workflow, que va despues de este, asi que la vuelta
+    #     de las 07:15 enseña el de ayer y las siguientes el de hoy.
+    #     Observador puro: ninguna ruta lo lee para pujar.
+    try:
+        from src.intelligence.el_informe_de_la_manana import (
+            el_ultimo_informe,
+        )
+
+        informe_de_la_manana = el_ultimo_informe()
+
+    except Exception as error:                      # noqa: BLE001
+        informe_de_la_manana = {
+            "available": False,
+            "reason": (
+                f"No se pudo leer el informe de la mañana: "
+                f"{type(error).__name__}: {error}"
+            ),
+        }
+
     try:
         from src.analysis.solvency_clock import build_solvency_clock
 
@@ -6592,6 +6615,10 @@ def build_dashboard_state() -> dict:
         # los que dejamos pasar. Observador puro.
         "libro_del_escaparate": libro_escaparate,
         "libro_de_la_valoracion": libro_valoracion,
+
+        # Sube y puntua de los nuevos del mercado tras el reset (el
+        # ultimo dia apuntado). Observador puro: no decide nada.
+        "el_informe_de_la_manana": informe_de_la_manana,
 
         # EL LIBRO EN LA SOMBRA. Lo que se compraria con la
         # compuerta de ritmo apagada del todo. SIN DINERO:

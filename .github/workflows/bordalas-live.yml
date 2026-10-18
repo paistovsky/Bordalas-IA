@@ -628,6 +628,17 @@ jobs:
         shell: bash
         run: |
           python -m src.actions.la_rotacion 2>&1 | tee data/trading/la_rotacion_vuelta.txt || true
+      # EL INFORME DE LA MAÑANA (18/10/2026, laboratorio del 18/10). DESPUES
+      #   de la rotacion y ANTES de guardar los libros: una vez por dia de
+      #   mercado, tras el reset, pone a cada nuevo del mercado (Computer y
+      #   managers) dos notas, SUBE y PUNTUA, con los pesos medidos, y lo
+      #   apunta en su libro. Lee una pagina de FF por equipo para las
+      #   noticias. SOLO OBSERVA: no puja ni vende. APAGADO:
+      #   `BORDALAS_EL_INFORME_DE_LA_MANANA`. Nunca rompe la vuelta.
+      - name: El informe de la manana
+        shell: bash
+        run: |
+          python -m src.intelligence.el_informe_de_la_manana || true
       - name: Update Cloudflare dashboard
         shell: bash
         run: |
