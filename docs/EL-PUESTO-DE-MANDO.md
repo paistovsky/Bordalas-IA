@@ -352,6 +352,25 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **18/10 10:47 (laboratorio de rivales).** Rivales en el reset del 18/10:
+  Manzagool gano a Manu Sanchez por 1.968.500 (+19,3 %; nuestra puja
+  cancelada de 1.778.494 habria perdido) y queda en -1,83 M de caja;
+  Luismi gano a Ilaix (3,46 M, sin rival) y queda en -7,62 M, y republico
+  19 a x1,5. Pollo17 no opera desde el 15/10 y gana ~0,9 M al dia con 18 de
+  19 subiendo: 105,07 M, 48,4 M por encima de nosotros (56,68 M). Puso a
+  Giuliano Simeone (6,25 M) y German Valera (5,21 M) a su precio: la
+  puerta los ve, pero no hay caja y pasan del tope de 3 M. Tres con caja
+  negativa antes del aplazado del 21/10: Luismi, Manzagool y nosotros.
+  Nuestras tacticas: la cartera, 0 pujas en 32 vueltas (colchon <= 0); la
+  puerta, 2 ofertas en su vida y 0 aceptadas; la mejora solo si sube, 0
+  pujas. **Encendido:** el motor viejo solo si sube (88bb2676; ensayo
+  #39112934857, paso 0 con 52). **La caja del 21/10:** la vende la mejora
+  (Rico es su 'sale', con Cardona dentro): desde el 20/10 00:00 acepta la
+  oferta si llega al 90 % de su valor y, a menos de 20 h, cualquiera; el
+  motor viejo renueva su publicacion. Si no se vendiera, empezariamos el
+  aplazado en -432k y la J10 en -182k aun con la racha: vigilarlo el
+  martes 08:22.
+
 - **18/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2306 a #2315,
   esperada la de las 07:15 tras el reset). Saldo **-432.317** a las 07:19,
   0 comprometido, plantilla 57,1 M. Nada vendido ni comprado en el reset
