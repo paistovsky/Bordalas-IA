@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 18/10/2026, 07:35 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **18/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2306 a #2315,
+  esperada la de las 07:15 tras el reset). Saldo **-432.317** a las 07:19,
+  0 comprometido, plantilla 57,1 M. Nada vendido ni comprado en el reset
+  del domingo. Quedan dos resets (lun 20/10 y mar 21/10, 07:00) para llegar
+  a positivo antes del plazo del martes 14:00 (aplazado de la J6). Dato del
+  chat del dueno que lo refuerza: Luismi perdio los 64 puntos de la J6
+  aplazada por empezarla en negativo. Si el lunes a las 21:15 no hay venta
+  en marcha, aviso al dueno con a quien vender.
 
 - **17/10 noche (laboratorio de rivales, tercera vuelta).** Rivales: nadie
   compro ni vendio desde la manana. Pollo17 en 7 dias: 4 compras al
