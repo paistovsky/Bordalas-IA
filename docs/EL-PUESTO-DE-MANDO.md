@@ -352,6 +352,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **18/10 20:47 (laboratorio de rivales).** Sin reset desde la manana: el
+  tablon solo trae la racha de Manzagool (+250k). Nosotros: -432.317, 0
+  pujas, la cartera y la rotacion en NADA con la J9 jugandose. La
+  publicacion de Rico se renovo (caduca en 40 h): seguira publicado en los
+  resets del 19 y el 20, y la mejora lo vende desde el 20/10 00:00. J9: 37
+  puntos con Jonny, Ibanez (Celta-Alaves) y Unai (lunes) por puntuar.
+
 - **18/10 tarde: EL INFORME DE LA MAÑANA (encargo del dueno, tras Carvajal).**
   Laboratorio (1.981 jugador-dia de mercado, 22.520 de catalogo; informe en
   `scratchpad/lab_informe/INFORME.md`): lo que sube a 7 dias lo dice el
