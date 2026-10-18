@@ -275,6 +275,16 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_ROTACION: "1"
 
+      # Encendido 18/10 de Madrid. EL MOTOR VIEJO, SOLO SI SUBE (laboratorio
+      #   de rivales): lo que esa rama pujo desde el 21/08 por jugadores que
+      #   bajaban el dia de la puja dejo -716.045 (n=3); subiendo, +1,18 M
+      #   (n=4). Solo puja por el que sube de verdad (la vara de la mejora).
+      #   Solo quita gasto. Revision adversarial (4 arreglados); verja
+      #   218/218 con los de produccion y con el nuevo; paso 0 con 52;
+      #   ensayo #39112934857 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_EL_MOTOR_VIEJO_SOLO_SI_SUBE: "1"
+
       # Encendido 12/10 de Madrid. LA MEJORA DEL ONCE (el dueno: «2 dias
       #   que habia jugadores para mejorar el XI y Pepe no ha hecho
       #   nada»). Paso propio tras el panel, en cada vuelta: la
