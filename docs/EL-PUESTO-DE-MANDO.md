@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/10/2026, 07:35 de Madrid (rafaga de las 07:15).
+Actualizado: 18/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **18/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2315 a #2322).
+  Saldo -432.317, 0 comprometido; la puja vieja por Manu Sanchez sale
+  PERDIDA en el libro (Manzagool pago +19,3 %). Revisada la cuenta de E47:
+  me la creo. Sin vender a nadie: racha +250.000 el mie 21/10 ~00:10 y el
+  premio de la J9 el mar 20/10 entre 12:00 y 17:00 (minimo historico
+  ~870.000) => positivo antes del plazo del mie 21/10 14:00. **Mi punto de
+  control sigue:** mar 20/10 21:15. Si el premio no ha entrado para
+  entonces, la racha sola deja -182.317 y aviso al dueno con a quien vender.
 
 - **18/10 10:47 (laboratorio de rivales).** Rivales en el reset del 18/10:
   Manzagool gano a Manu Sanchez por 1.968.500 (+19,3 %; nuestra puja
