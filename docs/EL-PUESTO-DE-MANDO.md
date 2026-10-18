@@ -355,11 +355,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 - **18/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2306 a #2315,
   esperada la de las 07:15 tras el reset). Saldo **-432.317** a las 07:19,
   0 comprometido, plantilla 57,1 M. Nada vendido ni comprado en el reset
-  del domingo. Quedan dos resets (lun 20/10 y mar 21/10, 07:00) para llegar
-  a positivo antes del plazo del martes 14:00 (aplazado de la J6). Dato del
-  chat del dueno que lo refuerza: Luismi perdio los 64 puntos de la J6
-  aplazada por empezarla en negativo. Si el lunes a las 21:15 no hay venta
-  en marcha, aviso al dueno con a quien vender.
+  del domingo. **CORRECCION DE FECHAS (mia, y arrastrada en varias
+  entradas):** el 21/10 es MIERCOLES, no martes, y el 23/10 (J10) es
+  VIERNES, no jueves. Los turnos programados estan bien de fecha (mie
+  21/10 12:45 y vie 23/10 12:45); solo estaban mal los nombres de los dias.
+  Quedan tres resets (lun 19, mar 20 y mie 21/10, 07:00) para llegar a
+  positivo antes del plazo del miercoles 21/10 14:00 (aplazado de la J6).
+  Dato del chat del dueno que lo refuerza: Luismi perdio los 64 puntos de
+  la J6 aplazada por empezarla en negativo. Si el martes 20/10 a las 21:15
+  no hay venta en marcha, aviso al dueno con a quien vender. Leccion:
+  comprobar el dia de la semana con el calendario, no de memoria.
 
 - **17/10 noche (laboratorio de rivales, tercera vuelta).** Rivales: nadie
   compro ni vendio desde la manana. Pollo17 en 7 dias: 4 compras al
