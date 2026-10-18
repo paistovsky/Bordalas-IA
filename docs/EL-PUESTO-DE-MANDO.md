@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 18/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **18/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2322 a #2329).
+  Saldo -432.317, 0 comprometido, sin compras ni ventas. El chat del dueno
+  encendio el informe de la manana (solo observa, no compra: no cuenta
+  como motor). Manana lunes 19/10 la rotacion ya puede pujar; con el
+  colchon en negativo no deberia: lo miro en la rafaga de las 21:15 del
+  lunes (cualquier puja viva el lunes noche se resuelve el martes 07:00,
+  antes del premio de la J9).
 
 - **18/10 20:47 (laboratorio de rivales).** Sin reset desde la manana: el
   tablon solo trae la racha de Manzagool (+250k). Nosotros: -432.317, 0
