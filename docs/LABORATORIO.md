@@ -69,6 +69,50 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E48 · 18/10/2026 17:15 de Madrid · La carrera otra vez: Pollo17 ya tiene mejor once
+
+**Hipotesis:** E20 (05/10) daba el once de Pepe por delante del de Pollo17
+(48,1 contra 46,2 esperados). Pollo17 ha comprado desde entonces a los que
+suben (prima media +16,7 %): ¿ha cambiado el orden?
+**Datos:** la foto del ciclo de las 17:09 de hoy (`rival_squads` +
+`todaLaLiga`), la misma vara que E20 (puntos por partido x titularidad FF,
+estado ok), y todos los jugadores sanos con 4+ partidos para la curva
+puntos-precio (n = 259).
+**Codigo:** `lab/carrera/proyeccion.py` (E20) y `lab/carrera/once_detalle.py`.
+
+    manager        puntos   once esperado 05/10 -> 18/10   valor del once
+    Luismi_Haz       287          58,8 -> 59,1                85,0 M
+    Pollo17          320          46,2 -> 53,3                64,2 M
+    Manzagool        253          37,2 -> 50,3                  -
+    Pepe             323          48,1 -> 47,5                56,6 M
+
+**Lo que se aprende:**
+- **Pollo17 ya saca 5,7 puntos por jornada mas que Pepe** con el once de
+  hoy. En 30 jornadas son **+139 a +179 puntos** (con el 81-104 % de
+  acierto de la vara, E20). La ventaja de 3 puntos de hoy no aguanta ni
+  una jornada. Luismi va aun mejor (59,1), pero con -7,6 M de caja.
+- **No es mal reparto, es menos dinero en el once.** Pepe saca 47,5 de
+  56,6 M (0,84 pts/M) y Pollo17 53,3 de 64,2 M (0,83 pts/M). Los 7,6 M de
+  diferencia en el once explican la diferencia: en la curva de la liga,
+  entre 5 y 10 M cada millon da ~0,7-1,0 pts por partido.
+- **Yamal no es el problema.** Vender a Yamal (25,4 M, 12,1 esperados)
+  para fichar cinco de 5 M (mediana 5,5 pts/partido) y quitar a los cuatro
+  peores (Cardona 2,0, Jonny 2,5, Chust 3,3, Luismi Cruz 3,3) deja el once
+  igual a la mediana (22 contra 23,2) y solo gana ~+4 si los cinco fueran
+  del cuartil alto, antes de pagar primas. La regla del dueno no cuesta
+  puntos.
+- **El once de Pepe es Yamal + Roberto + nueve de 2-4 puntos.** El de
+  Pollo17 no tiene ninguno por debajo de 4 salvo Ruben Sanchez (30 %).
+
+**Limites:** la vara sobreestima (81-104 %); es una foto de una tarde; la
+titularidad de FF cambia cada dia; la J9 esta a medias.
+
+**Veredicto: AVISO para la carrera.** Con el once de hoy Pepe pierde la
+liga contra Pollo17 por ~150 puntos. La palanca es meter ~7-8 M mas en el
+once (patrimonio, no reventa): lo que la cartera y la rotacion ganen tiene
+que acabar en el once (regla del dueno: inversion son puntos), empezando
+por las plazas de 2-3 puntos (Cardona, Jonny).
+
 ### E47 · 18/10/2026 11:16 de Madrid · ¿Hace falta vender a Rico para el plazo del miercoles?
 
 **El caso:** Pepe esta en -432.317 y el plazo del aplazado de la J6 es el
