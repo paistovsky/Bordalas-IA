@@ -70,7 +70,24 @@ def test_sin_marcador_previo_el_lineup_de_siempre():
     assert [f["nombre"] for f in r["filas"]] == [str(p) for p in ONCE_J10]
 
 
+def test_la_jornada_de_ahora_no_la_tapa_un_aplazado():
+    def _p(ko, local="A", fuera="B"):
+        return {"home": local, "away": fuera, "kickoff": ko}
+    calendario = {"matchdays": [
+        {"matchday": 6, "matches": [_p("2026-09-15T21:00:00+02:00"),
+                                    _p("2026-10-21T20:00:00+02:00", "Levante UD", "Athletic Club")]},
+        {"matchday": 9, "matches": [_p("2026-10-16T21:00:00+02:00"), _p("2026-10-18T14:00:00+02:00"),
+                                    _p("2026-10-19T21:00:00+02:00")]},
+    ]}
+    ahora = datetime(2026, 10, 18, 11, 13, tzinfo=timezone.utc)
+    assert V.la_jornada_de_ahora(calendario, ahora)["matchday"] == 9
+    # El miercoles del aplazado, la J6 (la J9 ya quedo atras).
+    assert V.la_jornada_de_ahora(calendario, datetime(2026, 10, 21, 18, tzinfo=timezone.utc))["matchday"] == 6
+    assert V.la_jornada_de_ahora(calendario, datetime(2026, 8, 1, tzinfo=timezone.utc)) is None
+
+
 TESTS = [
+    test_la_jornada_de_ahora_no_la_tapa_un_aplazado,
     test_cuenta_el_once_que_empezo_no_el_de_ahora,
     test_el_que_ya_no_esta_sale_con_su_nombre,
     test_sin_marcador_previo_el_lineup_de_siempre,

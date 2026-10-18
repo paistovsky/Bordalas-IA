@@ -80,17 +80,33 @@ def el_once_que_empezo(previo: dict | None, status: dict) -> list | None:
         return None
 
 
+def la_jornada_de_ahora(calendario: dict, ahora: datetime) -> dict | None:
+    """
+    La jornada en curso: la que tiene MAS partidos alrededor de ahora (de
+    2 dias antes a 1 despues de cada partido). Antes era la primera que
+    tuviera alguno, y el 18/10 salia la J6: su aplazado (Levante-Athletic,
+    21/10) caia dentro de la ventana y la J6 va antes que la J9.
+    """
+    mejor, cuantos = None, 0
+    for m in calendario.get("matchdays") or []:
+        n = 0
+        for x in m.get("matches") or []:
+            try:
+                ko = datetime.fromisoformat(x["kickoff"])
+            except Exception:                       # noqa: BLE001
+                continue
+            if ko - timedelta(days=2) <= ahora <= ko + timedelta(days=1):
+                n += 1
+        if n > cuantos:
+            mejor, cuantos = m, n
+    return mejor
+
+
 def la_jornada(status: dict, calendario: dict, ahora: datetime,
                previo: dict | None = None, marcador: dict | None = None) -> dict:
     once = (el_once_que_empezo(previo, status)
             or [p for p in (status.get("lineup") or {}).get("players") or []])
-    # La jornada en curso: la que tiene partidos alrededor de ahora.
-    jornada = None
-    for m in calendario.get("matchdays") or []:
-        ko = [datetime.fromisoformat(x["kickoff"]) for x in m.get("matches") or []]
-        if ko and min(ko) - timedelta(days=2) <= ahora <= max(ko) + timedelta(days=1):
-            jornada = m
-            break
+    jornada = la_jornada_de_ahora(calendario, ahora)
     filas = []
     tot_prev, tot_now = {}, {}
     if previo and marcador:
