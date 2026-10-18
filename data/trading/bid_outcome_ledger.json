@@ -1751,11 +1751,11 @@
    "trend_days": 3,
    "seller_user_id": null,
    "placed_at": "2026-10-17T07:09:46.809990+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null
+   "outcome": "LOST",
+   "resolved_at": "2026-10-18T05:19:09.624781+00:00",
+   "winning_amount": 1968500,
+   "margin": 190006,
+   "event_id": "b52fe685b5074481899afc47"
   }
  }
 }

@@ -195997,5 +195997,42 @@
         "amount": 4695000
       }
     ]
+  },
+  {
+    "event_id": "b52fe685b5074481899afc47",
+    "date": 1792299956,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 1721,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 1968500,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 1652000
+          }
+        ]
+      },
+      {
+        "player": 21084,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3461000
+      }
+    ]
   }
 ]
