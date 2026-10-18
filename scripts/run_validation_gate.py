@@ -235,6 +235,11 @@ TESTS = [
     # por uno de su posicion que sube y puntua igual o mas; se vende
     # cuando el otro llego, sin hueco en el once ni ronda jugandose. Apagada.
     "src.analysis.test_la_rotacion_v1",
+    # El informe de la mañana (laboratorio del 18/10): sube y puntua de
+    # los nuevos del mercado tras el reset, una vez por dia, con las
+    # noticias de FF sin romper nada si la red falla. Solo observa y
+    # solo escribe su libro. Apagado.
+    "src.analysis.test_el_informe_de_la_manana_v1",
 
     # El dia despues de las seis compras del 21/09: cerrar la
     # reventa sin cerrar la compra para quedarse, y que el tope

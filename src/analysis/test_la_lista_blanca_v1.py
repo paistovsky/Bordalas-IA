@@ -77,6 +77,11 @@ NO_SE_PINTAN = {
     # se escribio y por que, para mirarlo en el JSON.
     "libro_de_la_valoracion": "cuaderno; se mira en el JSON",
 
+    # El informe de la mañana (18/10/2026): sube y puntua de los
+    # nuevos del mercado tras el reset. Fase 1, solo observa: se
+    # publica para mirarlo en el JSON; el cuadro llega con la fase 2.
+    "el_informe_de_la_manana": "fase 1, observador; sin cuadro todavia, se mira en el JSON",
+
     # El estado del jugador franquicia. Hoy sale NO_FRANCHISE y
     # no hay ningun cuadro que lo enseñe; se publica para poder
     # mirarlo en el JSON cuando se active.

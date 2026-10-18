@@ -262,6 +262,14 @@ QUE_HACE = {
         "sale lo vende cuando el otro ya ha llegado, desde el 99 % de su valor, y "
         "si era titular pone al nuevo en su sitio del once. Nunca con una ronda "
         "jugándose.",
+    "BORDALAS_EL_INFORME_DE_LA_MANANA":
+        "Cada mañana, después del reset, mira a todos los jugadores nuevos del "
+        "mercado (del Computer y de los managers) y les pone dos notas: cuánto "
+        "puede subir su precio en una semana y cuántos puntos haría en la próxima "
+        "jornada (con lo que ha subido hoy, si vale menos de 1 M, si FutbolFantasy "
+        "dice que vuelve, su titularidad y la prensa). Solo lo apunta en su libro "
+        "y lo deja en los datos del panel, que todavía no lo pinta: todavía no "
+        "decide ninguna puja.",
     "BORDALAS_EL_CALENDARIO_EN_EL_ONCE":
         "Al elegir el once mira el partido de la próxima ronda: en casa contra "
         "uno que no es de los de arriba suma; fuera, o contra uno de arriba, "

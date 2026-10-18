@@ -92,6 +92,26 @@ LIBROS = (
         ),
     },
     {
+        "ruta": "data/intelligence/el_informe_de_la_manana.jsonl",
+        "que_es": (
+            "El informe de cada mañana tras el reset: una linea DIA con "
+            "el mercado entero y quien es nuevo, y una linea por cada "
+            "jugador nuevo (del Computer y de los managers) con sus dos "
+            "notas —sube y puntua, pesos del laboratorio del 18/10—, el "
+            "por que y las señales de ese dia (titular de FF, noticias "
+            "de la pagina del equipo, prensa, Jornada Perfecta)."
+        ),
+        "por_que_no_se_reconstruye": (
+            "El tablero de FF, el informe de prensa y el mercado de JP "
+            "se pisan cada vuelta, y las noticias de la pagina del "
+            "equipo no se guardan en ningun otro sitio: lo que sabia "
+            "Pepe de un jugador la mañana que salio al mercado no "
+            "existe en ninguna parte. Sin el no se pueden volver a "
+            "medir los pesos de las dos notas (fase 1) antes de "
+            "dejarlas pesar en una puja (fase 2)."
+        ),
+    },
+    {
         "ruta": "data/intelligence/marcador.json",
         "que_es": (
             "El marcador de la temporada: una entrada por "

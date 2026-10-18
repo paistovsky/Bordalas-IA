@@ -72,6 +72,7 @@ data/
 !/data/intelligence/rejection_ledger.json
 !/data/intelligence/libro_de_la_valoracion.jsonl
 !/data/intelligence/puntos_por_jornada.jsonl
+!/data/intelligence/el_informe_de_la_manana.jsonl
 
 !/data/rival_intelligence/
 /data/rival_intelligence/*

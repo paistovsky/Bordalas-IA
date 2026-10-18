@@ -124,6 +124,14 @@ PUEDEN_MIRAR_EL_RELOJ = {
         "misma forma: marcas relativas a `now` y aserciones "
         "sobre frescura, no sobre una palabra."
     ),
+    "test_el_informe_de_la_manana_v1.py": (
+        "mide con `time.monotonic()` que el tope de RELOJ de las "
+        "noticias de FF corta una descarga que gotea (un "
+        "`requests.get` y un `fetch` de mentira que duermen): "
+        "afirma sobre lo que TARDA, una diferencia, nunca sobre "
+        "una palabra ni una fecha. La hora del informe se le pasa "
+        "siempre (`AHORA`)."
+    ),
 }
 
 
