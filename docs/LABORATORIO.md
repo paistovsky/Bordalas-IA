@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E47 · 18/10/2026 11:16 de Madrid · ¿Hace falta vender a Rico para el plazo del miercoles?
+
+**El caso:** Pepe esta en -432.317 y el plazo del aplazado de la J6 es el
+**miercoles 21/10 a las 14:00** (E45, decision del gestor). El plan es
+vender a Diego Rico (oferta ~468.100) tras su partido de la J9. Pero hay
+dos ingresos con fecha: la racha diaria (250.000) y el premio de la J9.
+**Datos:** las 37 rachas cobradas del tablon (7 managers) y el reloj de
+premios de E43; calendario de la J9 (artefacto de las 13:10 de hoy).
+**Codigo:** `lab/caja/la_racha.py`.
+
+**Lo que se aprende:**
+- **La racha de Pepe es un reloj:** 250.000 cada 5 dias, las tres
+  ultimas exactas (5,0 dias) a las 00:10 de Madrid (la vuelta de las
+  00:07, que entra cada dia). La siguiente: **miercoles 21/10 ~00:10**,
+  antes del plazo. Los rivales que no entran todos los dias la pierden
+  (huecos de 9-11 dias en DiosMande y Luismi).
+- **El premio de la J9:** su ultimo partido es el lunes 19/10 21:00
+  (Getafe-Rayo) y la J9 no tiene aplazados en el calendario. Biwenger
+  paga 13-18 h despues (E43, 6 de 6): **martes 20/10 entre las 12:00 y
+  las 17:00**. La peor jornada de Pepe hasta hoy son 29 puntos = 870.000.
+- **La cuenta:** -432.317 + 250.000 (racha) = -182.317; con el premio de
+  la J9, **+0,7 M o mas sin vender a nadie**. Solo la racha no basta.
+
+**Limites:** la J8 enseña que un premio puede esperar (E43), aunque alli
+habia un partido sin jugar; la racha depende de que la vuelta de las 00:07
+entre a su hora.
+
+**Veredicto: AVISO con regla de decision para el gestor.** El martes 20/10
+a las 21:15: si el premio de la J9 ha entrado («roundFinished» de la J9 en
+el tablon y saldo arriba), no se vende a Rico por el plazo. Si no ha
+entrado, vender a Rico esa noche: su oferta del lote del 19/10 07:00 sigue
+viva hasta el 21/10 07:00 (E42) y deja el saldo en ~+286.000 con la racha.
+
 ### E46 · 17/10/2026 17:15 de Madrid · La rotacion con la prima de verdad
 
 **El caso:** hoy se ha construido, apagada, «la rotacion»
@@ -2155,6 +2188,13 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E47, 18/10 11:16) Plazo del mie 21/10 14:00: no vender a Rico si el
+  premio de la J9 entra el martes.** -432.317 + racha (250.000, mie 21/10
+  ~00:10; Pepe la cobra cada 5,0 dias exactos) + premio de la J9 (mar 20/10
+  12-17 h, minimo historico 29 pts = 870.000) = +0,7 M o mas. Martes 21:15:
+  si no hay «roundFinished» de la J9, vender a Rico (oferta viva hasta el
+  21/10 07:00). Y en la caja de cada jornada, contar la racha de Pepe como
+  ingreso con fecha (cada 5 dias a las 00:10).
 - **(E43, 16/10 11:16) El calendario de la mejora tiene que ver los
   aplazados.** El Rayo-Athletic de la J8 (10/10) no se jugo y
   `laliga_calendar.json` lo da por jugado, sin fecha nueva. Regla: si un
