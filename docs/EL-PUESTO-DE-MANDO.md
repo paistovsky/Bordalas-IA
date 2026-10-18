@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **18/10 tarde: EL INFORME DE LA MAÑANA (encargo del dueno, tras Carvajal).**
+  Laboratorio (1.981 jugador-dia de mercado, 22.520 de catalogo; informe en
+  `scratchpad/lab_informe/INFORME.md`): lo que sube a 7 dias lo dice el
+  cambio de precio de HOY (rho +0,63; las webs de mercado publican ese mismo
+  numero, r 0,97); suman algo una noticia de VUELTA en FF (72 h) y valer menos
+  de 1 M. Los puntos los dice la titularidad de FF por los puntos por partido
+  (rho +0,45); resta la prensa de BAJA/DUDA. Recomendaciones tipo 'ficha si
+  sale', jerarquia, racha: sin efecto medible o sin historia (peso 0, se
+  apuntan). Formulas: sube = -1 + 4,5*cambio% + 2*VUELTA + 3*(<1 M);
+  puntua = 0,5 + 0,85*titular*puntos por partido - 1*prensa. Construido
+  y revisado (12 arreglados), ENCENDIDO en modo observador (dca3790d;
+  ensayo #39129474545: 20 nuevos, Carvajal sube 35 / puntua 1,3). Fase 2,
+  tras 1-2 semanas medido: sube en la cartera y la rotacion, puntua en la
+  mejora, con su interruptor; ojo con las ventas de managers (Raba pide
+  x1,5 su valor: la nota mira el valor). Tambien: la jornada en vivo elegia
+  la J6 por el aplazado (27d86b0d).
+
 - **18/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2315 a #2322).
   Saldo -432.317, 0 comprometido; la puja vieja por Manu Sanchez sale
   PERDIDA en el libro (Manzagool pago +19,3 %). Revisada la cuenta de E47:
