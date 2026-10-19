@@ -73,6 +73,7 @@ data/
 !/data/intelligence/libro_de_la_valoracion.jsonl
 !/data/intelligence/puntos_por_jornada.jsonl
 !/data/intelligence/el_informe_de_la_manana.jsonl
+!/data/intelligence/la_titularidad_del_dia.jsonl
 
 !/data/rival_intelligence/
 /data/rival_intelligence/*

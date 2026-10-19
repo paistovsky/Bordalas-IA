@@ -112,6 +112,27 @@ LIBROS = (
         ),
     },
     {
+        "ruta": "data/intelligence/la_titularidad_del_dia.jsonl",
+        "que_es": (
+            "Una linea al dia: la titularidad de FutbolFantasy (%, "
+            "jerarquia y parte) de TODOS los jugadores cuyas paginas ya "
+            "lee el tablero -no solo sus objetivos-, por id de Biwenger "
+            "o, si no empareja, con su identidad de FF; y el estado de "
+            "Biwenger de todo el catalogo. Se poda a 60 dias "
+            "(`archivo_diario.DIAS_QUE_SE_GUARDAN`)."
+        ),
+        "por_que_no_se_reconstruye": (
+            "El tablero de FF se pisa cada vuelta y solo guardaba 141 "
+            "de 551; el estado de Biwenger vive en la foto, que caduca. "
+            "La titularidad que publicaba FF un martes no esta en "
+            "ninguna parte despues: sin ella el laboratorio del 19/10 "
+            "no pudo validar el xP de la J8 y la J9 ni la penalizacion "
+            "de -1,2 por el estado. El archivo diario de `archivo/` no "
+            "sirve para esto: vive en la cache de Actions, que el "
+            "laboratorio no puede leer."
+        ),
+    },
+    {
         "ruta": "data/intelligence/marcador.json",
         "que_es": (
             "El marcador de la temporada: una entrada por "

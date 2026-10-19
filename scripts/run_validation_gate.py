@@ -575,6 +575,12 @@ TESTS = [
     # Y ningun once en papel alinea a un lesionado, un sancionado,
     # un descartado o uno de estado desconocido.
     "src.analysis.test_el_once_no_alinea_lesionados_v1",
+
+    # La titularidad de FF de todos los que ya lee el tablero (no solo
+    # sus 141 objetivos) y el estado de Biwenger de la liga, una linea
+    # al dia en un libro de git, para validar el xP (laboratorio del
+    # 19/10/2026). No decide nada.
+    "src.analysis.test_la_titularidad_del_dia_v1",
 ]
 
 

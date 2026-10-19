@@ -173,6 +173,51 @@ def las_rondas(calendario=None) -> list:
         return []
 
 
+def los_equipos_de(ronda, calendario=None) -> list | None:
+    """
+    Los equipos que juegan una ronda (una de `las_rondas`): local y
+    visitante de cada partido de su jornada que cae entre su `inicio`
+    y su `fin`, con el nombre que trae el calendario («Levante UD»,
+    «Athletic Club»). Ordenados y sin repetir.
+
+    None si no se sabe: calendario ilegible, ningun partido en la
+    ronda (la jornada sin partidos, solo con `first_kickoff`) o algun
+    partido de la ronda sin los dos nombres. Quien pregunta para
+    frenar algo tiene que frenarlo entero con None: una lista a
+    medias diria que no juega quien si juega. Nunca lanza.
+    """
+    try:
+        ronda = ronda if isinstance(ronda, dict) else {}
+        inicio, fin = ronda.get("inicio"), ronda.get("fin")
+        if inicio is None or fin is None:
+            return None
+        d = _leer(calendario)
+        partidos = []
+        for j in d.get("matchdays") or []:
+            if isinstance(j, dict) and j.get("matchday") == ronda.get("jornada"):
+                partidos += [m for m in j.get("matches") or [] if isinstance(m, dict)]
+        if not partidos:
+            # Sin `matchdays`, la lista suelta (como `_horas_por_jornada`).
+            partidos = [m for m in d.get("matches") or []
+                        if isinstance(m, dict) and m.get("matchday") == ronda.get("jornada")]
+        equipos, vistos = set(), 0
+        for m in partidos:
+            hora = _hora(m.get("kickoff"))
+            if hora is None or not inicio <= hora <= fin:
+                continue
+            vistos += 1
+            casa, fuera = str(m.get("home") or "").strip(), str(m.get("away") or "").strip()
+            if not casa or not fuera:
+                return None
+            equipos |= {casa, fuera}
+        # Uno por partido de la ronda, o no se sabe.
+        if not vistos or vistos != ronda.get("partidos"):
+            return None
+        return sorted(equipos)
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def horas_al_proximo_cierre(ahora: datetime, ruta=None):
     """Horas desde `ahora` hasta el inicio de la próxima ronda que no ha
     empezado (aplazados y adelantados incluidos). None si no se sabe."""

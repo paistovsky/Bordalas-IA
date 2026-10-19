@@ -1384,6 +1384,36 @@ def stale_fallback(
     }
 
 
+# ----------------------------------------------------------------
+# LAS PLANTILLAS ENTERAS (19/10/2026)
+#
+# Cada pagina de equipo trae a TODA la plantilla -26 a 29 filas-,
+# pero el tablero solo guardaba a los objetivos emparejados: 141 de
+# 551 el 19/10. Las otras 400 filas se leian y se tiraban, y con
+# ellas la titularidad de FF de casi toda la liga: el laboratorio
+# del 19/10 no pudo validar el xP de J8 y J9 por eso.
+#
+# Ahora el tablero guarda tambien, por equipo, las filas de su
+# pagina tal cual las leyo (`plantillas`), sin emparejar con nadie:
+# emparejar es cosa de quien las lea (`archivo_diario`, una vez al
+# dia). No cambia ni una peticion ni un objetivo, y NADIE DECIDE CON
+# ESTO: el lookup de titularidad sigue leyendo `players`.
+#
+# Al completar, las de los equipos que no se vuelven a bajar se
+# conservan de la cache, cada una con su hora (`at`).
+# ----------------------------------------------------------------
+
+CAMPOS_DE_LA_PLANTILLA = (
+    "ff_slug",
+    "ff_name",
+    "probability",
+    "hierarchy_value",
+    "availability_code",
+    "sanctioned",
+    "ff_biwenger_value",
+)
+
+
 def refresh_board(
     snapshot: dict,
     matchday: int,
@@ -1527,6 +1557,7 @@ def refresh_board(
 
     jugadores = []
     equipos_meta = {}
+    plantillas = {}
     errores = []
     sin_slug = []
     paginas = 0
@@ -1561,6 +1592,15 @@ def refresh_board(
             continue
 
         equipos_meta[team_name] = pagina["team"]
+
+        plantillas[team_name] = {
+            "at": datetime.now(timezone.utc).isoformat(),
+            "players": [
+                {campo: fila.get(campo) for campo in CAMPOS_DE_LA_PLANTILLA}
+                for fila in pagina["players"]
+                if isinstance(fila, dict)
+            ],
+        }
 
         for match in match_team(pagina["players"], targets):
 
@@ -1610,6 +1650,16 @@ def refresh_board(
         ] + jugadores
 
     cubiertos = {entry["player_id"] for entry in jugadores}
+
+    # Las plantillas de los equipos que no se han vuelto a bajar, de
+    # la cache (misma jornada: si no, no se completa).
+    if completando:
+
+        for equipo, plantilla in (
+            (cache or {}).get("plantillas") or {}
+        ).items():
+
+            plantillas.setdefault(equipo, plantilla)
 
     salida = {
         "version": "V12.0",
@@ -1709,6 +1759,10 @@ def refresh_board(
 
         "teams": equipos_meta,
         "players": jugadores,
+
+        # Todas las filas de cada pagina leida, sin emparejar. Ver
+        # `CAMPOS_DE_LA_PLANTILLA`.
+        "plantillas": plantillas,
 
         "cache": {
             "status": "TOPPED_UP" if completando else "REFRESHED",

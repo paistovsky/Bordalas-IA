@@ -864,6 +864,49 @@ def test_la_prensa_vieja_no_cuenta():
     assert M.la_prensa_vale(PRENSA, AHORA) is None
 
 
+def test_la_baja_de_otro_no_resta():
+    """
+    La falsa baja de Yamal (laboratorio del 19/10): «Nuno Mendes, su
+    antidoto para frenar a un Lamine Yamal (...), esta lesionado y
+    Digne, ...». La prensa se la colgaba a Yamal -el unico del catalogo
+    en la frase- y PUNTUA le restaba 1,0. Ahora "lesionado" es de quien
+    lo tiene mas cerca (`scout/press.py`) y PRENSA_BAJA no salta; una
+    baja de verdad con equipos y estadios alrededor, si.
+    """
+    from src.intelligence.scout import press
+
+    def _feed(*titulares):
+        return ('<?xml version="1.0" encoding="UTF-8"?><rss><channel>' + "".join(
+            f"<item><title><![CDATA[{t}]]></title><description><![CDATA[{d}]]>"
+            f"</description><link>https://ejemplo/{i}</link>"
+            f"<pubDate>Sun, 18 Oct 2026 06:00:00 +0200</pubDate></item>"
+            for i, (t, d) in enumerate(titulares)) + "</channel></rss>")
+
+    catalogo = {"data": {
+        "players": {"26271": {"id": 26271, "name": "Yamal", "price": 25_470_000, "teamID": 3},
+                    "20": {"id": 20, "name": "Eric García", "price": 5_540_000, "teamID": 3}},
+        "teams": {"3": {"id": 3, "name": "Barcelona"}, "87": {"id": 87, "name": "Betis"}}}}
+    informe = press.build_press_report(catalogo, now=AHORA, xml_by_feed={"MUNDO_DEPORTIVO": _feed(
+        ("El PSG llega tocado",
+         "Nuno Mendes , su antídoto para frenar a un Lamine Yamal en un momento de juego "
+         "magnífico, está lesionado y Digne, su alternativa natural, viene de firmar un "
+         "partido espeso y poco resolutivo frente al Estrasburgo (1-3)."),
+        ("Un mensaje en las redes",
+         "Eric Garcia , una vez conocido y asumido el alcance de la lesión sufrida ante el "
+         "Betis en La Cartuja, publicó un sentido mensaje en las redes sociales."))})
+    corte = M.el_corte_de_las_noticias(AHORA)
+    yamal, eric = M.la_prensa_de(informe, 26271, corte), M.la_prensa_de(informe, 20, corte)
+    assert yamal["baja"] is False and yamal["items"] == [], yamal
+    assert eric["baja"] is True and [i["tipo"] for i in eric["items"]] == ["BAJA"], eric
+    # En la nota: con la misma titularidad y los mismos puntos, Yamal ya no
+    # pierde el 1,0 de la prensa.
+    base = {"titular_ff": 90, "jugados": 9, "jornadas": 9, "puntos": 109, "posicion": 4,
+            "estado": "ok"}
+    sin_baja = M.puntuar({**base, "prensa_baja": yamal["baja"]})["puntua"]
+    con_baja = M.puntuar({**base, "prensa_baja": True})["puntua"]
+    assert round(sin_baja - con_baja, 2) == 1.0, (sin_baja, con_baja)
+
+
 def test_el_mercado_sin_renovar_no_se_apunta():
     """
     Una foto de despues del reset que aun trae el mercado de ayer (el
@@ -1186,6 +1229,7 @@ TESTS = [
     test_el_tope_de_tiempo_es_de_reloj,
     test_la_ventana_de_las_noticias,
     test_la_prensa_vieja_no_cuenta,
+    test_la_baja_de_otro_no_resta,
     test_el_mercado_sin_renovar_no_se_apunta,
     test_la_cuota_y_el_cambio_del_historico,
     test_clasifica_los_titulares,

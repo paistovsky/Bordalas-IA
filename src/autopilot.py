@@ -4287,6 +4287,20 @@ def run_cycle(
 
         podar()
 
+        # LA TITULARIDAD DEL DIA (19/10/2026): la de FF de todos los
+        # que el tablero ya leyo (no solo sus 141 objetivos) y el
+        # estado de Biwenger de todo el catalogo, una linea al dia en
+        # un libro de git. Va aqui, DESPUES del tablero de esta vuelta
+        # (`build_cycle_acquisition_board`), y no pide nada a la red.
+        from src.intelligence.archivo_diario import (
+            archivar_la_titularidad,
+        )
+
+        titularidad = archivar_la_titularidad(snapshot)
+
+        if titularidad.get("written"):
+            print(f"Titularidad: {titularidad['reason']}")
+
     except Exception as error:                      # noqa: BLE001
         archivo = {
             "available": False,
