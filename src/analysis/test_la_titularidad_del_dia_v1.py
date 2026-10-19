@@ -288,14 +288,24 @@ def test_lo_caducado_no_es_de_hoy_y_se_poda():
 # ------------------------------------------------------------------
 
 def test_nunca_lanza_y_se_apaga():
+    import src.intelligence.futbolfantasy_provider as ff
+
     with tempfile.TemporaryDirectory() as carpeta:
         libro = Path(carpeta) / "titularidad.jsonl"
-        for snapshot, tablero in ((None, None), ("x", 5), ({"catalog": 7}, {"plantillas": "x"}),
-                                  ({}, {"updated_at": "ayer", "players": [None, 3]})):
-            r = _archivar(snapshot, tablero, AHORA, libro)
-            assert isinstance(r, dict) and not r["written"] and r["reason"], r
-            linea = la_titularidad_de_hoy(snapshot, tablero, AHORA)
-            assert isinstance(linea, dict) and linea["dia"] == "2026-10-19", linea
+        # Sin tablero dado, el modulo lee el de disco. En CI la cache trae
+        # el de produccion (143 objetivos) y escribia (20/10 00:07, verja
+        # roja): la guardia no puede depender de lo que haya en `data/`.
+        tablero_de_disco = ff.BOARD_FILE
+        ff.BOARD_FILE = Path(carpeta) / "no_hay_tablero.json"
+        try:
+            for snapshot, tablero in ((None, None), ("x", 5), ({"catalog": 7}, {"plantillas": "x"}),
+                                      ({}, {"updated_at": "ayer", "players": [None, 3]})):
+                r = _archivar(snapshot, tablero, AHORA, libro)
+                assert isinstance(r, dict) and not r["written"] and r["reason"], r
+                linea = la_titularidad_de_hoy(snapshot, tablero, AHORA)
+                assert isinstance(linea, dict) and linea["dia"] == "2026-10-19", linea
+        finally:
+            ff.BOARD_FILE = tablero_de_disco
         # Sin catalogo ni tablero no se escribe nada (ni se crea el libro).
         assert not libro.exists()
         # Una plantilla rota no tumba la linea.
