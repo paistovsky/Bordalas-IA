@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 19/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 19/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **19/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2345 a #2352).
+  Saldo -432.317, 0 comprometido, sin movimientos. Leido lo del chat del
+  dueno: la J8 sigue abierta (Rayo-Athletic suspendido) y al cerrarla
+  vamos segundos a ~27 puntos de Pollo17; ese Rayo-Athletic, cuando tenga
+  fecha, sera OTRO plazo de caja (lo apunto para crear su turno en cuanto
+  salga en el calendario). Para el mie 21/10 nada cambia: premio de la J9
+  manana, control mio manana a las 21:15.
 
 - **19/10 20:47 (laboratorio de rivales).** Sin reset desde la manana: el
   tablon no trae compras ni ventas. Nosotros: -432.317, 0 pujas; Rico con
