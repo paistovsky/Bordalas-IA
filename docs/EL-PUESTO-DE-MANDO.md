@@ -352,6 +352,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **19/10 tarde. CORRECCION DEL DUENO: la clasificacion 323-320 NO es la
+  real.** Solo cuenta las jornadas cerradas (hasta la J7). La J8 sigue
+  abierta por el Rayo-Athletic suspendido, y en ella Pollo17 hizo 74 y
+  nosotros 44: al cerrarla iremos SEGUNDOS, a unos 27 puntos (394-367),
+  mas lo que deje la J9 (nosotros 43 con Unai por jugar). El panel de la
+  carrera (`race`) dice LIDER por lo mismo: hay que corregirlo para que
+  cuente las jornadas abiertas como provisionales. Y el Rayo-Athletic,
+  cuando tenga fecha, sera otra ronda aparte (como el Levante-Athletic):
+  otro plazo de caja, con Unai Lopez en el once.
+
 - **19/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2338 a #2345).
   Saldo -432.317, 0 comprometido, sin movimientos. Nada que cambiar: hoy a
   las 21:00 el Getafe-Rayo cierra la J9; el premio, manana 12:00-17:00.
