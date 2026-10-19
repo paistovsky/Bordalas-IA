@@ -69,6 +69,46 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E50 · 19/10/2026 17:15 de Madrid · El Levante-Athletic del 21/10, manager a manager
+
+**Hipotesis:** el aplazado de la J6 (mie 21/10 20:00) pesa distinto para
+cada manager segun cuantos jugadores tenga del Levante y del Athletic; y
+si es ronda propia (E45), quien la empiece en rojo los pierde.
+**Datos:** la foto del ciclo de las 17:10 de hoy (plantillas, titularidad
+FF, caja de cada manager); vara de E20 (puntos por partido x titularidad).
+**Codigo:** `lab/carrera/quien_se_juega_el_21.py`.
+
+    manager        caja hoy       esperado en ese partido
+    Pollo17        -377.549          17,8  (De la Fuente, Ivan Romero, Robert Navarro, Brugue)
+    Mex             560.800           5,0
+    Prinzipote    1.314.772           4,1
+    Pepe           -432.317           3,7  (Olasagasti)
+    Luismi_Haz  -12.144.016           3,0
+    Manzagool    -1.578.989           2,5
+    Alvaro R.    15.105.200           1,3
+    DiosMande       345.475           0
+
+**Lo que se aprende:**
+- **Ese partido favorece a Pollo17 en ~14 puntos sobre Pepe** si cuenta
+  con los onces de hoy (17,8 contra 3,7): la ventaja de 3 puntos de Pepe
+  se iria ese miercoles.
+- **Pollo17 esta en rojo** (-377.549) y, si es ronda propia, perderia esos
+  ~18 puntos y ~530.000 de premio si no sale antes. Lo normal es que
+  salga: cobrara el premio de la J9 el martes (E43/E47) igual que Pepe.
+- **Es la prueba que zanja E45:** el jueves 22/10 por la manana, mirar si
+  la clasificacion de Pollo17 sube con los puntos de esos cuatro en ese
+  partido. Si sube, el aplazado iba con el once de hoy (ronda propia o la
+  4904 con onces nuevos); si no se mueve hasta que termine la 4904, iba
+  con el once del 03/09 (cuando Pollo17 no tenia a varios de ellos).
+
+**Limites:** una foto; la titularidad cambia; no se sabe con que once
+contara Biwenger ese partido.
+
+**Veredicto: AVISO para la carrera y prueba apuntada.** Para Pepe no
+cambia nada (plazo de caja del miercoles, E47). Para leer la clasificacion
+del jueves: un salto de Pollo17 de ~15-20 puntos sin jornada nueva es este
+partido.
+
 ### E49 · 19/10/2026 11:16 de Madrid · E41 fuera de muestra: la pelea se sigue viendo venir
 
 **Hipotesis:** la regla de E41 (sin subida la vispera casi nadie pelea;
