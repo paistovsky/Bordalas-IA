@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 19/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **19/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2329 a #2338,
+  la de las 07:15 incluida). Saldo -432.317 a las 07:19, 0 comprometido,
+  nada comprado ni vendido en el reset del lunes. Sin cambios en el plan:
+  premio de la J9 el mar 20/10 (12:00-17:00), racha el mie 21/10 00:10,
+  plazo del aplazado de la J6 el mie 21/10 14:00. Control: mar 20/10 21:15.
 
 - **18/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2322 a #2329).
   Saldo -432.317, 0 comprometido, sin compras ni ventas. El chat del dueno
