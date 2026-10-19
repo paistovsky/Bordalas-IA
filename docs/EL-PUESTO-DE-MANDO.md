@@ -352,6 +352,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/10 00:23 (verja roja y venta de Rico).** La vuelta de las 00:07
+  (#39332653635) se paro en la verja: la guardia nueva de la titularidad
+  leia el tablero de FF del cache de produccion (en local no hay `data/`
+  y pasaba). Arreglada para no leer disco (886d30bc) y relanzada a mano
+  (#39334128386): todo verde. En esa vuelta **la mejora acepto la oferta
+  del Computer por Diego Rico (430.300, http 200)**: caja -2.017 para el
+  aplazado del mie 21/10 20:00. La cubre la racha (+250k, ~21/10 00:10) o
+  el premio de la J9. La rotacion ya solo frena a titulares de Levante y
+  Athletic. Leccion: una guardia que lee `data/` en CI ve lo de produccion.
+
 - **19/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2345 a #2352).
   Saldo -432.317, 0 comprometido, sin movimientos. Leido lo del chat del
   dueno: la J8 sigue abierta (Rayo-Athletic suspendido) y al cerrarla
