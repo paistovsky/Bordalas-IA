@@ -69,6 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E49 · 19/10/2026 11:16 de Madrid · E41 fuera de muestra: la pelea se sigue viendo venir
+
+**Hipotesis:** la regla de E41 (sin subida la vispera casi nadie pelea;
+con subida >= 2 %, pelea y prima alta) vale tambien en subastas que E41 no
+vio.
+**Datos:** las 13 subastas del Computer resueltas del 15/10 al 19/10
+(dia de mercado >= 15/10), 6 con pelea. n pequeño: es una comprobacion,
+no una medida nueva.
+**Codigo:** `lab/subasta/pelea_fuera_de_muestra.py`.
+
+    vispera          n   con pelea (E41)    paga el ganador si hay pelea (E41)
+    no subio         2      0 %  (13 %)          -
+    subio < 2 %      7     43 %  (64 %)       +10,1 %  (+7,2 %)
+    subio >= 2 %     4     75 %  (83 %)       +33,0 %  (+16,2 %)
+
+**Lo que se aprende:**
+- **El orden se mantiene:** sin subida no hay pelea; cuanto mas sube, mas
+  pelea. **Pero las primas han subido:** el ganador paga ahora +10 % y
+  +33 % (E41: +7 % y +16 %). Luismi puja fuerte con -7,6 M de caja y
+  Pollo17 le disputa (19/10: Luismi pago 4.256.000 por uno que Pollo17
+  pujaba a 3.777.000).
+- **Pepe en esos dias:** Lemar (subia +0,8 %) perdida, el ganador pago
+  +10,1 %; **Cardona (subia +2,2 %) GANADA a +1 %**, por 7.000 sobre
+  Luismi: el unico caso que va contra E41 (que le daba un 2 % de
+  ganarla). Las pujas por Alvaro Nunez y Freeman no salen en el tablon.
+
+**Limites:** 13 subastas en 5 dias. Las primas de un mercado que se
+calienta pueden volver a bajar.
+
+**Veredicto: SE AGUANTA E41** (y con ella la regla de «Listo para el
+plan»). Ajuste para cuando se use: en los que suben >= 2 %, la prima que
+gana hoy esta mas cerca de +30 % que de +16 %: pujar solo si el cambio en
+el once lo vale.
+
 ### E48 · 18/10/2026 17:15 de Madrid · La carrera otra vez: Pollo17 ya tiene mejor once
 
 **Hipotesis:** E20 (05/10) daba el once de Pepe por delante del de Pollo17
