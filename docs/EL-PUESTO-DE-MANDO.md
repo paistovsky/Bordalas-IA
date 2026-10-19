@@ -352,6 +352,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **19/10 10:47 (laboratorio de rivales).** Reset del 19/10: Luismi gano a
+  Carvajal por 4.256.000 (+33 %; hoy vale 3,34 M: -916k en papel) y a Danjuma
+  (valor + 1 euro), y queda en -12,14 M de caja; Pollo17 rompio su parada:
+  vendio a Sucic al Computer (+2,64 M tras 48 dias), gano a Tchouameni (a
+  valor, sin subir) y a Espi (+7,2 %), perdio a Carvajal pujando 3.777.000
+  (+18 %) y queda en -0,38 M. Cuatro en negativo antes del aplazado del
+  21/10 (Pollo, Luismi, Manzagool, nosotros). Distancia con Pollo: 49,27 M
+  (+0,8 M al dia); puntos 323-320 a nuestro favor con la J9 sin cerrar. Las
+  compras de la semana de los rivales pierden en papel (Pollo -1,30 M,
+  Luismi -1,14 M): su ventaja es lo que ya tienen, no lo que compran. El
+  informe de la manana del 18/10 puntuo a 3 de los 4 que se llevaron
+  (Carvajal sube +35, el mejor). Nada que construir (el esceptico lo
+  confirma). Caja del 21/10: Rico 430.300 -> -2.017; la racha (+250k,
+  ~21/10 00:10) la pone en positivo; si fallara, solo los puntos de
+  Olasagasti en ese partido.
+
 - **19/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2329 a #2338,
   la de las 07:15 incluida). Saldo -432.317 a las 07:19, 0 comprometido,
   nada comprado ni vendido en el reset del lunes. Sin cambios en el plan:
