@@ -199872,5 +199872,114 @@
         ]
       }
     ]
+  },
+  {
+    "event_id": "70b313a5075f6b92315b6536",
+    "date": 1792429257,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 638784,
+        "until": 1792605600,
+        "expired": false,
+        "mode": "bet",
+        "games": [
+          {
+            "id": 50765,
+            "date": 1792605600,
+            "status": "preview",
+            "home": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": null,
+              "difficulty": {
+                "rating": 54,
+                "standings": [
+                  55,
+                  35
+                ],
+                "homeAway": [
+                  45,
+                  20
+                ],
+                "form": [
+                  68,
+                  25
+                ],
+                "goalDiff": [
+                  43,
+                  20
+                ]
+              }
+            },
+            "away": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": null,
+              "difficulty": {
+                "rating": 36,
+                "standings": [
+                  23,
+                  35
+                ],
+                "homeAway": [
+                  87,
+                  20
+                ],
+                "form": [
+                  22,
+                  25
+                ],
+                "goalDiff": [
+                  27,
+                  20
+                ]
+              }
+            }
+          }
+        ],
+        "prizes": [],
+        "competition": "la-liga",
+        "round": {
+          "id": 5176,
+          "name": "Jornada 6 (aplazada)",
+          "short": "J6",
+          "part": 3,
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "responses": [],
+        "global": true,
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": {
+          "es": "<p style='text-align: center'><strong>Envíanos tu pronóstico para el Levante - Athletic</strong> y podrás <strong>ganar créditos</strong>.<br/>¡Mucha suerte!</p>",
+          "en": "<p style='text-align: center'><strong>Send us your forecast for Levante - Athletic</strong> and you can <strong>earn credits</strong>.<br/>Good luck!</p>",
+          "ca": "<p style='text-align: center'><strong>Envia'ns el teu pronòstic per al Levante - Athletic</strong> i podràs <strong>guanyar crèdits</strong>.<br/>Molta sort!</p>",
+          "gl": "<p style='text-align: center'><strong>Envíanos o teu pronóstico para o Levante - Athletic</strong> e poderás <strong>gañar créditos</strong>.<br/>Moita sorte!</p>",
+          "eu": "<p style='text-align: center'><strong>Bidali iezaguzu Levante - Athletic partidaren iragarpena</strong> eta <strong>kredituak irabazi ahal izango dituzu</strong>.<br/>Zorte on!</p>",
+          "hr": "<p style='text-align: center'><strong>Pošalji nam svoju prognozu za Levante - Athletic</strong> i možeš <strong>osvojiti kredite</strong>.<br/>Sretno!</p>",
+          "de": "<p style='text-align: center'><strong>Sende uns deine Prognose für Levante - Athletic</strong> und du kannst <strong>Credits gewinnen</strong>.<br/>Viel Glück!</p>",
+          "it": "<p style='text-align: center'><strong>Inviaci la tua previsione per Levante - Athletic</strong> e potrai <strong>vincere crediti</strong>.<br/>Buona fortuna!</p>",
+          "fr": "<p style='text-align: center'><strong>Envoie-nous ton pronostic pour le Levante - Athletic</strong> et tu pourras <strong>gagner des crédits</strong>.<br/>Bonne chance !</p>",
+          "pt": "<p style='text-align: center'><strong>Envia-nos o teu prognóstico para Levante – Athletic</strong> e poderás <strong>ganhar créditos</strong>.<br/>Boa sorte!</p>",
+          "ru": "<p style='text-align: center'><strong>Отправьте нам свой прогноз на матч Levante — Athletic</strong>, и вы сможете <strong>выиграть кредиты</strong>.<br/>Удачи!</p>",
+          "tr": "<p style='text-align: center'><strong>Levante - Athletic maçı için tahminini gönder</strong> ve <strong>kredi kazan</strong>.<br/>Bol şans!</p>",
+          "he": "<p style='text-align: center'><strong>שלח לנו את ההימור שלך ל-Levante - Athletic</strong> ותוכל <strong>לזכות בנקודות זיכוי</strong>.<br/>בהצלחה!</p>",
+          "el": "<p style='text-align: center'><strong>Στείλε μας την πρόβλεψή σου για το Levante - Athletic</strong> και μπορείς να <strong>κερδίσεις πιστώσεις</strong>.<br/>Καλή τύχη!</p>",
+          "ar": "<p style='text-align: center'><strong>أرسل لنا توقعاتك لمباراة Levante - Athletic</strong> ويمكنك <strong>ربح أرصدة</strong>.<br/>حظًا سعيدًا!</p>"
+        }
+      }
+    }
   }
 ]
