@@ -1797,3 +1797,4 @@
 {"dia":"2026-10-19","id":42627,"name":"Marchal","value":0,"price":240000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-10-19","id":34483,"name":"Pedro Díaz","value":0,"price":1110000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-19","id":42557,"name":"Adeyemi","value":0,"price":10600000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-19","id":23572,"name":"Rubén Sánchez","value":987678,"price":970000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
