@@ -36,8 +36,12 @@ import { formatMoney } from "../lib/utils";
  *   distancia y no son el mismo problema.
  */
 
+// EN_JUEGO (19/10/2026): primeros solo en las rondas cerradas, con
+// rondas abiertas sin contar y una ventaja que no llega al margen. Sin
+// esta linea la pastilla caia a "SIN DATOS".
 const URGENCIA = {
   LIDER: ["pill ok", "VAS PRIMERO"],
+  EN_JUEGO: ["pill warn", "EN JUEGO"],
   COMODA: ["pill ok", "DISTANCIA CORTA"],
   EXIGENTE: ["pill warn", "EXIGENTE"],
   DIFICIL: ["pill warn", "DIFÍCIL"],
@@ -93,6 +97,12 @@ export default function RacePanel({ data }) {
           ritmo, y se dice en vez de enseñar un hueco mudo. */}
       {race.calendar_available === false && (
         <div className="alert warn">{race.calendar_reason}</div>
+      )}
+
+      {/* Lo que la clasificacion todavia no cuenta (19/10/2026). Solo
+          con rondas abiertas: con todo cerrado la frase ya basta. */}
+      {(race.jornadas_abiertas || []).length > 0 && race.por_que && (
+        <div className="alert warn">{race.por_que}</div>
       )}
 
       <table>

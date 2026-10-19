@@ -292,8 +292,19 @@ def test_ir_primero_no_es_ir_a_menos_cero() -> None:
     for m in managers:
         m["is_current_user"] = m["name"] == "Pollo17"
 
+    # Con el tablon y todas las rondas cerradas: desde el 19/10
+    # LIDER exige saber que no queda nada por contar
+    # (`test_las_rondas_abiertas_v1`).
+    tablon = [
+        {"type": "roundStarted", "date": 1,
+         "content": {"round": {"id": 1, "name": "Jornada 1"}}},
+        {"type": "roundFinished", "date": 2,
+         "content": {"round": {"id": 1, "name": "Jornada 1"}}},
+    ]
+
     r = build_race_state(
-        _squads(managers), calendar=_calendario(), now=AHORA
+        _squads(managers), calendar=_calendario(), now=AHORA,
+        eventos=tablon,
     )
 
     assert r["is_leader"] is True

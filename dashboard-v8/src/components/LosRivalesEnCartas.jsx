@@ -10,6 +10,14 @@ import { clave, millones, movimientosDe } from "../lib/lectura";
  *
  * La amenaza no va en rojo: cinco puntos, más llenos cuanto más
  * aprieta. El dueño no quiere avisos de colores.
+ *
+ * SOLO RONDAS CERRADAS (19/10/2026)
+ *
+ * "Le sacamos 3 puntos" a Pollo17 con la J8 abierta poniéndole
+ * treinta por delante. La clasificación de Biwenger solo suma las
+ * rondas cerradas: con rondas abiertas (`race.jornadas_abiertas`)
+ * o con el liderato sin asegurar (`race.urgency` EN_JUEGO), la
+ * distancia de cada carta lo dice.
  */
 
 const AMENAZA = {
@@ -58,6 +66,13 @@ export default function LosRivalesEnCartas({ data }) {
   const semana = data.tablonSemana;
   const cuadre = data.rivalIntel?.cash_check || {};
 
+  const race = data.race || {};
+  const soloCerradas =
+    (Array.isArray(race.jornadas_abiertas) && race.jornadas_abiertas.length > 0) ||
+    race.urgency === "EN_JUEGO" ||
+    Boolean(race.is_leader && race.lider_asegurado === false);
+  const cerradas = soloCerradas ? " en las rondas cerradas" : "";
+
   return (
     <Tarjeta titulo="LOS RIVALES, UNO A UNO" pregunta="¿Quién aprieta, con cuánto dinero y qué ha movido esta semana?">
       <div className="c2-rivales">
@@ -80,7 +95,11 @@ export default function LosRivalesEnCartas({ data }) {
 
               {!esNos && diff != null && (
                 <div className="c2-rival-frase">
-                  {diff > 0 ? `Nos saca ${diff} puntos.` : diff < 0 ? `Le sacamos ${-diff} puntos.` : "Empatados a puntos."}
+                  {diff > 0
+                    ? `Nos saca ${diff} puntos${cerradas}.`
+                    : diff < 0
+                      ? `Le sacamos ${-diff} puntos${cerradas}.`
+                      : `Empatados a puntos${cerradas}.`}
                 </div>
               )}
 

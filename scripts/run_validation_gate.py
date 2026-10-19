@@ -323,6 +323,10 @@ TESTS = [
     "src.analysis.test_tope_por_operacion_v1",
     "src.analysis.test_jornada_en_la_valoracion_v1",
     "src.analysis.test_estado_de_carrera_v1",
+    # Primeros en lo cerrado no es ir primeros: con rondas
+    # abiertas sin contar y poca ventaja, la carrera no dice
+    # LIDER (19/10/2026, la J8 abierta).
+    "src.analysis.test_las_rondas_abiertas_v1",
     "src.analysis.test_valor_temporada_sombra_v1",
     "src.analysis.test_ampliar_plantilla_sombra_v1",
     "src.analysis.test_dashboard_orden_de_variables_v1",
