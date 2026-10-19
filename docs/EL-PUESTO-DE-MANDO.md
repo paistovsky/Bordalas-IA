@@ -352,6 +352,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **19/10 20:47 (laboratorio de rivales).** Sin reset desde la manana: el
+  tablon no trae compras ni ventas. Nosotros: -432.317, 0 pujas; Rico con
+  oferta de 430.300 (caduca en 35 h) para la mejora desde el 20/10 00:00. En
+  marcha el experimento 'el once con nuestro dinero' (mejor once posible con
+  56,6 M, camino realista con el mercado de cada dia, Yamal en numeros):
+  Pollo no nos gana especulando sino con un once que vale 23,4 M mas (~10
+  puntos por jornada).
+
 - **19/10 tarde. CORRECCION DEL DUENO: la clasificacion 323-320 NO es la
   real.** Solo cuenta las jornadas cerradas (hasta la J7). La J8 sigue
   abierta por el Rayo-Athletic suspendido, y en ella Pollo17 hizo 74 y
