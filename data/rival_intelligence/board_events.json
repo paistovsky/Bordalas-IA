@@ -201025,5 +201025,24 @@
         "comments": 0
       }
     }
+  },
+  {
+    "event_id": "66b9e78a0e39619fc7336073",
+    "date": 1792512373,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 23572,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 1012400
+      }
+    ]
   }
 ]
