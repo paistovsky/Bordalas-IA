@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E52 · 20/10/2026 17:17 de Madrid · La formula del premio de jornada (y el premio de la J9)
+
+**El caso:** el premio de la J9 ha entrado hoy a las **17:05 de Madrid**
+(18,1 h tras el ultimo partido, dentro de la ventana de E43/E47): Pepe 49
+puntos, **1.470.000**. Saldo de -2.017 a ~+1,47 M: el plazo del aplazado
+de mañana esta cubierto sin la racha (E47 lo daba por hecho con un minimo
+de 870.000; la venta de Rico de anoche no hacia falta). Pero los de abajo
+no cobraron 30.000 por punto: DiosMande, 27 puntos, 1.310.000.
+**Datos:** los 10 «roundFinished» del tablon (J1-J9 y las partes
+aplazadas), 67 premios.
+**Codigo:** `lab/caja/el_premio.py`.
+
+**La formula, comprobada:**
+- **Premio = 30.000 x puntos + un plus para los tres ultimos de la
+  jornada:** antepenultimo +100.000, penultimo +250.000, ultimo +500.000.
+  45 de 67 premios son 30.000 x puntos exactos; los 21 de abajo llevan
+  justo esos plus (J1-J5, J7, J9; con 7 u 8 managers). La parte aplazada
+  de la J6 no llevo plus.
+- **Quien empieza en rojo cobra 0** aunque puntue (Luismi, J6 aplazada,
+  64 puntos, 0 euros: E29).
+- **Para Pepe nada cambia:** siempre ha quedado del 1.º al 5.º, donde el
+  punto vale 30.000 justos (E16). El plus empuja a los de abajo: quedar
+  ultimo con 27 puntos paga lo mismo que quedar quinto con 44.
+
+**Limites:** 10 rondas; no se ha visto a dos empatados en el puesto del
+plus (en la J5 Mex y Prinzipote empatan a 45 y solo cobra el plus el que
+el tablon pone despues).
+
+**Veredicto: SE AGUANTA E16** (30.000 por punto para Pepe) y el reloj del
+premio de E43 acierta otra vez (7 de 7). Sin regla nueva. Nota para la
+caja: el premio de la J9 llego a las 17:05, al final de la ventana; contar
+con el a partir de las 18:00, no de las 12:00.
+
 ### E51 · 20/10/2026 11:16 de Madrid · ¿Cuanto le queda a una racha de subidas?
 
 **Hipotesis:** cuanto mas lleva un jugador subiendo, menos le queda (la
