@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 19/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 20/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/10 07:15 (rafaga de la manana).** Ciclos: UNA ROJA, ya arreglada
+  por el chat del dueno: #2355 (lun 19/10 00:07 de Madrid... en realidad la
+  vuelta de las 00:07 del martes 20/10), la guardia de la titularidad leia
+  el tablero de FF de disco (886d30bc); #2356 de las 00:19 verde y verdes
+  desde entonces (#2356 a #2362). **Venta:** Diego Rico vendido por la
+  mejora (430.300). Saldo a las 07:19: **-2.017**, 0 comprometido. Con el
+  premio de la J9 (hoy 12:00-17:00) y la racha (mie 00:10) queda de sobra
+  en positivo para el plazo del mie 21/10 14:00. Control: hoy 21:15.
 
 - **20/10 00:23 (verja roja y venta de Rico).** La vuelta de las 00:07
   (#39332653635) se paro en la verja: la guardia nueva de la titularidad
