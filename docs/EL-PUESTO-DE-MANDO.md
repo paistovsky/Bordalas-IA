@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 20/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2362 a #2369).
+  Saldo -2.017 a las 14:10, 0 comprometido; el premio de la J9 aun no ha
+  entrado (ventana 12:00-17:00). El chat del dueno APAGO la puerta a
+  precio de mercado (6080b86d: 2 ofertas y 0 aceptadas): bien, un
+  interruptor menos que vigilar. Control: hoy 21:15 (premio dentro o no).
 
 - **20/10 10:47 (laboratorio de rivales).** Workflow de 8 (rivales,
   nuestras tacticas, el coste de los ceros, huecos, 2 escepticos por
