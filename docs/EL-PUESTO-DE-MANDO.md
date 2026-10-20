@@ -352,6 +352,32 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/10 20:47 (laboratorio de rivales).** **Rivales:** premio de la J9
+  pagado a todos (30.000/punto + plus a los tres ultimos, E52): Luismi
+  1,98 M, Pollo 1,83 M, Manzagool 1,56 M, Pepe 1,47 M. Solo dos ventas al
+  Computer: Pollo, Ruben Sanchez a +3,3 % (subia; 15,5 dias; +435k) y
+  Luismi, Alvaro Carreras a +2,3 % (-5,6k). Cajas: Pollo +2,46 M, Luismi
+  **-9,07 M**, Manzagool -19k: si siguen en rojo el mie a las 20:00 cobran
+  0 por la parte aplazada. Pollo: patrimonio 108,41 M frente a 57,96 M
+  (distancia 50,46 M); su once por precio, 24,1 M mas caro. **Kubo:** nadie
+  lo tiene; a las 20:09 no habia puja nuestra (la orden ya vende a Luismi
+  si llega). **El aplazado frena la compra 40 h** (hallado hoy): cuesta UN
+  reset por ronda aparte (este, el del 21/10; ~10 rondas aparte mas en la
+  temporada). Disenado y construido APAGADO (la orden, la mejora y el
+  cierre; la ronda y los chollos, no). Con el interruptor apagado es
+  identico a main (fuzz de 3.000 casos), pero la revision adversarial
+  encontro defectos con el encendido: (1) ALTO, la orden deja pasar un
+  segundo `fichar` sin pareja por `_la_paga_la_caja` sin contar las pujas
+  de la misma vuelta; (2) ALTO, el cierre cancela la puja que genera el
+  credito y se queda con el credito (hay que llevarlo por relevo o poner
+  esos relevos en no_retirar); (3) los chollos de las 04:50 no ven la puja
+  de la orden de la misma vuelta; (4) el umbral de 40 h a la principal se
+  mide distinto al pujar y al cobrar; (5) se acredita a un saliente ya
+  vendido en la vuelta; (6) la orden que caduca antes del cobro; (7) la
+  publicacion se compara con el inicio y no con el cobro. **NO va a main:**
+  guardado en `claude/ecstatic-turing-j6tgw6` (0167687d) para arreglarlo
+  con calma; la proxima ronda aparte (Rayo-Athletic) no tiene fecha.
+
 - **20/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2362 a #2369).
   Saldo -2.017 a las 14:10, 0 comprometido; el premio de la J9 aun no ha
   entrado (ventana 12:00-17:00). El chat del dueno APAGO la puerta a
