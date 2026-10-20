@@ -352,6 +352,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/10 08:22 (supervision).** Vuelta #2363 (08:07). Reset sin
+  movimientos (0 pujas vivas: nada ganado ni perdido). Desde ayer, una sola
+  operacion de Pepe: la mejora vendio a Rico al Computer (430.300). Saldo
+  **-2.017**, plantilla de 11 (56,49 M); la ronda, los chollos, la orden,
+  la mejora y la rotacion, NADA (sin caja). El informe de la manana: 20
+  nuevos, arriba Kubo (+7,5 %) y Osambela (+21,1 %). **Plazo del mie 21/10
+  20:00:** la racha va 4 de 5 y se ha cobrado 7 de 7 veces, cada 5 dias, en
+  la vuelta de la 01:07 (+250.000 => +247.983). Por si falla, la orden
+  lleva un ULTIMO RECURSO: Luismi Cruz (el que mas cae de los
+  prescindibles, -60k/dia, xP 2,3) se publica solo si a partir del mie
+  01:30 seguimos en rojo, y se acepta la oferta del Computer del reset de
+  las 07:00 (suelo 2 M). Simulado en los 7 casos; verja 221/221. Rico
+  fuera de `conservar`. El mie a las 08:22 se borra el ultimo recurso.
+
 - **20/10 07:15 (rafaga de la manana).** Ciclos: UNA ROJA, ya arreglada
   por el chat del dueno: #2355 (mar 20/10 00:07 de Madrid), la guardia
   de la titularidad leia
