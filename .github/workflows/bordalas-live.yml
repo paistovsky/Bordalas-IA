@@ -217,7 +217,15 @@ jobs:
       #   paso 0 con 45; ensayo #38969326126 verde (pujaria por
       #   Freeman 2.012.000 y Alvaro Nunez 1.091.000, a Manzagool).
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
-      BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO: "1"
+      # APAGADA el 20/10 (martes) por el gestor, laboratorio de las 10:47:
+      #   2 ofertas en su vida (Freeman y Alvaro Nunez, 16/10), 0 aceptadas;
+      #   ningun manager le vende a otro desde el 18/09 (31 dias). La
+      #   colchoneta solo le cobra puja - 0,92 x valor, asi que con ~248k de
+      #   caja el mie por la noche mandaria ~4 M en ofertas que la rotacion
+      #   cuenta enteras: la dejaria sin su unica ventana antes de la J10.
+      #   Dos escepticos rehicieron los numeros: se sostiene. Volvera, si
+      #   vuelve, pujando sobre el valor de hoy y con la puja entera a caja.
+      # BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO: "1"
 
       # Encendido 17/10 de Madrid, de madrugada, por orden del dueno («Hazlo
       #   ya. Que se revaloricen, la misma estrategia que ellos»). LA CARTERA

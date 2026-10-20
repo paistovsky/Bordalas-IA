@@ -352,6 +352,35 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/10 10:47 (laboratorio de rivales).** Workflow de 8 (rivales,
+  nuestras tacticas, el coste de los ceros, huecos, 2 escepticos por
+  hallazgo; `scratchpad/lab2010/`). **Rivales:** en el reset del 20/10
+  nadie gano ni vendio nada (0 subastas; ultimo movimiento del tablon, la
+  venta de Rico). Pollo17 sigue ganando por aguantar: +5,70 M en 7 dias, de
+  ellos +5,50 M sin tocar su plantilla del 13/10 y -0,05 M por operar;
+  patrimonio 106,55 M frente a 56,49 M (distancia 50,06 M, +0,83 M al dia);
+  su once por precio, 80,6 M frente a 56,5 M. **Correccion:** Pollo SI
+  opero: vendio a Sucic al Computer el 18/10 (5,42 M) y gano a Tchouameni
+  (4,28 M, +0,2 %) y Espi (2,78 M, +7,2 %) en el reset del 19/10; caja
+  -0,38 M. Luismi gano a Carvajal a +33 % (4,26 M; vale 3,44 M), va a -12,14
+  M y ha pasado a publicar 10 a su valor (x1,00, antes x1,5): necesita
+  vender ~12 M antes de la J10. Manzagool -1,58 M. **Nuestras tacticas:** la
+  cartera y la mejora solo si sube, 0 pujas desde el 17/10 (sin caja); la
+  puerta, 2 ofertas y 0 aceptadas en su vida; el informe de la manana
+  acierta la subida del dia siguiente 17 de 27 (base 6/27), pero los de
+  nota 2,0 justa (menos de 1 M y sin subir) solo 1 de 9. **Los ceros:** esta
+  liga NO tiene suplentes automaticos (lineupReserves false): un banquillo
+  solo sirve si se mete en el once antes del cierre. Nos costaron 3 ceros en
+  33 huecos (J7-J9), ~5 de los 28 puntos de la J8 con Pollo; dos suplentes
+  baratos valen 0,2-0,5 pts por jornada: **el punto 7 del laboratorio baja
+  de prioridad**. **La prima segun la subida (punto 5):** NO se construye;
+  en 1-3 M no se ve ganancia frente al +4 % (+8 % es una moneda al aire) y
+  +1 % parece mejor con solo 2 victorias que lo decidan; se repite el 31/10.
+  **Aplicado:** la puerta APAGADA (la colchoneta solo le cobra puja - 0,92 x
+  valor: el mie por la noche mandaria ~4 M en ofertas que la rotacion cuenta
+  enteras); verja 221/221. Y retirado mi ultimo recurso de las 08:22 (ver
+  abajo).
+
 - **20/10 11:55. RETIRO MI ULTIMO RECURSO DE LAS 08:22 (error mio).** El
   `vender_si_ficha` con `si_saldo_negativo` (Luismi Cruz) lo leen otros
   motores como venta YA en marcha: la mejora conto +2,11 M que no existen
