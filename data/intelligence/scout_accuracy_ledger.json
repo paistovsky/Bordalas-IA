@@ -2393286,6 +2393286,48 @@
       "direction_hit": null,
       "magnitude_error_percent": null,
       "scored_at": null
+    },
+    "41386|PRENSA_RELEVO|3|2026-10-20": {
+      "player_id": "41386",
+      "player_name": "Mourinho",
+      "source": "PRENSA_RELEVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 3750000,
+      "predicted_at": "2026-10-20T23:10:48.602505+00:00",
+      "due_at": "2026-10-23T23:10:48.602505+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
+    },
+    "37719|PRENSA_MUNDO_DEPORTIVO|3|2026-10-20": {
+      "player_id": "37719",
+      "player_name": "Álvaro Núñez",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 1030000,
+      "predicted_at": "2026-10-20T23:10:41.073444+00:00",
+      "due_at": "2026-10-23T23:10:41.073444+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
     }
   }
 }
