@@ -353,8 +353,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 ## Bitacora de despertares
 
 - **20/10 07:15 (rafaga de la manana).** Ciclos: UNA ROJA, ya arreglada
-  por el chat del dueno: #2355 (lun 19/10 00:07 de Madrid... en realidad la
-  vuelta de las 00:07 del martes 20/10), la guardia de la titularidad leia
+  por el chat del dueno: #2355 (mar 20/10 00:07 de Madrid), la guardia
+  de la titularidad leia
   el tablero de FF de disco (886d30bc); #2356 de las 00:19 verde y verdes
   desde entonces (#2356 a #2362). **Venta:** Diego Rico vendido por la
   mejora (430.300). Saldo a las 07:19: **-2.017**, 0 comprometido. Con el
