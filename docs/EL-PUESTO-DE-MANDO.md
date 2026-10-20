@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 20/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2369 a #2376).
+  **El premio de la J9 ENTRO:** saldo **+1.467.983** a las 21:09 (+1,47 M).
+  0 pujas de Pepe. El dueno puja por Kubo desde la app (se resuelve mie
+  07:00); la orden ya tiene el plan si llega: vender a Luismi Cruz a su
+  oferta del Computer (2.958.000) en la vuelta siguiente, antes del
+  aplazado. Peor caso del mie: +1.467.983 + racha 250.000 - Kubo, tapado
+  por Luismi en la vuelta de las 08:07. Mi turno del mie 12:45 lo
+  comprueba con la vuelta de despues del reset, no con una anterior.
 
 - **20/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2362 a #2369).
   Saldo -2.017 a las 14:10, 0 comprometido; el premio de la J9 aun no ha
