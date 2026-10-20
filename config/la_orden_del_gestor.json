@@ -12,17 +12,7 @@
     }
   ],
   "vender_si_ficha": {
-    "si_esta": 26271,
-    "por_que": "20/10, el gestor (supervision de las 08:22): ULTIMO RECURSO para el plazo de caja del aplazado de la J6 (Levante-Athletic, mie 21/10 20:00). Caja -2.017 tras vender a Rico; la cubre la racha (+250.000, 4 de 5, cobrada 7 de 7 veces, la vuelta de la 01:07 del mie). Solo si a partir de la 01:30 del mie el saldo sigue en rojo: se publica a Luismi Cruz y se acepta la oferta del Computer del reset de las 07:00. `si_esta` es Yamal (protegido) porque esta venta no espera a ningun fichaje. Se borra el mie 21/10 en la supervision de las 08:22.",
-    "jugadores": [
-      {
-        "player_id": 25777,
-        "nombre": "Luismi Cruz",
-        "suelo": 2000000,
-        "desde": "2026-10-21T01:30:00+02:00",
-        "si_saldo_negativo": true
-      }
-    ]
+    "jugadores": []
   },
   "proteger": [
     {

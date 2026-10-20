@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/10 11:55. RETIRO MI ULTIMO RECURSO DE LAS 08:22 (error mio).** El
+  `vender_si_ficha` con `si_saldo_negativo` (Luismi Cruz) lo leen otros
+  motores como venta YA en marcha: la mejora conto +2,11 M que no existen
+  (caja de la jornada 2.109.093 en #2364-#2366, en vez de -2.017; no pujo
+  de milagro), el cierre armo el once de la J10 con 10 (39,3 xP, sin
+  Luismi) y la rotacion no podia tocarlo (LO_VENDE_OTRO_LIBRO). El ultimo
+  recurso es de antes (29/09) que la mejora y el cierre, y nadie lo
+  integro con ellos. **Ademas sobraba:** nuestros titulares ya tienen
+  ofertas vivas del Computer (Luismi 2.958.000 hasta ~jue 07:00, Jonny
+  1.900.400, Chust 1.725.200...): si la racha fallara, una linea en la
+  orden el mie por la manana se cobra en la vuelta siguiente, antes de las
+  20:00. Orden de vuelta a `vender_si_ficha` vacio; verja 221/221.
+  Pendiente (no urgente): que la mejora, el cierre y la rotacion solo
+  cuenten un `si_saldo_negativo` cuando de verdad toca (saldo < 0 y pasado
+  `desde`). Leccion: una linea de la orden mueve a TODOS los motores;
+  antes de escribirla, mirar la caja de la mejora y el once del cierre en
+  la vuelta siguiente.
+
 - **20/10 08:22 (supervision).** Vuelta #2363 (08:07). Reset sin
   movimientos (0 pujas vivas: nada ganado ni perdido). Desde ayer, una sola
   operacion de Pepe: la mejora vendio a Rico al Computer (430.300). Saldo
