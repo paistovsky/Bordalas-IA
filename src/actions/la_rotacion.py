@@ -99,16 +99,17 @@ LA REGLA
        los que salen de parejas ya ganadas (el 95 % de su valor si ya
        estan publicados y su oferta llega antes de la ronda; la oferta
        aceptada en esta vuelta, por su importe), y SOLO si nada frena su
-       venta (ni `nunca`, ni titular sin relevo, ni titular antes de una
-       ronda de aplazados, ni el once sin leer o incompleto, ni el que
-       entro vendido en esta vuelta). Despues = antes - la puja + el 95 %
-       del que sale SOLO si se cobra antes de la ronda (dos resets:
-       `HORAS_PARA_COBRAR`) y no es (o puede ser: once sin saber)
-       titular antes de una ronda de aplazados, que es cuando la venta
-       se frena. Vale si despues >= 0 o despues >= antes. Hoy (saldo
-       -432.317) solo pasan los cambios que no gastan caja. Si una puja
-       solo cabe con lo aceptado en esta misma vuelta
-       (`cuenta_con_lo_aceptado`) y esa aceptacion no entra, no se manda.
+       venta (ni `nunca`, ni titular sin relevo, ni titular de un equipo
+       de la ronda de aplazados que viene, ni el once sin leer o
+       incompleto, ni el que entro vendido en esta vuelta). Despues =
+       antes - la puja + el 95 % del que sale SOLO si se cobra antes de
+       la ronda (dos resets: `HORAS_PARA_COBRAR`) y no es (o puede ser:
+       once sin saber) titular de un equipo de la ronda de aplazados que
+       viene, que es cuando la venta se frena. Vale si despues >= 0 o
+       despues >= antes. Hoy (saldo -432.317) solo pasan los cambios que
+       no gastan caja. Si una puja solo cabe con lo aceptado en esta
+       misma vuelta (`cuenta_con_lo_aceptado`) y esa aceptacion no
+       entra, no se manda.
 
     7. LA VENTA, solo cuando el que entra YA esta en la plantilla, sin
        ronda jugandose y a mas de `HORAS_SIN_TOCAR_EL_ONCE` del cierre:
@@ -122,9 +123,24 @@ LA REGLA
             ni lo publicado en esta vuelta: lo venderian sin mirar el
             once). Solo si Biwenger dice que se guardo se acepta la
             oferta. Sin relevo, o sin poder leer el once, no se vende. Si
-            la proxima ronda es de aplazados (solo juegan dos equipos) y es
-            titular, tampoco: su relevo seguramente no juega; se vende
-            cuando acabe.
+            la proxima ronda es de aplazados (solo juegan dos equipos), es
+            titular y su equipo la juega, tampoco: su relevo seguramente
+            no juega; se vende cuando acabe. Si su equipo NO la juega, se
+            vende (19/10/2026): en esa ronda solo puntuan los de sus
+            equipos, y con el once congelado al empezar su jornada
+            (laboratorio de las rondas aparte). El freno a todos los
+            titulares paraba la rotacion hasta el 21/10 a las 22:00 con
+            Roberto Fernandez (Espanyol) cayendo 150.000 al dia. Los
+            equipos salen de los partidos de esa ronda en el calendario,
+            y de los de las rondas de aplazados que la siguen hasta la
+            proxima ronda entera (`el_reloj`: `equipos_parcial`; un
+            Rayo-Getafe el jueves detras del Levante-Athletic del
+            miercoles tambien frena al del Rayo), y el club de cada uno del
+            catalogo (`teamID` y `teams`); sin saber cualquiera de los
+            dos, frena a todos los titulares, como antes. La caja no
+            cambia: el cobro de uno que no se frena cuenta solo si llega
+            antes de la ronda (`HORAS_PARA_COBRAR`), y la ronda de
+            aplazados es una ronda como las demas (>= 0 a su hora).
             No se fia del orquestador: escribe el once una vez por
             vuelta como mucho, la caja le gana la prioridad, se cierra
             de T-15 a +2 h y corre ANTES que este paso (una venta aqui
@@ -386,6 +402,18 @@ def el_reloj(ahora, calendario=None, puede_escribir=True) -> dict:
                         con menos de `PARTIDOS_DE_UNA_RONDA` partidos,
                         como el Levante-Athletic del 21/10): solo
                         puntuan los de esos equipos
+        equipos_parcial los de esa ronda de aplazados Y de las de
+                        aplazados que la siguen hasta la proxima ronda
+                        entera (a la misma hora o despues: el Rayo-Getafe
+                        de la J8 detras del Levante-Athletic), por su
+                        clave de club (`el_calendario_de_puntos.
+                        clave_de_equipo`: "levante", "athletic"), de sus
+                        partidos en el calendario
+                        (`la_proxima_jornada.los_equipos_de`). None si
+                        no es parcial o si no se sabe en alguna de ellas
+                        (un partido sin nombres, un nombre que no casa
+                        con ningun club): entonces frena a cualquier
+                        titular
         dia, semana     el dia de mercado y su semana ISO
 
     Nunca lanza: si algo falla, `sin_calendario`.
@@ -394,10 +422,11 @@ def el_reloj(ahora, calendario=None, puede_escribir=True) -> dict:
     reloj = {"puede_escribir": bool(puede_escribir), "sin_calendario": True,
              "en_curso": True, "horas_ronda": None, "horas_reset": None,
              "reset_en_ronda": True, "ventana": None, "inicio_ronda": None,
-             "ronda_parcial": False, "dia": None, "semana": None, "proximo_reset": None}
+             "ronda_parcial": False, "equipos_parcial": None, "dia": None, "semana": None,
+             "proximo_reset": None}
     try:
         from src.analysis.la_proxima_jornada import (
-            horas_al_proximo_cierre, jornada_en_curso, las_rondas,
+            horas_al_proximo_cierre, jornada_en_curso, las_rondas, los_equipos_de,
         )
 
         ahora = _utc(ahora)
@@ -420,13 +449,53 @@ def el_reloj(ahora, calendario=None, puede_escribir=True) -> dict:
             "ventana": la_ventana_de(futuras[0]) if futuras else None,
             "inicio_ronda": (futuras[0]["inicio"].astimezone(timezone.utc).isoformat()
                              if futuras else None),
-            "ronda_parcial": bool(futuras) and bool(
-                futuras[0].get("aparte")
-                or (_int(futuras[0].get("partidos"), 0) or 0) < PARTIDOS_DE_UNA_RONDA),
+            "ronda_parcial": bool(futuras) and _es_parcial(futuras[0]),
         })
+        if reloj["ronda_parcial"]:
+            # TODAS las de aplazados hasta la proxima ronda entera, no
+            # solo la primera (19/10/2026): con un Rayo-Getafe de la J8 el
+            # jueves 22/10 detras del Levante-Athletic del 21/10 (o a la
+            # misma hora), el titular del Rayo se vendia el martes y no
+            # puntuaba el jueves. Una que no se sabe: None, frena a todos.
+            nombres = []
+            for ronda in futuras:
+                if not _es_parcial(ronda):
+                    break
+                suyos = los_equipos_de(ronda, calendario)
+                if not suyos:
+                    nombres = None
+                    break
+                nombres += list(suyos)
+            reloj["equipos_parcial"] = los_equipos_de_la_parcial(nombres)
     except Exception:                               # noqa: BLE001
         reloj["sin_calendario"] = True
     return reloj
+
+
+def _es_parcial(ronda) -> bool:
+    """Una ronda de aplazados: aparte, o con menos de
+    `PARTIDOS_DE_UNA_RONDA` partidos."""
+    ronda = _dict(ronda)
+    return bool(ronda.get("aparte")
+                or (_int(ronda.get("partidos"), 0) or 0) < PARTIDOS_DE_UNA_RONDA)
+
+
+def los_equipos_de_la_parcial(nombres) -> list | None:
+    """Las claves de club (`clave_de_equipo`) de los equipos de las rondas
+    de aplazados que vienen, ordenadas. None si no se sabe: sin nombres, o con uno
+    que no da clave (mejor frenar a todos que soltar a uno que juega).
+    Nunca lanza."""
+    try:
+        from src.analysis.el_calendario_de_puntos import clave_de_equipo
+
+        if not nombres or isinstance(nombres, (str, bytes)):
+            return None
+        claves = [clave_de_equipo(n) for n in nombres]
+        if not claves or any(c is None for c in claves):
+            return None
+        return sorted(set(claves))
+    except Exception:                               # noqa: BLE001
+        return None
 
 
 def por_que_no(reloj) -> str | None:
@@ -509,9 +578,9 @@ MOTIVOS = {
     "SIN_RELEVO_PARA_EL_ONCE": ("es titular y no hay relevo sano de su posicion: no se "
                                 "vende (dejaria el once en 10)"),
     "ONCE_INCOMPLETO": "el once vigente no tiene 11 o no trae dibujo: no se toca",
-    "TITULAR_ANTES_DE_UNA_RONDA_PARCIAL": ("es titular y la proxima ronda es de aplazados: "
-                                           "su relevo seguramente no juega; se vende "
-                                           "cuando acabe"),
+    "TITULAR_ANTES_DE_UNA_RONDA_PARCIAL": ("es titular, la proxima ronda es de aplazados y "
+                                           "su equipo la juega (o no se sabe): su relevo "
+                                           "seguramente no juega; se vende cuando acabe"),
     "EL_QUE_ENTRO_SE_VENDIO_EN_ESTA_VUELTA": ("otro motor vendio en esta vuelta al que "
                                               "entro: la pareja se rompe y el que iba a "
                                               "salir no se vende"),
@@ -684,7 +753,7 @@ def decidir(
     en_venta=frozenset(), parejas=(), protegidos=frozenset(), no_rotar=frozenset(),
     aguanta=frozenset(), vetados=frozenset(), otros_venden=frozenset(),
     vendidos=frozenset(), listados=frozenset(), once=None, once_de_la_foto=None,
-    reloj=None,
+    reloj=None, equipos=None,
 ) -> dict:
     """
     Que hace la rotacion en esta vuelta. Pura: ni red, ni disco, ni reloj.
@@ -717,6 +786,10 @@ def decidir(
                             titular y no se vendera antes de una ronda
                             de aplazados
         reloj               `el_reloj`
+        equipos             {teamID: nombre} del catalogo (`teams`): de
+                            que club es cada uno, para saber si juega
+                            la ronda de aplazados. None = no se sabe
+                            (frena a cualquier titular, como antes)
 
     `{"activo", "motivo", "acciones", "caidos", "no_rota", "parejas_nuevas",
     "cupo", "caja", "por_que_no_puja", "por_que_no_vende",
@@ -764,6 +837,29 @@ def decidir(
 
         def puede_ser_titular(pid):
             return pid in conocidos if sabido else True
+
+        # LA RONDA DE APLAZADOS SOLO FRENA A LOS SUYOS (19/10/2026).
+        # En una ronda de aplazados solo puntuan los de sus equipos (y
+        # con el once congelado al empezar su jornada: laboratorio de las
+        # rondas aparte del 19/10). Vender antes a un titular de otro
+        # equipo no le quita un punto a esa ronda. Sin saber de que club
+        # es, o que equipos la juegan, frena como antes.
+        from src.analysis.el_calendario_de_puntos import clave_de_equipo
+
+        parcial = bool(reloj.get("ronda_parcial"))
+        claves_parcial = reloj.get("equipos_parcial")
+        claves_parcial = ({str(c) for c in claves_parcial}
+                          if isinstance(claves_parcial, (list, tuple, set, frozenset)) else set())
+        nombres_de_equipo = {k: v for k, v in _por_id(equipos).items() if v}
+
+        def juega_la_parcial(pid):
+            if not parcial:
+                return False
+            if not claves_parcial:
+                return True
+            clave = clave_de_equipo(
+                nombres_de_equipo.get(_int(_dict(fichas.get(pid)).get("teamID"))))
+            return clave is None or clave in claves_parcial
 
         def precio_de(pid):
             return _int(_dict(fichas.get(pid)).get("price")) or None
@@ -830,7 +926,7 @@ def decidir(
             # Lo que ya se sabe que frenara la venta, haya oferta o no: su
             # cobro no cuenta (con la ronda jugandose tambien: se vende
             # despues, si nada lo frena).
-            if puede_ser_titular(sale) and reloj.get("ronda_parcial"):
+            if puede_ser_titular(sale) and juega_la_parcial(sale):
                 sin_cobro[sale] = "TITULAR_ANTES_DE_UNA_RONDA_PARCIAL"
             elif puede_ser_titular(sale) and el_relevo(
                     sale, entra, conocidos, plantilla, fichas, rondas,
@@ -849,7 +945,7 @@ def decidir(
                     frena("FALTA_LEER_EL_ONCE" if once is None else "SIN_ONCE_DE_BIWENGER")
                     continue
                 requiere = sale in nuevo_once
-                if requiere and reloj.get("ronda_parcial"):
+                if requiere and juega_la_parcial(sale):
                     frena("TITULAR_ANTES_DE_UNA_RONDA_PARCIAL")
                     continue
                 if requiere:
@@ -1006,8 +1102,9 @@ def decidir(
             if quedan <= 0:
                 break
             # Su venta cuenta solo si se cobra antes de la ronda y no la
-            # frenara la ronda de aplazados (titular, o no se sabe).
-            frenada = bool(reloj.get("ronda_parcial")) and puede_ser_titular(c["player_id"])
+            # frenara la ronda de aplazados (titular de uno de sus equipos,
+            # o no se sabe).
+            frenada = juega_la_parcial(c["player_id"]) and puede_ser_titular(c["player_id"])
             venta = int(c["precio"] * VENTA_ESTIMADA) if cobra and not frenada else 0
             for e in candidatos:
                 if e["player_id"] in usados or e["posicion"] != c["posicion"]:
@@ -1511,6 +1608,9 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
 
         catalogo = _dict(_dict(_dict(snapshot.get("catalog")).get("data")).get("players"))
         fichas = {k: v for k, v in _por_id(catalogo).items() if isinstance(v, dict)}
+        # De que club es cada uno, para la ronda de aplazados.
+        equipos = {k: _dict(v).get("name") for k, v in _por_id(
+            _dict(_dict(snapshot.get("catalog")).get("data")).get("teams")).items()}
         for j in _lista(snapshot.get("my_team")):
             pid = _int(j.get("id"))
             if pid is not None and pid not in fichas:
@@ -1576,6 +1676,7 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
             aguanta=los_que_aguanta(libro_ronda_ruta), vetados=vetados(orden_ruta, ahora),
             otros_venden=otros_venden, vendidos=set(vuelta["vendidos"]),
             listados=set(vuelta["listados"]), once_de_la_foto=once_de_la_foto, reloj=reloj,
+            equipos=equipos,
         )
         d = decidir(**base, once=None)
 
@@ -1630,7 +1731,9 @@ def el_resumen(r) -> list:
         if reloj:
             lineas.append(f"  Reloj: {reloj.get('horas_ronda')} h a la ronda, "
                           f"{reloj.get('horas_reset')} h al reset, ventana {reloj.get('ventana')}, "
-                          f"en curso {reloj.get('en_curso')}")
+                          f"en curso {reloj.get('en_curso')}"
+                          + (f", aplazados de {reloj.get('equipos_parcial') or 'equipos sin saber'}"
+                             if reloj.get("ronda_parcial") else ""))
         for v in r.get("vuelta_descartada") or []:
             lineas.append(f"  Sin contar lo de esta vuelta de {v}")
         if r.get("libro_rehecho"):

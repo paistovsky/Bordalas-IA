@@ -249,6 +249,183 @@ REGLAS = (
 MIN_NAME_LENGTH = 4
 
 
+# ============================================================
+# LA BAJA ES DE QUIEN LA TIENE MAS CERCA (19/10/2026)
+# ============================================================
+#
+#     El caso real, el que le costo 1,0 xP a Yamal en el informe
+#     de la mañana -su PRENSA_BAJA- (laboratorio del 19/10):
+#
+#         "Nuno Mendes , su antidoto para frenar a un Lamine
+#          Yamal en un momento de juego magnifico, esta lesionado
+#          y Digne, su alternativa natural, ..."
+#
+#     El lesionado es Nuno Mendes, del PSG. Ni el ni Digne estan
+#     en el catalogo de Biwenger, asi que la frase tenia UN solo
+#     activo y el candado de los dos sujetos no salto: la regla
+#     vio "lesionado" y se lo colgo al unico que conocia.
+#
+#     Ahora una palabra de BAJA o de DUDA solo cuenta para el
+#     jugador si ningun OTRO nombre propio de la frase -del
+#     catalogo o no- esta mas cerca de ella, en palabras. A
+#     igualdad, cuenta: el empate no es "otro mas cerca". Basta
+#     con que UNA de las palabras de la regla sea suya ("bajas
+#     sensibles, siendo la de Aubameyang la mas dura al tener que
+#     ser operado": "operado" es suya). Si no cuenta, se sigue con
+#     las reglas de abajo, pero SOLO con las que no suben
+#     (ALINEACION, FICHAJE) o MENCION: una baja apartada nunca se
+#     da la vuelta en VUELVE/UP. Se vio: "Arda Güler regresa de
+#     Turquia con molestias" era DUDA y, con "Turquia" mas cerca de
+#     "molestias", salia VUELVE; el "regresa" va pegado al sujeto y
+#     la proximidad no lo aparta. "Canales regresa y el central
+#     cubre la baja de Vivian", con Vivian fuera del catalogo, queda
+#     en MENCION: ni resta ni suma. Yamal: "lesionado" esta a una
+#     palabra de Digne y a siete de el; se queda en ALINEACION por
+#     "suplentes", que es FLAT y no resta. El item lo dice en
+#     `keyword_reason`.
+#
+#     QUE ES UN NOMBRE PROPIO AQUI. Palabras en mayuscula
+#     seguidas ("Nuno Mendes", "Frenkie de Jong"), sin los
+#     equipos -los del catalogo y los de `NO_SON_PERSONAS`-, ni
+#     las palabras que van en mayuscula por ir al principio
+#     ("Alarma con la lesion de Guruzeta": "Alarma" no es nadie).
+#     Salvo que la primera palabra, sola, tenga pinta de sujeto: una
+#     coma detras ("Dembele, lesionado, no podra medirse a Yamal") o
+#     un verbo (es, se, sera, esta, sufre) o una palabra de las
+#     reglas justo despues. Si ella misma es una palabra de las
+#     reglas ("Lesionado, Pedri se pierde..."), no.
+#     Medido sobre las 75 BAJA/DUDA de la prensa de los artefactos
+#     del 13 y el 19/10, con el catalogo de ese dia: cambian 9. Ocho
+#     eran de otro (Yamal; Redondo, por la baja de Vicky Lopez; la
+#     sancion de Vinicius, colgada a Mourinho y a Saliba; el
+#     expulsado Marin, a Nsongo; Morata, a Cordoba; la baja de
+#     Yangel, a Matarazzo; las de Zaka y Casado, a Hidalgo) y
+#     Raphinha pasa de BAJA a DUDA: "lesionado" era de Frenkie de
+#     Jong y sus "molestias" si son suyas. Ninguna de las otras 66
+#     cambia. Siguen mal las que no tienen otro nombre cerca ("sin
+#     duda", "el jugador estara tres meses de baja, como señalo
+#     ... Luis Garcia Plaza"). Con lo que se añadio esa noche (la
+#     lista de abajo, la primera palabra con pinta de sujeto, nada de
+#     VUELVE tras una baja apartada), sobre las 21 BAJA/DUDA de un
+#     solo sujeto de los informes de prensa del 12 al 18/10 que se
+#     conservan, cambian las mismas dos de antes (Morata, Raphinha).
+#
+#     LO QUE NO ARREGLA, dicho claro. Es proximidad, no
+#     gramatica: sin "y Digne" detras, Yamal quedaria mas cerca
+#     de "lesionado" que Nuno Mendes y seguiria siendo BAJA. Y una
+#     palabra en mayuscula que no es una persona -un estadio, una
+#     ciudad que no esta en la lista- cuenta como "otro nombre":
+#     si esta mas cerca, la baja verdadera se pierde (queda en
+#     MENCION o en lo FLAT de la frase; nunca en VUELVE). Por eso la
+#     lista de abajo existe y por eso solo se aplica a BAJA y DUDA,
+#     las dos que restan puntos. Y el empate es del sujeto: "Hakimi
+#     es baja y Yamal tendra via libre" sigue siendo BAJA de Yamal
+#     ("baja" esta a una palabra de cada uno).
+
+PROXIMIDAD = (BAJA, DUDA)
+
+
+# Lo que va en mayuscula sin ser un nombre: articulos y palabras
+# que abren frase, y el "Leer" que Mundo Deportivo pega al final
+# de cada entradilla. Se quitan de las puntas de cada nombre.
+NO_ABREN_NOMBRE = frozenset({
+    "el", "la", "los", "las", "lo", "un", "una", "unos", "unas",
+    "al", "del", "de", "y", "e", "o", "u", "a", "en", "con", "sin",
+    "por", "para", "ante", "tras", "segun", "desde", "hasta", "sobre",
+    "entre", "contra", "hacia", "pero", "aunque", "si", "no", "que",
+    "como", "cuando", "donde", "quien", "cual", "ya", "asi", "solo",
+    "tambien", "mas", "este", "esta", "estos", "estas", "ese", "esa",
+    "esos", "esas", "aquel", "su", "sus", "mi", "otro", "otra", "hoy",
+    "ayer", "manana", "leer", "ver", "video", "directo", "oficial",
+    "ultima", "hora", "jornada",
+})
+
+
+# Lo que une dos trozos de un mismo nombre: "Frenkie de Jong",
+# "Luis de la Fuente", "Marc-Andre ter Stegen".
+UNEN_NOMBRE = frozenset({
+    "de", "del", "la", "las", "los", "da", "das", "do", "dos", "van",
+    "von", "der", "den", "di", "du", "ter", "le",
+})
+
+
+# Nombres propios que no son personas y salen en los titulares:
+# clubes de LaLiga (por si el catalogo llega sin equipos) y de
+# fuera, selecciones, competiciones, estadios y ciudades. Sin
+# acentos y en minuscula, palabra a palabra: un nombre cuyas
+# palabras estan TODAS aqui (o en los equipos del catalogo) no es
+# una persona. No pretende ser completa: es lo visto en los
+# titulares de octubre.
+NO_SON_PERSONAS = frozenset({
+    # LaLiga
+    "alaves", "athletic", "atletico", "atleti", "barcelona", "barca",
+    "betis", "celta", "elche", "espanyol", "getafe", "girona",
+    "levante", "mallorca", "osasuna", "oviedo", "rayo", "vallecano",
+    "real", "madrid", "sociedad", "sevilla", "valencia", "villarreal",
+    "racing", "deportivo", "malaga", "leganes", "cordoba", "sanse",
+    "submarino", "amarillo", "rojiblanco", "rojillos", "leones",
+    "club", "fc", "cf", "ud", "cd", "sd", "rcd", "rc", "ca", "sad",
+    # Fuera
+    "psg", "paris", "napoles", "galatasaray", "manchester", "united",
+    "city", "bournemouth", "estrasburgo", "roma", "lazio", "juventus",
+    "milan", "inter", "bayern", "dortmund", "liverpool", "chelsea",
+    "arsenal", "tottenham", "benfica", "oporto", "porto", "sporting",
+    "ajax", "psv", "brujas", "leverkusen", "monaco", "marsella",
+    "lyon", "napoli", "atalanta", "newcastle", "aston", "villa",
+    # Champions y Europa League de octubre (19/10/2026): "Militao,
+    # que se retiro con molestias ante el Olympiacos, es duda".
+    "olympiacos", "olympiakos", "olympique", "copenhague", "celtic",
+    "rangers", "salzburgo", "shakhtar", "dinamo", "zagreb", "slavia",
+    "sparta", "praga", "qarabag", "bodo", "glimt", "union", "gilloise",
+    "eintracht", "frankfurt", "leipzig", "stuttgart", "feyenoord",
+    "pafos", "kairat", "almaty", "fenerbahce",
+    # Selecciones y paises
+    "espana", "seleccion", "roja", "sub", "brasil", "argentina",
+    "francia", "italia", "alemania", "inglaterra", "portugal",
+    "belgica", "holanda", "paises", "bajos", "croacia", "marruecos",
+    "uruguay", "colombia", "mexico", "estados", "unidos", "guinea",
+    "bisau", "nigeria", "albania", "indonesia", "suiza", "suecia",
+    "noruega", "dinamarca", "japon", "senegal", "ghana", "camerun",
+    # Los rivales de las ventanas de selecciones (19/10/2026): "Arda
+    # Güler regresa de Turquia con molestias".
+    "turquia", "georgia", "ecuador", "bulgaria", "serbia", "grecia",
+    "escocia", "gales", "irlanda", "austria", "hungria", "polonia",
+    "chequia", "eslovaquia", "eslovenia", "rumania", "ucrania",
+    "kosovo", "islandia", "finlandia", "chipre", "peru", "chile",
+    "paraguay", "venezuela", "bolivia", "canada", "egipto", "argelia",
+    "tunez", "corea", "australia", "qatar",
+    # Partidos con nombre: "Kubo, con un esguince, es duda para el
+    # Clasico" (19/10/2026)
+    "clasico", "derbi",
+    # Competiciones y organismos
+    "laliga", "liga", "ea", "sports", "hypermotion", "primera",
+    "segunda", "division", "champions", "league", "europa",
+    "conference", "copa", "rey", "supercopa", "mundial", "eurocopa",
+    "uefa", "fifa", "rfef", "csd", "var", "comite", "competicion",
+    "disciplina", "federacion", "apelacion", "tad",
+    # Estadios y ciudades
+    "bernabeu", "santiago", "metropolitano", "camp", "nou",
+    "montjuic", "mestalla", "anoeta", "reale", "arena", "cartuja",
+    "sadar", "vallecas", "lezama", "balaidos", "riazor", "abanca",
+    "ciutat", "estadio", "stadium", "rcde", "coliseum", "ipurua",
+    "mendizorroza", "ceramica", "pizjuan", "villamarin", "zorrilla",
+    "tartiere", "sardinero", "rosaleda", "vitoria", "donostia",
+    "bilbao", "vigo", "coruna", "pamplona", "estambul", "ali", "sami",
+    "yen", "londres", "munich",
+    # Estadios y ciudades deportivas que faltaban (19/10/2026):
+    # "Sancet se lesiona en San Mames y sera baja". Con "san" y
+    # "son" no se pierde a nadie con apellido: un nombre sale solo si
+    # TODAS sus palabras estan aqui ("San Mames" y "Son Moix" si;
+    # "Heung-min Son", no).
+    "san", "mames", "son", "moix", "montilivi", "valdebebas",
+    "zubieta", "paterna", "butarque", "lasesarre", "majadahonda",
+    "rozas", "clairefontaine",
+    # Medios y programas
+    "marca", "sport", "relevo", "mundo", "cope", "ser", "onda", "cero",
+    "partidazo", "chiringuito", "movistar", "dazn",
+})
+
+
 CONFIDENCE_BASIS = (
     "Ningun periodico publica una fiabilidad. La direccion es una "
     "deduccion nuestra a partir de la frase citada, no un dato "
@@ -448,23 +625,333 @@ def frases(texto: str) -> list:
     return [t.strip() for t in trozos if t and t.strip()]
 
 
-def classify(frase: str) -> tuple:
+def classify(frase: str, sujeto: str | None = None,
+             equipos=frozenset()) -> tuple:
     """
     Que clase de noticia es. ESTO ES UNA DEDUCCION.
 
     Devuelve `(kind, direction)`. `MENCION` cuando el jugador sale
     pero no hay ninguna palabra que diga nada: nombrar a alguien
     no es una señal.
+
+    Con `sujeto` (el nombre del catalogo del unico activo de la
+    frase), una palabra de BAJA o DUDA solo cuenta si ningun otro
+    nombre propio esta mas cerca de ella (`de_quien_es`). Sin
+    `sujeto`, como siempre.
+    """
+
+    return clasificar(frase, sujeto, equipos)["clase"]
+
+
+def _palabras(texto: str) -> list:
+    """`[(inicio, fin, palabra)]` de un texto, en orden."""
+
+    return [
+        (m.start(), m.end(), m.group(0))
+        for m in re.finditer(r"\w+(?:['’\-]\w+)*", texto)
+    ]
+
+
+def _indice_de(palabras: list, posicion: int) -> int:
+    """La palabra que contiene (o sigue a) un caracter."""
+
+    for indice, (inicio, fin, _) in enumerate(palabras):
+
+        if posicion < fin:
+            return indice
+
+    return max(len(palabras) - 1, 0)
+
+
+# Lo que, detras de la primera palabra de la frase, dice que es el
+# sujeto: "Dembele es baja", "Hakimi se pierde el partido".
+VERBOS_DE_SUJETO = frozenset({
+    "es", "se", "sera", "esta", "estara", "sufre",
+})
+
+
+def _abre_como_sujeto(frase: str, palabras: list) -> bool:
+    """
+    ¿La primera palabra de la frase, sola, tiene pinta de nombre?
+    Si detras va una coma ("Dembele, lesionado, ..."), uno de
+    `VERBOS_DE_SUJETO` o una palabra de las `REGLAS` ("Dembele
+    lesionado"). Nunca si ella misma es una palabra de las reglas
+    ("Lesionado, Pedri se pierde el Clasico") ni si no hay nada
+    detras. Nunca lanza.
+    """
+
+    try:
+        if len(palabras) < 2:
+            return False
+
+        primera = plano(palabras[0][2])
+
+        if any(re.search(patron, primera) for _, _, patron in REGLAS):
+            return False
+
+        entre = frase[palabras[0][1]:palabras[1][0]].strip()
+
+        if entre.startswith(","):
+            return True
+
+        if entre:
+            return False
+
+        siguiente = plano(palabras[1][2])
+
+        return siguiente in VERBOS_DE_SUJETO or any(
+            re.search(patron, siguiente) for _, _, patron in REGLAS
+        )
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def nombres_propios(frase: str, equipos=frozenset()) -> list:
+    """
+    Los nombres propios de una frase que pueden ser personas.
+
+    `[(primera, ultima, texto)]`, con las posiciones en PALABRAS.
+    Palabras en mayuscula seguidas (con `UNEN_NOMBRE` en medio:
+    "Frenkie de Jong"), sin las de `NO_ABREN_NOMBRE` en las puntas,
+    sin la primera de la frase si va sola ("Alarma con la lesion
+    de Guruzeta") salvo que tenga pinta de sujeto ("Dembele,
+    lesionado, ...": `_abre_como_sujeto`) y sin los que son todo
+    equipo o lugar (`NO_SON_PERSONAS` y las palabras de `equipos`).
+    Nunca lanza.
+    """
+
+    try:
+        palabras = _palabras(frase)
+
+        def mayuscula(i):
+            return palabras[i][2][:1].isupper()
+
+        def pegada(i):
+            # Solo espacios entre la palabra i-1 y la i: una coma
+            # corta el nombre ("Digne, su alternativa").
+            return not frase[palabras[i - 1][1]:palabras[i][0]].strip()
+
+        trozos = []
+        i = 0
+
+        while i < len(palabras):
+
+            if not mayuscula(i):
+                i += 1
+                continue
+
+            fin = i
+
+            while True:
+                j = fin + 1
+
+                # Los que unen: solo si detras viene otra mayuscula.
+                while (
+                    j < len(palabras)
+                    and pegada(j)
+                    and not mayuscula(j)
+                    and plano(palabras[j][2]) in UNEN_NOMBRE
+                ):
+                    j += 1
+
+                if j < len(palabras) and pegada(j) and mayuscula(j):
+                    fin = j
+                    continue
+
+                break
+
+            trozos.append((i, fin))
+            i = fin + 1
+
+        nombres = []
+        fuera = NO_SON_PERSONAS | frozenset(equipos or ())
+
+        for primera, ultima in trozos:
+
+            while primera <= ultima and plano(
+                palabras[primera][2]
+            ) in NO_ABREN_NOMBRE:
+                primera += 1
+
+            while ultima >= primera and plano(
+                palabras[ultima][2]
+            ) in NO_ABREN_NOMBRE:
+                ultima -= 1
+
+            if primera > ultima:
+                continue
+
+            # La primera palabra de la frase va en mayuscula por ir
+            # la primera. Sola, no dice que sea un nombre... salvo
+            # que tenga pinta de sujeto (`_abre_como_sujeto`).
+            if (
+                primera == 0
+                and ultima == 0
+                and not _abre_como_sujeto(frase, palabras)
+            ):
+                continue
+
+            sueltas = [
+                trozo
+                for k in range(primera, ultima + 1)
+                for trozo in re.split(r"['’\-]", plano(palabras[k][2]))
+                if trozo and trozo not in UNEN_NOMBRE
+            ]
+
+            if sueltas and all(trozo in fuera for trozo in sueltas):
+                continue
+
+            nombres.append(
+                (
+                    primera,
+                    ultima,
+                    frase[palabras[primera][0]:palabras[ultima][1]],
+                )
+            )
+
+        return nombres
+
+    except Exception:                               # noqa: BLE001
+        return []
+
+
+def de_quien_es(frase: str, patron: str, sujeto: str,
+                equipos=frozenset()) -> dict:
+    """
+    ¿Es del `sujeto` alguna palabra de `patron` en la frase?
+
+    `{"suya", "palabra", "mas_cerca"}`. `suya` es True si en alguna
+    aparicion de la regla ningun otro nombre propio esta MAS cerca
+    (en palabras) que el sujeto; a igualdad, suya. Si no, False, y
+    `palabra` y `mas_cerca` dicen cual y de quien. Si no se
+    encuentra al sujeto en la frase, suya (lo de siempre). Nunca
+    lanza.
+    """
+
+    salida = {"suya": True, "palabra": None, "mas_cerca": None}
+
+    try:
+        texto = plano(frase)
+        palabras = _palabras(frase)
+        buscable = plano(sujeto or "")
+
+        # Donde esta el sujeto: cada aparicion en mayuscula, como en
+        # `mentions`.
+        suyas = [
+            (
+                _indice_de(palabras, m.start()),
+                _indice_de(palabras, m.end() - 1),
+            )
+            for m in re.finditer(
+                r"(?<![a-z0-9])" + re.escape(buscable) + r"(?![a-z0-9])",
+                texto,
+            )
+            if buscable and frase[m.start()].isupper()
+        ]
+
+        if not suyas:
+            return salida
+
+        otros = [
+            (primera, ultima, nombre)
+            for primera, ultima, nombre in nombres_propios(frase, equipos)
+            if not any(
+                primera <= fin and inicio <= ultima
+                for inicio, fin in suyas
+            )
+        ]
+
+        if not otros:
+            return salida
+
+        def distancia(tramo, primera, ultima):
+            inicio, fin = tramo
+
+            if ultima < inicio:
+                return inicio - ultima - 1
+
+            if primera > fin:
+                return primera - fin - 1
+
+            return 0
+
+        primera_ajena = None
+
+        for m in re.finditer(patron, texto):
+
+            tramo = (
+                _indice_de(palabras, m.start()),
+                _indice_de(palabras, m.end() - 1),
+            )
+
+            mia = min(distancia(tramo, a, b) for a, b in suyas)
+
+            ajena, quien = min(
+                (distancia(tramo, a, b), nombre)
+                for a, b, nombre in otros
+            )
+
+            if mia <= ajena:
+                return salida
+
+            if primera_ajena is None:
+                primera_ajena = (frase[m.start():m.end()], quien)
+
+        if primera_ajena is None:
+            return salida
+
+        return {
+            "suya": False,
+            "palabra": primera_ajena[0],
+            "mas_cerca": primera_ajena[1],
+        }
+
+    except Exception:                               # noqa: BLE001
+        return salida
+
+
+def clasificar(frase: str, sujeto: str | None = None,
+               equipos=frozenset()) -> dict:
+    """
+    `classify` con el por que: `{"clase": (kind, direction),
+    "ajena": None | {"kind", "palabra", "mas_cerca"}}`. `ajena` es la
+    primera palabra de BAJA o DUDA que se salto por estar mas cerca
+    de otro nombre. Con una `ajena`, las reglas que suben (VUELVE) ya
+    no cuentan: la baja apartada no se da la vuelta. Nunca lanza.
     """
 
     texto = plano(frase)
+    ajena = None
 
     for clase, direccion, patron in REGLAS:
 
-        if re.search(patron, texto):
-            return (clase, direccion)
+        if not re.search(patron, texto):
+            continue
 
-    return (MENCION, FLAT)
+        # UNA BAJA APARTADA NO SE DA LA VUELTA (19/10/2026). "Arda
+        # Güler regresa de Turquia con molestias" era DUDA; con
+        # "molestias" mas cerca de "Turquia", el "regresa" -pegado al
+        # sujeto- la convertia en VUELVE/UP. Solo lo FLAT o MENCION.
+        if ajena is not None and direccion == UP:
+            continue
+
+        if sujeto and clase in PROXIMIDAD:
+
+            quien = de_quien_es(frase, patron, sujeto, equipos)
+
+            if not quien["suya"]:
+                if ajena is None:
+                    ajena = {
+                        "kind": clase,
+                        "palabra": quien["palabra"],
+                        "mas_cerca": quien["mas_cerca"],
+                    }
+                continue
+
+        return {"clase": (clase, direccion), "ajena": ajena}
+
+    return {"clase": (MENCION, FLAT), "ajena": ajena}
 
 
 # ============================================================
@@ -492,6 +979,34 @@ def build_index(targets: list | None) -> dict:
         indice.setdefault(plano(nombre), []).append(objetivo)
 
     return indice
+
+
+def palabras_de_equipos(catalog: dict | None) -> frozenset:
+    """
+    Las palabras de los nombres de los equipos del catalogo, sin
+    acentos: "Rayo Vallecano" -> {"rayo", "vallecano"}. Un nombre
+    propio hecho solo de estas no es una persona. Nunca lanza.
+    """
+
+    try:
+        equipos = ((catalog or {}).get("data") or {}).get("teams") or {}
+
+        if isinstance(equipos, dict):
+            equipos = list(equipos.values())
+
+        return frozenset(
+            palabra
+            for equipo in equipos
+            if isinstance(equipo, dict)
+            for palabra in re.split(
+                r"[\s'’\-\.]+",
+                plano(str(equipo.get("name") or "")),
+            )
+            if palabra
+        )
+
+    except Exception:                               # noqa: BLE001
+        return frozenset()
 
 
 def mentions(texto: str, indice: dict) -> tuple:
@@ -640,6 +1155,7 @@ def build_press_report(
     try:
         objetivos = build_targets(catalog)
         indice = build_index(objetivos)
+        equipos = palabras_de_equipos(catalog)
 
         fuentes = {}
         por_jugador: dict[str, dict] = {}
@@ -691,7 +1207,9 @@ def build_press_report(
                     viejos += 1
                     continue
 
-                señales = _senales_de(noticia, indice, feed)
+                señales = _senales_de(
+                    noticia, indice, feed, equipos
+                )
 
                 if not señales:
 
@@ -824,7 +1342,8 @@ def build_press_report(
         }
 
 
-def _senales_de(noticia: dict, indice: dict, feed: str) -> list:
+def _senales_de(noticia: dict, indice: dict, feed: str,
+                equipos=frozenset()) -> list:
     """
     Las señales de UNA noticia, frase a frase.
 
@@ -871,11 +1390,18 @@ def _senales_de(noticia: dict, indice: dict, feed: str) -> list:
         # EL SUJETO TIENE QUE SER UNO SOLO.
         sujeto_unico = len(jugadores) == 1
 
-        clase, direccion = (
-            classify(frase)
+        # Y LA BAJA, SUYA (19/10/2026): con un solo activo, una
+        # palabra de BAJA o DUDA que esta mas cerca de otro nombre
+        # -Nuno Mendes, Digne- no se le cuelga a el.
+        deduccion = (
+            clasificar(frase, jugadores[0]["name"], equipos)
             if sujeto_unico
-            else (MENCION, FLAT)
+            else {"clase": (MENCION, FLAT), "ajena": None}
         )
+
+        clase, direccion = deduccion["clase"]
+
+        ajena = deduccion["ajena"]
 
         motivo = (
             None
@@ -929,6 +1455,16 @@ def _senales_de(noticia: dict, indice: dict, feed: str) -> list:
                     "subjects_in_quote": len(jugadores),
                     "ambiguous_subject": not sujeto_unico,
                     "ambiguous_reason": motivo,
+
+                    # La palabra de BAJA o DUDA que NO se le
+                    # atribuyo, y por que. None si no hubo ninguna.
+                    "keyword_reason": (
+                        f"«{ajena['palabra']}» ({ajena['kind']}) esta "
+                        f"mas cerca de «{ajena['mas_cerca']}» que de "
+                        f"{jugador['name']}: no se le atribuye."
+                        if ajena
+                        else None
+                    ),
 
                     "seen_at": now_iso(),
                 }

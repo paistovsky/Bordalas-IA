@@ -24,7 +24,7 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from src.analysis.la_proxima_jornada import (     # noqa: E402
-    horas_al_proximo_cierre, jornada_en_curso, las_rondas,
+    horas_al_proximo_cierre, jornada_en_curso, las_rondas, los_equipos_de,
 )
 
 
@@ -165,6 +165,30 @@ def test_los_relojes_de_siempre_delegan():
     assert de_la_mejora(_t("2026-10-20T12:00:00+02:00"), "/no/existe.json") is True
 
 
+def test_los_equipos_de_cada_ronda():
+    # Los de la ronda y solo esos (19/10/2026: el freno de la rotacion
+    # antes del Levante-Athletic solo vale para los de esos dos).
+    j6 = [r for r in las_rondas(CALENDARIO) if r["jornada"] == 6]
+    assert los_equipos_de(j6[0], CALENDARIO) == ["L0", "V0"]
+    assert los_equipos_de(j6[2], CALENDARIO) == ["L9", "V9"]
+    assert len(los_equipos_de(j6[1], CALENDARIO)) == 16
+    # Un partido de la ronda sin un nombre, o la jornada sin partidos (solo
+    # `first_kickoff`): no se sabe, None; nunca una lista a medias.
+    cojo = {"matchdays": [{"matchday": 6, "matches": [
+        {"matchday": 6, "home": "Levante UD", "away": None,
+         "kickoff": "2026-10-21T20:00:00+02:00"}]}]}
+    assert los_equipos_de(las_rondas(cojo)[0], cojo) is None
+    solo = {"matchdays": [{"matchday": 3, "first_kickoff": "2026-08-28T19:00:00+02:00"}]}
+    assert los_equipos_de(las_rondas(solo)[0], solo) is None
+    # Sin `matchdays`, la lista suelta.
+    sueltos = {"matches": [{"matchday": 6, "home": "Levante UD", "away": "Athletic Club",
+                            "kickoff": "2026-10-21T20:00:00+02:00"}]}
+    assert los_equipos_de(las_rondas(sueltos)[0], sueltos) == ["Athletic Club", "Levante UD"]
+    for raro in (None, {}, 7, "x"):
+        assert los_equipos_de(raro, CALENDARIO) is None
+    assert los_equipos_de(j6[2], "/no/existe/calendario.json") is None
+
+
 def test_nunca_lanza():
     # (Nunca `None`: sería el calendario de producción.)
     raros = (7, "", [], {"matchdays": [None, 3, {"matches": None}]},
@@ -180,7 +204,8 @@ def test_nunca_lanza():
 
 TESTS = [test_la_j6_son_tres_rondas, test_los_aplazados_que_se_juegan_juntos_van_en_una_ronda,
          test_las_horas_al_proximo_cierre, test_la_jornada_en_curso,
-         test_los_relojes_de_siempre_delegan, test_nunca_lanza]
+         test_los_relojes_de_siempre_delegan, test_los_equipos_de_cada_ronda,
+         test_nunca_lanza]
 
 
 def main() -> None:

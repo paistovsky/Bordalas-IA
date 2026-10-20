@@ -3986,10 +3986,21 @@ def build_dashboard_state() -> dict:
     # Blindado: nunca lanza por su cuenta, pero el envoltorio se
     # queda por si el import falla. Un marcador roto no puede
     # tumbar la telemetria.
+    #
+    # EL TABLON, PARA SABER QUE NO CUENTA TODAVIA (19/10/2026)
+    #
+    #     La clasificacion de Biwenger solo suma rondas cerradas.
+    #     Decia LIDER con 3 de ventaja y la J8 abierta ponia a
+    #     Pollo17 treinta por delante. Con el tablon se sabe que
+    #     rondas estan abiertas y cuanto pueden mover; sin el no
+    #     se dice LIDER.
     try:
         from src.analysis.race_state import build_race_state
 
-        race = build_race_state(rival_squads)
+        race = build_race_state(
+            rival_squads,
+            eventos=board.get("events"),
+        )
 
     except Exception as error:                      # noqa: BLE001
         race = {

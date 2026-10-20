@@ -69,6 +69,196 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E52 · 20/10/2026 17:17 de Madrid · La formula del premio de jornada (y el premio de la J9)
+
+**El caso:** el premio de la J9 ha entrado hoy a las **17:05 de Madrid**
+(18,1 h tras el ultimo partido, dentro de la ventana de E43/E47): Pepe 49
+puntos, **1.470.000**. Saldo de -2.017 a ~+1,47 M: el plazo del aplazado
+de mañana esta cubierto sin la racha (E47 lo daba por hecho con un minimo
+de 870.000; la venta de Rico de anoche no hacia falta). Pero los de abajo
+no cobraron 30.000 por punto: DiosMande, 27 puntos, 1.310.000.
+**Datos:** los 10 «roundFinished» del tablon (J1-J9 y las partes
+aplazadas), 67 premios.
+**Codigo:** `lab/caja/el_premio.py`.
+
+**La formula, comprobada:**
+- **Premio = 30.000 x puntos + un plus para los tres ultimos de la
+  jornada:** antepenultimo +100.000, penultimo +250.000, ultimo +500.000.
+  45 de 67 premios son 30.000 x puntos exactos; los 21 de abajo llevan
+  justo esos plus (J1-J5, J7, J9; con 7 u 8 managers). La parte aplazada
+  de la J6 no llevo plus.
+- **Quien empieza en rojo cobra 0** aunque puntue (Luismi, J6 aplazada,
+  64 puntos, 0 euros: E29).
+- **Para Pepe nada cambia:** siempre ha quedado del 1.º al 5.º, donde el
+  punto vale 30.000 justos (E16). El plus empuja a los de abajo: quedar
+  ultimo con 27 puntos paga lo mismo que quedar quinto con 44.
+
+**Limites:** 10 rondas; no se ha visto a dos empatados en el puesto del
+plus (en la J5 Mex y Prinzipote empatan a 45 y solo cobra el plus el que
+el tablon pone despues).
+
+**Veredicto: SE AGUANTA E16** (30.000 por punto para Pepe) y el reloj del
+premio de E43 acierta otra vez (7 de 7). Sin regla nueva. Nota para la
+caja: el premio de la J9 llego a las 17:05, al final de la ventana; contar
+con el a partir de las 18:00, no de las 12:00.
+
+### E51 · 20/10/2026 11:16 de Madrid · ¿Cuanto le queda a una racha de subidas?
+
+**Hipotesis:** cuanto mas lleva un jugador subiendo, menos le queda (la
+racha «se cansa»). Si es asi, la cartera y la rotacion deberian preferir
+al que acaba de empezar a subir.
+**Datos:** `data/autopilot/price_history.json`, todos los jugadores, cada
+dia de una racha (n = 7.519 dias-jugador subiendo).
+**Codigo:** `lab/precio/rachas.py`.
+
+    dias seguidos subiendo   casos   sube manana   le queda hasta el primer dia sin subir (mediana)
+        1                     745      90,6 %         +6,8 %
+        2                     646      92,4 %         +7,1 %
+        3-5                 1.597      91-94 %        +5,9 a +6,5 %
+        6-9                 1.496      88-92 %        +4,6 a +5,6 %
+        10+                 3.035      92,4 %         +4,5 %
+
+**Lo que se aprende:**
+- **La racha no se cansa:** la probabilidad de subir mañana es ~91 % se
+  lleve 1 dia o 10. Lo que si baja es lo que queda en %: de +7 % al
+  empezar a +4,5 % tras 10 dias (el precio ya es mayor y las subidas
+  diarias no crecen tanto). La media (+13 a +44 %) la inflan unos pocos
+  baratos que se disparan.
+- **La cuenta que importa para comprar:** lo que le queda a uno que sube
+  (+4,5 a +7 % de mediana) contra lo que cuesta ganarlo. Sin pelea (+1 %),
+  gana. Con pelea, el ganador paga hoy +10 % por los que suben poco y
+  +33 % por los que suben mucho (E49): **a la mediana, una compra con
+  pelea no se paga con la subida que le queda.** Solo se paga si el
+  jugador entra en el once (puntos) o si es de los baratos que se
+  disparan.
+
+**Limites:** la mediana esconde colas muy largas en los baratos; no separa
+por precio; dias-jugador de la misma racha no son independientes.
+
+**Veredicto: SE AGUANTA lo que hay** (comprar al que sube, vender el
+primer dia que no sube, E1/E3) y no hace falta mirar cuantos dias lleva
+subiendo. Refuerza E46/E49: para revender, la prima tiene que quedarse por
+debajo de lo que le queda a la racha (~+5 %); por encima, solo si es para
+el once.
+
+### E50 · 19/10/2026 17:15 de Madrid · El Levante-Athletic del 21/10, manager a manager
+
+**Hipotesis:** el aplazado de la J6 (mie 21/10 20:00) pesa distinto para
+cada manager segun cuantos jugadores tenga del Levante y del Athletic; y
+si es ronda propia (E45), quien la empiece en rojo los pierde.
+**Datos:** la foto del ciclo de las 17:10 de hoy (plantillas, titularidad
+FF, caja de cada manager); vara de E20 (puntos por partido x titularidad).
+**Codigo:** `lab/carrera/quien_se_juega_el_21.py`.
+
+    manager        caja hoy       esperado en ese partido
+    Pollo17        -377.549          17,8  (De la Fuente, Ivan Romero, Robert Navarro, Brugue)
+    Mex             560.800           5,0
+    Prinzipote    1.314.772           4,1
+    Pepe           -432.317           3,7  (Olasagasti)
+    Luismi_Haz  -12.144.016           3,0
+    Manzagool    -1.578.989           2,5
+    Alvaro R.    15.105.200           1,3
+    DiosMande       345.475           0
+
+**Lo que se aprende:**
+- **Ese partido favorece a Pollo17 en ~14 puntos sobre Pepe** si cuenta
+  con los onces de hoy (17,8 contra 3,7): la ventaja de 3 puntos de Pepe
+  se iria ese miercoles.
+- **Pollo17 esta en rojo** (-377.549) y, si es ronda propia, perderia esos
+  ~18 puntos y ~530.000 de premio si no sale antes. Lo normal es que
+  salga: cobrara el premio de la J9 el martes (E43/E47) igual que Pepe.
+- **Es la prueba que zanja E45:** el jueves 22/10 por la manana, mirar si
+  la clasificacion de Pollo17 sube con los puntos de esos cuatro en ese
+  partido. Si sube, el aplazado iba con el once de hoy (ronda propia o la
+  4904 con onces nuevos); si no se mueve hasta que termine la 4904, iba
+  con el once del 03/09 (cuando Pollo17 no tenia a varios de ellos).
+
+**Limites:** una foto; la titularidad cambia; no se sabe con que once
+contara Biwenger ese partido.
+
+**Veredicto: AVISO para la carrera y prueba apuntada.** Para Pepe no
+cambia nada (plazo de caja del miercoles, E47). Para leer la clasificacion
+del jueves: un salto de Pollo17 de ~15-20 puntos sin jornada nueva es este
+partido.
+
+### E49 · 19/10/2026 11:16 de Madrid · E41 fuera de muestra: la pelea se sigue viendo venir
+
+**Hipotesis:** la regla de E41 (sin subida la vispera casi nadie pelea;
+con subida >= 2 %, pelea y prima alta) vale tambien en subastas que E41 no
+vio.
+**Datos:** las 13 subastas del Computer resueltas del 15/10 al 19/10
+(dia de mercado >= 15/10), 6 con pelea. n pequeño: es una comprobacion,
+no una medida nueva.
+**Codigo:** `lab/subasta/pelea_fuera_de_muestra.py`.
+
+    vispera          n   con pelea (E41)    paga el ganador si hay pelea (E41)
+    no subio         2      0 %  (13 %)          -
+    subio < 2 %      7     43 %  (64 %)       +10,1 %  (+7,2 %)
+    subio >= 2 %     4     75 %  (83 %)       +33,0 %  (+16,2 %)
+
+**Lo que se aprende:**
+- **El orden se mantiene:** sin subida no hay pelea; cuanto mas sube, mas
+  pelea. **Pero las primas han subido:** el ganador paga ahora +10 % y
+  +33 % (E41: +7 % y +16 %). Luismi puja fuerte con -7,6 M de caja y
+  Pollo17 le disputa (19/10: Luismi pago 4.256.000 por uno que Pollo17
+  pujaba a 3.777.000).
+- **Pepe en esos dias:** Lemar (subia +0,8 %) perdida, el ganador pago
+  +10,1 %; **Cardona (subia +2,2 %) GANADA a +1 %**, por 7.000 sobre
+  Luismi: el unico caso que va contra E41 (que le daba un 2 % de
+  ganarla). Las pujas por Alvaro Nunez y Freeman no salen en el tablon.
+
+**Limites:** 13 subastas en 5 dias. Las primas de un mercado que se
+calienta pueden volver a bajar.
+
+**Veredicto: SE AGUANTA E41** (y con ella la regla de «Listo para el
+plan»). Ajuste para cuando se use: en los que suben >= 2 %, la prima que
+gana hoy esta mas cerca de +30 % que de +16 %: pujar solo si el cambio en
+el once lo vale.
+
+### E48 · 18/10/2026 17:15 de Madrid · La carrera otra vez: Pollo17 ya tiene mejor once
+
+**Hipotesis:** E20 (05/10) daba el once de Pepe por delante del de Pollo17
+(48,1 contra 46,2 esperados). Pollo17 ha comprado desde entonces a los que
+suben (prima media +16,7 %): ¿ha cambiado el orden?
+**Datos:** la foto del ciclo de las 17:09 de hoy (`rival_squads` +
+`todaLaLiga`), la misma vara que E20 (puntos por partido x titularidad FF,
+estado ok), y todos los jugadores sanos con 4+ partidos para la curva
+puntos-precio (n = 259).
+**Codigo:** `lab/carrera/proyeccion.py` (E20) y `lab/carrera/once_detalle.py`.
+
+    manager        puntos   once esperado 05/10 -> 18/10   valor del once
+    Luismi_Haz       287          58,8 -> 59,1                85,0 M
+    Pollo17          320          46,2 -> 53,3                64,2 M
+    Manzagool        253          37,2 -> 50,3                  -
+    Pepe             323          48,1 -> 47,5                56,6 M
+
+**Lo que se aprende:**
+- **Pollo17 ya saca 5,7 puntos por jornada mas que Pepe** con el once de
+  hoy. En 30 jornadas son **+139 a +179 puntos** (con el 81-104 % de
+  acierto de la vara, E20). La ventaja de 3 puntos de hoy no aguanta ni
+  una jornada. Luismi va aun mejor (59,1), pero con -7,6 M de caja.
+- **No es mal reparto, es menos dinero en el once.** Pepe saca 47,5 de
+  56,6 M (0,84 pts/M) y Pollo17 53,3 de 64,2 M (0,83 pts/M). Los 7,6 M de
+  diferencia en el once explican la diferencia: en la curva de la liga,
+  entre 5 y 10 M cada millon da ~0,7-1,0 pts por partido.
+- **Yamal no es el problema.** Vender a Yamal (25,4 M, 12,1 esperados)
+  para fichar cinco de 5 M (mediana 5,5 pts/partido) y quitar a los cuatro
+  peores (Cardona 2,0, Jonny 2,5, Chust 3,3, Luismi Cruz 3,3) deja el once
+  igual a la mediana (22 contra 23,2) y solo gana ~+4 si los cinco fueran
+  del cuartil alto, antes de pagar primas. La regla del dueno no cuesta
+  puntos.
+- **El once de Pepe es Yamal + Roberto + nueve de 2-4 puntos.** El de
+  Pollo17 no tiene ninguno por debajo de 4 salvo Ruben Sanchez (30 %).
+
+**Limites:** la vara sobreestima (81-104 %); es una foto de una tarde; la
+titularidad de FF cambia cada dia; la J9 esta a medias.
+
+**Veredicto: AVISO para la carrera.** Con el once de hoy Pepe pierde la
+liga contra Pollo17 por ~150 puntos. La palanca es meter ~7-8 M mas en el
+once (patrimonio, no reventa): lo que la cartera y la rotacion ganen tiene
+que acabar en el once (regla del dueno: inversion son puntos), empezando
+por las plazas de 2-3 puntos (Cardona, Jonny).
+
 ### E47 · 18/10/2026 11:16 de Madrid · ¿Hace falta vender a Rico para el plazo del miercoles?
 
 **El caso:** Pepe esta en -432.317 y el plazo del aplazado de la J6 es el

@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 20/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,176 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2362 a #2369).
+  Saldo -2.017 a las 14:10, 0 comprometido; el premio de la J9 aun no ha
+  entrado (ventana 12:00-17:00). El chat del dueno APAGO la puerta a
+  precio de mercado (6080b86d: 2 ofertas y 0 aceptadas): bien, un
+  interruptor menos que vigilar. Control: hoy 21:15 (premio dentro o no).
+
+- **20/10 10:47 (laboratorio de rivales).** Workflow de 8 (rivales,
+  nuestras tacticas, el coste de los ceros, huecos, 2 escepticos por
+  hallazgo; `scratchpad/lab2010/`). **Rivales:** en el reset del 20/10
+  nadie gano ni vendio nada (0 subastas; ultimo movimiento del tablon, la
+  venta de Rico). Pollo17 sigue ganando por aguantar: +5,70 M en 7 dias, de
+  ellos +5,50 M sin tocar su plantilla del 13/10 y -0,05 M por operar;
+  patrimonio 106,55 M frente a 56,49 M (distancia 50,06 M, +0,83 M al dia);
+  su once por precio, 80,6 M frente a 56,5 M. **Correccion:** Pollo SI
+  opero: vendio a Sucic al Computer el 18/10 (5,42 M) y gano a Tchouameni
+  (4,28 M, +0,2 %) y Espi (2,78 M, +7,2 %) en el reset del 19/10; caja
+  -0,38 M. Luismi gano a Carvajal a +33 % (4,26 M; vale 3,44 M), va a -12,14
+  M y ha pasado a publicar 10 a su valor (x1,00, antes x1,5): necesita
+  vender ~12 M antes de la J10. Manzagool -1,58 M. **Nuestras tacticas:** la
+  cartera y la mejora solo si sube, 0 pujas desde el 17/10 (sin caja); la
+  puerta, 2 ofertas y 0 aceptadas en su vida; el informe de la manana
+  acierta la subida del dia siguiente 17 de 27 (base 6/27), pero los de
+  nota 2,0 justa (menos de 1 M y sin subir) solo 1 de 9. **Los ceros:** esta
+  liga NO tiene suplentes automaticos (lineupReserves false): un banquillo
+  solo sirve si se mete en el once antes del cierre. Nos costaron 3 ceros en
+  33 huecos (J7-J9), ~5 de los 28 puntos de la J8 con Pollo; dos suplentes
+  baratos valen 0,2-0,5 pts por jornada: **el punto 7 del laboratorio baja
+  de prioridad**. **La prima segun la subida (punto 5):** NO se construye;
+  en 1-3 M no se ve ganancia frente al +4 % (+8 % es una moneda al aire) y
+  +1 % parece mejor con solo 2 victorias que lo decidan; se repite el 31/10.
+  **Aplicado:** la puerta APAGADA (la colchoneta solo le cobra puja - 0,92 x
+  valor: el mie por la noche mandaria ~4 M en ofertas que la rotacion cuenta
+  enteras); verja 221/221. Y retirado mi ultimo recurso de las 08:22 (ver
+  abajo).
+
+- **20/10 11:55. RETIRO MI ULTIMO RECURSO DE LAS 08:22 (error mio).** El
+  `vender_si_ficha` con `si_saldo_negativo` (Luismi Cruz) lo leen otros
+  motores como venta YA en marcha: la mejora conto +2,11 M que no existen
+  (caja de la jornada 2.109.093 en #2364-#2366, en vez de -2.017; no pujo
+  de milagro), el cierre armo el once de la J10 con 10 (39,3 xP, sin
+  Luismi) y la rotacion no podia tocarlo (LO_VENDE_OTRO_LIBRO). El ultimo
+  recurso es de antes (29/09) que la mejora y el cierre, y nadie lo
+  integro con ellos. **Ademas sobraba:** nuestros titulares ya tienen
+  ofertas vivas del Computer (Luismi 2.958.000 hasta ~jue 07:00, Jonny
+  1.900.400, Chust 1.725.200...): si la racha fallara, una linea en la
+  orden el mie por la manana se cobra en la vuelta siguiente, antes de las
+  20:00. Orden de vuelta a `vender_si_ficha` vacio; verja 221/221.
+  Pendiente (no urgente): que la mejora, el cierre y la rotacion solo
+  cuenten un `si_saldo_negativo` cuando de verdad toca (saldo < 0 y pasado
+  `desde`). Leccion: una linea de la orden mueve a TODOS los motores;
+  antes de escribirla, mirar la caja de la mejora y el once del cierre en
+  la vuelta siguiente.
+
+- **20/10 08:22 (supervision).** Vuelta #2363 (08:07). Reset sin
+  movimientos (0 pujas vivas: nada ganado ni perdido). Desde ayer, una sola
+  operacion de Pepe: la mejora vendio a Rico al Computer (430.300). Saldo
+  **-2.017**, plantilla de 11 (56,49 M); la ronda, los chollos, la orden,
+  la mejora y la rotacion, NADA (sin caja). El informe de la manana: 20
+  nuevos, arriba Kubo (+7,5 %) y Osambela (+21,1 %). **Plazo del mie 21/10
+  20:00:** la racha va 4 de 5 y se ha cobrado 7 de 7 veces, cada 5 dias, en
+  la vuelta de la 01:07 (+250.000 => +247.983). Por si falla, la orden
+  lleva un ULTIMO RECURSO: Luismi Cruz (el que mas cae de los
+  prescindibles, -60k/dia, xP 2,3) se publica solo si a partir del mie
+  01:30 seguimos en rojo, y se acepta la oferta del Computer del reset de
+  las 07:00 (suelo 2 M). Simulado en los 7 casos; verja 221/221. Rico
+  fuera de `conservar`. El mie a las 08:22 se borra el ultimo recurso.
+
+- **20/10 07:15 (rafaga de la manana).** Ciclos: UNA ROJA, ya arreglada
+  por el chat del dueno: #2355 (mar 20/10 00:07 de Madrid), la guardia
+  de la titularidad leia
+  el tablero de FF de disco (886d30bc); #2356 de las 00:19 verde y verdes
+  desde entonces (#2356 a #2362). **Venta:** Diego Rico vendido por la
+  mejora (430.300). Saldo a las 07:19: **-2.017**, 0 comprometido. Con el
+  premio de la J9 (hoy 12:00-17:00) y la racha (mie 00:10) queda de sobra
+  en positivo para el plazo del mie 21/10 14:00. Control: hoy 21:15.
+
+- **20/10 00:23 (verja roja y venta de Rico).** La vuelta de las 00:07
+  (#39332653635) se paro en la verja: la guardia nueva de la titularidad
+  leia el tablero de FF del cache de produccion (en local no hay `data/`
+  y pasaba). Arreglada para no leer disco (886d30bc) y relanzada a mano
+  (#39334128386): todo verde. En esa vuelta **la mejora acepto la oferta
+  del Computer por Diego Rico (430.300, http 200)**: caja -2.017 para el
+  aplazado del mie 21/10 20:00. La cubre la racha (+250k, ~21/10 00:10) o
+  el premio de la J9. La rotacion ya solo frena a titulares de Levante y
+  Athletic. Leccion: una guardia que lee `data/` en CI ve lo de produccion.
+
+- **19/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2345 a #2352).
+  Saldo -432.317, 0 comprometido, sin movimientos. Leido lo del chat del
+  dueno: la J8 sigue abierta (Rayo-Athletic suspendido) y al cerrarla
+  vamos segundos a ~27 puntos de Pollo17; ese Rayo-Athletic, cuando tenga
+  fecha, sera OTRO plazo de caja (lo apunto para crear su turno en cuanto
+  salga en el calendario). Para el mie 21/10 nada cambia: premio de la J9
+  manana, control mio manana a las 21:15.
+
+- **19/10 20:47 (laboratorio de rivales).** Sin reset desde la manana: el
+  tablon no trae compras ni ventas. Nosotros: -432.317, 0 pujas; Rico con
+  oferta de 430.300 (caduca en 35 h) para la mejora desde el 20/10 00:00. En
+  marcha el experimento 'el once con nuestro dinero' (mejor once posible con
+  56,6 M, camino realista con el mercado de cada dia, Yamal en numeros):
+  Pollo no nos gana especulando sino con un once que vale 23,4 M mas (~10
+  puntos por jornada).
+
+- **19/10 tarde. CORRECCION DEL DUENO: la clasificacion 323-320 NO es la
+  real.** Solo cuenta las jornadas cerradas (hasta la J7). La J8 sigue
+  abierta por el Rayo-Athletic suspendido, y en ella Pollo17 hizo 74 y
+  nosotros 44: al cerrarla iremos SEGUNDOS, a unos 27 puntos (394-367),
+  mas lo que deje la J9 (nosotros 43 con Unai por jugar). El panel de la
+  carrera (`race`) dice LIDER por lo mismo: hay que corregirlo para que
+  cuente las jornadas abiertas como provisionales. Y el Rayo-Athletic,
+  cuando tenga fecha, sera otra ronda aparte (como el Levante-Athletic):
+  otro plazo de caja, con Unai Lopez en el once.
+
+- **19/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2338 a #2345).
+  Saldo -432.317, 0 comprometido, sin movimientos. Nada que cambiar: hoy a
+  las 21:00 el Getafe-Rayo cierra la J9; el premio, manana 12:00-17:00.
+
+- **19/10 10:47 (laboratorio de rivales).** Reset del 19/10: Luismi gano a
+  Carvajal por 4.256.000 (+33 %; hoy vale 3,34 M: -916k en papel) y a Danjuma
+  (valor + 1 euro), y queda en -12,14 M de caja; Pollo17 rompio su parada:
+  vendio a Sucic al Computer (+2,64 M tras 48 dias), gano a Tchouameni (a
+  valor, sin subir) y a Espi (+7,2 %), perdio a Carvajal pujando 3.777.000
+  (+18 %) y queda en -0,38 M. Cuatro en negativo antes del aplazado del
+  21/10 (Pollo, Luismi, Manzagool, nosotros). Distancia con Pollo: 49,27 M
+  (+0,8 M al dia); puntos 323-320 a nuestro favor con la J9 sin cerrar. Las
+  compras de la semana de los rivales pierden en papel (Pollo -1,30 M,
+  Luismi -1,14 M): su ventaja es lo que ya tienen, no lo que compran. El
+  informe de la manana del 18/10 puntuo a 3 de los 4 que se llevaron
+  (Carvajal sube +35, el mejor). Nada que construir (el esceptico lo
+  confirma). Caja del 21/10: Rico 430.300 -> -2.017; la racha (+250k,
+  ~21/10 00:10) la pone en positivo; si fallara, solo los puntos de
+  Olasagasti en ese partido.
+
+- **19/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2329 a #2338,
+  la de las 07:15 incluida). Saldo -432.317 a las 07:19, 0 comprometido,
+  nada comprado ni vendido en el reset del lunes. Sin cambios en el plan:
+  premio de la J9 el mar 20/10 (12:00-17:00), racha el mie 21/10 00:10,
+  plazo del aplazado de la J6 el mie 21/10 14:00. Control: mar 20/10 21:15.
+
+- **18/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2322 a #2329).
+  Saldo -432.317, 0 comprometido, sin compras ni ventas. El chat del dueno
+  encendio el informe de la manana (solo observa, no compra: no cuenta
+  como motor). Manana lunes 19/10 la rotacion ya puede pujar; con el
+  colchon en negativo no deberia: lo miro en la rafaga de las 21:15 del
+  lunes (cualquier puja viva el lunes noche se resuelve el martes 07:00,
+  antes del premio de la J9).
+
+- **18/10 20:47 (laboratorio de rivales).** Sin reset desde la manana: el
+  tablon solo trae la racha de Manzagool (+250k). Nosotros: -432.317, 0
+  pujas, la cartera y la rotacion en NADA con la J9 jugandose. La
+  publicacion de Rico se renovo (caduca en 40 h): seguira publicado en los
+  resets del 19 y el 20, y la mejora lo vende desde el 20/10 00:00. J9: 37
+  puntos con Jonny, Ibanez (Celta-Alaves) y Unai (lunes) por puntuar.
+
+- **18/10 tarde: EL INFORME DE LA MAÑANA (encargo del dueno, tras Carvajal).**
+  Laboratorio (1.981 jugador-dia de mercado, 22.520 de catalogo; informe en
+  `scratchpad/lab_informe/INFORME.md`): lo que sube a 7 dias lo dice el
+  cambio de precio de HOY (rho +0,63; las webs de mercado publican ese mismo
+  numero, r 0,97); suman algo una noticia de VUELTA en FF (72 h) y valer menos
+  de 1 M. Los puntos los dice la titularidad de FF por los puntos por partido
+  (rho +0,45); resta la prensa de BAJA/DUDA. Recomendaciones tipo 'ficha si
+  sale', jerarquia, racha: sin efecto medible o sin historia (peso 0, se
+  apuntan). Formulas: sube = -1 + 4,5*cambio% + 2*VUELTA + 3*(<1 M);
+  puntua = 0,5 + 0,85*titular*puntos por partido - 1*prensa. Construido
+  y revisado (12 arreglados), ENCENDIDO en modo observador (dca3790d;
+  ensayo #39129474545: 20 nuevos, Carvajal sube 35 / puntua 1,3). Fase 2,
+  tras 1-2 semanas medido: sube en la cartera y la rotacion, puntua en la
+  mejora, con su interruptor; ojo con las ventas de managers (Raba pide
+  x1,5 su valor: la nota mira el valor). Tambien: la jornada en vivo elegia
+  la J6 por el aplazado (27d86b0d).
 
 - **18/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2315 a #2322).
   Saldo -432.317, 0 comprometido; la puja vieja por Manu Sanchez sale

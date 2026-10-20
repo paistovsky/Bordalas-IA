@@ -100,6 +100,15 @@ MATCH_DURATION_HOURS = 2
 #     una jornada, no elegidos a ojo:
 #
 #     LIDER          Vas primero. No hay distancia que recuperar.
+#                    Y ADEMAS lo que queda por contar no te lo
+#                    puede quitar (ver EN_JUEGO, abajo).
+#
+#     EN_JUEGO       Vas primero en las jornadas cerradas, pero hay
+#                    rondas abiertas sin contar y la ventaja no
+#                    llega al margen de seguridad. No se dice
+#                    LIDER: el 19/10 se decia con 3 de ventaja y la
+#                    J8 abierta ya ponia a Pollo17 treinta por
+#                    delante.
 #
 #     COMODA         < 1 %. Una sola jornada buena lo cubre. La
 #                    distancia es ruido: la temporada decide.
@@ -122,6 +131,439 @@ URGENCY_THRESHOLDS = (
 )
 
 URGENCY_UNKNOWN = "SIN_DATOS"
+
+URGENCY_EN_JUEGO = "EN_JUEGO"
+
+
+# ============================================================
+# LAS RONDAS QUE TODAVIA NO CUENTAN  (19/10/2026)
+# ============================================================
+#
+# EL SINTOMA
+#
+#     El panel decia LIDER con 323 contra los 320 de Pollo17. El
+#     dueño, con la app en la mano: la J8 sigue abierta por el
+#     Rayo-Athletic suspendido, y en ella Pollo hizo 74 y
+#     nosotros 44. Al cerrarla vamos SEGUNDOS.
+#
+# LA CAUSA
+#
+#     `standings[].points` es la clasificacion de Biwenger, y
+#     Biwenger solo suma una ronda cuando la CIERRA. Una jornada
+#     con un partido aplazado se queda abierta semanas, y el
+#     partido aplazado se juega como ronda aparte (el
+#     Levante-Athletic de la J6, el 21/10). Todo lo que hay
+#     dentro de una ronda abierta es invisible para la
+#     clasificacion.
+#
+# LO QUE SE BUSCO, Y NO ESTA
+#
+#     La clasificacion PROVISIONAL —lo que lleva cada manager en
+#     las rondas abiertas— no la publica ninguna fuente que lea
+#     el ciclo:
+#
+#       - `rounds/league` -> `standings[].points`: solo cerradas
+#         (323 con la J8 y la J9 jugadas).
+#       - El tablon: `roundFinished` trae los puntos de cada
+#         manager, pero SOLO al cerrar la ronda.
+#       - El ledger de rivales: plantillas y caja, sin puntos de
+#         ronda.
+#       - El marcador: reconstruye los NUESTROS de cada jornada,
+#         no los de los rivales.
+#
+#     Reconstruir los de los rivales con sus onces seria
+#     inventar: `standings[].lineup` llego a ir cinco dias por
+#     detras del once vigente (`el_once_que_jugo`). Asi que no se
+#     publica ninguna clasificacion provisional: se publica que
+#     no la hay y por que.
+#
+# LO QUE SI SE SABE
+#
+#     QUE rondas estan abiertas. El tablon publica
+#     `roundStarted` al empezar cada ronda y `roundFinished` al
+#     cerrarla, con el mismo `round.id`. Empezada y sin cerrar =
+#     abierta: sus puntos no estan en la clasificacion.
+#
+#     Y CUANTO puede mover una ronda: lo mas que un rival nos ha
+#     sacado en una sola ronda cerrada, medido en el mismo
+#     tablon (35, Luismi en la J6 aplazada; el dueño vio 30 en la
+#     J8). Con un suelo para que una temporada corta no lo deje
+#     pequeño.
+#
+# LA REGLA
+#
+#     Vamos LIDER solo si la ventaja pasa de
+#
+#         margen por ronda x rondas abiertas
+#
+#     Si no llega, la etiqueta es EN_JUEGO. Si no se sabe que
+#     rondas hay abiertas (sin tablon), tampoco se dice LIDER: se
+#     dice SIN_DATOS. Ausencia de dato != dato.
+#
+# EL LADO DEL ERROR
+#
+#     Si Biwenger dejase una ronda empezada sin cerrar para
+#     siempre, aqui saldria abierta para siempre y el panel diria
+#     EN_JUEGO de mas. Es el lado bueno del error, y la lista va
+#     publicada con su fecha de inicio para que se vea: en el
+#     JSON (`empezo`) y en la frase que pinta el panel
+#     (`por_que`: "Jornada 6 desde el 03/09"), ver `_con_fecha`.
+
+# El suelo del margen, en puntos por ronda abierta. Por encima
+# de todo lo medido el 19/10/2026: el mayor hueco de un rival
+# sobre nosotros en una ronda cerrada era 35 (tablon) y el de la
+# J8 abierta, 30 (app del dueño). Si el tablon mide mas, manda
+# el tablon.
+SUELO_DEL_MARGEN_POR_RONDA = 40
+
+
+def _ronda_del_evento(evento) -> dict | None:
+    """El `round` de un evento del tablon, o None si no lo trae."""
+
+    if not isinstance(evento, dict):
+        return None
+
+    contenido = evento.get("content")
+
+    if not isinstance(contenido, dict):
+        return None
+
+    ronda = contenido.get("round")
+
+    if not isinstance(ronda, dict) or not safe_int(ronda.get("id")):
+        return None
+
+    return ronda
+
+
+def _fecha_iso(epoch) -> str | None:
+    segundos = safe_int(epoch)
+
+    if not segundos:
+        return None
+
+    try:
+        return datetime.fromtimestamp(
+            segundos,
+            tz=timezone.utc,
+        ).isoformat()
+
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
+def find_open_rounds(eventos) -> list | None:
+    """
+    Las rondas de Biwenger empezadas y sin cerrar, segun el tablon.
+
+    None si no se puede saber: sin tablon, o un tablon sin una
+    sola ronda empezada. Una lista vacia es otra cosa: se sabe,
+    y no hay ninguna abierta.
+    """
+
+    if not isinstance(eventos, list):
+        return None
+
+    empezadas = {}
+    cerradas = set()
+
+    for evento in eventos:
+
+        if not isinstance(evento, dict):
+            continue
+
+        tipo = evento.get("type")
+
+        if tipo not in ("roundStarted", "roundFinished"):
+            continue
+
+        ronda = _ronda_del_evento(evento)
+
+        if ronda is None:
+            continue
+
+        round_id = safe_int(ronda.get("id"))
+
+        if tipo == "roundFinished":
+            cerradas.add(round_id)
+            continue
+
+        fecha = safe_int(evento.get("date"))
+        previa = empezadas.get(round_id)
+
+        # El tablon reemite: se queda la PRIMERA vez que empezo.
+        if previa is not None and (
+            not fecha or (previa["_fecha"] and previa["_fecha"] <= fecha)
+        ):
+            continue
+
+        empezadas[round_id] = {
+            "_fecha": fecha,
+            "round_id": round_id,
+            "nombre": str(ronda.get("name") or f"Ronda {round_id}"),
+            "parte": safe_int(ronda.get("part")) or None,
+            "empezo": _fecha_iso(fecha),
+        }
+
+    if not empezadas:
+        return None
+
+    abiertas = sorted(
+        (
+            fila
+            for round_id, fila in empezadas.items()
+            if round_id not in cerradas
+        ),
+        key=lambda fila: (fila["_fecha"] or 0, fila["round_id"]),
+    )
+
+    return [
+        {k: v for k, v in fila.items() if not k.startswith("_")}
+        for fila in abiertas
+    ]
+
+
+def measure_round_margin(eventos, mi_user_id) -> dict:
+    """
+    Cuanto puede movernos una ronda: lo mas que un rival nos ha
+    sacado en UNA ronda cerrada, medido en el tablon, con suelo.
+
+    Se mide con los puntos que publica `roundFinished`, tal cual.
+    Si a alguien se le anularon por saldo negativo (Luismi en la
+    J6 aplazada: 64 publicados, 0 sumados), aqui cuentan los 64:
+    el margen es de seguridad y se mide por arriba.
+    """
+
+    mi_user_id = safe_int(mi_user_id)
+
+    medido = None
+    donde = None
+    vistas = set()
+
+    for evento in (eventos if isinstance(eventos, list) else []):
+
+        if not isinstance(evento, dict):
+            continue
+
+        if evento.get("type") != "roundFinished":
+            continue
+
+        ronda = _ronda_del_evento(evento)
+
+        if ronda is None:
+            continue
+
+        round_id = safe_int(ronda.get("id"))
+
+        # El tablon reemite la misma ronda: se mide una vez.
+        if round_id in vistas:
+            continue
+
+        resultados = (evento.get("content") or {}).get("results")
+
+        if not isinstance(resultados, list):
+            continue
+
+        nuestros = None
+        mejor = None
+        quien = None
+
+        for fila in resultados:
+
+            if not isinstance(fila, dict):
+                continue
+
+            puntos = fila.get("points")
+
+            if isinstance(puntos, bool) or not isinstance(
+                puntos, (int, float)
+            ):
+                continue
+
+            usuario = fila.get("user")
+            usuario = usuario if isinstance(usuario, dict) else {}
+
+            if mi_user_id and safe_int(usuario.get("id")) == mi_user_id:
+                nuestros = int(puntos)
+
+            elif mejor is None or puntos > mejor:
+                mejor = int(puntos)
+                quien = usuario.get("name")
+
+        if nuestros is None or mejor is None:
+            continue
+
+        vistas.add(round_id)
+
+        hueco = mejor - nuestros
+
+        if medido is None or hueco > medido:
+            medido = hueco
+            donde = {
+                "round_id": round_id,
+                "nombre": ronda.get("name"),
+                "rival": quien,
+                "suyos": mejor,
+                "nuestros": nuestros,
+            }
+
+    return {
+        "por_ronda": max(medido or 0, SUELO_DEL_MARGEN_POR_RONDA),
+        "medido": medido,
+        "medido_en": donde,
+        "rondas_medidas": len(vistas),
+        "suelo": SUELO_DEL_MARGEN_POR_RONDA,
+    }
+
+
+def _rondas(n: int) -> str:
+    return "1 ronda abierta" if n == 1 else f"{n} rondas abiertas"
+
+
+def _lista(nombres: list) -> str:
+    nombres = [str(n) for n in nombres if n]
+
+    if len(nombres) <= 1:
+        return "".join(nombres)
+
+    return ", ".join(nombres[:-1]) + " y " + nombres[-1]
+
+
+def _con_fecha(ronda: dict) -> str | None:
+    """
+    "Jornada 8 desde el 09/10": el nombre y el dia en que empezo,
+    en hora de Madrid.
+
+    LA FECHA SE VE (19/10/2026)
+
+        El lado del error de `find_open_rounds` es una ronda que
+        Biwenger no cierre nunca: saldria abierta para siempre.
+        La salvaguarda era que la lista lleva su fecha de inicio,
+        pero `empezo` solo estaba en el JSON y el panel pinta la
+        frase. Una "Jornada 6 desde el 03/09" en octubre se ve;
+        una "Jornada 6" a secas, no.
+    """
+
+    if not isinstance(ronda, dict):
+        return None
+
+    nombre = ronda.get("nombre")
+
+    if not nombre:
+        return None
+
+    try:
+        cuando = datetime.fromisoformat(str(ronda.get("empezo") or ""))
+
+    except ValueError:
+        return str(nombre)
+
+    try:
+        from zoneinfo import ZoneInfo
+
+        cuando = cuando.astimezone(ZoneInfo("Europe/Madrid"))
+
+    except Exception:                                    # noqa: BLE001
+        pass
+
+    return f"{nombre} desde el {cuando.strftime('%d/%m')}"
+
+
+def _por_que(datos: dict) -> str:
+    """Por que la etiqueta dice lo que dice, para el dueño."""
+
+    abiertas = datos.get("jornadas_abiertas")
+    lider = datos.get("is_leader")
+    ventaja = datos.get("points_ahead") or 0
+
+    if not datos.get("season_started", True):
+        return "Nadie ha puntuado todavia: no hay carrera que contar."
+
+    if abiertas is None:
+        return (
+            f"No se sabe que rondas estan abiertas "
+            f"({datos.get('jornadas_abiertas_motivo')}). La "
+            f"clasificacion de Biwenger solo suma las rondas "
+            f"cerradas, asi que "
+            + (
+                "no se nos da por lideres sin saber que falta por "
+                "contar."
+                if lider
+                else "la distancia puede no ser la de verdad."
+            )
+        )
+
+    if not abiertas:
+        return (
+            "Todas las rondas empezadas estan cerradas: la "
+            "clasificacion cuenta todo lo jugado."
+        )
+
+    margen = datos.get("margen_de_seguridad") or {}
+    total = margen.get("total") or 0
+    medido_en = margen.get("medido_en") or {}
+
+    frase = (
+        f"La clasificacion de Biwenger solo suma las rondas "
+        f"cerradas. Hay {_rondas(len(abiertas))} cuyos puntos "
+        f"todavia no cuentan: "
+        f"{_lista([_con_fecha(r) for r in abiertas])}. Ninguna "
+        f"fuente que leamos publica cuantos lleva cada manager en "
+        f"ellas: el tablon solo los da al cerrar."
+    )
+
+    # UN HUECO NEGATIVO NO ES UN HUECO (19/10/2026)
+    #
+    #     Si en todas las rondas cerradas hicimos mas que cada
+    #     rival, `medido` sale <= 0 y la frase decia "un rival nos
+    #     ha llegado a sacar -5". Nadie nos ha sacado nada: manda
+    #     el suelo, y se dice asi.
+    medido = margen.get("medido")
+
+    if medido is not None and medido > 0 and medido_en:
+        frase += (
+            f" En una sola ronda un rival nos ha llegado a sacar "
+            f"{medido}: {medido_en.get('rival')} en la "
+            f"{medido_en.get('nombre')}"
+        )
+
+    elif medido is not None:
+        frase += (
+            f" En las rondas cerradas ningun rival nos ha sacado "
+            f"puntos en una sola ronda, asi que manda el suelo de "
+            f"{margen.get('suelo')}"
+        )
+
+    else:
+        frase += " Sin rondas cerradas que medir"
+
+    frase += (
+        f"; se cuentan {margen.get('por_ronda')} por ronda abierta, "
+        f"{total} en total."
+    )
+
+    if lider and datos.get("lider_asegurado"):
+        frase += (
+            f" Con {ventaja} de ventaja no nos alcanzan ni "
+            f"perdiendo eso en todas: vamos primeros aunque cierren "
+            f"mal."
+        )
+
+    elif lider:
+        frase += (
+            f" Con {ventaja} de ventaja eso no asegura nada: no se "
+            f"nos da por lideres hasta que cierren o la ventaja pase "
+            f"de {total}."
+        )
+
+    else:
+        frase += (
+            f" La distancia de {datos.get('points_behind') or 0} "
+            f"puede moverse hasta {total} en cualquier sentido "
+            f"cuando cierren."
+        )
+
+    return frase
 
 
 def safe_int(value, default: int = 0) -> int:
@@ -261,16 +703,66 @@ def _headline(datos: dict) -> str:
             f"cero. Todavia no hay carrera que medir."
         )
 
-    if datos.get("is_leader"):
+    # PRIMEROS EN LO CERRADO NO ES IR PRIMEROS (19/10/2026)
+    #
+    #     `lider_asegurado` solo existe cuando se ha mirado el
+    #     tablon. Si vale False siendo `is_leader`, la ventaja es
+    #     de las rondas cerradas y lo abierto la puede tumbar: la
+    #     frase no dice "Vas 1º" a secas. Sin la clave (quien
+    #     llama sin tablon a `_headline`) se queda como estaba.
+    abiertas = datos.get("jornadas_abiertas")
+    en_el_aire = (
+        datos.get("is_leader")
+        and datos.get("lider_asegurado") is False
+    )
+
+    if en_el_aire and abiertas:
+        cabeza = (
+            f"Vas 1º solo en las rondas cerradas, con "
+            f"{datos.get('points_ahead') or 0} de ventaja: hay "
+            f"{_rondas(len(abiertas))} sin contar "
+            f"({_lista([r.get('nombre') for r in abiertas])}) y "
+            f"hasta que cierren no se sabe quien va primero"
+        )
+
+    elif en_el_aire:
+        # El motivo es el que ya calculo `build_race_state`: "sin
+        # el tablon" a secas mentia cuando el tablon SI llego pero
+        # sin una sola ronda empezada (19/10/2026).
+        cabeza = (
+            f"Vas 1º en las rondas cerradas, con "
+            f"{datos.get('points_ahead') or 0} de ventaja, pero no "
+            f"se sabe que rondas quedan por contar ("
+            f"{datos.get('jornadas_abiertas_motivo') or 'sin el tablon'}"
+            f")"
+        )
+
+    elif datos.get("is_leader"):
         cabeza = f"Vas 1º, con {datos.get('points_ahead') or 0} de ventaja"
 
     else:
         cabeza = f"Vas {puesto}º, a {distancia} puntos"
 
+    if abiertas and not en_el_aire:
+        cabeza += (
+            f" (solo rondas cerradas; {_rondas(len(abiertas))} sin "
+            f"contar)"
+        )
+
     restantes = datos.get("matchdays_remaining")
     ritmo = datos.get("required_pace")
 
-    if restantes is None:
+    if en_el_aire:
+        # "Necesitas sacarle 0,00 por jornada" al lado de "no se
+        # sabe quien va primero" se contradice. Se dice lo que
+        # queda y nada mas.
+        medio = (
+            f"; quedan {restantes} jornadas"
+            if restantes
+            else ""
+        )
+
+    elif restantes is None:
         medio = ", jornadas restantes desconocidas (sin calendario)"
 
     elif restantes <= 0:
@@ -343,9 +835,15 @@ def build_race_state(
     calendar: dict | None = None,
     calendar_path: Path | None = None,
     now: datetime | None = None,
+    eventos: list | None = None,
 ) -> dict:
     """
     El marcador de la temporada. Nunca lanza.
+
+    `eventos` es el tablon (los eventos normalizados de
+    `collect_board_history`). De ahi salen las rondas abiertas y
+    el margen de seguridad. Sin el no se sabe que falta por
+    contar, y no se dice LIDER.
 
     FASE OBSERVADOR: ningun motor lee esto.
     """
@@ -597,11 +1095,77 @@ def build_race_state(
             ),
         }
 
-        datos["urgency"] = (
+        # ------------------------------------------------------
+        # LO QUE LA CLASIFICACION TODAVIA NO CUENTA (19/10/2026)
+        # ------------------------------------------------------
+        #
+        #     Los puntos de arriba son los de Biwenger: solo
+        #     rondas cerradas. Lo abierto no se suma porque nadie
+        #     lo publica por manager; se dice que rondas son, cuanto
+        #     pueden mover, y si con eso la ventaja aguanta.
+        abiertas = find_open_rounds(eventos)
+
+        datos["clasificacion_cuenta"] = "SOLO_RONDAS_CERRADAS"
+        datos["jornadas_abiertas"] = abiertas
+        datos["jornadas_abiertas_motivo"] = (
+            None
+            if abiertas is not None
+            else (
+                "no se paso el tablon"
+                if not isinstance(eventos, list)
+                else "el tablon no trae ninguna ronda empezada"
+            )
+        )
+
+        datos["clasificacion_provisional"] = None
+        datos["clasificacion_provisional_motivo"] = (
+            "Ninguna fuente que lea el ciclo publica los puntos de "
+            "cada manager en las rondas abiertas: la clasificacion "
+            "de Biwenger solo suma las cerradas, el tablon da los "
+            "resultados al cerrar y el marcador solo reconstruye "
+            "los nuestros. No se inventan."
+        )
+
+        if abiertas is None:
+            datos["margen_de_seguridad"] = None
+
+        else:
+            margen = measure_round_margin(
+                eventos,
+                nosotros.get("user_id"),
+            )
+            margen["rondas_abiertas"] = len(abiertas)
+            margen["total"] = margen["por_ronda"] * len(abiertas)
+            datos["margen_de_seguridad"] = margen
+
+        datos["lider_asegurado"] = bool(
+            somos_lider
+            and abiertas is not None
+            and (
+                not abiertas
+                or (ventaja or 0)
+                > datos["margen_de_seguridad"]["total"]
+            )
+        )
+
+        urgencia = (
             _urgency(exigencia, distancia, restantes)
             if temporada_empezada
             else URGENCY_UNKNOWN
         )
+
+        # LIDER solo si lo abierto no nos lo puede quitar. Si hay
+        # rondas abiertas y la ventaja no llega, EN_JUEGO; si no
+        # se sabe que hay abierto, SIN_DATOS.
+        if urgencia == "LIDER" and not datos["lider_asegurado"]:
+
+            if abiertas is None:
+                urgencia = URGENCY_UNKNOWN
+
+            elif abiertas:
+                urgencia = URGENCY_EN_JUEGO
+
+        datos["urgency"] = urgencia
         datos["urgency_scale"] = [
             etiqueta for _, etiqueta in URGENCY_THRESHOLDS
         ] + ["FUERA_DE_ALCANCE"]
@@ -632,6 +1196,7 @@ def build_race_state(
         ]
 
         datos["headline"] = _headline(datos)
+        datos["por_que"] = _por_que(datos)
 
         return datos
 

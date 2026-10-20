@@ -290,6 +290,233 @@ def test_con_un_solo_sujeto_si_se_clasifica() -> None:
     assert item["ambiguous_subject"] is False
 
 
+# LA FRASE DE VERDAD (19/10/2026), tal cual la sirvio Mundo
+# Deportivo -con el espacio antes de la coma-. Le costo 1,0 xP a
+# Yamal en el informe de la mañana: el lesionado es Nuno Mendes. Que
+# ese informe ya no le resta lo comprueba su propia guardia
+# (`test_la_baja_de_otro_no_resta`), que es la que puede importarlo.
+NUNO_MENDES = (
+    "Nuno Mendes , su antídoto para frenar a un Lamine Yamal en un "
+    "momento de juego magnífico, está lesionado y Digne, su "
+    "alternativa natural, viene de firmar un partido espeso y poco "
+    "resolutivo frente al Estrasburgo (1-3), hasta el punto que el "
+    "técnico asturiano se vio obligado a sustituirle para enmendar "
+    "su apuesta por los suplentes."
+)
+
+# Y una BAJA de verdad con otros nombres propios mas cerca de la
+# palabra que el lesionado: el Betis y La Cartuja no son personas.
+ERIC_GARCIA = (
+    "Eric Garcia , una vez conocido y asumido el alcance de la "
+    "lesión sufrida ante el Betis en La Cartuja, publicó un sentido "
+    "mensaje en las redes sociales, dolido por no poder ayudar al "
+    "Barça en dos partidos tan importantes como los que disputará "
+    "este semana ante PSG y Real Madrid ."
+)
+
+
+def _catalogo_con_equipos(*jugadores, equipos=()) -> dict:
+    catalogo = _catalogo(*jugadores)
+
+    catalogo["data"]["teams"] = {
+        str(i): {"id": i, "name": nombre}
+        for i, nombre in enumerate(equipos, start=1)
+    }
+
+    return catalogo
+
+
+def test_la_baja_es_de_quien_la_tiene_mas_cerca() -> None:
+    """
+    Nuno Mendes y Digne no estan en el catalogo, asi que la frase
+    tiene un solo activo -Yamal- y el candado de los dos sujetos
+    no salta. "lesionado" esta a una palabra de Digne y a siete de
+    Yamal: no es suya.
+    """
+
+    catalogo = _catalogo_con_equipos(
+        (26271, "Yamal", 25_470_000),
+        (20, "Eric García", 5_540_000),
+        (41386, "Mourinho", 3_770_000),
+        equipos=("Barcelona", "Betis", "Real Madrid"),
+    )
+
+    informe = press.build_press_report(
+        catalogo,
+        xml_by_feed={
+            "MUNDO_DEPORTIVO": _feed(
+                ("El PSG llega tocado", NUNO_MENDES),
+                # El titular no nombra a nadie: con nombre, el item
+                # seria el del titular (uno por jugador y noticia).
+                ("Un mensaje en las redes", ERIC_GARCIA),
+                ("La primera reacción de Mourinho a la sanción de "
+                 "Vinicius", ""),
+            )
+        },
+        now=_recien_publicado(),
+    )
+
+    por_nombre: dict = {}
+
+    for item in _items(informe):
+        por_nombre.setdefault(item["player_name"], []).append(item)
+
+    # El lesionado nombrado solo por el apellido, al principio y con
+    # una coma detras, tambien es "otro nombre": Dembele no esta en el
+    # catalogo y la baja no es de Yamal.
+    for frase in (
+        "Dembélé, lesionado, no podrá medirse a Yamal en la Champions",
+        "Dembélé sufre una lesión y no podrá medirse a Yamal en la "
+        "Champions",
+    ):
+        assert press.classify(
+            frase, "Yamal", press.palabras_de_equipos(catalogo)
+        )[0] not in (press.BAJA, press.DUDA), frase
+
+    # Pero la primera palabra que ES la de la regla no es un nombre.
+    assert press.classify(
+        "Lesionado, Yamal se pierde el partido", "Yamal",
+        press.palabras_de_equipos(catalogo),
+    )[0] == press.BAJA
+
+    # Yamal: ni BAJA ni DUDA, y el item dice de quien era.
+    yamal = por_nombre["Yamal"]
+
+    assert [i["kind"] for i in yamal] == [press.ALINEACION], yamal
+    assert "Digne" in (yamal[0]["keyword_reason"] or ""), yamal
+    assert "lesionado" in yamal[0]["keyword_reason"], yamal
+    assert yamal[0]["ambiguous_subject"] is False
+
+    # La baja verdadera sigue siendo baja: Betis y La Cartuja no son
+    # personas, y Eric Garcia es el unico nombre que queda.
+    eric = por_nombre["Eric García"]
+
+    assert [i["kind"] for i in eric] == [press.BAJA], eric
+    assert eric[0]["keyword_reason"] is None
+
+    # La sancion es de Vinicius (fuera del catalogo), no de Mourinho.
+    assert [i["kind"] for i in por_nombre["Mourinho"]] == [
+        press.MENCION
+    ], por_nombre["Mourinho"]
+
+    # Los que leen la clase: al libro de acierto no va Yamal.
+    adaptado = press.as_accuracy_report(informe)
+
+    assert set(adaptado["players"]) == {"20"}, adaptado["players"]
+
+    # Y la pantalla: Yamal no sube como baja.
+    bloque = press.build_press_block(informe)
+
+    assert [
+        (f["player_name"], f["kind"])
+        for f in bloque["items"]
+        if f["kind"] in (press.BAJA, press.DUDA)
+    ] == [("Eric García", press.BAJA)], bloque["items"]
+
+
+def test_la_proximidad_no_quita_lo_que_es_suyo() -> None:
+    """
+    Los casos que tienen que seguir igual: el empate cuenta, basta
+    con UNA palabra de la regla que sea suya, la primera palabra de
+    la frase no es un nombre, y si la baja es de otro se sigue con
+    las reglas de abajo.
+    """
+
+    clase = lambda frase, sujeto: press.classify(       # noqa: E731
+        frase, sujeto, press.palabras_de_equipos(None)
+    )[0]
+
+    # Empate (tres palabras a cada lado): suya.
+    assert clase(
+        "Preocupación en el Athletic por la lesión sufrida por "
+        "Guruzeta el sábado en Mestalla",
+        "Guruzeta",
+    ) == press.BAJA
+
+    # "bajas" esta mas cerca de Anoeta... que no es nadie; y
+    # "operado", de Aubameyang.
+    assert clase(
+        "El Deportivo de A Coruña llegará a Anoeta con bajas "
+        "sensibles, siendo la de Aubameyang la más dura al tener que "
+        "ser operado del menisco.",
+        "Aubameyang",
+    ) == press.BAJA
+
+    # "Alarma" abre la frase: no es un nombre.
+    assert clase("Alarma con la lesión de Guruzeta", "Guruzeta") == press.BAJA
+
+    # La baja es de Vivian (fuera del catalogo): a Canales no se le
+    # resta... ni se le suma por una frase que habla de una baja.
+    kind, direction = press.classify(
+        "Canales regresa y el central cubre la baja de Vivian",
+        "Canales", press.palabras_de_equipos(None),
+    )
+    assert kind not in (press.BAJA, press.DUDA), kind
+    assert direction != press.UP, (kind, direction)
+
+    # UNA BAJA APARTADA NO SE DA LA VUELTA. Con "Turquia" en la lista
+    # es DUDA, como antes; y con un sitio que no esta en ella (que
+    # gana a "molestias" por cercania), nunca VUELVE/UP: el "regresa"
+    # va pegado al sujeto.
+    for frase in (
+        "Arda Güler regresa de Turquía con molestias",
+        "Mikautadze vuelve de Georgia con molestias en el tobillo",
+        "Mbappé vuelve de Clairefontaine con molestias",
+        "Pedri, que vuelve a tener problemas en el sóleo, es duda para "
+        "el Clásico",
+    ):
+        sujeto = frase.split(",")[0].split(" regresa")[0].split(" vuelve")[0]
+        assert press.classify(
+            frase, sujeto, press.palabras_de_equipos(None)
+        ) == (press.DUDA, press.DOWN), (frase, sujeto)
+
+    kind, direction = press.classify(
+        "Arda Güler regresa de Xanadú con molestias",
+        "Arda Güler", press.palabras_de_equipos(None),
+    )
+    assert (kind, direction) == (press.MENCION, press.FLAT), (kind, direction)
+
+    # Lo que no es una persona y estaba mas cerca de la palabra que el
+    # lesionado: el Clasico, San Mames.
+    assert clase(
+        "Kubo, con un esguince de tobillo, es duda para el Clásico", "Kubo"
+    ) == press.DUDA
+    assert clase(
+        "Sancet se lesiona en San Mamés y será baja", "Sancet"
+    ) == press.BAJA
+    for frase, sujeto, esperada in (
+        ("Oyarzabal estará tres semanas de baja tras lesionarse en "
+         "Zubieta", "Oyarzabal", press.BAJA),
+        ("Militão, que se retiró con molestias ante el Olympiacos, es "
+         "duda", "Militão", press.DUDA),
+        ("Fermín se lesiona con España ante Georgia y es baja para el "
+         "Clásico", "Fermín", press.BAJA),
+    ):
+        assert clase(frase, sujeto) == esperada, (frase, sujeto)
+
+    # Sin sujeto, lo de siempre.
+    assert press.classify(NUNO_MENDES) == (press.BAJA, press.DOWN)
+
+    # Lo que se aparta de un nombre propio: equipos, estadios,
+    # articulos y el "Leer" de Mundo Deportivo.
+    nombres = [
+        n for _, _, n in press.nombres_propios(
+            "El Betis-Barça en La Cartuja deja a Nuno Mendes y "
+            "Frenkie de Jong fuera Leer",
+            press.palabras_de_equipos(
+                {"data": {"teams": {"1": {"name": "Real Betis"}}}}
+            ),
+        )
+    ]
+
+    assert nombres == ["Nuno Mendes", "Frenkie de Jong"], nombres
+
+    # Nunca lanza.
+    for basura in (None, "", 5, "....."):
+        assert press.nombres_propios(basura) == []
+        assert press.de_quien_es(basura, "baja", "Yamal")["suya"] is True
+
+
 def test_tocado_no_es_una_lesion() -> None:
     """
     "no podemos amedrentarnos porque nos hayan TOCADO el Atletico"
@@ -740,6 +967,8 @@ TESTS = [
     test_lo_que_no_empareja_va_a_unmatched_con_su_motivo,
     test_una_frase_con_dos_nombres_no_se_clasifica,
     test_con_un_solo_sujeto_si_se_clasifica,
+    test_la_baja_es_de_quien_la_tiene_mas_cerca,
+    test_la_proximidad_no_quita_lo_que_es_suyo,
     test_tocado_no_es_una_lesion,
     test_nombrar_a_alguien_no_es_una_señal,
     test_la_confianza_es_siempre_nula_y_dice_por_que,

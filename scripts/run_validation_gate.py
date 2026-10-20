@@ -240,6 +240,13 @@ TESTS = [
     # noticias de FF sin romper nada si la red falla. Solo observa y
     # solo escribe su libro. Apagado.
     "src.analysis.test_el_informe_de_la_manana_v1",
+    # El aplazado no frena la compra (20/10): ante una ronda de aplazados
+    # a menos de 40 h, la orden y la mejora pujan si la puja se resuelve
+    # antes, la regla de siempre se cumple hasta la ronda entera y la
+    # caja del aplazado (pujas enteras, menos lo que el que sale ya tiene
+    # ofrecido y vivo) queda en >= 0; el cierre cuenta ese mismo cobro.
+    # Apagado, byte a byte lo de antes.
+    "src.analysis.test_el_aplazado_no_frena_v1",
 
     # El dia despues de las seis compras del 21/09: cerrar la
     # reventa sin cerrar la compra para quedarse, y que el tope
@@ -323,6 +330,10 @@ TESTS = [
     "src.analysis.test_tope_por_operacion_v1",
     "src.analysis.test_jornada_en_la_valoracion_v1",
     "src.analysis.test_estado_de_carrera_v1",
+    # Primeros en lo cerrado no es ir primeros: con rondas
+    # abiertas sin contar y poca ventaja, la carrera no dice
+    # LIDER (19/10/2026, la J8 abierta).
+    "src.analysis.test_las_rondas_abiertas_v1",
     "src.analysis.test_valor_temporada_sombra_v1",
     "src.analysis.test_ampliar_plantilla_sombra_v1",
     "src.analysis.test_dashboard_orden_de_variables_v1",
@@ -571,6 +582,12 @@ TESTS = [
     # Y ningun once en papel alinea a un lesionado, un sancionado,
     # un descartado o uno de estado desconocido.
     "src.analysis.test_el_once_no_alinea_lesionados_v1",
+
+    # La titularidad de FF de todos los que ya lee el tablero (no solo
+    # sus 141 objetivos) y el estado de Biwenger de la liga, una linea
+    # al dia en un libro de git, para validar el xP (laboratorio del
+    # 19/10/2026). No decide nada.
+    "src.analysis.test_la_titularidad_del_dia_v1",
 ]
 
 

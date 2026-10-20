@@ -12,7 +12,15 @@
     }
   ],
   "vender_si_ficha": {
-    "jugadores": []
+    "si_esta": 20102,
+    "por_que": "20/10 18:40, el gestor: si llega Kubo (puja del dueno en la app, subasta del reset del mie 21/10 07:00), se vende a Luismi Cruz con su oferta viva del Computer (2.958.000, hasta el jue ~07:00) en la vuelta siguiente, para tener caja >= 0 antes del aplazado (mie 20:00). Kubo entra en el once de la J10 (3-5-2). Si Kubo no llega, esta linea no hace nada y se borra el mie a las 08:22.",
+    "jugadores": [
+      {
+        "player_id": 25777,
+        "nombre": "Luismi Cruz",
+        "suelo": 2700000
+      }
+    ]
   },
   "proteger": [
     {
@@ -59,11 +67,6 @@
       "player_id": 30493,
       "nombre": "Sergi Cardona",
       "por_que": "17/10, el gestor: ganado en el reset del 17/10 (919.000, puja de la mejora del once del 16/10 a las 21:10; por error se apunto como del dueno). Titular del once de la J10 en lugar de Diego Rico (70 % frente a 30 %); la J9 se juega con el once del viernes. No se vende para liquidez."
-    },
-    {
-      "player_id": 5678,
-      "nombre": "Diego Rico",
-      "por_que": "17/10, el gestor: esta en el once de la J9, que quedo cerrado al empezar la jornada (en esta liga no se admiten cambios una vez empezada). No se vende hasta que acabe la J9 (lunes 19/10); despues, es la venta que devuelve la caja a positivo."
     }
   ],
   "viajes": {

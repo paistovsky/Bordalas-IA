@@ -34,6 +34,11 @@ LA ROTACION (17/10/2026). Guardias de `src/actions/la_rotacion.py`
        otro libro; la hora de la foto es de Madrid y perdida es despues
        del reset; el estado se rehace del registro; el reroll, la mejora
        y el cierre ven las parejas abiertas.
+   10. El aplazado solo frena a los suyos (19/10/2026): un titular del
+       Levante antes del Levante-Athletic sigue frenado; uno del Espanyol
+       no (su venta cuenta y se vende); sin saber el club o los equipos de
+       la ronda, frena a todos. La caja no cambia: una venta que no se
+       cobra antes del aplazado no paga una puja.
 
 Todo con datos de mentira: la hora se pasa siempre, el calendario es un
 dict de este fichero, la orden y los libros se escriben en una carpeta
@@ -949,6 +954,144 @@ def test_el_aplazado_del_21_de_19_a_21():
         _entorno(**antes)
 
 
+# EL APLAZADO SOLO FRENA A LOS SUYOS (19/10/2026). El mismo calendario,
+# con los nombres de verdad del Levante-Athletic del 21/10 (los de
+# MARCA_CALENDAR), y los clubes de Biwenger en el catalogo.
+CAL_REAL = {"matchdays": [
+    CAL["matchdays"][0],
+    {"matchday": 6, "matches": [
+        {"matchday": 6, "home": "Levante UD", "away": "Athletic Club",
+         "kickoff": "2026-10-21T20:00:00+02:00"}]},
+    CAL["matchdays"][2],
+]}
+EQUIPOS = {1: "Levante", 2: "Athletic", 3: "Espanyol"}
+
+
+def _de(equipo, *pids):
+    """FICHAS con esos jugadores en ese club (`teamID`)."""
+    return {**FICHAS, **{p: {**FICHAS[p], "teamID": equipo} for p in pids}}
+
+
+def test_el_aplazado_solo_frena_a_los_suyos():
+    # El reloj sabe quien juega la ronda de aplazados.
+    lunes = el_reloj(LUNES, CAL_REAL, True)
+    assert lunes["ronda_parcial"] and lunes["equipos_parcial"] == ["athletic", "levante"], lunes
+    assert el_reloj(ANTES_DE_J9, CAL_REAL, True)["equipos_parcial"] is None
+    # Un partido sin nombres: no se sabe, None (frena a todos).
+    sin_nombres = {"matchdays": [CAL["matchdays"][0], {"matchday": 6, "matches": [
+        {"matchday": 6, "home": "Levante UD", "away": "",
+         "kickoff": "2026-10-21T20:00:00+02:00"}]}, CAL["matchdays"][2]]}
+    assert el_reloj(LUNES, sin_nombres, True)["equipos_parcial"] is None
+
+    # Lunes 19/10, 300 mil de caja. El 5 (titular que cae) del LEVANTE:
+    # frenado como siempre, su venta no cuenta y solo pasa el 17 por el 109.
+    base = dict(saldo=300_000, pujas_vivas={}, mercado=LIBRE, reloj=lunes,
+                once_de_la_foto=ONCE, equipos=EQUIPOS)
+    d = _d(**base, fichas=_de(1, 5))
+    assert _pujas(d) == [(17, 109, 1_049_900)], _pujas(d)
+    # Del ESPANYOL: no juega el aplazado, su venta (1,9 M, se cobra antes)
+    # cuenta y el 5 por el 101 pasa: 300.000 - 1.569.900 + 1.900.000 =
+    # 630.100; y despues el 17 por el 109: 340.200.
+    d = _d(**base, fichas=_de(3, 5))
+    assert _pujas(d) == [(5, 101, 1_569_900), (17, 109, 1_049_900)], _pujas(d)
+    assert d["caja"]["despues"] == 340_200, d["caja"]
+    assert d["parejas_nuevas"][0]["se_cobra_antes"] is True
+    # Sin saber de que club es (sin `equipos` o sin `teamID`): frena.
+    d = _d(**{**base, "equipos": None}, fichas=_de(3, 5))
+    assert _pujas(d) == [(17, 109, 1_049_900)], _pujas(d)
+    assert _pujas(_d(**base)) == [(17, 109, 1_049_900)]
+
+    # Martes 20/10, la pareja 5>101 ganada y oferta de 1,99 M. Del
+    # Levante: no se vende y su cobro no cuenta.
+    martes = el_reloj(MARTES, CAL_REAL, True)
+    ganada = dict(saldo=-432_317, pujas_vivas={}, mercado=LIBRE,
+                  plantilla=set(PLANTILLA) | {101}, parejas=[_pareja(5, 101, GANADA)],
+                  en_venta={5}, ofertas_del_computer={5: {"offer_id": 905, "amount": 1_990_000}},
+                  once=ONCE_442, reloj=martes, equipos=EQUIPOS)
+    d = _d(**ganada, fichas=_de(1, 5, 101))
+    assert d["sin_cobro"] == {5: "TITULAR_ANTES_DE_UNA_RONDA_PARCIAL"}, d["sin_cobro"]
+    assert _acciones(d, "ACEPTAR_OFERTA_DEL_COMPUTER") == [] and _pujas(d) == [], d
+    # Del Espanyol: el once con el 101 en su sitio y se acepta. Con ese
+    # 1,99 M la caja pasa a +1.557.683 y cabe el 17 por el 109, que solo
+    # sale si la aceptacion entra (`cuenta_con_lo_aceptado`).
+    d = _d(**ganada, fichas=_de(3, 5, 101))
+    assert _acciones(d)[:2] == [("CAMBIAR_EL_ONCE", None),
+                                ("ACEPTAR_OFERTA_DEL_COMPUTER", 5)], d["acciones"]
+    assert d["sin_cobro"] == {} and d["caja"]["cobros_esperados"] == 1_990_000, d["caja"]
+    assert [(a["player_id"], a["cuenta_con_lo_aceptado"]) for a in d["acciones"]
+            if a["accion"] == "PUJAR"] == [(109, [5])], d["acciones"]
+
+    # LA CAJA NO CAMBIA. El martes la venta del 5 ya no se cobra antes del
+    # aplazado (dos resets: el del miercoles no llega a cobrar), asi que,
+    # aunque sea del Espanyol, el 5 por el 101 no pasa en rojo ni con 300
+    # mil: el aplazado empezaria en negativo.
+    for saldo in (-432_317, 300_000):
+        d = _d(saldo=saldo, pujas_vivas={}, mercado=LIBRE, reloj=martes,
+               once_de_la_foto=ONCE, equipos=EQUIPOS, fichas=_de(3, 5))
+        assert d["por_que_no_puja"] is None and (5, 101, 1_569_900) not in _pujas(d), d
+        assert d["caja"]["despues"] >= 0 or d["caja"]["despues"] >= d["caja"]["antes"], d["caja"]
+
+    # DOS RONDAS DE APLAZADOS SEGUIDAS. Un Rayo-Getafe de la J8 el jueves
+    # 22/10 (o esa misma tarde, a la misma hora o despues del
+    # Levante-Athletic) es otra ronda de aplazados antes de la J10: el
+    # titular del Rayo tambien se frena, aunque no juegue la primera.
+    equipos_rayo = {**EQUIPOS, 4: "Rayo Vallecano"}
+    for hora in ("2026-10-22T20:00:00+02:00", "2026-10-21T20:00:00+02:00",
+                 "2026-10-21T21:00:00+02:00", "2026-10-21T19:00:00+02:00"):
+        cal = json.loads(json.dumps(CAL_REAL))
+        cal["matchdays"].insert(2, {"matchday": 8, "matches": [
+            {"matchday": 8, "home": "Rayo Vallecano", "away": "Getafe CF", "kickoff": hora}]})
+        martes_j8 = el_reloj(MARTES, cal, True)
+        assert martes_j8["equipos_parcial"] == ["athletic", "getafe", "levante", "rayo"], (
+            hora, martes_j8)
+        for club in (4, 1):
+            d = _d(**{**ganada, "reloj": martes_j8, "equipos": equipos_rayo},
+                   fichas=_de(club, 5, 101))
+            assert _acciones(d) == [("NADA", 5)], (hora, club, d["acciones"])
+            assert d["sin_cobro"] == {5: "TITULAR_ANTES_DE_UNA_RONDA_PARCIAL"}, (hora, club)
+        # Y el del Espanyol, que no juega ninguna, se sigue vendiendo.
+        d = _d(**{**ganada, "reloj": martes_j8, "equipos": equipos_rayo},
+               fichas=_de(3, 5, 101))
+        assert d["sin_cobro"] == {} and ("ACEPTAR_OFERTA_DEL_COMPUTER", 5) in _acciones(d), (
+            hora, d["acciones"])
+        # El lunes la venta del del Rayo no paga el 5 por el 101.
+        lunes_j8 = el_reloj(LUNES, cal, True)
+        d = _d(**{**base, "reloj": lunes_j8, "equipos": equipos_rayo}, fichas=_de(4, 5))
+        assert _pujas(d) == [(17, 109, 1_049_900)], (hora, _pujas(d))
+        assert d["caja"]["despues"] == 10_100, d["caja"]
+    # Una de ellas sin nombres: no se sabe, None (frena a todos).
+    cal = json.loads(json.dumps(CAL_REAL))
+    cal["matchdays"].insert(2, {"matchday": 8, "matches": [
+        {"matchday": 8, "home": "Rayo Vallecano", "away": "",
+         "kickoff": "2026-10-22T20:00:00+02:00"}]})
+    assert el_reloj(MARTES, cal, True)["equipos_parcial"] is None
+    # Con la J10 (entera) por medio, la de despues ya no cuenta.
+    cal = json.loads(json.dumps(CAL_REAL))
+    cal["matchdays"].append({"matchday": 8, "matches": [
+        {"matchday": 8, "home": "Rayo Vallecano", "away": "Getafe CF",
+         "kickoff": "2026-10-28T20:00:00+01:00"}]})
+    assert el_reloj(MARTES, cal, True)["equipos_parcial"] == ["athletic", "levante"]
+
+    # De punta a punta: el club sale del catalogo de la foto (`teams`).
+    antes = _entorno(**ENCENDIDO)
+    try:
+        for club, pujados in ((3, [101, 109]), (1, [109])):
+            with tempfile.TemporaryDirectory() as carpeta:
+                _limpiar()
+                foto = _la_foto(saldo=1_400_000, cuando="2026-10-19T07:10:00")
+                foto["catalog"] = {"data": {
+                    "players": {str(p): f for p, f in _de(club, 5).items()},
+                    "teams": {str(k): {"id": k, "name": v} for k, v in EQUIPOS.items()}}}
+                r = _correr(carpeta, ahora=LUNES, calendario=CAL_REAL,
+                            historico=_historico(date(2026, 10, 19)), cycle={"snapshot": foto})
+                assert r["motivo"] == "EJECUTADA", r
+                assert [c[1]["player_id"] for c in _Escritor.llamadas] == pujados, (
+                    club, _Escritor.llamadas)
+                assert r["reloj"]["equipos_parcial"] == ["athletic", "levante"], r["reloj"]
+    finally:
+        _entorno(**antes)
+
+
 def test_si_la_aceptacion_no_entra_no_se_puja_con_su_dinero():
     oferta = {5: {"offer_id": 905, "amount": 1_990_000}}
     base = dict(pujas_vivas={}, mercado=LIBRE, plantilla=set(PLANTILLA) | {101},
@@ -1365,6 +1508,7 @@ TESTS = [
     test_nunca_lanza_con_basura,
     test_la_caja_no_cuenta_una_venta_frenada,
     test_el_aplazado_del_21_de_19_a_21,
+    test_el_aplazado_solo_frena_a_los_suyos,
     test_si_la_aceptacion_no_entra_no_se_puja_con_su_dinero,
     test_la_ventana_es_la_ronda_y_no_su_hora,
     test_nunca_en_la_franja_de_silencio,
