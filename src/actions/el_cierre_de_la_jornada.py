@@ -120,6 +120,23 @@ LA REGLA
        ventana y tambien si algo falla (activo False y el error), para
        que nadie lea uno viejo.
 
+EL CREDITO DEL APLAZADO (20/10/2026,
+`BORDALAS_EL_APLAZADO_NO_FRENA_LA_COMPRA`, nace APAGADO)
+
+    Con el interruptor, la orden y la mejora pueden pujar antes de un
+    aplazado si la puja se resuelve antes de el y lo que cobra el que
+    sale de su cambio la paga (`la_orden_del_gestor`, EL APLAZADO NO
+    FRENA LA COMPRA). El cierre contaba esa puja entera en el plazo del
+    aplazado y, a menos de 40 h, retiraba las pujas de la ronda y los
+    chollos y vendia al banquillo por un deficit que esa oferta ya
+    cubre. Ahora, si el plazo es un aplazado y la proxima puja aun se
+    resuelve antes de el, ese cobro (`el_credito_del_aplazado`, la misma
+    cuenta que dejo pujar) cubre el deficit antes que retirar o vender
+    (motivo `EN_POSITIVO_CON_EL_COBRO_DEL_APLAZADO`). La caja publicada y
+    la adopcion siguen SIN el: solo vale lo cobrado. Pasado el ultimo
+    reset antes del aplazado, el credito es 0 y toda puja viva cuenta
+    entera, como siempre.
+
 LOS `conservar`
 
     El modelo del dueño: «se vende a los que falten para estar en
@@ -560,7 +577,7 @@ def decidir(
     pujas=None, vendidos=None, ofertas=None, en_venta=frozenset(),
     especulativas=frozenset(), intocables=INTOCABLES, protegidos=frozenset(),
     no_vender=frozenset(), se_van=frozenset(), once_escrito=frozenset(),
-    no_retirar=frozenset(), inventario=frozenset(), cartera=False,
+    no_retirar=frozenset(), inventario=frozenset(), cartera=False, credito=0,
 ) -> dict:
     """
     Que hace el cierre en esta vuelta. Pura: ni red, ni disco, ni reloj.
@@ -601,6 +618,13 @@ def decidir(
                        vende antes de la jornada lo que sube; en rojo, lo
                        del `inventario` no entra en el once y se puede
                        vender como cualquier suplente
+        credito        EL APLAZADO NO FRENA LA COMPRA (20/10/2026, de
+                       `el_credito_del_aplazado`): lo que los cambios de
+                       nuestras pujas vivas cobran ANTES del aplazado que
+                       es el plazo (la misma cuenta que dejo pujar). Cubre
+                       el deficit antes de retirar pujas o vender a nadie;
+                       la caja (y la adopcion) siguen sin el. 0: lo de
+                       siempre
     """
 
     salida = {
@@ -675,16 +699,25 @@ def decidir(
         caja = la_caja(saldo, pujas, vendidos)
         salida["caja"] = caja
 
+        # EL CREDITO DEL APLAZADO (20/10/2026): lo que el que sale de un
+        # cambio pujado cobra antes del aplazado. Sin el, el cierre contaba
+        # la puja entera y, a menos de 40 h, retiraba las de la ronda y los
+        # chollos y vendia al banquillo por un deficit que esa oferta ya
+        # cubre. Solo cubre el deficit: la caja y la adopcion, sin el.
+        credito = max(0, _int(credito, 0) or 0)
+        if credito:
+            salida["credito_del_aplazado"] = credito
+
         # 4. La palanca barata: retirar lo especulativo que ya no da tiempo.
         acciones, cancelar, caja_tras = [], [], caja
-        if caja < 0 and horas < HORAS_SIN_TIEMPO:
+        if caja + credito < 0 and horas < HORAS_SIN_TIEMPO:
             vivas = sorted(
                 ((_importe(p), pid, _int(_dict(p).get("offer_id")))
                  for pid, p in pujas.items() if pid in especulativas),
                 key=lambda t: (-t[0], t[1]),
             )
             for importe, pid, offer_id in vivas:
-                if caja_tras >= 0:
+                if caja_tras + credito >= 0:
                     break
                 if not offer_id or importe <= 0:
                     continue
@@ -698,7 +731,7 @@ def decidir(
                 })
         salida["cancelar"] = cancelar
         salida["caja_tras_cancelar"] = caja_tras
-        deficit = max(0, -caja_tras)
+        deficit = max(0, -(caja_tras + credito))
         salida["deficit"] = deficit
 
         # LA CARTERA (16/10/2026). Sin ella, el de la ronda que entra en el
@@ -826,6 +859,8 @@ def decidir(
         salida["activo"] = True
         if caja_tras >= 0:
             salida["motivo"] = "EN_POSITIVO" if not cancelar else "EN_POSITIVO_RETIRANDO_PUJAS"
+        elif credito and caja_tras + credito >= 0:
+            salida["motivo"] = "EN_POSITIVO_CON_EL_COBRO_DEL_APLAZADO"
         elif falta:
             salida["motivo"] = "FALTA"
         else:
@@ -1109,6 +1144,57 @@ def la_mejora(libro_mejora, plantilla, pujas=None) -> dict:
     return salida
 
 
+def el_credito_del_aplazado(ahora, calendario, snapshot, yo, foto, pujas, orden,
+                            libro_mejora, plantilla) -> int:
+    """
+    EL CREDITO DEL APLAZADO (20/10/2026, `BORDALAS_EL_APLAZADO_NO_FRENA_LA_COMPRA`).
+
+    Lo que los cambios de nuestras pujas vivas (`pujas`, ya con lo de esta
+    vuelta) cobran ANTES del aplazado que es el plazo, con la misma cuenta
+    que dejo pujar a la orden y a la mejora
+    (`la_orden_del_gestor.lo_que_se_cobra_antes`): por cada puja, la
+    oferta del Computer que ya hay por el que sale de su cambio, viva al
+    empezar el aplazado, como mucho su importe; cada uno que sale, una
+    vez. Las parejas: las de la orden viva (`las_parejas_de_la_orden`,
+    con su suelo) y las del libro de la mejora cuyo relevo aun no es
+    nuestro (sin suelo).
+
+    0 si el interruptor esta apagado, si el plazo no es un aplazado
+    (`el_proximo_cierre`: `parcial`) o si la proxima puja ya no se
+    resuelve antes de el (`resuelve_antes`): pasado el ultimo reset, cada
+    puja viva cuenta entera, como siempre. 0 si algo no se sabe. Nunca
+    lanza.
+    """
+    try:
+        from src.actions.la_orden_del_gestor import (
+            activa as orden_activa, el_aplazado_activo, las_caducidades,
+            las_parejas_de_la_orden, lo_que_se_cobra_antes, validar,
+        )
+        from src.analysis.la_proxima_jornada import el_proximo_cierre
+
+        if not el_aplazado_activo():
+            return 0
+        cierre = el_proximo_cierre(ahora, calendario)
+        if not cierre.get("parcial") or not cierre.get("resuelve_antes"):
+            return 0
+        parejas: dict = {}
+        if orden_activa() and validar(orden, ahora) is None:
+            for relevo, lista in las_parejas_de_la_orden(orden, ahora).items():
+                parejas.setdefault(relevo, []).extend(lista)
+        nuestros = _ids(plantilla)
+        for entra, c in _dict(libro_mejora).items():
+            entra, sale = _int(entra), _int(_dict(c).get("sale"))
+            if entra is None or sale is None or entra in nuestros:
+                continue
+            parejas.setdefault(entra, []).append((sale, 0))
+        credito = lo_que_se_cobra_antes(
+            pujas, parejas, _dict(_dict(foto).get("ofertas_del_computer")),
+            las_caducidades(snapshot, yo), cierre.get("inicio"))
+        return max(0, _int(credito, 0) or 0)
+    except Exception:                               # noqa: BLE001
+        return 0
+
+
 # ============================================================
 # EL PASO DEL WORKFLOW
 # ============================================================
@@ -1179,7 +1265,7 @@ def _el_plan(d, ventana, ahora, hechas=(), adoptados=(), mejora_descartada=None)
             generado = ahora.isoformat()
         except Exception:                           # noqa: BLE001
             generado = None
-        return {
+        plan = {
             "version": 2,
             "activo": bool(d.get("activo")),
             "motivo": d.get("motivo"),
@@ -1205,6 +1291,10 @@ def _el_plan(d, ventana, ahora, hechas=(), adoptados=(), mejora_descartada=None)
             "vuelta_mejora_descartada": mejora_descartada,
             "generated_at": generado,
         }
+        # EL APLAZADO (20/10/2026): solo si el credito conto algo.
+        if d.get("credito_del_aplazado"):
+            plan["credito_del_aplazado"] = d.get("credito_del_aplazado")
+        return plan
     except Exception as error:                      # noqa: BLE001
         return {"version": 2, "activo": False,
                 "motivo": f"ERROR: {type(error).__name__}: {error}", "generated_at": None}
@@ -1339,6 +1429,11 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
 
         # Rondas de sobra: `decidir` se queda con las principales.
         ctx = contexto(status, calendario, ahora, RONDAS_A_MIRAR)
+        # EL APLAZADO NO FRENA LA COMPRA (20/10/2026): con su interruptor,
+        # lo que los cambios pujados cobran antes del aplazado (0 si no).
+        credito = el_credito_del_aplazado(
+            ahora, calendario, snapshot, yo, foto, pujas, orden, libros.get("mejora"),
+            plantilla)
         d = decidir(
             plantilla=las_fichas(status, plantilla, leer_los_estados(snapshot), foto["precios"]),
             ctx=ctx, horas=ventana["horas"], en_curso=ventana["en_curso"],
@@ -1353,7 +1448,7 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
                     | de_la_rotacion["se_van"]),
             once_escrito=once_escrito, no_retirar=no_retirar,
             inventario=de_la_ronda_y_los_chollos & plantilla,
-            cartera=_la_cartera(),
+            cartera=_la_cartera(), credito=credito,
         )
         salida["decision"] = d
         salida["acciones"] = d["acciones"]
@@ -1429,6 +1524,9 @@ def el_parte(r) -> list:
                           f"{d.get('titulares_que_no_se_venden')}")
         lineas.append(f"  Caja al empezar la ronda: {_euros(d.get('caja'))}"
                       f"  (saldo - pujas vivas enteras + cobrado en la vuelta)")
+        if d.get("credito_del_aplazado"):
+            lineas.append(f"  Cobro antes del aplazado (los que salen de las pujas vivas): "
+                          f"{_euros(d.get('credito_del_aplazado'))}")
         if d.get("cancelar"):
             lineas.append(f"  Retirar pujas especulativas: {d.get('cancelar')}"
                           f"  -> caja {_euros(d.get('caja_tras_cancelar'))}")
