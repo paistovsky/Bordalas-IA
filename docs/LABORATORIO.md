@@ -69,6 +69,45 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E51 · 20/10/2026 11:16 de Madrid · ¿Cuanto le queda a una racha de subidas?
+
+**Hipotesis:** cuanto mas lleva un jugador subiendo, menos le queda (la
+racha «se cansa»). Si es asi, la cartera y la rotacion deberian preferir
+al que acaba de empezar a subir.
+**Datos:** `data/autopilot/price_history.json`, todos los jugadores, cada
+dia de una racha (n = 7.519 dias-jugador subiendo).
+**Codigo:** `lab/precio/rachas.py`.
+
+    dias seguidos subiendo   casos   sube manana   le queda hasta el primer dia sin subir (mediana)
+        1                     745      90,6 %         +6,8 %
+        2                     646      92,4 %         +7,1 %
+        3-5                 1.597      91-94 %        +5,9 a +6,5 %
+        6-9                 1.496      88-92 %        +4,6 a +5,6 %
+        10+                 3.035      92,4 %         +4,5 %
+
+**Lo que se aprende:**
+- **La racha no se cansa:** la probabilidad de subir mañana es ~91 % se
+  lleve 1 dia o 10. Lo que si baja es lo que queda en %: de +7 % al
+  empezar a +4,5 % tras 10 dias (el precio ya es mayor y las subidas
+  diarias no crecen tanto). La media (+13 a +44 %) la inflan unos pocos
+  baratos que se disparan.
+- **La cuenta que importa para comprar:** lo que le queda a uno que sube
+  (+4,5 a +7 % de mediana) contra lo que cuesta ganarlo. Sin pelea (+1 %),
+  gana. Con pelea, el ganador paga hoy +10 % por los que suben poco y
+  +33 % por los que suben mucho (E49): **a la mediana, una compra con
+  pelea no se paga con la subida que le queda.** Solo se paga si el
+  jugador entra en el once (puntos) o si es de los baratos que se
+  disparan.
+
+**Limites:** la mediana esconde colas muy largas en los baratos; no separa
+por precio; dias-jugador de la misma racha no son independientes.
+
+**Veredicto: SE AGUANTA lo que hay** (comprar al que sube, vender el
+primer dia que no sube, E1/E3) y no hace falta mirar cuantos dias lleva
+subiendo. Refuerza E46/E49: para revender, la prima tiene que quedarse por
+debajo de lo que le queda a la racha (~+5 %); por encima, solo si es para
+el once.
+
 ### E50 · 19/10/2026 17:15 de Madrid · El Levante-Athletic del 21/10, manager a manager
 
 **Hipotesis:** el aplazado de la J6 (mie 21/10 20:00) pesa distinto para
