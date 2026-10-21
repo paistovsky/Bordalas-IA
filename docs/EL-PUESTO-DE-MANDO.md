@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 21/10/2026, 20:35 de Madrid (mirada al aplazado de la J6).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/10 20:30 (mirada al aplazado de la J6). RESUELTO: ES RONDA PROPIA.**
+  En `data/rival_intelligence/board_events.json` aparece un «roundStarted»
+  nuevo a las 18:00 UTC (20:00 de Madrid): ronda **5176, «Jornada 6
+  (aplazada)», part 3**. El saldo a esa hora era **+1.717.983** (vuelta
+  de las 20:07, #2398 verde): Pepe la empieza en positivo y sus puntos
+  cuentan. **Regla que queda:** cada aplazado es una ronda aparte y un
+  plazo de caja propio. El siguiente sera el Rayo-Athletic de la J8 (Unai
+  Lopez en el once) cuando tenga fecha: crear su turno en cuanto salga.
 
 - **21/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2390 a #2392).
   Saldo +1.717.983 a las 14:10: el plazo del aplazado (14:00) PASADO EN
