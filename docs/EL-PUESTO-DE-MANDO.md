@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **21/10 13:15. EL PARTE VENDE, ARREGLADO (sigue APAGADO).** Dos rondas
+  de arreglos con revision adversarial (workflows de 3 agentes cada uno).
+  Ronda 1 (ac13f484): D1 no vende un fichaje de menos de 7 dias (fechas de
+  compra del tablon); D2 sin el once de Biwenger (GET /user caido) no se
+  hace nada; D3 el sancionado no se vende (un partido, sin medir). Los
+  revisores encontraron dos huecos y ronda 2 (6c814023) los cierra: H1, un
+  fichaje no se vende hasta que acaba una ronda PRINCIPAL que empezo
+  despues de su llegada (E14: el paron de noviembre y Navidad), nunca
+  antes de 7 dias, y sin ronda conocida tras el fichaje no se vende; H2,
+  con el tablon atrasado nadie tiene fecha y no se vende a nadie. Segunda
+  revision: 0 defectos de venta (30.000 casos al azar sobre el calendario
+  real, 0 violaciones); solo un hueco de la guardia (el filtro `aparte`),
+  cubierto por mi (5be80a4f; la mutacion ya la pilla). Verja 221/221 con
+  los de produccion y con `--con BORDALAS_EL_PARTE_VENDE`. Pendiente para
+  encenderlo (mar 27 o mie 28/10, tras la J10): paso 0, ensayo y la linea
+  del YAML con config/paso_0.json en el mismo commit.
+
 - **21/10 12:45 (TURNO DEL APLAZADO DE LA J6).** Ciclos: verdes (#2385 a
   #2390). Saldo **+1.717.983** a las 12:10, el plazo de las 14:00 CUBIERTO.
   Puja viva de Pepe: **Gaya 1.711.008** (la rendija, de las 07:19), se
