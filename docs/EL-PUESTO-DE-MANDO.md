@@ -356,8 +356,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Saldo +1.717.983, puja viva Gaya 1.711.008 (jue 07:00). Segun el chat del
   dueno, Pollo17 y Luismi empezaron la parte aplazada de la J6 en rojo:
   nosotros no. Turno del cierre de la J10 en pie (vie 23/10 12:45); el de
-  la J11 (dom 01/11 17:00, ya en horario de invierno: turno a las 11:45
-  de Madrid = 10:45 UTC) lo crea ese turno. Viernes: no se enciende nada.
+  la J11 lo crea ese turno: **ojo, la J11 empieza el dom 01/11 a las
+  17:00 (horario de invierno, UTC+1), asi que el plazo T-6 es a las 11:00
+  y el turno tiene que ser a las 09:45 de Madrid (08:45 UTC), no a las
+  12:45 de siempre.** Viernes: no se enciende nada.
 
 - **21/10 20:47 (laboratorio de rivales).** Desde el reset, dos ventas al
   Computer y las dos con perdida: **Pollo17** vendio a Espi (comprado el
