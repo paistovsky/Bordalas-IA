@@ -201256,5 +201256,23 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "8ea900a9342d950a77dcbd3d",
+    "date": 1792587533,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 5220,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 3924400
+      }
+    ]
   }
 ]
