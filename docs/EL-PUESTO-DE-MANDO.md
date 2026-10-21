@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/10/2026, 12:50 de Madrid (turno del aplazado de la J6).
+Actualizado: 21/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2390 a #2392).
+  Saldo +1.717.983 a las 14:10: el plazo del aplazado (14:00) PASADO EN
+  VERDE. Puja viva Gaya 1.711.008 (jue 07:00). Nada mas; a las 20:30 miro
+  si el aplazado abrio ronda propia.
 
 - **21/10 13:15. EL PARTE VENDE, ARREGLADO (sigue APAGADO).** Dos rondas
   de arreglos con revision adversarial (workflows de 3 agentes cada uno).
