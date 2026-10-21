@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **21/10 20:47 (laboratorio de rivales).** Desde el reset, dos ventas al
+  Computer y las dos con perdida: **Pollo17** vendio a Espi (comprado el
+  19/10 a 2.777.000, +7,2 % y subiendo) por 2.521.300 a los 2,1 dias
+  (-255.700), el primer dia que bajaba; **Manzagool** a Fran Garcia
+  (comprado el 20/09 a 5.135.070) por 3.924.400 tras 31 dias (-1.210.670).
+  Las dos cuadran con lo medido esta manana: prima alta en 1-3 M y
+  aguantar en >3 M pierden. Cajas al empezar la parte aplazada de la J6
+  (ronda 5176, 18:00 UTC), reconstruidas del tablon: Pollo -2,86 M (vendio
+  y cobro la racha, no llego), Luismi -8,17 M (nada), Manzagool +1,04 M:
+  **Pollo y Luismi cobran 0 por esa parte** (E52); nosotros, +1.717.983.
+  Distancia de patrimonio con Pollo, ~50,4 M. **Nosotros:** la ronda, los
+  chollos, la orden, la mejora y la rotacion, NADA en la vuelta de las
+  20:07 (la caja libre es 6.975: la puja del dueno por Gaya, 1.711.008, se
+  lleva el resto; se resuelve manana a las 07:00). Sin cambios ni
+  interruptores esta noche. Manana: comprobar los puntos de la parte
+  aplazada (el once del 15/09) y si llego Gaya.
+
 - **21/10 20:30 (mirada al aplazado de la J6). RESUELTO: ES RONDA PROPIA.**
   En `data/rival_intelligence/board_events.json` aparece un «roundStarted»
   nuevo a las 18:00 UTC (20:00 de Madrid): ronda **5176, «Jornada 6
