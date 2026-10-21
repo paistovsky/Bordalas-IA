@@ -21,12 +21,23 @@ laboratorio).
     8. (21/10, D2) Sin el once de Biwenger (`user_lineup` None o vacio)
        tampoco se hace nada (`SIN_ONCE_DE_BIWENGER`), y lo dice.
     9. (21/10, D3) El sancionado se mira y no se vende (`SANCION`).
+   10. (21/10, segunda revision, H1) Un fichaje no se toca hasta que
+       acaba la primera ronda que empezo despues de su llegada, y
+       nunca antes de 7 dias (`SIN_JUGAR_CON_NOSOTROS`): el fichaje
+       del paron de noviembre, el de Navidad y el que llega con la J10
+       empezada. Sin ninguna ronda despues de su llegada, no se toca
+       (`SIN_RONDA_TRAS_EL_FICHAJE`). Al del reparto no le cambia nada.
+   11. (21/10, segunda revision, H2) Con el tablon atrasado nadie tiene
+       fecha y no se vende a nadie (el vendido y recomprado ya no pasa
+       por nuestro desde la primera compra); un dia sin subasta, un
+       movimiento de 2 h despues del reset dice que esta al dia.
 
 Todo con datos de mentira: la hora se pasa siempre, el calendario es un
-dict de este fichero, la orden y el libro de la ronda se escriben en una
-carpeta temporal, el tablon es una lista de este fichero y el escritor
-es de mentira. No se lee el estado de produccion, ni el reloj, ni se
-sale a la red.
+dict de este fichero (con la J8 ya jugada antes de AHORA: sin una ronda
+jugada despues de su llegada no se vende a nadie), la orden y el libro
+de la ronda se escriben en una carpeta temporal, el tablon es una lista
+de este fichero y el escritor es de mentira. No se lee el estado de
+produccion, ni el reloj, ni se sale a la red.
 """
 
 from __future__ import annotations
@@ -45,10 +56,12 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from src.actions.el_parte_vende import (     # noqa: E402
-    AVISOS, DIAS_DE_FICHAJE, ENV, MALOS, MOTIVOS, SANCIONADO, SUELO, activa, correr,
-    decidir, el_parte, el_suelo, el_ultimo_reset, ids_del_once, las_fechas_de_fichaje,
+    AVISOS, DIAS_DE_FICHAJE, ENV, MALOS, MARGEN_DEL_TABLON, MARGEN_FINAL, MOTIVOS,
+    PARTIDOS_DE_RONDA, SANCIONADO, SUELO, activa, correr, decidir, el_parte, el_suelo,
+    el_ultimo_reset, hasta_cuando_no_se_toca, ids_del_once, las_fechas_de_fichaje,
     lo_vendido_y_publicado, por_que_no,
 )
+from src.analysis.la_proxima_jornada import las_rondas     # noqa: E402
 
 
 AHORA = datetime(2026, 10, 14, 18, 7, tzinfo=timezone.utc)      # mie 20:07 Madrid
@@ -70,8 +83,21 @@ def _p(j, casa, fuera, cuando):
             "kickoff": cuando}
 
 
-# La J9 empieza el viernes 16/10 a las 21:00 de Madrid y acaba el lunes 19/10.
+# La J8 (09-12/10) ya se jugo antes de AHORA: es la ronda que "jugaron"
+# con nosotros los del reparto y los fichajes de la plantilla de mentira
+# (sin ella, nadie habria jugado una ronda desde su llegada y no se
+# venderia a nadie: H1). La J9 empieza el viernes 16/10 a las 21:00 de
+# Madrid y acaba el lunes 19/10; la J10, del 23 al 26/10; la J11, del 30/10
+# al 02/11. La J12 acaba el 08/11; el paron de noviembre; la J13, del 20
+# al 23/11. La J17 acaba el 20/12; el de Navidad; la J18, del 02 al 04/01.
 CAL = {"matchdays": [
+    {"matchday": 8, "matches": [
+        _p(8, 1, 2, "2026-10-09T21:00:00+02:00"),
+        _p(8, 3, 4, "2026-10-10T16:15:00+02:00"),
+        _p(8, 5, 6, "2026-10-11T14:00:00+02:00"),
+        _p(8, 7, 8, "2026-10-11T18:30:00+02:00"),
+        _p(8, 9, 10, "2026-10-12T21:00:00+02:00"),
+    ]},
     {"matchday": 9, "matches": [
         _p(9, 7, 1, "2026-10-16T21:00:00+02:00"),
         _p(9, 8, 9, "2026-10-17T16:00:00+02:00"),
@@ -86,7 +112,44 @@ CAL = {"matchdays": [
         _p(10, 3, 4, "2026-10-25T14:00:00+01:00"),
         _p(10, 5, 6, "2026-10-26T21:00:00+01:00"),
     ]},
+    {"matchday": 11, "matches": [
+        _p(11, 2, 7, "2026-10-30T21:00:00+01:00"),
+        _p(11, 4, 9, "2026-10-31T16:15:00+01:00"),
+        _p(11, 6, 1, "2026-11-01T14:00:00+01:00"),
+        _p(11, 8, 3, "2026-11-01T18:30:00+01:00"),
+        _p(11, 10, 5, "2026-11-02T21:00:00+01:00"),
+    ]},
+    {"matchday": 12, "matches": [
+        _p(12, 1, 3, "2026-11-06T21:00:00+01:00"),
+        _p(12, 5, 7, "2026-11-07T16:15:00+01:00"),
+        _p(12, 9, 2, "2026-11-07T18:30:00+01:00"),
+        _p(12, 4, 6, "2026-11-08T14:00:00+01:00"),
+        _p(12, 8, 10, "2026-11-08T21:00:00+01:00"),
+    ]},
+    {"matchday": 13, "matches": [
+        _p(13, 3, 5, "2026-11-20T21:00:00+01:00"),
+        _p(13, 7, 9, "2026-11-21T16:15:00+01:00"),
+        _p(13, 2, 4, "2026-11-22T14:00:00+01:00"),
+        _p(13, 6, 8, "2026-11-22T18:30:00+01:00"),
+        _p(13, 10, 1, "2026-11-23T21:00:00+01:00"),
+    ]},
+    {"matchday": 17, "matches": [
+        _p(17, 1, 5, "2026-12-18T21:00:00+01:00"),
+        _p(17, 2, 6, "2026-12-19T16:15:00+01:00"),
+        _p(17, 3, 7, "2026-12-19T18:30:00+01:00"),
+        _p(17, 4, 8, "2026-12-20T14:00:00+01:00"),
+        _p(17, 9, 10, "2026-12-20T21:00:00+01:00"),
+    ]},
+    {"matchday": 18, "matches": [
+        _p(18, 5, 2, "2027-01-02T16:15:00+01:00"),
+        _p(18, 6, 3, "2027-01-02T18:30:00+01:00"),
+        _p(18, 7, 4, "2027-01-03T14:00:00+01:00"),
+        _p(18, 8, 9, "2027-01-03T18:30:00+01:00"),
+        _p(18, 10, 1, "2027-01-04T21:00:00+01:00"),
+    ]},
 ]}
+# Las rondas de ese calendario, como se las pasa `correr` a `decidir`.
+RONDAS = las_rondas(CAL)
 
 
 # ------------------------------------------------------------------
@@ -152,7 +215,7 @@ PUBLICADOS = {14}
 GAYA = _j(26, "Gaya", "doubt", 1_700_000)
 
 
-def _la_foto(once_de_biwenger=True):
+def _la_foto(once_de_biwenger=True, proximo_reset=PROXIMO_RESET):
     foto = {
         "league": {"user": {"id": 99}},
         "market": {
@@ -160,7 +223,7 @@ def _la_foto(once_de_biwenger=True):
             "sales": [{"player": {"id": p}, "user": {"id": 99}, "price": 3_100_000}
                       for p in PUBLICADOS]
             + [{"player": {"id": 500}, "user": None, "price": 1_000_000,
-                "until": int(PROXIMO_RESET.timestamp())}],
+                "until": int(proximo_reset.timestamp())}],
             "offers": [{"id": o, "status": "waiting", "amount": a,
                         "requestedPlayers": [{"id": p}], "from": None}
                        for p, (o, a) in OFERTAS.items()],
@@ -177,16 +240,26 @@ def _la_foto(once_de_biwenger=True):
     return foto
 
 
+def _con_fichaje(foto, ficha, offer_id, oferta):
+    """La foto con un fichaje mas en la plantilla y una oferta del
+    Computer por el."""
+    foto["my_team"].append({"id": ficha["id"], "price": ficha["price"]})
+    foto["catalog"]["data"]["players"][str(ficha["id"])] = {
+        "name": ficha["name"], "status": ficha["status"], "price": ficha["price"]}
+    foto["market"]["offers"].append({"id": offer_id, "status": "waiting", "amount": oferta,
+                                     "requestedPlayers": [{"id": ficha["id"]}],
+                                     "from": None})
+    return foto
+
+
 def _con_gaya(foto, oferta=1_700_000):
     """La foto con el fichaje de hoy en la plantilla, en duda y con una
     oferta del Computer que llega al 95 %."""
-    foto["my_team"].append({"id": GAYA["id"], "price": GAYA["price"]})
-    foto["catalog"]["data"]["players"][str(GAYA["id"])] = {
-        "name": GAYA["name"], "status": GAYA["status"], "price": GAYA["price"]}
-    foto["market"]["offers"].append({"id": 726, "status": "waiting", "amount": oferta,
-                                     "requestedPlayers": [{"id": GAYA["id"]}],
-                                     "from": None})
-    return foto
+    return _con_fichaje(foto, GAYA, 726, oferta)
+
+
+# El fichaje del paron de noviembre (H1): en duda, 3 M, oferta de 2,9 M.
+PARON = _j(27, "Fichaje del paron", "doubt", 3_000_000)
 
 
 def _el_status(con_once=True):
@@ -214,7 +287,7 @@ def _ev(eid, tipo, cuando, content):
             "fixed": False, "title": "", "author": None, "content": content}
 
 
-def _el_tablon(*extra, con_reset=True, subastas_de_hoy=True, gaya=False):
+def _el_tablon(*extra, con_reset=True, subastas_de_hoy=True, gaya=False, hoy=ULTIMO_RESET):
     eventos = []
     if con_reset:
         eventos.append({"event_id": "reset", "date": int(RESET_LIGA.timestamp()),
@@ -235,12 +308,12 @@ def _el_tablon(*extra, con_reset=True, subastas_de_hoy=True, gaya=False):
             {"id": 1}),
     ]
     if subastas_de_hoy:
-        hoy = [{"player": 600, "to": RIVAL, "amount": 1_000_000}]
+        ganadas = [{"player": 600, "to": RIVAL, "amount": 1_000_000}]
         if gaya:
-            hoy.append({"player": GAYA["id"], "to": NOSOTROS, "amount": 1_711_008,
-                        "bids": [{"user": RIVAL, "amount": 1_650_000}]})
+            ganadas.append({"player": GAYA["id"], "to": NOSOTROS, "amount": 1_711_008,
+                            "bids": [{"user": RIVAL, "amount": 1_650_000}]})
         # Las subastas del ultimo reset del Computer (05:00), a las 05:04.
-        eventos.append(_ev("m-hoy", "market", ULTIMO_RESET + timedelta(minutes=4), hoy))
+        eventos.append(_ev("m-hoy", "market", hoy + timedelta(minutes=4), ganadas))
     return eventos + list(extra)
 
 
@@ -258,8 +331,8 @@ PLAN_CIERRE = {"generated_at": AHORA.isoformat(),
 
 def _d(**k):
     """`decidir` con la plantilla de mentira, ya leida: el once del panel
-    (1-11) y el de Biwenger (1-11 y el 25), y todos nuestros desde el
-    reparto."""
+    (1-11) y el de Biwenger (1-11 y el 25), todos nuestros desde el
+    reparto y las rondas del calendario de mentira (la J8, jugada)."""
     base = dict(
         plantilla={p["id"] for p in PLANTILLA},
         estados={p["id"]: p["status"] for p in PLANTILLA},
@@ -269,7 +342,7 @@ def _d(**k):
         en_venta=set(PUBLICADOS) | {24},
         once_escrito=ONCE, once_de_biwenger=ONCE | {25},
         protegidos={18}, conservados={19}, aguanta={21}, vendidos={23},
-        fichajes={p["id"]: VIEJO for p in PLANTILLA}, ahora=AHORA,
+        fichajes={p["id"]: VIEJO for p in PLANTILLA}, ahora=AHORA, rondas=RONDAS,
     )
     base.update(k)
     return decidir(**base)
@@ -281,7 +354,8 @@ def _uno(estado="doubt", oferta=950_000, **k):
     base = dict(plantilla={7}, estados={7: estado}, nombres={7: "Suplente"},
                 precios={7: 1_000_000},
                 ofertas_del_computer={7: {"offer_id": 70, "amount": oferta}},
-                once_escrito={1}, once_de_biwenger={1}, fichajes={7: VIEJO}, ahora=AHORA)
+                once_escrito={1}, once_de_biwenger={1}, fichajes={7: VIEJO}, ahora=AHORA,
+                rondas=RONDAS)
     base.update(k)
     return decidir(**base)
 
@@ -362,6 +436,27 @@ def _ficheros(carpeta):
     return orden, libro
 
 
+def _el_reset_de(ahora):
+    """El ultimo reset del Computer (05:00 UTC) antes de `ahora`."""
+    reset = ahora.replace(hour=5, minute=0, second=0, microsecond=0)
+    return reset if reset <= ahora else reset - timedelta(days=1)
+
+
+def _el_dia(ahora, ficha=None, llega=None, offer_id=None, oferta=None):
+    """La foto y el tablon de una vuelta de otro dia: el `until` del
+    Computer y las subastas de hoy son los de `ahora`. Con `ficha`, ese
+    fichaje esta en la plantilla, ganado en la subasta de `llega`."""
+    reset = _el_reset_de(ahora)
+    foto = _la_foto(proximo_reset=reset + timedelta(days=1))
+    extra = []
+    if ficha is not None:
+        foto = _con_fichaje(foto, ficha, offer_id, oferta)
+        extra.append(_ev(f"m{ficha['id']}", "market", llega,
+                         [{"player": ficha["id"], "to": NOSOTROS, "amount": ficha["price"]}]))
+    return {"cycle": {"snapshot": foto}, "tablon": _el_tablon(*extra, hoy=reset),
+            "ahora": ahora, "v10": {}, "plan_cierre": {}}
+
+
 def _correr(carpeta, **k):
     orden, libro = _ficheros(carpeta)
     base = dict(cycle={"snapshot": _la_foto()}, escritor_factory=_Escritor, ahora=AHORA,
@@ -394,7 +489,9 @@ def test_vende_al_dudoso_fuera_del_once_desde_el_95():
                 precios={"7": "1000000"},
                 ofertas_del_computer={"7": {"offer_id": "70", "amount": "1000000"}},
                 once_escrito=["1"], once_de_biwenger=["1"],
-                fichajes={"7": VIEJO.isoformat()}, ahora=AHORA.isoformat())
+                fichajes={"7": VIEJO.isoformat()}, ahora=AHORA.isoformat(),
+                rondas=[{**r, "inicio": r["inicio"].isoformat(), "fin": r["fin"].isoformat()}
+                        for r in RONDAS])
     assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 7)], d
 
 
@@ -592,6 +689,8 @@ def test_nace_apagado():
 
     assert "95 %" in QUE_HACE[ENV], QUE_HACE.get(ENV)
     assert "ni a un sancionado" in QUE_HACE[ENV] and "7 días" in QUE_HACE[ENV], QUE_HACE[ENV]
+    assert "no ha jugado una ronda" in QUE_HACE[ENV], QUE_HACE[ENV]       # H1
+    assert "tablón atrasado, a nadie" in QUE_HACE[ENV], QUE_HACE[ENV]     # H2
 
 
 def test_nunca_lanza_con_basura():
@@ -600,8 +699,14 @@ def test_nunca_lanza_con_basura():
                     ofertas_del_computer=basura, en_venta=basura, once_escrito=basura,
                     once_de_biwenger=basura, protegidos=basura, conservados=basura,
                     aguanta=basura, vendidos=basura, fichajes=basura, ahora=basura,
-                    en_curso=False, puede_escribir=True, sin_calendario=False)
+                    rondas=basura, en_curso=False, puede_escribir=True,
+                    sin_calendario=False)
         assert isinstance(d, dict) and d["acciones"] == [], d
+        assert hasta_cuando_no_se_toca(basura, basura) is None
+        assert hasta_cuando_no_se_toca(VIEJO, basura) is None
+        # Rondas rotas con un buen jugador: no se sabe, no se vende.
+        d = _uno(rondas=basura)
+        assert d["acciones"] == [] and _por(d) == {7: "SIN_RONDA_TRAS_EL_FICHAJE"}, d
         por_que_no(puede_escribir=basura, sin_calendario=basura, en_curso=basura,
                    once_escrito=basura, once_de_biwenger=basura)
         el_parte(basura)
@@ -617,8 +722,11 @@ def test_nunca_lanza_con_basura():
     d = decidir(plantilla=[7, "x", None], estados={7: "doubt", "x": 5},
                 nombres={7: 5}, precios={7: "mucho"},
                 ofertas_del_computer={7: "x"}, once_escrito={1}, once_de_biwenger={1},
-                fichajes={7: "ayer", "x": object()}, ahora=AHORA)
+                fichajes={7: "ayer", "x": object()}, ahora=AHORA,
+                rondas=[None, 5, {"inicio": "x"}, {"inicio": AHORA, "fin": "y"}] + RONDAS)
     assert isinstance(d, dict) and _escrituras(d) == [], d
+    assert hasta_cuando_no_se_toca(VIEJO, [None, 5, {"inicio": "x", "fin": 3, "partidos": 9},
+                                           {"inicio": object(), "partidos": "x"}]) is None
     # Eventos rotos en el tablon: los que se entienden cuentan, el resto no.
     f = las_fechas_de_fichaje([None, 5, {"type": "market", "date": "x"},
                                {"type": "market", "date": 10**20, "content": 5},
@@ -675,11 +783,13 @@ def test_d1_el_fichaje_no_se_revende_antes_de_jugar():
     for ahora in (datetime(2026, 10, 22, 18, 0, tzinfo=timezone.utc),    # jue 20:00
                   datetime(2026, 10, 23, 10, 0, tzinfo=timezone.utc),    # vie, antes de la J10
                   llega + timedelta(days=7, minutes=-1)):
-        # Con oferta que llega al 95 %: no se cobra.
+        # Con oferta que llega al 95 %: no se cobra. Hasta los 7 dias (la
+        # J10, su primera ronda, acaba antes: H1).
         d = _uno(oferta=1_000_000, fichajes={7: llega}, ahora=ahora)
         assert d["acciones"] == [] and d["no_se_tocan"] == [
             {"player_id": 7, "nombre": "Suplente", "estado": "doubt",
-             "por": "RECIEN_FICHADO", "fichado": llega.isoformat()}], (ahora, d)
+             "por": "RECIEN_FICHADO", "fichado": llega.isoformat(),
+             "hasta": (llega + timedelta(days=7)).isoformat()}], (ahora, d)
         # Sin oferta y sin publicar: tampoco se publica (haria nacer la
         # oferta del proximo reset).
         d = _uno(ofertas_del_computer={}, fichajes={7: llega}, ahora=ahora)
@@ -715,17 +825,17 @@ def test_d1_el_fichaje_no_se_revende_antes_de_jugar():
             assert any("RECIEN_FICHADO" in linea and "26" in linea for linea in el_parte(r))
             # Sin el evento de su subasta (el tablon de la vuelta anterior,
             # si la peticion de esta fallo) tampoco: el tablon no esta al dia
-            # y Gaya no tiene fecha. Los del reparto esperan; el 13 y el 15,
-            # con su compra en el tablon, siguen.
+            # y Gaya no tiene fecha. Y desde la segunda revision (H2) nadie:
+            # el 13 y el 15, con su compra en el tablon, antes se vendian.
             _limpiar()
             r = _correr(carpeta, cycle={"snapshot": _con_gaya(_la_foto())},
                         tablon=_el_tablon(subastas_de_hoy=False))
             por = _por(r["decision"])
-            assert por[26] == "SIN_FECHA_DE_FICHAJE" and por[12] == "SIN_FECHA_DE_FICHAJE", por
-            assert _escrituras(r["decision"]) == [("PONER_A_LA_VENTA", 13),
-                                                  ("PONER_A_LA_VENTA", 15)], r["acciones"]
+            assert all(por[p] == "SIN_FECHA_DE_FICHAJE" for p in (12, 13, 15, 24, 26)), por
+            assert _escrituras(r["decision"]) == [] and r["motivo"] == "NADA_QUE_HACER", r
+            assert _Escritor.creados == 0, r
             assert r["aviso_del_tablon"] == "TABLON_ATRASADO", r
-            assert any("TABLON_ATRASADO" in linea for linea in el_parte(r))
+            assert any("TABLON_ATRASADO" in linea and "NADIE" in linea for linea in el_parte(r))
     finally:
         _entorno(**antes)
 
@@ -768,17 +878,26 @@ def test_d1_sin_fecha_de_fichaje_no_se_vende():
                       "bids": [{"user": luismi_haz, "amount": 912000}]}]},
     ]
     hoy = datetime(2026, 10, 21, 8, 0, tzinfo=timezone.utc)
+    # Sin saber el ultimo reset no se sabe si esta al dia: nadie tiene
+    # fecha (H2; antes, la tenian los que se habian movido).
     f = las_fechas_de_fichaje(de_verdad, yo, {30493, 25777, 1844}, ultimo_reset=None)
-    assert f["fechas"] == {
+    assert f == {"fechas": {}, "aviso": "TABLON_ATRASADO"}, f
+    # Con la foto del 17/10 (su reset, a las 05:00 UTC) esta al dia: la
+    # subasta de Sergi Cardona es de las 05:05:38.
+    f = las_fechas_de_fichaje(de_verdad, yo, {30493, 25777, 1844},
+                              ultimo_reset=datetime(2026, 10, 17, 5, 0, tzinfo=timezone.utc))
+    assert f["aviso"] is None and f["fechas"] == {
         30493: datetime(2026, 10, 17, 5, 5, 38, tzinfo=timezone.utc),
-        25777: datetime(2026, 10, 14, 5, 3, 3, tzinfo=timezone.utc)}, f
-    # Sin saber el ultimo reset, al que no se movio no se le da fecha.
-    assert f["aviso"] == "TABLON_ATRASADO" and 1844 not in f["fechas"], f
+        25777: datetime(2026, 10, 14, 5, 3, 3, tzinfo=timezone.utc),
+        1844: datetime.fromtimestamp(1786278446, timezone.utc)}, f
+    # El 21/10, con la J9 (16-19/10) jugada: Luismi Cruz, nuestro desde el
+    # 14/10, ya jugo una ronda; Sergi Cardona, del 17/10, no lleva 7 dias.
     d = decidir(plantilla={30493, 25777}, estados={30493: "doubt", 25777: "injured"},
                 nombres={30493: "Sergi Cardona", 25777: "Luismi Cruz"},
                 precios={30493: 1_190_000, 25777: 2_870_000},
                 ofertas_del_computer={30493: {"offer_id": 1, "amount": 1_190_000}},
-                once_escrito={1}, once_de_biwenger={1}, fichajes=f["fechas"], ahora=hoy)
+                once_escrito={1}, once_de_biwenger={1}, fichajes=f["fechas"], ahora=hoy,
+                rondas=RONDAS)
     assert _por(d) == {30493: "RECIEN_FICHADO"} and _acciones(d) == [
         ("PONER_A_LA_VENTA", 25777)], d
 
@@ -796,7 +915,9 @@ def test_d1_sin_fecha_de_fichaje_no_se_vende():
                                  "TABLON_ATRASADO")):
         f = las_fechas_de_fichaje(tablon, 99, {13, 15, 21}, tope)
         assert 21 not in f["fechas"] and f["aviso"] == aviso and aviso in AVISOS, f
-        assert set(f["fechas"]) == {13, 15}, f
+        # Sin el reset, los que se movieron; atrasado, nadie (H2).
+        assert set(f["fechas"]) == ({13, 15} if aviso == "SIN_RESET_EN_EL_TABLON"
+                                    else set()), f
     # Ilegible o vacio: nadie tiene fecha.
     for tablon in (None, "x", [], {}, {"events": []}, [{"type": "bettingPool"}]):
         f = las_fechas_de_fichaje(tablon, 99, {13, 21}, ULTIMO_RESET)
@@ -838,11 +959,13 @@ def test_d1_sin_fecha_de_fichaje_no_se_vende():
                 assert all(por[p] == "SIN_FECHA_DE_FICHAJE" for p in (12, 13, 15, 24)), por
                 assert r["aviso_del_tablon"] == "SIN_TABLON", r
                 assert any("SIN_TABLON" in linea for linea in el_parte(r))
+            # La foto no dice cuando fue el reset: no se sabe si el tablon
+            # esta al dia y no se vende a nadie (H2; antes, al 13 y al 15).
             _limpiar()
             r = _correr(carpeta, cycle={"snapshot": sin_computer})
             assert r["aviso_del_tablon"] == "TABLON_ATRASADO", r
-            assert _escrituras(r["decision"]) == [("PONER_A_LA_VENTA", 13),
-                                                  ("PONER_A_LA_VENTA", 15)], r["acciones"]
+            assert _escrituras(r["decision"]) == [] and _Escritor.creados == 0, r["acciones"]
+            assert _por(r["decision"])[13] == "SIN_FECHA_DE_FICHAJE", r["decision"]
     finally:
         _entorno(**antes)
 
@@ -929,6 +1052,252 @@ def test_d3_el_sancionado_no_se_vende():
         _entorno(**antes)
 
 
+# ------------------------------------------------------------------
+# 7. LA SEGUNDA REVISION DEL 21/10/2026
+# ------------------------------------------------------------------
+
+UTC = timezone.utc
+
+
+def _fin(jornada, rondas=RONDAS):
+    """Cuando se da por jugada la ronda principal de `jornada` (en UTC,
+    como la escribe `decidir`)."""
+    fin = [r["fin"] for r in rondas if r["jornada"] == jornada and not r["aparte"]][0]
+    return (fin + MARGEN_FINAL).astimezone(UTC)
+
+
+def test_h1_el_fichaje_no_se_vende_sin_jugar_una_ronda():
+    """E14: «un fichaje para el once no se revende antes de jugar con
+    nosotros». Los cuatro de -3,3 M se vendieron en un paron: con el
+    reloj de 7 dias solo, el fichaje del 10/11 se vendia el 17/11, sin
+    haber jugado la J13."""
+    from src.analysis.la_proxima_jornada import MARGEN_FINAL as MARGEN_DE_LA_JORNADA
+
+    assert MARGEN_FINAL == MARGEN_DE_LA_JORNADA == timedelta(hours=3)
+    assert PARTIDOS_DE_RONDA == 5
+
+    # La cuenta, pura. Al del reparto le vale la J8 (ya jugada).
+    assert hasta_cuando_no_se_toca(VIEJO, RONDAS) == _fin(8) < AHORA
+    # Gaya llega el 22/10 a las 05:00 UTC, antes del cierre de la J10: la
+    # J10 acaba antes de los 7 dias, y mandan los 7 dias.
+    gaya = datetime(2026, 10, 22, 5, 0, tzinfo=UTC)
+    assert hasta_cuando_no_se_toca(gaya, RONDAS) == gaya + timedelta(days=7) > _fin(10)
+    # El que llega justo cuando empieza una ronda no la juega: la siguiente.
+    j10 = [r for r in RONDAS if r["jornada"] == 10][0]
+    assert hasta_cuando_no_se_toca(j10["inicio"], RONDAS) == _fin(11)
+    # Sin rondas, o sin ninguna que empiece despues de su llegada: no se sabe.
+    llega = datetime(2026, 11, 10, 5, 4, tzinfo=UTC)
+    hasta_la_j12 = [r for r in RONDAS if r["jornada"] <= 12]
+    for rondas in (None, [], hasta_la_j12):
+        assert hasta_cuando_no_se_toca(llega, rondas) is None, rondas
+    assert hasta_cuando_no_se_toca(None, RONDAS) is None
+    # Y en decidir: SIN_RONDA_TRAS_EL_FICHAJE (sin rondas, ni al del reparto).
+    d = _uno(fichajes={7: llega}, ahora=datetime(2026, 11, 17, 10, 7, tzinfo=UTC),
+             rondas=hasta_la_j12)
+    assert d["acciones"] == [] and d["no_se_tocan"] == [
+        {"player_id": 7, "nombre": "Suplente", "estado": "doubt",
+         "por": "SIN_RONDA_TRAS_EL_FICHAJE", "fichado": llega.isoformat()}], d
+    for rondas in (None, []):
+        d = _d(rondas=rondas)
+        assert d["acciones"] == [] and {p: "SIN_RONDA_TRAS_EL_FICHAJE" for p in (12, 13, 15, 24)
+                                        }.items() <= _por(d).items(), _por(d)
+
+    # EL PARON DE NOVIEMBRE: ganado en la subasta del 10/11 (la J12 acabo
+    # el 08/11), en duda y fuera del once. El 17/11 lleva 7 dias y no ha
+    # jugado: no se toca hasta que acaba la J13 (23/11 a las 21:00 CET).
+    oferta = {7: {"offer_id": 70, "amount": 990_000}}
+    for ahora in (datetime(2026, 11, 17, 10, 7, tzinfo=UTC),       # el caso de la revision
+                  datetime(2026, 11, 20, 18, 0, tzinfo=UTC),       # antes de la J13
+                  _fin(13) - timedelta(minutes=1)):
+        d = _uno(ofertas_del_computer=oferta, fichajes={7: llega}, ahora=ahora)
+        assert d["acciones"] == [] and d["no_se_tocan"] == [
+            {"player_id": 7, "nombre": "Suplente", "estado": "doubt",
+             "por": "SIN_JUGAR_CON_NOSOTROS", "fichado": llega.isoformat(),
+             "hasta": _fin(13).isoformat()}], (ahora, d)
+    d = _uno(ofertas_del_computer=oferta, fichajes={7: llega}, ahora=_fin(13))
+    assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 7)], d
+
+    # Un aplazado suelto en el paron (aparte) o una jornada de la que el
+    # calendario solo guarda un partido (como la J6 de hoy) no cuentan.
+    cal = {"matchdays": [m for m in CAL["matchdays"] if m["matchday"] in (12, 13)] + [
+        {"matchday": 5, "matches": [_p(5, 1, 2, "2026-09-12T18:30:00+02:00"),
+                                    _p(5, 3, 4, "2026-09-13T14:00:00+02:00"),
+                                    _p(5, 5, 6, "2026-09-13T18:30:00+02:00"),
+                                    _p(5, 7, 8, "2026-09-14T21:00:00+02:00"),
+                                    _p(5, 9, 10, "2026-11-18T19:00:00+01:00")]},
+        {"matchday": 6, "matches": [_p(6, 3, 8, "2026-11-19T19:00:00+01:00")]},
+    ]}
+    rondas = las_rondas(cal)
+    sueltas = [r for r in rondas if r["jornada"] in (5, 6) and r["inicio"] > llega]
+    assert len(sueltas) == 2 and sueltas[0]["aparte"] and sueltas[1]["partidos"] == 1, rondas
+    assert hasta_cuando_no_se_toca(llega, rondas) == _fin(13, rondas) == _fin(13)
+
+    # NAVIDAD: la J17 acaba el 20/12 y la J18 empieza el 02/01. El fichaje
+    # del 22/12 no se vende el 29/12; despues de la J18, si. El del 17/12,
+    # que juega la J17, a los 7 dias.
+    navidad = datetime(2026, 12, 22, 5, 4, tzinfo=UTC)
+    d = _uno(fichajes={7: navidad}, ahora=datetime(2026, 12, 29, 10, 7, tzinfo=UTC))
+    assert _por(d) == {7: "SIN_JUGAR_CON_NOSOTROS"} and d["acciones"] == [], d
+    assert d["no_se_tocan"][0]["hasta"] == _fin(18).isoformat(), d
+    d = _uno(fichajes={7: navidad}, ahora=datetime(2027, 1, 5, 10, 7, tzinfo=UTC))
+    assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 7)], d
+    antes_de_la_j17 = datetime(2026, 12, 17, 5, 4, tzinfo=UTC)
+    assert hasta_cuando_no_se_toca(antes_de_la_j17, RONDAS) == antes_de_la_j17 + timedelta(days=7)
+
+    # COMO GAYA, FUERA DEL ONCE EN LA J10: si llega con la J10 empezada
+    # (la subasta del sabado 24/10), no la puede jugar con nosotros. El
+    # jueves 29/10 no se toca (5 dias); el 01/11, con 7 dias, tampoco: no
+    # ha acabado la J11. Despues de la J11, si.
+    sabado = datetime(2026, 10, 24, 5, 4, tzinfo=UTC)
+    assert hasta_cuando_no_se_toca(sabado, RONDAS) == _fin(11)
+    for ahora, por in ((datetime(2026, 10, 29, 9, 7, tzinfo=UTC), "RECIEN_FICHADO"),
+                       (datetime(2026, 11, 1, 12, 0, tzinfo=UTC), "SIN_JUGAR_CON_NOSOTROS"),
+                       (_fin(11) - timedelta(minutes=1), "SIN_JUGAR_CON_NOSOTROS")):
+        d = _uno(oferta=1_000_000, fichajes={7: sabado}, ahora=ahora)
+        assert d["acciones"] == [] and _por(d) == {7: por}, (ahora, d)
+        assert d["no_se_tocan"][0]["hasta"] == _fin(11).isoformat(), d
+    d = _uno(oferta=1_000_000, fichajes={7: sabado}, ahora=_fin(11))
+    assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 7)], d
+    # LO QUE EL CALENDARIO NO VE: si llega el 22/10, antes del cierre de la
+    # J10, la J10 cuenta como jugada aunque se quedara fuera del once (no
+    # hay libro de los onces de cada ronda): desde el 29/10 a las 05:00 UTC.
+    d = _uno(oferta=1_000_000, fichajes={7: gaya},
+             ahora=gaya + timedelta(days=7, minutes=-1))
+    assert _por(d) == {7: "RECIEN_FICHADO"}, d
+    d = _uno(oferta=1_000_000, fichajes={7: gaya}, ahora=datetime(2026, 10, 29, 9, 7, tzinfo=UTC))
+    assert _acciones(d) == [("ACEPTAR_OFERTA_DEL_COMPUTER", 7)], d
+
+    # De punta a punta, con el tablon y la foto de cada dia.
+    antes = _entorno(**ENCENDIDO)
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            # El paron: el 17/11 no se toca al 27; a los del reparto, si.
+            _limpiar()
+            r = _correr(carpeta, **_el_dia(datetime(2026, 11, 17, 10, 7, tzinfo=UTC),
+                                           PARON, llega, 727, 2_900_000))
+            assert r["motivo"] == "EJECUTADA" and not r.get("aviso_del_tablon"), r
+            assert _por(r["decision"])[27] == "SIN_JUGAR_CON_NOSOTROS", r["decision"]
+            assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 12) in _escrituras(r["decision"]), r
+            assert 27 not in {a["player_id"] for a in r["acciones"]}, r["acciones"]
+            assert ("accept_offer", {"offer_id": 727, "execute": True}) not in _Escritor.llamadas
+            assert any("SIN_JUGAR_CON_NOSOTROS" in linea and "27" in linea
+                       and _fin(13).isoformat() in linea for linea in el_parte(r)), el_parte(r)
+            # Acabada la J13, se vende.
+            _limpiar()
+            r = _correr(carpeta, **_el_dia(datetime(2026, 11, 24, 10, 7, tzinfo=UTC),
+                                           PARON, llega, 727, 2_900_000))
+            assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 27) in _escrituras(r["decision"]), r
+            assert ("accept_offer", {"offer_id": 727, "execute": True}) in _Escritor.llamadas
+
+            # Como Gaya: ganado el sabado 24/10, con la J10 jugandose.
+            gaya_del_sabado = dict(ficha=GAYA, llega=sabado, offer_id=726, oferta=1_700_000)
+            _limpiar()
+            r = _correr(carpeta, **_el_dia(datetime(2026, 10, 29, 9, 7, tzinfo=UTC),
+                                           **gaya_del_sabado))
+            assert _por(r["decision"])[26] == "RECIEN_FICHADO", r["decision"]
+            assert ("accept_offer", {"offer_id": 726, "execute": True}) not in _Escritor.llamadas
+            _limpiar()
+            r = _correr(carpeta, **_el_dia(datetime(2026, 11, 1, 12, 0, tzinfo=UTC),
+                                           **gaya_del_sabado))
+            assert r["motivo"] == "JORNADA_EN_CURSO" and _Escritor.creados == 0, r
+            _limpiar()
+            r = _correr(carpeta, **_el_dia(datetime(2026, 11, 3, 9, 7, tzinfo=UTC),
+                                           **gaya_del_sabado))
+            assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 26) in _escrituras(r["decision"]), r
+    finally:
+        _entorno(**antes)
+
+
+def test_h2_con_el_tablon_atrasado_no_se_vende_a_nadie():
+    """Con el tablon atrasado, al que tenia un movimiento se le fechaba con
+    el ultimo que traia el fichero. Jonny (1599), de verdad: nuestro desde
+    el 10/08, vendido el 20/08 y recomprado en la subasta del 23/08; con el
+    tablon parado el 20/08 se le daba por nuestro desde el 10/08."""
+    assert MARGEN_DEL_TABLON == timedelta(hours=2)
+    assert "NADIE" in AVISOS["TABLON_ATRASADO"], AVISOS["TABLON_ATRASADO"]
+
+    # El 13 (comprado el 20/09) se vende al Computer el 20/10 a las 22:00 y
+    # se recompra en la subasta del 21/10 (05:04). La peticion del tablon
+    # falla desde el 20/10 a mediodia: el fichero se queda en las subastas
+    # del 20/10 (05:04).
+    hoy = datetime(2026, 10, 21, 5, 0, tzinfo=UTC)
+    ahora = datetime(2026, 10, 21, 10, 7, tzinfo=UTC)
+    ayer = _ev("m-ayer", "market", hoy - timedelta(days=1) + timedelta(minutes=4),
+               [{"player": 600, "to": RIVAL, "amount": 1}])
+    se_fue = _ev("t13", "transfer", datetime(2026, 10, 20, 22, 0, tzinfo=UTC),
+                 [{"player": 13, "from": NOSOTROS, "amount": 950_000}])
+    vuelve = _ev("m13-hoy", "market", hoy + timedelta(minutes=4),
+                 [{"player": 13, "to": NOSOTROS, "amount": 1_000_000}])
+    al_dia = _el_tablon(ayer, se_fue, vuelve, hoy=hoy)
+    atrasado = _el_tablon(ayer, subastas_de_hoy=False)
+    f = las_fechas_de_fichaje(al_dia, 99, {13, 21}, hoy)
+    assert f == {"fechas": {13: hoy + timedelta(minutes=4), 21: RESET_LIGA}, "aviso": None}, f
+    f = las_fechas_de_fichaje(atrasado, 99, {13, 21}, hoy)
+    assert f == {"fechas": {}, "aviso": "TABLON_ATRASADO"}, f
+    d = _d(fichajes=f["fechas"], ahora=ahora, vendidos=set())
+    assert d["acciones"] == [] and all(
+        _por(d)[p] == "SIN_FECHA_DE_FICHAJE" for p in (12, 13, 15, 23, 24)), _por(d)
+
+    # UN DIA SIN SUBASTA (5 de 73): sin 'market' desde el reset, pero un
+    # rival vende al Computer a las 07:43 UTC (como el 09/10): se pidio
+    # despues, esta al dia. Justo a las 2 h, tambien; un minuto antes, no.
+    sin_subasta = _el_tablon(subastas_de_hoy=False)
+
+    def _vende_un_rival(despues, tipo="transfer"):
+        return _ev(f"{tipo}-{despues}", tipo, ULTIMO_RESET + despues,
+                   [{"player": 602, "from": RIVAL, "amount": 500_000}])
+
+    base = {13: datetime(2026, 9, 20, 5, 5, tzinfo=UTC),
+            15: datetime(2026, 10, 1, 10, 0, tzinfo=UTC), 21: RESET_LIGA}
+    for despues in (timedelta(hours=2, minutes=43), MARGEN_DEL_TABLON):
+        f = las_fechas_de_fichaje(sin_subasta + [_vende_un_rival(despues)], 99, {13, 15, 21},
+                                  ULTIMO_RESET)
+        assert f == {"fechas": base, "aviso": None}, (despues, f)
+    f = las_fechas_de_fichaje(sin_subasta + [_vende_un_rival(MARGEN_DEL_TABLON
+                                                             - timedelta(minutes=1))],
+                              99, {13, 15, 21}, ULTIMO_RESET)
+    assert f == {"fechas": {}, "aviso": "TABLON_ATRASADO"}, f
+    # Solo cuentan 'market' y 'transfer': las porras, las encuestas y los
+    # avisos llegan con fecha de atras (medido el 21/10: 2.545 veces).
+    for tipo in ("bettingPool", "poll", "adminText", "bonus", "roundFinished"):
+        f = las_fechas_de_fichaje(sin_subasta + [_ev(tipo, tipo, ULTIMO_RESET
+                                                     + timedelta(hours=5), {"id": 1})],
+                                  99, {13, 15, 21}, ULTIMO_RESET)
+        assert f == {"fechas": {}, "aviso": "TABLON_ATRASADO"}, (tipo, f)
+    # Sin saber el ultimo reset, ni con un movimiento de esta tarde.
+    f = las_fechas_de_fichaje(sin_subasta + [_vende_un_rival(timedelta(hours=9))], 99,
+                              {13, 15, 21}, None)
+    assert f == {"fechas": {}, "aviso": "TABLON_ATRASADO"}, f
+
+    antes = _entorno(**ENCENDIDO)
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            # El vendido y recomprado, de punta a punta: con el tablon
+            # atrasado no se vende a nadie (antes, el 13 por nuestro desde
+            # el 20/09); al dia, el 13 es un recien fichado.
+            vuelta = _el_dia(ahora)
+            _limpiar()
+            r = _correr(carpeta, **{**vuelta, "tablon": atrasado})
+            assert r["motivo"] == "NADA_QUE_HACER" and _Escritor.creados == 0, r
+            assert r["aviso_del_tablon"] == "TABLON_ATRASADO", r
+            assert all(_por(r["decision"])[p] == "SIN_FECHA_DE_FICHAJE"
+                       for p in (12, 13, 15, 23, 24)), r["decision"]
+            assert any("TABLON_ATRASADO" in linea and "NADIE" in linea for linea in el_parte(r))
+            _limpiar()
+            r = _correr(carpeta, **{**vuelta, "tablon": al_dia})
+            assert r["motivo"] == "EJECUTADA" and not r.get("aviso_del_tablon"), r
+            assert _por(r["decision"])[13] == "RECIEN_FICHADO", r["decision"]
+            assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 12) in _escrituras(r["decision"]), r
+            # Un dia sin subasta, con un movimiento de las 07:43: se vende.
+            _limpiar()
+            r = _correr(carpeta, tablon=sin_subasta
+                        + [_vende_un_rival(timedelta(hours=2, minutes=43))])
+            assert r["motivo"] == "EJECUTADA" and not r.get("aviso_del_tablon"), r
+            assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 12) in _escrituras(r["decision"]), r
+    finally:
+        _entorno(**antes)
+
+
 TESTS = [
     test_vende_al_dudoso_fuera_del_once_desde_el_95,
     test_no_vende_por_debajo_del_95,
@@ -943,6 +1312,8 @@ TESTS = [
     test_d1_sin_fecha_de_fichaje_no_se_vende,
     test_d2_hacen_falta_los_dos_onces,
     test_d3_el_sancionado_no_se_vende,
+    test_h1_el_fichaje_no_se_vende_sin_jugar_una_ronda,
+    test_h2_con_el_tablon_atrasado_no_se_vende_a_nadie,
 ]
 
 

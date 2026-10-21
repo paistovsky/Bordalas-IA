@@ -253,8 +253,9 @@ QUE_HACE = {
         "Vende a los suplentes que Biwenger da en duda o lesionados (caen un "
         "3-5 % en la semana): los publica a su valor y acepta la oferta del "
         "Computer desde el 95 %. Nunca a uno del once escrito (hacen falta el del "
-        "panel y el de Biwenger), ni a un sancionado, ni a un fichaje de hace "
-        "menos de 7 días (ni a uno sin fecha de fichaje en el tablón), ni a Yamal, "
+        "panel y el de Biwenger), ni a un sancionado, ni a un fichaje que todavía "
+        "no ha jugado una ronda con nosotros y nunca antes de 7 días (ni a uno sin "
+        "fecha de fichaje: con el tablón atrasado, a nadie), ni a Yamal, "
         "ni a los protegidos o `conservar` del gestor, ni a lo que aguanta la "
         "cartera, ni con una ronda jugándose.",
     "BORDALAS_LA_ROTACION":

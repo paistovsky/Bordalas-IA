@@ -1,5 +1,5 @@
 """
-EL PARTE VENDE (17/10/2026; arreglado el 21/10/2026)
+EL PARTE VENDE (17/10/2026; arreglado el 21/10/2026, dos veces)
 
 POR QUE EXISTE
 
@@ -32,9 +32,13 @@ LA REGLA
            dos casos NO SE HACE NADA y la salida lo dice;
          - a un sancionado ('sanctioned'): se mira y no se toca
            (`SANCION`);
-         - a un FICHAJE de hace menos de `DIAS_DE_FICHAJE` (7) dias
-           (`RECIEN_FICHADO`), ni a uno del que no se sepa desde cuando
-           es nuestro (`SIN_FECHA_DE_FICHAJE`);
+         - a un FICHAJE que todavia no ha jugado una ronda con
+           nosotros: hasta que ACABA la primera ronda que EMPEZO
+           despues de su llegada, y nunca antes de `DIAS_DE_FICHAJE`
+           (7) dias (`RECIEN_FICHADO` los 7 dias,
+           `SIN_JUGAR_CON_NOSOTROS` despues); ni a uno del que no se
+           sepa desde cuando es nuestro (`SIN_FECHA_DE_FICHAJE`) o
+           cuando juega su primera ronda (`SIN_RONDA_TRAS_EL_FICHAJE`);
          - a Yamal, por su nombre, siempre (este como este la orden).
            Sin nombre no se vende: no se sabria si es el;
          - a un protegido del gestor (`la_orden_del_gestor.protegidos`:
@@ -71,9 +75,11 @@ LOS TRES ARREGLOS (21/10/2026)
        se resuelve el 22/10 a las 05:00 UTC; si llega en duda y los once
        sanos lo dejan fuera del once, el parte lo publicaba el jueves y
        lo vendia el viernes, antes de la J10, deshaciendo la compra.
-       Ahora no se toca a quien es nuestro desde hace menos de 7 dias.
-       La salvedad de la lesion larga NO se aplica: el catalogo no dice
-       cuanto dura; si hace falta, lo vende el dueño a mano.
+       Ahora no se toca a quien es nuestro desde hace menos de 7 dias
+       (y, desde la segunda revision, hasta que juega una ronda: ver
+       H1 mas abajo). La salvedad de la lesion larga NO se aplica: el
+       catalogo no dice cuanto dura; si hace falta, lo vende el dueño
+       a mano.
 
        DE DONDE SALE LA FECHA: del tablon de la liga (`TABLON`,
        `data/rival_intelligence/board_events.json`), que el paso V10
@@ -99,18 +105,18 @@ LOS TRES ARREGLOS (21/10/2026)
        desde entonces y (c) el tablon esta AL DIA: trae el evento
        'market' (las subastas) del ultimo reset del Computer, que se
        lee de la foto (`el_ultimo_reset`: el `until` de sus ventas
-       menos 24 h, `market_clock`). Si lo ultimo que dice el tablon de
-       un jugador nuestro es que se fue o que lo compro otro, el tablon
-       va por detras. En todos esos casos, y si el tablon no se puede
-       leer: sin fecha, y no se vende (`SIN_FECHA_DE_FICHAJE`). Lo que
-       cuesta: los dias en que nadie gana una subasta (5 de 73 hasta el
-       21/10), y quiza el del cambio de hora (si el reset sigue la hora
-       de Madrid, las 24 h no cuadran), los del reparto esperan: se
-       falla del lado seguro. Lo que queda sin cubrir: una
-       compra a un manager hecha despues de la ultima peticion buena,
-       de uno que ese manager tenia del reparto, pasaria por nuestra
-       desde el reset (tiene que fallar la peticion de esta vuelta, y
-       compras entre managers hemos hecho una en 73 dias).
+       menos 24 h, `market_clock`), o, desde la segunda revision, un
+       movimiento de 2 h despues de ese reset (H2). Si lo ultimo que
+       dice el tablon de un jugador nuestro es que se fue o que lo
+       compro otro, el tablon va por detras. En todos esos casos, y si
+       el tablon no se puede leer: sin fecha, y no se vende
+       (`SIN_FECHA_DE_FICHAJE`). Y si el tablon no esta al dia, desde
+       la segunda revision no tiene fecha NADIE (H2). Se falla del
+       lado seguro. Lo que queda sin cubrir: una compra a un manager
+       hecha despues de la ultima peticion buena, de uno que ese
+       manager tenia del reparto, pasaria por nuestra desde el reset
+       (tiene que fallar la peticion de esta vuelta, y compras entre
+       managers hemos hecho una en 73 dias).
 
     2. LOS DOS ONCES. El once del panel ya deja fuera a los titulares
        lesionados y sancionados (es el once que se quiere poner); el de
@@ -126,6 +132,99 @@ LOS TRES ARREGLOS (21/10/2026)
        -3,4 %, AR7 -4,7 %): al titular que se pierde una jornada por
        tarjetas se le vendia para siempre por una caida que nadie ha
        medido. Sale en `malos` (se miro) y en `no_se_tocan` (`SANCION`).
+
+LA SEGUNDA REVISION (21/10/2026)
+
+    La revision de esos arreglos reprodujo dos fallos mas, con el
+    calendario y el tablon de verdad.
+
+    H1. SIETE DIAS NO SON JUGAR. E14 dice «antes de jugar con
+        nosotros», no «antes de una semana», y los cuatro de -3,3 M se
+        vendieron EN UN PARON. Con el reloj de 7 dias, un fichaje del
+        10/11 (la J12 acaba el 08/11 y la J13 no se juega hasta el
+        22/11) en duda y fuera del once se vendia el 17/11 sin haber
+        jugado; uno del 22/12 (la J17 acaba el 20/12, la J18 es el
+        03/01), el 29/12. Ahora no se toca a un fichaje hasta que
+        ACABA (su `fin` mas `MARGEN_FINAL`, las 3 h de
+        `la_proxima_jornada.jornada_en_curso`) la primera ronda de
+        `las_rondas` que EMPEZO despues de su llegada: la primera en la
+        que pudo estar en nuestro once (en esta liga el once se cierra
+        al empezar la ronda). Y nunca antes de los 7 dias. `correr` le
+        pasa a `decidir` las rondas del mismo calendario con el que
+        mira si hay una ronda jugandose; la cuenta la hace
+        `hasta_cuando_no_se_toca`, pura.
+
+        - Cuenta una ronda de verdad: la ventana principal de su
+          jornada (`aparte` False) con al menos `PARTIDOS_DE_RONDA` (5)
+          partidos. Un adelantado o un aplazado suelto no: en el
+          adelantado de la J6 (Real Sociedad-Celta, jueves 03/09)
+          jugaban dos equipos de veinte, y el calendario de hoy guarda
+          de la J6 solo el Levante-Athletic del 21/10 (sale como su
+          ventana principal, con un partido). Con ellos se daria por
+          jugada una ronda en la que su equipo, casi seguro, no jugo; y
+          si cae en un paron, es venderlo sin jugar.
+        - Sin ninguna ronda que empiece despues de su llegada (el
+          calendario no la trae, o no llegan las rondas), no se sabe
+          cuando juega: no se vende (`SIN_RONDA_TRAS_EL_FICHAJE`). Sin
+          calendario el parte ya no hacia nada (`SIN_CALENDARIO`).
+        - Al del reparto y al que llego antes de una ronda que ya acabo
+          no les cambia nada, si el calendario guarda esa ronda: el de
+          produccion guarda las ultimas jugadas (el del 19/10 traia la
+          J8 y la J9, no la J7). Si algun dia solo trajera las por
+          jugar, esperarian a que acabe la proxima: del lado seguro.
+
+        LO QUE EL CALENDARIO NO VE. Quien jugo de verdad. Al fichaje que
+        llego antes del cierre de una ronda y se quedo fuera de nuestro
+        once se le da por jugada: Gaya, si llega el 22/10 a las 05:00
+        UTC en duda y no entra en el once de la J10 (23-26/10), se
+        puede vender desde el 29/10 a las 05:00 UTC (los 7 dias). Para
+        no darsela haria falta el once de cada ronda, y el libro que lo
+        guarda (`data/intelligence/onces_de_la_jornada.jsonl`) tiene
+        una (la J9). El que llega CON la ronda empezada (una subasta
+        del sabado) si espera a la siguiente. Tampoco ve si su equipo
+        juega esa ronda (un aplazado suyo) ni la hora de verdad de las
+        jornadas que LaLiga no ha fijado: hasta que la fija, el
+        calendario trae todos sus partidos el domingo a las 17:00, como
+        para `jornada_en_curso`.
+
+    H2. EL TABLON ATRASADO NO DA FECHAS. Con el tablon sin las subastas
+        del ultimo reset (`TABLON_ATRASADO`) solo esperaban los del
+        reparto: al que tenia un movimiento se le fechaba con el ultimo
+        que traia el fichero... que puede no ser el ultimo. Historia de
+        verdad: Jonny (1599), nuestro desde el 10/08, se vendio el
+        20/08 a las 09:59 y se recompro en la subasta del 23/08 a las
+        05:03; con el tablon parado el 20/08 a las 09:00 (peticiones
+        fallando), el parte lo daba por nuestro desde el 10/08 y
+        aceptaba la oferta el 23/08, el dia que volvio. Ahora, si no se
+        sabe que el tablon esta al dia, no tiene fecha NADIE y en esa
+        vuelta no se vende a nadie (`SIN_FECHA_DE_FICHAJE`).
+
+        AL DIA SIN SUBASTA. Para que los dias en que nadie gana una
+        subasta (5 de 73) no paren el parte entero, el tablon tambien
+        esta al dia si trae un movimiento ('market' o 'transfer') de
+        `MARGEN_DEL_TABLON` (2 h) o mas despues del ultimo reset: si lo
+        trae, se pidio despues, y para entonces las subastas de ese
+        reset ya estaban. Medido el 21/10 con las 159 versiones del
+        tablon que hay en git (23/09-21/10, cada una como se pidio):
+          - ningun 'market' ni 'transfer' aparecio en una version
+            posterior a otra que ya traia uno mas nuevo, ni con fecha
+            posterior a su version. Los que si llegan tarde son
+            'bettingPool', 'poll' y 'adminText' (2.545 veces): no
+            cuentan;
+          - las 71 subastas llegaron entre 2 y 11,5 minutos despues de
+            las 05:00 UTC;
+          - cada version usada cada hora hasta 48 h despues (el tablon
+            de una vuelta cuya peticion fallo): 7.510 casos, NINGUNO
+            dado por al dia sin las subastas de su dia, ni con la
+            prueba de antes ni con esta. Esta da por al dia 318 mas y
+            desatasca los cuatro dias sin subasta que caen en esas
+            versiones (03, 09, 11 y 20/10) desde su primer movimiento
+            (entre las 07:43 y las 16:06 UTC); hasta entonces, ese
+            dia no se vende.
+        Las 2 h cubren tambien el cambio de hora: si el reset sigue la
+        hora de Madrid, en primavera `el_ultimo_reset` (el `until`
+        menos 24 h) sale una hora antes que el de verdad, y 2 h
+        despues de el sigue siendo una hora despues del reset.
 
 QUE NO HACE
 
@@ -175,8 +274,23 @@ MALOS = frozenset({"doubt", "injured"})
 # de un partido y su caida no esta medida.
 SANCIONADO = "sanctioned"
 
-# Un fichaje no se toca hasta que lleva estos dias con nosotros (E14).
+# Un fichaje no se toca hasta que lleva estos dias con nosotros (E14)...
 DIAS_DE_FICHAJE = 7
+
+# ... ni hasta que acaba la primera ronda que empezo despues de su
+# llegada (21/10/2026, H1): su ultimo partido mas este margen
+# (= `la_proxima_jornada.MARGEN_FINAL`, el de `jornada_en_curso`).
+MARGEN_FINAL = timedelta(hours=3)
+
+# Lo que hace falta para que una ronda cuente como jugada: la ventana
+# principal de su jornada con al menos media jornada de partidos. Un
+# aplazado o un adelantado suelto no (ver H1).
+PARTIDOS_DE_RONDA = 5
+
+# El tablon esta al dia sin subasta si trae un movimiento de esto o mas
+# despues del ultimo reset del Computer (21/10/2026, H2): las subastas
+# llegan entre 2 y 11,5 min despues, y 1 h es la del cambio de hora.
+MARGEN_DEL_TABLON = timedelta(hours=2)
 
 # Lo minimo que se acepta del Computer, sobre el valor de hoy.
 SUELO = 0.95
@@ -315,9 +429,12 @@ AVISOS = {
                    "se vende a nadie (SIN_FECHA_DE_FICHAJE)"),
     "SIN_RESET_EN_EL_TABLON": ("el tablon no empieza en el reset de la liga: a los "
                                "del reparto no se les puede dar fecha y no se venden"),
-    "TABLON_ATRASADO": ("el tablon no trae las subastas del ultimo reset del "
-                        "Computer (o la foto no dice cuando fue): a los del reparto "
-                        "no se les puede dar fecha y no se venden en esta vuelta"),
+    "TABLON_ATRASADO": ("no se sabe si el tablon esta al dia: no trae las subastas "
+                        "del ultimo reset del Computer ni ningun movimiento de 2 h "
+                        "despues (o la foto no dice cuando fue el reset). Lo ultimo "
+                        "que trae de cada uno puede no ser lo ultimo que paso: no se "
+                        "da fecha a NADIE y en esta vuelta no se vende a nadie "
+                        "(SIN_FECHA_DE_FICHAJE)"),
 }
 
 
@@ -328,12 +445,17 @@ def las_fechas_de_fichaje(eventos, yo, plantilla, ultimo_reset=None) -> dict:
 
         {"fechas": {player_id: datetime UTC}, "aviso": None o un AVISOS}
 
-    Con compra en el tablon (lo ultimo que lo movio fue un 'market' o un
-    'transfer' con `to.id` = `yo`), la fecha de ese evento. Sin ningun
-    movimiento desde el reset, la del reset, pero solo si el tablon
-    empieza en el y trae un 'market' desde `ultimo_reset` (esta al dia).
-    Si lo ultimo que lo movio no es hacia nosotros, el tablon va por
-    detras: sin fecha. Quien no tiene fecha no esta en `fechas`.
+    Primero, si el tablon esta AL DIA: trae un 'market' (las subastas)
+    desde `ultimo_reset`, o un movimiento ('market' o 'transfer') de
+    `MARGEN_DEL_TABLON` o mas despues (21/10/2026, H2). Si no lo esta,
+    o no se sabe `ultimo_reset`: NADIE tiene fecha (`TABLON_ATRASADO`).
+
+    Al dia, con compra en el tablon (lo ultimo que lo movio fue un
+    'market' o un 'transfer' con `to.id` = `yo`), la fecha de ese
+    evento. Sin ningun movimiento desde el reset, la del reset, si el
+    tablon empieza en el. Si lo ultimo que lo movio no es hacia
+    nosotros, el tablon va por detras: sin fecha. Quien no tiene fecha
+    no esta en `fechas`.
     """
 
     salida = {"fechas": {}, "aviso": None}
@@ -355,6 +477,7 @@ def las_fechas_de_fichaje(eventos, yo, plantilla, ultimo_reset=None) -> dict:
 
         tope = _fecha(ultimo_reset)
         al_dia = False
+        ultimo_movimiento = None
         movidos: dict = {}                  # {player_id: (cuando, hacia nosotros)}
         for e in eventos:
             if e.get("type") not in ("market", "transfer"):
@@ -364,6 +487,8 @@ def las_fechas_de_fichaje(eventos, yo, plantilla, ultimo_reset=None) -> dict:
                 continue
             if e.get("type") == "market" and tope is not None and cuando >= tope:
                 al_dia = True
+            if ultimo_movimiento is None or cuando > ultimo_movimiento:
+                ultimo_movimiento = cuando
             for op in _lista(e.get("content")):
                 jugador = op.get("player")
                 pid = _int(_dict(jugador).get("id") if isinstance(jugador, dict) else jugador)
@@ -378,23 +503,69 @@ def las_fechas_de_fichaje(eventos, yo, plantilla, ultimo_reset=None) -> dict:
                     # solo si lo son los dos.
                     movidos[pid] = (cuando, antes[1] and a_nosotros)
 
+        # Sin subasta desde el reset (5 dias de 73): al dia si trae un
+        # movimiento de 2 h despues. Solo 'market' y 'transfer': las
+        # porras y las encuestas llegan con fecha de atras (H2).
+        if (not al_dia and tope is not None and ultimo_movimiento is not None
+                and ultimo_movimiento >= tope + MARGEN_DEL_TABLON):
+            al_dia = True
+        if not al_dia:
+            # H2: lo ultimo que trae de cada uno puede no ser lo ultimo
+            # que paso (vendido y recomprado despues): nadie tiene fecha.
+            salida["aviso"] = "TABLON_ATRASADO"
+            return salida
+
         fechas = {}
         for pid in _ids(plantilla):
             if pid in movidos:
                 cuando, a_nosotros = movidos[pid]
                 if a_nosotros:
                     fechas[pid] = cuando
-            elif reset is not None and al_dia:
+            elif reset is not None:
                 fechas[pid] = reset
 
         salida["fechas"] = fechas
         if reset is None:
             salida["aviso"] = "SIN_RESET_EN_EL_TABLON"
-        elif not al_dia:
-            salida["aviso"] = "TABLON_ATRASADO"
         return salida
     except Exception:                               # noqa: BLE001
         return {"fechas": {}, "aviso": "SIN_TABLON"}
+
+
+# ============================================================
+# HASTA CUANDO NO SE TOCA UN FICHAJE (21/10/2026, H1)
+# ============================================================
+
+def hasta_cuando_no_se_toca(fichado, rondas) -> datetime | None:
+    """
+    Hasta cuando no se vende a uno que es nuestro desde `fichado` (E14:
+    no se revende antes de jugar con nosotros): hasta que acaba (`fin`
+    mas `MARGEN_FINAL`) la primera ronda de `rondas` que EMPEZO despues
+    de su llegada, y nunca antes de `DIAS_DE_FICHAJE` dias desde que
+    llego. Las de `la_proxima_jornada.las_rondas`: `[{inicio, fin,
+    partidos, aparte}]`. Solo cuentan las de verdad: `aparte` False y
+    `PARTIDOS_DE_RONDA` partidos o mas.
+
+    None si no se sabe: sin `fichado`, sin rondas o sin ninguna que
+    empiece despues de su llegada. Pura. Nunca lanza.
+    """
+    try:
+        fichado = _fecha(fichado)
+        if fichado is None:
+            return None
+        finales = []
+        for r in _lista(rondas):
+            if r.get("aparte") or (_int(r.get("partidos")) or 0) < PARTIDOS_DE_RONDA:
+                continue
+            inicio, fin = _fecha(r.get("inicio")), _fecha(r.get("fin"))
+            if inicio is None or fin is None or inicio <= fichado:
+                continue
+            finales.append(max(inicio, fin) + MARGEN_FINAL)
+        if not finales:
+            return None
+        return max(fichado + timedelta(days=DIAS_DE_FICHAJE), min(finales))
+    except Exception:                               # noqa: BLE001
+        return None
 
 
 # ============================================================
@@ -443,7 +614,7 @@ def decidir(
     *, plantilla, estados, nombres=None, precios=None, ofertas_del_computer=None,
     en_venta=frozenset(), once_escrito=frozenset(), once_de_biwenger=frozenset(),
     protegidos=frozenset(), conservados=frozenset(), aguanta=frozenset(),
-    vendidos=frozenset(), fichajes=None, ahora=None,
+    vendidos=frozenset(), fichajes=None, ahora=None, rondas=None,
     en_curso=False, puede_escribir=True, sin_calendario=False,
 ) -> dict:
     """
@@ -469,6 +640,11 @@ def decidir(
                               no esta, o None, no se vende
         ahora                 la hora de la vuelta (sin ella, no se
                               cuentan los dias y no se vende a nadie)
+        rondas                las de `la_proxima_jornada.las_rondas`
+                              (21/10/2026, H1): con ellas se sabe si un
+                              fichaje ya jugo una ronda con nosotros
+                              (`hasta_cuando_no_se_toca`); None o
+                              vacias, no se sabe y no se vende a nadie
         en_curso              hay una ronda jugandose (None: no se sabe)
         puede_escribir        fuera de la zona de silencio
         sin_calendario        no hay rondas que mirar
@@ -497,6 +673,7 @@ def decidir(
         fichajes = {pid: f for pid, f in ((p, _fecha(v)) for p, v in _por_id(fichajes).items())
                     if f is not None}
         ahora = _fecha(ahora)
+        rondas = _lista(rondas)
 
         acciones, malos, no_se_tocan = [], [], []
         for pid in sorted(_ids(plantilla)):
@@ -507,6 +684,7 @@ def decidir(
             suyos = _nombres(nombres.get(pid))
             nombre = suyos[0] if suyos else None
             fichado = fichajes.get(pid)
+            hasta = None
 
             if pid in vendidos:
                 por = "VENDIDO_EN_ESTA_VUELTA"
@@ -526,18 +704,28 @@ def decidir(
                 por = "SANCION"
             elif fichado is None or ahora is None:
                 por = "SIN_FECHA_DE_FICHAJE"
-            elif ahora - fichado < timedelta(days=DIAS_DE_FICHAJE):
-                por = "RECIEN_FICHADO"
             else:
-                por = None
+                # E14 (H1): los 7 dias, y hasta que acaba su primera ronda.
+                hasta = hasta_cuando_no_se_toca(fichado, rondas)
+                if ahora - fichado < timedelta(days=DIAS_DE_FICHAJE):
+                    por = "RECIEN_FICHADO"
+                elif hasta is None:
+                    por = "SIN_RONDA_TRAS_EL_FICHAJE"
+                elif ahora < hasta:
+                    por = "SIN_JUGAR_CON_NOSOTROS"
+                else:
+                    por = None
             valor = _int(precios.get(pid))
             suelo = el_suelo(valor)
             if por is None and suelo is None:
                 por = "SIN_VALOR"
             if por:
                 fila = {"player_id": pid, "nombre": nombre, "estado": estado, "por": por}
-                if por == "RECIEN_FICHADO":
+                if por in ("RECIEN_FICHADO", "SIN_JUGAR_CON_NOSOTROS",
+                           "SIN_RONDA_TRAS_EL_FICHAJE"):
                     fila["fichado"] = fichado.isoformat()
+                    if hasta is not None:
+                        fila["hasta"] = hasta.isoformat()
                 no_se_tocan.append(fila)
                 continue
 
@@ -655,7 +843,9 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
         # 3. CUANDO: con una ronda jugandose, en la zona de silencio o sin
         # calendario, nada (y sin leer nada mas).
         cal = CALENDARIO if calendario is None else calendario
-        sin_calendario = not las_rondas(cal)
+        # Las rondas tambien dicen cuando ha jugado un fichaje (H1).
+        rondas = las_rondas(cal)
+        sin_calendario = not rondas
         en_curso = bool(jornada_en_curso(ahora, cal))
         puede_escribir = bool(_puede_escribir(ahora))
         salida["en_curso"] = en_curso
@@ -716,8 +906,8 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
         salida["vuelta_descartada"] = vuelta["descartados"]
 
         # DESDE CUANDO ES NUESTRO CADA UNO (21/10/2026): del tablon que el
-        # paso V10 acaba de pedir. Sin tablon, nadie tiene fecha y no se
-        # vende a nadie.
+        # paso V10 acaba de pedir. Sin tablon, o sin saber que esta al
+        # dia (H2), nadie tiene fecha y no se vende a nadie.
         if tablon is None:
             tablon = _leer(TABLON, None)
         fichajes = las_fechas_de_fichaje(tablon, yo, foto["plantilla"],
@@ -757,7 +947,7 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
             conservados=conservados(orden_ruta, ahora),
             aguanta=los_que_aguanta(libro_ronda_ruta),
             vendidos=vuelta["vendidos"], fichajes=fichajes["fechas"], ahora=ahora,
-            en_curso=en_curso, puede_escribir=puede_escribir,
+            rondas=rondas, en_curso=en_curso, puede_escribir=puede_escribir,
             sin_calendario=sin_calendario,
         )
         salida["decision"] = d
@@ -804,9 +994,13 @@ def el_parte(r) -> list:
         if d.get("malos"):
             lineas.append(f"  Con parte malo en la plantilla: {d.get('malos')}")
         for n in _lista(d.get("no_se_tocan")):
+            desde = ""
+            if n.get("fichado"):
+                desde = (f" (nuestro desde {n.get('fichado')}"
+                         + (f"; no se toca hasta {n.get('hasta')}" if n.get("hasta") else "")
+                         + ")")
             lineas.append(f"      no se toca {n.get('player_id')} {n.get('nombre') or ''} "
-                          f"({n.get('estado')}): {n.get('por')}"
-                          + (f" (nuestro desde {n.get('fichado')})" if n.get("fichado") else ""))
+                          f"({n.get('estado')}): {n.get('por')}{desde}")
         for a in _lista(r.get("acciones")):
             importe = a.get("importe") or a.get("precio")
             lineas.append(f"  -> {a.get('accion')} {a.get('player_id')} {a.get('nombre') or ''} "
