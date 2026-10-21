@@ -201218,5 +201218,43 @@
         "amount": 1007000
       }
     ]
+  },
+  {
+    "event_id": "290e1c7eed271ee926c6f973",
+    "date": 1792571045,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 37711,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2521300
+      }
+    ]
+  },
+  {
+    "event_id": "fb0b6b93dc24930a48d73f88",
+    "date": 1792571448,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]

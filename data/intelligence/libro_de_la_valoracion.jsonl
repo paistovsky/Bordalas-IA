@@ -1894,3 +1894,5 @@
 {"dia":"2026-10-21","id":42370,"name":"Facundo Bernal","value":0,"price":1440000,"bid":0,"live_bid":0,"decision":"NO_DISPONIBLE","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-10-21","id":42794,"name":"Van Oevelen","value":0,"price":230000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-10-21","id":24956,"name":"Nico Serrano","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-21","id":12221,"name":"Pepelu","value":2963520,"price":2520000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
+{"dia":"2026-10-21","id":26048,"name":"Tchouameni","value":4137007,"price":4280000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
