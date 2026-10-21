@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/10/2026, 20:35 de Madrid (mirada al aplazado de la J6).
+Actualizado: 21/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2397 a #2399).
+  Saldo +1.717.983, puja viva Gaya 1.711.008 (jue 07:00). Segun el chat del
+  dueno, Pollo17 y Luismi empezaron la parte aplazada de la J6 en rojo:
+  nosotros no. Turno del cierre de la J10 en pie (vie 23/10 12:45); el de
+  la J11 (dom 01/11 17:00, ya en horario de invierno: turno a las 11:45
+  de Madrid = 10:45 UTC) lo crea ese turno. Viernes: no se enciende nada.
 
 - **21/10 20:47 (laboratorio de rivales).** Desde el reset, dos ventas al
   Computer y las dos con perdida: **Pollo17** vendio a Espi (comprado el
