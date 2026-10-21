@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-21T04:53:00.683123",
+  "updated_at": "2026-10-21T07:19:09.217925",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -1953,49 +1953,49 @@
     },
     "4907": {
       "round_id": 4907,
-      "visto": "2026-10-21T04:53:00.683123",
-      "datos_de": "2026-10-21T04:52:49.282366+00:00",
-      "escrito_en": "2026-10-21T04:53:00.683123",
+      "visto": "2026-10-21T07:19:09.217925",
+      "datos_de": "2026-10-21T07:19:01.257144+00:00",
+      "escrito_en": "2026-10-21T07:19:09.217925",
       "clasificacion": [
-        {
-          "user_id": 14175949,
-          "name": "Pepe Bordalás",
-          "points": 323
-        },
         {
           "user_id": 14145555,
           "name": "Pollo17",
-          "points": 320
+          "points": 381
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 372
         },
         {
           "user_id": 14156489,
           "name": "Luismi_Haz",
-          "points": 287
+          "points": 353
         },
         {
           "user_id": 14151726,
           "name": "DiosMande a Rodri al Palancas",
-          "points": 281
-        },
-        {
-          "user_id": 14154203,
-          "name": "Prinzipote",
-          "points": 258
+          "points": 308
         },
         {
           "user_id": 14176382,
           "name": "Manzagool",
-          "points": 253
+          "points": 305
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 298
         },
         {
           "user_id": 14178736,
           "name": "Mex",
-          "points": 246
+          "points": 274
         },
         {
           "user_id": 14456960,
           "name": "Alvaro Retamosa Sanguino",
-          "points": 198
+          "points": 237
         }
       ],
       "mi_user_id": 14175949,
