@@ -1,5 +1,5 @@
 """
-EL PARTE VENDE (17/10/2026)
+EL PARTE VENDE (17/10/2026; arreglado el 21/10/2026)
 
 POR QUE EXISTE
 
@@ -16,20 +16,25 @@ POR QUE EXISTE
     Ojo con lo que compra el suelo: aceptar al 95 % de su valor es ceder
     hoy lo que de media se pierde en una semana (-4,7 %). Lo que se gana
     es cualquier oferta por encima del suelo, no esperar a que caiga, y
-    la caja libre para la ronda y la mejora. 'sanctioned' entra en la
-    regla del dueño, pero la medida es solo de 'doubt' e 'injured'.
+    la caja libre para la ronda y la mejora.
 
 LA REGLA
 
     1. A QUIEN. De la plantilla de la foto (`my_team`), los que el
        catalogo de la foto (`la_orden_del_gestor.leer_los_estados`) da
-       en 'doubt', 'injured' o 'sanctioned' (`MALOS`). Nunca:
+       en 'doubt' o 'injured' (`MALOS`). Nunca:
          - a uno del ONCE ESCRITO: el del panel (`status.lineup.players`,
-           la misma fuente que `el_cierre_de_la_jornada`) y, ademas, la
-           alineacion vigente en Biwenger de la foto
-           (`user_lineup.data.lineup.players`). Si el panel no trae el
-           once, no se sabe quien es titular y NO SE HACE NADA
-           (`SIN_ONCE_ESCRITO`, y la salida lo dice);
+           la misma fuente que `el_cierre_de_la_jornada`) y la alineacion
+           vigente en Biwenger de la foto (`user_lineup.data.lineup
+           .players`). Hacen falta LOS DOS: sin el del panel no se sabe
+           quien es titular (`SIN_ONCE_ESCRITO`), sin el de Biwenger no
+           se sabe quien sigue puesto (`SIN_ONCE_DE_BIWENGER`), y en los
+           dos casos NO SE HACE NADA y la salida lo dice;
+         - a un sancionado ('sanctioned'): se mira y no se toca
+           (`SANCION`);
+         - a un FICHAJE de hace menos de `DIAS_DE_FICHAJE` (7) dias
+           (`RECIEN_FICHADO`), ni a uno del que no se sepa desde cuando
+           es nuestro (`SIN_FECHA_DE_FICHAJE`);
          - a Yamal, por su nombre, siempre (este como este la orden).
            Sin nombre no se vende: no se sabria si es el;
          - a un protegido del gestor (`la_orden_del_gestor.protegidos`:
@@ -53,6 +58,74 @@ LA REGLA
        vender a uno del once cerrado pierde sus puntos. Ni en la zona de
        silencio, ni sin calendario (`SIN_CALENDARIO`). En esos casos no
        se escribe nada, tampoco se publica.
+
+LOS TRES ARREGLOS (21/10/2026)
+
+    La revision del laboratorio del 21/10 reprodujo tres fallos.
+
+    1. EL FICHAJE NO SE REVENDE ANTES DE JUGAR. Regla de la casa (E14,
+       02/10): «un fichaje para el once no se revende antes de jugar con
+       nosotros, salvo lesion larga» (cuatro vendidos en el paron sin
+       jugar: -3,3 M y cero puntos; la ida y vuelta cuesta un 10-20 %).
+       Nada protegia al recien llegado: la puja del dueño por Gaya (1844)
+       se resuelve el 22/10 a las 05:00 UTC; si llega en duda y los once
+       sanos lo dejan fuera del once, el parte lo publicaba el jueves y
+       lo vendia el viernes, antes de la J10, deshaciendo la compra.
+       Ahora no se toca a quien es nuestro desde hace menos de 7 dias.
+       La salvedad de la lesion larga NO se aplica: el catalogo no dice
+       cuanto dura; si hace falta, lo vende el dueño a mano.
+
+       DE DONDE SALE LA FECHA: del tablon de la liga (`TABLON`,
+       `data/rival_intelligence/board_events.json`), que el paso V10
+       del workflow pide en cada vuelta ANTES del parte
+       (`collect_board_history`) y que se guarda como libro. Es lo que
+       publica Biwenger: una subasta ganada es un evento 'market' con
+       `content[].to.id` = nosotros; una compra a un manager, un
+       'transfer' con `to.id` = nosotros. Medido el 21/10 sobre el
+       tablon de verdad: Sergi Cardona (30493), 'market' del 17/10 a
+       las 05:05:38 UTC por 919.000; Luismi Cruz (25777), 'market' del
+       14/10 a las 05:03:03 UTC por 3.252.000; estan los diez fichajes
+       que siguen en la plantilla. El libro de posiciones
+       (`data/trading/position_ledger.json`) tambien trae a los dos,
+       pero con la hora a la que los VIO (14 minutos despues), no trae
+       a Yamal (26271) y da por perdido a 19862, que sigue siendo
+       nuestro: no sirve de fuente.
+
+       QUIEN NO TIENE COMPRA EN EL TABLON es del reparto del dia 1 (el
+       `leagueReset` del 09/08)... o un fichaje que el fichero todavia
+       no trae (si la peticion de esta vuelta fallo, es el de la
+       anterior). Se le da por nuestro DESDE EL RESET solo si (a) el
+       tablon empieza en el reset, (b) el jugador no se ha movido nunca
+       desde entonces y (c) el tablon esta AL DIA: trae el evento
+       'market' (las subastas) del ultimo reset del Computer, que se
+       lee de la foto (`el_ultimo_reset`: el `until` de sus ventas
+       menos 24 h, `market_clock`). Si lo ultimo que dice el tablon de
+       un jugador nuestro es que se fue o que lo compro otro, el tablon
+       va por detras. En todos esos casos, y si el tablon no se puede
+       leer: sin fecha, y no se vende (`SIN_FECHA_DE_FICHAJE`). Lo que
+       cuesta: los dias en que nadie gana una subasta (5 de 73 hasta el
+       21/10), y quiza el del cambio de hora (si el reset sigue la hora
+       de Madrid, las 24 h no cuadran), los del reparto esperan: se
+       falla del lado seguro. Lo que queda sin cubrir: una
+       compra a un manager hecha despues de la ultima peticion buena,
+       de uno que ese manager tenia del reparto, pasaria por nuestra
+       desde el reset (tiene que fallar la peticion de esta vuelta, y
+       compras entre managers hemos hecho una en 73 dias).
+
+    2. LOS DOS ONCES. El once del panel ya deja fuera a los titulares
+       lesionados y sancionados (es el once que se quiere poner); el de
+       Biwenger es el que esta puesto. Antes bastaba el del panel, y
+       `league_collector` deja `user_lineup` en None si `GET /user`
+       falla: sin la mitad de Biwenger, el titular en duda que el panel
+       ya habia quitado se podia vender. Ahora sin uno de los dos no se
+       hace nada (`SIN_ONCE_DE_BIWENGER`).
+
+    3. EL SANCIONADO NO SE VENDE. La regla del dueño lo nombraba
+       ('sanctioned' estaba en `MALOS`), pero una sancion suele ser de
+       un partido y el laboratorio solo midio 'doubt' e 'injured' (AR3
+       -3,4 %, AR7 -4,7 %): al titular que se pierde una jornada por
+       tarjetas se le vendia para siempre por una caida que nadie ha
+       medido. Sale en `malos` (se miro) y en `no_se_tocan` (`SANCION`).
 
 QUE NO HACE
 
@@ -81,7 +154,7 @@ from __future__ import annotations
 import json
 import os
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -91,8 +164,19 @@ RAIZ = Path(__file__).parents[2]
 # Lo que mando en esta vuelta, para la rotacion (que corre despues).
 VUELTA_PARTE = RAIZ / "data" / "trading" / "el_parte_vuelta.json"
 
-# Lo que dice el parte del catalogo de Biwenger para vender.
-MALOS = frozenset({"doubt", "injured", "sanctioned"})
+# El tablon de la liga: de donde sale desde cuando es nuestro cada uno.
+TABLON = RAIZ / "data" / "rival_intelligence" / "board_events.json"
+
+# Lo que dice el parte del catalogo de Biwenger para vender. Sin
+# 'sanctioned' desde el 21/10/2026: ver `SANCIONADO`.
+MALOS = frozenset({"doubt", "injured"})
+
+# El sancionado se mira y no se vende (`SANCION`): una sancion suele ser
+# de un partido y su caida no esta medida.
+SANCIONADO = "sanctioned"
+
+# Un fichaje no se toca hasta que lleva estos dias con nosotros (E14).
+DIAS_DE_FICHAJE = 7
 
 # Lo minimo que se acepta del Computer, sobre el valor de hoy.
 SUELO = 0.95
@@ -163,6 +247,28 @@ def _nombres(x) -> list:
         return []
 
 
+def _fecha(x) -> datetime | None:
+    """Un instante en UTC: un `datetime` (sin zona, UTC), un epoch en
+    segundos (el `date` del tablon) o un texto ISO. None si no es nada de
+    eso. Nunca lanza."""
+    try:
+        if isinstance(x, datetime):
+            cuando = x
+        elif isinstance(x, (int, float)) and not isinstance(x, bool):
+            if x <= 0:
+                return None
+            cuando = datetime.fromtimestamp(x, timezone.utc)
+        elif isinstance(x, str) and x.strip():
+            cuando = datetime.fromisoformat(x.strip().replace("Z", "+00:00"))
+        else:
+            return None
+        if cuando.tzinfo is None:
+            cuando = cuando.replace(tzinfo=timezone.utc)
+        return cuando.astimezone(timezone.utc)
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def el_suelo(valor) -> int | None:
     """El `SUELO` de `valor`, redondeado hacia arriba (al menos el 95 %).
     None si no hay valor. Pura."""
@@ -182,15 +288,126 @@ def ids_del_once(alineacion) -> set:
 
 
 # ============================================================
+# DESDE CUANDO ES NUESTRO (21/10/2026)
+# ============================================================
+
+def el_ultimo_reset(snapshot) -> datetime | None:
+    """
+    El ultimo reset del Computer que ve la foto: el `until` comun de sus
+    ventas es el PROXIMO (`market_clock.computer_reset_epoch`), y el
+    ultimo fue 24 h antes. None si la foto no trae ventas del Computer:
+    entonces no se puede saber si el tablon esta al dia. Nunca lanza.
+    """
+    try:
+        from src.analysis.market_clock import computer_reset_epoch
+
+        proximo, _ = computer_reset_epoch(_dict(snapshot))
+        proximo = _int(proximo)
+        if proximo is None or proximo <= 24 * 3600:
+            return None
+        return datetime.fromtimestamp(proximo - 24 * 3600, timezone.utc)
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+AVISOS = {
+    "SIN_TABLON": ("el tablon no se pudo leer: no se sabe cuando llego nadie y no "
+                   "se vende a nadie (SIN_FECHA_DE_FICHAJE)"),
+    "SIN_RESET_EN_EL_TABLON": ("el tablon no empieza en el reset de la liga: a los "
+                               "del reparto no se les puede dar fecha y no se venden"),
+    "TABLON_ATRASADO": ("el tablon no trae las subastas del ultimo reset del "
+                        "Computer (o la foto no dice cuando fue): a los del reparto "
+                        "no se les puede dar fecha y no se venden en esta vuelta"),
+}
+
+
+def las_fechas_de_fichaje(eventos, yo, plantilla, ultimo_reset=None) -> dict:
+    """
+    Desde cuando es nuestro cada jugador de `plantilla`, del tablon de
+    la liga (la lista de `board_events.json`). Pura. Nunca lanza.
+
+        {"fechas": {player_id: datetime UTC}, "aviso": None o un AVISOS}
+
+    Con compra en el tablon (lo ultimo que lo movio fue un 'market' o un
+    'transfer' con `to.id` = `yo`), la fecha de ese evento. Sin ningun
+    movimiento desde el reset, la del reset, pero solo si el tablon
+    empieza en el y trae un 'market' desde `ultimo_reset` (esta al dia).
+    Si lo ultimo que lo movio no es hacia nosotros, el tablon va por
+    detras: sin fecha. Quien no tiene fecha no esta en `fechas`.
+    """
+
+    salida = {"fechas": {}, "aviso": None}
+    try:
+        yo = _int(yo)
+        if isinstance(eventos, dict):
+            eventos = eventos.get("events")
+        eventos = _lista(eventos) if isinstance(eventos, list) else []
+        if yo is None or not eventos:
+            salida["aviso"] = "SIN_TABLON"
+            return salida
+
+        # El reset vigente: lo de antes es de otra temporada.
+        reset = None
+        for e in eventos:
+            cuando = _fecha(_int(e.get("date")))
+            if e.get("type") == "leagueReset" and cuando is not None:
+                reset = cuando if reset is None or cuando > reset else reset
+
+        tope = _fecha(ultimo_reset)
+        al_dia = False
+        movidos: dict = {}                  # {player_id: (cuando, hacia nosotros)}
+        for e in eventos:
+            if e.get("type") not in ("market", "transfer"):
+                continue
+            cuando = _fecha(_int(e.get("date")))
+            if cuando is None or (reset is not None and cuando < reset):
+                continue
+            if e.get("type") == "market" and tope is not None and cuando >= tope:
+                al_dia = True
+            for op in _lista(e.get("content")):
+                jugador = op.get("player")
+                pid = _int(_dict(jugador).get("id") if isinstance(jugador, dict) else jugador)
+                if pid is None:
+                    continue
+                a_nosotros = _int(_dict(op.get("to")).get("id")) == yo
+                antes = movidos.get(pid)
+                if antes is None or cuando > antes[0]:
+                    movidos[pid] = (cuando, a_nosotros)
+                elif cuando == antes[0]:
+                    # Dos movimientos en el mismo segundo: hacia nosotros
+                    # solo si lo son los dos.
+                    movidos[pid] = (cuando, antes[1] and a_nosotros)
+
+        fechas = {}
+        for pid in _ids(plantilla):
+            if pid in movidos:
+                cuando, a_nosotros = movidos[pid]
+                if a_nosotros:
+                    fechas[pid] = cuando
+            elif reset is not None and al_dia:
+                fechas[pid] = reset
+
+        salida["fechas"] = fechas
+        if reset is None:
+            salida["aviso"] = "SIN_RESET_EN_EL_TABLON"
+        elif not al_dia:
+            salida["aviso"] = "TABLON_ATRASADO"
+        return salida
+    except Exception:                               # noqa: BLE001
+        return {"fechas": {}, "aviso": "SIN_TABLON"}
+
+
+# ============================================================
 # LA DECISION (pura)
 # ============================================================
 
 def por_que_no(*, puede_escribir=True, sin_calendario=False, en_curso=False,
-               once_escrito=None):
+               once_escrito=None, once_de_biwenger=None):
     """None si toca mirar el parte en esta vuelta. Si no, el motivo.
-    `en_curso` None es no saberlo: no se hace nada. `once_escrito` None
-    es no mirarlo todavia (el reloj va antes que leer el panel); vacio,
-    no saber quien es titular: no se hace nada. Nunca lanza."""
+    `en_curso` None es no saberlo: no se hace nada. `once_escrito` (el
+    del panel) y `once_de_biwenger` None es no mirarlos todavia (el reloj
+    va antes que leer el panel); vacios, no saber quien es titular: no
+    se hace nada. Nunca lanza."""
     try:
         if not puede_escribir:
             return "ZONA_DE_SILENCIO"
@@ -200,6 +417,8 @@ def por_que_no(*, puede_escribir=True, sin_calendario=False, en_curso=False,
             return "JORNADA_EN_CURSO"
         if once_escrito is not None and not _ids(once_escrito):
             return "SIN_ONCE_ESCRITO"
+        if once_de_biwenger is not None and not _ids(once_de_biwenger):
+            return "SIN_ONCE_DE_BIWENGER"
         return None
     except Exception:                               # noqa: BLE001
         return "SIN_ONCE_ESCRITO"
@@ -212,13 +431,19 @@ MOTIVOS = {
                          "ronda): no se vende ni se publica"),
     "SIN_ONCE_ESCRITO": ("sin el once escrito del panel (status.lineup.players) no se "
                          "sabe quien es titular: no se vende ni se publica a nadie"),
+    "SIN_ONCE_DE_BIWENGER": ("sin la alineacion vigente en Biwenger "
+                             "(user_lineup.data.lineup.players: la foto la deja en None "
+                             "si GET /user falla) no se sabe quien sigue puesto, y el "
+                             "once del panel ya deja fuera a los lesionados y "
+                             "sancionados: no se vende ni se publica a nadie"),
 }
 
 
 def decidir(
     *, plantilla, estados, nombres=None, precios=None, ofertas_del_computer=None,
-    en_venta=frozenset(), once_escrito=frozenset(), protegidos=frozenset(),
-    conservados=frozenset(), aguanta=frozenset(), vendidos=frozenset(),
+    en_venta=frozenset(), once_escrito=frozenset(), once_de_biwenger=frozenset(),
+    protegidos=frozenset(), conservados=frozenset(), aguanta=frozenset(),
+    vendidos=frozenset(), fichajes=None, ahora=None,
     en_curso=False, puede_escribir=True, sin_calendario=False,
 ) -> dict:
     """
@@ -230,48 +455,62 @@ def decidir(
         precios               {player_id: valor de hoy}
         ofertas_del_computer  {player_id: {"offer_id", "amount"}}
         en_venta              {player_id} publicados (foto y esta vuelta)
-        once_escrito          {player_id} titulares escritos; vacio = no
+        once_escrito          {player_id} titulares del panel; vacio = no
                               se sabe y no se hace nada
+        once_de_biwenger      {player_id} la alineacion vigente en
+                              Biwenger; vacio = no se sabe y no se hace
+                              nada
         protegidos            `proteger` y `fichar` de la orden
         conservados           `conservar` de la orden
         aguanta               lo de LA CARTERA de la ronda
         vendidos              {player_id} vendidos en esta vuelta
+        fichajes              {player_id: datetime} desde cuando es
+                              nuestro (`las_fechas_de_fichaje`); quien
+                              no esta, o None, no se vende
+        ahora                 la hora de la vuelta (sin ella, no se
+                              cuentan los dias y no se vende a nadie)
         en_curso              hay una ronda jugandose (None: no se sabe)
         puede_escribir        fuera de la zona de silencio
         sin_calendario        no hay rondas que mirar
 
     `{"activo", "motivo", "acciones", "malos", "no_se_tocan"}`: `malos`
-    son los del parte que se miraron; `no_se_tocan`, los que no se
-    venden y por que.
+    son los del parte que se miraron (tambien los sancionados);
+    `no_se_tocan`, los que no se venden y por que.
     """
 
     salida = {"activo": False, "motivo": None, "acciones": [], "malos": [],
               "no_se_tocan": []}
     try:
-        once_escrito = _ids(once_escrito)
+        once_escrito, once_de_biwenger = _ids(once_escrito), _ids(once_de_biwenger)
         motivo = por_que_no(puede_escribir=puede_escribir, sin_calendario=sin_calendario,
-                            en_curso=en_curso, once_escrito=once_escrito)
+                            en_curso=en_curso, once_escrito=once_escrito,
+                            once_de_biwenger=once_de_biwenger)
         if motivo:
             salida["motivo"] = motivo
             return salida
 
+        once = once_escrito | once_de_biwenger
         estados, nombres = _por_id(estados), _por_id(nombres)
         precios, ofertas = _por_id(precios), _por_id(ofertas_del_computer)
         en_venta, vendidos = _ids(en_venta), _ids(vendidos)
         protegidos, conservados, aguanta = _ids(protegidos), _ids(conservados), _ids(aguanta)
+        fichajes = {pid: f for pid, f in ((p, _fecha(v)) for p, v in _por_id(fichajes).items())
+                    if f is not None}
+        ahora = _fecha(ahora)
 
         acciones, malos, no_se_tocan = [], [], []
         for pid in sorted(_ids(plantilla)):
             estado = str(estados.get(pid) or "").strip().lower()
-            if estado not in MALOS:
+            if estado not in MALOS and estado != SANCIONADO:
                 continue
             malos.append(pid)
             suyos = _nombres(nombres.get(pid))
             nombre = suyos[0] if suyos else None
+            fichado = fichajes.get(pid)
 
             if pid in vendidos:
                 por = "VENDIDO_EN_ESTA_VUELTA"
-            elif pid in once_escrito:
+            elif pid in once:
                 por = "ONCE_ESCRITO"
             elif any(INTOCABLE in n.lower() for n in suyos):
                 por = "YAMAL"
@@ -283,6 +522,12 @@ def decidir(
                 por = "CONSERVAR"
             elif pid in aguanta:
                 por = "LA_CARTERA"
+            elif estado == SANCIONADO:
+                por = "SANCION"
+            elif fichado is None or ahora is None:
+                por = "SIN_FECHA_DE_FICHAJE"
+            elif ahora - fichado < timedelta(days=DIAS_DE_FICHAJE):
+                por = "RECIEN_FICHADO"
             else:
                 por = None
             valor = _int(precios.get(pid))
@@ -290,8 +535,10 @@ def decidir(
             if por is None and suelo is None:
                 por = "SIN_VALOR"
             if por:
-                no_se_tocan.append({"player_id": pid, "nombre": nombre, "estado": estado,
-                                    "por": por})
+                fila = {"player_id": pid, "nombre": nombre, "estado": estado, "por": por}
+                if por == "RECIEN_FICHADO":
+                    fila["fichado"] = fichado.isoformat()
+                no_se_tocan.append(fila)
                 continue
 
             oferta = _dict(ofertas.get(pid))
@@ -375,15 +622,16 @@ def lo_vendido_y_publicado(v10, vuelta_mejora, plan_cierre, ahora, run_id=None) 
 
 def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
            status=None, calendario=None, orden_ruta=None, libro_ronda_ruta=None,
-           v10=None, vuelta_mejora=None, plan_cierre=None) -> dict:
+           v10=None, vuelta_mejora=None, plan_cierre=None, tablon=None) -> dict:
     """
     El parte, en esta vuelta. Nunca lanza.
 
     Lo que no se pasa se lee de produccion: la foto de `cycle["snapshot"]`
     (sin `cycle`, la ultima `snapshot_*.json`, como el cierre), `status`
     del panel, el calendario de los chollos, la orden del gestor
-    (`orden_ruta`), el libro de la ronda (`libro_ronda_ruta`) y lo que
-    esta vuelta ya hizo (`v10`, `vuelta_mejora`, `plan_cierre`).
+    (`orden_ruta`), el libro de la ronda (`libro_ronda_ruta`), lo que
+    esta vuelta ya hizo (`v10`, `vuelta_mejora`, `plan_cierre`) y los
+    eventos del tablon (`tablon`, la lista de `TABLON`).
     Apagado, no lee ni escribe nada.
     """
 
@@ -432,9 +680,11 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
             return salida
         foto = leer_la_foto(snapshot, yo)
 
-        # EL ONCE ESCRITO: el del panel (la fuente del cierre). Sin el, no
-        # se sabe quien es titular y no se hace nada. Con el, tambien la
-        # alineacion vigente en Biwenger de la foto: no se toca a ninguno.
+        # EL ONCE ESCRITO: el del panel (la fuente del cierre) Y la
+        # alineacion vigente en Biwenger de la foto (21/10/2026: hacen
+        # falta los dos; el del panel ya deja fuera a los lesionados y
+        # sancionados). Sin uno de los dos, no se hace nada. Con los dos,
+        # no se toca a ninguno de ninguno.
         if status is None:
             from src.actions.la_mejora_del_once import STATUS
 
@@ -442,11 +692,12 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
         del_panel = ids_del_once(_dict(status).get("lineup"))
         de_biwenger = ids_del_once(_dict(_dict(snapshot.get("user_lineup")).get("data"))
                                    .get("lineup"))
-        once_escrito = (del_panel | de_biwenger) if del_panel else set()
+        once_escrito = (del_panel | de_biwenger) if (del_panel and de_biwenger) else set()
         salida["once_escrito"] = sorted(once_escrito)
 
         motivo = por_que_no(puede_escribir=puede_escribir, sin_calendario=sin_calendario,
-                            en_curso=en_curso, once_escrito=once_escrito)
+                            en_curso=en_curso, once_escrito=del_panel,
+                            once_de_biwenger=de_biwenger)
         if motivo:
             salida["motivo"] = motivo
             salida["detalle"] = MOTIVOS.get(motivo)
@@ -463,6 +714,17 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
         vuelta = lo_vendido_y_publicado(v10, vuelta_mejora, plan_cierre, ahora,
                                         os.environ.get("GITHUB_RUN_ID"))
         salida["vuelta_descartada"] = vuelta["descartados"]
+
+        # DESDE CUANDO ES NUESTRO CADA UNO (21/10/2026): del tablon que el
+        # paso V10 acaba de pedir. Sin tablon, nadie tiene fecha y no se
+        # vende a nadie.
+        if tablon is None:
+            tablon = _leer(TABLON, None)
+        fichajes = las_fechas_de_fichaje(tablon, yo, foto["plantilla"],
+                                         el_ultimo_reset(snapshot))
+        if fichajes["aviso"]:
+            salida["aviso_del_tablon"] = fichajes["aviso"]
+            salida["detalle_del_tablon"] = AVISOS.get(fichajes["aviso"])
 
         # Nombres y valor: la foto (plantilla y catalogo) y el panel.
         catalogo = _dict(_dict(_dict(snapshot.get("catalog")).get("data")).get("players"))
@@ -490,12 +752,13 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
             nombres=nombres, precios=precios,
             ofertas_del_computer=foto["ofertas_del_computer"],
             en_venta=set(foto["en_venta"]) | vuelta["listados"],
-            once_escrito=once_escrito,
+            once_escrito=del_panel, once_de_biwenger=de_biwenger,
             protegidos=protegidos(orden_ruta, ahora),
             conservados=conservados(orden_ruta, ahora),
             aguanta=los_que_aguanta(libro_ronda_ruta),
-            vendidos=vuelta["vendidos"], en_curso=en_curso,
-            puede_escribir=puede_escribir, sin_calendario=sin_calendario,
+            vendidos=vuelta["vendidos"], fichajes=fichajes["fechas"], ahora=ahora,
+            en_curso=en_curso, puede_escribir=puede_escribir,
+            sin_calendario=sin_calendario,
         )
         salida["decision"] = d
         salida["acciones"] = d["acciones"]
@@ -533,12 +796,17 @@ def el_parte(r) -> list:
             lineas.append(f"  Once escrito (no se toca): {r.get('once_escrito')}")
         for v in r.get("vuelta_descartada") or []:
             lineas.append(f"  Sin contar lo de esta vuelta de {v}")
+        if r.get("aviso_del_tablon"):
+            lineas.append(f"  Fechas de fichaje: {r.get('aviso_del_tablon')}"
+                          + (f": {r.get('detalle_del_tablon')}"
+                             if r.get("detalle_del_tablon") else ""))
         d = _dict(r.get("decision"))
         if d.get("malos"):
             lineas.append(f"  Con parte malo en la plantilla: {d.get('malos')}")
         for n in _lista(d.get("no_se_tocan")):
             lineas.append(f"      no se toca {n.get('player_id')} {n.get('nombre') or ''} "
-                          f"({n.get('estado')}): {n.get('por')}")
+                          f"({n.get('estado')}): {n.get('por')}"
+                          + (f" (nuestro desde {n.get('fichado')})" if n.get("fichado") else ""))
         for a in _lista(r.get("acciones")):
             importe = a.get("importe") or a.get("precio")
             lineas.append(f"  -> {a.get('accion')} {a.get('player_id')} {a.get('nombre') or ''} "

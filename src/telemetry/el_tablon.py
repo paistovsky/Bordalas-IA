@@ -250,10 +250,12 @@ QUE_HACE = {
         "ronda: saldo menos todas las pujas vivas más el 92 % de lo de la cartera. "
         "Lo suyo cuenta entero; si no cabe, no puja.",
     "BORDALAS_EL_PARTE_VENDE":
-        "Vende a los suplentes que Biwenger da en duda, lesionados o sancionados "
-        "(caen un 3-5 % en la semana): los publica a su valor y acepta la oferta "
-        "del Computer desde el 95 %. Nunca a uno del once escrito, ni a Yamal, ni "
-        "a los protegidos o `conservar` del gestor, ni a lo que aguanta la "
+        "Vende a los suplentes que Biwenger da en duda o lesionados (caen un "
+        "3-5 % en la semana): los publica a su valor y acepta la oferta del "
+        "Computer desde el 95 %. Nunca a uno del once escrito (hacen falta el del "
+        "panel y el de Biwenger), ni a un sancionado, ni a un fichaje de hace "
+        "menos de 7 días (ni a uno sin fecha de fichaje en el tablón), ni a Yamal, "
+        "ni a los protegidos o `conservar` del gestor, ni a lo que aguanta la "
         "cartera, ni con una ronda jugándose.",
     "BORDALAS_LA_ROTACION":
         "Cambia a uno de la plantilla que lleva dos días sin subir por uno de su "
