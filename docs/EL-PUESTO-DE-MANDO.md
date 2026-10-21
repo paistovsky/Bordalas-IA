@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 21/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/10 07:15 (rafaga de la manana, dia del aplazado de la J6).** Ciclos:
+  verdes (#2376 a #2385, la de las 07:15 tras el reset incluida). Saldo
+  **+1.717.983** a las 07:19 (entro la racha, +250.000), 0 comprometido,
+  plantilla 56,48 M y 11 jugadores, sin Kubo: la puja del dueno no entro
+  (saldo y plantilla no cambian), asi que Luismi Cruz no se vende. **El
+  plazo de hoy 14:00 esta cubierto.** Turno de las 12:45 en pie.
 
 - **20/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2369 a #2376).
   **El premio de la J9 ENTRO:** saldo **+1.467.983** a las 21:09 (+1,47 M).
