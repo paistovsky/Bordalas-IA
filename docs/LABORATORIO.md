@@ -69,6 +69,45 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E53 · 21/10/2026 11:16 de Madrid · La vara de puntos fuera de muestra: el precio predice mejor
+
+**Hipotesis:** los puntos por partido (la base de la vara de Pepe: tasa x
+titularidad) predicen lo que un jugador hara despues mejor que su precio.
+**Datos:** `data/intelligence/puntos_por_jornada.jsonl` ya tiene tres
+fotos (tras la J7, J8 y J9). Lo que se sabia tras la J7 (puntos, partidos,
+precio) contra los puntos hechos en la J8 y la J9. 364 jugadores con 3+
+partidos; fuera Athletic y Rayo (su partido de la J8 no se jugo, E43).
+**Codigo:** `lab/puntos/vara_fuera_de_muestra.py`.
+
+    Spearman con los puntos de J8+J9          todos (364)   jugaron las dos (216)
+    puntos por partido                           +0,34            +0,42
+    puntos por partido encogidos (K=3)           +0,33            +0,42
+    puntos totales                               +0,37              -
+    PRECIO                                       +0,44            +0,49
+    precio + encogidos (rangos sumados)          +0,42            +0,49
+
+    por posicion (todos):  DEF ppp +0,29 / precio +0,43;  MED +0,37 / +0,46;
+                           DEL +0,27 / +0,41;  POR (n=19) nada predice
+
+**Lo que se aprende:**
+- **El precio predice los puntos que vienen mejor que los puntos por
+  partido**, en todas las posiciones de campo (+0,41 a +0,46 contra +0,27
+  a +0,37). El precio ya resume titularidad, forma y lo que sabe el
+  mercado. Sumar los puntos por partido al precio no añade nada.
+- Encoger los puntos por partido hacia la media (como hace
+  `el_calendario_de_puntos.tasa_encogida`) no mejora nada con estos datos.
+- Cuadra con E48: cada millon da puntos, con rendimientos decrecientes.
+
+**Limites:** dos jornadas; la foto de la J9 pudo cerrarse antes del
+Getafe-Rayo; no se ha podido probar la titularidad de FF del momento (no
+se guardaba), que es lo que la vara de Pepe multiplica: la vara real
+(tasa x titularidad) daba ~+0,36 en E7, por debajo de este +0,44 del
+precio. Repetir con la J10-J11.
+
+**Veredicto: GANA con cautela** (pasa a «Listo para el plan» como
+prueba, no como cambio directo): la mejora del once deberia mirar el
+precio como segunda opinion.
+
 ### E52 · 20/10/2026 17:17 de Madrid · La formula del premio de jornada (y el premio de la J9)
 
 **El caso:** el premio de la J9 ha entrado hoy a las **17:05 de Madrid**
@@ -2378,6 +2417,15 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E53, 21/10 11:16) El precio como segunda opinion en la mejora del
+  once.** Fuera de muestra (J8+J9, n = 364), el precio predice los puntos
+  que vienen mejor que los puntos por partido (Spearman +0,44 contra
+  +0,34; en los que juegan, +0,49 contra +0,42), en todas las posiciones
+  de campo. Propuesta: que la mejora NO haga un cambio cuyo xP sube pero
+  que cambia a un jugador por otro bastante mas barato (el precio dice lo
+  contrario), o que encoja la tasa hacia la que corresponde a su precio
+  (curva de E48) en vez de hacia la media. Antes de encender: medirlo en
+  el ensayo con la J10-J11 contra la vara de hoy.
 - **(E47, 18/10 11:16) Plazo del mie 21/10 14:00: no vender a Rico si el
   premio de la J9 entra el martes.** -432.317 + racha (250.000, mie 21/10
   ~00:10; Pepe la cobra cada 5,0 dias exactos) + premio de la J9 (mar 20/10
