@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 21/10/2026, 12:50 de Madrid (turno del aplazado de la J6).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/10 12:45 (TURNO DEL APLAZADO DE LA J6).** Ciclos: verdes (#2385 a
+  #2390). Saldo **+1.717.983** a las 12:10, el plazo de las 14:00 CUBIERTO.
+  Puja viva de Pepe: **Gaya 1.711.008** (la rendija, de las 07:19), se
+  resuelve el jue 22/10 07:00, despues del aplazado; si entra, peor caso
+  +6.975: sigue en positivo para la J10 (vie 23/10, plazo 15:00), pero
+  justo. Kubo se lo llevo Pollo17 (3.407.000). Programada la mirada de las
+  20:30 (trig_01Qh1ZrwmiJLTRFcTinyESnd) para ver si el aplazado abrio
+  ronda propia.
 
 - **21/10 10:47 (laboratorio de rivales).** Workflow de 7 (rivales, el
   horizonte de las primas, el parte vende; 2 escepticos por conclusion,
