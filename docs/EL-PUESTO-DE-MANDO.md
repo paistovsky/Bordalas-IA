@@ -352,6 +352,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **21/10 08:22 (supervision).** Vuelta #2386 (08:07). Racha cobrada
+  (+250.000, 01:11): saldo **1.717.983**. Pepe no hizo nada solo desde
+  ayer: 0 compras, 0 ventas (la ronda, los chollos, la orden y el carril,
+  NADA; el aplazado frena la compra hasta las 20:00). En el reset de las
+  07:00 no teniamos pujas: nada ganado ni perdido. **Kubo** se lo llevo
+  Pollo17 por 3.407.000 (+18 %; Manzagool 3.380.000, Luismi 3.256.000): el
+  tope de 3.090.000 que propuse habria perdido. Pollo tambien gano a Pepelu
+  (2.607.000, +6,4 %), Gorrotxategi (1.077.000, +22 %) y otro por 1.007.000;
+  Manzagool, a De Jong (2.870.000, +32 %). **Puja viva:** Gaya (Valencia,
+  lateral, 1.710.000) por 1.711.008, puesta a mano desde la app (Pepe la ve
+  como `pujas_del_dueno`); FF: 80 %, no esta en el parte de bajas del
+  Valencia. Se resuelve el jue 07:00, despues del aplazado. **Caja:** al
+  empezar el aplazado (hoy 20:00), 1.717.983 - 1.711.008 = **6.975 >= 0**;
+  con Gaya, J10 en 6.975. Orden limpia: fuera la linea de Kubo/Luismi
+  (Kubo no llego); verja 221/221.
+
 - **21/10 07:15 (rafaga de la manana, dia del aplazado de la J6).** Ciclos:
   verdes (#2376 a #2385, la de las 07:15 tras el reset incluida). Saldo
   **+1.717.983** a las 07:19 (entro la racha, +250.000), 0 comprometido,
