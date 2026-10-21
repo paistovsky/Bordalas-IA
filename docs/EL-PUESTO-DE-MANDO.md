@@ -359,7 +359,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   la J11 lo crea ese turno: **ojo, la J11 empieza el dom 01/11 a las
   17:00 (horario de invierno, UTC+1), asi que el plazo T-6 es a las 11:00
   y el turno tiene que ser a las 09:45 de Madrid (08:45 UTC), no a las
-  12:45 de siempre.** Viernes: no se enciende nada.
+  12:45 de siempre.** Creado ya: dom 01/11 09:45 (trig_01NzaNuaDH69dCE38wMa7wg2).
+  Viernes: no se enciende nada.
 
 - **21/10 20:47 (laboratorio de rivales).** Desde el reset, dos ventas al
   Computer y las dos con perdida: **Pollo17** vendio a Espi (comprado el
