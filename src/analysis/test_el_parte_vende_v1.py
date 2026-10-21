@@ -1132,6 +1132,26 @@ def test_h1_el_fichaje_no_se_vende_sin_jugar_una_ronda():
     assert len(sueltas) == 2 and sueltas[0]["aparte"] and sueltas[1]["partidos"] == 1, rondas
     assert hasta_cuando_no_se_toca(llega, rondas) == _fin(13, rondas) == _fin(13)
 
+    # UNA JORNADA PARTIDA 5/5 (revision del 21/10): la mitad aplazada tiene
+    # 5 partidos, asi que solo `aparte` la deja fuera. El que llega entre
+    # las dos mitades no se vende al acabar la mitad aplazada (su equipo
+    # puede no jugarla): espera a la J21.
+    partida = {"matchdays": [
+        {"matchday": 20, "matches": (
+            [_p(20, i, i + 10, f"2027-01-{16 + i // 2:02d}T18:00:00+01:00") for i in range(5)]
+            + [_p(20, i + 5, i + 15, f"2027-02-0{3 + i // 3}T21:00:00+01:00") for i in range(5)])},
+        {"matchday": 21, "matches": [
+            _p(21, i, i + 10, f"2027-02-{12 + i // 2:02d}T18:00:00+01:00") for i in range(10)]},
+    ]}
+    rondas = las_rondas(partida)
+    mitad = [r for r in rondas if r["jornada"] == 20 and r["aparte"]]
+    assert len(mitad) == 1 and mitad[0]["partidos"] == PARTIDOS_DE_RONDA, rondas
+    entre = datetime(2027, 1, 20, 5, 4, tzinfo=UTC)
+    assert hasta_cuando_no_se_toca(entre, rondas) == _fin(21, rondas), rondas
+    d = _uno(ofertas_del_computer={7: {"offer_id": 70, "amount": 990_000}},
+             fichajes={7: entre}, ahora=datetime(2027, 2, 6, 10, 0, tzinfo=UTC), rondas=rondas)
+    assert d["acciones"] == [] and _por(d) == {7: "SIN_JUGAR_CON_NOSOTROS"}, d
+
     # NAVIDAD: la J17 acaba el 20/12 y la J18 empieza el 02/01. El fichaje
     # del 22/12 no se vende el 29/12; despues de la J18, si. El del 17/12,
     # que juega la J17, a los 7 dias.
