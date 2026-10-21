@@ -69,6 +69,44 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E54 · 21/10/2026 17:18 de Madrid · Tras un cero: ¿tiene razon «el parte vende»?
+
+**Hipotesis:** un jugador que hace 0 puntos o menos en una jornada (la
+señal de «el parte vende», construido y apagado, para encender tras la
+J10) juega menos, puntua menos y pierde precio despues; si fuera ruido,
+venderlo seria regalarlo.
+**Datos:** las tres fotos de `puntos_por_jornada.jsonl` (tras J7, J8 y J9):
+264 jugadores que jugaron la J8 (fuera Athletic, Rayo y Levante por los
+aplazados); 21 hicieron <= 0. Puntos de la J9 y precio del 13/10 (el dia
+despues de la J8) al 20/10.
+**Codigo:** `lab/puntos/tras_un_cero.py`.
+
+    J8               n    pts/partido antes   juega la J9   pts en la J9   precio a 7 dias
+    <= 0 puntos     21          3,0               24 %           1,4            -8,2 %
+    > 0 puntos     243          4,0               82 %           4,3            -2,0 %
+
+    mismo nivel previo (0-3 pts/partido):  <= 0  n=4   J9 0,5   precio -6,4 %
+                                            > 0  n=57  J9 3,3   precio -4,5 %
+
+**Lo que se aprende:**
+- **El cero anuncia de verdad:** de los 21, solo 5 jugaron la J9 (24 %
+  contra 82 %) y su precio cayo otro -8,2 % en la semana siguiente (contra
+  -2,0 %). Un cero suele ser lesion, roja o perder el sitio, no mala
+  suerte.
+- **Vender el dia despues compensa:** el -8,2 % se mide desde el 13/10, el
+  dia siguiente a la jornada; venderlo esa mañana al Computer (oferta
+  ~precio, E38/E42) se ahorra esa caida y deja hueco para uno que juegue.
+- Con el mismo nivel previo, la diferencia se encoge pero no se va
+  (n muy pequeño).
+
+**Limites:** una sola jornada y 21 casos; los de 5+ pts/partido con cero
+son 1. Repetir con la J10 (y separar porteros, que no se midieron aparte).
+
+**Veredicto: SE AGUANTA la premisa de «el parte vende».** Nada nuevo que
+construir (ya esta hecho y revisado); cuando se encienda tras la J10, su
+primera semana sirve de prueba: los que venda, ¿bajan despues mas de un
+-2 % a 7 dias?
+
 ### E53 · 21/10/2026 11:16 de Madrid · La vara de puntos fuera de muestra: el precio predice mejor
 
 **Hipotesis:** los puntos por partido (la base de la vara de Pepe: tasa x
