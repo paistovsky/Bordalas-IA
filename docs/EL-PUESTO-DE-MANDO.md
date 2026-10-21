@@ -352,6 +352,33 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **21/10 10:47 (laboratorio de rivales).** Workflow de 7 (rivales, el
+  horizonte de las primas, el parte vende; 2 escepticos por conclusion,
+  ninguno la refuta; `scratchpad/lab2110/`). **Rivales:** en el reset de
+  las 07:00 Pollo17 gano Kubo (3.407.000, +18,3 %), Pepelu (2.607.000,
+  +6,4 %), Gorrotxategi (1.077.000, +22,4 %) y Riedel (1.007.000, +13,1 %,
+  sin subir), tres de ellos sin rival; Manzagool, De Jong (2.870.000, +32,3
+  %). Tras el reset Pollo esta 648k por debajo de lo pagado y Manzagool
+  600k. Luismi vendio a Zakharyan (+350k en 26 dias, el primer dia sin
+  subir) y a Cordoba. **Los tres de arriba, en rojo** antes del aplazado de
+  esta noche: Pollo -5,63 M, Luismi -8,17 M, Manzagool -2,89 M (premio 0 de
+  esa parte si siguen asi). Nosotros +1.717.983 (6.975 si gana Gaya).
+  Patrimonio: Pollo +50,11 M sobre nosotros; su once por precio, +24,56 M.
+  Con nuestra cartera (+4 % en 1-3 M) habriamos perdido los 4. **Lo
+  aprendido (219 subastas, 23/08-21/10):** aguantar MAS no rescata las
+  primas: en 1-3 M y >3 M el mercado cae ~3,5-4,5 % cada 14 dias; vender el
+  primer dia que no sube gana +97,8k por compra y le saca 245k a aguantar
+  14 dias y 349k a aguantar 28 (IC 80 % fuera del 0). Pollo aguanta una
+  mediana de 6 dias, no semanas; su ventaja es el precio de venta, no
+  aguantar. Desde el 21/09 todas las reglas pierden dinero (el mercado
+  ya no infla). **Sin cambios** en PRIMAS_DE_LA_CARTERA ni en la regla de
+  venta; para mas adelante, «vender en la primera bajada» (+6k por compra
+  en 1-3 M). **El parte vende: NO se enciende hoy** (no ganaria nada: 10 de
+  11 en conservar/proteger y nadie con parte malo) y tiene 3 defectos
+  reproducidos: vende a un fichaje recien llegado (Gaya), el once de
+  Biwenger es opcional si falla GET /user, y vende al sancionado de un
+  partido. Arreglos en marcha (apagado); encender el mar 27 o mie 28/10.
+
 - **21/10 08:22 (supervision).** Vuelta #2386 (08:07). Racha cobrada
   (+250.000, 01:11): saldo **1.717.983**. Pepe no hizo nada solo desde
   ayer: 0 compras, 0 ventas (la ronda, los chollos, la orden y el carril,
