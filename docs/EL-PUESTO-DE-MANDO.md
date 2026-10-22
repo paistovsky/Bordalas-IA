@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/10/2026, 14:35 de Madrid (rafaga de las 14:15).
+Actualizado: 22/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2415 a #2422).
+  Entro el premio de la J6 (+330.000): saldo **+336.975**, puja viva Boye
+  5.989.900 (vie 07:00). **CORRECCION MIA (por E56 del chat del dueno):**
+  el 21/10 escribi «cada aplazado es una ronda aparte y un plazo de caja
+  propio». Es falso: la parte aplazada se puntua con el once y la caja del
+  inicio de la jornada (n=2). El plazo del 21/10 no hacia falta (no costo
+  nada) y el Rayo-Athletic de la J8 NO necesita turno de caja propio. Lo
+  que si queda: el roundStarted nuevo no significa ronda con plazo nuevo.
+  Peor caso del vie si entra Boye: 336.975 - 5.989.900 + Luismi 2.959.100
+  + Exposito (>= 3.050.000) => >= +356.175; sin oferta por Exposito,
+  -2,69 M. Turnos del vie: chat del dueno 07:25, yo 12:45.
 
 - **22/10 20:47 (laboratorio de rivales). CONFIRMADO: LA PARTE APLAZADA SE
   PUNTUA CON EL ONCE DEL INICIO DE LA JORNADA (n=2).** La ronda 5176
