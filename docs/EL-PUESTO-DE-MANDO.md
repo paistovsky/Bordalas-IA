@@ -352,6 +352,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **22/10 20:47 (laboratorio de rivales). CONFIRMADO: LA PARTE APLAZADA SE
+  PUNTUA CON EL ONCE DEL INICIO DE LA JORNADA (n=2).** La ronda 5176
+  (Levante-Athletic) cerro a las 16:23: nuestra J6 pasa de 29 a **40**
+  puntos (+11) y cobramos la diferencia, **+330.000** (saldo 336.975).
+  Los +11 son exactamente los del once del 15/09: Olasagasti +5, Manu
+  Sanchez +3, Oriol Rey +3 (con el once de hoy habrian sido solo los +5 de
+  Olasagasti). Totales de la J6: Luismi 64 (premio 0: empezo en rojo,
+  E52), Manzagool 52, DiosMande 52, Pepe 40, Prinzipote 36, Alvaro 29,
+  Pollo17 24, Mex 13. **Rivales:** Pollo vendio a Tchouameni al Computer
+  (4.370.300, +1,6 %; comprado el 19/10 a 4.277.000, +93k en 3 dias): su
+  caja, ~-6,1 M con el premio de la J6; tiene que vender ~6,1 M mas antes
+  de la J10 (vie 21:00). Luismi sigue en ~-2,2 M. **Nosotros:** puja por
+  Boye viva (5.989.900); si llega, con la venta de Luismi la caja queda en
+  -2,69 M y la de Exposito la deja en ~+1,8 M. Hoy es jueves: sin
+  interruptores. Comprobacion propia manana a las 05:25 UTC.
+
 - **22/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2408 a #2415).
   Saldo +6.975; puja viva **Boye 5.989.900** (orden del dueno, vie 07:00).
   Leido el plan del chat del dueno y lo doy por bueno: si entra, se venden
