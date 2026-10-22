@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-22T04:57:10.652538",
+  "updated_at": "2026-10-22T07:18:32.172360",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -2157,6 +2157,228 @@
             30493,
             19862,
             29661,
+            14800,
+            1969,
+            26271,
+            35678,
+            25777
+          ]
+        }
+      }
+    },
+    "5176": {
+      "round_id": 5176,
+      "visto": "2026-10-22T07:18:32.172360",
+      "datos_de": "2026-10-22T07:18:25.676950+00:00",
+      "escrito_en": "2026-10-22T07:18:32.172360",
+      "clasificacion": [
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 381
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 372
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 353
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 308
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 305
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 298
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 274
+        },
+        {
+          "user_id": 14456960,
+          "name": "Alvaro Retamosa Sanguino",
+          "points": 237
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "3-4-3",
+        "players": [
+          38433,
+          1760,
+          1844,
+          1599,
+          29661,
+          19862,
+          14800,
+          1969,
+          26271,
+          35678,
+          25777
+        ]
+      },
+      "plantilla": [
+        {
+          "id": 1599,
+          "name": "Jonny",
+          "position": 2
+        },
+        {
+          "id": 1760,
+          "name": "Chust",
+          "position": 2
+        },
+        {
+          "id": 1844,
+          "name": "Gayà",
+          "position": 2
+        },
+        {
+          "id": 1969,
+          "name": "Unai López",
+          "position": 3
+        },
+        {
+          "id": 14800,
+          "name": "Pablo Ibáñez",
+          "position": 3
+        },
+        {
+          "id": 19862,
+          "name": "Expósito",
+          "position": 3
+        },
+        {
+          "id": 25777,
+          "name": "Luismi Cruz",
+          "position": 4
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 30493,
+          "name": "Sergi Cardona",
+          "position": 2
+        },
+        {
+          "id": 35678,
+          "name": "Roberto Fernández",
+          "position": 4
+        },
+        {
+          "id": 38433,
+          "name": "Gulácsi",
+          "position": 1
+        }
+      ],
+      "totales": {
+        "1599": 27,
+        "1760": 37,
+        "1844": 23,
+        "1969": 34,
+        "14800": 40,
+        "19862": 42,
+        "25777": 42,
+        "26271": 109,
+        "29661": 47,
+        "30493": 14,
+        "35678": 64,
+        "38433": 26
+      },
+      "once_alternativo": {
+        "formation": "3-4-3",
+        "players": [
+          38433,
+          1760,
+          1844,
+          1599,
+          1969,
+          14800,
+          29661,
+          19862,
+          26271,
+          35678,
+          25777
+        ],
+        "vara": "base"
+      },
+      "nombres": {
+        "1599": "Jonny",
+        "1760": "Chust",
+        "1844": "Gayà",
+        "1969": "Unai López",
+        "14800": "Pablo Ibáñez",
+        "19862": "Expósito",
+        "25777": "Luismi Cruz",
+        "26271": "Yamal",
+        "29661": "Olasagasti",
+        "30493": "Sergi Cardona",
+        "35678": "Roberto Fernández",
+        "38433": "Gulácsi"
+      },
+      "onces_por_vara": {
+        "base": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            1760,
+            1844,
+            1599,
+            1969,
+            14800,
+            29661,
+            19862,
+            26271,
+            35678,
+            25777
+          ]
+        },
+        "factores": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            1760,
+            1844,
+            1599,
+            1969,
+            14800,
+            29661,
+            19862,
+            26271,
+            35678,
+            25777
+          ]
+        },
+        "actual": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            1760,
+            1844,
+            1599,
+            29661,
+            19862,
             14800,
             1969,
             26271,
