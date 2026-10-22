@@ -1,0 +1,8 @@
+{
+  "por_que": "22/10/2026: el dueno se apunto sin querer a una segunda liga ('Reto el clasico'). Pepe elegia la PRIMERA liga de la cuenta (leagues[0]): si Biwenger la pusiera delante, pujaria y venderia en la liga equivocada. Ahora juega la de `activa` (o la de BIWENGER_LEAGUE_ID, que manda) y, si no esta en la cuenta, no hace nada.",
+  "activa": 2165477,
+  "ligas": [
+    {"id": 2165477, "nombre": "El Chiringuito", "juega": true},
+    {"id": null, "nombre": "Reto el clasico", "juega": false, "nota": "se apunto el dueno sin querer el 22/10; su id se lee de la cuenta en la proxima vuelta"}
+  ]
+}

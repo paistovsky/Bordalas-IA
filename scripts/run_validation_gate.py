@@ -581,6 +581,7 @@ TESTS = [
     # al dia en un libro de git, para validar el xP (laboratorio del
     # 19/10/2026). No decide nada.
     "src.analysis.test_la_titularidad_del_dia_v1",
+    "src.analysis.test_las_ligas_v1",
 ]
 
 

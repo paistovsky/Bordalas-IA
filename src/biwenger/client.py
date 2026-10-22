@@ -1,4 +1,6 @@
+import json
 import os
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -33,11 +35,45 @@ def cliente_del_ciclo() -> "BiwengerClient":
 
         nuevo = BiwengerClient()
         nuevo.login()
-        nuevo.select_league()
+        liga = nuevo.select_league()
+        print(f"Liga: {liga.get('name')} ({nuevo.league_id}); en la cuenta: "
+              f"{[(l.get('name'), l.get('id')) for l in getattr(nuevo, 'leagues', [])]}")
 
         _CLIENTE_DEL_CICLO["value"] = nuevo
 
     return _CLIENTE_DEL_CICLO["value"]
+
+
+# LAS LIGAS (22/10/2026): en la que juega Pepe, por su id. La de El
+# Chiringuito, si no se dice otra cosa.
+LIGA_POR_DEFECTO = 2165477
+LAS_LIGAS = Path(__file__).parents[2] / "config" / "las_ligas.json"
+
+
+def la_liga_que_juega(ruta=None, entorno=None) -> int:
+    """
+    El id de la liga en la que juega Pepe: `BIWENGER_LEAGUE_ID` si está
+    (manda, para cambiar de liga desde el workflow), si no la `activa` de
+    `config/las_ligas.json`, y si no se puede leer, El Chiringuito. Nunca
+    lanza.
+    """
+
+    try:
+        valor = (os.environ if entorno is None else entorno).get("BIWENGER_LEAGUE_ID")
+        if valor and str(valor).strip().isdigit():
+            return int(str(valor).strip())
+    except Exception:                               # noqa: BLE001
+        pass
+    try:
+        datos = json.loads(Path(ruta or LAS_LIGAS).read_text())
+        activa = datos.get("activa")
+        if isinstance(activa, int) and not isinstance(activa, bool):
+            return activa
+        if isinstance(activa, str) and activa.strip().isdigit():
+            return int(activa.strip())
+    except Exception:                               # noqa: BLE001
+        pass
+    return LIGA_POR_DEFECTO
 
 
 def reset_cliente_del_ciclo() -> None:
@@ -154,7 +190,17 @@ class BiwengerClient:
         return data["data"]
 
     def select_league(self) -> dict[str, Any]:
-        """Selecciona automáticamente la primera liga de la cuenta."""
+        """
+        Selecciona la liga en la que juega Pepe.
+
+        LA LIGA, POR SU ID (22/10/2026). Antes era la PRIMERA de la cuenta
+        (`leagues[0]`). El dueño se apuntó sin querer a una segunda liga
+        ('Reto el clásico'): si Biwenger la pusiera delante, Pepe pujaría y
+        vendería en la liga equivocada (con la puja por Boyé viva). Ahora:
+        la de `BIWENGER_LEAGUE_ID` si está (para cambiar de liga sin tocar
+        el código) o la `activa` de `config/las_ligas.json`; si esa liga no
+        está en la cuenta, se para (RuntimeError): nunca juega en otra.
+        """
 
         account = self.get_account()
 
@@ -176,7 +222,23 @@ class BiwengerClient:
                 "La cuenta no tiene ninguna liga."
             )
 
-        league = leagues[0]
+        self.leagues = [
+            {"id": l.get("id"), "name": l.get("name")}
+            for l in leagues if isinstance(l, dict)
+        ]
+
+        objetivo = la_liga_que_juega()
+        league = next(
+            (l for l in leagues
+             if isinstance(l, dict) and str(l.get("id")) == str(objetivo)),
+            None,
+        )
+
+        if league is None:
+            raise RuntimeError(
+                f"La liga {objetivo} no esta en la cuenta "
+                f"({self.leagues}): no se juega en otra."
+            )
 
         self.league = league
         self.league_id = league["id"]

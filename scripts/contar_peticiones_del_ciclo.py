@@ -97,7 +97,9 @@ def cuerpo_para(url: str) -> dict:
             "data": {
                 "leagues": [
                     {
-                        "id": 1,
+                        # La de Pepe (config/las_ligas.json): desde el
+                        # 22/10 juega su liga por id, no la primera.
+                        "id": 2165477,
                         "name": "Liga",
                         "user": {"id": 99, "name": "Pepe"},
                     }
