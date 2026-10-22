@@ -69,6 +69,49 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E55 · 22/10/2026 11:16 de Madrid · El aplazado del 21/10 era ronda propia, y Pollo17 la empezo en rojo
+
+**Lo que quedaba abierto:** E45 dudaba entre dos cosas: que el
+Levante-Athletic fuera el partido que le faltaba a la ronda 4904 (con el
+once del 03/09) o que Biwenger abriera una ronda nueva. E50 dejo apuntada
+la prueba.
+**Datos:** el tablon de hoy y las fotos de los ciclos de las 19:10 y 20:09
+de Madrid del 21/10 (artefactos), justo antes y despues del saque (20:00).
+**Codigo:** `lab/carrera/quien_se_juega_el_21.py` (E50) sobre la foto de
+las 19:10.
+
+**Lo que dice el tablon:**
+
+    21/10 18:00 UTC  roundStarted  «Jornada 6 (aplazada)», part 3, id 5176
+
+- **Era ronda propia** (la hipotesis que E45 daba por menos probable). El
+  gestor acerto al tratarlo como plazo de caja (E45/E47). La 4904 («Jornada
+  6», 03/09) y la 4906 (J8, sin el Rayo-Athletic) siguen abiertas.
+
+**Quien la empezo en rojo** (saldo a las 19:10 y 20:09 de Madrid, igual):
+
+    manager        caja al saque     esperado en ese partido
+    Pollo17         -2.861.849           23,7  (Ivan Romero, Robert Navarro, Brugue, De la Fuente)
+    Luismi_Haz      -8.166.616            3,6
+    Pepe            +1.717.983            5,2  (Olasagasti)
+    los demas        en verde
+
+- **Pollo17 empezo la ronda en rojo** (gasto el premio de la J9 en Kubo,
+  Pepelu y dos mas el 21/10 a las 07:00). Por la regla de la liga (E29,
+  Luismi en la J6 aplazada: 64 puntos, 0 euros), **sus ~24 puntos
+  esperados de ese partido no cuentan**. Era la ronda que mas le
+  favorecia (E50: +14 sobre Pepe); ahora puede ir al reves.
+
+**Prediccion para cuando se pague la 5176** (por el reloj de E43, hoy
+entre las 12:00 y las 17:00 de Madrid): Pollo17 y Luismi, 0 puntos y 0
+euros; Pepe, los de Olasagasti x 30.000 (o el plus si queda entre los tres
+ultimos de esa ronda, E52). La clasificacion de hoy (Pollo 381, Pepe 372,
+solo rondas cerradas) se acercaria en lo que haga Olasagasti.
+
+**Veredicto: CIERRA E45** (ronda propia, comprobado) y deja una
+prediccion que se juzga esta tarde. Para Pepe: la regla de no empezar
+nunca en rojo, otra vez, vale puntos; esta vez se los quita al rival.
+
 ### E54 · 21/10/2026 17:18 de Madrid · Tras un cero: ¿tiene razon «el parte vende»?
 
 **Hipotesis:** un jugador que hace 0 puntos o menos en una jornada (la
