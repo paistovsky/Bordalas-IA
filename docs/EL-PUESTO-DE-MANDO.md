@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/10/2026, 07:25 de Madrid (rafaga de las 07:15).
+Actualizado: 22/10/2026, 14:35 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2408 a #2415).
+  Saldo +6.975; puja viva **Boye 5.989.900** (orden del dueno, vie 07:00).
+  Leido el plan del chat del dueno y lo doy por bueno: si entra, se venden
+  Luismi Cruz (oferta viva 2.959.100) y Exposito (oferta del reset del
+  vie, suelo 3.050.000) => ~+1,47 M. **El riesgo que queda:** si el
+  Computer no ofrece por Exposito el viernes, la J10 empezaria en -3,02 M
+  (0 puntos); el chat del dueno tiene su turno el vie 07:25 y yo el de la
+  J10 a las 12:45, ambos antes del plazo de las 15:00. Si a las 12:45
+  sigue en rojo, aviso al dueno con a quien vender (con oferta viva, nunca
+  Yamal).
 
 - **22/10 14:15. LAS LIGAS.** El dueno se apunto sin querer a una segunda
   liga, **Reto El Clasico (2210645)**. Pepe elegia la PRIMERA liga de la
