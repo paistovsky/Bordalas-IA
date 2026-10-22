@@ -352,6 +352,27 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **22/10 10:47 (laboratorio de rivales).** Workflow de 4 (rivales; la
+  subasta de Boye; un escéptico por informe, ninguno refuta). **Puja por
+  Boye puesta** (vuelta de las 11:07: 5.989.900, http 200; el cierre la
+  cuenta pagada por sus ventas, EN_POSITIVO, sin escrituras). **Rivales:**
+  en el reset Pollo17 gano a Cubarsi (Barcelona, DEF, 8.407.000, +4,2 %;
+  Luismi 8.221.000); Luismi vendio a Ilaix (-59.800) y Danjuma (+74.699).
+  Cajas: Pollo **-11,27 M** (tiene que vender ~11,3 M de banquillo antes de
+  la J10), Luismi -2,22 M. Patrimonio: Pollo +51,09 M sobre nosotros; su
+  once por precio, 84,3 M (+27,3 M). La parte aplazada de la J6 (ronda
+  5176) aun sin roundFinished. **La subasta de Boye:** es el unico de mas
+  de 3 M que sube hoy; P(ganar) a 5.989.900 (+12,2 %) ~85 % con toda la
+  temporada, **~75 % con octubre** (los rivales pujan mas fuerte desde el
+  01/10). Amenaza: Manzagool (caja +1,04 M, le falta un delantero, sus
+  ultimas pujas por los que suben +13,6 % a +32,3 %). Subir no compensa
+  (6,08 M: ~0,8-2,6 M por victoria extra); bajar tampoco. **Se queda.**
+  **La caja si se gana:** la oferta de Exposito muere en el mismo reset; la
+  nueva llega cada 2 dias (patron de toda la temporada), pero si no
+  llegara, la J10 empezaria en -3,02 M (premio 0). Turno propio mio el vie
+  23/10 a las 05:25 UTC para comprobarlo y, si hace falta, vender a otro con
+  oferta antes de las 14:00 UTC. Hoy es jueves: ningun interruptor.
+
 - **22/10 11:00. BOYE, POR ORDEN DEL DUENO («ok, do it»).** Boye (Alaves,
   DEL, 5,34 M, FF 90 %, 58 pts en 8 partidos) salio al mercado; Pepe no
   podia pujar: caja 6.975 (Gaya) y el reloj de 40 h antes de la J10 (vie
