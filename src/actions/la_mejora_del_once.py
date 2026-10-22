@@ -145,18 +145,6 @@ SIN FANTASMAS EN LA CAJA (13/10/2026)
     Al final de cada vuelta encendida escribe `VUELTA_MEJORA` (run_id,
     hora, las `hechas`): el cierre de la jornada corre después.
 
-EL APLAZADO NO FRENA LA COMPRA (20/10/2026,
-`BORDALAS_EL_APLAZADO_NO_FRENA_LA_COMPRA`, nace APAGADO)
-
-    `HORAS_SIN_COMPRAR` se medía hasta el próximo cierre de cualquier
-    clase, y el Levante-Athletic (J6 aplazada, una ronda aparte de un
-    partido, mié 21/10 20:00) paraba la mejora dos días de mercado. Con
-    el interruptor, ante un aplazado a menos de 40 h cuya puja se
-    resuelve antes (`decidir(aparte=...)`), la compra se mide hasta la
-    ronda ENTERA y cada cambio cabe en la caja del aplazado (la regla
-    entera, en `la_orden_del_gestor`). Vender sigue midiéndose hasta el
-    aplazado. Apagado, byte a byte lo de antes.
-
 QUE NO HACE
 
     No toca a Yamal (salvo su llave de lesión), ni a los `proteger` de la
@@ -350,123 +338,6 @@ def con_puja_fuerte(cambio: dict, precio) -> dict:
         return cambio
 
 
-# EL APLAZADO NO FRENA LA COMPRA (20/10/2026,
-# `BORDALAS_EL_APLAZADO_NO_FRENA_LA_COMPRA`, nace APAGADO; la regla entera
-# en `la_orden_del_gestor`). La mejora paraba a `HORAS_SIN_COMPRAR` del
-# Levante-Athletic (J6 aplazada, mie 21/10 20:00 de Madrid): dos mercados
-# sin poder mejorar el once, para un partido que se puntua con el once
-# congelado. Con el interruptor, si la puja se resuelve antes del
-# aplazado y la ronda entera esta a 40 h o mas, la ventana de compra y el
-# minimo con deuda se miden hasta la ronda entera, y cada cambio tiene que
-# caber en la caja del aplazado: su puja entera, menos lo que el que sale
-# cobra ANTES del aplazado con la oferta que ya tiene (sin suelo: en rojo
-# y a menos de `HORAS_SOLVENCIA` la mejora lo cobra a lo que sea, y la
-# vuelta que cobra va 13-15 h antes del partido).
-
-def _el_aplazado_de_la_mejora(aparte) -> dict | None:
-    """
-    `{"inicio", "horas_principal", "caja", "caducidades"}` si la regla del
-    aplazado aplica a la compra: se resuelve antes (`resuelve_antes`), la
-    ronda entera esta a `HORAS_SIN_COMPRAR` o mas y se sabe la caja del
-    aplazado. Si no, None (lo de siempre). Pura, nunca lanza.
-    """
-    try:
-        if not isinstance(aparte, dict) or not aparte.get("resuelve_antes"):
-            return None
-        principal = aparte.get("horas_principal")
-        if principal is None or isinstance(principal, bool):
-            return None
-        principal = float(principal)
-        if principal != principal or principal in (float("inf"), float("-inf")):
-            return None
-        caja = _int(aparte.get("caja"))
-        if principal < HORAS_SIN_COMPRAR or caja is None:
-            return None
-        if not isinstance(aparte.get("inicio"), datetime):
-            return None
-        caducidades = aparte.get("caducidades")
-        return {"inicio": aparte["inicio"], "horas_principal": principal, "caja": caja,
-                "caducidades": caducidades if isinstance(caducidades, dict) else {}}
-    except Exception:                               # noqa: BLE001
-        return None
-
-
-def con_la_caja_del_aplazado(cambio: dict, ofertas, aplazado) -> dict:
-    """
-    El cambio con `caja_aplazado`: lo que deja en la caja del aplazado.
-    0 si ya es nuestro (no se puja); si no, - su puja + lo que el que
-    sale cobra antes del aplazado (`la_orden_del_gestor.cobrable`, suelo
-    0), como mucho la puja. Pura; con basura, - su puja entera.
-    """
-    try:
-        if cambio.get("ya_es_nuestro"):
-            return {**cambio, "caja_aplazado": 0}
-        from src.actions.la_orden_del_gestor import cobrable
-
-        puja = _int(cambio.get("puja"), 0) or 0
-        cobro = cobrable(cambio.get("sale"), 0, ofertas, aplazado.get("caducidades"),
-                         aplazado.get("inicio"))
-        return {**cambio, "caja_aplazado": -puja + min(puja, cobro)}
-    except Exception:                               # noqa: BLE001
-        return {**cambio, "caja_aplazado": -(_int(cambio.get("puja"), 0) or 0)}
-
-
-def el_aplazado_de_la_vuelta(fuera, ahora, snapshot, yo, foto, orden, libro,
-                             esta_vuelta) -> dict | None:
-    """
-    El `aparte` de la mejora en esta vuelta (solo con el interruptor):
-
-        de `fuera["aparte"]` si lo trae; si `fuera` trae las horas
-        (`horas_jornada`) y no el aparte, None (no se mezcla el
-        calendario de produccion con unas horas de prueba); si no,
-        `la_orden_del_gestor.el_aplazado` con el de produccion.
-
-    Con su `caja`: `la_caja_del_aplazado` del saldo (con lo cobrado en
-    esta vuelta), nuestras pujas vivas (las de la foto sin las retiradas,
-    con las de esta vuelta encima, todas enteras) y las parejas de la
-    orden viva y del libro de la mejora (el que sale, sin suelo). None si
-    no aplica o no se sabe. Nunca lanza.
-    """
-    try:
-        from src.actions.la_orden_del_gestor import (
-            activa as orden_activa, el_aplazado, la_caja_del_aplazado,
-            las_parejas_de_la_orden, validar,
-        )
-
-        fuera = fuera if isinstance(fuera, dict) else {}
-        if "aparte" in fuera:
-            aparte = fuera["aparte"]
-        elif "horas_jornada" in fuera:
-            return None
-        else:
-            aparte = el_aplazado(ahora, None, snapshot, yo)
-        if not isinstance(aparte, dict):
-            return None
-        vivas = {}
-        for q, p in (foto.get("nuestras_pujas") or {}).items():
-            if _int(q) is not None:
-                vivas[_int(q)] = p
-        for q, importe in ((esta_vuelta or {}).get("pujas") or {}).items():
-            if _int(q) is not None:
-                vivas[_int(q)] = {"amount": importe}
-        parejas: dict = {}
-        if orden_activa() and validar(orden, ahora) is None:
-            for relevo, lista in las_parejas_de_la_orden(orden, ahora).items():
-                parejas.setdefault(relevo, []).extend(lista)
-        for k, c in (libro or {}).items():
-            entra = _int(k)
-            sale = _int(c.get("sale")) if isinstance(c, dict) else None
-            if entra is not None and sale is not None:
-                parejas.setdefault(entra, []).append((sale, 0))
-        caja = la_caja_del_aplazado(
-            foto.get("saldo"), vivas, parejas, foto.get("ofertas_del_computer") or {},
-            aparte.get("caducidades") or {}, aparte.get("inicio"),
-        )
-        return {**aparte, "caja": caja}
-    except Exception:                               # noqa: BLE001
-        return None
-
-
 def el_calendario_activo() -> bool:
     """`BORDALAS_EL_CALENDARIO_EN_LA_MEJORA`, leído como `activa`. Nace
     APAGADO. Nunca lanza."""
@@ -632,8 +503,7 @@ def el_plan_del_calendario(ctx) -> dict:
 
 
 def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
-                         disponible: int, deficit: bool = False,
-                         caja_aplazado: int | None = None) -> list:
+                         disponible: int, deficit: bool = False) -> list:
     """
     De los cambios posibles (cada uno con `entra`, `sale`, `puntos`,
     `caja`, `puja`), la combinación sin repetir jugador que más puntos
@@ -645,11 +515,6 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
     combinación que pierde puntos si es la que menos pierde de las que
     devuelven la caja a `minimo_de_caja` («fichar y luego ver con quién
     nos quedamos y vender para quedarnos en positivo», el dueño, 12/10).
-
-    Con `caja_aplazado` (EL APLAZADO NO FRENA LA COMPRA, 20/10/2026): la
-    caja del aplazado sin estos cambios; la combinación tiene que dejarla
-    en >= 0 sumando el `caja_aplazado` de cada cambio (sin él, lo que
-    puja, entero). None: no se mira.
     """
 
     mejoras = sorted((c for c in cambios if c["puntos"] >= GANANCIA_MINIMA),
@@ -691,12 +556,6 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
                 continue
             if sum(c["puja"] for c in combo) > disponible:
                 continue
-            # EL APLAZADO (20/10/2026): al empezar el aplazado, la caja en
-            # >= 0 con las pujas enteras y solo lo que el que sale cobra
-            # antes (cada cambio, el suyo).
-            if caja_aplazado is not None and caja_aplazado + sum(
-                    c.get("caja_aplazado", -(c.get("puja") or 0)) for c in combo) < 0:
-                continue
             k = (round(puntos, 6), caja + sum(c["caja"] for c in combo))
             if clave is None or k > clave:
                 mejor, clave = list(combo), k
@@ -709,7 +568,7 @@ def decidir(
     ya_pujados=frozenset(), caja, horas_jornada, puede_escribir=True,
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
     estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
-    en_9900=False, aparte=None,
+    en_9900=False,
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -749,19 +608,6 @@ def decidir(
                     un hueco (el que sale fuera o con poca titularidad)
         en_9900     LA PUJA EN 9.900 (17/10): la puja del que entra termina
                     en 9.900 (`la_ronda_de_la_manana.en_9900`)
-        aparte      EL APLAZADO NO FRENA LA COMPRA (20/10/2026, solo con
-                    `BORDALAS_EL_APLAZADO_NO_FRENA_LA_COMPRA`): el de
-                    `la_orden_del_gestor.el_aplazado` con su `caja` (la
-                    caja del aplazado sin estos cambios, de `correr`).
-                    Si lo que viene es un aplazado a menos de
-                    `HORAS_SIN_COMPRAR` que se resuelve antes
-                    (`resuelve_antes`) y la ronda entera esta a
-                    `HORAS_SIN_COMPRAR` o mas, la ventana de compra y el
-                    minimo de la caja se miden hasta la ronda entera, y
-                    cada cambio tiene que caber en la caja del aplazado
-                    (`caja_aplazado`: lo que puja, menos lo que el que
-                    sale cobra antes del aplazado, sin suelo). None: lo
-                    de siempre, byte a byte
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -830,18 +676,7 @@ def decidir(
         plan["calendario"] = el_plan_del_calendario(calendario_de_puntos)
     if frenadas:
         plan["frenadas"] = frenadas
-
-    # EL APLAZADO NO FRENA LA COMPRA (20/10/2026): con un aplazado a menos
-    # de `HORAS_SIN_COMPRAR` que se resuelve antes, la compra (la ventana,
-    # el minimo con deuda y el deficit) se mide hasta la ronda ENTERA; la
-    # venta (suelo en rojo, parte del relevo, arriba) sigue con
-    # `horas_jornada`, las del aplazado.
-    horas_compra, aplazado = horas_jornada, None
-    if aparte and horas_jornada is not None and horas_jornada < HORAS_SIN_COMPRAR:
-        aplazado = _el_aplazado_de_la_mejora(aparte)
-        if aplazado is not None:
-            horas_compra = aplazado["horas_principal"]
-    if not puede_escribir or horas_compra is None or horas_compra < HORAS_SIN_COMPRAR:
+    if not puede_escribir or horas_jornada is None or horas_jornada < HORAS_SIN_COMPRAR:
         return {"acciones": acciones, "soltar": soltar, "adoptar": adoptar, "plan": plan}
 
     # EL CALENDARIO: con contexto, los puntos de cada lado son el xP por
@@ -1015,18 +850,12 @@ def decidir(
         precios = {e["id"]: e.get("precio") for e in entran}
         cambios = [con_puja_fuerte(c, precios.get(c["entra"])) for c in cambios]
 
-    # EL APLAZADO (20/10/2026): lo que cada cambio deja en la caja del
-    # aplazado, con su puja ya final (fuerte, en 9.900).
-    if aplazado is not None:
-        cambios = [con_la_caja_del_aplazado(c, ofertas, aplazado) for c in cambios]
-
-    minimo = -DEUDA_TOLERADA if horas_compra >= HORAS_CON_DEUDA else 0
+    minimo = -DEUDA_TOLERADA if horas_jornada >= HORAS_CON_DEUDA else 0
     disponible = (_int(foto.get("maximo_de_puja"), 0) or 0) - RESERVA
     # En rojo, cambiar caro por barato solo a partir de `HORAS_DEFICIT`:
     # antes puede entrar el premio de la jornada que acaba de jugarse.
-    deficit = caja < minimo and horas_compra < HORAS_DEFICIT
-    elegidos = la_mejor_combinacion(cambios, caja, minimo, disponible, deficit=deficit,
-                                    caja_aplazado=None if aplazado is None else aplazado["caja"])
+    deficit = caja < minimo and horas_jornada < HORAS_DEFICIT
+    elegidos = la_mejor_combinacion(cambios, caja, minimo, disponible, deficit=deficit)
     plan = {"caja": caja, "minimo": minimo, "disponible": disponible, "deficit": deficit,
             "cambios": elegidos,
             "caja_despues": caja + sum(c["caja"] for c in elegidos)}
@@ -1038,13 +867,6 @@ def decidir(
         plan["frenadas"] = frenadas
     if solo_si_sube:
         plan["sin_subir"] = sin_subir
-    if aplazado is not None:
-        plan["aplazado"] = {
-            "inicio": aplazado["inicio"].isoformat(),
-            "horas_principal": round(aplazado["horas_principal"], 2),
-            "caja": aplazado["caja"],
-            "caja_despues": aplazado["caja"] + sum(c.get("caja_aplazado", 0) for c in elegidos),
-        }
 
     for c in elegidos:
         if c["ya_es_nuestro"]:
@@ -1442,10 +1264,8 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
                     (`orden`, `vetados`, `protegidos`, las rutas
                     `libro_ronda` y `libro_chollos`, `horas_jornada`,
                     `puede_escribir`, `en_curso`, `rotando`: los ids de
-                    las parejas abiertas de la rotación; `aparte`, el del
-                    aplazado, solo con su interruptor: ver
-                    `el_aplazado_de_la_vuelta`). Lo que no trae, de
-                    producción, como siempre.
+                    las parejas abiertas de la rotación). Lo que no trae,
+                    de producción, como siempre.
         vuelta_ruta dónde va `escribir_la_vuelta` (encendida, siempre,
                     también con error). Por defecto `VUELTA_MEJORA`; con
                     `libro_ruta` y sin esto, junto al libro (quien mueve
@@ -1560,14 +1380,6 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             foto["saldo"] = ((_int(foto.get("saldo"), 0) or 0)
                              + sum(esta_vuelta["cobros"].values()))
 
-        # EL APLAZADO NO FRENA LA COMPRA (20/10/2026), solo con su
-        # interruptor: el aplazado que viene y su caja (del saldo de arriba,
-        # ya con lo cobrado en esta vuelta).
-        from src.actions.la_orden_del_gestor import el_aplazado_activo
-        aparte = (el_aplazado_de_la_vuelta(fuera, ahora, snapshot, yo, foto, orden, libro,
-                                           esta_vuelta)
-                  if el_aplazado_activo() else None)
-
         # EL CALENDARIO, una vez por vuelta y solo con su interruptor.
         ctx = el_contexto(status, calendario, ahora) if el_calendario_activo() else None
 
@@ -1588,7 +1400,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             en_9900=la_puja_en_9900_activa(),
             probabilidades=las_probabilidades(status),
             estados=los_estados(snapshot, liga),
-            vendidos=vendidos, aparte=aparte,
+            vendidos=vendidos,
         )
         salida["acciones"], salida["plan"] = d["acciones"], d["plan"]
 

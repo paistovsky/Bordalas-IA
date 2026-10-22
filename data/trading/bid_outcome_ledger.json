@@ -1756,6 +1756,27 @@
    "winning_amount": 1968500,
    "margin": 190006,
    "event_id": "b52fe685b5074481899afc47"
+  },
+  "1844:2026-10-21T05:19:04.299904+00:00": {
+   "player_id": 1844,
+   "player_name": "Gayà",
+   "amount": 1711008,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 1710000,
+   "recommended_bid": 1710000,
+   "intent": "REVENDER",
+   "target_source": "RENDIJA",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-10-21T05:19:04.299904+00:00",
+   "outcome": "WON",
+   "resolved_at": "2026-10-22T05:18:24.763243+00:00",
+   "winning_amount": 1711008,
+   "margin": 0,
+   "event_id": "54b32f179c3880343a0f7302"
   }
  }
 }

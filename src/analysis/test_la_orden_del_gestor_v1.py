@@ -481,6 +481,74 @@ def test_el_reloj_no_deja_fichar_tarde() -> None:
         "con un `vender_si_ficha` que espera a este fichaje, el reloj manda"
 
 
+def test_la_pagan_sus_ventas() -> None:
+    """22/10: Boye se subasta el viernes a las 07:00, 14 h antes de la J10.
+    Con `la_pagan_sus_ventas` escrito por el gestor, el reloj le deja pujar
+    si las ofertas vivas por los que salen por EL pagan la puja entera."""
+    boye, luismi, exposito, otro = 12494, 25777, 19862, 777
+    orden = {**ORDEN,
+             "fichar": [{"player_id": boye, "nombre": "Boye", "puja": 5_989_900,
+                         "la_pagan_sus_ventas": True}],
+             "no_pujar": [],
+             "vender_si_ficha": {"si_esta": boye, "jugadores": [
+                 {"player_id": luismi, "nombre": "Luismi Cruz", "suelo": 2_700_000},
+                 {"player_id": exposito, "nombre": "Exposito", "suelo": 4_200_000}]}}
+    plantilla = {luismi, exposito, otro}
+    ofertas = {luismi: {"offer_id": 1, "amount": 2_959_100},
+               exposito: {"offer_id": 2, "amount": 4_490_300}}
+
+    def _d(o=orden, **kw):
+        base = dict(mercado={boye: 5_340_000}, nuestras_pujas={}, plantilla=plantilla,
+                    ofertas_del_computer=ofertas, en_venta={luismi, exposito}, precios={},
+                    maximo_de_puja=14_566_975, saldo=6_975, horas_jornada=35.0,
+                    estados={boye: "ok", luismi: "ok", exposito: "ok", otro: "ok"})
+        base.update(kw)
+        return orden_mod.decidir(o, **base)
+
+    a = _d()
+    assert _tipos(a) == [("PUJAR", boye)], a
+    assert a[0]["importe"] == 5_989_900 and a[0]["guardia"] == "LA_PAGAN_SUS_VENTAS", a
+
+    # Sin la marca del gestor, el reloj manda como siempre.
+    sin_marca = {**orden, "fichar": [{k: v for k, v in orden["fichar"][0].items()
+                                      if k != "la_pagan_sus_ventas"}]}
+    assert _tipos(_d(sin_marca)) == [("NADA", boye)], _d(sin_marca)
+    for marca in ("si", 1, "true", None):
+        o = {**orden, "fichar": [{**orden["fichar"][0], "la_pagan_sus_ventas": marca}]}
+        assert _tipos(_d(o)) == [("NADA", boye)], (marca, _d(o))
+
+    # Las ofertas no llegan: falta caja (sin la de Exposito, 2.966.075).
+    assert _tipos(_d(ofertas_del_computer={luismi: ofertas[luismi]})) == [("NADA", boye)]
+    # Por debajo del suelo no cuenta.
+    bajas = {**ofertas, exposito: {"offer_id": 2, "amount": 4_100_000}}
+    assert _tipos(_d(ofertas_del_computer=bajas)) == [("NADA", boye)]
+    # Otra puja viva se descuenta entera.
+    otra = {999: {"offer_id": 5, "amount": 1_500_000}}
+    assert _tipos(_d(nuestras_pujas=otra)) == [("NADA", boye)]
+    # El que ya no es nuestro no paga.
+    assert _tipos(_d(plantilla={luismi, otro})) == [("NADA", boye)]
+    # Solo cuentan los que salen por ESTE fichaje.
+    de_otro = {**orden, "vender_si_ficha": {"si_esta": 4242,
+                                            "jugadores": orden["vender_si_ficha"]["jugadores"]}}
+    assert _tipos(_d(de_otro)) == [("NADA", boye)]
+    # Sin saldo, nada.
+    assert _tipos(_d(saldo=None)) == [("NADA", boye)]
+
+    # Lejos de la jornada el reloj no aplica: puja normal, sin guardia.
+    a = _d(horas_jornada=60.0)
+    assert _tipos(a) == [("PUJAR", boye)] and "guardia" not in a[0], a
+
+    # Ganado: se cobran las dos ofertas en la vuelta siguiente.
+    a = _d(plantilla=plantilla | {boye}, saldo=6_975 - 5_989_900, horas_jornada=13.9)
+    assert sorted(_tipos(a)) == sorted([("ACEPTAR_OFERTA_DEL_COMPUTER", luismi),
+                                        ("ACEPTAR_OFERTA_DEL_COMPUTER", exposito)]), a
+
+    # Nunca lanza.
+    for basura in (None, "x", {"player_id": "x", "la_pagan_sus_ventas": True}):
+        assert orden_mod._la_pagan_sus_ventas(orden, basura, 1, 1, {}, plantilla, ofertas) is False
+    assert orden_mod._la_pagan_sus_ventas({}, orden["fichar"][0], 1, 1, None, None, None) is False
+
+
 def test_el_relevo_tiene_que_estar_sano() -> None:
     plantilla = {ROBERTO, JUTGLA, BLANCO, YAMAL}
     ofertas = {JUTGLA: {"offer_id": 71, "amount": 3_050_000}}
@@ -898,6 +966,7 @@ TESTS = [
     test_en_rojo_no_se_cobra_si_el_relevo_no_juega,
     test_correr_retira_la_puja_del_fichaje_lesionado,
     test_el_reloj_no_deja_fichar_tarde,
+    test_la_pagan_sus_ventas,
     test_el_relevo_tiene_que_estar_sano,
     test_no_se_cobra_con_la_jornada_jugandose,
     test_correr_pasa_las_guardias,

@@ -3,7 +3,15 @@
   "por": "el gestor, a peticion del dueno («alguien se los va a llevar»)",
   "motivo": "Roberto Fernandez: 59 puntos en 7 jornadas (8.o de 547), sube diez dias seguidos. Jutgla, nuestro segundo delantero, 29. Se paga vendiendo al Computer a cuatro que no mueven el once; el saldo vuelve a positivo antes de la J8 (09/10 21:00). 29/09 11:00: el dueno no quiere vender a Jutgla; se vende a Pablo Duran (Celta), Cabrera y Guevara, y Jutgla queda como ultimo recurso (solo desde el 08/10 07:00 y si el saldo sigue en rojo). 29/09 19:00: Zubeldia sigue al margen (FF 21/09, 28/09 y 29/09; Biwenger «doubt» desde el 29/09): pasa a la venta y Maffeo se queda como tercer defensa. 29/09 22:50: puja subida de 8.950.000 a 9.650.000 (+15,2 % sobre 8,38 M). En las peleas por jugadores caros se paga +7 a +16,5 % (Pollo17: Moleiro +9,8 % hoy, +16,5 % el 11/09); Pollo17 tiene ~7,5 M en caja y puja maxima >25 M; el dueno avisa de que Pollo y Luismi van a ir a por el. 30/09 08:30: Roberto fichado (9.650.000). Vendidos Cabrera, Zubeldia, Duran y Guevara (5,18 M); saldo -4.113.816. Blanco: el Computer ofrece 2.899.200 (-4 %) y su precio baja cada dia; suelo a 2.850.000 para venderlo ya. 30/09 13:40: ERROR DEL GESTOR: Maffeo ya no era nuestro; la plantilla quedo en 10 con 2 defensas. Se ficha a Diego Rico (Osasuna, 50 % titular, 0,57 M; puja 620.000) para completar el once. Lejeune (95 % titular, 3,37 M) obligaria a vender a Jutgla. Sale Maffeo de conservar y Lejeune de no_pujar. 30/09 14:45: descartado el cambio Oriol Rey/Unai Lopez: Oriol Rey NO esta hoy en el mercado (la fila era del 23/09). El hueco de ~1,3 M se decide con el mercado de los proximos dias (cambio de uno por otro con relevo). Red de seguridad: Jutgla desde el 08/10 07:00 si el saldo sigue en rojo (mejor un hueco que 0 puntos en la jornada).",
   "caduca": "2026-11-30T23:59:00+01:00",
-  "fichar": [],
+  "fichar": [
+    {
+      "player_id": 12494,
+      "nombre": "Boyé",
+      "puja": 5989900,
+      "la_pagan_sus_ventas": true,
+      "por_que": "22/10, el dueno («ok, do it»): Boye (Alaves, DEL, 5,34 M, FF 90 %, 58 pts en 8 partidos) por Luismi Cruz y Exposito, +1,4/+2,0 xP por jornada en un 4-3-3 con Cardona. Tope 5.990.000. Se resuelve el vie 23/10 07:00; las ventas, en la vuelta siguiente con sus ofertas del Computer, 13 h antes de la J10."
+    }
+  ],
   "no_pujar": [
     {
       "player_id": 1721,
@@ -12,13 +20,18 @@
     }
   ],
   "vender_si_ficha": {
-    "si_esta": 20102,
-    "por_que": "20/10 18:40, el gestor: si llega Kubo (puja del dueno en la app, subasta del reset del mie 21/10 07:00), se vende a Luismi Cruz con su oferta viva del Computer (2.958.000, hasta el jue ~07:00) en la vuelta siguiente, para tener caja >= 0 antes del aplazado (mie 20:00). Kubo entra en el once de la J10 (3-5-2). Si Kubo no llega, esta linea no hace nada y se borra el mie a las 08:22.",
+    "si_esta": 12494,
+    "por_que": "22/10 09:40, el gestor: si llega Boye (Alaves, DEL, 5,34 M, FF 90 %, 7,25 pts/partido; puja del dueno en la app, subasta del reset del vie 23/10 07:00), se venden Luismi Cruz (oferta viva 2.959.100 hasta el sab) y Exposito (oferta nueva del reset del vie) en la vuelta siguiente: caja >= 0 mucho antes de la J10 (vie 21:00). Once 4-3-3 con Boye y Cardona. Si Boye no llega, esta linea no hace nada y se borra el vie a las 08:22.",
     "jugadores": [
       {
         "player_id": 25777,
         "nombre": "Luismi Cruz",
         "suelo": 2700000
+      },
+      {
+        "player_id": 19862,
+        "nombre": "Expósito",
+        "suelo": 4200000
       }
     ]
   },
@@ -67,6 +80,11 @@
       "player_id": 30493,
       "nombre": "Sergi Cardona",
       "por_que": "17/10, el gestor: ganado en el reset del 17/10 (919.000, puja de la mejora del once del 16/10 a las 21:10; por error se apunto como del dueno). Titular del once de la J10 en lugar de Diego Rico (70 % frente a 30 %); la J9 se juega con el once del viernes. No se vende para liquidez."
+    },
+    {
+      "player_id": 1844,
+      "nombre": "Gayà",
+      "por_que": "22/10, el gestor: fichaje del dueno desde la app (1.711.008, sin rival, reset del 22/10). Titular del once de la J10 (FF 80 %, Valencia-Villarreal). Un fichaje para el once no se revende antes de jugar con nosotros (E14)."
     }
   ],
   "viajes": {

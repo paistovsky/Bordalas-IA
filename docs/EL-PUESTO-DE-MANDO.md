@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 22/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,180 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/10 08:22 (supervision).** Vuelta #2409 (08:07). En el reset de las
+  07:00 entro **Gaya** (puja del dueno, 1.711.008, sin rival); nada perdido.
+  Pepe solo: 0 compras, 0 ventas (la ronda, los chollos, la orden, la
+  mejora y la rotacion, NADA: caja libre 6.975). Saldo **6.975**, 12
+  jugadores, 58,24 M. Once de la J10 (3-4-3, 42,9 xP): Gaya entra, Sergi
+  Cardona al banquillo (FF 50 %, como Jonny, que va por xP). El cierre,
+  EN_POSITIVO, no vende nada. **Caja de la J10** (vie 21:00, a 36,8 h):
+  6.975 >= 0, sin pujas vivas. **Orden:** Gaya a `conservar` (fichaje del
+  dueno y titular; E14); verja 221/221. Rivales en el reset: Pollo17 gano
+  al 32440 por 8.407.000 (Luismi 8.221.000); Luismi vendio dos al Computer
+  (3.401.200 y 2.544.700). Clasificacion (solo rondas cerradas, con la J9):
+  Pollo 381, **Pepe 372**, Luismi 353. La parte aplazada de la J6 (ronda
+  5176) aun no tiene roundFinished: el once del 15/09, por comprobar.
+
+- **22/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2399 a #2408).
+  **Gaya GANADO** (1.711.008, sin rival por encima). Saldo **+6.975** a las
+  07:18, 0 comprometido, plantilla 58,24 M (12 jugadores: por fin uno de
+  banquillo). Para la J10 (vie 23/10, plazo 15:00) estamos en positivo pero
+  al limite: **cualquier puja que se resuelva el vie 07:00 sin una venta
+  que la cubra nos deja en rojo**. Lo miro esta tarde y esta noche; el
+  turno del vie 12:45 lo confirma. Jueves: no se enciende nada.
+
+- **21/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2397 a #2399).
+  Saldo +1.717.983, puja viva Gaya 1.711.008 (jue 07:00). Segun el chat del
+  dueno, Pollo17 y Luismi empezaron la parte aplazada de la J6 en rojo:
+  nosotros no. Turno del cierre de la J10 en pie (vie 23/10 12:45); el de
+  la J11 lo crea ese turno: **ojo, la J11 empieza el dom 01/11 a las
+  17:00 (horario de invierno, UTC+1), asi que el plazo T-6 es a las 11:00
+  y el turno tiene que ser a las 09:45 de Madrid (08:45 UTC), no a las
+  12:45 de siempre.** Creado ya: dom 01/11 09:45 (trig_01NzaNuaDH69dCE38wMa7wg2).
+  Viernes: no se enciende nada.
+
+- **21/10 20:47 (laboratorio de rivales).** Desde el reset, dos ventas al
+  Computer y las dos con perdida: **Pollo17** vendio a Espi (comprado el
+  19/10 a 2.777.000, +7,2 % y subiendo) por 2.521.300 a los 2,1 dias
+  (-255.700), el primer dia que bajaba; **Manzagool** a Fran Garcia
+  (comprado el 20/09 a 5.135.070) por 3.924.400 tras 31 dias (-1.210.670).
+  Las dos cuadran con lo medido esta manana: prima alta en 1-3 M y
+  aguantar en >3 M pierden. Cajas al empezar la parte aplazada de la J6
+  (ronda 5176, 18:00 UTC), reconstruidas del tablon: Pollo -2,86 M (vendio
+  y cobro la racha, no llego), Luismi -8,17 M (nada), Manzagool +1,04 M:
+  **Pollo y Luismi cobran 0 por esa parte** (E52); nosotros, +1.717.983.
+  Distancia de patrimonio con Pollo, ~50,4 M. **Nosotros:** la ronda, los
+  chollos, la orden, la mejora y la rotacion, NADA en la vuelta de las
+  20:07 (la caja libre es 6.975: la puja del dueno por Gaya, 1.711.008, se
+  lleva el resto; se resuelve manana a las 07:00). Sin cambios ni
+  interruptores esta noche. Manana: comprobar los puntos de la parte
+  aplazada (el once del 15/09) y si llego Gaya.
+
+- **21/10 20:30 (mirada al aplazado de la J6). RESUELTO: ES RONDA PROPIA.**
+  En `data/rival_intelligence/board_events.json` aparece un «roundStarted»
+  nuevo a las 18:00 UTC (20:00 de Madrid): ronda **5176, «Jornada 6
+  (aplazada)», part 3**. El saldo a esa hora era **+1.717.983** (vuelta
+  de las 20:07, #2398 verde): Pepe la empieza en positivo y sus puntos
+  cuentan. **Regla que queda:** cada aplazado es una ronda aparte y un
+  plazo de caja propio. El siguiente sera el Rayo-Athletic de la J8 (Unai
+  Lopez en el once) cuando tenga fecha: crear su turno en cuanto salga.
+
+- **21/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2390 a #2392).
+  Saldo +1.717.983 a las 14:10: el plazo del aplazado (14:00) PASADO EN
+  VERDE. Puja viva Gaya 1.711.008 (jue 07:00). Nada mas; a las 20:30 miro
+  si el aplazado abrio ronda propia.
+
+- **21/10 13:15. EL PARTE VENDE, ARREGLADO (sigue APAGADO).** Dos rondas
+  de arreglos con revision adversarial (workflows de 3 agentes cada uno).
+  Ronda 1 (ac13f484): D1 no vende un fichaje de menos de 7 dias (fechas de
+  compra del tablon); D2 sin el once de Biwenger (GET /user caido) no se
+  hace nada; D3 el sancionado no se vende (un partido, sin medir). Los
+  revisores encontraron dos huecos y ronda 2 (6c814023) los cierra: H1, un
+  fichaje no se vende hasta que acaba una ronda PRINCIPAL que empezo
+  despues de su llegada (E14: el paron de noviembre y Navidad), nunca
+  antes de 7 dias, y sin ronda conocida tras el fichaje no se vende; H2,
+  con el tablon atrasado nadie tiene fecha y no se vende a nadie. Segunda
+  revision: 0 defectos de venta (30.000 casos al azar sobre el calendario
+  real, 0 violaciones); solo un hueco de la guardia (el filtro `aparte`),
+  cubierto por mi (5be80a4f; la mutacion ya la pilla). Verja 221/221 con
+  los de produccion y con `--con BORDALAS_EL_PARTE_VENDE`. Pendiente para
+  encenderlo (mar 27 o mie 28/10, tras la J10): paso 0, ensayo y la linea
+  del YAML con config/paso_0.json en el mismo commit.
+
+- **21/10 12:45 (TURNO DEL APLAZADO DE LA J6).** Ciclos: verdes (#2385 a
+  #2390). Saldo **+1.717.983** a las 12:10, el plazo de las 14:00 CUBIERTO.
+  Puja viva de Pepe: **Gaya 1.711.008** (la rendija, de las 07:19), se
+  resuelve el jue 22/10 07:00, despues del aplazado; si entra, peor caso
+  +6.975: sigue en positivo para la J10 (vie 23/10, plazo 15:00), pero
+  justo. Kubo se lo llevo Pollo17 (3.407.000). Programada la mirada de las
+  20:30 (trig_01Qh1ZrwmiJLTRFcTinyESnd) para ver si el aplazado abrio
+  ronda propia.
+
+- **21/10 10:47 (laboratorio de rivales).** Workflow de 7 (rivales, el
+  horizonte de las primas, el parte vende; 2 escepticos por conclusion,
+  ninguno la refuta; `scratchpad/lab2110/`). **Rivales:** en el reset de
+  las 07:00 Pollo17 gano Kubo (3.407.000, +18,3 %), Pepelu (2.607.000,
+  +6,4 %), Gorrotxategi (1.077.000, +22,4 %) y Riedel (1.007.000, +13,1 %,
+  sin subir), tres de ellos sin rival; Manzagool, De Jong (2.870.000, +32,3
+  %). Tras el reset Pollo esta 648k por debajo de lo pagado y Manzagool
+  600k. Luismi vendio a Zakharyan (+350k en 26 dias, el primer dia sin
+  subir) y a Cordoba. **Los tres de arriba, en rojo** antes del aplazado de
+  esta noche: Pollo -5,63 M, Luismi -8,17 M, Manzagool -2,89 M (premio 0 de
+  esa parte si siguen asi). Nosotros +1.717.983 (6.975 si gana Gaya).
+  Patrimonio: Pollo +50,11 M sobre nosotros; su once por precio, +24,56 M.
+  Con nuestra cartera (+4 % en 1-3 M) habriamos perdido los 4. **Lo
+  aprendido (219 subastas, 23/08-21/10):** aguantar MAS no rescata las
+  primas: en 1-3 M y >3 M el mercado cae ~3,5-4,5 % cada 14 dias; vender el
+  primer dia que no sube gana +97,8k por compra y le saca 245k a aguantar
+  14 dias y 349k a aguantar 28 (IC 80 % fuera del 0). Pollo aguanta una
+  mediana de 6 dias, no semanas; su ventaja es el precio de venta, no
+  aguantar. Desde el 21/09 todas las reglas pierden dinero (el mercado
+  ya no infla). **Sin cambios** en PRIMAS_DE_LA_CARTERA ni en la regla de
+  venta; para mas adelante, «vender en la primera bajada» (+6k por compra
+  en 1-3 M). **El parte vende: NO se enciende hoy** (no ganaria nada: 10 de
+  11 en conservar/proteger y nadie con parte malo) y tiene 3 defectos
+  reproducidos: vende a un fichaje recien llegado (Gaya), el once de
+  Biwenger es opcional si falla GET /user, y vende al sancionado de un
+  partido. Arreglos en marcha (apagado); encender el mar 27 o mie 28/10.
+
+- **21/10 08:22 (supervision).** Vuelta #2386 (08:07). Racha cobrada
+  (+250.000, 01:11): saldo **1.717.983**. Pepe no hizo nada solo desde
+  ayer: 0 compras, 0 ventas (la ronda, los chollos, la orden y el carril,
+  NADA; el aplazado frena la compra hasta las 20:00). En el reset de las
+  07:00 no teniamos pujas: nada ganado ni perdido. **Kubo** se lo llevo
+  Pollo17 por 3.407.000 (+18 %; Manzagool 3.380.000, Luismi 3.256.000): el
+  tope de 3.090.000 que propuse habria perdido. Pollo tambien gano a Pepelu
+  (2.607.000, +6,4 %), Gorrotxategi (1.077.000, +22 %) y otro por 1.007.000;
+  Manzagool, a De Jong (2.870.000, +32 %). **Puja viva:** Gaya (Valencia,
+  lateral, 1.710.000) por 1.711.008, puesta a mano desde la app (Pepe la ve
+  como `pujas_del_dueno`); FF: 80 %, no esta en el parte de bajas del
+  Valencia. Se resuelve el jue 07:00, despues del aplazado. **Caja:** al
+  empezar el aplazado (hoy 20:00), 1.717.983 - 1.711.008 = **6.975 >= 0**;
+  con Gaya, J10 en 6.975. Orden limpia: fuera la linea de Kubo/Luismi
+  (Kubo no llego); verja 221/221.
+
+- **21/10 07:15 (rafaga de la manana, dia del aplazado de la J6).** Ciclos:
+  verdes (#2376 a #2385, la de las 07:15 tras el reset incluida). Saldo
+  **+1.717.983** a las 07:19 (entro la racha, +250.000), 0 comprometido,
+  plantilla 56,48 M y 11 jugadores, sin Kubo: la puja del dueno no entro
+  (saldo y plantilla no cambian), asi que Luismi Cruz no se vende. **El
+  plazo de hoy 14:00 esta cubierto.** Turno de las 12:45 en pie.
+
+- **20/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2369 a #2376).
+  **El premio de la J9 ENTRO:** saldo **+1.467.983** a las 21:09 (+1,47 M).
+  0 pujas de Pepe. El dueno puja por Kubo desde la app (se resuelve mie
+  07:00); la orden ya tiene el plan si llega: vender a Luismi Cruz a su
+  oferta del Computer (2.958.000) en la vuelta siguiente, antes del
+  aplazado. Peor caso del mie: +1.467.983 + racha 250.000 - Kubo, tapado
+  por Luismi en la vuelta de las 08:07. Mi turno del mie 12:45 lo
+  comprueba con la vuelta de despues del reset, no con una anterior.
+
+- **20/10 20:47 (laboratorio de rivales).** **Rivales:** premio de la J9
+  pagado a todos (30.000/punto + plus a los tres ultimos, E52): Luismi
+  1,98 M, Pollo 1,83 M, Manzagool 1,56 M, Pepe 1,47 M. Solo dos ventas al
+  Computer: Pollo, Ruben Sanchez a +3,3 % (subia; 15,5 dias; +435k) y
+  Luismi, Alvaro Carreras a +2,3 % (-5,6k). Cajas: Pollo +2,46 M, Luismi
+  **-9,07 M**, Manzagool -19k: si siguen en rojo el mie a las 20:00 cobran
+  0 por la parte aplazada. Pollo: patrimonio 108,41 M frente a 57,96 M
+  (distancia 50,46 M); su once por precio, 24,1 M mas caro. **Kubo:** nadie
+  lo tiene; a las 20:09 no habia puja nuestra (la orden ya vende a Luismi
+  si llega). **El aplazado frena la compra 40 h** (hallado hoy): cuesta UN
+  reset por ronda aparte (este, el del 21/10; ~10 rondas aparte mas en la
+  temporada). Disenado y construido APAGADO (la orden, la mejora y el
+  cierre; la ronda y los chollos, no). Con el interruptor apagado es
+  identico a main (fuzz de 3.000 casos), pero la revision adversarial
+  encontro defectos con el encendido: (1) ALTO, la orden deja pasar un
+  segundo `fichar` sin pareja por `_la_paga_la_caja` sin contar las pujas
+  de la misma vuelta; (2) ALTO, el cierre cancela la puja que genera el
+  credito y se queda con el credito (hay que llevarlo por relevo o poner
+  esos relevos en no_retirar); (3) los chollos de las 04:50 no ven la puja
+  de la orden de la misma vuelta; (4) el umbral de 40 h a la principal se
+  mide distinto al pujar y al cobrar; (5) se acredita a un saliente ya
+  vendido en la vuelta; (6) la orden que caduca antes del cobro; (7) la
+  publicacion se compara con el inicio y no con el cobro. **NO va a main:**
+  guardado en `claude/ecstatic-turing-j6tgw6` (0167687d) para arreglarlo
+  con calma; la proxima ronda aparte (Rayo-Athletic) no tiene fecha.
 
 - **20/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2362 a #2369).
   Saldo -2.017 a las 14:10, 0 comprometido; el premio de la J9 aun no ha
