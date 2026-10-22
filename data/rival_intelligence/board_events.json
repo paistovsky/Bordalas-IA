@@ -201552,6 +201552,84 @@
     }
   },
   {
+    "event_id": "2d8fc693957bdbbacdf788d1",
+    "date": 1792429257,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 638784,
+        "until": 1792605600,
+        "expired": true,
+        "mode": "bet",
+        "games": [
+          {
+            "id": 50765,
+            "date": 1792605600,
+            "status": "finished",
+            "home": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": 3
+            },
+            "away": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": 1
+            }
+          }
+        ],
+        "prizes": [
+          0,
+          42
+        ],
+        "competition": "la-liga",
+        "round": {
+          "id": 5176,
+          "name": "Jornada 6 (aplazada)",
+          "short": "J6",
+          "part": 3,
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "responses": [],
+        "global": true,
+        "winners": [
+          "-",
+          86
+        ],
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": {
+          "es": "<p style='text-align: center'><strong>Envíanos tu pronóstico para el Levante - Athletic</strong> y podrás <strong>ganar créditos</strong>.<br/>¡Mucha suerte!</p>",
+          "en": "<p style='text-align: center'><strong>Send us your forecast for Levante - Athletic</strong> and you can <strong>earn credits</strong>.<br/>Good luck!</p>",
+          "ca": "<p style='text-align: center'><strong>Envia'ns el teu pronòstic per al Levante - Athletic</strong> i podràs <strong>guanyar crèdits</strong>.<br/>Molta sort!</p>",
+          "gl": "<p style='text-align: center'><strong>Envíanos o teu pronóstico para o Levante - Athletic</strong> e poderás <strong>gañar créditos</strong>.<br/>Moita sorte!</p>",
+          "eu": "<p style='text-align: center'><strong>Bidali iezaguzu Levante - Athletic partidaren iragarpena</strong> eta <strong>kredituak irabazi ahal izango dituzu</strong>.<br/>Zorte on!</p>",
+          "hr": "<p style='text-align: center'><strong>Pošalji nam svoju prognozu za Levante - Athletic</strong> i možeš <strong>osvojiti kredite</strong>.<br/>Sretno!</p>",
+          "de": "<p style='text-align: center'><strong>Sende uns deine Prognose für Levante - Athletic</strong> und du kannst <strong>Credits gewinnen</strong>.<br/>Viel Glück!</p>",
+          "it": "<p style='text-align: center'><strong>Inviaci la tua previsione per Levante - Athletic</strong> e potrai <strong>vincere crediti</strong>.<br/>Buona fortuna!</p>",
+          "fr": "<p style='text-align: center'><strong>Envoie-nous ton pronostic pour le Levante - Athletic</strong> et tu pourras <strong>gagner des crédits</strong>.<br/>Bonne chance !</p>",
+          "pt": "<p style='text-align: center'><strong>Envia-nos o teu prognóstico para Levante – Athletic</strong> e poderás <strong>ganhar créditos</strong>.<br/>Boa sorte!</p>",
+          "ru": "<p style='text-align: center'><strong>Отправьте нам свой прогноз на матч Levante — Athletic</strong>, и вы сможете <strong>выиграть кредиты</strong>.<br/>Удачи!</p>",
+          "tr": "<p style='text-align: center'><strong>Levante - Athletic maçı için tahminini gönder</strong> ve <strong>kredi kazan</strong>.<br/>Bol şans!</p>",
+          "he": "<p style='text-align: center'><strong>שלח לנו את ההימור שלך ל-Levante - Athletic</strong> ותוכל <strong>לזכות בנקודות זיכוי</strong>.<br/>בהצלחה!</p>",
+          "el": "<p style='text-align: center'><strong>Στείλε μας την πρόβλεψή σου για το Levante - Athletic</strong> και μπορείς να <strong>κερδίσεις πιστώσεις</strong>.<br/>Καλή τύχη!</p>",
+          "ar": "<p style='text-align: center'><strong>أرسل لنا توقعاتك لمباراة Levante - Athletic</strong> ويمكنك <strong>ربح أرصدة</strong>.<br/>حظًا سعيدًا!</p>"
+        }
+      }
+    }
+  },
+  {
     "event_id": "4d27fffc7f877138bab6a45d",
     "date": 1792429257,
     "type": "bettingPool",
@@ -205885,5 +205963,120 @@
     "title": "¡Llega el Clásico!",
     "author": null,
     "content": "<p><a href=\"https://biwenger.as.com/join/clasico?utm_source=tablon&amp;utm_medium=app&amp;utm_campaign=reto-el-clasico-26-27\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/reto-el-clasico/tablon.jpg\" alt=\"\" /></a></p>\r\n<p style=\"text-align: center;\">[button url=\"https://biwenger.as.com/join/clasico?utm_source=tablon&amp;utm_medium=app&amp;utm_campaign=reto-el-clasico-26-27\"]&iexcl;AP&Uacute;NTATE! [/button]</p>"
+  },
+  {
+    "event_id": "a3623dcfa5bb4dadc380f7f4",
+    "date": 1792680856,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 26048,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 4370300
+      }
+    ]
+  },
+  {
+    "event_id": "67c9ef727711d3f68cff8770",
+    "date": 1792681402,
+    "type": "roundFinished",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "round": {
+        "id": 5176,
+        "name": "Jornada 6 (aplazada)",
+        "part": 3
+      },
+      "scoreID": 5,
+      "results": [
+        {
+          "user": {
+            "id": 14176382,
+            "name": "Manzagool"
+          },
+          "points": 52,
+          "bonus": 1560000
+        },
+        {
+          "user": {
+            "id": 14151726,
+            "name": "DiosMande a Rodri al Palancas",
+            "icon": "i/u/14151726.png"
+          },
+          "points": 52,
+          "bonus": 1560000
+        },
+        {
+          "user": {
+            "id": 14175949,
+            "name": "Pepe Bordalás",
+            "icon": "i/u/14175949.png"
+          },
+          "points": 40,
+          "bonus": 1200000
+        },
+        {
+          "user": {
+            "id": 14154203,
+            "name": "Prinzipote"
+          },
+          "points": 36,
+          "bonus": 1080000
+        },
+        {
+          "user": {
+            "id": 14456960,
+            "name": "Alvaro Retamosa Sanguino",
+            "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+          },
+          "points": 29,
+          "bonus": 870000
+        },
+        {
+          "user": {
+            "id": 14145555,
+            "name": "Pollo17",
+            "icon": "icons/13.png"
+          },
+          "points": 24,
+          "bonus": 820000,
+          "reason": {
+            "bonusPoint": 720000,
+            "bonusRoundPosition": 100000
+          }
+        },
+        {
+          "user": {
+            "id": 14178736,
+            "name": "Mex"
+          },
+          "points": 13,
+          "bonus": 640000,
+          "reason": {
+            "bonusPoint": 390000,
+            "bonusRoundPosition": 250000
+          }
+        },
+        {
+          "user": {
+            "id": 14156489,
+            "name": "Luismi_Haz",
+            "icon": "icons/11.png"
+          },
+          "points": 64,
+          "count": 0
+        }
+      ],
+      "step": 3
+    }
   }
 ]
