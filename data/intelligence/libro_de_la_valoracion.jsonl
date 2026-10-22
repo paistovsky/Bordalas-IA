@@ -1994,3 +1994,5 @@
 {"dia":"2026-10-22","id":24956,"name":"Nico Serrano","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-22","id":37719,"name":"Álvaro Núñez","value":0,"price":900000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-22","id":42557,"name":"Adeyemi","value":0,"price":10340000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-22","id":37897,"name":"Gorrotxategi","value":1053030,"price":970000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-22","id":38517,"name":"Riedel","value":0,"price":890000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
