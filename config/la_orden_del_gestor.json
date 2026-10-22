@@ -12,7 +12,20 @@
     }
   ],
   "vender_si_ficha": {
-    "jugadores": []
+    "si_esta": 12494,
+    "por_que": "22/10 09:40, el gestor: si llega Boye (Alaves, DEL, 5,34 M, FF 90 %, 7,25 pts/partido; puja del dueno en la app, subasta del reset del vie 23/10 07:00), se venden Luismi Cruz (oferta viva 2.959.100 hasta el sab) y Exposito (oferta nueva del reset del vie) en la vuelta siguiente: caja >= 0 mucho antes de la J10 (vie 21:00). Once 4-3-3 con Boye y Cardona. Si Boye no llega, esta linea no hace nada y se borra el vie a las 08:22.",
+    "jugadores": [
+      {
+        "player_id": 25777,
+        "nombre": "Luismi Cruz",
+        "suelo": 2700000
+      },
+      {
+        "player_id": 19862,
+        "nombre": "Expósito",
+        "suelo": 4200000
+      }
+    ]
   },
   "proteger": [
     {
