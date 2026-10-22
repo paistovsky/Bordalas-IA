@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 22/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2399 a #2408).
+  **Gaya GANADO** (1.711.008, sin rival por encima). Saldo **+6.975** a las
+  07:18, 0 comprometido, plantilla 58,24 M (12 jugadores: por fin uno de
+  banquillo). Para la J10 (vie 23/10, plazo 15:00) estamos en positivo pero
+  al limite: **cualquier puja que se resuelva el vie 07:00 sin una venta
+  que la cubra nos deja en rojo**. Lo miro esta tarde y esta noche; el
+  turno del vie 12:45 lo confirma. Jueves: no se enciende nada.
 
 - **21/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2397 a #2399).
   Saldo +1.717.983, puja viva Gaya 1.711.008 (jue 07:00). Segun el chat del
