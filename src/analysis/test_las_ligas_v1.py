@@ -84,14 +84,33 @@ def test_el_entorno_manda_y_la_config_vale():
         ruta.write_text(json.dumps({"activa": True}))
         assert C.la_liga_que_juega(ruta=ruta, entorno={}) == 2165477
     assert C.la_liga_que_juega(ruta="/no/existe.json", entorno={}) == 2165477
-    # La del repo: El Chiringuito.
-    assert json.loads(C.LAS_LIGAS.read_text())["activa"] == 2165477
+
+
+def test_cambiar_de_liga_aun_no_se_puede():
+    """Revision adversarial del 22/10: los libros de data/ (tablon, caches,
+    posiciones, marcador, pujas) y la orden no llevan liga. Una vuelta en
+    otra liga borraria o mezclaria los de El Chiringuito, y la orden podria
+    pujar por Boye alli. Hasta separarlos por liga, la verja se para si la
+    liga activa (config o BIWENGER_LEAGUE_ID) no es El Chiringuito."""
+    import os
+
+    activa = json.loads(C.LAS_LIGAS.read_text())["activa"]
+    assert activa == C.LIGA_POR_DEFECTO == 2165477, (
+        f"config/las_ligas.json activa={activa}: cambiar de liga necesita antes "
+        "separar los libros de data/ y la orden por liga")
+    entorno = os.environ.get("BIWENGER_LEAGUE_ID")
+    assert entorno in (None, "", str(C.LIGA_POR_DEFECTO)), (
+        f"BIWENGER_LEAGUE_ID={entorno}: cambiar de liga necesita antes separar "
+        "los libros de data/ y la orden por liga")
+    yaml = (RAIZ / ".github" / "workflows" / "bordalas-live.yml").read_text()
+    assert "BIWENGER_LEAGUE_ID" not in yaml, "el workflow no puede cambiar de liga todavia"
 
 
 TESTS = [
     test_juega_el_chiringuito_aunque_no_sea_la_primera,
     test_sin_la_liga_se_para,
     test_el_entorno_manda_y_la_config_vale,
+    test_cambiar_de_liga_aun_no_se_puede,
 ]
 
 
@@ -101,7 +120,7 @@ def main() -> None:
         try:
             test()
             print(f"OK   {test.__name__}")
-        except AssertionError as error:
+        except Exception as error:                  # noqa: BLE001
             fallos += 1
             print(f"FALLA {test.__name__}: {error}")
     print("=" * 60)

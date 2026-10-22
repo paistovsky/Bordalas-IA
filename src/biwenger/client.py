@@ -197,9 +197,14 @@ class BiwengerClient:
         (`leagues[0]`). El dueño se apuntó sin querer a una segunda liga
         ('Reto el clásico'): si Biwenger la pusiera delante, Pepe pujaría y
         vendería en la liga equivocada (con la puja por Boyé viva). Ahora:
-        la de `BIWENGER_LEAGUE_ID` si está (para cambiar de liga sin tocar
-        el código) o la `activa` de `config/las_ligas.json`; si esa liga no
-        está en la cuenta, se para (RuntimeError): nunca juega en otra.
+        la de `BIWENGER_LEAGUE_ID` si está o la `activa` de
+        `config/las_ligas.json`; si esa liga no está en la cuenta, se para
+        (RuntimeError): nunca juega en otra.
+
+        OJO: CAMBIAR DE LIGA AUN NO SE PUEDE. Los libros de data/ y la orden
+        no llevan liga (revision del 22/10): una vuelta en otra liga
+        borraría o mezclaría los de El Chiringuito. La verja se para si se
+        intenta (`test_las_ligas_v1`) hasta que los libros vayan por liga.
         """
 
         account = self.get_account()
