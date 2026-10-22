@@ -1314,6 +1314,32 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
 
         orden = _dict(leer_la_orden(orden_ruta))
         de_la_orden = la_orden(orden, plantilla, ahora, pujas, foto.get("mercado"))
+        # LA PAGAN SUS VENTAS (22/10/2026, revision adversarial): la puja
+        # viva de un `fichar` con `la_pagan_sus_ventas` la pagan las ofertas
+        # vivas de los que salen por el (la orden las cobra en la vuelta de
+        # despues del reset). Para la caja del cierre cuenta solo lo que no
+        # cubren; si no, el cierre veia -5,98 M con la puja por Boye y
+        # vendia a Cardona (banquillo, `conservar`) para pagar lo ya pagado.
+        # Solo con la orden viva (la que cobra el viernes) y con el saldo
+        # de despues de lo cobrado en esta vuelta (segunda revision).
+        try:
+            from src.actions.la_orden_del_gestor import (
+                activa as orden_activa, el_credito_de_sus_ventas, validar,
+            )
+
+            credito = {}
+            if orden_activa() and validar(orden, ahora) is None and foto.get("saldo") is not None:
+                credito = el_credito_de_sus_ventas(
+                    orden, pujas, foto["saldo"] + sum(_dict(vuelta["vendidos"]).values()),
+                    plantilla, foto.get("ofertas_del_computer"), ahora, ventana.get("horas"))
+            for fid, menos in credito.items():
+                if fid in pujas and menos > 0:
+                    pujas[fid] = {**_dict(pujas[fid]),
+                                  "amount": max(0, _importe(pujas[fid]) - menos)}
+            if credito:
+                salida["credito_de_sus_ventas"] = credito
+        except Exception:                           # noqa: BLE001
+            pass
         de_la_mejora = la_mejora(libros.get("mejora"), plantilla, pujas)
         # LA ROTACION (17/10/2026): el que sale de una pareja ganada (su
         # relevo ya esta dentro) tampoco juega; fuera del once del cierre
@@ -1373,6 +1399,9 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
 
         salida["plan"] = _el_plan(d, ventana, ahora, salida["hechas"], salida["adoptados"],
                                   salida.get("vuelta_mejora_descartada"))
+        if salida.get("credito_de_sus_ventas"):
+            salida["plan"]["credito_de_sus_ventas"] = {
+                str(k): v for k, v in salida["credito_de_sus_ventas"].items()}
         publicar(salida["plan"], plan_ruta)
         salida["motivo"] = d["motivo"]
 
@@ -1429,6 +1458,9 @@ def el_parte(r) -> list:
                           f"{d.get('titulares_que_no_se_venden')}")
         lineas.append(f"  Caja al empezar la ronda: {_euros(d.get('caja'))}"
                       f"  (saldo - pujas vivas enteras + cobrado en la vuelta)")
+        for fid, menos in _dict(r.get("credito_de_sus_ventas")).items():
+            lineas.append(f"  La puja por {fid} la pagan sus ventas (la orden): "
+                          f"{_euros(menos)} fuera de la caja")
         if d.get("cancelar"):
             lineas.append(f"  Retirar pujas especulativas: {d.get('cancelar')}"
                           f"  -> caja {_euros(d.get('caja_tras_cancelar'))}")

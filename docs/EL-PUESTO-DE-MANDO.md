@@ -352,6 +352,32 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **22/10 11:00. BOYE, POR ORDEN DEL DUENO («ok, do it»).** Boye (Alaves,
+  DEL, 5,34 M, FF 90 %, 58 pts en 8 partidos) salio al mercado; Pepe no
+  podia pujar: caja 6.975 (Gaya) y el reloj de 40 h antes de la J10 (vie
+  21:00) frena toda compra que se pague vendiendo, aunque nuestros
+  titulares tengan ya oferta viva del Computer (el mismo hueco que con
+  Kubo). **Hecho:** nueva marca del gestor en la orden,
+  `la_pagan_sus_ventas` (solo si se escribe): el fichaje puede pujar dentro
+  del reloj si las ofertas vivas por los que salen por EL (el `si_esta`
+  general) pagan la puja entera, y solo si se resuelve en el proximo reset
+  con 2 h o mas antes del partido. El cierre cuenta esa puja por lo que sus
+  ventas no cubren (sin esto vendia a Cardona por un agujero de 5,98 M que
+  no existe). Orden: fichar Boye 5.989.900; si llega, se venden Luismi Cruz
+  (oferta viva 2.959.100) y Exposito (la del reset del vie; suelo 3.050.000,
+  lo minimo que deja la J10 en >= 0). Once 4-3-3 con Boye y Cardona, +1,4/
+  +2,0 xP por jornada; caja tras las ventas ~1,47 M. **Dos revisiones
+  adversariales** (4 agentes): la primera, NO (el cierre vendia a Cardona;
+  sin limite de hora; emparejamiento distinto del de la venta; dos fichajes
+  contaban la misma caja); arreglado todo; la segunda, SAFE TO PUSH con 5
+  arreglos menores, tambien aplicados (credito solo con la orden viva, no
+  si la puja viva supera la escrita, con lo cobrado en la vuelta, el
+  `_la_paga_la_caja` cuenta lo ya pujado, el credito en el plan y el log).
+  Simulacion de la cadena orden+cierre: jueves EN_POSITIVO sin escrituras;
+  ganado, +1.466.475 y 11 en 4-3-3; perdido, nada. Verja 221/221. Riesgo
+  aceptado: si la oferta nueva por Exposito baja de 3,05 M (-33 %), la J10
+  empezaria en rojo; lo miro el vie a las 08:22.
+
 - **22/10 08:22 (supervision).** Vuelta #2409 (08:07). En el reset de las
   07:00 entro **Gaya** (puja del dueno, 1.711.008, sin rival); nada perdido.
   Pepe solo: 0 compras, 0 ventas (la ronda, los chollos, la orden, la

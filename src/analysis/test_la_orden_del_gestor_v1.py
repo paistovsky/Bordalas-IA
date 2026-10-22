@@ -481,6 +481,138 @@ def test_el_reloj_no_deja_fichar_tarde() -> None:
         "con un `vender_si_ficha` que espera a este fichaje, el reloj manda"
 
 
+def test_la_pagan_sus_ventas() -> None:
+    """22/10: Boye se subasta el viernes a las 07:00, 14 h antes de la J10.
+    Con `la_pagan_sus_ventas` escrito por el gestor, el reloj le deja pujar
+    si las ofertas vivas por los que salen por EL pagan la puja entera, y
+    solo si la puja se resuelve en el proximo reset con margen antes del
+    partido (revision adversarial del 22/10)."""
+    from datetime import timedelta
+
+    utc = timezone.utc
+    boye, luismi, exposito, otro = 12494, 25777, 19862, 777
+    jueves = datetime(2026, 10, 22, 9, 7, tzinfo=utc)
+    partido = datetime(2026, 10, 23, 19, 0, tzinfo=utc)        # J10, vie 21:00
+
+    def _h(ahora):
+        return (partido - ahora).total_seconds() / 3600
+
+    orden = {**ORDEN,
+             "fichar": [{"player_id": boye, "nombre": "Boye", "puja": 5_989_900,
+                         "la_pagan_sus_ventas": True}],
+             "no_pujar": [],
+             "vender_si_ficha": {"si_esta": boye, "jugadores": [
+                 {"player_id": luismi, "nombre": "Luismi Cruz", "suelo": 2_700_000},
+                 {"player_id": exposito, "nombre": "Exposito", "suelo": 3_050_000}]}}
+    plantilla = {luismi, exposito, otro}
+    ofertas = {luismi: {"offer_id": 1, "amount": 2_959_100},
+               exposito: {"offer_id": 2, "amount": 4_490_300}}
+
+    def _d(o=orden, ahora=jueves, **kw):
+        base = dict(mercado={boye: 5_340_000}, nuestras_pujas={}, plantilla=plantilla,
+                    ofertas_del_computer=ofertas, en_venta={luismi, exposito}, precios={},
+                    maximo_de_puja=14_566_975, saldo=6_975,
+                    horas_jornada=_h(ahora) if ahora else 33.9,
+                    estados={boye: "ok", luismi: "ok", exposito: "ok", otro: "ok"},
+                    ahora=ahora)
+        base.update(kw)
+        return orden_mod.decidir(o, **base)
+
+    a = _d()
+    assert _tipos(a) == [("PUJAR", boye)], a
+    assert a[0]["importe"] == 5_989_900 and a[0]["guardia"] == "LA_PAGAN_SUS_VENTAS", a
+
+    # Sin la marca del gestor, el reloj manda como siempre.
+    sin_marca = {**orden, "fichar": [{k: v for k, v in orden["fichar"][0].items()
+                                      if k != "la_pagan_sus_ventas"}]}
+    assert _tipos(_d(sin_marca)) == [("NADA", boye)], _d(sin_marca)
+    for marca in ("si", 1, "true", None):
+        o = {**orden, "fichar": [{**orden["fichar"][0], "la_pagan_sus_ventas": marca}]}
+        assert _tipos(_d(o)) == [("NADA", boye)], (marca, _d(o))
+
+    # Sin hora o sin calendario, nada (el reloj de siempre).
+    assert _tipos(_d(ahora=None, horas_jornada=33.9)) == [("NADA", boye)]
+    assert _tipos(_d(horas_jornada=None)) == [("NADA", boye)]
+    # Despues del ultimo reset antes del partido, la puja seguiria viva al
+    # empezar la J10: nada. Y con menos de 2 h entre reset y partido, nada.
+    viernes = datetime(2026, 10, 23, 5, 7, tzinfo=utc)
+    assert _tipos(_d(ahora=viernes)) == [("NADA", boye)]
+    justo = datetime(2026, 10, 23, 6, 30, tzinfo=utc)          # partido 1,5 h tras el reset
+    assert _tipos(_d(ahora=jueves, horas_jornada=(justo - jueves).total_seconds() / 3600)) \
+        == [("NADA", boye)]
+
+    # Las ofertas no llegan: falta caja (sin la de Exposito, 2.966.075).
+    assert _tipos(_d(ofertas_del_computer={luismi: ofertas[luismi]})) == [("NADA", boye)]
+    # Por debajo del suelo no cuenta.
+    bajas = {**ofertas, exposito: {"offer_id": 2, "amount": 3_000_000}}
+    assert _tipos(_d(ofertas_del_computer=bajas)) == [("NADA", boye)]
+    # Otra puja viva se descuenta entera.
+    otra = {999: {"offer_id": 5, "amount": 1_500_000}}
+    assert _tipos(_d(nuestras_pujas=otra)) == [("NADA", boye)]
+    # El que ya no es nuestro no paga.
+    assert _tipos(_d(plantilla={luismi, otro})) == [("NADA", boye)]
+    # Solo cuentan los que salen por ESTE fichaje, como los vende la orden:
+    # el `si_esta` general es el; sin general (cada uno con el suyo), no.
+    de_otro = {**orden, "vender_si_ficha": {"si_esta": 4242,
+                                            "jugadores": orden["vender_si_ficha"]["jugadores"]}}
+    assert _tipos(_d(de_otro)) == [("NADA", boye)]
+    sin_general = {**orden, "vender_si_ficha": {"jugadores": [
+        {**j, "si_esta": boye} for j in orden["vender_si_ficha"]["jugadores"]]}}
+    assert _tipos(_d(sin_general)) == [("NADA", boye)]
+    # El ultimo recurso y el de `desde` futuro no pagan.
+    for extra in ({"si_saldo_negativo": True}, {"desde": "2026-10-30T07:00:00+01:00"}):
+        o = {**orden, "vender_si_ficha": {**orden["vender_si_ficha"], "jugadores": [
+            orden["vender_si_ficha"]["jugadores"][0],
+            {**orden["vender_si_ficha"]["jugadores"][1], **extra}]}}
+        assert _tipos(_d(o)) == [("NADA", boye)], (extra, _d(o))
+    # Sin saldo, nada.
+    assert _tipos(_d(saldo=None)) == [("NADA", boye)]
+    # Dos fichajes marcados en la misma vuelta: el segundo cuenta lo que ya
+    # puso el primero.
+    dos = {**orden, "fichar": orden["fichar"] + [
+        {"player_id": 4343, "nombre": "Otro", "puja": 1_000_000, "la_pagan_sus_ventas": True}]}
+    a = _d(dos, mercado={boye: 5_340_000, 4343: 900_000})
+    assert ("PUJAR", boye) in _tipos(a) and ("NADA", 4343) in _tipos(a), a
+
+    # Lejos de la jornada el reloj no aplica: puja normal, sin guardia.
+    lunes = datetime(2026, 10, 19, 9, 7, tzinfo=utc)
+    a = _d(ahora=lunes)
+    assert _tipos(a) == [("PUJAR", boye)] and "guardia" not in a[0], a
+
+    # Ganado: se cobran las dos ofertas en la vuelta siguiente.
+    a = _d(plantilla=plantilla | {boye}, saldo=6_975 - 5_989_900, ahora=viernes)
+    assert sorted(_tipos(a)) == sorted([("ACEPTAR_OFERTA_DEL_COMPUTER", luismi),
+                                        ("ACEPTAR_OFERTA_DEL_COMPUTER", exposito)]), a
+
+    # El credito para el cierre: la puja viva cuenta por lo que no cubren.
+    viva = {boye: {"offer_id": None, "amount": 5_989_900}}
+    assert orden_mod.el_credito_de_sus_ventas(
+        orden, viva, 6_975, plantilla, ofertas, jueves, _h(jueves)) == {boye: 5_989_900}
+    assert orden_mod.el_credito_de_sus_ventas(
+        orden, viva, 6_975, plantilla, {luismi: ofertas[luismi]}, jueves, _h(jueves)) == {}
+    assert orden_mod.el_credito_de_sus_ventas(
+        orden, viva, 6_975, plantilla, ofertas, viernes, _h(viernes)) == {}
+    assert orden_mod.el_credito_de_sus_ventas(sin_marca, viva, 6_975, plantilla, ofertas,
+                                              jueves, _h(jueves)) == {}
+
+    # Nunca lanza.
+    for basura in (None, "x", {"player_id": "x", "la_pagan_sus_ventas": True}):
+        assert orden_mod._la_pagan_sus_ventas(orden, basura, 1, 1, {}, plantilla, ofertas,
+                                              ahora=jueves, horas_jornada=30.0) is False
+    assert orden_mod._la_pagan_sus_ventas({}, orden["fichar"][0], 1, 1, None, None, None,
+                                          ahora=jueves, horas_jornada=30.0) is False
+    for basura in (None, "x", 3, {"fichar": "x"}, {"fichar": [1]}):
+        assert orden_mod.el_credito_de_sus_ventas(basura, viva, 1, plantilla, ofertas,
+                                                  jueves, 30.0) == {}
+    assert orden_mod.lo_que_cobran_sus_ventas(None, None, None, None) == 0
+    assert orden_mod._el_proximo_reset(jueves) == datetime(2026, 10, 23, 5, 0, tzinfo=utc)
+    # Tras el cambio de hora (25/10), el reset es a las 06:00 UTC.
+    assert orden_mod._el_proximo_reset(datetime(2026, 10, 26, 9, 0, tzinfo=utc)) \
+        == datetime(2026, 10, 27, 6, 0, tzinfo=utc)
+    assert orden_mod._el_proximo_reset(jueves - timedelta(hours=5)) \
+        == datetime(2026, 10, 22, 5, 0, tzinfo=utc)
+
+
 def test_el_relevo_tiene_que_estar_sano() -> None:
     plantilla = {ROBERTO, JUTGLA, BLANCO, YAMAL}
     ofertas = {JUTGLA: {"offer_id": 71, "amount": 3_050_000}}
@@ -898,6 +1030,7 @@ TESTS = [
     test_en_rojo_no_se_cobra_si_el_relevo_no_juega,
     test_correr_retira_la_puja_del_fichaje_lesionado,
     test_el_reloj_no_deja_fichar_tarde,
+    test_la_pagan_sus_ventas,
     test_el_relevo_tiene_que_estar_sano,
     test_no_se_cobra_con_la_jornada_jugandose,
     test_correr_pasa_las_guardias,
