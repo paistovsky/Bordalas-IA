@@ -320,6 +320,9 @@ def decidir(
         # `HORAS_SIN_FICHAR`). Ni se pone ni se sube; la viva se queda.
         pagan_sus_ventas = _la_pagan_sus_ventas(
             orden, f, puja, saldo, nuestras_pujas, plantilla, ofertas_del_computer,
+            ahora=ahora, horas_jornada=horas_jornada,
+            ya_pujado=sum(_int(x.get("importe"), 0) or 0 for x in acciones
+                          if x.get("accion") == "PUJAR"),
         )
         if (horas_jornada is None or horas_jornada < HORAS_SIN_FICHAR) and not _la_paga_la_caja(
             orden, pid, puja, saldo, nuestras_pujas,
@@ -588,8 +591,81 @@ def _la_paga_la_caja(orden, pid, puja, saldo, nuestras_pujas) -> bool:
         return False
 
 
+# Horas que tiene que haber entre el reset que resuelve la puja y el
+# partido: la vuelta de despues del reset cobra las ofertas (LA PAGAN SUS
+# VENTAS). Con menos, la puja seguiria viva al empezar la jornada.
+MARGEN_TRAS_EL_RESET = 2
+
+
+def _el_proximo_reset(ahora: datetime) -> datetime | None:
+    """Las 07:00 de Madrid siguientes a `ahora`, en UTC (con la regla
+    europea de `market_clock`, sin `zoneinfo`). None si no se sabe."""
+    try:
+        from datetime import timedelta
+
+        from src.analysis.market_clock import madrid_offset_hours
+
+        if ahora.tzinfo is None:
+            ahora = ahora.replace(tzinfo=timezone.utc)
+        for dias in (0, 1, 2):
+            d = (ahora + timedelta(days=dias)).date()
+            base = datetime(d.year, d.month, d.day, 7, tzinfo=timezone.utc)
+            reset = base - timedelta(hours=madrid_offset_hours(base.replace(hour=5)))
+            if reset > ahora:
+                return reset
+    except Exception:                               # noqa: BLE001
+        return None
+    return None
+
+
+def lo_que_cobran_sus_ventas(orden, f, plantilla, ofertas_del_computer,
+                             ahora=None) -> int:
+    """
+    Lo que pagan las ofertas vivas del Computer por los que salen por el
+    fichaje `f` (22/10/2026), con las mismas condiciones con las que la
+    orden los vende: el `si_esta` general es ESTE fichaje (el de cada uno,
+    si lo tiene, tambien), siguen siendo nuestros, no son intocables, no
+    son el ultimo recurso (`si_saldo_negativo`), su `desde` ya paso y la
+    oferta llega a su `suelo`. 0 si nada. Nunca lanza.
+    """
+
+    try:
+        pid = _int(_dict_o_nada(f).get("player_id"))
+        venta = (orden or {}).get("vender_si_ficha") or {}
+        if pid is None or _int(venta.get("si_esta")) != pid:
+            return 0
+        plantilla = set(plantilla or ())
+        intocables = _intocables(orden)
+        cobro = 0
+        for j in venta.get("jugadores") or []:
+            if not isinstance(j, dict):
+                continue
+            sale = _int(j.get("player_id"))
+            suyo = _int(j.get("si_esta"))
+            if sale not in plantilla or (suyo is not None and suyo != pid):
+                continue
+            if j.get("si_saldo_negativo"):
+                continue
+            if str(j.get("nombre", "")).strip().lower() in intocables:
+                continue
+            desde = _cuando(j.get("desde")) if j.get("desde") else None
+            if desde is not None and (ahora is None or ahora < desde):
+                continue
+            importe = _int(((ofertas_del_computer or {}).get(sale) or {}).get("amount"), 0) or 0
+            if importe >= (_int(j.get("suelo"), 0) or 0):
+                cobro += importe
+        return cobro
+    except Exception:                               # noqa: BLE001
+        return 0
+
+
+def _dict_o_nada(x) -> dict:
+    return x if isinstance(x, dict) else {}
+
+
 def _la_pagan_sus_ventas(orden, f, puja, saldo, nuestras_pujas, plantilla,
-                         ofertas_del_computer) -> bool:
+                         ofertas_del_computer, *, ahora=None, horas_jornada=None,
+                         ya_pujado=0) -> bool:
     """
     LA PAGAN SUS VENTAS (22/10/2026). Boye sale al mercado el jueves 22/10
     y su subasta se resuelve el viernes a las 07:00, 14 h antes de la J10:
@@ -599,13 +675,17 @@ def _la_pagan_sus_ventas(orden, f, puja, saldo, nuestras_pujas, plantilla,
     partido. El reloj no sabia mirar eso (el mismo hueco que con Kubo).
 
     Solo si el gestor lo escribe en el fichaje
-    (`"la_pagan_sus_ventas": true`): no lo decide Pepe. Y solo si saldo -
-    las demas pujas vivas + las ofertas vivas del Computer por los que
-    salen por ESTE fichaje (el `si_esta` general o el suyo apuntan a el,
-    siguen siendo nuestros y su oferta llega a su `suelo`) pagan la puja
-    entera. Una oferta que caduca en el reset se cuenta: el Computer
-    renueva la oferta de los publicados en ese mismo reset (el riesgo lo
-    asume el gestor al escribirlo). Nunca lanza.
+    (`"la_pagan_sus_ventas": true`): no lo decide Pepe. Y solo si:
+      - se sabe la hora y cuanto falta para la jornada, y la puja se
+        resuelve en el proximo reset con al menos `MARGEN_TRAS_EL_RESET`
+        horas antes del partido (despues, seguiria viva al empezar);
+      - saldo - las demas pujas vivas - lo ya pujado en esta vuelta + lo
+        que cobran sus ventas (`lo_que_cobran_sus_ventas`) paga la puja
+        entera.
+    Una oferta que caduca en ese mismo reset se cuenta: el Computer
+    renueva la de los publicados en ese reset (el riesgo lo asume el
+    gestor al escribirlo; el `suelo` de cada uno es lo que lo acota).
+    Revision adversarial del 22/10. Nunca lanza.
     """
 
     try:
@@ -614,27 +694,54 @@ def _la_pagan_sus_ventas(orden, f, puja, saldo, nuestras_pujas, plantilla,
         pid = _int(f.get("player_id"))
         if pid is None or saldo is None or puja is None:
             return False
-        venta = orden.get("vender_si_ficha") or {}
-        general = _int(venta.get("si_esta"))
-        plantilla = set(plantilla or ())
-        cobro = 0
-        for j in venta.get("jugadores") or []:
-            sale = _int(j.get("player_id"))
-            suyo = _int(j.get("si_esta"))
-            if sale not in plantilla or pid not in {general, suyo}:
-                continue
-            if suyo is not None and general is not None and suyo != general:
-                continue
-            importe = _int(((ofertas_del_computer or {}).get(sale) or {}).get("amount"), 0) or 0
-            if importe >= (_int(j.get("suelo"), 0) or 0):
-                cobro += importe
+        if ahora is None or horas_jornada is None or isinstance(horas_jornada, bool):
+            return False
+        from datetime import timedelta
+
+        if ahora.tzinfo is None:
+            ahora = ahora.replace(tzinfo=timezone.utc)
+        reset = _el_proximo_reset(ahora)
+        partido = ahora + timedelta(hours=float(horas_jornada))
+        if reset is None or partido - reset < timedelta(hours=MARGEN_TRAS_EL_RESET):
+            return False
+        cobro = lo_que_cobran_sus_ventas(orden, f, plantilla, ofertas_del_computer, ahora)
         vivas = sum(
             _int((p or {}).get("amount"), 0) or 0
             for q, p in (nuestras_pujas or {}).items() if q != pid
-        )
+        ) + (_int(ya_pujado, 0) or 0)
         return cobro > 0 and saldo - vivas + cobro >= puja
     except Exception:                               # noqa: BLE001
         return False
+
+
+def el_credito_de_sus_ventas(orden, pujas, saldo, plantilla, ofertas_del_computer,
+                             ahora=None, horas_jornada=None) -> dict:
+    """
+    {player_id: credito} para el cierre (22/10/2026): la puja viva de un
+    `fichar` con `la_pagan_sus_ventas` que la orden sigue pudiendo pagar
+    con sus ventas cuenta solo por lo que esas ventas no cubren. Sin esto
+    el cierre ve un agujero que no existe y vende al banquillo (Cardona,
+    `conservar`) para pagar una puja ya pagada. Nunca lanza.
+    """
+
+    salida = {}
+    try:
+        for f in (orden or {}).get("fichar") or []:
+            if not isinstance(f, dict):
+                continue
+            fid = _int(f.get("player_id"))
+            viva = (pujas or {}).get(fid)
+            importe = _int((viva or {}).get("amount"), 0) if isinstance(viva, dict) else _int(viva, 0)
+            if not fid or not importe:
+                continue
+            if _la_pagan_sus_ventas(orden, f, importe, saldo, pujas, plantilla,
+                                    ofertas_del_computer, ahora=ahora,
+                                    horas_jornada=horas_jornada):
+                salida[fid] = min(importe, lo_que_cobran_sus_ventas(
+                    orden, f, plantilla, ofertas_del_computer, ahora))
+    except Exception:                               # noqa: BLE001
+        return {}
+    return salida
 
 
 def _no_se_cobra_en_jornada(pid, nombre) -> dict:

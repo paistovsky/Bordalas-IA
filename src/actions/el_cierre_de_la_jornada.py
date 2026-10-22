@@ -1314,6 +1314,26 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
 
         orden = _dict(leer_la_orden(orden_ruta))
         de_la_orden = la_orden(orden, plantilla, ahora, pujas, foto.get("mercado"))
+        # LA PAGAN SUS VENTAS (22/10/2026, revision adversarial): la puja
+        # viva de un `fichar` con `la_pagan_sus_ventas` la pagan las ofertas
+        # vivas de los que salen por el (la orden las cobra en la vuelta de
+        # despues del reset). Para la caja del cierre cuenta solo lo que no
+        # cubren; si no, el cierre veia -5,98 M con la puja por Boye y
+        # vendia a Cardona (banquillo, `conservar`) para pagar lo ya pagado.
+        try:
+            from src.actions.la_orden_del_gestor import el_credito_de_sus_ventas
+
+            credito = el_credito_de_sus_ventas(
+                orden, pujas, foto.get("saldo"), plantilla,
+                foto.get("ofertas_del_computer"), ahora, ventana.get("horas"))
+            for fid, menos in credito.items():
+                if fid in pujas and menos > 0:
+                    pujas[fid] = {**_dict(pujas[fid]),
+                                  "amount": max(0, _importe(pujas[fid]) - menos)}
+            if credito:
+                salida["credito_de_sus_ventas"] = credito
+        except Exception:                           # noqa: BLE001
+            pass
         de_la_mejora = la_mejora(libros.get("mejora"), plantilla, pujas)
         # LA ROTACION (17/10/2026): el que sale de una pareja ganada (su
         # relevo ya esta dentro) tampoco juega; fuera del once del cierre
