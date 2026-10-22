@@ -4,14 +4,14 @@
   "ligas": [
     {
       "id": 2165477,
-      "nombre": "El Chiringuito",
+      "nombre": "El chiringuito",
       "juega": true
     },
     {
-      "id": null,
-      "nombre": "Reto el clasico",
+      "id": 2210645,
+      "nombre": "Reto El Clásico",
       "juega": false,
-      "nota": "se apunto el dueno sin querer el 22/10; su id se lee de la cuenta en la proxima vuelta"
+      "nota": "se apunto el dueno sin querer el 22/10; id leido de la cuenta en la vuelta #2415 (22/10 12:07 UTC). Pepe no juega en ella."
     }
   ]
 }
