@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **22/10 14:15. LAS LIGAS.** El dueno se apunto sin querer a una segunda
+  liga, **Reto El Clasico (2210645)**. Pepe elegia la PRIMERA liga de la
+  cuenta (`leagues[0]`): ahora juega El chiringuito por su id (2165477,
+  `config/las_ligas.json`) y, si no estuviera en la cuenta, se para
+  (2960ff1d). Cada vuelta escribe las ligas de la cuenta: #2415 (14:07)
+  verde, «Liga: El chiringuito (2165477); en la cuenta: El chiringuito,
+  Reto El Clasico». **Cambiar de liga AUN NO SE PUEDE** (revision
+  adversarial): el tablon, las caches, las posiciones, el marcador, las
+  pujas y la orden no llevan liga; una vuelta en otra liga borraria o
+  mezclaria los de El chiringuito y la orden podria pujar por Boye alli.
+  `test_las_ligas_v1` para la verja si se intenta, a proposito (3cf4be2c,
+  fdc3dfe3). **Error mio:** 3cf4be2c subio con la verja en rojo (mi comando
+  no paraba si fallaba); arreglado en 6 minutos (fdc3dfe3), antes de
+  ninguna vuelta. Desde ahora: subir solo dentro de `if verja; then`.
+  Jugar las dos ligas: separar los libros por liga; plan y coste al dueno
+  despues de la J10.
+
 - **22/10 10:47 (laboratorio de rivales).** Workflow de 4 (rivales; la
   subasta de Boye; un escéptico por informe, ninguno refuta). **Puja por
   Boye puesta** (vuelta de las 11:07: 5.989.900, http 200; el cierre la
