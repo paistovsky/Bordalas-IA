@@ -352,6 +352,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **22/10 08:22 (supervision).** Vuelta #2409 (08:07). En el reset de las
+  07:00 entro **Gaya** (puja del dueno, 1.711.008, sin rival); nada perdido.
+  Pepe solo: 0 compras, 0 ventas (la ronda, los chollos, la orden, la
+  mejora y la rotacion, NADA: caja libre 6.975). Saldo **6.975**, 12
+  jugadores, 58,24 M. Once de la J10 (3-4-3, 42,9 xP): Gaya entra, Sergi
+  Cardona al banquillo (FF 50 %, como Jonny, que va por xP). El cierre,
+  EN_POSITIVO, no vende nada. **Caja de la J10** (vie 21:00, a 36,8 h):
+  6.975 >= 0, sin pujas vivas. **Orden:** Gaya a `conservar` (fichaje del
+  dueno y titular; E14); verja 221/221. Rivales en el reset: Pollo17 gano
+  al 32440 por 8.407.000 (Luismi 8.221.000); Luismi vendio dos al Computer
+  (3.401.200 y 2.544.700). Clasificacion (solo rondas cerradas, con la J9):
+  Pollo 381, **Pepe 372**, Luismi 353. La parte aplazada de la J6 (ronda
+  5176) aun no tiene roundFinished: el once del 15/09, por comprobar.
+
 - **22/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2399 a #2408).
   **Gaya GANADO** (1.711.008, sin rival por encima). Saldo **+6.975** a las
   07:18, 0 comprometido, plantilla 58,24 M (12 jugadores: por fin uno de
