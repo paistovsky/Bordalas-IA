@@ -2467038,6 +2467038,27 @@
       "direction_hit": null,
       "magnitude_error_percent": null,
       "scored_at": null
+    },
+    "41413|PRENSA_MUNDO_DEPORTIVO|3|2026-10-22": {
+      "player_id": "41413",
+      "player_name": "Murillo",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 150000,
+      "predicted_at": "2026-10-22T13:10:22.854893+00:00",
+      "due_at": "2026-10-25T13:10:22.854893+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
     }
   }
 }
