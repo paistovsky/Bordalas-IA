@@ -69,6 +69,52 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E56 · 22/10/2026 17:18 de Madrid · Como paga la «parte 3»: con el once y la caja de la parte 2 (E55 fallo)
+
+**El caso:** E55 predijo que Pollo17, en rojo al saque del Levante-Athletic
+(21/10), cobraria 0. La ronda 5176 se pago hoy a las 17:03 de Madrid y
+**la prediccion fallo**.
+**Datos:** las rondas 5125 (J6 parte 2, pagada el 18/09) y 5176 (parte 3)
+del tablon, y la bitacora del saldo de Pepe.
+**Codigo:** `lab/carrera/partes_de_una_jornada.py`.
+
+    manager        parte 2 (18/09)     parte 3 (22/10)     diferencia
+    Pepe            29 pts   870.000    40 pts 1.200.000    +11 pts  +330.000
+    Pollo17         17 pts   510.000    24 pts   820.000     +7 pts  +310.000
+    Manzagool       49                  52                   +3      +90.000
+    Alvaro R.       26                  29                   +3      +90.000
+    Prinzipote      35                  36                   +1      +30.000
+    DiosMande       52                  52                    0            0
+    Mex             13 pts   390.000    13 pts   640.000      0     +250.000
+    Luismi_Haz      64 sin premio       64 sin premio        (rojo en la parte 2)
+
+    saldo de Pepe: 6.975 -> 336.975 (+330.000 = 11 x 30.000)
+
+**Lo que se aprende:**
+- **La parte 3 no es una jornada nueva: es la misma J6 que se completa.**
+  Biwenger lista los TOTALES de la J6 (parte 2 + el partido nuevo) y paga
+  solo la diferencia. DiosMande, sin nadie en ese partido, sigue en 52.
+- **Cuenta el once de la parte 2 (15/09), no el de hoy:** Pollo17 suma +7,
+  no los ~24 de sus jugadores de ahora (E50); Pepe suma +11, no los 5 de
+  Olasagasti.
+- **Y el rojo que cuenta es el de la parte 2:** Pollo17 empezo el 21/10 en
+  -2,86 M y cobro igual; Luismi, en rojo el 15/09, sigue sin premio.
+- **El plus de los tres ultimos se recalcula con los totales:** Mex no
+  suma puntos pero cobra +250.000 (ahora es penultimo de la J6 entera);
+  Pollo17 cobra +100.000 por quedar antepenultimo.
+- **Por tanto, E45 se equivoco dos veces** (habia ronda nueva, pero con el
+  once y la caja viejos) y **el plazo de caja del 21/10 no hacia falta:**
+  la venta de Rico (E47 ya decia que sobraba) no salvo nada.
+
+**Limites:** un solo caso (n = 1). La parte 2 de la J6 si fue ronda con
+caja propia (Luismi la perdio el 15/09); lo medido aqui vale para una
+parte que solo completa partidos sueltos de una ronda ya pagada.
+
+**Veredicto: CORRIGE E45/E55** y pasa a «Listo para el plan»: el partido
+suelto de una jornada ya empezada no es plazo de caja. Aplica ya al
+Rayo-Athletic de la J8: contara con el once y la caja del 09/10 (Pepe en
+verde), y su premio llegara como diferencia sobre la J8.
+
 ### E55 · 22/10/2026 11:16 de Madrid · El aplazado del 21/10 era ronda propia, y Pollo17 la empezo en rojo
 
 **Lo que quedaba abierto:** E45 dudaba entre dos cosas: que el
@@ -101,6 +147,9 @@ las 19:10.
   Luismi en la J6 aplazada: 64 puntos, 0 euros), **sus ~24 puntos
   esperados de ese partido no cuentan**. Era la ronda que mas le
   favorecia (E50: +14 sobre Pepe); ahora puede ir al reves.
+
+**(Nota del 22/10 17:18: esta prediccion FALLO; ver E56. La parte 3
+cuenta con el once y la caja de la parte 2.)**
 
 **Prediccion para cuando se pague la 5176** (por el reloj de E43, hoy
 entre las 12:00 y las 17:00 de Madrid): Pollo17 y Luismi, 0 puntos y 0
@@ -2498,6 +2547,15 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E56, 22/10 17:18) Un partido suelto de una jornada ya empezada NO es
+  plazo de caja.** La parte 3 de la J6 (Levante-Athletic, 21/10) conto con
+  el once y la caja de la parte 2 (15/09): Pollo17, en rojo el 21/10,
+  cobro igual; Biwenger lista los totales de la jornada y paga solo la
+  diferencia (Pepe +11 pts, +330.000). Para Pepe: no vender ni frenar
+  compras por el Rayo-Athletic de la J8 cuando tenga fecha (contara con
+  el once y la caja del 09/10). Quitar la regla «el aplazado es ronda
+  propia» de la rotacion y del cierre si la tienen. n = 1: vigilar la
+  siguiente.
 - **(E53, 21/10 11:16) El precio como segunda opinion en la mejora del
   once.** Fuera de muestra (J8+J9, n = 364), el precio predice los puntos
   que vienen mejor que los puntos por partido (Spearman +0,44 contra
