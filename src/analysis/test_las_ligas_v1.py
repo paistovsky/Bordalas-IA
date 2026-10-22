@@ -87,7 +87,7 @@ def test_el_entorno_manda_y_la_config_vale():
 
 
 def test_cambiar_de_liga_aun_no_se_puede():
-    """Revision adversarial del 22/10: los libros de data/ (tablon, caches,
+    """Revision adversarial del 22/10: los libros (tablon, caches,
     posiciones, marcador, pujas) y la orden no llevan liga. Una vuelta en
     otra liga borraria o mezclaria los de El Chiringuito, y la orden podria
     pujar por Boye alli. Hasta separarlos por liga, la verja se para si la
@@ -96,12 +96,12 @@ def test_cambiar_de_liga_aun_no_se_puede():
 
     activa = json.loads(C.LAS_LIGAS.read_text())["activa"]
     assert activa == C.LIGA_POR_DEFECTO == 2165477, (
-        f"config/las_ligas.json activa={activa}: cambiar de liga necesita antes "
-        "separar los libros de data/ y la orden por liga")
+        f"la liga activa es {activa}: cambiar de liga necesita antes "
+        "separar los libros y la orden por liga")
     entorno = os.environ.get("BIWENGER_LEAGUE_ID")
     assert entorno in (None, "", str(C.LIGA_POR_DEFECTO)), (
         f"BIWENGER_LEAGUE_ID={entorno}: cambiar de liga necesita antes separar "
-        "los libros de data/ y la orden por liga")
+        "los libros y la orden por liga")
     yaml = (RAIZ / ".github" / "workflows" / "bordalas-live.yml").read_text()
     assert "BIWENGER_LEAGUE_ID" not in yaml, "el workflow no puede cambiar de liga todavia"
 
