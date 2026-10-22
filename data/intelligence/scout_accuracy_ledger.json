@@ -2344790,13 +2344790,13 @@
       "price_at_prediction": 25470000,
       "predicted_at": "2026-10-19T08:10:50.094271+00:00",
       "due_at": "2026-10-22T08:10:50.094271+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 25480000,
+      "actual_direction": "UP",
+      "actual_percent": 0.039,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-22T08:11:02.595473+00:00"
     },
     "19508|PRENSA_MARCA|3|2026-10-19": {
       "player_id": "19508",
@@ -2344811,13 +2344811,13 @@
       "price_at_prediction": 550000,
       "predicted_at": "2026-10-19T08:10:47.691276+00:00",
       "due_at": "2026-10-22T08:10:47.691276+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 580000,
+      "actual_direction": "UP",
+      "actual_percent": 5.455,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-22T08:11:02.595473+00:00"
     },
     "19513|PRENSA_MUNDO_DEPORTIVO|3|2026-10-19": {
       "player_id": "19513",
@@ -2344832,13 +2344832,13 @@
       "price_at_prediction": 2250000,
       "predicted_at": "2026-10-19T08:10:49.698926+00:00",
       "due_at": "2026-10-22T08:10:49.698926+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 2260000,
+      "actual_direction": "UP",
+      "actual_percent": 0.444,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-22T08:11:02.595473+00:00"
     },
     "17056|PRENSA_MARCA|3|2026-10-19": {
       "player_id": "17056",
@@ -2344853,13 +2344853,13 @@
       "price_at_prediction": 1440000,
       "predicted_at": "2026-10-19T08:10:47.781397+00:00",
       "due_at": "2026-10-22T08:10:47.781397+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 1220000,
+      "actual_direction": "DOWN",
+      "actual_percent": -15.278,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-22T08:11:02.595473+00:00"
     },
     "17056|PRENSA_MUNDO_DEPORTIVO|3|2026-10-19": {
       "player_id": "17056",
@@ -2344874,13 +2344874,13 @@
       "price_at_prediction": 1440000,
       "predicted_at": "2026-10-19T08:10:51.640517+00:00",
       "due_at": "2026-10-22T08:10:51.640517+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 1220000,
+      "actual_direction": "DOWN",
+      "actual_percent": -15.278,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-22T08:11:02.595473+00:00"
     },
     "20|PRENSA_MUNDO_DEPORTIVO|3|2026-10-19": {
       "player_id": "20",
@@ -2344895,13 +2344895,13 @@
       "price_at_prediction": 5540000,
       "predicted_at": "2026-10-19T08:10:57.503658+00:00",
       "due_at": "2026-10-22T08:10:57.503658+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 4880000,
+      "actual_direction": "DOWN",
+      "actual_percent": -11.913,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-22T08:11:02.595473+00:00"
     },
     "429|PRENSA_MUNDO_DEPORTIVO|3|2026-10-19": {
       "player_id": "429",
@@ -2344916,13 +2344916,13 @@
       "price_at_prediction": 16440000,
       "predicted_at": "2026-10-19T08:10:59.169131+00:00",
       "due_at": "2026-10-22T08:10:59.169131+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 16710000,
+      "actual_direction": "UP",
+      "actual_percent": 1.642,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-22T08:11:02.595473+00:00"
     },
     "1683|PRENSA_MUNDO_DEPORTIVO|3|2026-10-19": {
       "player_id": "1683",
