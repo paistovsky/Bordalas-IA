@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/10/2026, 20:20 de Madrid (segunda mirada a la J10).
+Actualizado: 23/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/10 21:15 (rafaga de la noche; la J10 ya ha empezado).** Ciclos:
+  verdes (#2443 a #2445). Saldo +1.737.675 al empezar la J10: puntua.
+  Puja viva Revivo 1.723.901 (sab 07:00). **Para el fin de semana (no en
+  viernes):** el banquillo, empezando por un defensa, y revisar que la
+  mejora no vuelva a dejarnos en 11 justos antes de la J11 (dom 01/11,
+  plazo 11:00, horario de invierno).
 
 - **23/10 20:47 (laboratorio de rivales).** Desde la manana, solo Luismi:
   vendio a Areso al Computer por 2.302.300 (comprado el 04/09 por 1.151.000:
