@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **23/10 08:15. BOYE, NUESTRO.** Reset de las 07:00: Boye por 5.989.900,
+  **sin rival** (nadie mas pujo). En la vuelta de las 07:15 la orden vendio
+  a Luismi Cruz (2.959.100) y a Exposito (4.431.500, su oferta nueva del
+  reset, como se esperaba): saldo **+1.737.675**. Vuelta de las 08:07:
+  alineacion de Biwenger 4-3-3 con 11 (Gulacsi; Chust, Gaya, Jonny,
+  Cardona; Olasagasti, Ibanez, Unai; Yamal, Roberto, Boye), 45,4 xP (antes
+  42,9). Orden limpia: Boye a `conservar`, fuera el fichar y las ventas
+  hechas (19a7a617; verja 222/222). En esa vuelta el carril (RENDIJA) pujo
+  por **Revivo** (DEF, 1.720.000, +50k/dia cinco dias seguidos, FF 90 %)
+  1.723.901: caja al empezar la J10, 13.774 >= 0; se resuelve el sab 07:00
+  con la J10 en juego (no cambia la alineacion). Se deja: sube de verdad y
+  pasa la puerta de solo si sube del carril.
+
 - **23/10 07:15 (rafaga de la manana, DIA DEL CIERRE DE LA J10).** Ciclos:
   verdes (#2422 a #2431). **Boye GANADO** (5.989.900). Saldo a las 07:19:
   **-5.652.925**, 0 comprometido, 13 en plantilla. Ofertas vivas del
