@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/10/2026, 08:25 de Madrid (mirada tras las ventas).
+Actualizado: 23/10/2026, 12:55 de Madrid (turno del cierre de la J10).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/10 12:45 (TURNO DEL CIERRE DE LA J10).** Calendario sin cambios
+  (J10 hoy 21:00; J11 dom 01/11 17:00, turno ya creado a las 09:45).
+  (1) Solvencia: **+1.737.675** a las 12:10: verde para las 15:00. (2) Once
+  (artefacto de #2436, 12:07): **4-3-3, 11 jugables, 0 huecos, todos
+  «ok»**, con Boye y Gaya. Dudosos: Jonny y Sergi Cardona, 50 %; no hay
+  banquillo (11 justos tras vender a Luismi y Exposito). (3) Ciclos:
+  verdes (#2431 a #2436). (4) Puja viva: Revivo 1.723.901, se resuelve el
+  sab 07:00, con la J10 ya empezada: no toca la caja del inicio; si entra,
+  la caja queda en ~+13.774. (5) Segunda mirada a las 20:15 programada.
+  (6) Turno de la J11 en pie (trig_01NzaNuaDH69dCE38wMa7wg2).
 
 - **23/10 10:47 (laboratorio de rivales).** Desde anoche: **Pollo17**
   vendio al Computer el 25159 (4.127.100, +4,2 %; 22 dias, -349.900) y a
