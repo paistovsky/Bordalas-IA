@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/10/2026, 12:55 de Madrid (turno del cierre de la J10).
+Actualizado: 23/10/2026, 14:20 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2436 a #2438).
+  Saldo +1.737.675 a las 14:10: el plazo de las 15:00 se pasa en verde.
+  Puja viva Revivo 1.723.901 (sab 07:00). Viernes: nada que tocar.
+  Segunda mirada a las 20:15.
 
 - **23/10 12:45 (TURNO DEL CIERRE DE LA J10).** Calendario sin cambios
   (J10 hoy 21:00; J11 dom 01/11 17:00, turno ya creado a las 09:45).
