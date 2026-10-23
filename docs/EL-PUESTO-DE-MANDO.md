@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/10/2026, 14:20 de Madrid (rafaga de las 14:15).
+Actualizado: 23/10/2026, 20:20 de Madrid (segunda mirada a la J10).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/10 20:15 (segunda mirada al cierre de la J10).** Ciclos: verdes
+  (#2438 a #2444, la de las 20:07 incluida). Saldo +1.737.675: solvente.
+  Once (artefacto de #2444): 4-3-3, 11 jugables, todos «ok». **Jonny baja
+  a 0 %** (a las 12:07, 50 %): con las alineaciones publicadas, parece
+  suplente. Sergi Cardona sube a 90 %, Boye y Pablo Ibanez a 100 %. No hay
+  recambio (11 justos): nada que hacer a mano. **Para despues de la J10:**
+  sigue haciendo falta un banquillo, empezando por un defensa (es la
+  segunda jornada seguida que perdemos un titular por no tener recambio).
 
 - **23/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2436 a #2438).
   Saldo +1.737.675 a las 14:10: el plazo de las 15:00 se pasa en verde.
