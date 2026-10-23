@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **23/10 20:47 (laboratorio de rivales).** Desde la manana, solo Luismi:
+  vendio a Areso al Computer por 2.302.300 (comprado el 04/09 por 1.151.000:
+  **+1,15 M en 49 dias**, el doble) y al 24956 (154.100). Con eso, su caja
+  reconstruida queda en ~-5.000 al empezar la J10 (si la reconstruccion
+  cuadra al euro, premio 0 otra vez; margen de error de la reconstruccion,
+  pequeno pero no nulo). Pollo, en positivo. Areso es otra vez el patron
+  de septiembre (comprado barato subiendo y aguantado semanas); desde el
+  21/09 ese patron ya no paga en media (laboratorio del 21/10). Nosotros:
+  sin movimientos; puja del carril por Revivo viva (1.723.901, se resuelve
+  el sab 07:00, con la J10 en juego: no toca la alineacion). Caja al
+  empezar la J10: 1.737.675 - 1.723.901 = 13.774. Viernes: sin
+  interruptores.
+
 - **23/10 20:15 (segunda mirada al cierre de la J10).** Ciclos: verdes
   (#2438 a #2444, la de las 20:07 incluida). Saldo +1.737.675: solvente.
   Once (artefacto de #2444): 4-3-3, 11 jugables, todos «ok». **Jonny baja
