@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **23/10 10:47 (laboratorio de rivales).** Desde anoche: **Pollo17**
+  vendio al Computer el 25159 (4.127.100, +4,2 %; 22 dias, -349.900) y a
+  Pepelu (2.699.000; 2,1 dias, +92.000): con eso y la racha/premio sale
+  del rojo (~+0,75 M) antes de la J10. **Luismi** compro el 33938 por
+  241.000 (+20,5 %, sin rival) y sigue en rojo (~-2,46 M): si no vende
+  antes de las 21:00, premio 0 de la J10. **Manzagool** vendio el 37719
+  (847.700, -5,8 %; +53.870). Nosotros: Boye 5.989.900 (+12,2 %) **sin
+  rival**; Luismi Cruz y Exposito vendidos con perdida sobre lo pagado
+  (-292.900 en 9 dias y -715.500 en 48: caian). **Lo aprendido (hipotesis,
+  n pequeno):** a menos de 24 h de una jornada, los rivales en rojo no
+  pujan fuerte por los caros (Boye y Gaya, sin rival; Pollo -11 M y Luismi
+  -2 M esa noche). El modelo de la subasta del 22/10 no miraba la caja de
+  los rivales ni las horas a la jornada: pagamos ~650k de prima que quiza
+  no hacia falta. **A medir** (laboratorio, no hoy): P(rival) segun su
+  caja y las horas a la jornada; si se confirma, la prima de la orden y de
+  la mejora la tendra en cuenta. Viernes: sin interruptores.
+
 - **23/10 08:20 (mirada tras las ventas).** Vuelta #2432 (08:07) verde:
   vendidos Luismi Cruz (2.959.100) y Exposito (4.431.500). Saldo
   **+1.737.675** a las 08:10, justo lo calculado. **El plazo de la J10
