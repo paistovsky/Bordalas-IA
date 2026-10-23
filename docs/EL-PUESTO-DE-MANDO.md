@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 23/10/2026, 07:25 de Madrid (rafaga de las 07:15, dia de la J10).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/10 07:15 (rafaga de la manana, DIA DEL CIERRE DE LA J10).** Ciclos:
+  verdes (#2422 a #2431). **Boye GANADO** (5.989.900). Saldo a las 07:19:
+  **-5.652.925**, 0 comprometido, 13 en plantilla. Ofertas vivas del
+  Computer (artefacto de #2431): **Exposito 4.431.500** (si llego, por
+  encima del suelo de 3.050.000) y **Luismi Cruz 2.959.100**: juntas
+  7.390.600 => **~+1.737.675** cuando la orden las cobre (vuelta de las
+  08:07). Once 3-4-3, 11 jugables, todos «ok». Programada una mirada a las
+  08:20 (trig_01VHZqLmwkce7RahxKkbeeVD); el turno del cierre, 12:45. Hoy
+  no se construye nada.
 
 - **22/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2415 a #2422).
   Entro el premio de la J6 (+330.000): saldo **+336.975**, puja viva Boye
