@@ -2392712,13 +2392712,13 @@
       "price_at_prediction": 3440000,
       "predicted_at": "2026-10-20T10:09:21.676039+00:00",
       "due_at": "2026-10-23T10:09:21.676039+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 3620000,
+      "actual_direction": "UP",
+      "actual_percent": 5.233,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-23T10:10:53.900261+00:00"
     },
     "8517|PRENSA_MARCA|3|2026-10-20": {
       "player_id": "8517",
@@ -2392733,13 +2392733,13 @@
       "price_at_prediction": 150000,
       "predicted_at": "2026-10-20T10:09:17.335839+00:00",
       "due_at": "2026-10-23T10:09:17.335839+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
+      "outcome": "FLAT",
+      "price_at_outcome": 150000,
+      "actual_direction": "FLAT",
+      "actual_percent": 0.0,
       "direction_hit": null,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-23T10:10:53.900261+00:00"
     },
     "17056|PRENSA_MARCA|3|2026-10-20": {
       "player_id": "17056",
@@ -2392754,13 +2392754,13 @@
       "price_at_prediction": 1350000,
       "predicted_at": "2026-10-20T10:09:17.397030+00:00",
       "due_at": "2026-10-23T10:09:17.397030+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 1190000,
+      "actual_direction": "DOWN",
+      "actual_percent": -11.852,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-23T10:10:53.900261+00:00"
     },
     "17056|PRENSA_MUNDO_DEPORTIVO|3|2026-10-20": {
       "player_id": "17056",
@@ -2392775,13 +2392775,13 @@
       "price_at_prediction": 1350000,
       "predicted_at": "2026-10-20T10:09:23.649966+00:00",
       "due_at": "2026-10-23T10:09:23.649966+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 1190000,
+      "actual_direction": "DOWN",
+      "actual_percent": -11.852,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-23T10:10:53.900261+00:00"
     },
     "10276|PRENSA_MUNDO_DEPORTIVO|3|2026-10-20": {
       "player_id": "10276",
@@ -2392796,13 +2392796,13 @@
       "price_at_prediction": 6070000,
       "predicted_at": "2026-10-20T10:09:19.391469+00:00",
       "due_at": "2026-10-23T10:09:19.391469+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 5180000,
+      "actual_direction": "DOWN",
+      "actual_percent": -14.662,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-23T10:10:53.900261+00:00"
     },
     "42395|PRENSA_MUNDO_DEPORTIVO|3|2026-10-20": {
       "player_id": "42395",
@@ -2392817,13 +2392817,13 @@
       "price_at_prediction": 590000,
       "predicted_at": "2026-10-20T10:09:19.556048+00:00",
       "due_at": "2026-10-23T10:09:19.556048+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 490000,
+      "actual_direction": "DOWN",
+      "actual_percent": -16.949,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-23T10:10:53.900261+00:00"
     },
     "41684|COMUNIATE|1|2026-10-20": {
       "player_id": "41684",
