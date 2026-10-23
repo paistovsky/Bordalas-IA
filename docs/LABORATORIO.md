@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E58 · 23/10/2026 17:24 de Madrid · ¿Cuanto juega un 50 % de FF? Aun no hay datos para saberlo
+### E58 · 23/10/2026 17:21 de Madrid · ¿Cuanto juega un 50 % de FF? Aun no hay datos para saberlo
 
 **El caso:** el once de la J10 lleva a Jonny y a Sergi Cardona al 50 % de
 FF, sin banquillo. La vara de Pepe cuenta un 50 % como medio jugador. ¿Es
