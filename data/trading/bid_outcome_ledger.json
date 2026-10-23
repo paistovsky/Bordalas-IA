@@ -1820,6 +1820,28 @@
    "winning_amount": null,
    "margin": null,
    "event_id": null
+  },
+  "17731:2026-10-23T19:10:56+00:00": {
+   "player_id": 17731,
+   "player_name": "Catena",
+   "amount": 2599900,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 2570000,
+   "recommended_bid": null,
+   "intent": null,
+   "target_source": "DESCONOCIDO",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-10-23T19:10:56+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null,
+   "recorded_by": "TABLON"
   }
  }
 }
