@@ -69,6 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E57 · 23/10/2026 11:16 de Madrid · ¿Hay menos pelea la vispera de la jornada?
+
+**Hipotesis (del gestor, 23/10):** Boye (+12,2 %) y Gaya se ganaron sin
+rival en el reset del dia de la jornada; quiza los rivales no pujan fuerte
+cuando la subasta se resuelve justo antes de que empiece la jornada (en
+rojo no pueden arriesgar; lo que compren casi no llega a jugar).
+**Datos:** las 210 subastas del Computer del tablon con precio y una
+jornada por delante; horas desde el reset que la resuelve hasta el
+siguiente «roundStarted».
+**Codigo:** `lab/subasta/vispera_de_jornada.py`.
+
+    horas a la jornada     n    con pelea   pujadores   prima del ganador   solo las que suben (n / pelea)
+       0-24               39       31 %       1,46          +0,3 %              21 /  52 %
+      24-48               22       41 %       1,50          +1,2 %              11 /  64 %
+      48-96               51       57 %       1,78          +3,3 %              33 /  73 %
+      96+                 98       50 %       1,77          +2,6 %              62 /  73 %
+
+**Lo que se aprende:**
+- **La hipotesis se sostiene:** en las subastas que se resuelven el dia de
+  la jornada hay la mitad de pelea (31 % contra 50-57 %), y el ganador
+  paga +0,3 % de mediana (contra +2,6 a +3,3 %). Pasa tambien con los que
+  suben (52 % contra 73 %), asi que no es solo que haya menos de los que
+  suben ese dia.
+- **Boye (+12,2 %, sin rival) pago ~650.000 de mas casi seguro:** a
+  menos de 24 h, 7 de cada 10 subastas no tienen rival.
+
+**Limites:** n = 39 en el tramo de menos de 24 h (9 de 3 M o mas, 4 con
+pelea); no mide la caja de cada rival (no hay historial de su saldo), que
+seria la otra mitad de la hipotesis.
+
+**Veredicto: GANA** (pasa a «Listo para el plan»): la prima de la orden y
+de la mejora del once, un escalon mas baja cuando la puja se resuelve el
+dia de la jornada.
+
 ### E56 · 22/10/2026 17:18 de Madrid · Como paga la «parte 3»: con el once y la caja de la parte 2 (E55 fallo)
 
 **El caso:** E55 predijo que Pollo17, en rojo al saque del Levante-Athletic
@@ -2547,6 +2581,13 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E57, 23/10 11:16) Prima mas baja si la puja se resuelve el dia de la
+  jornada.** En los resets a menos de 24 h del primer partido hay la mitad
+  de pelea (31 % contra 50-57 %; los que suben, 52 % contra 73 %) y el
+  ganador paga +0,3 % de mediana (contra ~+3 %); n = 39. Para la orden y
+  la mejora: en esas pujas, bajar la prima un escalon de E41 (lo que
+  pedia +8-12 %, +4 %; lo que pedia +3 %, +1 %). Boye a +12,2 % sin rival:
+  ~650.000 probablemente de mas.
 - **(E56, 22/10 17:18) Un partido suelto de una jornada ya empezada NO es
   plazo de caja.** La parte 3 de la J6 (Levante-Athletic, 21/10) conto con
   el once y la caja de la parte 2 (15/09): Pollo17, en rojo el 21/10,
