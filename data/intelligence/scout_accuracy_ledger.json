@@ -2235065,13 +2235065,13 @@
       "price_at_prediction": 2770000,
       "predicted_at": "2026-10-16T12:10:16.645438+00:00",
       "due_at": "2026-10-23T12:10:16.645438+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
-      "magnitude_error_percent": null,
-      "scored_at": null
+      "outcome": "MISS",
+      "price_at_outcome": 2390000,
+      "actual_direction": "DOWN",
+      "actual_percent": -13.718,
+      "direction_hit": false,
+      "magnitude_error_percent": 19.443,
+      "scored_at": "2026-10-23T12:10:17.760711+00:00"
     },
     "42747|PRENSA_MUNDO_DEPORTIVO|3|2026-10-16": {
       "player_id": "42747",
