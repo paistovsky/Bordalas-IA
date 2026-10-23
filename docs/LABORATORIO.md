@@ -69,6 +69,36 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E58 · 23/10/2026 17:24 de Madrid · ¿Cuanto juega un 50 % de FF? Aun no hay datos para saberlo
+
+**El caso:** el once de la J10 lleva a Jonny y a Sergi Cardona al 50 % de
+FF, sin banquillo. La vara de Pepe cuenta un 50 % como medio jugador. ¿Es
+asi?
+**Datos:** solo habia titularidad de FF guardada para los 20 del
+escaparate de cada dia: la vispera de la J8 y la J9, **60 casos**
+jugador-jornada; jugo = un partido mas en `puntos_por_jornada`.
+**Codigo:** `lab/puntos/titularidad_calibrada.py`.
+
+    FF la vispera    n    jugo
+      0-30 %        19    21 %
+     30-50 %        14    71 %
+     50-60 %        10    50 %
+     70-80 %         8   100 %
+     80-100 %        8    62 %
+
+**Lo que se aprende:** con 60 casos no sale una curva: los tramos van
+arriba y abajo (30-50 % juega mas que 50-60 %; 80-100 % menos que
+70-80 %). «Jugo» cuenta tambien salir del banquillo. **No he aprendido
+cuanto juega un 50 %.**
+
+**Lo que si hay:** desde el 20/10 Pepe guarda cada dia la titularidad de
+FF de ~505 jugadores (`la_titularidad_del_dia.jsonl`, commit 983fce96).
+El script ya lee ese libro: cuando entre la foto de la J10 en
+`puntos_por_jornada`, la curva saldra con ~500 casos por jornada.
+
+**Veredicto: SIN RESULTADO** (datos insuficientes). Pendiente: correr el
+script el martes 27/10, tras la J10.
+
 ### E57 · 23/10/2026 11:16 de Madrid · ¿Hay menos pelea la vispera de la jornada?
 
 **Hipotesis (del gestor, 23/10):** Boye (+12,2 %) y Gaya se ganaron sin
