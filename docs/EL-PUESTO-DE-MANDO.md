@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/10/2026, 07:25 de Madrid (rafaga de las 07:15, dia de la J10).
+Actualizado: 23/10/2026, 08:25 de Madrid (mirada tras las ventas).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/10 08:20 (mirada tras las ventas).** Vuelta #2432 (08:07) verde:
+  vendidos Luismi Cruz (2.959.100) y Exposito (4.431.500). Saldo
+  **+1.737.675** a las 08:10, justo lo calculado. **El plazo de la J10
+  (15:00) esta cubierto.** La puja del carril por Revivo (chat del dueno)
+  se resuelve el sab 07:00, con la J10 ya empezada: no toca la caja de
+  hoy. Turno del cierre a las 12:45.
 
 - **23/10 08:15. BOYE, NUESTRO.** Reset de las 07:00: Boye por 5.989.900,
   **sin rival** (nadie mas pujo). En la vuelta de las 07:15 la orden vendio
