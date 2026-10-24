@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/10/2026, 13:00 de Madrid (orden de Kike Salas por Jonny).
+Actualizado: 24/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2454 a #2461).
+  Saldo +1.737.675; puja viva **Kike Salas 3.439.900** (por Jonny, que no
+  jugo la J10; si llega, Jonny se vende tras la J10). Peor caso si entra:
+  -1.702.225 hasta cobrar a Jonny (oferta de 1,80 M el 23/10), y hay de
+  margen hasta el plazo de la J11. **Gracias al chat del dueno por pillar
+  mi error:** la J11 es el **vie 30/10 21:00**, no el dom 01/11; el
+  `data/calendar/laliga_calendar.json` esta viejo (dice 01/11) y yo me fie
+  de el. **Leccion:** la fecha manda la de Biwenger (first_kickoff del log
+  de Pepe), no el fichero del 28/09. Creado mi turno de la J11 para esta
+  sesion, vie 30/10 12:50 (trig_01YG8Zb7LBN2wYmsgujup8UG), como segunda
+  mirada tras el del chat del dueno (12:45). **Pendiente para quien toque
+  el calendario:** refrescar `laliga_calendar.json` (la J11 adelantada).
 
 - **24/10 13:00 (Jonny no jugo; orden para Kike Salas).** El dueno: «Jhonny
   didn't play yesterday». Workflow de 6 (porque, mercado, motores, plan y dos
