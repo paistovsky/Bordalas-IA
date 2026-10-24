@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 24/10/2026, 11:15 de Madrid (laboratorio de las 10:47).
 
 ## El mandato
 
@@ -351,6 +351,44 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/10 10:47 (laboratorio de rivales).** **Rivales:** solo el reset de
+  las 07:00. Luismi compro cinco (13,74 M: Fornals 5.663.000, Satriano
+  3.156.000, Catena 2.621.000, Villares 1.221.000 y Thiago Fernandez
+  1.076.000) desde ~0 de caja, a 159 h de la J11; Manzagool, Revivo
+  (2.227.000). **Medido (workflow de 3, toda la temporada: 5.671 filas
+  rival x jugador en 36 resets del escaparate):** la hipotesis de ayer
+  («un rival en rojo cerca de la jornada no puja fuerte») **NO se sostiene**.
+  En conjunto, los que estan en rojo pujan MAS (8,7 % / 4,2 % frente a
+  2,6 % en positivo), porque los que mas mueven (Luismi, Pollo) son los que
+  suelen estar en rojo; y si su deficit es menor que el precio, pujan
+  igual cerca de la jornada (5/12 frente a 9/19) y no mas barato (+3,2 %
+  frente a +2,6 % de mediana). Ejemplos: Pollo a -6,7 M se llevo a
+  Aubameyang a +16,5 % 14 h antes de la J5; luego vendio y empezo en
+  positivo. La version estrecha (deficit >= precio y <48 h) salia
+  p=0,043, pero **los dos esceptivos la tumban**: cuenta filas como
+  independientes (por reset, p=0,08-0,28), depende de tomar la parte 1
+  de la J6 como plazo (con splitRound=ignoreFirst el plazo fue la parte 2:
+  Luismi vendio 42 min tarde y lo dijo en el chat), y con ese plazo la
+  regla falla el 14/09 (Luismi a -5,4 M gana a +7,5 %). Solo aguanta el
+  tramo «desde el 16/09», elegido a posteriori, y casi todo es Luismi.
+  **Boye y Gaya sin rival: base, no suerte** (el 54 % de las subastas
+  cercanas a la jornada de jugadores >=1M que suben no tienen puja rival
+  de +1 % o mas). **Manzagool es la amenaza real cerca de la jornada:**
+  casi siempre en positivo, puja en el 25 % de esos casos, mediana +7,1 %.
+  **Aplicado: nada.** No se toca la prima de la orden ni de la mejora.
+  **Dos hallazgos de paso, apuntados:** (1) caja_de_la_liga paga el premio
+  de una jornada partida solo en la ultima parte; Biwenger lo paga por
+  partes (a Pepe le faltan 870 k entre el 18/09 y el 22/10 en la
+  reconstruccion). Afecta a la caja de los rivales que leen los motores de
+  analisis, no a la nuestra (la nuestra es la real). Arreglo con test, otro
+  dia. (2) Con la jornada partida y ignoreFirst, el plazo de caja es la
+  primera parte que cuenta, no la primera que empieza. **Y un error mio,
+  corregido:** la J11 NO es el dom 01/11; la adelantaron el 03/10 y empieza
+  el **vie 30/10 a las 21:00** (Villarreal-Espanyol; Pepe ya lo sabe:
+  first_kickoff 30/10 21:00, cierre 20:45). El turno del domingo
+  (trig_01NzaNuaDH69dCE38wMa7wg2) queda pausado; el nuevo es el **vie 30/10
+  a las 12:45** (trig_01YPqTGcmBTwP46U7Vdc37rp): plazo de caja a las 15:00.
 
 - **24/10 08:22 (supervision).** Pepe solo, desde ayer (con la J10 ya
   empezada, ventana hacia la J11): la mejora pujo 2.599.900 por **Catena**
