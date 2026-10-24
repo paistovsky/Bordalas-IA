@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 24/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2461 a #2468).
+  Saldo +1.737.675, puja viva Kike Salas 3.439.900 (dom 07:00). Sin
+  movimientos. Esta noche Madrid pasa a horario de invierno (UTC+1): manana
+  compruebo que las rafagas y el latido llegan a su hora de Madrid.
 
 - **24/10 19:30 (el parte de cada jugador, el primero).** Workflow de 6.
   **Sergi Cardona, suplente en Mestalla** (sano; FF 0 %, Buchanan de
