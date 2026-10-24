@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/10/2026, 11:15 de Madrid (laboratorio de las 10:47).
+Actualizado: 24/10/2026, 13:00 de Madrid (orden de Kike Salas por Jonny).
 
 ## El mandato
 
@@ -351,6 +351,41 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/10 13:00 (Jonny no jugo; orden para Kike Salas).** El dueno: «Jhonny
+  didn't play yesterday». Workflow de 6 (porque, mercado, motores, plan y dos
+  esceptivos). **Por que:** decision tecnica de Quique, no lesion: suplente
+  sin jugar en Alaves 1-1 Malaga; Valentini lleva 5 titularidades seguidas
+  y, con la defensa entera, gano el duelo. J11 en el Camp Nou (sab 31/10
+  21:00): FF 50 %, JP 40 %, y el once del Alaves sale DESPUES de nuestro
+  cierre (vie 30/10 20:45). ~4 xP en J11-J13. **Pepe solo no hacia nada:**
+  la mejora solo entra si Jonny baja de 50 % o si el que llega sube su
+  minimo del tramo (Kike +10.000 < 20.000); su prima +1 % es la que perdio
+  Catena. **Orden:** fichar **Kike Salas** (Sevilla, 3,15 M, 4,0 pts/partido,
+  FF 90 % Clave, ~10 xP en J11-J13) a **3.439.900** (+9,2 %), sin
+  la_pagan_sus_ventas; si llega, vender_si_ficha **Jonny** (suelo 1.450.000)
+  en la primera vuelta tras la J10 (mar 27/10 00:07). Caja esperada si se
+  gana: -1,70 M el dom, -1,45 M el lun (racha +250.000), ~+0,15/+0,33 M tras
+  vender a Jonny, y despues el premio de la J10. P(ganar) 0,7-0,85 (DiosMande
+  tiene un solo defensa sano y pujo +23,5 % por Revivo). **Contingencia
+  (obligatoria):** Sevilla-Osasuna lun 26/10 21:00. Si Kike se lesiona o le
+  expulsan, vaciar vender_si_ficha.jugadores ANTES de la vuelta de las 00:07
+  (Biwenger tarda en marcarlo) y decidir a mano antes del jue 29/10 12:45:
+  (a) vender a Jonny igual con si_saldo_negativo (mejor un hueco que 0
+  puntos) o (b) sacar a Kike de fichar y publicarlo. Sin eso, el codigo
+  empieza la J11 en rojo (la orden dice NADA FUERA y la mejora cuenta una
+  venta fantasma de +1,53 M). Mirada programada el lun 26/10 23:05.
+  **Si se pierde el dom 07:00:** el domingo por la tarde, cambiar el objetivo
+  (Lago solo si sigue en el mercado y no ve la 5.a amarilla ante el Betis;
+  si no, el mejor defensa ok >= 70 % de los mercados dom-mie). Comprobaciones
+  de la leccion del 20/10 en la vuelta siguiente: puja viva a 3.439.900,
+  caja de la mejora ~-171.670, cierre inactivo hasta el mie 07:15, rotacion
+  sin Jonny. **Nuevo turno diario:** «El parte de cada jugador» a las 18:37
+  (trig_01DtfCcQ5VtRdskbX5PNFk7g), por orden del dueno («This analysis
+  should be done daily on each player»): veredicto de cada jugador, recambio
+  si falta y actuar; apunta en docs/EL-PARTE-DE-LA-PLANTILLA.md. Errata de
+  codigo vista: el_cierre_de_la_jornada.py:198-202 dice que 64 h antes de un
+  viernes 21:00 es «martes 05:00»; es miercoles 05:00.
 
 - **24/10 10:47 (laboratorio de rivales).** **Rivales:** solo el reset de
   las 07:00. Luismi compro cinco (13,74 M: Fornals 5.663.000, Satriano
