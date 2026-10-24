@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 24/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2445 a #2454,
+  la de las 07:15 incluida). Reset: **Revivo PERDIDO** (1.723.901 contra
+  2.227.000, +29 %) y **Catena PERDIDO** (2.599.900 contra 2.621.000:
+  por 21.100, un 0,8 %). Saldo **+1.737.675**, 0 comprometido, 11 en
+  plantilla (sin banquillo). **Dato para el chat del dueno:** Catena se
+  pierde por menos de un 1 %; si la puja la hizo un motor con prima fija,
+  vale la pena mirar si un escalon mas (p.ej. terminacion o +1 %) habria
+  ganado, sin romper el colchon. La J11 es el dom 01/11 (plazo 11:00).
 
 - **23/10 21:15 (rafaga de la noche; la J10 ya ha empezado).** Ciclos:
   verdes (#2443 a #2445). Saldo +1.737.675 al empezar la J10: puntua.
