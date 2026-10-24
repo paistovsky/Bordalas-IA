@@ -352,6 +352,35 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **24/10 20:47 (laboratorio de rivales).** **Rivales:** nada desde el
+  reset de la manana (tablon sin eventos nuevos). **La carrera (jornadas
+  cerradas):** Pollo17 388, **Pepe 383 (-5)**, Luismi 353 (su J6 vale 0 por
+  empezar en rojo; sin eso iria primero), Manzagool y DiosMande 308. J10 por
+  ahora: Pepe 18, Pollo 0 (no ha jugado ninguno suyo con informe). **Medido
+  (workflow de 3): el banquillo, otra vez.** Con 11 justos (J8-J10) perdimos
+  4 de 33 huecos (12 %); con banquillo (J1-J7), ~4 %. Solo un cero era
+  seguro antes del cierre y no estructural: Jonny en la J10 (0 % a las
+  20:15). Rico (J8, J9) era un titular flojo, no falta de banquillo (se
+  arregla con un cambio 1 por 1). J9 tenia dos avisos (Rico 30 %, Olasagasti
+  0 % y entro y puntuo 3): un 12.o habria ganado ~+0,8, no +3,8. Un 12.o
+  vale ~0,3-0,7 pts/jornada y cuesta ~0,35-1,0 (perdida de valor de los de
+  <1 M: mediana -11/-13 % en 14 dias): **neto ~0. Se mantiene lo del 20/10:
+  sin banquillo fijo, sin 13.o, sin regla en los motores.** Si acaso UNO
+  oportunista por la orden: <= 1,0 M, ok, FF >= 70 %, 3+ partidos, 2,5+
+  pts/partido, en el mercado del Computer, subasta >= 64 h antes del cierre,
+  caja >= +0,5 M en el plazo de la J11 tras pujar, puja <= valor +5 %, y
+  mejor un MEDIO (con 4 DEF cubre cualquier ausencia de campo); fuera de
+  conservar. Solo ~4 de 38 dias aparece uno asi. **Lo que de verdad paga:**
+  cambiar a los titulares flojos 1 por 1 (Kike por Jonny ya; Cardona el mie
+  28). Los rivales: banquillo medio Pollo 7, Prinzipote 5,5, Luismi 4,6, Pepe
+  2,0; correlacion con los puntos debil (+0,1/+0,2) y mezclada con el valor
+  de la plantilla; ningun rival visto usando el banquillo para tapar un
+  cero. **Datos:** la J6 parte 3 se puntuo con el once de la parte 2 (ahora
+  n=8 onces): el aplazado Rayo-Athletic de la J8 puntuara con el once de la
+  J8. **Fallo visto:** marcador.json guarda mi_once desplazado una jornada
+  desde la 4902 (pendiente). **Aplicado:** nada. Re-medir en la J16
+  guardando el FF del once en cada cierre (artefacto de las 20:07).
+
 - **24/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2461 a #2468).
   Saldo +1.737.675, puja viva Kike Salas 3.439.900 (dom 07:00). Sin
   movimientos. Esta noche Madrid pasa a horario de invierno (UTC+1): manana
