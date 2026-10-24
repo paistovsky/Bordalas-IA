@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E60 · 24/10/2026 17:15 de Madrid · ¿Esta viejo el calendario de Pepe? No: el que estaba viejo era otro
+
+**El caso:** el gestor (24/10 14:15) se equivoco con la fecha de la J11
+(dijo dom 01/11; es vie 30/10) y culpo a `data/calendar/laliga_calendar.json`
+(«dice 01/11, es del 28/09»).
+**Datos:** el `laliga_calendar.json` del artefacto del ciclo de las 17:09
+de hoy (el que usa Pepe en produccion) contra los «roundStarted» reales del
+tablon (J1-J10), y `data/calendar/calendar_changes.jsonl` (380 partidos
+dados de alta, 90 cambios de hora).
+**Codigo:** `lab/infra/calendario_contra_biwenger.py`.
+
+**Lo que se aprende:**
+- **El calendario de produccion acierta las diez:** el primer partido de
+  cada jornada del fichero coincide al minuto con el inicio de Biwenger
+  (J1-J10, 0,0 h de diferencia, incluida la J6 adelantada al 03/09). El
+  fichero se baja en cada vuelta (hoy a las 17:09) y da la **J11 el vie
+  30/10 21:00**.
+- **El cambio de la J11 se conocia desde el 03/10:** ese dia el fichero
+  movio los diez partidos del 01/11 a sus horas (el primero, el
+  Villarreal-Espanyol del 30/10). Los 90 cambios de hora llegaron entre 12
+  y ~60 dias antes del partido (mediana 29).
+- **El error no fue del fichero de Pepe, sino de quien lo leyo:** la
+  copia vieja estaba fuera del ciclo (no hay `laliga_calendar.json` en git;
+  solo `calendar_changes.jsonl`).
+
+**Limites:** solo las fechas de comienzo de jornada; los aplazados (E43)
+el fichero no los ve hasta que hay fecha nueva.
+
+**Veredicto: SE AGUANTA el calendario de Pepe.** Para el gestor y el chat
+del dueno: las fechas se leen del artefacto del ultimo ciclo (o del log de
+Pepe), nunca de una copia local; y el «roundStarted» del tablon confirma
+la hora.
+
 ### E59 · 24/10/2026 11:15 de Madrid · ¿Mas pelea con la jornada en juego? No
 
 **Hipotesis:** el otro lado de E57: si la vispera hay poca pelea, quiza
