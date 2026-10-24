@@ -352,6 +352,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **24/10 08:22 (supervision).** Pepe solo, desde ayer (con la J10 ya
+  empezada, ventana hacia la J11): la mejora pujo 2.599.900 por **Catena**
+  (DEF) para sustituir a Jonny (suplente en Alaves; +3,0 xP por jornada,
+  caja -927.900 con deuda permitida a mas de 64 h) y los chollos 1.029.000
+  por **Thiago Fernandez**; el carril ya tenia la de Revivo (1.723.901).
+  **Las tres perdidas** en el reset: Catena y Thiago, Luismi (2.621.000,
+  por 21.100; y 1.076.000); Revivo, Manzagool (2.227.000). Nada vendido.
+  Luismi compro cinco (13,74 M, Fornals 5.663.000 entre ellos): vuelve a
+  hundirse en rojo. Caja **1.737.675**, 0 pujas vivas; alineacion 4-3-3
+  con 11 en la J10. Orden sin nada que limpiar.
+
 - **24/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2445 a #2454,
   la de las 07:15 incluida). Reset: **Revivo PERDIDO** (1.723.901 contra
   2.227.000, +29 %) y **Catena PERDIDO** (2.599.900 contra 2.621.000:
