@@ -1815,11 +1815,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-10-23T06:10:37.625144+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null
+   "outcome": "LOST",
+   "resolved_at": "2026-10-24T05:19:12.218747+00:00",
+   "winning_amount": 2227000,
+   "margin": 503099,
+   "event_id": "219d051a4dfbe8a0c171bdae"
   },
   "17731:2026-10-23T19:10:56+00:00": {
    "player_id": 17731,
@@ -1836,11 +1836,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-10-23T19:10:56+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "LOST",
+   "resolved_at": "2026-10-24T05:19:12.218747+00:00",
+   "winning_amount": 2621000,
+   "margin": 21100,
+   "event_id": "219d051a4dfbe8a0c171bdae",
    "recorded_by": "TABLON"
   }
  }

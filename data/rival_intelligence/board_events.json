@@ -208538,5 +208538,122 @@
         "name": "Jornada 10"
       }
     }
+  },
+  {
+    "event_id": "219d051a4dfbe8a0c171bdae",
+    "date": 1792818373,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 43268,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 2227000,
+        "bids": [
+          {
+            "user": {
+              "id": 14151726,
+              "name": "DiosMande a Rodri al Palancas",
+              "icon": "i/u/14151726.png"
+            },
+            "amount": 2125060
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 1902000
+          }
+        ]
+      },
+      {
+        "player": 17731,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 2621000,
+        "bids": [
+          {
+            "user": {
+              "id": 14175949,
+              "name": "Pepe Bordalás",
+              "icon": "i/u/14175949.png"
+            },
+            "amount": 2599900
+          }
+        ]
+      },
+      {
+        "player": 39792,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3156000,
+        "bids": [
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 2830050
+          }
+        ]
+      },
+      {
+        "player": 41076,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1221000
+      },
+      {
+        "player": 39431,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1076000,
+        "bids": [
+          {
+            "user": {
+              "id": 14175949,
+              "name": "Pepe Bordalás",
+              "icon": "i/u/14175949.png"
+            },
+            "amount": 1029000
+          },
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 980000
+          }
+        ]
+      },
+      {
+        "player": 2597,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 5663000
+      }
+    ]
   }
 ]
