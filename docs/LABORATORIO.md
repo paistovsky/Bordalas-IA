@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E59 · 24/10/2026 11:15 de Madrid · ¿Mas pelea con la jornada en juego? No
+
+**Hipotesis:** el otro lado de E57: si la vispera hay poca pelea, quiza
+con la jornada ya empezada hay mas (los rivales rehacen plantilla para la
+siguiente). Hoy, con la J10 en juego, Pepe perdio tres pujas (Catena por
+21.100, Revivo a +29 %, Thiago Fernandez) y Luismi compro cinco.
+**Datos:** las 217 subastas del Computer del tablon, clasificadas por el
+momento del reset que las resuelve: con una jornada principal empezada y
+sin terminar, la vispera (<24 h de la siguiente) o entre jornadas.
+**Codigo:** `lab/subasta/con_la_jornada_en_juego.py`.
+
+    momento              n    con pelea   prima (mediana)   las que suben: pelea / prima con pelea
+    vispera (<24 h)     23       26 %         +0,3 %                43 %  /  +24 %
+    jornada en juego   119       50 %         +1,9 %                68 %  /  +8,3 %
+    entre jornadas      75       49 %         +4,6 %                71 %  /  +8,7 %
+
+**Lo que se aprende:**
+- **Con la jornada en juego no hay mas pelea que entre jornadas** (50 %
+  contra 49 %; en los que suben, 68 % contra 71 %, prima casi igual). La
+  hipotesis no se sostiene.
+- **E57 se mantiene** con otra forma de contar: la vispera, la mitad de
+  pelea y prima mediana +0,3 %. (Cuando la hay, entre los que suben, es
+  cara: +24 %, n muy pequeño.)
+- Lo de hoy es lo normal: pujas por jugadores que suben, a prima corta,
+  contra rivales que pagan +8 % de mediana (E41/E49). Catena por un 0,8 %
+  es mala suerte dentro de esa regla, no un patron.
+
+**Limites:** el tramo de la vispera se queda en 23 al separar las
+subastas con una ronda en juego (los aplazados se solapan).
+
+**Veredicto: NO GANA** (nada nuevo para el plan). Lo unico que confirma:
+la ventana barata es el reset del dia de la jornada (E57).
+
 ### E58 · 23/10/2026 17:21 de Madrid · ¿Cuanto juega un 50 % de FF? Aun no hay datos para saberlo
 
 **El caso:** el once de la J10 lleva a Jonny y a Sergi Cardona al 50 % de
