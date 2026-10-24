@@ -352,6 +352,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **24/10 19:30 (el parte de cada jugador, el primero).** Workflow de 6.
+  **Sergi Cardona, suplente en Mestalla** (sano; FF 0 %, Buchanan de
+  carrilero): DUDA para la J11 (~35 %), con Carlos Romero volviendo a final
+  de mes. Jonny DUDA (cubierto por la orden de Kike). El resto TITULAR
+  (75-90 %). No se toca nada hoy (el esceptico tumbo todas las lineas).
+  Plan y decision del mie 28/10 en docs/EL-PARTE-DE-LA-PLANTILLA.md. Ojo: la
+  mejora puede pujar sola desde el dom leyendo el 0 % de Cardona; mirar el
+  objetivo. Fallo de Pepe: el tablero de FF mezcla jornadas por equipo
+  (pendiente: comprobar la jornada de cada pagina).
+
 - **24/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2454 a #2461).
   Saldo +1.737.675; puja viva **Kike Salas 3.439.900** (por Jonny, que no
   jugo la J10; si llega, Jonny se vende tras la J10). Peor caso si entra:
