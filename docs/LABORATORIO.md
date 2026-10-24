@@ -88,8 +88,8 @@ dados de alta, 90 cambios de hora).
   30/10 21:00**.
 - **El cambio de la J11 se conocia desde el 03/10:** ese dia el fichero
   movio los diez partidos del 01/11 a sus horas (el primero, el
-  Villarreal-Espanyol del 30/10). Los 90 cambios de hora llegaron entre 12
-  y ~60 dias antes del partido (mediana 29).
+  Villarreal-Espanyol del 30/10). Los 90 cambios de hora llegaron como poco 12
+  dias antes del partido (mediana 29).
 - **El error no fue del fichero de Pepe, sino de quien lo leyo:** la
   copia vieja estaba fuera del ciclo (no hay `laliga_calendar.json` en git;
   solo `calendar_changes.jsonl`).
