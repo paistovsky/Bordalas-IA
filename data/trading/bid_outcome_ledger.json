@@ -1842,6 +1842,28 @@
    "margin": 21100,
    "event_id": "219d051a4dfbe8a0c171bdae",
    "recorded_by": "TABLON"
+  },
+  "28115:2026-10-24T11:10:34+00:00": {
+   "player_id": 28115,
+   "player_name": "Kike Salas",
+   "amount": 3439900,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 3150000,
+   "recommended_bid": null,
+   "intent": null,
+   "target_source": "DESCONOCIDO",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-10-24T11:10:34+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null,
+   "recorded_by": "TABLON"
   }
  }
 }
