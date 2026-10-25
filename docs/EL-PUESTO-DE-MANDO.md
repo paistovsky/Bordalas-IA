@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/10/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 25/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2485 a #2492).
+  Saldo -1.702.225, 0 comprometido, sin movimientos. Plan para el vie
+  30/10 15:00 sin cambios (Jonny tras la J10 + premio de la J10). El chat
+  del dueno prepara un interruptor nuevo para el lunes (paso 0 en seco
+  verde): uno, y con su vuelta vigilada.
 
 - **25/10 20:47 (laboratorio de rivales).** **Rivales:** nada en todo el
   domingo (tablon sin eventos desde el reset). **J10:** 33 pts con 9 de 11
