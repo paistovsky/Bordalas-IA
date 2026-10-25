@@ -69,6 +69,29 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E62 · 25/10/2026 17:15 de Madrid · Vender a un manager (agenda, punto 4): un mercado que ya no existe
+
+**Hipotesis:** venderle a un manager paga mas que venderle al Computer,
+y merece la pena buscarlo (la puerta a precio de mercado se apago el 20/10
+con 2 ofertas y 0 aceptadas).
+**Datos:** todas las ventas entre managers del tablon (10, del 10/08 al
+18/09; 6 con precio del dia) y el precio del jugador 7 y 14 dias despues.
+**Codigo:** `lab/ofertas/entre_managers.py`.
+
+**Lo que se aprende:**
+- **Entre managers casi no se vende:** 10 ventas en toda la temporada y
+  **ninguna desde el 18/09** (cinco semanas). Pepe hizo cuatro, todas en
+  agosto y septiembre.
+- Cuando se vende, es por encima del precio (6 de 6, mediana +6,5 %), pero
+  al vendedor le salio bien la mitad (3 de 6: el jugador subio mas que la
+  prima en una semana).
+- Con n = 6 no hay regla que sacar; lo que si se ve es que no hay
+  comprador al otro lado: los rivales compran al Computer (E41/E57).
+
+**Veredicto: NO GANA.** Confirma que apagar la puerta fue lo correcto:
+vender se hace al Computer (oferta viva cada 48 h, E42), y la agenda puede
+cerrar el punto 4 hasta que vuelva a haber ventas entre managers.
+
 ### E61 · 25/10/2026 11:15 de Madrid · Como elige el Computer a sus 20: cuanto se espera a un objetivo
 
 **El caso:** el gestor ha puesto «la lista de objetivos» (el mejor equipo
