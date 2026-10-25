@@ -352,6 +352,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **25/10 08:22 (supervision).** **Kike Salas GANADO** en el reset (07:04
+  CET): 3.439.900; Luismi pujo 3.163.000 (+0,4 %): con el +1 % de la mejora
+  (3.189.900) tambien se habria ganado; la prima costo ~250.000 de mas, a
+  cambio de asegurar. Luismi compro ademas al 26299 (446.000). Nada mas en
+  el tablon. Pepe solo: nada (ronda, chollos y carril NADA_QUE_HACER; la
+  orden espera a vender a Jonny: JORNADA_EN_CURSO). Plantilla 12, caja
+  **-1.702.225**, 0 pujas vivas, 132 h a la J11. Oferta del Computer por
+  Jonny: 1.701.200 (suelo 1.450.000): se vende el mar 27/10 00:07. Racha
+  4/5 (la cobra manana, +250.000). **Orden limpia:** Kike sale de fichar y
+  pasa a conservar; la venta de Jonny sigue (si_esta 28115 ya en plantilla).
+  Mirada del lun 23:05 (Sevilla-Osasuna) en pie.
+
 - **24/10 20:47 (laboratorio de rivales).** **Rivales:** nada desde el
   reset de la manana (tablon sin eventos nuevos). **La carrera (jornadas
   cerradas):** Pollo17 388, **Pepe 383 (-5)**, Luismi 353 (su J6 vale 0 por
