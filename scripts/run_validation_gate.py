@@ -582,6 +582,11 @@ TESTS = [
     # 19/10/2026). No decide nada.
     "src.analysis.test_la_titularidad_del_dia_v1",
     "src.analysis.test_las_ligas_v1",
+
+    # La jornada de cada pagina de FF (25/10/2026): el tablero apunta
+    # de que jornada es la pagina de cada equipo y la mejora no abre un
+    # hueco con una titularidad de otra jornada. Apagado.
+    "src.analysis.test_la_jornada_de_cada_pagina_v1",
 ]
 
 

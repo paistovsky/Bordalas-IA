@@ -145,6 +145,18 @@ SIN FANTASMAS EN LA CAJA (13/10/2026)
     Al final de cada vuelta encendida escribe `VUELTA_MEJORA` (run_id,
     hora, las `hechas`): el cierre de la jornada corre después.
 
+LA JORNADA DE CADA PAGINA (25/10/2026, `BORDALAS_LA_JORNADA_DE_CADA_PAGINA`)
+
+    El 24/10 Sergi Cardona salia al 0 % con el tablero en la J11: era la
+    "Alineacion confirmada J10" de su pagina de FF, no un pronostico. Un
+    0 % aqui es un hueco, y un hueco se salta SOLO SI SUBE. Con el
+    interruptor, el tablero marca cada ficha que sale de una pagina de
+    otra jornada; la que es una CONFIRMADA (11 al 100 %, el resto al 0 %)
+    no vale para decidir: el titular sano no sale, y el del Computer o
+    el del inventario no entra (`las_de_otra_jornada`,
+    `decidir(de_otra_jornada=...)`). Ver el bloque junto a
+    `la_jornada_de_cada_pagina_activa`. Nace APAGADO.
+
 QUE NO HACE
 
     No toca a Yamal (salvo su llave de lesión), ni a los `proteger` de la
@@ -176,8 +188,12 @@ ENV_CALENDARIO = "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA"     # nace APAGADO
 ENV_PUJA_FUERTE = "BORDALAS_LA_MEJORA_PUJA_FUERTE"          # nace APAGADO
 ENV_SOLO_SI_SUBE = "BORDALAS_LA_MEJORA_SOLO_SI_SUBE"        # nace APAGADO
 ENV_PUJA_EN_9900 = "BORDALAS_LA_PUJA_EN_9900"               # nace APAGADO
+ENV_LA_JORNADA_DE_CADA_PAGINA = "BORDALAS_LA_JORNADA_DE_CADA_PAGINA"   # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
+# El tablero de FF (`futbolfantasy_provider.BOARD_FILE`), para LA JORNADA
+# DE CADA PAGINA (25/10/2026): solo se lee con su interruptor.
+TABLERO_FF = RAIZ / "data" / "intelligence" / "futbolfantasy_board.json"
 # Lo que hizo la mejora en ESTA vuelta (13/10/2026), para el cierre de la
 # jornada, que corre después: {"run_id", "generated_at", "hechas"}.
 VUELTA_MEJORA = RAIZ / "data" / "trading" / "la_mejora_vuelta.json"
@@ -266,6 +282,93 @@ def la_mejora_solo_si_sube_activa() -> bool:
     """`BORDALAS_LA_MEJORA_SOLO_SI_SUBE`, leído como `activa`. Nunca lanza."""
     try:
         return str(os.environ.get(ENV_SOLO_SI_SUBE, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+# LA JORNADA DE CADA PAGINA (25/10/2026)
+#
+# EL FALLO (24/10/2026). La titularidad de FF sale de la pagina de cada
+# equipo, y una pagina no cambia de jornada cuando cambia el tablero: el
+# equipo que ya jugo sigue mostrando su "Alineacion confirmada" (11 al
+# 100 %, el resto al 0 %) hasta que FF publica la siguiente, y el que
+# juega el lunes sigue con el pronostico de la jornada anterior. El panel
+# del 24/10 a las 18:10 tenia a Sergi Cardona al 0 % (confirmada de la
+# J10) con el tablero ya en la J11. Aqui un 0 % es un hueco
+# (`TITULARIDAD_HUECO`): SOLO SI SUBE se salta y la mejora puja por
+# cualquier defensa sano con un 60 % o mas. Y aunque no fuera hueco, el
+# `esperado` (o el xP) del que sale vale 0 y el cambio sale gratis en
+# puntos. El 24/10 a las 19:30 el log ya avisaba: «puede pujar sola desde
+# el dom leyendo el 0 % de Cardona».
+#
+# Medido: ~21 % de las horas-equipo de la semana son de una pagina de otra
+# jornada, todas entre el viernes a las 23:00 y el martes; y la mejora
+# puede comprar todo el fin de semana (la jornada que cuenta es la
+# siguiente, y `en_curso` solo frena las ventas). En octubre, 4 de las
+# ultimas 15 pujas de la casa salieron dentro de esas ventanas (la ronda,
+# el motor viejo y la orden; ninguna aun de la mejora).
+#
+# Con el interruptor (el MISMO que marca el tablero, en
+# `futbolfantasy_provider`), la titularidad de una CONFIRMADA de otra
+# jornada no vale para decidir (`las_de_otra_jornada`):
+#
+#     QUIEN SALE. El titular SANO ('ok' o 'warned', `SANOS`) marcado no
+#     es candidato a salir en esta vuelta, ni como hueco ni como cambio.
+#     Se espera a la pagina de la jornada que toca: de 3 a 13 horas
+#     despues de un partido del fin de semana, el martes para los del
+#     lunes; la mejora puede comprar hasta 40 horas antes del cierre (el
+#     jueves a las 04:45 para un viernes). El lesionado o sancionado
+#     sigue siendo hueco, como siempre, y el que esta en duda tambien
+#     puede serlo: 'doubt' con un 0 % en la ultima confirmada suele ser
+#     un hueco de verdad (no jugo con un golpe), y se mide como antes.
+#
+#     QUIEN ENTRA (revision del 25/10/2026). El del Computer o el del
+#     inventario marcado no entra en esta vuelta: un 100 % de la
+#     confirmada de la J10 pasa el 60 % y le pone un `esperado` que gana
+#     a cualquier pronostico de verdad de la J11 (Chust y Unai Lopez el
+#     24/10), y el +1 % de un hueco iria a el. Un 0 % viejo ya lo dejaba
+#     fuera; ahora ademas se dice. Salen en
+#     `plan["de_otra_jornada_entran"]`.
+#
+# SOLO LAS CONFIRMADAS (revision del 25/10/2026). La primera version
+# congelaba toda pagina de otra jornada. Con las 20 paginas de verdad del
+# 25/10 a las 08:15 y el tablero en la J11, eran 10 equipos (254 de las
+# 511 filas de sus paginas): todas POSIBLES de la J10 de equipos que aun
+# no habian jugado, ninguna confirmada. El 24/10 entre las 16:40 y las
+# 17:21 UTC, 13 de 17 paginas, de las que solo 4 eran confirmadas
+# (Espanyol, Racing, Valencia, Villarreal). Un pronostico de la jornada
+# anterior es lo mejor que hay (error medio 11,0 contra 16,7, ver el
+# proveedor) y se usa como siempre.
+# Lo que no vale es la confirmada: 11 al 100 % y el resto al 0 %, sin
+# nada de pronostico. Tambien la confirmada cuya jornada no se pudo leer
+# (FF cambia la pagina, o sus marcas no coinciden): mientras la mejora
+# puede comprar (40 horas o mas antes del cierre) una confirmada solo
+# puede ser de un partido ya jugado o jugandose.
+#
+# SIN SILENCIOS. Si a menos de `AVISO_ANTES_DE_CERRAR` horas de dejar de
+# comprar (`HORAS_SIN_COMPRAR`) sigue habiendo titulares congelados, el
+# plan lo dice (`plan["de_otra_jornada_aviso"]`) y `main` lo grita: la
+# ventana se cierra sin cambios para ellos. Y `correr` lee del tablero
+# sus alarmas (`metadata.matchday_alarms`: la jornada del tablero no
+# cuadra con ninguna pagina, o ninguna pagina dice la suya) y los
+# equipos sin jornada legible (`metadata.pages_without_matchday`), y
+# `main` los imprime.
+#
+# Lo que NO toca: el once, el cierre, el xP ni el panel: ven los mismos
+# numeros. Sin la marca en el tablero (tablero de antes del interruptor,
+# fichero que no esta), lo de siempre.
+#
+# Nace APAGADO. Apagado, `correr` ni abre el tablero y `decidir` es byte a
+# byte lo de antes.
+AVISO_ANTES_DE_CERRAR = 24
+
+
+def la_jornada_de_cada_pagina_activa() -> bool:
+    """`BORDALAS_LA_JORNADA_DE_CADA_PAGINA`, leido como `activa` (al
+    llamarse). Nace APAGADO. Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_LA_JORNADA_DE_CADA_PAGINA, "")).strip().lower() in {
             "1", "true", "si", "yes"}
     except Exception:                               # noqa: BLE001
         return False
@@ -568,7 +671,7 @@ def decidir(
     ya_pujados=frozenset(), caja, horas_jornada, puede_escribir=True,
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
     estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
-    en_9900=False,
+    en_9900=False, de_otra_jornada=frozenset(),
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -608,6 +711,28 @@ def decidir(
                     un hueco (el que sale fuera o con poca titularidad)
         en_9900     LA PUJA EN 9.900 (17/10): la puja del que entra termina
                     en 9.900 (`la_ronda_de_la_manana.en_9900`)
+        de_otra_jornada  LA JORNADA DE CADA PAGINA (25/10): {id} cuya
+                    titularidad salio de una CONFIRMADA de FF de otra
+                    jornada (`las_de_otra_jornada`), nuestros o no:
+                      - el titular SANO ('ok', 'warned') que esta aqui no
+                        es candidato a salir en esta vuelta: ni abre un
+                        hueco (no se salta SOLO SI SUBE) ni pone precio a
+                        un cambio con un `esperado` o un xP falsos. El
+                        lesionado, el sancionado y el que esta en duda,
+                        como siempre (pueden ser hueco). Salen en
+                        `plan["de_otra_jornada"]` ({id, nombre,
+                        titularidad});
+                      - el del Computer o el del inventario que esta
+                        aqui no entra: su 100 % (o su 0 %) no es de esta
+                        jornada. Salen en `plan["de_otra_jornada_entran"]`
+                        ({id, nombre, titularidad, ya_es_nuestro});
+                      - con titulares congelados y a menos de
+                        `AVISO_ANTES_DE_CERRAR` horas de
+                        `HORAS_SIN_COMPRAR`, `plan["de_otra_jornada_aviso"]`
+                        ({horas_para_cerrar, ids}): la ventana se cierra
+                        sin poder cambiarlos.
+                    Cada clave, solo si hay algo. Vacio (lo de siempre):
+                    byte a byte lo de antes.
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -709,6 +834,7 @@ def decidir(
     # los que ya salen o la orden vende.
     vivos = {_int(k) for k in (libro or {})}
     nuestros = []
+    de_otra = []
     for p in once:
         pid = _int(p.get("id"))
         if (str(p.get("name") or "").strip().lower() in intocables or pid in protegidos
@@ -721,6 +847,14 @@ def decidir(
         valor = _int(p.get("price")) or _int((liga.get(pid) or {}).get("price"), 0) or 0
         estado = str((estados or {}).get(pid) or (liga.get(pid) or {}).get("status")
                      or "ok").strip().lower()
+        # LA JORNADA DE CADA PAGINA (25/10/2026): su % es de la confirmada
+        # de otra jornada (11 al 100 %, el resto al 0 %). Sano ('ok' o
+        # 'warned'), no sale en esta vuelta: ni hueco ni cambio. El que
+        # esta en duda, lesionado o sancionado, como siempre: con un 0 %
+        # en la ultima confirmada, su hueco suele ser de verdad.
+        if de_otra_jornada and pid in de_otra_jornada and estado in SANOS:
+            de_otra.append({"id": pid, "nombre": p.get("name"), "titularidad": prob})
+            continue
         try:
             hueco = estado in FUERA_DEL_ONCE or (prob is not None
                                                   and float(prob) < TITULARIDAD_HUECO)
@@ -734,6 +868,7 @@ def decidir(
     # Quién puede entrar: el Computer de hoy, y lo que ya tienen la ronda
     # y los chollos (sin pujar: ya es nuestro).
     entran = []
+    de_otra_entran = []
     for c in escaparate or []:
         pid = _int(c.get("id"))
         lc = liga.get(pid) or {}
@@ -744,6 +879,14 @@ def decidir(
                 or (_int(c.get("played"), 0) or 0) < PARTIDOS_MINIMOS):
             continue
         prob = c.get("starter_probability")
+        # LA JORNADA DE CADA PAGINA (25/10/2026): su % es de la confirmada
+        # de otra jornada. Un 100 % viejo pasa el 60 % y gana a cualquier
+        # pronostico de verdad (Chust y Unai Lopez el 24/10): no entra en
+        # esta vuelta.
+        if de_otra_jornada and pid in de_otra_jornada:
+            de_otra_entran.append({"id": pid, "nombre": c.get("name"), "titularidad": prob,
+                                   "ya_es_nuestro": False})
+            continue
         if prob is None or prob < TITULARIDAD_MINIMA:
             continue
         tasa = lc.get("tasa") or ((c.get("points") or 0) / c["played"])
@@ -778,6 +921,13 @@ def decidir(
         # La titularidad de la plantilla entera (`roster.players`): el del
         # inventario casi nunca está en el once, y `todaLaLiga` no la trae.
         prob = _prob_nuestra(pid, prob_once.get(pid) or lc.get("starter_probability"))
+        # LA JORNADA DE CADA PAGINA (25/10/2026): lo mismo que al del
+        # Computer. Quedarselo con un 100 % viejo seria vender despues a
+        # un titular con un pronostico de verdad.
+        if de_otra_jornada and pid in de_otra_jornada:
+            de_otra_entran.append({"id": pid, "nombre": lc.get("name"), "titularidad": prob,
+                                   "ya_es_nuestro": True})
+            continue
         if not _titular(prob):
             continue
         e = esperado(lc.get("tasa"), prob)
@@ -867,6 +1017,18 @@ def decidir(
         plan["frenadas"] = frenadas
     if solo_si_sube:
         plan["sin_subir"] = sin_subir
+    if de_otra:
+        plan["de_otra_jornada"] = de_otra
+    if de_otra_entran:
+        plan["de_otra_jornada_entran"] = de_otra_entran
+    # SIN SILENCIOS: la ventana de comprar se cierra con titulares
+    # congelados (un aplazado, un partido del lunes en una semana con
+    # jornada entre semana, FF que publica tarde).
+    if de_otra and horas_jornada < HORAS_SIN_COMPRAR + AVISO_ANTES_DE_CERRAR:
+        plan["de_otra_jornada_aviso"] = {
+            "horas_para_cerrar": round(horas_jornada - HORAS_SIN_COMPRAR, 1),
+            "ids": [o["id"] for o in de_otra],
+        }
 
     for c in elegidos:
         if c["ya_es_nuestro"]:
@@ -1166,6 +1328,87 @@ def las_probabilidades(status) -> dict:
     return salida
 
 
+def _el_tablero_de_ff(ruta) -> dict:
+    """El tablero de FF: `ruta` (por defecto `TABLERO_FF`) o el tablero
+    ya leido (un dict). Sin fichero o con basura, {}. Nunca lanza."""
+    try:
+        tablero = ruta if isinstance(ruta, dict) else _leer(ruta or TABLERO_FF, {})
+        return tablero if isinstance(tablero, dict) else {}
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
+def las_de_otra_jornada(ruta=None) -> frozenset:
+    """
+    LA JORNADA DE CADA PAGINA (25/10/2026). Los ids de Biwenger cuya
+    ficha del tablero de FF (`ruta`, por defecto `TABLERO_FF`, o el
+    tablero ya leido) salio de una CONFIRMADA (`ff_page_lineup`
+    exactamente "CONFIRMADA") que es:
+
+        de OTRA jornada  `ff_de_otra_jornada` exactamente True, la marca
+                         que pone `futbolfantasy_provider.
+                         build_player_entry` con el interruptor; o
+        de jornada que no se pudo leer  `ff_page_matchday` presente y
+                         None (FF cambio la pagina, o sus marcas no
+                         coinciden): mientras se puede comprar, una
+                         confirmada solo es de un partido ya jugado.
+
+    La POSIBLE de otra jornada NO esta aqui (revision del 25/10/2026):
+    es un pronostico, lo mejor que hay hasta que llega el de la
+    siguiente. Sin fichero, con basura o sin marcas (tablero de antes del
+    interruptor), vacio: lo de siempre. Nunca lanza.
+    """
+    try:
+        fichas = _el_tablero_de_ff(ruta).get("players")
+        if not isinstance(fichas, list):
+            return frozenset()
+        salida = set()
+        for ficha in fichas:
+            if not isinstance(ficha, dict) or ficha.get("ff_page_lineup") != "CONFIRMADA":
+                continue
+            de_otra = ficha.get("ff_de_otra_jornada") is True
+            sin_leer = "ff_page_matchday" in ficha and ficha.get("ff_page_matchday") is None
+            if not (de_otra or sin_leer):
+                continue
+            pid = _int(ficha.get("player_id"))
+            if pid is not None:
+                salida.add(pid)
+        return frozenset(salida)
+    except Exception:                               # noqa: BLE001
+        return frozenset()
+
+
+def los_avisos_del_tablero(ruta=None) -> list:
+    """
+    LA JORNADA DE CADA PAGINA, SIN SILENCIOS (25/10/2026). Lo que el
+    tablero de FF (`ruta`, por defecto `TABLERO_FF`, o el tablero ya
+    leido) dice de la jornada de sus paginas y hay que ver:
+
+        sus alarmas (`metadata.matchday_alarms`, del proveedor): la
+            jornada del tablero no cuadra con ninguna pagina (un
+            calendario caido la deja en 1), o ninguna pagina dice la
+            suya (FF ha cambiado su pagina);
+        los equipos cuya pagina no dice de que jornada es
+            (`metadata.pages_without_matchday`): para ellos solo se
+            frena la confirmada, la posible se usa tal cual.
+
+    Una lista de textos, vacia si no hay nada (o sin tablero, o con
+    basura). Nunca lanza.
+    """
+    try:
+        meta = _el_tablero_de_ff(ruta).get("metadata")
+        meta = meta if isinstance(meta, dict) else {}
+        alarmas = meta.get("matchday_alarms")
+        avisos = [str(a) for a in alarmas if a] if isinstance(alarmas, list) else []
+        sin = meta.get("pages_without_matchday")
+        if isinstance(sin, list) and sin:
+            avisos.append("paginas de FF sin jornada legible: "
+                          + ", ".join(str(e) for e in sin))
+        return avisos
+    except Exception:                               # noqa: BLE001
+        return []
+
+
 def los_estados(snapshot, liga) -> dict:
     """
     {id: status} para EL PARTE DEL RELEVO: el del catálogo de la foto de
@@ -1264,8 +1507,13 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
                     (`orden`, `vetados`, `protegidos`, las rutas
                     `libro_ronda` y `libro_chollos`, `horas_jornada`,
                     `puede_escribir`, `en_curso`, `rotando`: los ids de
-                    las parejas abiertas de la rotación). Lo que no trae,
-                    de producción, como siempre.
+                    las parejas abiertas de la rotación;
+                    `de_otra_jornada`: los ids con la titularidad de una
+                    confirmada de otra jornada, y `avisos_de_ff`, lo que
+                    el tablero avisa de sus paginas; solo con
+                    `BORDALAS_LA_JORNADA_DE_CADA_PAGINA`, que ademas deja
+                    los avisos en `salida["avisos_de_ff"]` si hay). Lo que
+                    no trae, de producción, como siempre.
         vuelta_ruta dónde va `escribir_la_vuelta` (encendida, siempre,
                     también con error). Por defecto `VUELTA_MEJORA`; con
                     `libro_ruta` y sin esto, junto al libro (quien mueve
@@ -1383,6 +1631,28 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         # EL CALENDARIO, una vez por vuelta y solo con su interruptor.
         ctx = el_contexto(status, calendario, ahora) if el_calendario_activo() else None
 
+        # LA JORNADA DE CADA PAGINA (25/10/2026), solo con su interruptor:
+        # los que tienen el % de una confirmada de FF de otra jornada, y
+        # lo que el tablero avisa de sus paginas. En produccion, el
+        # tablero que el paso de la v10 acaba de escribir (el panel salio
+        # de el en el mismo job), leido una vez. Dado
+        # (`de_fuera["de_otra_jornada"]`, y `de_fuera["avisos_de_ff"]`),
+        # manda; con `libro_ruta`, el de junto al libro: quien mueve el
+        # libro no lee el de produccion. Apagado, ni se abre.
+        de_otra_jornada = frozenset()
+        if la_jornada_de_cada_pagina_activa():
+            if "de_otra_jornada" in fuera:
+                de_otra_jornada = frozenset(
+                    _int(x) for x in (fuera["de_otra_jornada"] or ()) if _int(x) is not None)
+                avisos_de_ff = [str(a) for a in (fuera.get("avisos_de_ff") or ())]
+            else:
+                tablero_ff = _el_tablero_de_ff(
+                    Path(libro_ruta).with_name(TABLERO_FF.name) if libro_ruta else None)
+                de_otra_jornada = las_de_otra_jornada(tablero_ff)
+                avisos_de_ff = los_avisos_del_tablero(tablero_ff)
+            if avisos_de_ff:
+                salida["avisos_de_ff"] = avisos_de_ff
+
         d = decidir(
             once=once, liga=liga, escaparate=escaparate, foto=foto, libro=libro,
             inventario=inventario, pendientes=pendientes,
@@ -1401,6 +1671,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             probabilidades=las_probabilidades(status),
             estados=los_estados(snapshot, liga),
             vendidos=vendidos,
+            de_otra_jornada=de_otra_jornada,
         )
         salida["acciones"], salida["plan"] = d["acciones"], d["plan"]
 
@@ -1481,6 +1752,19 @@ def main() -> int:
         print(f"  frenados por el margen del calendario: {calendario['frenados_por_el_margen']}")
     if plan.get("sin_subir"):
         print(f"  frenados por no subir (solo si sube): {plan['sin_subir']}")
+    for o in plan.get("de_otra_jornada") or []:
+        print(f"  no sale {o.get('nombre')} ({o.get('id')}): su {o.get('titularidad')} % "
+              f"es de una confirmada de FF de otra jornada")
+    for o in plan.get("de_otra_jornada_entran") or []:
+        print(f"  no entra {o.get('nombre')} ({o.get('id')}): su {o.get('titularidad')} % "
+              f"es de una confirmada de FF de otra jornada")
+    aviso = plan.get("de_otra_jornada_aviso")
+    if aviso:
+        print(f"  AVISO: quedan {aviso.get('horas_para_cerrar')} h para dejar de comprar y "
+              f"{len(aviso.get('ids') or [])} titulares siguen con la confirmada de otra "
+              f"jornada: {aviso.get('ids')}")
+    for a in r.get("avisos_de_ff") or []:
+        print(f"  AVISO del tablero de FF: {a}")
     if r.get("v10_descartado"):
         print(f"  lo de esta vuelta, sin contar: {r['v10_descartado']}")
     for f in plan.get("frenadas") or []:
