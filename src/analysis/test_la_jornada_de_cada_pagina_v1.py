@@ -27,21 +27,32 @@ LO QUE SE FIJA
     1. La jornada de una pagina se lee de tres marcas DENTRO de la
        seccion de la alineacion (cabecera, selector, rotulo de la
        previsibilidad), y las trampas (la pestana del calendario, la
-       navegacion, el pie, `tipo`) no se miran nunca.
+       navegacion, el pie, `tipo`, una seccion sin `data-equipo`, un
+       0) no se miran nunca.
     2. El caso del 24/10: Cardona y Gulacsi (confirmada J10) marcados,
        Jonny (J11) no; el 0 % sigue siendo 0 %.
-    3. Apagado, el tablero es byte a byte el de antes; encendido solo
-       AÑADE claves, no cambia ni un numero.
+    3. Apagado, el tablero es byte a byte el de antes (una huella
+       sacada con el codigo de main) y `parse_team_page` se llama como
+       siempre; encendido solo AÑADE claves, no cambia ni un numero.
     4. Sin jornada legible no se marca nada, y se dice.
     5. Al completar, cada ficha lleva la marca de su propia bajada.
     6. La mejora no abre un hueco ni pone precio a un cambio con un %
-       de otra jornada; el lesionado sigue siendo hueco.
+       de otra jornada; el lesionado, el sancionado y el que esta en
+       duda siguen pudiendo ser hueco.
     7. Apagada, la mejora decide lo de siempre (la misma huella).
     8. `correr` lee las marcas del tablero de junto al libro, solo
-       encendido; lo dado en `de_fuera` manda.
+       encendido; lo dado en `de_fuera` manda. Solo frena las
+       CONFIRMADAS (de otra jornada, o sin jornada legible): la posible
+       de la jornada anterior es un pronostico.
     9. El lookup de titularidad no cambia: el once, el xP, el cierre,
        las valoraciones y el panel ven los mismos numeros.
    10. Nace apagado, se lee al llamarse y nunca lanza.
+   11. Quien entra con la confirmada de otra jornada (del Computer o
+       del inventario) no entra: un 100 % viejo no gana a un
+       pronostico de verdad (revision del 25/10).
+   12. Sin silencios: el jueves por la manana, con titulares aun
+       congelados, el plan avisa; y el tablero avisa de un calendario
+       caido o de una FF que ya no dice la jornada.
 
 Todo con datos de mentira: HTML sintetico (el repositorio no guarda
 paginas de FF), sin red, con el reloj parado, y el tablero y los libros
@@ -51,6 +62,7 @@ misma (doctrina 104).
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -298,7 +310,7 @@ def _el_tablero_del_24_10(encendido=True):
 NUEVAS_DE_LA_FICHA = ("ff_page_matchday", "ff_page_lineup", "ff_de_otra_jornada")
 NUEVAS_DEL_EQUIPO = ("page_matchday", "page_lineup", "page_matchday_source")
 NUEVAS_DE_LA_METADATA = ("pages_other_matchday", "pages_without_matchday",
-                         "players_other_matchday")
+                         "players_other_matchday", "matchday_alarms")
 
 
 def _sin_lo_nuevo(tablero) -> dict:
@@ -375,6 +387,25 @@ def test_lee_la_jornada_de_la_pagina():
     assert _jornada(choque) == (None, "POSIBLE", None, False), _jornada(choque)
     choque_del_rotulo = _pagina(10, False, FILAS_ALAVES, previsib=11)
     assert _jornada(choque_del_rotulo)[0] is None, _jornada(choque_del_rotulo)
+
+    # (g2) Un 0 no es una jornada: ni cuenta ni choca. La cabecera a 0 y
+    # el resto a 10 es la J10, por el selector; todo a 0, ninguna.
+    cero = _pagina(10, False, FILAS_ALAVES, cabecera=0)
+    assert _jornada(cero) == (10, "POSIBLE", "SELECTOR", True), _jornada(cero)
+    todo_cero = _pagina(10, False, FILAS_ALAVES, cabecera=0, selector=0, previsib=0)
+    assert _jornada(todo_cero) == (None, "POSIBLE", None, False), _jornada(todo_cero)
+
+    # (g3) Una seccion `alineacion_wrapper` SIN `data-equipo` delante de
+    # la de verdad (un modulo de otra cosa con la misma clase), con sus
+    # propias marcas de la J6 y `past`: no se mira. Es la J11 posible.
+    senuelo = ('<section class="mod alineacion_wrapper past">'
+               '<h2 class="lineup-title"><span class="jornada_label">J</span>'
+               '<span class="jornada">6</span></h2>'
+               '<select class="past-alineaciones"><option data-jornada="6" '
+               'data-confirmed="1">J6</option></select></section>')
+    con_senuelo = ALAVES_J11.replace("<body>", "<body>" + senuelo, 1)
+    assert con_senuelo != ALAVES_J11
+    assert _jornada(con_senuelo) == (11, "POSIBLE", "CABECERA", True), _jornada(con_senuelo)
 
     # (h) Con basura, todo None y sin lanzar.
     for basura in ("", None, 42, {"a": 1}, b"<p>basura</p>", "<<<>>>", object(),
@@ -454,6 +485,68 @@ def test_apagado_el_tablero_no_cambia_ni_un_byte():
         json.dumps(_sin_lo_nuevo(encendido), sort_keys=True)
     # Y lo escrito es lo devuelto, en los dos.
     assert en_disco_apagado == apagado and en_disco_encendido == encendido
+
+
+# La huella de los cinco tableros APAGADOS de `_los_tableros_apagados`,
+# sacada el 25/10/2026 con el codigo de main de ANTES de este cambio
+# (52a1f37d) y con el de esta rama: la misma. Si un solo byte del tablero
+# apagado cambia, esto se pone rojo (la comparacion de arriba es contra
+# el encendido de este mismo codigo; esta, contra main).
+HUELLA_DEL_TABLERO_APAGADO = "c82d3f997a0a41f8718f6f4ae6ae305a4fc782ab9f6e4a7fc931feb6201ff024"
+
+
+def _los_tableros_apagados() -> list:
+    """Cinco tableros con el interruptor QUITADO: el del 24/10
+    (REFRESHED), uno sin marcas, la cache servida (HIT), uno solo con
+    Cardona y el mismo completado con Jonny (TOPPED_UP)."""
+    apagado = dict(encendido=False)
+    a, _, _ = _el_tablero_del_24_10(**apagado)
+    b, _, _ = _con_ff_de_mentira(
+        lambda: ff.refresh_board(_snapshot(JONNY), 11, force=True, session=object()),
+        {"alaves": _pagina_sin_marcas(*FILAS_ALAVES)}, **apagado)
+    c, _, _ = _con_ff_de_mentira(
+        lambda: ff.refresh_board(_snapshot(CARDONA, JONNY), 11, session=object()),
+        {"villarreal": VILLARREAL_J11, "alaves": ALAVES_J11}, json.loads(json.dumps(a)),
+        **apagado)
+    d, _, _ = _con_ff_de_mentira(
+        lambda: ff.refresh_board(_snapshot(CARDONA), 11, force=True, session=object()),
+        {"villarreal": VILLARREAL_J10}, **apagado)
+    e, _, _ = _con_ff_de_mentira(
+        lambda: ff.refresh_board(_snapshot(CARDONA, JONNY), 11, session=object()),
+        {"villarreal": VILLARREAL_J11, "alaves": ALAVES_J11}, json.loads(json.dumps(d)),
+        **apagado)
+    return [a, b, c, d, e]
+
+
+def test_apagado_el_tablero_es_el_de_main():
+    tableros = _los_tableros_apagados()
+    assert [t["cache"]["status"] for t in tableros] == \
+        ["REFRESHED", "REFRESHED", "HIT", "REFRESHED", "TOPPED_UP"], \
+        [t["cache"]["status"] for t in tableros]
+    texto = json.dumps(tableros, sort_keys=True, ensure_ascii=False)
+    huella = hashlib.sha256(texto.encode("utf-8")).hexdigest()
+    assert huella == HUELLA_DEL_TABLERO_APAGADO, huella
+
+    # Apagado, `parse_team_page` se llama como siempre: el HTML y nada
+    # mas (un envoltorio de un argumento, como el de un script de
+    # diagnostico, sigue valiendo). Encendido, con `con_la_jornada`.
+    original = ff.parse_team_page
+    llamadas = []
+
+    def espia(*args, **kwargs):
+        llamadas.append((len(args), dict(kwargs)))
+        return original(*args, **kwargs)
+
+    ff.parse_team_page = espia
+    try:
+        _el_tablero_del_24_10(encendido=False)
+        apagado, llamadas[:] = list(llamadas), []
+        _el_tablero_del_24_10(encendido=True)
+        encendido = list(llamadas)
+    finally:
+        ff.parse_team_page = original
+    assert apagado == [(1, {}), (1, {})], apagado
+    assert encendido == [(1, {"con_la_jornada": True})] * 2, encendido
 
 
 def test_sin_jornada_no_se_marca():
@@ -579,9 +672,92 @@ def test_la_mejora_no_abre_hueco_con_otra_jornada():
         assert puja["importe"] == mejora.la_puja(3_700_000), puja
         assert "de_otra_jornada" not in d["plan"], d["plan"]
 
+    # En duda ('doubt') con el 0 % de la ultima confirmada: suele ser un
+    # hueco de verdad (no jugo con un golpe). No se congela: exactamente
+    # lo de apagado, la puja por el 20.
+    duda = dict(once=once, solo_si_sube=True, estados={10: "doubt"})
+    assert base._pujas(base._d(**duda)) == [(20, 10)]
+    assert base._d(**duda, de_otra_jornada=otra) == base._d(**duda)
+    # Apercibido ('warned') juega, como 'ok': se congela.
+    aviso = base._d(once=once, solo_si_sube=True, estados={10: "warned"}, de_otra_jornada=otra)
+    assert base._pujas(aviso) == [] and aviso["plan"]["de_otra_jornada"][0]["id"] == 10, \
+        aviso["plan"]
+    # Un estado que no se conoce, como antes: no se congela.
+    raro = dict(once=once, solo_si_sube=True, estados={10: "desconocido"})
+    assert base._d(**raro, de_otra_jornada=otra) == base._d(**raro)
+
     # Uno que no es de los nuestros marcado: exactamente lo de siempre.
     for k in (dict(once=once, solo_si_sube=True), dict(once=once), dict()):
         assert base._d(**k, de_otra_jornada=frozenset({999})) == base._d(**k), k
+
+
+def test_quien_entra_con_otra_jornada_no_entra():
+    # EL DEL COMPUTER. El 20 al 100 % de la confirmada de la J10 (Chust y
+    # Unai Lopez el 24/10) contra el 23 al 60 % de un pronostico de la
+    # J11: 5,70 contra 5,40 por jornada, y solo uno puede entrar por
+    # Flojo. Apagado, entra el del 100 % viejo.
+    viejo = [base._c(20, prob=100), base._c(23, prob=60)]
+    assert base._pujas(base._d(escaparate=viejo)) == [(20, 10)]
+    # Encendido, el del 100 % viejo no entra y gana el pronostico.
+    d = base._d(escaparate=viejo, de_otra_jornada=frozenset({20}))
+    assert base._pujas(d) == [(23, 10)], d["plan"]
+    assert d["plan"]["de_otra_jornada_entran"] == [
+        {"id": 20, "nombre": "c20", "titularidad": 100, "ya_es_nuestro": False}], d["plan"]
+    assert "de_otra_jornada" not in d["plan"], d["plan"]
+    # Solo, al 100 % viejo: no se compra nada.
+    solo = base._d(escaparate=[base._c(20, prob=100)], de_otra_jornada=frozenset({20}))
+    assert base._pujas(solo) == [], solo["plan"]
+    # Ni tapando un hueco de verdad (Flojo lesionado, SOLO SI SUBE
+    # puesto): el +1 % del hueco no va al del 100 % viejo.
+    hueco = dict(escaparate=[base._c(20, prob=100)], solo_si_sube=True, estados={10: "injured"})
+    assert base._pujas(base._d(**hueco)) == [(20, 10)]
+    assert base._pujas(base._d(**hueco, de_otra_jornada=frozenset({20}))) == []
+
+    # EL DEL INVENTARIO. El 23 de la ronda, al 70 %: apagado se lo queda
+    # el once por Flojo; con su % de una confirmada de otra jornada, no.
+    inventario = dict(foto=base._foto(plantilla={10, 11, 12, 13, 23}), escaparate=[],
+                      once=base.ONCE + [{"id": 23, "name": "c23", "position": 4,
+                                         "starter_probability": 70}],
+                      inventario={23})
+    apagado = base._d(**inventario)
+    assert [(c["entra"], c["sale"]) for c in apagado["adoptar"]] == [(23, 10)], apagado
+    encendido = base._d(**inventario, de_otra_jornada=frozenset({23}))
+    assert encendido["adoptar"] == [] and encendido["acciones"] == [], encendido
+    assert encendido["plan"]["de_otra_jornada_entran"] == [
+        {"id": 23, "nombre": None, "titularidad": 70, "ya_es_nuestro": True}], encendido["plan"]
+
+    # Vacio, o marcado alguien que no esta en ningun lado: lo de siempre.
+    for k in (dict(escaparate=viejo), inventario, hueco):
+        assert base._d(**k, de_otra_jornada=frozenset()) == base._d(**k), k
+        assert base._d(**k, de_otra_jornada=frozenset({999})) == base._d(**k), k
+        assert "de_otra_jornada_entran" not in base._d(**k)["plan"]
+
+
+def test_el_jueves_por_la_manana_avisa():
+    # La J11 cierra el viernes 30/10 a las 20:45 de Madrid; el jueves a
+    # las 03:15 quedan 41,5 horas: hora y media para dejar de comprar
+    # (`HORAS_SIN_COMPRAR`). Flojo sigue con el 0 % de la confirmada de
+    # otra jornada (un aplazado, una FF que no publica). Con caja.
+    once = _once_del_incidente()
+    jueves = dict(once=once, solo_si_sube=True, caja=2_000_000, horas_jornada=41.5)
+    # Apagado, el 0 % viejo es un hueco y se puja por el 20.
+    assert base._pujas(base._d(**jueves)) == [(20, 10)]
+    # Encendido: no sale (falla cerrado), y el plan avisa de que la
+    # ventana se cierra con el congelado.
+    d = base._d(**jueves, de_otra_jornada=frozenset({10}))
+    assert base._pujas(d) == [], d["plan"]
+    assert d["plan"]["de_otra_jornada_aviso"] == {"horas_para_cerrar": 1.5, "ids": [10]}, \
+        d["plan"]
+    # El lunes (100 horas) no hay aviso; a 63,9 si, a 64 ya no.
+    for horas, avisa in ((100, False), (64, False), (63.9, True), (40, True)):
+        d = base._d(**{**jueves, "horas_jornada": horas}, de_otra_jornada=frozenset({10}))
+        assert ("de_otra_jornada_aviso" in d["plan"]) is avisa, (horas, d["plan"])
+    # Cerrada la ventana (39 horas), ni plan de cambios ni aviso.
+    d = base._d(**{**jueves, "horas_jornada": 39}, de_otra_jornada=frozenset({10}))
+    assert d["acciones"] == [] and "de_otra_jornada_aviso" not in d["plan"], d["plan"]
+    # Sin congelados (el lesionado sigue siendo hueco), sin aviso.
+    d = base._d(**jueves, estados={10: "injured"}, de_otra_jornada=frozenset({10}))
+    assert base._pujas(d) == [(20, 10)] and "de_otra_jornada_aviso" not in d["plan"], d["plan"]
 
 
 def test_apagado_la_mejora_decide_lo_de_siempre():
@@ -606,7 +782,7 @@ def test_apagado_la_mejora_decide_lo_de_siempre():
     assert huella == base.HUELLA_DE_ANTES, huella
 
 
-def _correr(encendido, tablero=None, de_otra=None):
+def _correr(encendido, tablero=None, de_otra=None, avisos=None):
     """
     `correr` de la mejora con TODO dado: la foto, el panel, la vuelta,
     el reloj y lo que si no se lee de produccion. Los libros y el tablero
@@ -649,6 +825,8 @@ def _correr(encendido, tablero=None, de_otra=None):
                  "horas_jornada": 100.0, "puede_escribir": True, "en_curso": False}
         if de_otra is not None:
             fuera["de_otra_jornada"] = de_otra
+        if avisos is not None:
+            fuera["avisos_de_ff"] = avisos
         salida = mejora.correr(status=status, snapshot=snapshot, v10={},
                                escritor_factory=lambda: escritor, ahora=base.AHORA,
                                libro_ruta=rutas["mejora"], calendario={}, de_fuera=fuera)
@@ -663,34 +841,128 @@ TABLERO_CON_ROBERTO = {"matchday": 11, "players": [
 ]}
 
 
+def _con(tablero, pid, **cambios) -> dict:
+    """El tablero con la ficha de `pid` cambiada."""
+    copia = json.loads(json.dumps(tablero))
+    for ficha in copia["players"]:
+        if ficha["player_id"] == pid:
+            ficha.update(cambios)
+    return copia
+
+
+CONFIRMADA = "CONFIRMADA"
+FICHAS_MARCADAS = [
+    # La confirmada de otra jornada: frena.
+    {"player_id": 10, "ff_de_otra_jornada": True, "ff_page_lineup": CONFIRMADA,
+     "ff_page_matchday": 10},
+    # Confirmada, pero de la jornada del tablero: no.
+    {"player_id": 11, "ff_de_otra_jornada": False, "ff_page_lineup": CONFIRMADA,
+     "ff_page_matchday": 11},
+    # Sin marcas (tablero de antes del interruptor): no.
+    {"player_id": 12},
+    # El id como texto: si.
+    {"player_id": "13", "ff_de_otra_jornada": True, "ff_page_lineup": CONFIRMADA},
+    # La marca tiene que ser exactamente True.
+    {"player_id": 14, "ff_de_otra_jornada": "true", "ff_page_lineup": CONFIRMADA},
+    # La POSIBLE de otra jornada es un pronostico: no frena.
+    {"player_id": 15, "ff_de_otra_jornada": True, "ff_page_lineup": "POSIBLE",
+     "ff_page_matchday": 10},
+    # La confirmada cuya jornada no se pudo leer: frena.
+    {"player_id": 16, "ff_de_otra_jornada": False, "ff_page_lineup": CONFIRMADA,
+     "ff_page_matchday": None},
+    # La posible sin jornada: no.
+    {"player_id": 17, "ff_de_otra_jornada": False, "ff_page_lineup": "POSIBLE",
+     "ff_page_matchday": None},
+    # Marcada sin saber si es confirmada: no.
+    {"player_id": 18, "ff_de_otra_jornada": True},
+    # Confirmada sin la clave de la jornada (no es "ilegible"): no.
+    {"player_id": 19, "ff_de_otra_jornada": False, "ff_page_lineup": CONFIRMADA},
+    # "CONFIRMADA" exactamente.
+    {"player_id": 20, "ff_de_otra_jornada": True, "ff_page_lineup": "confirmada"},
+    {"player_id": None, "ff_de_otra_jornada": True, "ff_page_lineup": CONFIRMADA},
+    {"player_id": "basura", "ff_de_otra_jornada": True, "ff_page_lineup": CONFIRMADA},
+    "basura", 7, None, [],
+]
+
+
 def test_correr_lee_las_marcas_del_tablero():
-    # Las marcas: solo `ff_de_otra_jornada` exactamente True.
+    # Las marcas: solo las CONFIRMADAS, de otra jornada (la marca
+    # exactamente True) o sin jornada legible.
     with tempfile.TemporaryDirectory() as carpeta:
         ruta = Path(carpeta) / mejora.TABLERO_FF.name
-        ruta.write_text(json.dumps({"matchday": 11, "players": [
-            {"player_id": 10, "ff_de_otra_jornada": True},
-            {"player_id": 11, "ff_de_otra_jornada": False},
-            {"player_id": 12},
-            {"player_id": "13", "ff_de_otra_jornada": True},
-            {"player_id": 14, "ff_de_otra_jornada": "true"},
-            {"player_id": None, "ff_de_otra_jornada": True},
-            {"player_id": "basura", "ff_de_otra_jornada": True},
-            "basura", 7, None, [],
-        ]}))
-        assert mejora.las_de_otra_jornada(ruta) == frozenset({10, 13}), \
+        tablero = {"matchday": 11, "players": FICHAS_MARCADAS}
+        ruta.write_text(json.dumps(tablero))
+        assert mejora.las_de_otra_jornada(ruta) == frozenset({10, 13, 16}), \
             mejora.las_de_otra_jornada(ruta)
-        assert mejora.las_de_otra_jornada(str(ruta)) == frozenset({10, 13})
+        assert mejora.las_de_otra_jornada(str(ruta)) == frozenset({10, 13, 16})
+        # Y el tablero ya leido, lo mismo.
+        assert mejora.las_de_otra_jornada(json.loads(ruta.read_text())) == \
+            frozenset({10, 13, 16})
         assert mejora.las_de_otra_jornada(Path(carpeta) / "no_esta.json") == frozenset()
         for basura in ("{ no es json", "[]", "3", json.dumps({"players": {"10": {}}}),
                        json.dumps({"players": None}), json.dumps({"players": "texto"})):
             ruta.write_text(basura)
             assert mejora.las_de_otra_jornada(ruta) == frozenset(), basura
+            assert mejora.los_avisos_del_tablero(ruta) == [], basura
 
-    # APAGADO, con el tablero marcando a Roberto: lo de hoy, la puja.
-    apagado, escritor = _correr(False, TABLERO_CON_ROBERTO)
+        # Los avisos: las alarmas del proveedor y los equipos sin jornada.
+        ruta.write_text(json.dumps({"metadata": {
+            "matchday_alarms": ["la jornada del tablero (J1) no cuadra"],
+            "pages_without_matchday": ["Alavés", "Elche"]}}))
+        assert mejora.los_avisos_del_tablero(ruta) == [
+            "la jornada del tablero (J1) no cuadra",
+            "paginas de FF sin jornada legible: Alavés, Elche"], \
+            mejora.los_avisos_del_tablero(ruta)
+        for meta in ({}, {"matchday_alarms": [], "pages_without_matchday": []},
+                     {"matchday_alarms": "texto", "pages_without_matchday": "texto"},
+                     {"matchday_alarms": None}, "basura"):
+            ruta.write_text(json.dumps({"metadata": meta}))
+            assert mejora.los_avisos_del_tablero(ruta) == [], meta
+        assert mejora.los_avisos_del_tablero(Path(carpeta) / "no_esta.json") == []
+
+    # APAGADO, con el tablero marcando a Roberto (y con alarmas): lo de
+    # hoy, la puja, y ni un aviso.
+    con_alarmas = {**TABLERO_CON_ROBERTO, "metadata": {
+        "matchday_alarms": ["ninguna pagina dice su jornada"],
+        "pages_without_matchday": ["Equipo 12"]}}
+    apagado, escritor = _correr(False, con_alarmas)
     assert escritor.llamadas == [("PUJAR", 41, mejora.la_puja(3_000_000))], \
         (apagado["motivo"], escritor.llamadas, apagado["plan"])
     assert "de_otra_jornada" not in apagado["plan"], apagado["plan"]
+    assert "avisos_de_ff" not in apagado, sorted(apagado)
+
+    # ENCENDIDO con alarmas en el tablero: salen en la salida (y `main`
+    # las imprime).
+    encendido, _ = _correr(True, con_alarmas)
+    assert encendido["avisos_de_ff"] == [
+        "ninguna pagina dice su jornada",
+        "paginas de FF sin jornada legible: Equipo 12"], encendido.get("avisos_de_ff")
+
+    # ENCENDIDO, Roberto con el 0 % de la POSIBLE de la J10 (su equipo
+    # aun no ha jugado): es un pronostico, se usa como siempre.
+    posible = _con(TABLERO_CON_ROBERTO, 40, ff_page_lineup="POSIBLE")
+    de_posible, escritor = _correr(True, posible)
+    assert [ll[:2] for ll in escritor.llamadas] == [("PUJAR", 41)], de_posible["plan"]
+    assert "de_otra_jornada" not in de_posible["plan"], de_posible["plan"]
+    # Y con la CONFIRMADA sin jornada legible, se frena.
+    ilegible = _con(TABLERO_CON_ROBERTO, 40, ff_page_matchday=None, ff_de_otra_jornada=False)
+    de_ilegible, escritor = _correr(True, ilegible)
+    assert escritor.llamadas == [] and de_ilegible["plan"]["de_otra_jornada"][0]["id"] == 40, \
+        de_ilegible["plan"]
+
+    # ENCENDIDO, el Casero del Computer (41) con la confirmada de la J10:
+    # no entra, y el plan lo dice. Roberto, con un pronostico de verdad.
+    casero = _con(_con(TABLERO_CON_ROBERTO, 40, ff_page_matchday=11, ff_page_lineup="POSIBLE",
+                       ff_de_otra_jornada=False),
+                  41, ff_page_matchday=10, ff_page_lineup=CONFIRMADA, ff_de_otra_jornada=True)
+    sin_casero, escritor = _correr(True, casero)
+    assert escritor.llamadas == [], (sin_casero["motivo"], escritor.llamadas)
+    assert sin_casero["plan"]["de_otra_jornada_entran"] == [
+        {"id": 41, "nombre": "Casero", "titularidad": 80, "ya_es_nuestro": False}], \
+        sin_casero["plan"]
+    # Apagado, el mismo tablero: la puja de siempre.
+    _, escritor = _correr(False, casero)
+    assert [ll[:2] for ll in escritor.llamadas] == [("PUJAR", 41)], escritor.llamadas
 
     # ENCENDIDO: Roberto no sale, no se escribe nada y el plan lo dice.
     encendido, escritor = _correr(True, TABLERO_CON_ROBERTO)
@@ -699,15 +971,88 @@ def test_correr_lee_las_marcas_del_tablero():
     assert encendido["plan"]["de_otra_jornada"] == [
         {"id": 40, "nombre": "Roberto", "titularidad": 0}], encendido["plan"]
 
-    # Lo dado en `de_fuera` manda sobre el fichero: vacio, la puja.
-    dado, escritor = _correr(True, TABLERO_CON_ROBERTO, de_otra=[])
+    # Lo dado en `de_fuera` manda sobre el fichero: vacio, la puja (y
+    # sin los avisos del fichero).
+    dado, escritor = _correr(True, con_alarmas, de_otra=[])
     assert [ll[:2] for ll in escritor.llamadas] == [("PUJAR", 41)], dado
+    assert "avisos_de_ff" not in dado, dado.get("avisos_de_ff")
+    dado, _ = _correr(True, None, de_otra=[], avisos=["dado"])
+    assert dado["avisos_de_ff"] == ["dado"], dado.get("avisos_de_ff")
     # Y al reves: sin tablero, lo dado.
     dado, escritor = _correr(True, None, de_otra=["40"])
     assert escritor.llamadas == [] and dado["plan"]["de_otra_jornada"][0]["id"] == 40, dado
     # Encendido sin tablero junto al libro: lo de siempre.
     sin_tablero, escritor = _correr(True, None)
     assert [ll[:2] for ll in escritor.llamadas] == [("PUJAR", 41)], sin_tablero
+
+
+def test_las_alarmas_del_tablero():
+    alarmas = ff.las_alarmas_de_la_jornada
+
+    def equipos(*jornadas):
+        return {f"Equipo {i}": {"page_matchday": j} for i, j in enumerate(jornadas, start=1)}
+
+    # Lo normal: nada. El viernes por la noche (tablero ya en la J11 y
+    # todas las paginas aun en la J10) tampoco: estan a una.
+    assert alarmas(equipos(10, 11, 11, 10), 11) == []
+    assert alarmas(equipos(10, 10, 10, 10), 11) == []
+    # Un aplazado suelto (la J6 en la semana de la J10), con las demas a
+    # una o menos: nada.
+    assert alarmas(equipos(6, 10, 10), 10) == []
+    # El calendario caido: el autopiloto pone la 1, y ninguna pagina esta
+    # a una o menos.
+    r = alarmas(equipos(10, 11, 10), 1)
+    assert len(r) == 1 and "(J1)" in r[0] and "(J10-J11)" in r[0], r
+    # FF cambia su pagina: ninguna dice la suya.
+    r = alarmas(equipos(None, None, None), 11)
+    assert len(r) == 1 and "ninguna de las 3" in r[0], r
+    # Con una legible ya no es "ninguna" (y esa esta a una: nada).
+    assert alarmas(equipos(None, None, 10), 11) == []
+    # Pocas paginas (al completar se bajan dos o tres): nada.
+    assert alarmas(equipos(None, None), 11) == []
+    assert alarmas(equipos(10, 10), 1) == []
+    # Sin la jornada del tablero, solo cabe la de "ninguna".
+    assert alarmas(equipos(10, 10, 10), None) == []
+    # "10" vale como 10; con basura, nada y sin lanzar.
+    assert alarmas(equipos("10", "11", "10"), "11") == []
+    for basura in (None, [], "texto", {"a": "b"}, {"a": None, "b": 3, "c": []}, object()):
+        assert alarmas(basura, 11) == [], repr(basura)[:40]
+
+    # En el tablero, con el interruptor: el del 24/10, sin alarmas.
+    tablero, _, _ = _el_tablero_del_24_10()
+    assert tablero["metadata"]["matchday_alarms"] == [], tablero["metadata"]
+    # Con la jornada del tablero en 1, o sin marcas en las paginas, si
+    # (el umbral, a 2 para las dos paginas de la prueba). La mejora las
+    # lee del tablero.
+    umbral = ff.PAGINAS_PARA_LA_ALARMA
+    ff.PAGINAS_PARA_LA_ALARMA = 2
+    try:
+        en_la_1, _, _ = _con_ff_de_mentira(
+            lambda: ff.refresh_board(_snapshot(CARDONA, GULACSI, JONNY), 1, force=True,
+                                     session=object()), PAGINAS)
+        sin_marcas, _, _ = _con_ff_de_mentira(
+            lambda: ff.refresh_board(_snapshot(CARDONA, JONNY), 11, force=True,
+                                     session=object()),
+            {"villarreal": _pagina_sin_marcas(*FILAS_VILLARREAL),
+             "alaves": _pagina_sin_marcas(*FILAS_ALAVES)})
+        apagado, _, _ = _con_ff_de_mentira(
+            lambda: ff.refresh_board(_snapshot(CARDONA, GULACSI, JONNY), 1, force=True,
+                                     session=object()), PAGINAS, encendido=False)
+    finally:
+        ff.PAGINAS_PARA_LA_ALARMA = umbral
+    meta = en_la_1["metadata"]
+    assert len(meta["matchday_alarms"]) == 1 and "(J1)" in meta["matchday_alarms"][0], meta
+    assert meta["pages_other_matchday"] == ["Alavés", "Villarreal"], meta
+    assert mejora.los_avisos_del_tablero(en_la_1) == meta["matchday_alarms"]
+    meta = sin_marcas["metadata"]
+    assert len(meta["matchday_alarms"]) == 1 and "ninguna de las 2" in meta["matchday_alarms"][0], \
+        meta
+    assert mejora.los_avisos_del_tablero(sin_marcas) == meta["matchday_alarms"] + [
+        "paginas de FF sin jornada legible: Alavés, Villarreal"]
+    # Las alarmas no van a `errors` (ahi van las paginas que fallaron).
+    assert en_la_1["metadata"]["errors"] == sin_marcas["metadata"]["errors"] == []
+    # Apagado, ni la clave.
+    assert "matchday_alarms" not in apagado["metadata"], sorted(apagado["metadata"])
 
 
 # ------------------------------------------------------------------
@@ -769,11 +1114,15 @@ TESTS = [
     test_lee_la_jornada_de_la_pagina,
     test_la_regresion_del_24_10,
     test_apagado_el_tablero_no_cambia_ni_un_byte,
+    test_apagado_el_tablero_es_el_de_main,
     test_sin_jornada_no_se_marca,
     test_al_completar_cada_ficha_lleva_su_marca,
     test_la_mejora_no_abre_hueco_con_otra_jornada,
+    test_quien_entra_con_otra_jornada_no_entra,
+    test_el_jueves_por_la_manana_avisa,
     test_apagado_la_mejora_decide_lo_de_siempre,
     test_correr_lee_las_marcas_del_tablero,
+    test_las_alarmas_del_tablero,
     test_el_lookup_no_cambia,
     test_nace_apagado,
 ]

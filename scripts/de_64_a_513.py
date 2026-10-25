@@ -139,10 +139,14 @@ def cronometrar() -> None:
 
     parse, match = ff.parse_team_page, ff.match_team
 
-    def parse_cron(html):
+    # Con lo que le pasen, tal cual: con LA JORNADA DE CADA PAGINA
+    # (25/10/2026) `refresh_board` llama `parse_team_page(html,
+    # con_la_jornada=True)`, y un envoltorio de un argumento rompia
+    # cada pagina como error del parser (y el tablero salia vacio).
+    def parse_cron(*args, **kwargs):
         arranque = time.perf_counter()
         try:
-            return parse(html)
+            return parse(*args, **kwargs)
         finally:
             RELOJ["parse"] += time.perf_counter() - arranque
 

@@ -834,16 +834,37 @@ def parse_team_meta(soup) -> dict:
 #     medio 11,0 contra 16,7) ni dejarlo en None (cada lector lee
 #     None distinto: el once lo sienta, el cierre lo vende
 #     primero). Quien decide con la marca es la mejora del once,
-#     con el mismo interruptor.
+#     con el mismo interruptor, y solo con las CONFIRMADAS: una
+#     posible de la jornada anterior es un pronostico (revision del
+#     25/10/2026).
 #
 #     Una pagina cuya jornada no se puede leer NO se marca: sin
 #     saberla no se rechaza nada. Sale en
-#     `metadata.pages_without_matchday`, para verlo.
+#     `metadata.pages_without_matchday`, para verlo. (La mejora, eso
+#     si, no decide con una CONFIRMADA sin jornada legible: la ficha
+#     lleva `ff_page_lineup` y `ff_page_matchday` None, y mientras se
+#     puede comprar una confirmada solo es de un partido ya jugado.)
+#
+#     SIN SILENCIOS (revision del 25/10/2026). Dos fallos que no
+#     rompen nada y no se verian: la jornada del tablero sale de
+#     `int(target_matchday or 1)` en el autopiloto (sin calendario,
+#     la 1, y TODAS las paginas quedan en otra jornada), y si FF
+#     cambia su pagina, NINGUNA dice la suya (y no se marca nada).
+#     `las_alarmas_de_la_jornada` los mira con las paginas bajadas en
+#     la vuelta y los deja en `metadata.matchday_alarms`, que la
+#     mejora imprime. No van a `metadata.errors`: ahi van las
+#     paginas que fallaron, y el archivo diario las apunta como tales
+#     (`ff_errores`).
 #
 #     Nace APAGADO. Apagado, el tablero es byte a byte el de antes.
 # ----------------------------------------------------------------
 
 ENV_LA_JORNADA_DE_CADA_PAGINA = "BORDALAS_LA_JORNADA_DE_CADA_PAGINA"   # nace APAGADO
+
+# Con menos paginas bajadas en la vuelta (al completar suelen ser dos
+# o tres) no se da ninguna alarma: una pagina suelta sin jornada no
+# dice nada de las demas.
+PAGINAS_PARA_LA_ALARMA = 3
 
 
 def la_jornada_de_cada_pagina() -> bool:
@@ -996,6 +1017,74 @@ def la_jornada_de_la_pagina(soup) -> dict:
 
     except Exception:                               # noqa: BLE001
         return dict(vacio)
+
+
+def las_alarmas_de_la_jornada(equipos, jornada) -> list:
+    """
+    SIN SILENCIOS (25/10/2026). Lo que, con las paginas de equipo
+    bajadas en ESTA vuelta (`equipos`: {equipo: {"page_matchday",
+    ...}}, lo que `refresh_board` deja en `teams` con el interruptor)
+    y la jornada del tablero, hay que ver aunque no rompa nada. Pura,
+    nunca lanza; con menos de `PAGINAS_PARA_LA_ALARMA` paginas, nada.
+
+        NINGUNA DICE SU JORNADA. Todas sin jornada legible: FF ha
+            cambiado su pagina. No se marca nada y la mejora vuelve a
+            leer el 0 % de una confirmada vieja como un hueco (el fallo
+            del 24/10).
+
+        LA DEL TABLERO NO ES LA DE NADIE. Ninguna pagina legible esta
+            a una jornada o menos de la del tablero: la jornada del
+            tablero esta mal (sin calendario, el autopiloto pone la 1).
+            Un viernes por la noche, con el tablero ya en la J(N+1) y
+            todas las paginas aun en la J(N), NO es una alarma: estan a
+            una. Un aplazado suelto (la J6 en la semana de la J10)
+            tampoco, mientras haya otras a una o menos.
+
+    Una lista de textos, vacia si no hay nada.
+    """
+
+    try:
+
+        paginas = [
+            equipo
+            for equipo in (equipos or {}).values()
+            if isinstance(equipo, dict)
+        ]
+
+        if len(paginas) < PAGINAS_PARA_LA_ALARMA:
+            return []
+
+        leidas = [
+            _int(equipo.get("page_matchday"))
+            for equipo in paginas
+            if _int(equipo.get("page_matchday")) is not None
+        ]
+
+        if not leidas:
+            return [
+                f"ninguna de las {len(paginas)} paginas de equipo "
+                "bajadas dice de que jornada es: FF ha cambiado su "
+                "pagina? Sin jornada no se marca nada."
+            ]
+
+        del_tablero = _int(jornada)
+
+        if (
+            del_tablero is not None
+            and len(leidas) >= PAGINAS_PARA_LA_ALARMA
+            and all(abs(j - del_tablero) >= 2 for j in leidas)
+        ):
+            return [
+                f"la jornada del tablero (J{del_tablero}) no esta a "
+                f"una o menos de ninguna de las {len(leidas)} paginas "
+                f"(J{min(leidas)}-J{max(leidas)}): el calendario? Sin "
+                "el, el autopiloto pone la 1."
+            ]
+
+        return []
+
+    except Exception:                               # noqa: BLE001
+        return []
 
 
 # ----------------------------------------------------------------
@@ -1753,10 +1842,13 @@ def refresh_board(
         otra jornada (`pages_other_matchday`, sacado de las FICHAS:
         al completar, las de la cache conservan la marca de su
         propia bajada y sus equipos ya no estan en `teams`), cuales
-        no se pudieron leer (`pages_without_matchday`) y cuantas
-        fichas hay marcadas (`players_other_matchday`). HIT,
-        STALE_FALLBACK y TOPPED_UP dejan las marcas como estaban.
-        Ni un numero cambia. Apagado, ni una clave mas.
+        no se pudieron leer (`pages_without_matchday`), cuantas
+        fichas hay marcadas (`players_other_matchday`) y lo que hay
+        que ver aunque no rompa nada (`matchday_alarms`, de
+        `las_alarmas_de_la_jornada`: un calendario caido o una FF que
+        ya no dice la jornada). HIT, STALE_FALLBACK y TOPPED_UP dejan
+        las marcas como estaban. Ni un numero cambia. Apagado, ni una
+        clave mas.
     """
 
     # Una vez por tablero: todas las paginas de esta vuelta, con la
@@ -2154,6 +2246,14 @@ def refresh_board(
             set(sin_jornada)
         )
         salida["metadata"]["players_other_matchday"] = len(de_otra)
+
+        # SIN SILENCIOS: la jornada del tablero que no cuadra con
+        # ninguna pagina, o paginas que no dicen la suya. Con las
+        # bajadas en ESTA vuelta (`teams`).
+        salida["metadata"]["matchday_alarms"] = las_alarmas_de_la_jornada(
+            equipos_meta,
+            matchday,
+        )
 
     BOARD_FILE.parent.mkdir(parents=True, exist_ok=True)
 
