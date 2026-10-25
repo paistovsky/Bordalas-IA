@@ -213768,5 +213768,43 @@
         "amount": 5663000
       }
     ]
+  },
+  {
+    "event_id": "34f9c7c3be6af87a537c2030",
+    "date": 1792908252,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 28115,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 3439900,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 3163000
+          }
+        ]
+      },
+      {
+        "player": 26299,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 446000
+      }
+    ]
   }
 ]

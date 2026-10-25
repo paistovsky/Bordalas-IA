@@ -3512,7 +3512,7 @@
         "17482": {
           "player_name": "Dituro",
           "team": "Elche",
-          "appearances_at_prediction": 9,
+          "appearances_at_prediction": 10,
           "sources": {},
           "consensus": "UNCERTAIN",
           "consensus_probability": 50.0
@@ -3520,7 +3520,7 @@
         "25322": {
           "player_name": "Javi Hernández",
           "team": "Espanyol",
-          "appearances_at_prediction": 9,
+          "appearances_at_prediction": 10,
           "sources": {
             "ANALITICA_FANTASY": 70.0
           },

@@ -1858,11 +1858,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-10-24T11:10:34+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "WON",
+   "resolved_at": "2026-10-25T06:18:21.795514+00:00",
+   "winning_amount": 3439900,
+   "margin": 0,
+   "event_id": "34f9c7c3be6af87a537c2030",
    "recorded_by": "TABLON"
   }
  }
