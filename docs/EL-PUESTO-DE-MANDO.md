@@ -352,6 +352,28 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **25/10 10:00 (el mejor equipo posible y Roberto por Nino).** El dueno
+  pidio el mejor once con los libres y nuestro dinero (58,0 M = plantilla
+  59,73 M + caja -1,70 M) y despues: «We can always trade Roberto for Zabiri
+  or Adrian Nino in the future». Dos workflows (dos modelos + esceptico, y
+  comparar + mecanismo + esceptico). **El mejor once (3-4-3, 57,99 M):**
+  Remiro; Juan Iglesias, Chust, Ndukwe; Exposito, Agoume, Ivan Martin,
+  Olasagasti; Yamal, Adrian Nino, Boye: ~160 xP en J11-J13 contra ~140 del
+  nuestro (+7 por jornada), pero en ritmo de temporada ~54 contra 53,4: es
+  una apuesta de forma. Ninguno esta en el mercado: cada libre sale ~2 % de
+  los dias. **Roberto por Nino o Zabiri: NO «siempre».** Solo el dia que el
+  Computer los saca (Zabiri 0 veces en 39 listas; Nino no desde el 09/10):
+  ~1 de 10 antes de la J11, contando la subasta. Nino sube ~340 k/dia y
+  Roberto baja ~80 k: el hueco que libera (~5 M hoy) se cierra en ~1 semana.
+  En puntos los tres van parejos (segun el modelo, Roberto es el mejor de
+  los tres en J11-J13); Zabiri cuesta dinero y tiene 4 amarillas. **No se
+  deja una orden esperando** (la mejora resta la puja entera si un dia lee el
+  mercado vacio: riesgo de modo deficit). **Aplicado:** «La lista de
+  objetivos» en docs/EL-PARTE-DE-LA-PLANTILLA.md, y la supervision de las
+  08:22 la mira cada manana en el mercado del Computer y escribe la orden el
+  mismo dia si sale uno (con esceptico). Lo urgente sigue siendo Cardona
+  (decision del mie 28), que no necesita el dinero de Roberto.
+
 - **25/10 08:22 (supervision).** **Kike Salas GANADO** en el reset (07:04
   CET): 3.439.900; Luismi pujo 3.163.000 (+0,4 %): con el +1 % de la mejora
   (3.189.900) tambien se habria ganado; la prima costo ~250.000 de mas, a

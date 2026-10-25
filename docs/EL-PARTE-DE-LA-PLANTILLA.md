@@ -9,6 +9,32 @@ Veredictos: TITULAR / DUDA / SUPLENTE (perdio el puesto) / LESIONADO /
 SANCIONADO / DESCARTADO. «Perdio el puesto» solo con pruebas: dos
 suplencias seguidas estando sano, o lo dice el entrenador.
 
+## LA LISTA DE OBJETIVOS (25/10, del «mejor equipo posible»)
+
+Libres que suben el once si el Computer los saca. Se miran CADA MANANA en
+la supervision de las 08:22 (mercado del Computer del dia). Si sale uno: se
+compara con el peor de su puesto, se escribe `fichar` + `vender_si_ficha`
+(el que sale, con su propio `si_esta`, y solo cuando el nuevo ya es
+nuestro), con un esceptico antes, y nunca una J que empiece en rojo. NO se
+deja una orden esperando a un jugador que no esta en el mercado: la mejora
+resta la puja entera si un dia lee el mercado vacio (la_mejora_del_once.py,
+caja de la jornada) y puede entrar en modo deficit.
+
+| Objetivo | Puesto | Precio 25/10 | Por quien | Puja | Nota |
+|---|---|---|---|---|---|
+| Adrian Nino (Malaga) | DEL | 2,93 M, +340 k/dia | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana |
+| Juan Iglesias (Sevilla) | DEF | 3,62 M | Sergi Cardona | +8-10 % | 9 de 9 titular, FF 90 |
+| Ndukwe (Levante) | DEF | 1,07 M | Sergi Cardona | +12 % | gano el puesto a Mandi |
+| Remiro (Real Sociedad) | POR | 3,72 M | Gulacsi | +5-8 % | 6,0 pts/partido, 8 de 9 |
+| Exposito (Espanyol) | MED | 4,47 M | el peor medio | +5-8 % | lo vendimos el 23/10 por Boye |
+| Agoume (Sevilla) | MED | 3,36 M | el peor medio | +5-8 % | 9 de 9 titular |
+| Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90 |
+| Zabiri (Racing) | DEL | 7,54 M | Roberto Fernandez | +10-20 % | solo en el parón (09-19/11), si no esta apercibido (4 amarillas) y la caja lo paga |
+
+Ventanas de la J11 (vie 30/10 21:00): la mejora y la orden con venta
+emparejada pujan hasta la vuelta del jue 04:50 (40 h). Despues, solo lo que
+pague la caja entera.
+
 ## 24/10/2026, 19:30 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
 
 | Jugador | Veredicto | J11 % | J11 (Madrid) | J10 | Nota |
