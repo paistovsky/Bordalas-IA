@@ -352,6 +352,30 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **25/10 10:47 (laboratorio de rivales).** **Rivales:** nada desde el reset
+  (Luismi, el 26299 por 446.000). **Corregido (nace apagado):
+  BORDALAS_LA_JORNADA_DE_CADA_PAGINA** (merge e6f00878; workflow de 5:
+  entender, construir, dos revisores, arreglar). El fallo: cada pagina de
+  equipo de FF se leia como pronostico de la jornada siguiente aunque
+  mostrara la ALINEACION CONFIRMADA de la que se juega (Cardona 0 %, Chust
+  100 % el 24/10). Medido: ~21 % de las horas-equipo de cada semana (vie
+  23:00 a ~mar); una confirmada vieja falla un 29 % de media y da un 11,8 %
+  de huecos falsos; un pronostico viejo (POSIBLE) solo un 11 % (es lo mejor
+  que hay). 4 de las ultimas 15 pujas se hicieron en esas ventanas. El
+  arreglo: el tablero apunta la jornada de cada pagina (cabecera de la
+  alineacion, selector y «Previsib. J<N>», que coinciden en 199 de 202
+  paginas guardadas; cuatro trampas evitadas) y, encendido, la mejora no
+  saca a un titular SANO ni mete a un candidato cuya cifra salga de una
+  CONFIRMADA de otra jornada (la duda, el lesionado y el sancionado, como
+  siempre); avisa si la ventana de 40 h se cierra con alguien congelado y si
+  FF cambia la pagina. Apagado: identico (prueba con la huella del tablero y
+  de la mejora). Verja 223/223 y con --con. **Para encenderlo (lun 26/10):**
+  revision adversarial del diff final, paso 0 con --con, ensayo, linea del
+  YAML y config/paso_0.json en el mismo commit; forzar un refresco del
+  tablero (la cache de antes no trae marcas). Pendiente aparte: el cierre
+  del martes 07:15 sigue leyendo la confirmada de un equipo que jugo el
+  lunes.
+
 - **25/10 10:00 (el mejor equipo posible y Roberto por Nino).** El dueno
   pidio el mejor once con los libres y nuestro dinero (58,0 M = plantilla
   59,73 M + caja -1,70 M) y despues: «We can always trade Roberto for Zabiri
