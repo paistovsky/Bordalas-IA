@@ -2176,3 +2176,4 @@
 {"dia":"2026-10-25","id":30081,"name":"Pape Gueye","value":0,"price":7400000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-25","id":34483,"name":"Pedro Díaz","value":0,"price":1070000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-25","id":42557,"name":"Adeyemi","value":0,"price":10140000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-25","id":20102,"name":"Kubo","value":3656211,"price":3540000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
