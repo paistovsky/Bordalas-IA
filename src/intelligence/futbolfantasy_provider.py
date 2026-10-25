@@ -565,7 +565,7 @@ def _is_player_row(tag) -> bool:
     return any(re.fullmatch(r"jugador_\d+", c) for c in clases)
 
 
-def parse_team_page(html: str) -> dict:
+def parse_team_page(html: str, con_la_jornada: bool = False) -> dict:
     """
     Una pagina de equipo -> jugadores y datos del equipo.
 
@@ -573,6 +573,11 @@ def parse_team_page(html: str) -> dict:
     suplentes: 26 en el Alaves, 29 en el Athletic, 23 en el Barca.
     Las filas `tipo_campo` / `camiseta-wrapper` son el dibujo del
     campo, solo cubren el once y duplican jugadores. No se usan.
+
+    `con_la_jornada` (25/10/2026, LA JORNADA DE CADA PAGINA): ademas,
+    `page` = de que jornada es la alineacion que muestra la pagina
+    (`la_jornada_de_la_pagina`), de la misma sopa. Sin pasarlo, lo de
+    siempre: `players` y `team`, ni una clave mas.
     """
 
     soup = BeautifulSoup(html, "html.parser")
@@ -631,10 +636,15 @@ def parse_team_page(html: str) -> dict:
             }
         )
 
-    return {
+    salida = {
         "players": jugadores,
         "team": parse_team_meta(soup),
     }
+
+    if con_la_jornada:
+        salida["page"] = la_jornada_de_la_pagina(soup)
+
+    return salida
 
 
 def parse_team_meta(soup) -> dict:
@@ -726,6 +736,266 @@ def parse_team_meta(soup) -> dict:
             resultado["predictability_label"] = etiqueta
 
     return resultado
+
+
+# ----------------------------------------------------------------
+# LA JORNADA DE CADA PAGINA (25/10/2026)
+#
+# EL FALLO (24/10/2026)
+#
+#     El tablero ENTERO comprueba su jornada -la via HIT,
+#     `_misma_jornada`, `stale_fallback`-, pero cada PAGINA de
+#     equipo no. Y una pagina de FF no cambia de jornada cuando
+#     cambia el tablero:
+#
+#         · un equipo que ya ha jugado (o esta jugando) sigue
+#           mostrando la "Alineacion confirmada" de esa jornada
+#           -11 al 100 % y el resto al 0 %- hasta que FF publica
+#           el pronostico de la siguiente: de 1 a 13 horas despues
+#           del final, la noche entera si juega tarde;
+#
+#         · un equipo que juega el lunes sigue con el pronostico
+#           de la jornada anterior hasta una hora antes de su
+#           partido.
+#
+#     El tablero pasa a la J(N+1) dos horas despues del primer
+#     partido de la J(N) (el viernes a las 23:00), y desde ahi
+#     todo lo que siga en J(N) se sirve como J(N+1). El panel del
+#     24/10 a las 18:10 tenia a Sergi Cardona al 0 % y a Chust y
+#     Unai Lopez al 100 % (confirmadas de la J10) al lado de Jonny
+#     al 50 % (pronostico de la J11). La mejora del once lee un
+#     0 % como un hueco (`TITULARIDAD_HUECO`): se salta SOLO SI
+#     SUBE y puja por cualquier defensa sano con un 60 % o mas.
+#
+#     Medido: unas 700 de las 3.360 horas-equipo de la semana
+#     (~21 %) son de una pagina de otra jornada, todas entre el
+#     viernes a las 23:00 y el martes. Un aplazado (el
+#     Levante-Athletic de la J6, jugado el 21/10) hace lo mismo
+#     fuera del fin de semana.
+#
+# COMO SE SABE DE QUE JORNADA ES UNA PAGINA
+#
+#     Sobre 201 paginas de equipo guardadas (29/09-25/10, los 20
+#     equipos), leidas como datos. Tres marcas, y las tres
+#     coinciden en las 201:
+#
+#         1. CABECERA. Dentro de `section.alineacion_wrapper` con
+#            `data-equipo`: `h2.lineup-title` > `span.jornada`
+#            (la "J" va aparte, en `.jornada_label`). En todas las
+#            de octubre; no esta en las 19 del 29-30/09, que
+#            tenian otro DOM.
+#
+#         2. SELECTOR. La primera `option` del
+#            `select.past-alineaciones` de esa misma seccion, su
+#            `data-jornada`. En las 201. `data-confirmed` (1/0)
+#            solo desde octubre.
+#
+#         3. PREVISIBILIDAD. El rotulo "Previsib. J<N>" /
+#            "Rotaciones J<N>" de las filas del entrenador. Solo en
+#            las POSIBLES: una confirmada no las trae, y por eso su
+#            `team_context.predictability` sale None.
+#
+#     Confirmada = la seccion lleva la clase `past` (201/201 con
+#     `div.campo-wrapper.confirmed`). Toda confirmada son 11 filas
+#     al 100 % y el resto al 0 %; ningun pronostico pasa del 95 %.
+#
+# LAS TRAMPAS, QUE NO SE MIRAN NUNCA
+#
+#     1. `div.tab.checked[data-jornada]` del calendario de
+#        pestanas: en las 201 su data-jornada (1, 6...) no es la
+#        de su propio rotulo "J10". Por eso todo se busca DENTRO
+#        de la seccion de la alineacion y nunca se toma el primer
+#        data-jornada del documento.
+#     2. El "Equipo J<N>" de la navegacion es la PROXIMA jornada
+#        del equipo: el Espanyol del 17/10 decia J10 con la
+#        "Alineacion confirmada J9". Es el unico desacuerdo del
+#        corpus y falla justo en el caso que hace dano.
+#     3. El pie "Posibles alineaciones Jornada N" es de toda la
+#        web: el 24/10 decia 11 en todas, con todas en la J10.
+#     4. La variable `tipo` dice "previa" en confirmadas antes del
+#        partido (Rayo y Elche el 24/10): no es un estado.
+#     5. `data-rival` es el rival de la alineacion que se muestra.
+#        Cuadra con el calendario, pero no hay tabla de sus tres
+#        letras: como mucho, un cruce para otro dia.
+#
+# QUE HACE, Y QUE NO
+#
+#     Con el interruptor, cada ficha del tablero apunta de que
+#     jornada era la pagina de la que salio (`ff_page_matchday`,
+#     `ff_page_lineup`) y si no es la del tablero
+#     (`ff_de_otra_jornada`); cada equipo, la de su pagina; y la
+#     metadata, quien esta en otra jornada y quien no se pudo leer.
+#
+#     NO TOCA NI UN NUMERO. La titularidad, el consenso y las
+#     plantillas salen igual, asi que el lookup, el once, el xP,
+#     el cierre, las valoraciones y el panel ven lo mismo que
+#     ayer. Ni encoger hacia la jerarquia (con un pronostico de la
+#     jornada anterior el dato viejo es lo mejor que hay: error
+#     medio 11,0 contra 16,7) ni dejarlo en None (cada lector lee
+#     None distinto: el once lo sienta, el cierre lo vende
+#     primero). Quien decide con la marca es la mejora del once,
+#     con el mismo interruptor.
+#
+#     Una pagina cuya jornada no se puede leer NO se marca: sin
+#     saberla no se rechaza nada. Sale en
+#     `metadata.pages_without_matchday`, para verlo.
+#
+#     Nace APAGADO. Apagado, el tablero es byte a byte el de antes.
+# ----------------------------------------------------------------
+
+ENV_LA_JORNADA_DE_CADA_PAGINA = "BORDALAS_LA_JORNADA_DE_CADA_PAGINA"   # nace APAGADO
+
+
+def la_jornada_de_cada_pagina() -> bool:
+    """`BORDALAS_LA_JORNADA_DE_CADA_PAGINA`, leido al llamarse. Nunca
+    lanza."""
+
+    try:
+        import os
+
+        return str(
+            os.environ.get(ENV_LA_JORNADA_DE_CADA_PAGINA, "")
+        ).strip().lower() in {"1", "true", "si", "yes"}
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+# "Previsib. J10" y "Rotaciones J10", ya normalizados. "Previsib.
+# Temp." (la de la temporada) no lleva jornada y no casa.
+_ROTULO_CON_JORNADA = re.compile(r"(?:previsib|rotaciones) j ?(\d{1,2})")
+
+
+def la_jornada_de_la_pagina(soup) -> dict:
+    """
+    De que jornada es la alineacion que muestra una pagina de
+    equipo de FF, y si es confirmada o posible. Pura, nunca lanza.
+
+        matchday  la jornada, o None si no se lee o las marcas no
+                  coinciden
+        lineup    "CONFIRMADA" (la seccion lleva `past`), "POSIBLE"
+                  (hay seccion sin `past`) o None (no hay seccion)
+        source    "CABECERA", "SELECTOR" o "PREVISIBILIDAD": la
+                  primera marca leida, cuando hay jornada
+        agree     las marcas leidas coinciden (y hay al menos una)
+
+    LAS TRES MARCAS, POR ORDEN
+
+        CABECERA        `h2.lineup-title span.jornada` dentro de la
+                        seccion de la alineacion
+        SELECTOR        `data-jornada` de la primera `option` del
+                        `select.past-alineaciones` de esa seccion
+        PREVISIBILIDAD  el rotulo "Previsib. J<N>" o "Rotaciones
+                        J<N>" (solo en las posibles)
+
+        Se cuentan las que se leen (un 0 no es una jornada). Si
+        no coinciden, la jornada es None y `agree` es False: dos
+        marcas que dicen cosas distintas no son una jornada.
+
+    EL CASO DEL 24/10/2026
+
+        Villarreal, 16:40 y 17:21 UTC: "Alineacion confirmada J10",
+        Sergi Cardona al 0 %. Con el tablero ya en la J11, ese 0 %
+        se servia como el pronostico de la J11, y la mejora del
+        once lo leia como un hueco. El 25/10 por la manana su
+        pagina de la J11 le daba un 50 %.
+
+    LA EVIDENCIA (25/10/2026)
+
+        201 paginas guardadas del 29/09 al 25/10: las tres marcas
+        coinciden en las 201; la cabecera falta en las 19 de
+        septiembre (el selector y el rotulo, no).
+
+    LO QUE NO MIRA NUNCA
+
+        El `div.tab.checked[data-jornada]` del calendario (no es
+        la suya en ninguna de las 201), el "Equipo J<N>" de la
+        navegacion (es la proxima del equipo: el Espanyol del
+        17/10 decia J10 con la confirmada de la J9), el pie
+        "Posibles alineaciones Jornada N" (es de toda la web), la
+        variable `tipo` y `data-rival`. Ver el bloque de arriba.
+
+    Acepta el HTML o la sopa ya hecha. Con basura, todo None.
+    """
+
+    vacio = {
+        "matchday": None,
+        "lineup": None,
+        "source": None,
+        "agree": False,
+    }
+
+    try:
+
+        if isinstance(soup, (str, bytes)):
+            soup = BeautifulSoup(soup, "html.parser")
+
+        if soup is None or not hasattr(soup, "select"):
+            return dict(vacio)
+
+        seccion = next(
+            (
+                candidata
+                for candidata in soup.select("section.alineacion_wrapper")
+                if candidata.get("data-equipo")
+            ),
+            None,
+        )
+
+        cabecera = None
+        selector = None
+        previsib = None
+        lineup = None
+
+        if seccion is not None:
+
+            marca = seccion.select_one("h2.lineup-title span.jornada")
+
+            if marca is not None:
+                cabecera = _int(marca.get_text(strip=True))
+
+            opcion = seccion.select_one("select.past-alineaciones option")
+
+            if opcion is not None:
+                selector = _int(opcion.get("data-jornada"))
+
+            lineup = (
+                "CONFIRMADA"
+                if "past" in (seccion.get("class") or [])
+                else "POSIBLE"
+            )
+
+        for celda in soup.select("div[class*=col-5]"):
+
+            rotulo = _ROTULO_CON_JORNADA.fullmatch(
+                normalize(celda.get_text(strip=True))
+            )
+
+            if rotulo:
+                previsib = _int(rotulo.group(1))
+                break
+
+        leidas = [
+            (valor, fuente)
+            for valor, fuente in (
+                (cabecera, "CABECERA"),
+                (selector, "SELECTOR"),
+                (previsib, "PREVISIBILIDAD"),
+            )
+            if valor
+        ]
+
+        coinciden = bool(leidas) and len({valor for valor, _ in leidas}) == 1
+
+        return {
+            "matchday": leidas[0][0] if coinciden else None,
+            "lineup": lineup,
+            "source": leidas[0][1] if coinciden else None,
+            "agree": coinciden,
+        }
+
+    except Exception:                               # noqa: BLE001
+        return dict(vacio)
 
 
 # ----------------------------------------------------------------
@@ -1058,7 +1328,32 @@ def match_team(records: list[dict], targets: list[dict]) -> list[dict]:
 # ----------------------------------------------------------------
 
 
-def build_player_entry(match: dict, team_meta: dict, team_name: str) -> dict:
+def build_player_entry(
+    match: dict,
+    team_meta: dict,
+    team_name: str,
+    pagina: dict | None = None,
+    jornada=None,
+) -> dict:
+    """
+    La ficha del tablero de un jugador emparejado.
+
+    LA JORNADA DE CADA PAGINA (25/10/2026). Solo si se pasa `pagina`
+    (lo de `la_jornada_de_la_pagina`; `refresh_board` lo pasa con el
+    interruptor) y `jornada` (la del tablero), la ficha apunta ademas:
+
+        ff_page_matchday    de que jornada era la pagina (o None)
+        ff_page_lineup      "CONFIRMADA", "POSIBLE" o None
+        ff_de_otra_jornada  la de la pagina se sabe, la del tablero
+                            tambien, y NO son la misma
+
+    Distinta, no solo anterior: un aplazado (el Levante-Athletic de la
+    J6, jugado el 21/10 en la semana de la J10) o un adelantado
+    tambien muestran otra jornada. Sin saber la de la pagina NO se
+    marca: sin saberla no se rechaza nada (como en
+    `candidate_starter_lookup`). `starter_probability` no se toca
+    nunca. Sin `pagina`, la ficha de siempre, ni una clave mas.
+    """
 
     record = match["record"]
     target = match["target"]
@@ -1119,7 +1414,7 @@ def build_player_entry(match: dict, team_meta: dict, team_name: str) -> dict:
     else:
         confianza = "BAJA"
 
-    return {
+    entrada = {
         "player_id": target["id"],
         "player_name": target["name"],
         "team": team_name,
@@ -1191,6 +1486,22 @@ def build_player_entry(match: dict, team_meta: dict, team_name: str) -> dict:
             "confidence": confianza,
         },
     }
+
+    if pagina is not None:
+
+        pagina = pagina if isinstance(pagina, dict) else {}
+
+        de_la_pagina = pagina.get("matchday")
+
+        entrada["ff_page_matchday"] = de_la_pagina
+        entrada["ff_page_lineup"] = pagina.get("lineup")
+        entrada["ff_de_otra_jornada"] = bool(
+            _int(de_la_pagina) is not None
+            and _int(jornada) is not None
+            and not _misma_jornada(de_la_pagina, jornada)
+        )
+
+    return entrada
 
 
 def fetch(session, url: str) -> str:
@@ -1433,7 +1744,24 @@ def refresh_board(
         y no se pisa el disco. El fallo contrario -guardar un
         tablero de cero jugadores con error: null y servirlo
         despues como cache valida- ya paso una vez.
+
+    LA JORNADA DE CADA PAGINA (25/10/2026, con su interruptor)
+
+        Cada ficha bajada en ESTA vuelta apunta de que jornada era
+        su pagina (`build_player_entry`), cada equipo bajado la de
+        la suya, y la metadata dice que equipos tienen fichas de
+        otra jornada (`pages_other_matchday`, sacado de las FICHAS:
+        al completar, las de la cache conservan la marca de su
+        propia bajada y sus equipos ya no estan en `teams`), cuales
+        no se pudieron leer (`pages_without_matchday`) y cuantas
+        fichas hay marcadas (`players_other_matchday`). HIT,
+        STALE_FALLBACK y TOPPED_UP dejan las marcas como estaban.
+        Ni un numero cambia. Apagado, ni una clave mas.
     """
+
+    # Una vez por tablero: todas las paginas de esta vuelta, con la
+    # misma regla.
+    cada_pagina = la_jornada_de_cada_pagina()
 
     cache = load_board()
 
@@ -1563,6 +1891,10 @@ def refresh_board(
     paginas = 0
     metodos: dict[str, int] = {}
 
+    # Los equipos bajados en esta vuelta cuya pagina no dice de que
+    # jornada es (solo con LA JORNADA DE CADA PAGINA).
+    sin_jornada = []
+
     for team_name, targets in sorted(por_equipo.items()):
 
         slug = team_slug(team_name)
@@ -1584,14 +1916,34 @@ def refresh_board(
         paginas += 1
 
         try:
-            pagina = parse_team_page(html)
+            # Apagado, la llamada de siempre, tal cual.
+            pagina = (
+                parse_team_page(html, con_la_jornada=True)
+                if cada_pagina
+                else parse_team_page(html)
+            )
         except Exception as error:
             errores.append(
                 f"{team_name}: parser: {type(error).__name__}: {error}"
             )
             continue
 
-        equipos_meta[team_name] = pagina["team"]
+        if cada_pagina:
+
+            de_la_pagina = pagina.get("page") or {}
+
+            equipos_meta[team_name] = {
+                **pagina["team"],
+                "page_matchday": de_la_pagina.get("matchday"),
+                "page_lineup": de_la_pagina.get("lineup"),
+                "page_matchday_source": de_la_pagina.get("source"),
+            }
+
+            if de_la_pagina.get("matchday") is None:
+                sin_jornada.append(team_name)
+
+        else:
+            equipos_meta[team_name] = pagina["team"]
 
         plantillas[team_name] = {
             "at": datetime.now(timezone.utc).isoformat(),
@@ -1606,11 +1958,21 @@ def refresh_board(
 
             metodos[match["method"]] = metodos.get(match["method"], 0) + 1
 
-            entrada = build_player_entry(
-                match,
-                pagina["team"],
-                team_name,
-            )
+            if cada_pagina:
+                entrada = build_player_entry(
+                    match,
+                    pagina["team"],
+                    team_name,
+                    pagina=pagina.get("page") or {},
+                    jornada=matchday,
+                )
+
+            else:
+                entrada = build_player_entry(
+                    match,
+                    pagina["team"],
+                    team_name,
+                )
 
             parte = ausencias.get(
                 (entrada.get("ff") or {}).get("slug")
@@ -1771,6 +2133,27 @@ def refresh_board(
             "error": None,
         },
     }
+
+    # LA JORNADA DE CADA PAGINA (25/10/2026): lo que hay que ver de
+    # un vistazo. De las FICHAS, no de `teams`: al completar, una ficha
+    # de la cache trae la marca de su propia bajada y su equipo ya no
+    # esta en `teams`. Con ~20 equipos aqui, la jornada del tablero
+    # esta mal (un calendario viejo), no las paginas.
+    if cada_pagina:
+
+        de_otra = [
+            entry
+            for entry in jugadores
+            if entry.get("ff_de_otra_jornada") is True
+        ]
+
+        salida["metadata"]["pages_other_matchday"] = sorted(
+            {entry.get("team") for entry in de_otra if entry.get("team")}
+        )
+        salida["metadata"]["pages_without_matchday"] = sorted(
+            set(sin_jornada)
+        )
+        salida["metadata"]["players_other_matchday"] = len(de_otra)
 
     BOARD_FILE.parent.mkdir(parents=True, exist_ok=True)
 
