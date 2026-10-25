@@ -69,6 +69,41 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E61 · 25/10/2026 11:15 de Madrid · Como elige el Computer a sus 20: cuanto se espera a un objetivo
+
+**El caso:** el gestor ha puesto «la lista de objetivos» (el mejor equipo
+posible) y la mira cada mañana en el mercado del Computer; Nino o Zabiri
+por Roberto, «solo el dia que el Computer los saca». ¿Cuanto se espera?
+**Datos:** `libro_del_escaparate.jsonl`, 39 dias de lista (20 jugadores al
+dia, 780 apariciones, 310 jugadores distintos), contra los 424 libres de
+la foto del ciclo de hoy.
+**Codigo:** `lab/mercado/como_elige_el_computer.py`.
+
+**Lo que se aprende:**
+- **Cada jugador del Computer esta dos dias en la lista:** de 470 pares de
+  apariciones seguidas del mismo jugador, 343 son de un dia al siguiente
+  (cuadra con las 48 h de E42). Salen ~11 nuevos cada dia.
+- **Es casi al azar entre los libres, sin mirar el precio:** 4,0-4,6 % de
+  los dias en todos los tramos, algo menos entre 3 y 6 M (2,6 %). Un
+  jugador concreto **entra en la lista ~2,6 % de los dias: uno de cada
+  ~40 dias**.
+- **La cuenta para la lista de objetivos:** que salga al menos uno en una
+  semana:
+
+      nombres en la lista     1      3      5      10      15
+      sale alguno en 7 dias  17 %   42 %   60 %   84 %    94 %
+
+  Con 2-3 nombres (Nino, Zabiri) lo normal es no ver ninguno en semanas;
+  con 10, casi cada semana sale uno. Y entonces hay que ganar la subasta
+  (E41/E57).
+
+**Limites:** «libres» es la foto de hoy (cambia); el escaparate empieza el
+17/09; no se ve si el Computer evita a los que acaban de salir.
+
+**Veredicto: AVISO para la lista de objetivos** (pasa a «Listo para el
+plan»): una lista de 2-3 nombres apenas sale; para que sirva cada semana
+hacen falta ~10 por puesto que se quiera cubrir, ordenados.
+
 ### E60 · 24/10/2026 17:15 de Madrid · ¿Esta viejo el calendario de Pepe? No: el que estaba viejo era otro
 
 **El caso:** el gestor (24/10 14:15) se equivoco con la fecha de la J11
@@ -2677,6 +2712,12 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E61, 25/10 11:15) La lista de objetivos necesita ~10 nombres.** El
+  Computer saca ~11 nuevos al dia casi al azar entre los ~424 libres y cada
+  uno se queda dos dias: un jugador concreto sale uno de cada ~40 dias. Con
+  3 nombres, sale alguno en una semana el 42 % de las veces; con 10, el
+  84 %. Para Roberto por Nino o Zabiri, contar con semanas, no dias; y
+  ampliar la lista con suplentes igual de buenos por puesto.
 - **(E57, 23/10 11:16) Prima mas baja si la puja se resuelve el dia de la
   jornada.** En los resets a menos de 24 h del primer partido hay la mitad
   de pelea (31 % contra 50-57 %; los que suben, 52 % contra 73 %) y el
