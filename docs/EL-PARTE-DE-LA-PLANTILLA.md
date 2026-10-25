@@ -35,6 +35,44 @@ Ventanas de la J11 (vie 30/10 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 04:50 (40 h). Despues, solo lo que
 pague la caja entera.
 
+## 25/10/2026, 19:30 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
+
+| Jugador | Veredicto | J11 % | J11 (Madrid) | J10 | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR, Villarreal) | TITULAR | 88 | Villarreal-Espanyol, vie 30/10 21:00 | 90', 3 pts | 85 -> 88 (FF J11 90) |
+| Kike Salas (DEF, Sevilla) | TITULAR | 80 | Getafe-Sevilla, dom 01/11 14:00 | lun 26/10 21:00 vs Osasuna | nuestro desde el 25/10; FF aun en la J10 |
+| Chust (DEF, Elche) | TITULAR | 90 | Elche-Valencia, dom 01/11 18:30 | 90', 4 pts | = (FF J11 90) |
+| Gaya (DEF, Valencia) | TITULAR | 78 | Elche-Valencia, dom 01/11 18:30 | 90', 4 pts (codazo de Gueye, sano) | 75 -> 78 |
+| **Sergi Cardona (DEF, Villarreal)** | **DUDA** | **60** | Villarreal-Espanyol, vie 30/10 21:00 | **entro 65', asistencia, 8 pts** | 35 -> 60: FF J11 50 (con Carlos Romero, en duda por el aductor), JP titular; el entrenador: «gestionar» la carga, no perdio el puesto |
+| Jonny (DEF, Alaves) | DUDA | 40 | Barcelona-Alaves, sab 31/10 21:00 | suplente sin jugar, 0 | se vende el mar 00:07 |
+| Olasagasti (MED, Levante) | TITULAR | 78 | Levante-Atletico, sab 31/10 14:00 | titular hoy en Anoeta (en juego) | 75 -> 78 |
+| Pablo Ibanez (MED, Alaves) | TITULAR | 82 | Barcelona-Alaves, sab 31/10 21:00 | 90', 4 pts | 85 -> 82 |
+| Unai Lopez (MED, Rayo) | TITULAR | 78 | Rayo-Celta, sab 31/10 16:15 | 90', 5 pts | 82 -> 78 (FF 70, JP fijo) |
+| Yamal (DEL, Barcelona) | TITULAR | 90 | Barcelona-Alaves, sab 31/10 21:00 | Clasico hoy 21:00 | = |
+| Roberto Fernandez (DEL, Espanyol) | TITULAR | 88 | Villarreal-Espanyol, vie 30/10 21:00 | 90', 2 pts | = (riesgo de cambio de entrenador) |
+| Boye (DEL, Alaves) | TITULAR | 88 | Barcelona-Alaves, sab 31/10 21:00 | 90', 3 pts, amarilla | = |
+
+**J10:** 33 puntos con 9 de 11 jugados (Olasagasti y Yamal, hoy).
+
+**En riesgo para la J11:** Sergi Cardona (60 %). Ayer el 0 % era la
+alineacion CONFIRMADA de la J10, no un pronostico (el fallo que corrige
+BORDALAS_LA_JORNADA_DE_CADA_PAGINA, que se enciende el lun 26/10).
+
+**Hecho hoy:** nada. Opcion vista y descartada: Drkusic (Espanyol, 0,70 M,
+FF J11 70 %, juega el MISMO partido que Cardona, el primero de la J11, cuyos
+onces salen antes de nuestro cierre) como 12.o a 735.000. Gana ~+0,5 pts en
+la J11 solo si alguien cambia a mano el once el vie entre las 20:00 y las
+20:40; la caja del vie quedaria en ~+0,5 M (justo en la regla del 24/10) y
+la orden se complicaria (si_esta, limpiezas). Con el beneficio tan pequeno,
+no se hace.
+
+**Plan:** lun 23:05, Kike Salas tras Sevilla-Osasuna (antes de vender a
+Jonny a las 00:07). Mar: Jonny vendido y su fila fuera de la orden; onces de
+Copa (Manacor-Villarreal 21:00: si Cardona es titular, baja para la J11).
+**Mie 28, 18:00-23:00:** si Cardona <= 40 % y la mejora no ha pujado ya por
+un defensa, fichar uno titular seguro del mercado de ese dia con venta
+emparejada de Cardona (con su propio si_esta).
+
 ## 24/10/2026, 19:30 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
 
 | Jugador | Veredicto | J11 % | J11 (Madrid) | J10 | Nota |
