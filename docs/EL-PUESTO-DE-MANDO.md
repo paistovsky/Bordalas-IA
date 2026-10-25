@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 25/10/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/10 14:15 (rafaga de la tarde; la de las 07:15 quedo a medias).**
+  A las 07:15 Bash no respondio (el clasificador dio error 4 veces): solo
+  pude mirar los ciclos por MCP. Comprobado entonces: tras el cambio a
+  horario de invierno los disparos siguen a su hora de Madrid (04:45/04:50
+  = 03:45/03:50 UTC; 07:15 = 06:15 UTC). Ahora: ciclos verdes (#2477 a
+  #2485). **Kike Salas GANADO** (3.439.900, sin rival por encima). Saldo
+  **-1.702.225**, 0 comprometido, plantilla 59,73 M. Para el plazo de la
+  J11 (**vie 30/10 15:00**): venta de Jonny tras la J10 (oferta ~1,80 M)
+  y el premio de la J10 (martes, si la J10 acaba el lunes) => positivo.
+  Mi control: el miercoles 28/10 a las 21:15; si no hay venta en marcha,
+  aviso al dueno con a quien vender.
 
 - **25/10 10:47 (laboratorio de rivales).** **Rivales:** nada desde el reset
   (Luismi, el 26299 por 446.000). **Corregido (nace apagado):
