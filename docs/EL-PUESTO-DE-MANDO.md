@@ -352,6 +352,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **25/10 20:47 (laboratorio de rivales).** **Rivales:** nada en todo el
+  domingo (tablon sin eventos desde el reset). **J10:** 33 pts con 9 de 11
+  (faltan Olasagasti, hoy en Anoeta, y Yamal en el Clasico). **Preparado:**
+  el paso 0 en seco con TODOS los interruptores (54, incluido el nuevo
+  BORDALAS_LA_JORNADA_DE_CADA_PAGINA) pasa en 148 s; config/paso_0.json
+  revertido (va en el commit del YAML, manana). **Medido de paso:** la caja
+  de los rivales (caja_de_la_liga) solo se desvia mientras una jornada esta
+  partida (el premio por partes); hoy no hay ninguna pagada a medias (la J8
+  sigue sin pagarse), asi que su arreglo no corre prisa. El cierre de esta
+  semana abre el mie 05:00, cuando las paginas del lunes ya traen la J11: no
+  le afecta el fallo de las confirmadas. **Aplicado:** nada nuevo.
+
 - **25/10 14:15 (rafaga de la tarde; la de las 07:15 quedo a medias).**
   A las 07:15 Bash no respondio (el clasificador dio error 4 veces): solo
   pude mirar los ciclos por MCP. Comprobado entonces: tras el cambio a
