@@ -35,6 +35,52 @@ Ventanas de la J11 (vie 30/10 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 04:50 (40 h). Despues, solo lo que
 pague la caja entera.
 
+## 26/10/2026, 19:30 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
+
+| Jugador | Veredicto | J11 % | J11 (Madrid) | Copa | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR, Villarreal) | TITULAR | 88 | Villarreal-Espanyol, vie 30/10 21:00 | descansa (Luiz Junior en Manacor) | = |
+| Kike Salas (DEF, Sevilla) | TITULAR | 80 | Getafe-Sevilla, dom 01/11 14:00 | jue 29 (Hortaleza), FF le deja fuera | J10 hoy 21:00 |
+| Chust (DEF, Elche) | TITULAR | 90 | Elche-Valencia, dom 01/11 18:30 | descansa | = |
+| Gaya (DEF, Valencia) | TITULAR | 78 | Elche-Valencia, dom 01/11 18:30 | descansa (mie 28) | golpe en la nariz (codazo de Gueye), pruebas por posible fractura; entreno sin limites; como mucho, mascara |
+| **Sergi Cardona (DEF, Villarreal)** | **DUDA** | **55** | Villarreal-Espanyol, vie 30/10 21:00 | **FF le pone titular en Manacor (mar 27, 21:00)** | 60 -> 55. Romero no viaja a la Copa y vuelve «con cautela»; Akhomach tocado |
+| Jonny (DEF, Alaves) | DUDA | 40 | Barcelona-Alaves, sab 31/10 21:00 | | se vende esta noche (00:07) |
+| Olasagasti (MED, Levante) | TITULAR | 80 | Levante-Atletico, sab 31/10 14:00 | descansa (mie 28) | 78 -> 80 |
+| Pablo Ibanez (MED, Alaves) | TITULAR | 84 | Barcelona-Alaves, sab 31/10 21:00 | descansa | 82 -> 84 |
+| Unai Lopez (MED, Rayo) | TITULAR | 82 | Rayo-Celta, sab 31/10 16:15 | descansa (mar 27, Huelva) | 78 -> 82 (Ciss sancionado) |
+| Yamal (DEL, Barcelona) | TITULAR | 92 | Barcelona-Alaves, sab 31/10 21:00 | exento | J10: 3 pts, sin golpes |
+| Roberto Fernandez (DEL, Espanyol) | TITULAR | 87 | Villarreal-Espanyol, vie 30/10 21:00 | FF le hace descansar (mar 27, Sestao) | riesgo de cambio de entrenador |
+| Boye (DEL, Alaves) | TITULAR | 88 | Barcelona-Alaves, sab 31/10 21:00 | descansa | = |
+
+**J10:** 39 puntos (Yamal 3).
+
+**En riesgo para la J11:** Sergi Cardona (55 %). La senal decisiva es el
+once de Copa del mar 27 a las ~20:00: si es titular en Manacor, baja a
+35-40 % y se aplica la regla del mie; si no juega o sale suplente, sube a
+65-70 %.
+
+**Hecho hoy:** nada (en el mercado del Computer no hay ningun defensa mejor
+que Cardona para la J11; Pablo Ramon apercibido, Zaid Romero en duda).
+
+**Correcciones del esceptico (importantes):**
+- **Contingencia de Kike (lun 23:05):** si se lesiona o le expulsan, NO
+  vaciar `vender_si_ficha.jugadores` (la mejora perderia de golpe 1,53 M de
+  caja pendiente y podria entrar en deficit). En su lugar, frenar la venta
+  con `"desde": "2026-10-28T18:00:00+01:00"` en la fila de Jonny y decidir
+  el mie.
+- **Mar 08:22:** comprobar que Jonny se vendio (~+248.975) y que el once
+  guardado en Biwenger tiene 11 con Cardona (el de ahora tiene a Jonny y no
+  a Cardona: tras la venta quedaria con 10 si nadie lo reescribe).
+- **Mar tarde, al cobrar el premio de la J10 (~1,17 M):** vigilar que el
+  motor viejo (TABLERO) o el carril no se gasten la caja que hace falta para
+  el cambio de Cardona.
+- **Mie 18:00-23:00:** si Cardona <= 40 % y ningun motor ha pujado ya por
+  su relevo: fichar un defensa del mercado de ese dia (ok, FF J11 >= 80 en
+  una pagina «Posible alineacion J11», sin jugar la Copa del mie), puja
+  +10-15 %, con Cardona en vender_si_ficha con su propio si_esta (quitando
+  antes la fila de Jonny y el si_esta 28115). Candidatos: Sangare, Tarrega,
+  Marcos Alonso, Sergio Gomez. Si no hay ninguno, Cardona se queda.
+
 ## 25/10/2026, 19:30 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
 
 | Jugador | Veredicto | J11 % | J11 (Madrid) | J10 | Cambio |
