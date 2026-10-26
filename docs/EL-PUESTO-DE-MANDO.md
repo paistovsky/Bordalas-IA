@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/10/2026, 14:40 de Madrid (rafaga de las 14:15).
+Actualizado: 26/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **26/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2508 a #2515;
+  el interruptor nuevo lleva 9 vueltas verdes). Saldo -1.452.225, 0
+  comprometido, sin movimientos. Carrera: a 5 puntos de Pollo17 (chat del
+  dueno). Control de caja de la J11: mie 28/10 21:15.
 
 - **26/10 20:47 (laboratorio de rivales).** **Rivales:** Pollo17 vendio al
   Computer a Jonathan David (DEL) por 9.716.300, el dia que bajaba -710.000
