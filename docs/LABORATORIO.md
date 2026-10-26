@@ -69,6 +69,37 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E64 · 26/10/2026 17:21 de Madrid · Los rivales ya pujan por los que acaban de puntuar
+
+**Hipotesis:** si el precio va una semana por detras de los puntos (E63),
+los rivales lo saben y pujan mas por quien puntuo mucho; entonces lo que
+se gana en precio se paga en la subasta.
+**Datos:** las 37 subastas del Computer resueltas en los 7 dias que siguen
+a la J8 y a la J9 (desde el martes), con los puntos que hizo cada jugador
+en esa jornada (`puntos_por_jornada`).
+**Codigo:** `lab/subasta/pelea_y_puntos.py`.
+
+    puntos en la jornada    n   con pelea   prima del ganador (con pelea)
+    8 o mas                 8      75 %        +9,0 %  (+13,0 %)
+    1 a 7                  22      27 %        +1,3 %  (+6,0 %)
+    no jugo                 7      71 %        +7,2 %  (+11,5 %)
+
+**Lo que se aprende:**
+- **Si:** por los que hicieron 8+ hay pelea en 3 de cada 4 subastas y el
+  ganador paga +9 % de mediana (+13 % cuando hay pelea). Es casi lo mismo
+  que suben despues en una semana (+7 a +10 %, E63): **para revender, el
+  margen se va en la subasta.**
+- Los de 1-7 puntos tienen poca pelea (27 %) y salen a precio.
+- (Los que no jugaron con mucha pelea son pocos y raros: aplazados y
+  recien llegados; no se interpreta.)
+
+**Limites:** n = 8 en el grupo que importa; dos semanas.
+
+**Veredicto: MATIZA E63.** La regla de «Listo para el plan» se queda como
+esta (ordenar a los que suben por los puntos de la ultima jornada), con
+su limite: para el once, si; para revender, solo si se gana con prima
+corta, que con estos casi nunca pasa.
+
 ### E63 · 26/10/2026 11:16 de Madrid · El precio va una semana por detras de los puntos
 
 **Hipotesis:** Biwenger no sube el precio de un jugador de golpe tras una
