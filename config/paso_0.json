@@ -1,7 +1,7 @@
 {
  "version": 1,
- "cuando": "2026-10-18T13:01:10+00:00",
- "segundos": 194.2,
+ "cuando": "2026-10-26T10:21:26+00:00",
+ "segundos": 153.0,
  "maquina": "Linux x86_64",
  "probados": [
   "BORDALAS_BID_SALT",
@@ -23,6 +23,7 @@
   "BORDALAS_HORIZONTE_FIJO",
   "BORDALAS_JORNADAS_POR_SU_FECHA",
   "BORDALAS_LA_CARTERA",
+  "BORDALAS_LA_JORNADA_DE_CADA_PAGINA",
   "BORDALAS_LA_MEJORA_DEL_ONCE",
   "BORDALAS_LA_MEJORA_PUJA_FUERTE",
   "BORDALAS_LA_MEJORA_SOLO_SI_SUBE",
@@ -58,5 +59,5 @@
   "BORDALAS_VARA_PLANA",
   "BORDALAS_VIGILA_DATA"
  ],
- "huella": "a99eedfb7d5938db4092b67c603e0293b2048aac109e132fc1d0e0b1b4ea25ca"
+ "huella": "b0e422423af7af5059d4fb485be899333b6976cee9f6fa554e1d7df83c903d1a"
 }

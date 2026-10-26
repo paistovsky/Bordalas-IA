@@ -352,6 +352,28 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **26/10 11:30 (ENCENDIDO: BORDALAS_LA_JORNADA_DE_CADA_PAGINA).** Revision
+  final de 2 (SAFE_WITH_FIXES). **Lo que habria pasado sin ella:** el plan
+  (linea del YAML + paso_0.json) ponia la verja ROJA en la primera vuelta:
+  test_el_tablon_v1 exige una frase de QUE_HACE por cada interruptor
+  encendido, y ni --con ni el ensayo lo ven (leen el entorno, no el YAML).
+  Se habria parado el ciclo, la venta de Jonny de esta noche incluida.
+  **Leccion: antes de encender, la verja SIN --con contra el YAML ya
+  editado.** Arreglado en el mismo commit: (1) la frase en
+  src/telemetry/el_tablon.py; (2) el selector de FF lee la opcion ELEGIDA
+  (`selected`), no la primera: en semana de Copa FF pone primero el partido
+  de Copa (`data-jornada="1"`) y 9 de 20 paginas de hoy salian sin jornada;
+  ahora 20 de 20 (prueba nueva que falla sin el arreglo). Ensayo
+  #40300393985 verde (sirvio el tablero de la cache, sin marcas: no ejercita
+  lo nuevo; las marcas llegan con el primer refresco, <= 2 h). Paso 0 con
+  54, verja 223/223 contra el YAML editado. **Esta semana:** hoy nada
+  cambia (todas las paginas son POSIBLE); desde ~20:00 Sevilla y Osasuna
+  confirmadas de la J10: la mejora no saca a Kike ni mete a uno de esos dos
+  equipos hasta su pagina de la J11. **Pendiente (bajo):** congelar toda
+  CONFIRMADA (hueco del vie 21:07-22:07 con el tablero aun en la J(N));
+  contar los congelados en la metadata; ronda/chollos/rotacion/cierre no lo
+  usan. Si la vuelta siguiente sale roja, se quita la linea del YAML.
+
 - **26/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2492 a #2501,
   la de las 07:15 incluida). Saldo **-1.452.225** a las 07:20 (+250.000,
   la racha), 0 comprometido, reset sin compras ni ventas. Para el vie 30/10

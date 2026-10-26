@@ -975,7 +975,17 @@ def la_jornada_de_la_pagina(soup) -> dict:
             if marca is not None:
                 cabecera = _int(marca.get_text(strip=True))
 
-            opcion = seccion.select_one("select.past-alineaciones option")
+            # LA OPCION ELEGIDA, NO LA PRIMERA (revision del
+            # 26/10/2026). En semana de Copa o de Europa FF pone
+            # primero el partido de esa competicion, numerado por
+            # ella (la Copa R1 es `data-jornada="1"`): el 26/10, 9
+            # de 20 paginas. La que FF ensena es la `selected` (la
+            # misma que `data-prox`). Sin `selected`, la primera,
+            # como antes.
+            opcion = (
+                seccion.select_one("select.past-alineaciones option[selected]")
+                or seccion.select_one("select.past-alineaciones option")
+            )
 
             if opcion is not None:
                 selector = _int(opcion.get("data-jornada"))

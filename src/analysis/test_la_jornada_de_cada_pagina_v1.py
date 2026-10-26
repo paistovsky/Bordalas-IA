@@ -407,6 +407,24 @@ def test_lee_la_jornada_de_la_pagina():
     assert con_senuelo != ALAVES_J11
     assert _jornada(con_senuelo) == (11, "POSIBLE", "CABECERA", True), _jornada(con_senuelo)
 
+    # (g4) LA SEMANA DE COPA (revision del 26/10): FF pone primero el
+    # partido de Copa, numerado por ella (`data-jornada="1"`), y la opcion
+    # que ensena es la `selected`. El 26/10 eran 9 de 20 paginas: con la
+    # primera opcion, la marca chocaba y la jornada salia None. Se lee la
+    # elegida: es la J11 posible.
+    copa = ('<option value="24123" data-jornada="1" data-confirmed="0">'
+            'Copa R1</option>')
+    marca = '<select class="past-alineaciones past-alineaciones-btn select_radius">'
+    assert ALAVES_J11.count(marca) == 1
+    con_copa = ALAVES_J11.replace(marca, marca + copa, 1)
+    assert _jornada(con_copa) == (11, "POSIBLE", "CABECERA", True), _jornada(con_copa)
+    # Sin ninguna `selected`, la primera, como antes (el DOM viejo).
+    sin_elegida = ALAVES_J11.replace(" selected>", ">")
+    assert sin_elegida != ALAVES_J11
+    assert _jornada(sin_elegida) == (11, "POSIBLE", "CABECERA", True), _jornada(sin_elegida)
+    copa_sin_elegida = con_copa.replace(" selected>", ">")
+    assert _jornada(copa_sin_elegida)[0] is None, _jornada(copa_sin_elegida)
+
     # (h) Con basura, todo None y sin lanzar.
     for basura in ("", None, 42, {"a": 1}, b"<p>basura</p>", "<<<>>>", object(),
                    '<section class="alineacion_wrapper" data-equipo="1"><h2 class="lineup-title">'

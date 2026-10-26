@@ -254,6 +254,17 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_LA_MEJORA_SOLO_SI_SUBE: "1"
 
+      # Encendido 26/10 de Madrid. LA JORNADA DE CADA PAGINA (laboratorio
+      #   del 25/10): el tablero de FF apunta de que jornada es la pagina de
+      #   cada equipo, y la mejora no saca a un titular sano ni mete a nadie
+      #   por una alineacion CONFIRMADA de otra jornada (el 0 % de Cardona
+      #   del 24/10 era la confirmada de la J10). Revision final del 26/10:
+      #   la opcion elegida del selector (en semana de Copa la primera es la
+      #   de Copa), 20 de 20 paginas de hoy leidas. Verja 223/223 con los de
+      #   produccion y con el nuevo; paso 0 con 54; ensayo #40300393985 verde.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_LA_JORNADA_DE_CADA_PAGINA: "1"
+
       # Encendido 17/10 de Madrid. LA PUJA EN 9.900 (laboratorio, paso 3):
       #   la puja de quien entra en el once termina en 9.900 (ninguna de las
       #   186 pujas rivales mas altas acaba entre 9.901 y 9.999; Pollo17
