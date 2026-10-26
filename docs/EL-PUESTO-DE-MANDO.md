@@ -352,6 +352,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **26/10 20:47 (laboratorio de rivales).** **Rivales:** Pollo17 vendio al
+  Computer a Jonathan David (DEL) por 9.716.300, el dia que bajaba -710.000
+  (comprado a Luismi el 18/09 por 8,4 M: +1,32 M en 5 semanas). Es su regla
+  de siempre: vender el activo caro en la primera caida fuerte. Luismi y
+  Prinzipote, solo lo del reset (Drkusic 746.000, +6,6 %). **Carrera:**
+  Pollo 388, Pepe 383 en jornadas cerradas; J10 nuestra 39 (se cierra hoy
+  con Sevilla-Osasuna). Valor de plantilla: Pollo 112,5 M, nosotros 59,7 M.
+  **Hoy, de produccion:** encendida BORDALAS_LA_JORNADA_DE_CADA_PAGINA (ver
+  entrada de las 11:30); la vuelta de las 13:07 refresco el tablero con las
+  marcas, sin avisos ni errores. **Aplicado:** nada mas. **Nota del lab de
+  la otra sesion (E63/E64):** el precio va una semana por detras de los
+  puntos, pero por los que hicieron 8+ ya hay pelea en la subasta (+9 %):
+  para revender no queda margen; para el once, si.
+
 - **26/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2501 a #2508).
   El chat del dueno encendio `BORDALAS_LA_JORNADA_DE_CADA_PAGINA`
   (7ac2f3e3, 11:24 de Madrid): las tres vueltas de despues (12:07, 13:07,
