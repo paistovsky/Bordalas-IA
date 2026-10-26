@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 26/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **26/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2492 a #2501,
+  la de las 07:15 incluida). Saldo **-1.452.225** a las 07:20 (+250.000,
+  la racha), 0 comprometido, reset sin compras ni ventas. Para el vie 30/10
+  15:00 faltan ~1,45 M: Jonny (~1,80 M) tras la J10 y el premio de la J10.
 
 - **25/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2485 a #2492).
   Saldo -1.702.225, 0 comprometido, sin movimientos. Plan para el vie
