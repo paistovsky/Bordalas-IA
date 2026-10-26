@@ -3483,7 +3483,7 @@
         "3159": {
           "player_name": "Jutglà",
           "team": "Celta",
-          "appearances_at_prediction": 9,
+          "appearances_at_prediction": 10,
           "sources": {
             "FUTBOLFANTASY": 80.0
           },
@@ -3530,7 +3530,7 @@
         "26271": {
           "player_name": "Yamal",
           "team": "Barcelona",
-          "appearances_at_prediction": 9,
+          "appearances_at_prediction": 10,
           "sources": {
             "FUTBOLFANTASY": 60.0,
             "ANALITICA_FANTASY": 70.0
@@ -3541,7 +3541,7 @@
         "29661": {
           "player_name": "Olasagasti",
           "team": "Levante",
-          "appearances_at_prediction": 9,
+          "appearances_at_prediction": 10,
           "sources": {
             "ANALITICA_FANTASY": 70.0
           },
@@ -3561,7 +3561,7 @@
         "37898": {
           "player_name": "Hugo Rincón",
           "team": "Athletic",
-          "appearances_at_prediction": 4,
+          "appearances_at_prediction": 5,
           "sources": {
             "FUTBOLFANTASY": 50.0,
             "ANALITICA_FANTASY": 25.0
@@ -3582,7 +3582,7 @@
         "38318": {
           "player_name": "Valentín Gómez",
           "team": "Betis",
-          "appearances_at_prediction": 4,
+          "appearances_at_prediction": 5,
           "sources": {
             "FUTBOLFANTASY": 20.0
           },
@@ -3592,7 +3592,7 @@
         "39966": {
           "player_name": "Álvaro Fidalgo",
           "team": "Betis",
-          "appearances_at_prediction": 3,
+          "appearances_at_prediction": 4,
           "sources": {
             "FUTBOLFANTASY": 30.0
           },

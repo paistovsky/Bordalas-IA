@@ -217275,5 +217275,41 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "f694f414d3b6859ef60ff85b",
+    "date": 1792994745,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 24336,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 240001
+      },
+      {
+        "player": 17148,
+        "to": {
+          "id": 14154203,
+          "name": "Prinzipote"
+        },
+        "amount": 480000
+      },
+      {
+        "player": 42119,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 746000
+      }
+    ]
   }
 ]
