@@ -69,6 +69,44 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E63 · 26/10/2026 11:16 de Madrid · El precio va una semana por detras de los puntos
+
+**Hipotesis:** Biwenger no sube el precio de un jugador de golpe tras una
+buena jornada: lo va subiendo dias despues. Si es asi, el martes aun se
+puede comprar barato al que puntuo mucho el fin de semana.
+**Datos:** puntos de cada jugador en la J8 y la J9 (fotos de
+`puntos_por_jornada`, 264 jugadores por jornada que jugaron; fuera
+Athletic, Rayo y Levante) y su precio dia a dia.
+**Codigo:** `lab/precio/tras_la_jornada.py`.
+
+    Spearman entre los puntos de la jornada y el cambio de precio de cada dia
+                     vie    sab    dom    lun  | mar    mie    jue    vie
+    J8 (09-12/10)   +0,13  +0,33  +0,33  +0,68 | +0,70  +0,70  +0,65  +0,59
+    J9 (16-19/10)   +0,17  +0,28  +0,32  +0,57 | +0,63  +0,60  +0,58  +0,58
+                                                 (ya sin partidos)
+
+    comprar al precio del martes y mirar el lunes siguiente (6 dias):
+                                  J8              J9
+    subio el martes, 8+ pts     +7,1 % (n=30)   +9,9 % (n=33)
+    subio el martes, <8 pts     +2,9 % (n=61)   +4,5 % (n=69)
+    no subio                    -4,8 %          -4,7 %
+
+**Lo que se aprende:**
+- **El precio va una semana por detras de los puntos:** con la jornada ya
+  terminada, los cambios de precio del martes al viernes siguen casi tan
+  ligados a los puntos como el del lunes (+0,58 a +0,70).
+- **Los puntos añaden algo a «subio ayer»** (E1/E44/E51): entre los que
+  suben el martes, los que hicieron 8 o mas puntos suben el doble en la
+  semana (+7 a +10 % contra +3 a +4,5 %). Las dos jornadas dicen lo mismo.
+- Sirve doble: suben mas Y son los que puntuan (para el once).
+
+**Limites:** dos jornadas; 30-33 casos en el grupo bueno; son jugadores que
+suben, asi que la subasta tiene pelea (E41/E49: +10 a +30 % de prima): para
+revender solo compensa si se gana con prima corta; para el once, siempre.
+
+**Veredicto: GANA** (pasa a «Listo para el plan»): ordenar a los que suben
+por los puntos de la ultima jornada.
+
 ### E62 · 25/10/2026 17:15 de Madrid · Vender a un manager (agenda, punto 4): un mercado que ya no existe
 
 **Hipotesis:** venderle a un manager paga mas que venderle al Computer,
@@ -2735,6 +2773,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E63, 26/10 11:16) Entre los que suben, primero los que puntuaron 8+
+  en la ultima jornada.** El precio sigue a los puntos toda la semana
+  siguiente (Spearman +0,6-0,7 de martes a viernes). Comprando al precio
+  del martes, los que suben y hicieron 8+ ganan +7/+10 % en 6 dias; los que
+  suben con menos, +3/+4,5 % (J8 y J9). Para la cartera, la rotacion, el
+  informe de la mañana y la mejora: a igualdad de lo demas, elegir al que
+  hizo mas puntos en la ultima jornada. Para revender, solo si la prima
+  queda por debajo de ~+7 % (E49/E51).
 - **(E61, 25/10 11:15) La lista de objetivos necesita ~10 nombres.** El
   Computer saca ~11 nuevos al dia casi al azar entre los ~424 libres y cada
   uno se queda dos dias: un jugador concreto sale uno de cada ~40 dias. Con
