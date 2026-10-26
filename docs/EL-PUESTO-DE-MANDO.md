@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/10/2026, 07:25 de Madrid (rafaga de las 07:15).
+Actualizado: 26/10/2026, 14:40 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **26/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2501 a #2508).
+  El chat del dueno encendio `BORDALAS_LA_JORNADA_DE_CADA_PAGINA`
+  (7ac2f3e3, 11:24 de Madrid): las tres vueltas de despues (12:07, 13:07,
+  14:07) verdes. Saldo -1.452.225, 0 comprometido, sin movimientos.
 
 - **26/10 11:30 (ENCENDIDO: BORDALAS_LA_JORNADA_DE_CADA_PAGINA).** Revision
   final de 2 (SAFE_WITH_FIXES). **Lo que habria pasado sin ella:** el plan
