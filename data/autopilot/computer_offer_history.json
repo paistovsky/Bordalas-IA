@@ -287,6 +287,14 @@
       "best_offer_rejected": 2320600,
       "last_rerolled_offer_id": 4236308346,
       "last_rerolled_at": "2026-10-22T20:11:05.960380+00:00"
+    },
+    "12494": {
+      "reroll_count": 1,
+      "best_offer_seen": 0,
+      "offers": [],
+      "best_offer_rejected": 5304600,
+      "last_rerolled_offer_id": 3127600278,
+      "last_rerolled_at": "2026-10-26T15:11:19.980566+00:00"
     }
   }
 }
