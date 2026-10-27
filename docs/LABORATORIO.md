@@ -69,6 +69,45 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E66 · 27/10/2026 17:20 de Madrid · Para una jornada, manda la titularidad de FF (y E65 se matiza)
+
+**Hipotesis:** E53 (el precio predice mejor que los puntos por partido) y
+E65 (la vara calibrada) valen para elegir quien puntua en una jornada.
+**Datos:** lo sabido antes de la J10 (foto tras la J9 y FF del 23/10)
+contra los puntos de la J10; 362 jugadores con 3+ partidos, con FF y con
+su equipo en la foto.
+**Codigo:** `lab/puntos/vara_j10.py`.
+
+    Spearman con los puntos de la J10
+    puntos por partido              +0,25
+    precio                          +0,26
+    FF sola                         +0,54
+    vara de Pepe (ppp x FF/100)     +0,52
+    vara calibrada E65 (escalones)  +0,47
+    vara calibrada (curva continua) +0,50
+    FF + 0,25 x pts/partido         +0,53   (mas peso a pts/partido o precio: peor)
+
+    nivel medio por jugador: real 3,75 | vara de Pepe 2,21 | curva calibrada 3,48
+
+**Lo que se aprende:**
+- **Para una jornada, lo que manda es la titularidad de FF** (+0,54): los
+  puntos por partido y el precio dicen poco (+0,25). E53 (precio mejor
+  que puntos por partido sobre dos jornadas) es cierto, pero ninguno de los
+  dos se acerca a FF para la jornada siguiente.
+- **La vara de Pepe ordena bien** (+0,52, casi como FF sola) **pero se
+  queda corta de nivel**: espera 2,21 puntos por jugador y salen 3,75.
+- **La calibracion de E65 arregla el nivel y empeora un poco el orden**
+  (+0,47 con escalones, +0,50 con curva): no conviene cambiar la vara
+  entera.
+
+**Limites:** una jornada; E65 se calibro con esta misma J10 (el nivel
+cuadra por construccion; el orden si es una prueba justa).
+
+**Veredicto: MATIZA E65** (se corrige su linea en «Listo para el plan»):
+para ordenar el once y elegir entre candidatos, la vara de hoy vale; la
+curva calibrada solo para convertir un cambio en puntos (y en euros,
+E16) cuando se compara con lo que cuesta.
+
 ### E65 · 27/10/2026 11:16 de Madrid · La titularidad de FF no es una probabilidad: un 50 % juega 8 de cada 10
 
 **El caso:** E58 se quedo sin datos (60 casos). Desde el 20/10 Pepe guarda
@@ -2857,6 +2896,10 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
   a la mejora a cambiar dudosos por fijos ganando la mitad de lo que dice.
   Donde: `esperado` de la mejora (tasa x titularidad / 100) y
   `el_calendario_de_puntos.xp_jugador`. Con interruptor y ensayo.
+  **Matiz de E66 (27/10 17:20): no cambiar la vara entera.** Para ordenar
+  el once y elegir candidatos, la vara de hoy ordena mejor (+0,52 contra
+  +0,47/+0,50). La curva calibrada solo para el NIVEL: cuantos puntos gana
+  un cambio cuando se compara con lo que cuesta.
 - **(E63, 26/10 11:16) Entre los que suben, primero los que puntuaron 8+
   en la ultima jornada.** El precio sigue a los puntos toda la semana
   siguiente (Spearman +0,6-0,7 de martes a viernes). Comprando al precio
