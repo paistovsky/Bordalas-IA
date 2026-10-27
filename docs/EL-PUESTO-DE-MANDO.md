@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **27/10 12:30 (laboratorio: el parte vende, revision final).** **Rivales:**
+  en el reset, Luismi gano a Vivian (1.512.000) a Pollo (1.407.000) y
+  compro al 21084 (3.250.001). **Revision final de BORDALAS_EL_PARTE_VENDE
+  (2 revisores):** seguro, pero ESTA SEMANA no hace nada (los 11 en el once
+  y en conservar) y tenia un choque real con el cambio de Cardona: no leia
+  `vender_si_ficha`, asi que podia vender a Cardona por su cuenta al 95 %
+  aunque la orden lo estuviera reteniendo (relevo en duda, oferta bajo el
+  suelo del gestor). **Arreglado (apagado, merge en main; workflow
+  construir + revisor + arreglar):** (1) no toca a nadie de
+  `vender_si_ficha.jugadores` ni de `viajes.candidatos` (motivo LA_ORDEN);
+  (2) sin la orden encendida y valida no vende a nadie (ORDEN_APAGADA /
+  ORDEN_NO_VALIDA; antes, con la orden caducada, conservar y proteger se
+  quedaban sin escudo); una fila de la orden sin player_id cuenta como
+  orden que no se entiende. Prueba 17/17 (las nuevas fallan sin el
+  arreglo); verja 223/223 y con --con. **Encendido: mar 03/11 10:30**, tras
+  la J11 (turno programado), con ensayo y la salida del parte guardada en el
+  artefacto. **Pendiente:** renovar `caduca` de la orden antes del 30/11.
+
 - **27/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2515 a #2524,
   la de las 07:15 incluida). **Jonny vendido** (ya no esta en la
   plantilla; entro ~1,70 M de madrugada). Saldo **+248.975** en la vuelta
