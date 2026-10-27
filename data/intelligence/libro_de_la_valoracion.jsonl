@@ -2256,3 +2256,5 @@
 {"dia":"2026-10-26","id":30081,"name":"Pape Gueye","value":0,"price":6900000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-26","id":34483,"name":"Pedro Díaz","value":0,"price":1040000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-26","id":42557,"name":"Adeyemi","value":0,"price":9980000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-26","id":17687,"name":"Kang-in Lee","value":6470409,"price":8970000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-26","id":42119,"name":"Drkusic","value":824683,"price":740000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
