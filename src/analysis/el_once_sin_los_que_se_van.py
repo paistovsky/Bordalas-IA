@@ -29,37 +29,79 @@ LO QUE PASO (26/10/2026, J11)
 
 QUE HACE (con `BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN`)
 
-    1. QUIEN SE VA NO SE ALINEA si hay otro que pueda jugar. Se va:
+    1. QUIEN SE VA ANTES DEL CIERRE NO SE ALINEA si hay otro DE FIAR
+       que pueda jugar su hueco. Se va:
 
-         - LA ORDEN: un `vender_si_ficha` que pasa la puerta de
-           `decidir` (la condicion general o todos con su relevo), con
-           su relevo ya en la plantilla, o con puja viva nuestra que se
-           resuelve antes del cierre; y un viaje en la plantilla.
+         - LA ORDEN: un `vender_si_ficha` que pasa las puertas de
+           `decidir` -la condicion general o todos con su relevo, su
+           relevo ya en la plantilla, `desde`, `si_saldo_negativo` y EL
+           PARTE DEL RELEVO (el relevo 'ok' o 'warned' en el catalogo,
+           salvo en rojo a menos de `HORAS_ROJO`)-; y un viaje en la
+           plantilla.
          - LA MEJORA: el `sale` de un cambio vivo con el `entra` ya
-           dentro, o con puja viva que se resuelve antes del cierre.
-         - LA ROTACION: el que sale de una pareja GANADA, o de una
-           PUJADA que se resuelve antes del cierre.
+           dentro y sano (su PARTE DEL RELEVO).
+         - LA ROTACION: el que sale de una pareja GANADA.
 
-       Una puja se resuelve en el reset de las 07:00 de Madrid (25 h el
-       dia del cambio de hora): con menos de `HORAS_DE_UNA_PUJA` hasta
-       el cierre no sienta a nadie. El inventario de la ronda y los
-       chollos y los `vender` del cierre NO cuentan: el cierre adopta
-       el inventario en su once y nunca vende a uno del once.
+       Y solo si se puede cobrar ANTES DEL CIERRE: ya tiene una oferta
+       del Computer que llega a su suelo, o el proximo reset de las
+       07:00 de Madrid -cuando nacen las ofertas- cae antes del cierre.
+       Si no, a la hora del cierre sigue siendo nuestro y juega: el
+       publicado la misma mañana en que llega su relevo no cobra hasta
+       el reset siguiente. Sin saber cuando cierra, solo cuenta la
+       oferta que ya esta.
 
-       Como: en la busqueda, el que se va lleva `SE_VA` restado. La
-       busqueda maximiza primero cuantos huecos llena y luego el score,
-       asi que solo entra si nadie mas puede llenar su hueco (el mismo
-       truco que el suelo del que no tiene pronostico). Al salir, todas
-       las fichas vuelven a sus numeros de verdad: ningun numero
-       castigado sale del motor.
+       Una puja viva por el relevo NO cuenta: se resuelve en un reset y
+       la venta necesita otro. Si caben los dos antes del cierre, tras
+       el primero el relevo ya esta dentro y cuenta por la via de
+       siempre; contarla antes solo metia vaivenes en el once (y en el
+       `once` que lee la mejora).
+
+       NUNCA SE SIENTA por venderse (`se_quedan` en el informe):
+
+         - un Dios (`mandatory_hierarchy`) ni un intocable de la orden;
+         - si la proxima ronda es de aplazados, uno de un equipo que la
+           juega (o cualquiera, si no se sabe quien la juega, o si no se
+           sabe si es de aplazados): el once se congela al empezar esa
+           ronda, la rotacion no lo vende antes
+           (`TITULAR_ANTES_DE_UNA_RONDA_PARCIAL`) y sentarlo le quitaria
+           sus puntos y desarmaria esa guardia, que mira si esta en el
+           once escrito.
+
+       El inventario de la ronda y los chollos y los `vender` del cierre
+       NO cuentan: el cierre adopta el inventario en su once y nunca
+       vende a uno del once.
+
+       COMO. Primero, la busqueda de siempre. Si su once no lleva a
+       nadie que se va, es ese: nada cambia. Si lo lleva, se busca otra
+       vez con `SE_VA` restado a los que se van: la busqueda maximiza
+       primero cuantos huecos llena y luego el score, asi que el que se
+       va solo entra si nadie mas puede llenar su hueco (el mismo truco
+       que el suelo del que no tiene pronostico), y el dibujo cambia si
+       hace falta. Ese once solo vale si TODOS los que entran respecto al
+       de siempre son DE FIAR: alineables sin aviso (`automatic_lineup`),
+       con pronostico de FF y con una titularidad de al menos
+       `TITULARIDAD_HUECO` (la de la mejora) o a `MARGEN_FF` puntos o
+       menos del que se va. Al que no lo es se le resta `NO_ENTRA` (mas
+       que once `SE_VA`) y se busca otra vez, hasta `VUELTAS` veces; si
+       no sale, el once de siempre. Antes juega el que se va que uno en
+       duda, sin pronostico o al 0 %: si al final se queda, puntua; el
+       otro, casi seguro que no. Y el once nunca lleva menos alineables
+       sin aviso que el de siempre: un SAVE_LINEUP que hoy se escribe no
+       pasa a quedarse bloqueado (`playable_count` < 11).
+
+       Al salir, todas las fichas vuelven a sus numeros de verdad:
+       ningun numero castigado sale del motor.
 
     2. JORNADA PERFECTA DESEMPATA. Si FF deja a dos del mismo puesto a
        `MARGEN_FF` puntos o menos de titularidad, y JP (de la jornada
        que toca y de menos de `HORAS_DE_JP`) dice que juega el de fuera
-       (TITULAR o PROBABLE) y da peor veredicto al de dentro, se
-       cambian. Nunca se sienta a un Dios; nunca entra uno que se va.
-       Cada uno se cambia una vez como mucho, y en su mismo puesto: el
-       dibujo no se toca.
+       (TITULAR o PROBABLE) y que el de dentro puede no jugar (DUDA,
+       SUPLENTE o NO_CONVOCADO), se cambian. Un PROBABLE dentro no se
+       toca: entre PROBABLE (84) y TITULAR (96) hay muy poco para
+       ganarle a la calidad. El que entra, siempre alineable sin aviso;
+       nunca se sienta a un Dios; nunca entra uno que se va. Cada uno se
+       cambia una vez como mucho, y en su mismo puesto: el dibujo no se
+       toca.
 
     El banquillo lo cuenta: SE_VA y DESEMPATE_JP en vez de un «puntua
     menos que Cardona» que seria falso. Y la salida trae el informe en
@@ -80,6 +122,11 @@ DONDE MANDA, Y DONDE NO
     gratis: JP se refresca cada 10 minutos en las 2 ultimas horas, y
     su TITULAR del que abre ya entra en el desempate.
 
+    Con una jornada jugandose (`en_curso`) la orden y la mejora no
+    cobran, pero no hace falta mirarlo: el once que se escribe entonces
+    es el de la ronda SIGUIENTE, y cobran en cuanto acaba esta, antes de
+    ese cierre.
+
 EL INTERRUPTOR
 
     `BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN`. Nace APAGADO: sin el, el
@@ -89,9 +136,10 @@ EL INTERRUPTOR
 
 from __future__ import annotations
 
+import math
 import os
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 
 ENV = "BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN"
@@ -104,13 +152,19 @@ ENV = "BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN"
 # que nunca compite con ellos.
 SE_VA = 100_000_000.0
 
-# Una puja se resuelve en el siguiente reset de las 07:00 de Madrid:
-# como mucho 24 h, 25 el dia del cambio de hora. Con menos hasta el
-# cierre, puede no resolverse a tiempo: no sienta a nadie.
-HORAS_DE_UNA_PUJA = 25
+# Lo que se le resta al que entraria por uno que se va sin ser de
+# fiar: mas que once `SE_VA` (no hay mas de once que se van en un
+# once). Antes juega el que se va que el.
+NO_ENTRA = 12 * SE_VA
+
+# Cuantas veces se vuelve a buscar quitando a los que no son de fiar.
+# Cada vuelta quita al menos uno; si no basta, el once de siempre.
+VUELTAS = 4
 
 # Lo mas que FF puede separar a dos del mismo puesto para que desempate
-# Jornada Perfecta, en puntos de titularidad.
+# Jornada Perfecta, en puntos de titularidad. Y lo mas por debajo del
+# que se va que puede estar el que entra por el (si no llega a
+# `TITULARIDAD_HUECO`).
 MARGEN_FF = 10.0
 
 # Lo mas viejo que puede ser JP para desempatar: la misma frescura
@@ -131,6 +185,9 @@ ORDEN_JP = {
 # Los que dicen que juega: solo estos entran por JP.
 DICE_QUE_JUEGA = frozenset({"TITULAR", "PROBABLE"})
 
+# Y el de dentro solo sale si JP dice que puede no jugar: DUDA o peor.
+PUEDE_NO_JUGAR = ORDEN_JP["DUDA"]
+
 # Los motivos del banquillo que se pueden reescribir con SE_VA: los
 # que hablan de puntuar. Un lesionado o uno en duda se queda con su
 # motivo, que es el primer corte que no paso.
@@ -139,8 +196,13 @@ REESCRIBIBLES = frozenset({"POSICION_CUBIERTA", "SIN_PRONOSTICO", "PUNTUA_MENOS"
 POR_LA_ORDEN = "LA_ORDEN_DEL_GESTOR"
 POR_LA_MEJORA = "LA_MEJORA"
 POR_LA_ROTACION = "LA_ROTACION"
-CON_PUJA = ": relevo pujado"
 DE_VIAJE = ": viaje"
+
+# Por que uno que se esta vendiendo no se sienta (`se_quedan`).
+NO_SE_COBRA_ANTES = "NO_SE_COBRA_ANTES_DEL_CIERRE"
+UN_DIOS = "UN_DIOS"
+JUEGA_LOS_APLAZADOS = "JUEGA_LA_RONDA_DE_APLAZADOS"
+SIN_SABER_LAS_RONDAS = "SIN_SABER_SI_VIENE_UNA_RONDA_DE_APLAZADOS"
 
 
 def activa() -> bool:
@@ -170,7 +232,8 @@ def _num(x, defecto=None):
     try:
         if x is None or isinstance(x, bool):
             return defecto
-        return float(x)
+        valor = float(x)
+        return defecto if math.isnan(valor) else valor
     except (TypeError, ValueError):
         return defecto
 
@@ -188,6 +251,8 @@ def _ids(x) -> set:
     try:
         if isinstance(x, dict):
             x = x.keys()
+        if isinstance(x, (str, bytes)):
+            return set()
         return {i for i in (_int(v) for v in (x or ())) if i is not None}
     except Exception:                               # noqa: BLE001
         return set()
@@ -211,26 +276,57 @@ def _momento(ahora) -> datetime | None:
         return None
 
 
-def _apuntar(salida: dict, plantilla: set, pid, motivo: str) -> None:
+def _estado(estados, pid) -> str:
+    return str(_dict(estados).get(pid) or "").strip().lower()
+
+
+def _apuntar(salida: dict, plantilla: set, pid, motivo: str, suelo) -> None:
+    """`salida[pid][motivo] = suelo` (el mas bajo si se repite; None si
+    no se sabe)."""
     pid = _int(pid)
     if pid is None or pid not in plantilla:
         return
-    motivos = salida.setdefault(pid, [])
-    if motivo not in motivos:
-        motivos.append(motivo)
+    motivos = salida.setdefault(pid, {})
+    suelo = _int(suelo)
+    if motivo in motivos and motivos[motivo] is not None and suelo is not None:
+        motivos[motivo] = min(motivos[motivo], suelo)
+    elif motivo not in motivos:
+        motivos[motivo] = suelo
 
 
 # ============================================================
 # 1. QUIEN SE VA
 # ============================================================
 
-def _de_la_orden(salida, plantilla, orden, pujas, saldo, ahora, puja_cuenta) -> None:
-    """La orden del gestor: `vender_si_ficha` (con la puerta de
-    `decidir`) y los viajes. Solo viva: encendida, valida y sin
-    caducar."""
+def _relevo_sano(relevo, sale, estados, saldo, horas, *, sanos, horas_rojo,
+                 fuera=frozenset()) -> bool:
+    """
+    EL PARTE DEL RELEVO, como lo mira `decidir` (la orden y la mejora):
+    para cobrar al que sale, su relevo 'ok' o 'warned' en el catalogo,
+    salvo en rojo a menos de `horas_rojo`. Y en rojo y cerca, con
+    `fuera`, tampoco si el relevo no juega seguro y el que sale si (la
+    orden). Sin `estados` (None), no se mira. Sin estado, no esta sano.
+    """
+    if estados is None:
+        return True
+    parte = _estado(estados, relevo) if relevo is not None else ""
+    en_rojo_y_cerca = (
+        saldo is not None and saldo < 0
+        and horas is not None and horas < horas_rojo
+    )
+    if parte not in sanos and not en_rojo_y_cerca:
+        return False
+    if parte in fuera and _estado(estados, sale) not in fuera:
+        return False
+    return True
+
+
+def _de_la_orden(salida, plantilla, orden, saldo, ahora, horas, estados) -> None:
+    """La orden del gestor: `vender_si_ficha` (con las puertas de
+    `decidir`, seccion 3) y los viajes (seccion 4). Solo viva:
+    encendida, valida y sin caducar."""
 
     from src.actions import la_orden_del_gestor as orden_mod
-    from src.actions.la_mejora_del_once import las_ventas_de_la_orden
 
     if ahora is None or not orden_mod.activa() or orden_mod.validar(orden, ahora) is not None:
         return
@@ -240,36 +336,45 @@ def _de_la_orden(salida, plantilla, orden, pujas, saldo, ahora, puja_cuenta) -> 
     general = _int(venta.get("si_esta"))
     jugadores = _lista(venta.get("jugadores"))
 
-    # LA PUERTA DE `decidir` (seccion 3): sin `si_esta` general, todos
-    # tienen que traer su propio relevo; si falta uno, no vende a nadie.
+    # LA PUERTA DE `decidir`: con `si_esta` general, que este; sin el,
+    # todos tienen que traer su propio relevo (si falta uno, nadie).
     todos_con_relevo = bool(jugadores) and all(
         isinstance(j, dict) and _int(j.get("si_esta")) for j in jugadores)
 
-    if general or todos_con_relevo:
-        # Los que siguen en pie: su relevo (el general y el suyo) esta
-        # dentro o tiene puja viva nuestra. Sin `mercado`: uno que solo
-        # sigue en el mercado del Computer no se va todavia.
-        for j in las_ventas_de_la_orden(orden, plantilla=plantilla, pujadas=pujas):
+    if (general and general in plantilla) or (not general and todos_con_relevo):
+        for j in jugadores:
+            if not isinstance(j, dict):
+                continue
             pid = _int(j.get("player_id"))
             if pid not in plantilla:
                 continue
             if str(j.get("nombre", "")).strip().lower() in intocables:
+                continue
+            # SU PROPIO RELEVO: dentro. Uno pujado no basta (ver la
+            # cabecera: la puja no cuenta).
+            relevo = _int(j.get("si_esta"))
+            if relevo and relevo not in plantilla:
                 continue
             desde = orden_mod._cuando(j.get("desde")) if j.get("desde") else None
             if desde is not None and ahora < desde:
                 continue
             if j.get("si_saldo_negativo") and (saldo is None or saldo >= 0):
                 continue
-            relevos = {r for r in (general, _int(j.get("si_esta"))) if r is not None}
-            if relevos and all(r in plantilla for r in relevos):
-                _apuntar(salida, plantilla, pid, POR_LA_ORDEN)
-            elif puja_cuenta:
-                _apuntar(salida, plantilla, pid, POR_LA_ORDEN + CON_PUJA)
+            # EL PARTE DEL RELEVO: no frena el ultimo recurso.
+            if not j.get("si_saldo_negativo") and not _relevo_sano(
+                relevo or general, pid, estados, saldo, horas,
+                sanos=orden_mod.SANOS, horas_rojo=orden_mod.HORAS_ROJO,
+                fuera=orden_mod.FUERA,
+            ):
+                continue
+            _apuntar(salida, plantilla, pid, POR_LA_ORDEN, _int(j.get("suelo"), 0))
 
-    # LOS VIAJES (seccion 4): el candidato que ya es nuestro se pone a
-    # la venta siempre. Los mismos filtros que `decidir`.
+    # LOS VIAJES: el candidato que ya es nuestro se pone a la venta
+    # siempre. Los mismos filtros y el mismo suelo que `decidir`.
     viajes = _dict(orden.get("viajes"))
     tope = _int(viajes.get("tope_por_viaje"), 0) or 0
+    hasta = orden_mod._cuando(viajes.get("hasta")) if viajes.get("hasta") else None
+    listo = 0.95 if (hasta is not None and ahora >= hasta) else 1.01
     for v in _lista(viajes.get("candidatos")):
         if not isinstance(v, dict):
             continue
@@ -277,44 +382,134 @@ def _de_la_orden(salida, plantilla, orden, pujas, saldo, ahora, puja_cuenta) -> 
         puja = _int(v.get("puja"), 0) or 0
         if not pid or puja <= 0 or (tope and puja > tope):
             continue
-        _apuntar(salida, plantilla, pid, POR_LA_ORDEN + DE_VIAJE)
+        _apuntar(salida, plantilla, pid, POR_LA_ORDEN + DE_VIAJE, int(puja * listo))
 
 
-def _de_la_mejora(salida, plantilla, libro, pujas, puja_cuenta) -> None:
-    """La mejora del once: el `sale` de cada cambio vivo. Nunca el
-    `entra`."""
+def _de_la_mejora(salida, plantilla, libro, saldo, horas, estados) -> None:
+    """La mejora del once: el `sale` de cada cambio vivo con el `entra`
+    ya dentro y sano. Nunca el `entra`."""
 
     from src.actions import la_mejora_del_once as mejora_mod
-    from src.actions.el_cierre_de_la_jornada import la_mejora
 
     if not mejora_mod.activa():
         return
 
-    # Con `pujas` (aunque vacio): el cambio cuyo `entra` ni esta ni
-    # tiene puja viva es una puja perdida y no cuenta.
-    de_la_mejora = la_mejora(_dict(libro), plantilla, set(pujas))
+    for entra, cambio in _dict(libro).items():
+        cambio = _dict(cambio)
+        entra, sale = _int(entra), _int(cambio.get("sale"))
+        if entra is None or sale is None or entra not in plantilla:
+            continue
+        if not _relevo_sano(entra, sale, estados, saldo, horas,
+                            sanos=mejora_mod.SANOS, horas_rojo=mejora_mod.HORAS_ROJO):
+            continue
+        # El suelo de `decidir`: en rojo y cerca de la jornada, cualquiera.
+        suelo = _int(cambio.get("suelo"), 0) or 0
+        if (horas is not None and horas < mejora_mod.HORAS_SOLVENCIA
+                and saldo is not None and saldo < 0):
+            suelo = 0
+        _apuntar(salida, plantilla, sale, POR_LA_MEJORA, suelo)
 
-    for pid in sorted(de_la_mejora["se_van"]):
-        _apuntar(salida, plantilla, pid, POR_LA_MEJORA)
 
-    if puja_cuenta:
-        for pid in sorted(de_la_mejora["vende"] - de_la_mejora["se_van"]):
-            _apuntar(salida, plantilla, pid, POR_LA_MEJORA + CON_PUJA)
-
-
-def _de_la_rotacion(salida, plantilla, parejas, puja_cuenta) -> None:
+def _de_la_rotacion(salida, plantilla, parejas, precios) -> None:
     """La rotacion: `las_parejas_abiertas()` (vacia si esta apagada).
-    GANADA se va; PUJADA, si su puja llega antes del cierre."""
+    Se va el que sale de una GANADA: su relevo ya esta dentro. Su suelo,
+    el que acepta sin prisa (`ACEPTA` de su valor)."""
 
-    parejas = _dict(parejas)
-    se_van = _ids(parejas.get("se_van"))
+    from src.actions.la_rotacion import ACEPTA
 
-    for pid in sorted(se_van):
-        _apuntar(salida, plantilla, pid, POR_LA_ROTACION)
+    for pid in sorted(_ids(_dict(parejas).get("se_van"))):
+        precio = _int(_dict(precios).get(pid))
+        suelo = math.ceil(precio * ACEPTA) if precio else None
+        _apuntar(salida, plantilla, pid, POR_LA_ROTACION, suelo)
 
-    if puja_cuenta:
-        for pid in sorted(_ids(parejas.get("salen")) - se_van):
-            _apuntar(salida, plantilla, pid, POR_LA_ROTACION + CON_PUJA)
+
+def _el_proximo_reset(ahora) -> datetime | None:
+    """El proximo reset de las 07:00 de Madrid (cuando nacen las ofertas
+    del Computer y se resuelven las pujas), en UTC. None si falla."""
+    try:
+        from src.actions.la_rotacion import los_resets
+
+        return los_resets(ahora)[1]
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def se_cobra_antes_del_cierre(oferta, suelo, ahora, segundos_al_cierre) -> bool:
+    """
+    Si al que se vende se le puede cobrar antes del cierre: ya tiene una
+    oferta del Computer que llega a su `suelo`, o el proximo reset de
+    las 07:00 de Madrid (cuando nacen las ofertas) cae antes del cierre.
+    Sin saber cuando cierra, solo la oferta. Pura, nunca lanza.
+    """
+    try:
+        oferta, suelo = _int(oferta), _int(suelo)
+        if oferta is not None and suelo is not None and oferta >= suelo:
+            return True
+        ahora, segundos = _momento(ahora), _num(segundos_al_cierre)
+        if ahora is None or segundos is None:
+            return False
+        proximo = _el_proximo_reset(ahora)
+        return proximo is not None and proximo < ahora + timedelta(seconds=segundos)
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def _quien_se_va(
+    plantilla,
+    *,
+    orden=None,
+    libro_mejora=None,
+    parejas=None,
+    saldo=None,
+    ahora=None,
+    segundos_al_cierre=None,
+    estados=None,
+    ofertas=None,
+    precios=None,
+) -> tuple:
+    """`(se_van, no_llegan)`: `{id: [motivos]}` de los que se van antes
+    del cierre, y de los que se estan vendiendo pero no se cobran antes.
+    Ver `los_que_se_van`. Nunca lanza."""
+
+    candidatos: dict = {}
+
+    try:
+        plantilla = _ids(plantilla)
+        saldo = _int(saldo)
+        ahora = _momento(ahora)
+        segundos = _num(segundos_al_cierre)
+        horas = None if segundos is None else segundos / 3600.0
+        estados = None if estados is None else {
+            _int(k): v for k, v in _dict(estados).items() if _int(k) is not None}
+
+        # Cada libro por su lado: uno roto no se lleva a los demas.
+        for paso in (
+            lambda: _de_la_orden(candidatos, plantilla, _dict(orden), saldo, ahora,
+                                 horas, estados) if isinstance(orden, dict) else None,
+            lambda: _de_la_mejora(candidatos, plantilla, libro_mejora, saldo, horas, estados),
+            lambda: _de_la_rotacion(candidatos, plantilla, parejas, precios),
+        ):
+            try:
+                paso()
+            except Exception:                       # noqa: BLE001
+                continue
+
+        ofertas = {_int(k): v for k, v in _dict(ofertas).items() if _int(k) is not None}
+        se_van, no_llegan = {}, {}
+
+        for pid, motivos in candidatos.items():
+            suelos = [s for s in motivos.values() if s is not None]
+            oferta = _dict(ofertas.get(pid)).get("amount")
+            if se_cobra_antes_del_cierre(oferta, min(suelos) if suelos else None,
+                                         ahora, segundos):
+                se_van[pid] = list(motivos)
+            else:
+                no_llegan[pid] = list(motivos)
+
+        return se_van, no_llegan
+
+    except Exception:                               # noqa: BLE001
+        return {}, {}
 
 
 def los_que_se_van(
@@ -323,60 +518,124 @@ def los_que_se_van(
     orden=None,
     libro_mejora=None,
     parejas=None,
-    pujas=None,
     saldo=None,
     ahora=None,
     segundos_al_cierre=None,
+    estados=None,
+    ofertas=None,
+    precios=None,
 ) -> dict:
     """
     `{player_id: [motivos]}` de los de la plantilla que se estan
-    vendiendo. Pura: ni disco, ni red, ni reloj. Nunca lanza.
+    vendiendo y se pueden cobrar antes del cierre. Pura: ni disco, ni
+    red, ni reloj. Nunca lanza.
 
         plantilla           {id} de los nuestros
         orden               la orden del gestor (`leer_la_orden`)
-        libro_mejora        el libro de la mejora ({entra: {sale, ...}})
+        libro_mejora        el libro de la mejora ({entra: {sale, suelo}})
         parejas             `la_rotacion.las_parejas_abiertas()`
-        pujas               {id} con puja viva nuestra (o su dict)
-        saldo               el saldo de la foto (para `si_saldo_negativo`)
+        saldo               el saldo de la foto (`si_saldo_negativo`, y
+                            en rojo y cerca para EL PARTE DEL RELEVO)
         ahora               la hora (sin ella, la orden no cuenta: no se
                             sabe si caduco)
         segundos_al_cierre  hasta el cierre de la jornada (T-15); sin el,
-                            ninguna puja viva sienta a nadie
+                            solo se va el que ya tiene oferta a su suelo
+        estados             {id: status} del catalogo (EL PARTE DEL
+                            RELEVO); None, no se mira
+        ofertas             {id: {amount}} del Computer (`leer_la_foto`)
+        precios             {id: precio} (el suelo de la rotacion)
 
     El 26/10: la orden vende a Jonny (1599) cuando esta Kike Salas
-    (28115), y Kike ya es nuestro -> {1599: ['LA_ORDEN_DEL_GESTOR']}.
+    (28115), Kike ya es nuestro y sano, y quedan cuatro dias al cierre
+    -> {1599: ['LA_ORDEN_DEL_GESTOR']}.
     """
 
-    salida: dict = {}
+    return _quien_se_va(
+        plantilla, orden=orden, libro_mejora=libro_mejora, parejas=parejas,
+        saldo=saldo, ahora=ahora, segundos_al_cierre=segundos_al_cierre,
+        estados=estados, ofertas=ofertas, precios=precios,
+    )[0]
 
+
+def _nombrados(plantilla, libros) -> set:
+    """Los de la plantilla que nombra algun libro, sin mirar ninguna
+    puerta: si no hay ninguno, el reloj no hace falta. Nunca lanza."""
     try:
-        plantilla = _ids(plantilla)
-        pujas = _ids(pujas)
-        saldo = _int(saldo)
-        ahora = _momento(ahora)
-        segundos = _num(segundos_al_cierre)
-        puja_cuenta = segundos is not None and segundos > HORAS_DE_UNA_PUJA * 3600
-
-        # Cada libro por su lado: uno roto no se lleva a los demas.
-        for paso in (
-            lambda: _de_la_orden(salida, plantilla, _dict(orden), pujas, saldo,
-                                 ahora, puja_cuenta) if isinstance(orden, dict) else None,
-            lambda: _de_la_mejora(salida, plantilla, libro_mejora, pujas, puja_cuenta),
-            lambda: _de_la_rotacion(salida, plantilla, parejas, puja_cuenta),
-        ):
-            try:
-                paso()
-            except Exception:                       # noqa: BLE001
-                continue
-
+        libros = _dict(libros)
+        orden = _dict(libros.get("orden"))
+        nombres = set()
+        for j in _lista(_dict(orden.get("vender_si_ficha")).get("jugadores")):
+            nombres |= _ids([_dict(j).get("player_id")])
+        for v in _lista(_dict(orden.get("viajes")).get("candidatos")):
+            nombres |= _ids([_dict(v).get("player_id")])
+        for cambio in _dict(libros.get("mejora")).values():
+            nombres |= _ids([_dict(cambio).get("sale")])
+        nombres |= _ids(_dict(libros.get("parejas")).get("se_van"))
+        return nombres & _ids(plantilla)
     except Exception:                               # noqa: BLE001
-        return {}
-
-    return salida
+        return set()
 
 
 # ============================================================
-# 2. JORNADA PERFECTA, SI VALE
+# 2. LOS QUE NUNCA SE SIENTAN POR VENDERSE
+# ============================================================
+
+def los_que_no_se_sientan(players, se_van, rondas, equipos) -> dict:
+    """
+    `{id: motivo}` de los de `se_van` que juegan igual (cabecera, punto
+    1): un Dios o un intocable (`UN_DIOS`); y, si la proxima ronda es de
+    aplazados (`rondas`, el de `la_rotacion.el_reloj`), el de un equipo
+    que la juega (`JUEGA_LOS_APLAZADOS`), o cualquiera si no se sabe
+    quien la juega o si no se sabe si viene una
+    (`SIN_SABER_LAS_RONDAS`). `equipos`, {teamID: nombre} del catalogo.
+    Pura, nunca lanza: si algo falla, todos.
+    """
+
+    se_van = _ids(se_van)
+
+    try:
+        from src.actions.la_orden_del_gestor import INTOCABLES
+        from src.analysis.el_calendario_de_puntos import clave_de_equipo
+
+        fichas = {_pid(p): p for p in (players or []) if isinstance(p, dict)}
+        salida = {}
+
+        for pid in se_van:
+            ficha = _dict(fichas.get(pid))
+            nombre = str(ficha.get("name") or "").strip().lower()
+            if ficha.get("mandatory_hierarchy") or any(t in nombre for t in INTOCABLES):
+                salida[pid] = UN_DIOS
+
+        resto = sorted(se_van - set(salida))
+        if not resto:
+            return salida
+
+        rondas = _dict(rondas)
+        if rondas.get("sin_calendario", True):
+            return {**salida, **{pid: SIN_SABER_LAS_RONDAS for pid in resto}}
+
+        if not rondas.get("ronda_parcial"):
+            return salida
+
+        claves = rondas.get("equipos_parcial")
+        claves = ({str(c) for c in claves}
+                  if isinstance(claves, (list, tuple, set, frozenset)) else set())
+        nombres = {_int(k): v for k, v in _dict(equipos).items() if _int(k) is not None}
+
+        for pid in resto:
+            equipo = _int(_dict(fichas.get(pid)).get("teamID"))
+            clave = clave_de_equipo(nombres.get(equipo)) if nombres.get(equipo) else None
+            if not claves or clave is None or clave in claves:
+                salida[pid] = JUEGA_LOS_APLAZADOS
+
+        return salida
+
+    except Exception:                               # noqa: BLE001
+        return {pid: SIN_SABER_LAS_RONDAS for pid in se_van}
+
+
+# ============================================================
+# 3. JORNADA PERFECTA, SI VALE
 # ============================================================
 
 def jp_vale(lineup_intelligence, ronda) -> tuple:
@@ -426,25 +685,128 @@ def _veredicto(ficha) -> str | None:
 
 
 # ============================================================
-# 3. LA BUSQUEDA Y EL REMATE
+# 4. LA BUSQUEDA Y EL REMATE
 # ============================================================
 
-def para_la_busqueda(players, se_van) -> list:
+def para_la_busqueda(players, se_van, no_entran=()) -> list:
     """
     La lista que ve la busqueda: la misma, con `SE_VA` restado al
-    `lineup_score` de los que se van (una copia de su ficha; las demas,
-    tal cual). Como la entrada es otra, `el_once_se_busca_una_vez` no
-    la confunde con la de los que valoran.
+    `lineup_score` de los que se van y `NO_ENTRA` al de los que no son
+    de fiar para entrar por ellos (una copia de su ficha; las demas, tal
+    cual). Como la entrada es otra, `el_once_se_busca_una_vez` no la
+    confunde con la de los que valoran.
     """
 
-    se_van = _ids(se_van)
+    se_van, no_entran = _ids(se_van), _ids(no_entran)
+
+    def _castigo(pid):
+        return (SE_VA if pid in se_van else 0.0) + (NO_ENTRA if pid in no_entran else 0.0)
 
     return [
-        {**p, "lineup_score": float(p.get("lineup_score") or 0.0) - SE_VA}
-        if _pid(p) in se_van
+        {**p, "lineup_score": float(p.get("lineup_score") or 0.0) - _castigo(_pid(p))}
+        if _pid(p) in se_van or _pid(p) in no_entran
         else p
         for p in players
     ]
+
+
+def el_liston(fuera) -> float:
+    """
+    La titularidad de FF minima del que entra por los que se van
+    (`fuera`, sus fichas): `TITULARIDAD_HUECO` (la de la mejora: por
+    debajo, es un hueco) o `MARGEN_FF` por debajo del que se va, lo que
+    sea menos. Si uno de ellos no tiene pronostico, cualquiera con
+    pronostico. Nunca lanza.
+    """
+
+    try:
+        from src.actions.la_mejora_del_once import TITULARIDAD_HUECO
+
+        liston = float(TITULARIDAD_HUECO)
+    except Exception:                               # noqa: BLE001
+        liston = 50.0
+
+    for ficha in fuera or ():
+        ff = _num(_dict(ficha).get("starter_probability"))
+        if ff is None:
+            return float("-inf")
+        liston = min(liston, ff - MARGEN_FF)
+
+    return liston
+
+
+def de_fiar(ficha, liston) -> bool:
+    """Si puede entrar por uno que se va: alineable sin aviso, con
+    pronostico de FF y con al menos `liston`. Nunca lanza."""
+    ficha = _dict(ficha)
+    ff = _num(ficha.get("starter_probability"))
+    return bool(
+        ficha.get("lineup_eligible")
+        and ficha.get("automatic_lineup")
+        and ff is not None
+        and ff >= liston
+    )
+
+
+def elegir(preparado, players, candidatas, buscar) -> tuple:
+    """
+    `(candidatas, notas)`. `candidatas`, las de la busqueda de siempre
+    (de mejor a peor: la primera es el once); `buscar(lista)`, la misma
+    busqueda sobre otra lista (`lineup_engine._todas_las_formaciones`).
+
+    Si el once de siempre no lleva a nadie que se va, el mismo. Si lo
+    lleva, se busca sin ellos y solo vale si todos los que entran son de
+    fiar (cabecera, punto 1, COMO). Si no sale en `VUELTAS`, el de
+    siempre. Las candidatas que salen pueden traer numeros castigados:
+    `rematar` y `sin_castigo` los devuelven a los de verdad.
+
+    `notas`: {no_entran: [ids], al_de_siempre, vueltas}. Nunca lanza:
+    si algo falla, las de siempre.
+    """
+
+    notas = {"no_entran": [], "al_de_siempre": False, "vueltas": 0}
+
+    try:
+        se_van = _ids(_dict(preparado).get("se_van"))
+        players = [p for p in (players or []) if isinstance(p, dict)]
+
+        if not se_van or not candidatas:
+            return candidatas, notas
+
+        de_siempre = _lista(_dict(candidatas[0]).get("selected"))
+        dentro = {_pid(c) for c in de_siempre}
+        fuera = [c for c in de_siempre if _pid(c) in se_van]
+
+        if not fuera:
+            return candidatas, notas
+
+        fichas = {_pid(p): p for p in players}
+        liston = el_liston(fuera)
+        no_entran: set = set()
+
+        for vuelta in range(1, VUELTAS + 1):
+            notas["vueltas"] = vuelta
+            otras = buscar(para_la_busqueda(players, se_van, no_entran))
+            if not otras:
+                break
+            nuevos = {_pid(c) for c in _lista(_dict(otras[0]).get("selected"))} - dentro
+            malos = {
+                n for n in nuevos
+                if n in se_van or not de_fiar(fichas.get(n), liston)
+            }
+            if not malos:
+                notas["no_entran"] = sorted(no_entran)
+                return otras, notas
+            if malos <= no_entran:
+                break
+            no_entran |= malos
+
+        notas["no_entran"] = sorted(no_entran)
+        notas["al_de_siempre"] = True
+        return candidatas, notas
+
+    except Exception:                               # noqa: BLE001
+        return candidatas, {"no_entran": [], "al_de_siempre": True, "vueltas": 0}
 
 
 def _restaurar(players, selected) -> list:
@@ -460,7 +822,7 @@ def _restaurar(players, selected) -> list:
     ]
 
 
-def _desempatar(once, players, se_van, con_dudas) -> tuple:
+def _desempatar(once, players, se_van) -> tuple:
     """
     El desempate de JP sobre el once ya restaurado. Devuelve `(once,
     desempates)`. Ver la cabecera, punto 2.
@@ -475,11 +837,13 @@ def _desempatar(once, players, se_van, con_dudas) -> tuple:
     def _ff(ficha):
         return _num(ficha.get("starter_probability"))
 
+    # El que entra, siempre alineable sin aviso: nunca baja la cuenta de
+    # los que Biwenger deja alinear sin duda.
     candidatos = [
         o for o in players
         if _pid(o) not in dentro
         and o.get("lineup_eligible")
-        and (o.get("automatic_lineup") or con_dudas)
+        and o.get("automatic_lineup")
         and _pid(o) not in se_van
         and _ff(o) is not None
         and _veredicto(o) in DICE_QUE_JUEGA
@@ -503,6 +867,7 @@ def _desempatar(once, players, se_van, con_dudas) -> tuple:
             and not s.get("mandatory_hierarchy")
             and _ff(s) is not None
             and _rango(s) is not None
+            and _rango(s) <= PUEDE_NO_JUGAR
             and _rango(s) < _rango(fuera)
             and abs(_ff(s) - _ff(fuera)) <= MARGEN_FF
             and s.get("lineup_position") in puestos
@@ -531,21 +896,24 @@ def _desempatar(once, players, se_van, con_dudas) -> tuple:
     return once, desempates
 
 
-def rematar(preparado, players, selected, con_dudas=False) -> tuple:
+def rematar(preparado, players, selected, notas=None) -> tuple:
     """
-    `(once, informe)` tras la busqueda:
+    `(once, informe)` tras la busqueda (y `elegir`):
 
         1. cada ficha elegida vuelve a sus numeros de verdad (los de
            `players`), con su `lineup_position`;
         2. si JP vale, el desempate (cabecera, punto 2).
 
-    El informe: `{"se_van": [{id, name, por, en_el_once}], "desempates":
-    [{entra, entra_nombre, sale, sale_nombre, ff, jp}], "jp": {vale,
-    motivo, ronda, edad_horas, jornada}}`. Con basura, devuelve lo que
-    le llego y un informe vacio. Nunca lanza.
+    El informe: `{"se_van": [{id, name, por, en_el_once}], "se_quedan":
+    [{id, name, por, motivo}], "no_entran": [{id, name}],
+    "al_de_siempre", "desempates": [{entra, entra_nombre, sale,
+    sale_nombre, ff, jp}], "jp": {vale, motivo, ronda, edad_horas,
+    jornada}}`. Con basura, devuelve lo que le llego y un informe vacio.
+    Nunca lanza.
     """
 
-    informe = {"se_van": [], "desempates": [], "jp": {}}
+    informe = {"se_van": [], "se_quedan": [], "no_entran": [], "al_de_siempre": False,
+               "desempates": [], "jp": {}}
 
     if not isinstance(selected, list):
         return selected, informe
@@ -558,18 +926,20 @@ def rematar(preparado, players, selected, con_dudas=False) -> tuple:
         return selected, informe
 
     try:
-        por = _dict(preparado.get("por"))
+        por = _dict(preparado.get("se_van"))
         se_van = set(por)
+        notas = _dict(notas)
         informe["jp"] = dict(_dict(preparado.get("jp")))
+        informe["al_de_siempre"] = bool(notas.get("al_de_siempre"))
 
         if informe["jp"].get("vale"):
             try:
-                once, informe["desempates"] = _desempatar(
-                    once, players, se_van, bool(con_dudas))
+                once, informe["desempates"] = _desempatar(once, players, se_van)
             except Exception:                       # noqa: BLE001
                 informe["desempates"] = []
 
         dentro = {_pid(c) for c in once}
+        fichas = {_pid(p): p for p in players}
 
         informe["se_van"] = [
             {
@@ -580,6 +950,23 @@ def rematar(preparado, players, selected, con_dudas=False) -> tuple:
             }
             for p in players
             if _pid(p) in se_van
+        ]
+
+        quedan = _dict(preparado.get("se_quedan"))
+        informe["se_quedan"] = [
+            {
+                "id": _pid(p),
+                "name": p.get("name"),
+                "por": list(_dict(quedan[_pid(p)]).get("por") or []),
+                "motivo": _dict(quedan[_pid(p)]).get("motivo"),
+            }
+            for p in players
+            if _pid(p) in quedan
+        ]
+
+        informe["no_entran"] = [
+            {"id": pid, "name": _dict(fichas.get(pid)).get("name")}
+            for pid in _lista(notas.get("no_entran"))
         ]
 
     except Exception:                               # noqa: BLE001
@@ -646,8 +1033,8 @@ def con_motivo(bench, informe) -> list:
                     **fila,
                     "reason": "SE_VA",
                     "reason_text": (
-                        f"se vende ({motivos}): con otro que puede jugar, "
-                        "no se alinea"
+                        f"se vende antes del cierre ({motivos}) y hay otro "
+                        "de fiar que puede jugar: no se alinea"
                     ),
                 }
 
@@ -691,7 +1078,7 @@ def sin_castigo(formation_results, players) -> list:
 
 
 # ============================================================
-# 4. EL ENGANCHE: LO QUE LEE EN PRODUCCION
+# 5. EL ENGANCHE: LO QUE LEE EN PRODUCCION
 # ============================================================
 
 def _ahora() -> datetime:
@@ -708,6 +1095,16 @@ def _el_reloj(snapshot) -> dict:
     from src.analysis.calendar_state import build_calendar_state
 
     return build_calendar_state(snapshot)
+
+
+def _las_rondas(ahora) -> dict:
+    """Si la proxima ronda es de aplazados y que equipos la juegan: el
+    reloj de la rotacion (`la_rotacion.el_reloj`, del calendario de
+    `la_proxima_jornada`)."""
+
+    from src.actions.la_rotacion import el_reloj
+
+    return el_reloj(ahora)
 
 
 def _libros_de_produccion() -> dict:
@@ -742,57 +1139,65 @@ def preparar(
     ahora=None,
     libros=None,
     reloj=None,
+    rondas=None,
 ) -> dict | None:
     """
-    Lo que necesita la busqueda del once que se escribe, o None.
+    Lo que necesitan `elegir` y `rematar` en el once que se escribe, o
+    None.
 
-        se_van     {id: [motivos]} (`los_que_se_van`)
-        por        lo mismo (lo lee `rematar`)
-        busqueda   la lista para la busqueda (`para_la_busqueda`)
-        jp         {vale, motivo, ronda, edad_horas, jornada}
+        se_van      {id: [motivos]} (`los_que_se_van`, sin los que no se
+                    sientan)
+        se_quedan   {id: {por, motivo}}: se estan vendiendo y juegan
+                    igual (no se cobran antes del cierre, un Dios, la
+                    ronda de aplazados)
+        jp          {vale, motivo, ronda, edad_horas, jornada}
 
-    La plantilla sale de `players`; las pujas vivas y el saldo, de la
-    foto (`la_orden_del_gestor.leer_la_foto`, con el usuario de la
-    liga: sin el, ninguna puja); la jornada y el cierre, de `reloj` o
-    del calendario de la vuelta (este, solo si hay una puja viva o JP
-    disponible: si no, no cambia nada); los libros, de `libros` o de
-    produccion. `ahora`, de la hora del sistema si no se pasa.
+    La plantilla sale de `players`; las ofertas del Computer y el saldo,
+    de la foto (`la_orden_del_gestor.leer_la_foto`); los estados, de su
+    catalogo (`leer_los_estados`: sin catalogo, ningun relevo esta sano,
+    como en `decidir`); la jornada y el cierre, de `reloj` o del
+    calendario de la vuelta (este, solo si algun libro nombra a uno de
+    la plantilla o JP esta disponible: si no, no cambia nada); la ronda
+    de aplazados, de `rondas` o del reloj de la rotacion (solo si alguien
+    se va); los libros, de `libros` o de produccion. `ahora`, de la hora
+    del sistema si no se pasa.
 
     None -y entonces el once de hoy, byte a byte- con el interruptor
     apagado, si algo falla, o si no hay nada que hacer: nadie se va y
-    JP no vale. Nunca lanza.
+    JP no vale (aunque alguno se este vendiendo y se quede: el once es
+    el de siempre). Nunca lanza.
     """
 
     try:
         if not activa():
             return None
 
-        from src.actions.la_orden_del_gestor import leer_la_foto
+        from src.actions import la_orden_del_gestor as orden_mod
 
         players = [p for p in (players or []) if isinstance(p, dict)]
         plantilla = {_pid(p) for p in players if _pid(p) is not None}
+        precios = {_pid(p): p.get("price") for p in players if _pid(p) is not None}
 
         foto = _dict(snapshot)
         yo = _pid(_dict(foto.get("league")).get("user"))
-        de_la_foto = leer_la_foto(foto, yo)
-        pujas = set(de_la_foto.get("nuestras_pujas") or {}) if yo is not None else set()
+        de_la_foto = _dict(orden_mod.leer_la_foto(foto, yo))
+        ofertas = _dict(de_la_foto.get("ofertas_del_computer"))
         saldo = de_la_foto.get("saldo")
+        estados = orden_mod.leer_los_estados(foto)
 
         libros = _dict(libros if libros is not None else _libros_de_produccion())
+        intel = _dict(lineup_intelligence)
 
-        # EL RELOJ, SOLO SI ALGO LO NECESITA. Lo leen las pujas vivas
-        # (nuestras o las PUJADA de la rotacion: ¿se resuelven antes del
-        # cierre?) y JP (¿es de la jornada que toca?). Sin ninguna de las
-        # dos, el reloj no cambia nada y no se pregunta al calendario.
-        parejas = _dict(libros.get("parejas"))
-        lo_necesita = (
-            bool(pujas)
-            or bool(_ids(parejas.get("salen")) - _ids(parejas.get("se_van")))
-            or bool(_dict(lineup_intelligence).get("available"))
-        )
-
-        if reloj is None and lo_necesita:
-            reloj = _el_reloj(snapshot)
+        # EL RELOJ, SOLO SI ALGO LO NECESITA. Lo leen los que se venden
+        # (¿se cobran antes del cierre?) y JP (¿es de la jornada que
+        # toca?). Sin ninguno de los dos, el reloj no cambia nada y no
+        # se pregunta al calendario. Roto, no se sabe: solo cuenta la
+        # oferta que ya esta, y JP no vale.
+        if reloj is None and (_nombrados(plantilla, libros) or intel.get("available")):
+            try:
+                reloj = _el_reloj(snapshot)
+            except Exception:                       # noqa: BLE001
+                reloj = {}
 
         reloj = _dict(reloj)
         ronda = reloj.get("target_matchday")
@@ -800,27 +1205,48 @@ def preparar(
 
         momento = _momento(ahora) if ahora is not None else _ahora()
 
-        se_van = los_que_se_van(
+        se_van, no_llegan = _quien_se_va(
             plantilla,
             orden=libros.get("orden"),
             libro_mejora=libros.get("mejora"),
             parejas=libros.get("parejas"),
-            pujas=pujas,
             saldo=saldo,
             ahora=momento,
             segundos_al_cierre=segundos,
+            estados=estados,
+            ofertas=ofertas,
+            precios=precios,
         )
 
+        se_quedan = {
+            pid: {"por": motivos, "motivo": NO_SE_COBRA_ANTES}
+            for pid, motivos in no_llegan.items()
+        }
+
+        # LOS QUE NUNCA SE SIENTAN: un Dios y el de la ronda de
+        # aplazados. La ronda, solo si alguien se va.
+        if se_van:
+            if rondas is None:
+                try:
+                    rondas = _las_rondas(momento)
+                except Exception:                   # noqa: BLE001
+                    rondas = {"sin_calendario": True}
+            equipos = {
+                k: _dict(v).get("name")
+                for k, v in _dict(_dict(_dict(foto.get("catalog")).get("data")).get(
+                    "teams")).items()
+            }
+            for pid, motivo in los_que_no_se_sientan(players, se_van, rondas, equipos).items():
+                se_quedan[pid] = {"por": se_van.pop(pid), "motivo": motivo}
+
         vale, motivo = jp_vale(lineup_intelligence, ronda)
-        intel = _dict(lineup_intelligence)
 
         if not se_van and not vale:
             return None
 
         return {
             "se_van": se_van,
-            "por": se_van,
-            "busqueda": para_la_busqueda(players, se_van),
+            "se_quedan": se_quedan,
             "jp": {
                 "vale": vale,
                 "motivo": motivo,

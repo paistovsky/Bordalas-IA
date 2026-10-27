@@ -2190,6 +2190,50 @@ def banquillo_con_motivo(
     return banquillo
 
 
+def _todas_las_formaciones(
+    players: list[dict],
+) -> list[dict]:
+    """
+    Las siete formaciones sobre `players`, de mejor a peor: primero las
+    que llenan mas huecos y luego el score. La primera es el once. La
+    misma busqueda para el once de siempre y para la que repite el once
+    sin los que se van (`el_once_sin_los_que_se_van.elegir`).
+    """
+
+    formation_results = []
+
+    for (
+        formation_name,
+        formation,
+    ) in FORMATIONS.items():
+
+        result = (
+            evaluate_formation(
+                players,
+                formation_name,
+                formation,
+            )
+        )
+
+        formation_results.append(
+            result
+        )
+
+    formation_results.sort(
+        key=lambda result: (
+            result[
+                "filled"
+            ],
+            result[
+                "score"
+            ],
+        ),
+        reverse=True,
+    )
+
+    return formation_results
+
+
 def build_lineup(
     snapshot: dict,
     lineup_intelligence: dict | None = None,
@@ -2207,9 +2251,9 @@ def build_lineup(
     `lineup_score` de siempre, interruptor puesto o no.
 
     `sin_los_que_se_van=True`, igual: SOLO el once que se escribe, con
-    `BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN` puesto. El que se esta
-    vendiendo no se alinea si hay otro que pueda jugar, y Jornada
-    Perfecta desempata entre dos que FF deja a 10 puntos o menos
+    `BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN` puesto. El que se vende antes
+    del cierre no se alinea si hay otro de fiar que pueda jugar, y
+    Jornada Perfecta desempata entre dos que FF deja a 10 puntos o menos
     (`el_once_sin_los_que_se_van`). Sin el, ni una linea nueva corre.
     """
 
@@ -2246,8 +2290,8 @@ def build_lineup(
     # EL ONCE SIN LOS QUE SE VAN (27/10/2026)
     #
     #     Solo con `sin_los_que_se_van` y el interruptor puesto. Si no
-    #     (o si algo falla), `preparado` es None y la busqueda ve los
-    #     `players` de siempre: el once de hoy, byte a byte
+    #     (o si algo falla), `preparado` es None y nada de lo de abajo
+    #     corre: el once de hoy, byte a byte
     #     (`test_el_once_sin_los_que_se_van_v1`).
     preparado = None
 
@@ -2267,38 +2311,28 @@ def build_lineup(
         except Exception:                           # noqa: BLE001
             preparado = None
 
-    formation_results = []
-
-    for (
-        formation_name,
-        formation,
-    ) in FORMATIONS.items():
-
-        result = (
-            evaluate_formation(
-                players
-                if preparado is None
-                else preparado["busqueda"],
-                formation_name,
-                formation,
-            )
+    formation_results = (
+        _todas_las_formaciones(
+            players
         )
-
-        formation_results.append(
-            result
-        )
-
-    formation_results.sort(
-        key=lambda result: (
-            result[
-                "filled"
-            ],
-            result[
-                "score"
-            ],
-        ),
-        reverse=True,
     )
+
+    # Si alguien que se va esta en el once de siempre, se busca otra vez
+    # sin el y solo vale si los que entran son de fiar; si no, el de
+    # siempre (`el_once_sin_los_que_se_van.elegir`).
+    notas_de_los_que_se_van = None
+
+    if preparado is not None:
+
+        (
+            formation_results,
+            notas_de_los_que_se_van,
+        ) = _sin_los_que_se_van.elegir(
+            preparado,
+            players,
+            formation_results,
+            _todas_las_formaciones,
+        )
 
     best = (
         formation_results[
@@ -2338,9 +2372,7 @@ def build_lineup(
             preparado,
             players,
             best_lineup,
-            best[
-                "used_warning_players"
-            ],
+            notas_de_los_que_se_van,
         )
 
     selected_formation = (

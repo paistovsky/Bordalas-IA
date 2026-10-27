@@ -60,6 +60,14 @@ ENV = "BORDALAS_EL_CALENDARIO_EN_EL_ONCE"
 for _nombre in (ENV, "BORDALAS_CALIDAD_ETIQUETA", "BORDALAS_VARA_PLANA"):
     os.environ.pop(_nombre, None)
 
+# EL ONCE SIN LOS QUE SE VAN TAMPOCO (27/10/2026). Puesto, la prueba del
+# monitor (`build_lineup_monitor_state`) lee los libros de la orden, la
+# mejora y la rotacion de produccion (`el_once_sin_los_que_se_van`): el
+# vigilante la apuntaba como NUEVA, no censada, con
+# `--con BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN`. Lo mismo que hizo
+# `test_sin_pronostico_v1` con el calendario del once.
+os.environ.pop("BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN", None)
+
 
 from src.analysis import el_once_mira_el_calendario as once_cal  # noqa: E402
 from src.analysis.el_once_mira_el_calendario import (  # noqa: E402

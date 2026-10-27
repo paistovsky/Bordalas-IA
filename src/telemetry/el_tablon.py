@@ -284,11 +284,13 @@ QUE_HACE = {
         "resta un poco (desempata entre parecidos; si su equipo no juega esa "
         "ronda, ni suma ni resta).",
     "BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN":
-        "El once que se escribe no alinea a quien se está vendiendo (la orden, "
-        "la mejora o la rotación, con su relevo ya dentro o con puja viva que se "
-        "resuelve antes del cierre) si hay otro que pueda jugar; y si FF deja a "
-        "dos del mismo puesto a 10 puntos o menos de titularidad, decide Jornada "
-        "Perfecta (de la jornada que toca y de menos de 12 h).",
+        "El once que se escribe no alinea a quien se vende antes del cierre (la "
+        "orden, la mejora o la rotación, con su relevo ya dentro) si hay "
+        "otro de fiar que pueda jugar: sin duda, con pronóstico y con titularidad "
+        "suficiente; nunca a costa de un Dios ni de la ronda de aplazados. Y si FF "
+        "deja a dos del mismo puesto a 10 puntos o menos, decide Jornada Perfecta "
+        "(de la jornada que toca y de menos de 12 h) cuando da al de dentro en "
+        "duda o peor.",
     "BORDALAS_JORNADAS_POR_SU_FECHA":
         "Cuenta las jornadas por la fecha de los partidos, no por Biwenger.",
     "BORDALAS_LA_MONEDA_DE_LA_LIGA":
