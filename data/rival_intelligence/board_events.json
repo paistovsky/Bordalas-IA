@@ -218056,5 +218056,23 @@
         "amount": 3250001
       }
     ]
+  },
+  {
+    "event_id": "b194908f50dbb7b5dfdb8944",
+    "date": 1793082126,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
