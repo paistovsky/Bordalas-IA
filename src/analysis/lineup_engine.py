@@ -2194,6 +2194,7 @@ def build_lineup(
     snapshot: dict,
     lineup_intelligence: dict | None = None,
     con_calendario: bool = False,
+    sin_los_que_se_van: bool = False,
 ) -> dict:
     """
     El mejor once de la plantilla.
@@ -2204,6 +2205,12 @@ def build_lineup(
     proxima ronda desempata. Todos los demas -venta, liquidez, deuda
     segura, fichajes, orden de venta- llaman sin el y ven el once y el
     `lineup_score` de siempre, interruptor puesto o no.
+
+    `sin_los_que_se_van=True`, igual: SOLO el once que se escribe, con
+    `BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN` puesto. El que se esta
+    vendiendo no se alinea si hay otro que pueda jugar, y Jornada
+    Perfecta desempata entre dos que FF deja a 10 puntos o menos
+    (`el_once_sin_los_que_se_van`). Sin el, ni una linea nueva corre.
     """
 
     if lineup_intelligence is None:
@@ -2236,6 +2243,30 @@ def build_lineup(
         )
     )
 
+    # EL ONCE SIN LOS QUE SE VAN (27/10/2026)
+    #
+    #     Solo con `sin_los_que_se_van` y el interruptor puesto. Si no
+    #     (o si algo falla), `preparado` es None y la busqueda ve los
+    #     `players` de siempre: el once de hoy, byte a byte
+    #     (`test_el_once_sin_los_que_se_van_v1`).
+    preparado = None
+
+    if sin_los_que_se_van:
+
+        try:
+            from src.analysis import (
+                el_once_sin_los_que_se_van as _sin_los_que_se_van,
+            )
+
+            preparado = _sin_los_que_se_van.preparar(
+                snapshot,
+                players,
+                lineup_intelligence,
+            )
+
+        except Exception:                           # noqa: BLE001
+            preparado = None
+
     formation_results = []
 
     for (
@@ -2245,7 +2276,9 @@ def build_lineup(
 
         result = (
             evaluate_formation(
-                players,
+                players
+                if preparado is None
+                else preparado["busqueda"],
                 formation_name,
                 formation,
             )
@@ -2290,6 +2323,25 @@ def build_lineup(
             "selected"
         ]
     )
+
+    # Las fichas vuelven a sus numeros de verdad (ningun `SE_VA` sale
+    # del motor) y, si Jornada Perfecta vale, desempata. Mismo puesto
+    # para cada uno: la integridad de abajo sigue valiendo.
+    informe_de_los_que_se_van = None
+
+    if preparado is not None:
+
+        (
+            best_lineup,
+            informe_de_los_que_se_van,
+        ) = _sin_los_que_se_van.rematar(
+            preparado,
+            players,
+            best_lineup,
+            best[
+                "used_warning_players"
+            ],
+        )
 
     selected_formation = (
         best[
@@ -2689,6 +2741,42 @@ def build_lineup(
 
         if partidos:
             salida["fixture_multipliers"] = partidos
+
+    # EL ONCE SIN LOS QUE SE VAN, EN EL INFORME (27/10/2026)
+    #
+    #     Solo con `preparado` (si no, la salida es la de siempre). El
+    #     banquillo dice SE_VA o DESEMPATE_JP donde toca -no «puntua
+    #     menos que Cardona», que seria falso-, las candidatas de la
+    #     busqueda y el total con el bono salen con los numeros de
+    #     verdad, y el informe dice quien se va, por que y que desempato
+    #     Jornada Perfecta.
+    if preparado is not None:
+
+        salida["bench"] = _sin_los_que_se_van.con_motivo(
+            salida["bench"],
+            informe_de_los_que_se_van,
+        )
+
+        salida["formation_candidates"] = (
+            _sin_los_que_se_van.sin_castigo(
+                formation_results,
+                players,
+            )
+        )
+
+        salida["lineup_score_with_mandatory"] = sum(
+            float(
+                player.get(
+                    "lineup_score"
+                )
+                or 0.0
+            )
+            for player in best_lineup
+        )
+
+        salida["el_once_sin_los_que_se_van"] = (
+            informe_de_los_que_se_van
+        )
 
     return salida
 

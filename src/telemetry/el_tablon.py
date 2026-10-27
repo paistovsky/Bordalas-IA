@@ -283,6 +283,12 @@ QUE_HACE = {
         "uno que no es de los de arriba suma; fuera, o contra uno de arriba, "
         "resta un poco (desempata entre parecidos; si su equipo no juega esa "
         "ronda, ni suma ni resta).",
+    "BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN":
+        "El once que se escribe no alinea a quien se está vendiendo (la orden, "
+        "la mejora o la rotación, con su relevo ya dentro o con puja viva que se "
+        "resuelve antes del cierre) si hay otro que pueda jugar; y si FF deja a "
+        "dos del mismo puesto a 10 puntos o menos de titularidad, decide Jornada "
+        "Perfecta (de la jornada que toca y de menos de 12 h).",
     "BORDALAS_JORNADAS_POR_SU_FECHA":
         "Cuenta las jornadas por la fecha de los partidos, no por Biwenger.",
     "BORDALAS_LA_MONEDA_DE_LA_LIGA":

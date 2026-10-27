@@ -1024,6 +1024,23 @@ def _el_once_mira_el_calendario() -> bool:
         return False
 
 
+def _el_once_sin_los_que_se_van() -> bool:
+    """
+    Si el once QUE SE ESCRIBE deja fuera a los que se estan vendiendo
+    y desempata con Jornada Perfecta
+    (`BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN`). Nunca lanza: si no se
+    puede saber, no.
+    """
+
+    try:
+        from src.analysis.el_once_sin_los_que_se_van import activa
+
+        return bool(activa())
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def build_lineup_monitor_state(
     snapshot: dict,
     persist: bool = False,
@@ -1035,10 +1052,18 @@ def build_lineup_monitor_state(
     #     pide el partido de la proxima ronda: los que valoran (venta,
     #     liquidez, deuda segura, fichajes) llaman a `build_lineup`
     #     sin el. Con el interruptor apagado, la llamada de siempre.
+    #
+    # LOS QUE SE VAN, TAMBIEN SOLO AQUI (27/10/2026)
+    #
+    #     El 26/10 se escribio a Jonny, que la orden vendia esa noche, en
+    #     vez de a Cardona. De este once beben SAVE_LINEUP, `live_lineup`,
+    #     el panel, el `once_escrito` del cierre y el `once` de la mejora:
+    #     pedirlo aqui lo cambia para todos ellos, y para nadie mas.
     lineup = (
         build_lineup(
             snapshot,
             con_calendario=_el_once_mira_el_calendario(),
+            sin_los_que_se_van=_el_once_sin_los_que_se_van(),
         )
     )
 
