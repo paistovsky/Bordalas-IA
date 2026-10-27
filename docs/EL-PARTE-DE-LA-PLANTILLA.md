@@ -53,6 +53,17 @@ pague la caja entera.
 | Roberto Fernandez (DEL) | TITULAR | 89 | NO titular en Sestao (confirmado) | 87 -> 89 |
 | Boye (DEL) | TITULAR | 87 | mie 28, FF le deja fuera | «pequena molestia» de un golpe, ya recuperado |
 
+**21:30, once real de Manacor (ESPN, min 30, 0-2):** **Sergi Cardona
+TITULAR** de lateral izquierdo. Luiz Junior en la porteria (Gulacsi
+descansa: bien para la J11). Titulares tambien Mourino, Logan Costa, Pau
+Navarro, Macia, Moleiro, Diatta, El Jmili, Pepe y Oluwaseyi; en el
+banquillo Foyth, Veiga, Freeman, Gueye, Comesana, Buchanan, Ayoze, Gerard
+Moreno y Mikautadze. **Cardona J11: 45 -> 35-40 %.** Manana se aplica el
+plan del mie (abajo). Matiz antes de fichar: si Carlos Romero sigue fuera
+el viernes, Cardona es el unico lateral izquierdo y su % puede volver a
+subir. Mirar la «Posible alineacion J11» de FF y el parte de Romero, y
+cuantos minutos juega hoy.
+
 **Caja:** +1.418.975 (premio J10 cobrado: 39 pts), 0 pujas vivas; ningun motor
 ha pujado.
 
