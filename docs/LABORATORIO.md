@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E65 · 27/10/2026 11:22 de Madrid · La titularidad de FF no es una probabilidad: un 50 % juega 8 de cada 10
+### E65 · 27/10/2026 11:16 de Madrid · La titularidad de FF no es una probabilidad: un 50 % juega 8 de cada 10
 
 **El caso:** E58 se quedo sin datos (60 casos). Desde el 20/10 Pepe guarda
 la titularidad de FF de toda la liga, y ya esta la foto de la J10.
@@ -2849,7 +2849,7 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
-- **(E65, 27/10 11:22) La vara de puntos: cambiar FF/100 por un factor
+- **(E65, 27/10 11:16) La vara de puntos: cambiar FF/100 por un factor
   calibrado** (medido en la J10, n = 459; repetir con la J11 antes de
   encender). Con FF la vispera: 0-30 % -> x0,25; 30-50 % -> x0,85;
   50-60 % -> x1,0; 60 % o mas -> x1,1 (sobre los puntos por partido). Hoy
