@@ -31,6 +31,22 @@ laboratorio).
        fecha y no se vende a nadie (el vendido y recomprado ya no pasa
        por nuestro desde la primera compra); un dia sin subasta, un
        movimiento de 2 h despues del reset dice que esta al dia.
+   12. (27/10, revision final, F1) A un `vender_si_ficha` de la orden
+       valida no lo toca el parte (`LA_ORDEN`): ni con el relevo en
+       duda (la orden aguanta: EL_PARTE_DEL_RELEVO), ni con la oferta
+       por debajo del suelo del gestor, ni con el relevo sin llegar.
+       Las tres, con la orden de verdad (`la_orden_del_gestor.decidir`)
+       al lado: ella no cobra y el parte, antes, si. Desde la revision
+       del arreglo (27/10), tampoco a un viaje (`viajes.candidatos`):
+       la orden pide lo pagado mas un 1 % y el parte vendia al 95 % de
+       su valor.
+   13. (27/10, revision final, F2) Sin la orden del gestor encendida y
+       valida no se escribe nada (`ORDEN_APAGADA`, `ORDEN_NO_VALIDA`):
+       antes, `protegidos` y `conservados` daban vacio y se vendia a
+       los de `proteger` y `conservar`. Desde la revision del arreglo,
+       una orden con un `vender_si_ficha` o un viaje sin `player_id`
+       tampoco vale (`NO_SE_ENTIENDE`): la orden no lo vende y el
+       parte, antes, si, en su 95 %.
 
 Todo con datos de mentira: la hora se pasa siempre, el calendario es un
 dict de este fichero (con la J8 ya jugada antes de AHORA: sin una ronda
@@ -58,8 +74,8 @@ if str(RAIZ) not in sys.path:
 from src.actions.el_parte_vende import (     # noqa: E402
     AVISOS, DIAS_DE_FICHAJE, ENV, MALOS, MARGEN_DEL_TABLON, MARGEN_FINAL, MOTIVOS,
     PARTIDOS_DE_RONDA, SANCIONADO, SUELO, activa, correr, decidir, el_parte, el_suelo,
-    el_ultimo_reset, hasta_cuando_no_se_toca, ids_del_once, las_fechas_de_fichaje,
-    lo_vendido_y_publicado, por_que_no,
+    el_ultimo_reset, hasta_cuando_no_se_toca, ids_del_once, la_orden_no_vale,
+    las_fechas_de_fichaje, lo_vendido_y_publicado, los_que_vende_la_orden, por_que_no,
 )
 from src.analysis.la_proxima_jornada import las_rondas     # noqa: E402
 
@@ -423,13 +439,16 @@ ENCENDIDO = {ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1", "BORDALAS_LA_CARTERA
              "GITHUB_RUN_ID": None}
 
 
-def _ficheros(carpeta):
-    """La orden del gestor y el libro de la ronda, en la carpeta temporal."""
+def _ficheros(carpeta, **en_la_orden):
+    """La orden del gestor y el libro de la ronda, en la carpeta temporal.
+    Lo que se pase va a la orden, encima de lo de siempre (27/10/2026: un
+    `vender_si_ficha`, una orden caducada...)."""
     orden = Path(carpeta) / "orden.json"
     orden.write_text(json.dumps({
         "caduca": "2026-11-30T23:59:00+01:00",
         "proteger": [{"player_id": 18, "nombre": "Protegido"}],
         "conservar": [{"player_id": 19, "nombre": "Conservado"}],
+        **en_la_orden,
     }))
     libro = Path(carpeta) / "la_ronda.json"
     libro.write_text(json.dumps({"21": 1_000_000}))
@@ -457,8 +476,8 @@ def _el_dia(ahora, ficha=None, llega=None, offer_id=None, oferta=None):
             "ahora": ahora, "v10": {}, "plan_cierre": {}}
 
 
-def _correr(carpeta, **k):
-    orden, libro = _ficheros(carpeta)
+def _correr(carpeta, en_la_orden=None, **k):
+    orden, libro = _ficheros(carpeta, **(en_la_orden or {}))
     base = dict(cycle={"snapshot": _la_foto()}, escritor_factory=_Escritor, ahora=AHORA,
                 status=_el_status(), calendario=CAL, orden_ruta=orden,
                 libro_ronda_ruta=libro, v10=V10, vuelta_mejora={}, plan_cierre=PLAN_CIERRE,
@@ -1318,6 +1337,301 @@ def test_h2_con_el_tablon_atrasado_no_se_vende_a_nadie():
         _entorno(**antes)
 
 
+# ------------------------------------------------------------------
+# 8. LA REVISION FINAL DEL 27/10/2026: EL PARTE Y LA ORDEN
+# ------------------------------------------------------------------
+
+CADUCA = "2026-11-30T23:59:00+01:00"
+
+
+def _lo_que_hace_la_orden(venta, foto, pid, viajes=None):
+    """Lo que la orden de verdad (`la_orden_del_gestor.decidir`, con las
+    guardias que le pasa su `correr`) hace con `pid` en esa foto. Con
+    `viajes`, la orden los lleva tambien (revision del arreglo, 27/10)."""
+    from src.actions.la_orden_del_gestor import (
+        decidir as decide_la_orden, leer_la_foto, leer_los_estados,
+    )
+
+    suya = leer_la_foto(foto, 99)
+    suya.pop("de_managers", None)
+    orden = {"caduca": CADUCA, "vender_si_ficha": venta}
+    if viajes is not None:
+        orden["viajes"] = viajes
+    acciones = decide_la_orden(orden, **suya,
+                               ahora=AHORA, horas_jornada=48.0, en_curso=False,
+                               estados=leer_los_estados(foto))
+    return [a for a in acciones if a.get("player_id") == pid]
+
+
+def _las_aceptadas():
+    return {k.get("offer_id") for n, k in _Escritor.llamadas if n == "accept_offer"}
+
+
+def test_f1_lo_que_vende_la_orden_no_lo_toca_el_parte():
+    """El parte no leia `vender_si_ficha`: al que la orden vende con su
+    relevo y su suelo (y no esta tambien en `conservar`), en duda y fuera
+    del once, le aceptaba la oferta en su 95 % aunque la orden estuviera
+    aguantando la venta."""
+    # La puerta, pura: despues de `conservar` y del once, antes de todo lo demas.
+    d = _uno(de_la_orden={7})
+    assert d["acciones"] == [] and d["no_se_tocan"] == [
+        {"player_id": 7, "nombre": "Suplente", "estado": "doubt", "por": "LA_ORDEN"}], d
+    assert d["malos"] == [7], d
+    for de_la_orden in (["7"], {7: "x"}, frozenset({7})):
+        d = _uno(de_la_orden=de_la_orden)
+        assert d["acciones"] == [] and _por(d) == {7: "LA_ORDEN"}, (de_la_orden, d)
+    # Sin publicar y sin oferta: tampoco se publica (eso lo hace la orden).
+    d = _uno(ofertas_del_computer={}, de_la_orden={7})
+    assert d["acciones"] == [] and _por(d) == {7: "LA_ORDEN"}, d
+    assert _por(_uno(de_la_orden={7}, conservados={7})) == {7: "CONSERVAR"}
+    assert _por(_uno(de_la_orden={7}, once_escrito={1, 7})) == {7: "ONCE_ESCRITO"}
+    d = _d(de_la_orden={12, 21})
+    assert _por(d)[12] == "LA_ORDEN" and _por(d)[21] == "LA_ORDEN", _por(d)
+    assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 12) not in _acciones(d), d["acciones"]
+    # Sin pasarlo, como antes.
+    assert ("ACEPTAR_OFERTA_DEL_COMPUTER", 12) in _acciones(_d())
+
+    # A quien vende la orden: por su `player_id`, se cumpla o no su condicion.
+    assert los_que_vende_la_orden({"vender_si_ficha": {"si_esta": 500, "jugadores": [
+        {"player_id": 12, "suelo": 1}, {"player_id": "15"}, {"nombre": "Sin id"},
+        {"player_id": 30, "si_esta": 31, "desde": "2026-12-01T07:00:00+01:00",
+         "si_saldo_negativo": True}]}}) == {12, 15, 30}
+    for basura in (None, "x", 5, [1, 2], {}, {"vender_si_ficha": "x"},
+                   {"vender_si_ficha": {"jugadores": "x"}},
+                   {"vender_si_ficha": {"jugadores": [None, 5, "x", {"player_id": object()}]}}):
+        assert los_que_vende_la_orden(basura) == set(), basura
+    # Y sus viajes (revision del arreglo): tambien los vende ella, con el
+    # suelo del viaje, se cumplan o no sus topes.
+    assert los_que_vende_la_orden({
+        "vender_si_ficha": {"jugadores": [{"player_id": 15}]},
+        "viajes": {"hasta": CADUCA, "candidatos": [
+            {"player_id": 12, "puja": 1_950_000}, {"player_id": "21", "puja": 99_000_000},
+            {"nombre": "Sin id", "puja": 1}]}}) == {12, 15, 21}
+    for basura in ({"viajes": "x"}, {"viajes": [12]}, {"viajes": {"candidatos": "x"}},
+                   {"viajes": {"candidatos": [None, 5, {"nombre": "Sin id"}]}}):
+        assert los_que_vende_la_orden(basura) == set(), basura
+
+    # LAS TRES FORMAS, de punta a punta: el 12 (en duda, 2 M, oferta de
+    # 1,9 M: el 95 % justo, del reparto y fuera del once) lo vende la
+    # orden. La orden de verdad no lo cobra; el parte, antes, si.
+    relevo_en_duda = {"jugadores": [{"player_id": 12, "nombre": "Dudoso", "si_esta": GAYA["id"],
+                                     "suelo": 1_800_000}]}
+    bajo_el_suelo = {"jugadores": [{"player_id": 12, "nombre": "Dudoso", "si_esta": 16,
+                                    "suelo": 1_950_000}]}
+    sin_relevo = {"si_esta": 500, "jugadores": [{"player_id": 12, "nombre": "Dudoso",
+                                                 "suelo": 1_800_000}]}
+    foto = _con_gaya(_la_foto())
+    # (a) El relevo (Gaya) llega en duda: la orden aguanta la venta.
+    assert [(a["accion"], a.get("guardia")) for a in _lo_que_hace_la_orden(
+        relevo_en_duda, foto, 12)] == [("NADA", "EL_PARTE_DEL_RELEVO")]
+    # (b) El relevo (el 16) esta sano, pero 1,9 M no llega al suelo del
+    # gestor (1,95 M): la orden lo publica, no lo cobra.
+    assert [(a["accion"], a.get("precio")) for a in _lo_que_hace_la_orden(
+        bajo_el_suelo, foto, 12)] == [("PONER_A_LA_VENTA", 2_000_000)]
+    # (c) El relevo (el 500, en el mercado del Computer) no es nuestro.
+    assert _lo_que_hace_la_orden(sin_relevo, foto, 12) == []
+    # (d) Un viaje (revision del arreglo): el 12, comprado a 1,95 M. Hasta
+    # `hasta` la orden pide lo pagado mas un 1 % (1.969.500): lo publica,
+    # no lo cobra. El parte, en su 95 % del valor (1,9 M), lo cobraba.
+    viaje = {"hasta": CADUCA, "tope_por_viaje": 3_500_000, "tope_total": 4_500_000,
+             "candidatos": [{"player_id": 12, "nombre": "Dudoso", "puja": 1_950_000}]}
+    assert [(a["accion"], a.get("viaje"), a.get("precio")) for a in _lo_que_hace_la_orden(
+        {"jugadores": []}, foto, 12, viajes=viaje)] == [("PONER_A_LA_VENTA", True, 2_000_000)]
+
+    antes = _entorno(**ENCENDIDO)
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            for venta in (relevo_en_duda, bajo_el_suelo, sin_relevo):
+                _limpiar()
+                r = _correr(carpeta, en_la_orden={"vender_si_ficha": venta},
+                            cycle={"snapshot": _con_gaya(_la_foto())},
+                            tablon=_el_tablon(gaya=True))
+                assert r["motivo"] == "EJECUTADA", (venta, r)
+                assert _por(r["decision"])[12] == "LA_ORDEN", (venta, r["decision"])
+                assert 12 not in {a["player_id"] for a in r["acciones"]}, (venta, r["acciones"])
+                assert 712 not in _las_aceptadas(), (venta, _Escritor.llamadas)
+                # El resto, como siempre.
+                assert _escrituras(r["decision"]) == [("PONER_A_LA_VENTA", 13),
+                                                      ("PONER_A_LA_VENTA", 15)], r["acciones"]
+                assert any("LA_ORDEN" in linea and "12" in linea for linea in el_parte(r))
+            # (d) El viaje, de punta a punta: tampoco lo toca el parte.
+            _limpiar()
+            r = _correr(carpeta, en_la_orden={"viajes": viaje})
+            assert r["motivo"] == "EJECUTADA", r
+            assert _por(r["decision"])[12] == "LA_ORDEN", r["decision"]
+            assert 712 not in _las_aceptadas(), _Escritor.llamadas
+            assert _escrituras(r["decision"]) == [("PONER_A_LA_VENTA", 13),
+                                                  ("PONER_A_LA_VENTA", 15)], r["acciones"]
+            # La orden de hoy (`vender_si_ficha` vacio): el 12 se vende.
+            _limpiar()
+            r = _correr(carpeta, en_la_orden={"vender_si_ficha": {"jugadores": []}})
+            assert r["motivo"] == "EJECUTADA" and 712 in _las_aceptadas(), r
+            # Tambien con sus viajes de hoy (sin candidatos, `hasta` el 07/10).
+            _limpiar()
+            r = _correr(carpeta, en_la_orden={
+                "vender_si_ficha": {"jugadores": []},
+                "viajes": {"hasta": "2026-10-07T07:00:00+02:00", "tope_por_viaje": 3_500_000,
+                           "tope_total": 4_500_000, "candidatos": []}})
+            assert r["motivo"] == "EJECUTADA" and 712 in _las_aceptadas(), r
+    finally:
+        _entorno(**antes)
+
+
+def test_f2_sin_la_orden_encendida_y_valida_no_se_vende_a_nadie():
+    """`protegidos` y `conservados` dan vacio con la orden apagada,
+    caducada o que no vale, y el parte lo leia como «el gestor no guarda
+    a nadie»: vendia al de `proteger` (el 18) y al de `conservar` (el 19)
+    al 95 %. Ahora no escribe nada."""
+    from src.actions.la_orden_del_gestor import conservados, protegidos
+    from src.telemetry.el_tablon import QUE_HACE
+
+    assert "ORDEN_APAGADA" in MOTIVOS and "ORDEN_NO_VALIDA" in MOTIVOS
+    assert "a los que vende la orden" in QUE_HACE[ENV], QUE_HACE[ENV]
+    assert "Sin la orden del gestor encendida y válida, a nadie" in QUE_HACE[ENV]
+
+    # La puerta, pura.
+    valida = {"caduca": CADUCA, "proteger": [{"player_id": 18}],
+              "conservar": [{"player_id": 19, "nombre": "Conservado"}],
+              "fichar": [], "vender_si_ficha": {"jugadores": []}}
+    assert la_orden_no_vale(valida, AHORA) is None
+    assert la_orden_no_vale({"caduca": CADUCA}, AHORA) is None
+    assert la_orden_no_vale(valida, AHORA, encendida=False) == "APAGADA"
+    for orden, por in (
+            (None, "SIN_ORDEN"),
+            ({"conservar": [{"player_id": 19}]}, "SIN_CADUCIDAD"),
+            ({**valida, "caduca": "2026-10-01T00:00:00+02:00"}, "CADUCADA"),
+            ({**valida, "vender_si_ficha": {"jugadores": [{"player_id": 20,
+                                                           "nombre": "Yamal"}]}},
+             "NOMBRA_A_UN_INTOCABLE"),
+            ({**valida, "fichar": [{"player_id": 5}]}, "FICHAJE_MAL_ESCRITO"),
+            ({**valida, "vender_si_ficha": {"jugadores": [5]}}, "NO_SE_ENTIENDE"),
+            ({**valida, "vender_si_ficha": [12]}, "NO_SE_ENTIENDE"),
+            ({**valida, "vender_si_ficha": {"jugadores": {"12": {}}}}, "NO_SE_ENTIENDE"),
+            ({**valida, "conservar": [{"player_id": 19}, "Chust"]}, "NO_SE_ENTIENDE"),
+            ({**valida, "conservar": [{"player_id": 19}, {"nombre": "Chust"}]},
+             "NO_SE_ENTIENDE"),
+            ({**valida, "conservar": {"player_id": 19}}, "NO_SE_ENTIENDE"),
+            ({**valida, "proteger": [{"player_id": "x"}]}, "NO_SE_ENTIENDE"),
+            ({**valida, "proteger": [{"player_id": float("inf")}]}, "NO_SE_ENTIENDE"),
+            # Revision del arreglo: lo que vende ella, sin `player_id`, solo
+            # lo venderia el parte.
+            ({**valida, "vender_si_ficha": {"jugadores": [{"nombre": "Sin id"}]}},
+             "NO_SE_ENTIENDE"),
+            ({**valida, "vender_si_ficha": {"jugadores": [
+                {"player_id": 12}, {"player_id": "x", "nombre": "Cardona"}]}},
+             "NO_SE_ENTIENDE"),
+            ({**valida, "viajes": [12]}, "NO_SE_ENTIENDE"),
+            ({**valida, "viajes": {"candidatos": [5]}}, "NO_SE_ENTIENDE"),
+            ({**valida, "viajes": {"candidatos": {"12": {"player_id": 12}}}}, "NO_SE_ENTIENDE"),
+            ({**valida, "viajes": {"candidatos": [{"nombre": "Sin id", "puja": 1}]}},
+             "NO_SE_ENTIENDE")):
+        assert la_orden_no_vale(orden, AHORA) == por, (orden, por)
+    # Bien escritos, valen: el `player_id` en texto tambien (como lo lee la
+    # orden), y los viajes de hoy (sin candidatos).
+    assert la_orden_no_vale({**valida, "vender_si_ficha": {"jugadores": [
+        {"player_id": "30493", "nombre": "Cardona", "si_esta": 28115, "suelo": 1}]},
+        "viajes": {"hasta": "2026-10-07T07:00:00+02:00",
+                   "candidatos": [{"player_id": 12, "puja": 1}]}}, AHORA) is None
+    assert la_orden_no_vale({**valida, "viajes": {"candidatos": []}}, AHORA) is None
+    # Una hora sin zona hace reventar a `validar`: no se sabe, nada.
+    assert la_orden_no_vale(valida, AHORA.replace(tzinfo=None)) == "NO_SE_ENTIENDE"
+    for basura in (None, "x", 5, [1, 2], {"a": object()}, object()):
+        assert la_orden_no_vale(basura, basura, basura) is not None, basura
+        assert la_orden_no_vale(valida, basura) is not None, basura
+
+    antes = _entorno(**ENCENDIDO)
+    try:
+        with tempfile.TemporaryDirectory() as carpeta:
+            def _nada(r, motivo, razon):
+                assert r["motivo"] == motivo and r.get("la_orden") == razon, (razon, r)
+                assert r["acciones"] == [] and r["hechas"] == [] and r["decision"] is None, r
+                assert _Escritor.creados == 0 and _Escritor.llamadas == [], r
+                assert r["detalle"].startswith(MOTIVOS[motivo]), r["detalle"]
+                assert any(motivo in linea for linea in el_parte(r)), el_parte(r)
+
+            # Encendida y sin valer: sin caducidad, caducada, nombra a Yamal
+            # o no se sabe leer a quien guarda.
+            casos = [({"caduca": None}, "SIN_CADUCIDAD"),
+                     ({"caduca": "2026-10-01T00:00:00+02:00"}, "CADUCADA"),
+                     ({"vender_si_ficha": {"jugadores": [{"player_id": 20,
+                                                          "nombre": "Lamine Yamal"}]}},
+                      "NOMBRA_A_UN_INTOCABLE"),
+                     ({"conservar": [{"player_id": 19, "nombre": "Conservado"}, "Chust"]},
+                      "NO_SE_ENTIENDE")]
+            for en_la_orden, razon in casos:
+                orden, _ = _ficheros(carpeta, **en_la_orden)
+                # Lo que el parte leia antes: el de `conservar` (el 19), sin
+                # guardar; con la orden sin valer, tampoco el de `proteger`.
+                assert 19 not in conservados(orden, AHORA), razon
+                assert (18 in protegidos(orden, AHORA)) == (razon == "NO_SE_ENTIENDE"), razon
+                _limpiar()
+                r = _correr(carpeta, en_la_orden=en_la_orden)
+                _nada(r, "ORDEN_NO_VALIDA", razon)
+                assert razon in r["detalle"] and any(razon in linea for linea in el_parte(r))
+            # Sin fichero, o con el JSON roto.
+            orden, _ = _ficheros(carpeta)
+            sin_fichero = Path(carpeta) / "no_hay_orden.json"
+            rota = Path(carpeta) / "rota.json"
+            rota.write_text('{"caduca": "2026-11-30T23:59:00+01:00", ')
+            for ruta in (sin_fichero, rota):
+                assert conservados(ruta, AHORA) == set() == protegidos(ruta, AHORA)
+                _limpiar()
+                r = _correr(carpeta, orden_ruta=ruta)
+                _nada(r, "ORDEN_NO_VALIDA", "SIN_ORDEN")
+            # Revision del arreglo: el gestor vende al 12 ('Dudoso', 1,9 M de
+            # oferta: el 95 % justo) con su relevo y su suelo, pero sin
+            # `player_id`. `validar` la da por buena y `conservados` la lee;
+            # la orden de verdad no lo encuentra y no lo vende. El parte,
+            # antes, lo cobraba en su 95 %; ahora no escribe nada.
+            foto = _con_gaya(_la_foto())
+            for sin_id in ({"nombre": "Dudoso", "si_esta": GAYA["id"], "suelo": 1_950_000},
+                           {"player_id": "x", "nombre": "Dudoso", "si_esta": GAYA["id"],
+                            "suelo": 1_950_000}):
+                venta = {"jugadores": [sin_id]}
+                con_sin_id, _ = _ficheros(carpeta, vender_si_ficha=venta)
+                assert 19 in conservados(con_sin_id, AHORA), sin_id
+                assert 18 in protegidos(con_sin_id, AHORA), sin_id
+                assert _lo_que_hace_la_orden(venta, foto, 12) == []
+                _limpiar()
+                r = _correr(carpeta, en_la_orden={"vender_si_ficha": venta},
+                            cycle={"snapshot": _con_gaya(_la_foto())},
+                            tablon=_el_tablon(gaya=True))
+                _nada(r, "ORDEN_NO_VALIDA", "NO_SE_ENTIENDE")
+            # Lo mismo con un viaje sin `player_id`.
+            _limpiar()
+            r = _correr(carpeta, en_la_orden={"viajes": {"hasta": CADUCA, "candidatos": [
+                {"nombre": "Dudoso", "puja": 1_950_000}]}})
+            _nada(r, "ORDEN_NO_VALIDA", "NO_SE_ENTIENDE")
+
+            # Apagada: se falla del lado seguro. La orden de siempre, buena,
+            # pero sin su interruptor no se lee: a nadie.
+            _entorno(BORDALAS_LA_ORDEN_DEL_GESTOR=None)
+            assert conservados(orden, AHORA) == set() == protegidos(orden, AHORA)
+            for ruta in (orden, sin_fichero):
+                _limpiar()
+                r = _correr(carpeta, orden_ruta=ruta)
+                _nada(r, "ORDEN_APAGADA", "APAGADA")
+            # Lo del reloj se dice antes: no depende de la orden.
+            _limpiar()
+            r = _correr(carpeta, ahora=EN_CURSO)
+            assert r["motivo"] == "JORNADA_EN_CURSO" and _Escritor.creados == 0, r
+            _entorno(BORDALAS_LA_ORDEN_DEL_GESTOR="1")
+            _limpiar()
+            r = _correr(carpeta, ahora=EN_CURSO, orden_ruta=sin_fichero)
+            assert r["motivo"] == "JORNADA_EN_CURSO" and _Escritor.creados == 0, r
+
+            # Encendida y valida: el 18 y el 19 guardados, y el resto se vende.
+            _limpiar()
+            r = _correr(carpeta)
+            assert r["motivo"] == "EJECUTADA" and "la_orden" not in r, r
+            por = _por(r["decision"])
+            assert por[18] == "PROTEGIDO" and por[19] == "CONSERVAR", por
+            aceptadas = _las_aceptadas()
+            assert 712 in aceptadas and not {718, 719} & aceptadas, _Escritor.llamadas
+    finally:
+        _entorno(**antes)
+
+
 TESTS = [
     test_vende_al_dudoso_fuera_del_once_desde_el_95,
     test_no_vende_por_debajo_del_95,
@@ -1334,6 +1648,8 @@ TESTS = [
     test_d3_el_sancionado_no_se_vende,
     test_h1_el_fichaje_no_se_vende_sin_jugar_una_ronda,
     test_h2_con_el_tablon_atrasado_no_se_vende_a_nadie,
+    test_f1_lo_que_vende_la_orden_no_lo_toca_el_parte,
+    test_f2_sin_la_orden_encendida_y_valida_no_se_vende_a_nadie,
 ]
 
 

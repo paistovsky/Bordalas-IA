@@ -260,8 +260,9 @@ QUE_HACE = {
         "panel y el de Biwenger), ni a un sancionado, ni a un fichaje que todavía "
         "no ha jugado una ronda con nosotros y nunca antes de 7 días (ni a uno sin "
         "fecha de fichaje: con el tablón atrasado, a nadie), ni a Yamal, "
-        "ni a los protegidos o `conservar` del gestor, ni a lo que aguanta la "
-        "cartera, ni con una ronda jugándose.",
+        "ni a los protegidos o `conservar` del gestor, ni a los que vende la "
+        "orden, ni a lo que aguanta la cartera, ni con una ronda jugándose. "
+        "Sin la orden del gestor encendida y válida, a nadie.",
     "BORDALAS_LA_ROTACION":
         "Cambia a uno de la plantilla que lleva dos días sin subir por uno de su "
         "posición que sube en el Computer y puntúa lo mismo o más (como mucho 2 "
