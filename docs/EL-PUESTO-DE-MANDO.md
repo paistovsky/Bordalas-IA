@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/10/2026, 07:25 de Madrid (rafaga de las 07:15).
+Actualizado: 27/10/2026, 14:55 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/10 14:15 (rafaga de la tarde, llego a las 14:50).** Ciclos:
+  verdes (#2524 a #2531). Saldo +248.975, 0 comprometido, sin movimientos.
+  El premio de la J10 aun no ha entrado. El chat del dueno deja «el parte
+  vende» apagado hasta el 03/11 (despues de la J11): bien, nada se
+  enciende en la semana del cierre.
 
 - **27/10 12:30 (laboratorio: el parte vende, revision final).** **Rivales:**
   en el reset, Luismi gano a Vivian (1.512.000) a Pollo (1.407.000) y
