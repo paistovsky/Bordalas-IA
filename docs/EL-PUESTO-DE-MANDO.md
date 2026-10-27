@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 27/10/2026, 07:25 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2515 a #2524,
+  la de las 07:15 incluida). **Jonny vendido** (ya no esta en la
+  plantilla; entro ~1,70 M de madrugada). Saldo **+248.975** en la vuelta
+  de las 07:18 (despues del reset), 0 comprometido, 11 jugadores con Kike
+  Salas. **La J11 (vie 30/10, plazo 15:00) ya esta en positivo** aunque no
+  llegue el premio de la J10.
 
 - **26/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2508 a #2515;
   el interruptor nuevo lleva 9 vueltas verdes). Saldo -1.452.225, 0
