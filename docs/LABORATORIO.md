@@ -69,6 +69,51 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E65 · 27/10/2026 11:22 de Madrid · La titularidad de FF no es una probabilidad: un 50 % juega 8 de cada 10
+
+**El caso:** E58 se quedo sin datos (60 casos). Desde el 20/10 Pepe guarda
+la titularidad de FF de toda la liga, y ya esta la foto de la J10.
+**Datos:** FF del 23/10 (vispera de la J10, `la_titularidad_del_dia.jsonl`)
+de 507 jugadores; si jugaron y cuantos puntos hicieron, con
+`puntos_por_jornada` (J9 -> J10). Fuera los dos equipos que la foto de la
+J10 no recogio (partido del lunes por la noche): quedan 459.
+**Codigo:** `lab/puntos/titularidad_calibrada.py`.
+
+    FF la vispera     n    jugo (algun minuto)
+      0-30 %        143        19 %
+     30-50 %         79        65 %
+     50-60 %         77        82 %
+     60-80 %         81        93 %
+     80-100 %        79        97 %
+
+    la vara de Pepe (pts/partido x FF/100) contra lo que hicieron (3+ partidos antes)
+    FF          n    xP de la vara   puntos reales   puntos / (pts por partido)
+      0-30 %   69        0,18            0,74             23 %
+     30-50 %   63        1,07            2,68             84 %
+     50-60 %   73        1,85            3,67             99 %
+     60-80 %   78        2,89            5,13            122 %
+     80-100 %  79        4,54            5,95            113 %
+
+**Lo que se aprende:**
+- **El porcentaje de FF no es la probabilidad de jugar.** Un jugador al
+  50 % juega algun minuto el 82 % de las veces y hace, de media, lo mismo
+  que sus puntos por partido (99 %), no la mitad. Al 30-50 % hace el 84 %.
+  Solo por debajo del 30 % se cumple que «casi no juega» (19 %, 23 %).
+- **La vara de Pepe castiga de mas a los del medio:** para un 50 %, la
+  mejora cuenta 1,85 puntos esperados y salen 3,67; para un 30-50 %, 1,07
+  contra 2,68. Por eso la mejora tiende a querer sacar del once a los
+  dudosos (Cardona, Jonny al 50 %) para fichar a uno al 80-90 %, y lo que
+  gana en el papel es la mitad de lo que dice.
+- Por arriba, la vara se queda algo corta (113-122 %): los titulares
+  fijos hacen algo mas que su media.
+
+**Limites:** UNA jornada (J10, semana de Copa por medio); «jugo» incluye
+salir desde el banquillo; los puntos por partido son de los que ya jugaron
+3+. Repetir con la J11 antes de tocar nada.
+
+**Veredicto: GANA con cautela** (pasa a «Listo para el plan» como cambio a
+medir): en la vara, cambiar FF/100 por un factor calibrado.
+
 ### E64 · 26/10/2026 17:21 de Madrid · Los rivales ya pujan por los que acaban de puntuar
 
 **Hipotesis:** si el precio va una semana por detras de los puntos (E63),
@@ -2804,6 +2849,14 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E65, 27/10 11:22) La vara de puntos: cambiar FF/100 por un factor
+  calibrado** (medido en la J10, n = 459; repetir con la J11 antes de
+  encender). Con FF la vispera: 0-30 % -> x0,25; 30-50 % -> x0,85;
+  50-60 % -> x1,0; 60 % o mas -> x1,1 (sobre los puntos por partido). Hoy
+  la vara da a un 50 % la mitad de lo que hace (1,85 contra 3,67) y empuja
+  a la mejora a cambiar dudosos por fijos ganando la mitad de lo que dice.
+  Donde: `esperado` de la mejora (tasa x titularidad / 100) y
+  `el_calendario_de_puntos.xp_jugador`. Con interruptor y ensayo.
 - **(E63, 26/10 11:16) Entre los que suben, primero los que puntuaron 8+
   en la ultima jornada.** El precio sigue a los puntos toda la semana
   siguiente (Spearman +0,6-0,7 de martes a viernes). Comprando al precio
