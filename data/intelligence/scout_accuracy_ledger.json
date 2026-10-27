@@ -2540468,13 +2540468,13 @@
       "price_at_prediction": 160000,
       "predicted_at": "2026-10-24T15:09:10.561057+00:00",
       "due_at": "2026-10-27T15:09:10.561057+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
+      "outcome": "FLAT",
+      "price_at_outcome": 160000,
+      "actual_direction": "FLAT",
+      "actual_percent": 0.0,
       "direction_hit": null,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-27T15:10:18.033363+00:00"
     },
     "39399|PRENSA_MUNDO_DEPORTIVO|3|2026-10-24": {
       "player_id": "39399",
@@ -2540489,13 +2540489,13 @@
       "price_at_prediction": 1250000,
       "predicted_at": "2026-10-24T15:09:18.265025+00:00",
       "due_at": "2026-10-27T15:09:18.265025+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 1290000,
+      "actual_direction": "UP",
+      "actual_percent": 3.2,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-27T15:10:18.033363+00:00"
     },
     "38422|PRENSA_MARCA|3|2026-10-24": {
       "player_id": "38422",
@@ -2540510,13 +2540510,13 @@
       "price_at_prediction": 620000,
       "predicted_at": "2026-10-24T15:09:10.635102+00:00",
       "due_at": "2026-10-27T15:09:10.635102+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 880000,
+      "actual_direction": "UP",
+      "actual_percent": 41.935,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-27T15:10:18.033363+00:00"
     },
     "42370|PRENSA_MARCA|3|2026-10-24": {
       "player_id": "42370",
@@ -2540531,13 +2540531,13 @@
       "price_at_prediction": 1320000,
       "predicted_at": "2026-10-24T15:09:10.827947+00:00",
       "due_at": "2026-10-27T15:09:10.827947+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 1280000,
+      "actual_direction": "DOWN",
+      "actual_percent": -3.03,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-27T15:10:18.033363+00:00"
     },
     "19501|PRENSA_MUNDO_DEPORTIVO|3|2026-10-24": {
       "player_id": "19501",
@@ -2540552,13 +2540552,13 @@
       "price_at_prediction": 2870000,
       "predicted_at": "2026-10-24T15:09:15.301418+00:00",
       "due_at": "2026-10-27T15:09:15.301418+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 2910000,
+      "actual_direction": "UP",
+      "actual_percent": 1.394,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-27T15:10:18.033363+00:00"
     },
     "42572|PRENSA_MUNDO_DEPORTIVO|3|2026-10-24": {
       "player_id": "42572",
@@ -2540573,13 +2540573,13 @@
       "price_at_prediction": 930000,
       "predicted_at": "2026-10-24T15:09:18.171174+00:00",
       "due_at": "2026-10-27T15:09:18.171174+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
+      "outcome": "FLAT",
+      "price_at_outcome": 930000,
+      "actual_direction": "FLAT",
+      "actual_percent": 0.0,
       "direction_hit": null,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-27T15:10:18.033363+00:00"
     },
     "742|FUTBOLFANTASY|1|2026-10-25": {
       "player_id": "742",
