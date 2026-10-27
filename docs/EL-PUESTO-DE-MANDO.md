@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/10/2026, 14:55 de Madrid (rafaga de las 14:15).
+Actualizado: 27/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -383,6 +383,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   se encienden despues de la J11, en rafagas separadas del parte vende (mar
   03/11). Re-medir las primas de los que suben dentro de 3-4 semanas, con
   la prueba escrita antes de mirar los datos.
+
+- **27/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2531 a #2538).
+  **Entro el premio de la J10** (+1.170.000): saldo **+1.418.975**, 0
+  comprometido. La J11 (vie 30/10, plazo 15:00) cubierta con margen.
+  Sergi Cardona al 45 % (unico lateral izquierdo): duda para la J11.
 
 - **27/10 21:00 (Pepe: el once sin los que se van, APAGADO).** Workflow de 5
   (entender, construir, 2 revisores, arreglar). El caso: el 26/10 el once
