@@ -67,6 +67,11 @@ J11», sin jugar la Copa del mie, +1 pt sobre Cardona y caja >= 0 (puja
 maxima ~2,82 M con el suelo de Cardona en 1,40 M). Ultimo recurso De Haas
 (FF 70) si sigue. Si es suplente o no juega: 65-70 % y Cardona se queda.
 Antes de escribir, mirar que la mejora no haya pujado ya por un defensa.
+**Prima del relevo (laboratorio 27/10, sustituye al +10-15 %):** si no sube
+hoy, la salida redondeada a ...9.900; si sube <2 %, +2 %; con 8+ puntos en
+la J10 y subiendo <2 %, +5 %; si sube 2 % o mas, <1 M +20 % y 1-3 M +12 %.
+Siempre con tope: la prima en euros nunca pasa de la mitad de lo que vale
+el cambio (pts/jornada x 30 mil x 3; con +2 pts, 90 mil).
 Jue 08:22: limpieza de la orden.
 
 ## 26/10/2026, 19:30 de Madrid (J11: vie 30/10 21:00; cierre 20:45)

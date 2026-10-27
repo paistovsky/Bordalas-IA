@@ -352,6 +352,38 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **27/10 21:30 (laboratorio de la tarde: la prima que gana).** **Rivales:**
+  J10 cerrada: Pepe 39 (5.o), Pollo17 44; nos saca ~10 en la general.
+  Premio cobrado: caja +1.418.975, 0 pujas vivas. Como pujan (780 dias
+  de mercado del Computer,
+  17/09-26/10, prima sobre el precio de salida): Luismi mediana +2,2 % (a
+  menudo salida + 1 EUR), Pollo17 +6,4 %, Manzagool +10,4 %. **Lo
+  medido:** casi todo lo decide si el jugador SUBE de valor el dia de la
+  puja. Si no sube (688 de 780), solo hay rival el 4 % de las veces, y la
+  salida redondeada a ...9.900 gana el 99 %. Si sube menos del 2 %, hay
+  rival el 72 % (mediana +6 %). Si sube un 2 % o mas, siempre hay rival
+  (mediana +17 %). Los que suben y alguien pelea siguen subiendo; los que
+  no suben pierden un 5-6 % en una semana. **Esceptico (rehizo los datos
+  con su codigo: mismos numeros): ADOPTAR MAS ESTRECHO.** Probado fuera de
+  muestra, solo esto: (1) si no sube, pujar la salida redondeada a ...9.900,
+  sin el +1 % (ahorra 0 por debajo de 1 M, ~13,5 mil entre 1 y 3 M y ~50
+  mil por encima de 3 M; perdemos ~2 de cada 100 frente al salida+7-27 mil
+  de Pollo); (2) la ronda deja de revender a los que suben menos del 2 %,
+  con cualquier prima (resultado real a 7 dias <= 0 en las dos mitades).
+  NO probado: subir la prima de los que suben (+9 % / +15-20 %). En la
+  prueba hacia delante pierde contra el +1 % de hoy, y un % fijo paga de
+  mas por encima de ~1 M. Se queda como guia manual del gestor con tope en
+  euros: **la prima nunca pasa de la mitad de lo que vale la mejora en el
+  once** (pts/jornada x 30 mil x 3). Con 8+ puntos y subiendo <2 %: +5 %;
+  +9 % solo si son 2+ pts/jornada y la prima <= ~450 mil. Subiendo 2 % o
+  mas: <1 M +20 %, 1-3 M +12 %, 3 M+ se queda en +1 %; siempre dentro del
+  tope. **Aplicado hoy:** la regla manual ya manda en la decision de
+  Cardona del mie (ver el parte del 27/10). En produccion no se toca nada
+  esta semana: (1) y (2) se construyen apagados (un interruptor cada uno) y
+  se encienden despues de la J11, en rafagas separadas del parte vende (mar
+  03/11). Re-medir las primas de los que suben dentro de 3-4 semanas, con
+  la prueba escrita antes de mirar los datos.
+
 - **27/10 21:00 (Pepe: el once sin los que se van, APAGADO).** Workflow de 5
   (entender, construir, 2 revisores, arreglar). El caso: el 26/10 el once
   escrito tenia a Jonny (lo vendia la orden esa noche) y no a Cardona (FF
