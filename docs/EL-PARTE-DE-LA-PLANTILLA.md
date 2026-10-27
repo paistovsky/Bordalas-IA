@@ -35,6 +35,40 @@ Ventanas de la J11 (vie 30/10 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 04:50 (40 h). Despues, solo lo que
 pague la caja entera.
 
+## 27/10/2026, 19:15 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
+
+(La Copa no puntua para nosotros: solo se mira como pista de rotacion.)
+
+| Jugador | Veredicto | J11 % | Copa (pista) | Cambio |
+|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 88 | Manacor hoy 21:00, se espera a Luiz Junior | = |
+| Kike Salas (DEF) | TITULAR | 86 | jue 29, FF le deja fuera | 80 -> 86 (FF J11 90) |
+| Chust (DEF) | TITULAR | 92 | NO titular en Pinatar (confirmado): descansa | 90 -> 92 |
+| Gaya (DEF) | TITULAR | 82 | mie 28, FF le deja fuera | 78 -> 82: FF le da por recuperado del golpe en la nariz; entrena normal |
+| **Sergi Cardona (DEF)** | **DUDA** | **45** | **unico lateral izquierdo convocado para Manacor (21:00): casi seguro titular** | 55 -> 45 |
+| Olasagasti (MED) | TITULAR | 85 | fuera de la convocatoria de Copa (descansa) | 80 -> 85 |
+| Pablo Ibanez (MED) | TITULAR | 84 | mie 28, FF le deja fuera | = |
+| Unai Lopez (MED) | TITULAR | 82 | Huelva hoy 21:00, convocado | = (Ciss sancionado en la J11) |
+| Yamal (DEL) | TITULAR | 95 | exento | 92 -> 95 |
+| Roberto Fernandez (DEL) | TITULAR | 89 | NO titular en Sestao (confirmado) | 87 -> 89 |
+| Boye (DEL) | TITULAR | 87 | mie 28, FF le deja fuera | «pequena molestia» de un golpe, ya recuperado |
+
+**Caja:** +1.418.975 (premio J10 cobrado: 39 pts), 0 pujas vivas; ningun motor
+ha pujado.
+
+**Hecho hoy:** nada (en el mercado de hoy no hay ningun defensa que pase el
+liston: Lejeune deja la caja en rojo por +0,5 xP; De Haas FF 70).
+
+**Plan:** 20:10, once de Manacor. Si Cardona es titular: J11 35-40 % y
+mie 08:22-23:00 se busca relevo en el mercado de ese dia (TODOS los
+defensas de la lista, no solo los nombrados: los candidatos con nombre casi
+nunca salen): ok, 3+ partidos, FF J11 >= 80 en pagina «Posible alineacion
+J11», sin jugar la Copa del mie, +1 pt sobre Cardona y caja >= 0 (puja
+maxima ~2,82 M con el suelo de Cardona en 1,40 M). Ultimo recurso De Haas
+(FF 70) si sigue. Si es suplente o no juega: 65-70 % y Cardona se queda.
+Antes de escribir, mirar que la mejora no haya pujado ya por un defensa.
+Jue 08:22: limpieza de la orden.
+
 ## 26/10/2026, 19:30 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
 
 | Jugador | Veredicto | J11 % | J11 (Madrid) | Copa | Cambio |
