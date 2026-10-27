@@ -45,9 +45,10 @@ LA REGLA
          - a un protegido del gestor (`la_orden_del_gestor.protegidos`:
            `proteger` y `fichar`) ni a uno de `conservar`
            (`la_orden_del_gestor.conservados`);
-         - a uno que vende LA ORDEN (`vender_si_ficha.jugadores`): lo
-           vende ella, cuando su relevo y su suelo lo digan (`LA_ORDEN`,
-           desde el 27/10/2026: ver F1);
+         - a uno que vende LA ORDEN (`vender_si_ficha.jugadores` y
+           `viajes.candidatos`): lo vende ella, cuando su relevo y su
+           suelo (o el del viaje) lo digan (`LA_ORDEN`, desde el
+           27/10/2026: ver F1 y LOS VIAJES);
          - a lo que aguanta LA CARTERA de la ronda
            (`la_ronda_de_la_manana.los_que_aguanta`): tiene su propia
            salida;
@@ -263,7 +264,29 @@ LA REVISION FINAL (27/10/2026): EL PARTE Y LA ORDEN
         parte no los toca (`LA_ORDEN`), se cumpla o no su condicion
         (relevo, `desde`, `si_saldo_negativo`): los vende la orden,
         cuando ella diga y por lo que ella diga. Se lee el `player_id`
-        (`los_que_vende_la_orden`): sin el, la orden tampoco lo vende.
+        (`los_que_vende_la_orden`).
+
+        SIN `player_id` (27/10/2026, la revision del arreglo). Uno de
+        `vender_si_ficha` con solo el nombre (`{"nombre": "Cardona",
+        "si_esta": ..., "suelo": ...}`) o con un `player_id` que no es
+        un numero: la orden lo busca en la plantilla por su id, no lo
+        encuentra y no lo vende, pero el gestor lo escribio para
+        venderlo con su relevo y su suelo; el unico que lo venderia
+        seria el parte, en su 95 %, sin relevo ni suelo. Esa orden no
+        vale para el parte (`NO_SE_ENTIENDE`, F2), como un `proteger`,
+        un `conservar` o un `fichar` sin `player_id`: se falla del lado
+        seguro y el gestor la arregla.
+
+        LOS VIAJES (27/10/2026, la revision del arreglo). La orden
+        tambien vende los `viajes.candidatos` que estan en la
+        plantilla, con el suelo del viaje: lo pagado (`puja`) mas un
+        1 % hasta `hasta`, y hasta un 5 % por debajo despues. Un viaje
+        comprado hace mas de 7 dias, con su primera ronda jugada, en
+        duda y fuera del once, el parte lo vendia al 95 % de su valor de
+        hoy, por debajo de lo que pide la orden. Ahora tambien es de la
+        orden (`LA_ORDEN`), se cumplan o no sus topes, y sin `player_id`
+        la orden no vale (`NO_SE_ENTIENDE`). La de hoy no trae ninguno
+        (`candidatos` vacio, `hasta` el 07/10).
 
         LO QUE NO CUBRE: el relevo. Si ya es nuestro es un fichaje, y no
         se toca hasta que juega una ronda con nosotros (E14, H1); el
@@ -289,11 +312,13 @@ LA REVISION FINAL (27/10/2026): EL PARTE Y LA ORDEN
           - encendida, si `validar` no la da por buena (no hay fichero o
             no se lee: `SIN_ORDEN`; `SIN_CADUCIDAD`, `CADUCADA`,
             `NOMBRA_A_UN_INTOCABLE`, `FICHAJE_MAL_ESCRITO`), o no se
-            sabe leer a quien guarda (`NO_SE_ENTIENDE`: un jugador de
-            `conservar` que no es un dict deja vacio a `conservados`
-            ENTERO, y `validar` no mira `conservar`; uno sin
-            `player_id` no se guarda; un jugador de `vender_si_ficha`
-            que no es un dict hace reventar a `validar`), tampoco
+            sabe leer a quien guarda o que vende ella (`NO_SE_ENTIENDE`:
+            un jugador de `conservar` que no es un dict deja vacio a
+            `conservados` ENTERO, y `validar` no mira `conservar`; uno
+            sin `player_id` no se guarda; un jugador de
+            `vender_si_ficha` que no es un dict hace reventar a
+            `validar`; uno de `vender_si_ficha` o de `viajes.candidatos`
+            sin `player_id` solo lo venderia el parte), tampoco
             (`ORDEN_NO_VALIDA`; el motivo queda en `la_orden` y en el
             detalle).
         Lo del reloj (zona de silencio, ronda jugandose, sin calendario)
@@ -649,18 +674,24 @@ def hasta_cuando_no_se_toca(fichado, rondas) -> datetime | None:
 def los_que_vende_la_orden(orden) -> set:
     """
     Los `vender_si_ficha.jugadores` de la orden del gestor (27/10/2026,
-    F1), por su `player_id`: esten o no en la plantilla y se cumpla o no
-    su condicion (su relevo `si_esta` o el general, `desde`,
-    `si_saldo_negativo`). Esos los vende la orden, con su relevo y su
-    suelo, y el parte no los toca (`LA_ORDEN`). Uno sin `player_id` no
-    se puede guardar, pero la orden tampoco lo vende (lo busca en la
-    plantilla por el). Vacio si no hay orden o no se entiende. Solo vale
-    con la orden VALIDA: eso lo mira `correr` antes (`la_orden_no_vale`).
-    Pura. Nunca lanza.
+    F1) y sus `viajes.candidatos` (27/10/2026, la revision del arreglo:
+    LOS VIAJES), por su `player_id`: esten o no en la plantilla y se
+    cumpla o no su condicion (su relevo `si_esta` o el general, `desde`,
+    `si_saldo_negativo`; los topes y `hasta` del viaje). Esos los vende
+    la orden, con su relevo y su suelo (o el del viaje), y el parte no
+    los toca (`LA_ORDEN`). Uno sin `player_id` no se puede guardar, y la
+    orden tampoco lo vende (lo busca en la plantilla por el): solo lo
+    venderia el parte, asi que con uno asi la orden no vale
+    (`la_orden_no_vale`: `NO_SE_ENTIENDE`). Vacio si no hay orden o no
+    se entiende. Solo vale con la orden VALIDA: eso lo mira `correr`
+    antes (`la_orden_no_vale`). Pura. Nunca lanza.
     """
     try:
-        venta = _dict(_dict(orden).get("vender_si_ficha"))
-        return _ids(j.get("player_id") for j in _lista(venta.get("jugadores")))
+        orden = _dict(orden)
+        venta = _dict(orden.get("vender_si_ficha"))
+        viajes = _dict(orden.get("viajes"))
+        return (_ids(j.get("player_id") for j in _lista(venta.get("jugadores")))
+                | _ids(v.get("player_id") for v in _lista(viajes.get("candidatos"))))
     except Exception:                               # noqa: BLE001
         return set()
 
@@ -686,12 +717,19 @@ def la_orden_no_vale(orden, ahora, encendida=True) -> str | None:
                           vacios ENTEROS; uno sin `player_id` no se
                           guarda), o un `vender_si_ficha` o sus
                           `jugadores` que no son un dict y una lista de
-                          dicts
+                          dicts. Desde la revision del arreglo
+                          (27/10/2026), tambien lo que vende ella
+                          (`los_que_vende_la_orden`): un jugador de
+                          `vender_si_ficha` sin `player_id` (la orden no
+                          lo encuentra y solo lo venderia el parte, sin
+                          su relevo ni su suelo), o unos `viajes` y sus
+                          `candidatos` que no son un dict y una lista de
+                          jugadores, cada uno con su `player_id`
 
-    Con cualquiera de ellos `protegidos` y `conservados` dan vacio y no
-    se sabe a quien guarda el gestor: el parte no vende a nadie. `ahora`
-    se pasa tal cual, como a `protegidos` y `conservados`, para que los
-    tres digan lo mismo. Nunca lanza.
+    Con cualquiera de ellos `protegidos` y `conservados` dan vacio, o no
+    se sabe a quien guarda el gestor o que vende la orden: el parte no
+    vende a nadie. `ahora` se pasa tal cual, como a `protegidos` y
+    `conservados`, para que los tres digan lo mismo. Nunca lanza.
     """
     try:
         if not encendida:
@@ -714,10 +752,17 @@ def la_orden_no_vale(orden, ahora, encendida=True) -> str | None:
         venta = orden.get("vender_si_ficha")
         if venta and not isinstance(venta, dict):
             return "NO_SE_ENTIENDE"
-        jugadores = (venta or {}).get("jugadores")
-        if jugadores and (not isinstance(jugadores, list)
-                          or not all(isinstance(j, dict) for j in jugadores)):
+        viajes = orden.get("viajes")
+        if viajes and not isinstance(viajes, dict):
             return "NO_SE_ENTIENDE"
+        # Lo que vende ella (F1, LOS VIAJES), cada uno con su `player_id`:
+        # sin el, la orden no lo encuentra y solo lo venderia el parte, en
+        # su 95 % (27/10/2026, la revision del arreglo).
+        for jugadores in ((venta or {}).get("jugadores"), (viajes or {}).get("candidatos")):
+            if jugadores and (not isinstance(jugadores, list) or not all(
+                    isinstance(j, dict) and _int(j.get("player_id")) is not None
+                    for j in jugadores)):
+                return "NO_SE_ENTIENDE"
         return None
     except Exception:                               # noqa: BLE001
         return "NO_SE_ENTIENDE"
@@ -764,11 +809,11 @@ MOTIVOS = {
                              "sancionados: no se vende ni se publica a nadie"),
     "ORDEN_APAGADA": ("la orden del gestor esta apagada (BORDALAS_LA_ORDEN_DEL_GESTOR): "
                       "no se sabe a quien guarda (proteger, conservar) ni que vende "
-                      "ella (vender_si_ficha): no se vende ni se publica a nadie"),
+                      "ella (vender_si_ficha, viajes): no se vende ni se publica a nadie"),
     "ORDEN_NO_VALIDA": ("la orden del gestor no vale (no hay, no se lee, caducada o mal "
                         "escrita): sin ella no se sabe a quien guarda (proteger, "
-                        "conservar) ni que vende ella (vender_si_ficha): no se vende "
-                        "ni se publica a nadie"),
+                        "conservar) ni que vende ella (vender_si_ficha, viajes): no se "
+                        "vende ni se publica a nadie"),
 }
 
 
@@ -796,9 +841,10 @@ def decidir(
                               nada
         protegidos            `proteger` y `fichar` de la orden
         conservados           `conservar` de la orden
-        de_la_orden           `vender_si_ficha.jugadores` de la orden
-                              valida (27/10/2026, F1): los vende ella
-                              (`los_que_vende_la_orden`)
+        de_la_orden           `vender_si_ficha.jugadores` y
+                              `viajes.candidatos` de la orden valida
+                              (27/10/2026, F1 y LOS VIAJES): los vende
+                              ella (`los_que_vende_la_orden`)
         aguanta               lo de LA CARTERA de la ronda
         vendidos              {player_id} vendidos en esta vuelta
         fichajes              {player_id: datetime} desde cuando es
@@ -867,7 +913,8 @@ def decidir(
                 por = "CONSERVAR"
             elif pid in de_la_orden:
                 # F1 (27/10/2026): lo vende la orden, con su relevo y su
-                # suelo; si ella lo aguanta, el parte no se lo salta.
+                # suelo (o el del viaje); si ella lo aguanta, el parte no
+                # se lo salta.
                 por = "LA_ORDEN"
             elif pid in aguanta:
                 por = "LA_CARTERA"
