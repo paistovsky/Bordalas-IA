@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **27/10 21:00 (Pepe: el once sin los que se van, APAGADO).** Workflow de 5
+  (entender, construir, 2 revisores, arreglar). El caso: el 26/10 el once
+  escrito tenia a Jonny (lo vendia la orden esa noche) y no a Cardona (FF
+  50/50; Jonny «Importante» y mas puntos). Nuevo interruptor
+  **BORDALAS_EL_ONCE_SIN_LOS_QUE_SE_VAN** (nace apagado; solo lo lee el once
+  que se escribe): (1) no alinea a quien se vende ANTES del cierre (la orden
+  con su relevo sano dentro, la mejora, la rotacion GANADA, viajes) si hay
+  alternativa; nunca a un Dios ni a un intocable; respeta las rondas
+  parciales; solo acepta el once nuevo si es igual de completo; (2) Jornada
+  Perfecta desempata con FF a menos de 10 puntos, solo si JP dice que el de
+  dentro puede no jugar (DUDA/SUPLENTE/NO_CONVOCADO) y el de fuera es
+  alineable. Apagado: identico (huella de main). Merge en main. **Encender:**
+  tras la J11, en su propia rafaga (no el mismo dia que el parte vende).
+  **Hallazgo aparte (pendiente):** con el interruptor apagado, un dibujo de
+  emergencia con un jugador en duda (10 alineables) puede ganar a uno
+  completo de 11 sanos, y el ejecutor bloquea el SAVE_LINEUP. Con 11 justos
+  no cambia nada; con 12+ si. A estudiar.
+
 - **27/10 19:00 (el dueno: la Copa y Reto El Clasico).** «La copa no la
   jugamos, es solo liga»: la Copa no puntua; solo se mira como pista de
   rotacion para la jornada de liga (un titular en Copa a mitad de semana
