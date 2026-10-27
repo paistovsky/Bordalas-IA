@@ -352,6 +352,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **27/10 19:00 (el dueno: la Copa y Reto El Clasico).** «La copa no la
+  jugamos, es solo liga»: la Copa no puntua; solo se mira como pista de
+  rotacion para la jornada de liga (un titular en Copa a mitad de semana
+  descansa mas el fin de semana). «Lo del reto el clasico olvidalo, ademas
+  ya ha pasado. Eso fuera»: fuera de config/las_ligas.json y de los
+  pendientes (no hay plan multiliga). Se mantiene la proteccion: Pepe solo
+  juega El Chiringuito por su id. «El resto guay, sigue mejorando, eres el
+  CEO.» Plan de la semana: mie, decision de Cardona; jue-vie, sin encender
+  nada; vie-lun, J11; Pepe (apagado entre semana): el once no alinea a quien
+  vende la orden y desempata con JP y con quien juega antes del cierre; el
+  arreglo de FF para el hueco del vie 21:07-22:07 y para los demas motores;
+  la prima de puja segun el tipo de jugador; mar 03/11, encender el parte
+  vende.
+
 - **27/10 14:15 (rafaga de la tarde, llego a las 14:50).** Ciclos:
   verdes (#2524 a #2531). Saldo +248.975, 0 comprometido, sin movimientos.
   El premio de la J10 aun no ha entrado. El chat del dueno deja «el parte

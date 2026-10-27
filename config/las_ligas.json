@@ -1,17 +1,11 @@
 {
-  "por_que": "22/10/2026: el dueno se apunto sin querer a una segunda liga ('Reto el clasico'). Pepe elegia la PRIMERA liga de la cuenta (leagues[0]): si Biwenger la pusiera delante, pujaria y venderia en la liga equivocada. Ahora juega la de `activa` (2165477, El Chiringuito) y, si no esta en la cuenta, no hace nada. CAMBIAR DE LIGA AUN NO SE PUEDE: los libros de data/ (tablon, caches, posiciones, marcador, pujas) y la orden no llevan liga; una vuelta en otra liga borraria o mezclaria los de El Chiringuito (revision adversarial del 22/10). La guardia test_las_ligas_v1 para la verja si `activa` o BIWENGER_LEAGUE_ID apuntan a otra liga, a proposito, hasta que los libros vayan por liga.",
+  "por_que": "22/10/2026: el dueno se apunto sin querer a una segunda liga. Pepe elegia la PRIMERA liga de la cuenta (leagues[0]): si Biwenger la pusiera delante, pujaria y venderia en la liga equivocada. Ahora juega la de `activa` (2165477, El Chiringuito) y, si no esta en la cuenta, no hace nada. 27/10, el dueno: «lo del reto el clasico olvidalo, ademas ya ha pasado. Eso fuera»: fuera de la lista; Pepe solo juega El Chiringuito. La guardia test_las_ligas_v1 sigue parando la verja si `activa` o BIWENGER_LEAGUE_ID apuntan a otra liga (los libros de data/ y la orden no llevan liga).",
   "activa": 2165477,
   "ligas": [
     {
       "id": 2165477,
       "nombre": "El chiringuito",
       "juega": true
-    },
-    {
-      "id": 2210645,
-      "nombre": "Reto El Clásico",
-      "juega": false,
-      "nota": "se apunto el dueno sin querer el 22/10; id leido de la cuenta en la vuelta #2415 (22/10 12:07 UTC). Pepe no juega en ella."
     }
   ]
 }
