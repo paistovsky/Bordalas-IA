@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E66 · 27/10/2026 17:20 de Madrid · Para una jornada, manda la titularidad de FF (y E65 se matiza)
+### E66 · 27/10/2026 17:18 de Madrid · Para una jornada, manda la titularidad de FF (y E65 se matiza)
 
 **Hipotesis:** E53 (el precio predice mejor que los puntos por partido) y
 E65 (la vara calibrada) valen para elegir quien puntua en una jornada.
@@ -2896,7 +2896,7 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
   a la mejora a cambiar dudosos por fijos ganando la mitad de lo que dice.
   Donde: `esperado` de la mejora (tasa x titularidad / 100) y
   `el_calendario_de_puntos.xp_jugador`. Con interruptor y ensayo.
-  **Matiz de E66 (27/10 17:20): no cambiar la vara entera.** Para ordenar
+  **Matiz de E66 (27/10 17:18): no cambiar la vara entera.** Para ordenar
   el once y elegir candidatos, la vara de hoy ordena mejor (+0,52 contra
   +0,47/+0,50). La curva calibrada solo para el NIVEL: cuantos puntos gana
   un cambio cuando se compara con lo que cuesta.
