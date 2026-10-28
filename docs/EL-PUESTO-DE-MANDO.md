@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/10/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 28/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/10 21:15 (rafaga de la noche; mi control de caja de la J11).**
+  Ciclos: verdes (#2554 a #2561). Saldo +1.418.975, comprometido 838.000
+  (Nacho Perez, jue 07:00): **peor caso +580.975, verde para el vie 30/10
+  15:00. No hace falta avisar al dueno.** Once: todos titulares menos
+  Cardona (duda, 50 %), sin recambio. Turnos del vie: chat del dueno 12:45
+  y yo 12:50. Jueves y viernes: no se enciende nada.
 
 - **28/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2547 a #2554).
   Saldo +1.418.975; puja viva **Nacho Perez 838.000** (jue 07:00); la de
