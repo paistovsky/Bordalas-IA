@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 28/10/2026, 07:20 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2538 a #2546;
+  #2547 de las 07:15 en marcha). Saldo +1.418.975 (dato de las 04:53,
+  antes del reset; no habia pujas vivas, asi que el reset no podia
+  restar). J11 vie 30/10: cubierta. Cardona 35-40 % (titular en la Copa).
 
 - **27/10 21:30 (laboratorio de la tarde: la prima que gana).** **Rivales:**
   J10 cerrada: Pepe 39 (5.o), Pollo17 44; nos saca ~10 en la general.
