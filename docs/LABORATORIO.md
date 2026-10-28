@@ -69,6 +69,38 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E67 · 28/10/2026 11:17 de Madrid · ¿Se queda sin oferta un jugador publicado? Casi nunca (95 de 96)
+
+**El caso:** pendiente del equipo rojo (28/10 08:45): «el cierre no tiene
+plan B si un jugador de inventario no recibe oferta». E42 dijo que el
+Computer renueva cada 48 h las ofertas de todos los publicados.
+**Datos:** `libro_de_publicacion.jsonl` (cuando estuvo publicado cada
+jugador) contra `censo_de_ofertas.jsonl` (las ofertas vivas cada noche a
+las ~01:10 de Madrid), del 01/10 al 28/10. Cada jugador lleva su propio
+turno de 48 h (Chust y Gulacsi van en el otro), asi que la pregunta justa
+es: publicado dos noches seguidas enteras, ¿tiene oferta en alguna?
+**Codigo:** `lab/ofertas/sin_oferta.py`.
+
+**Lo que se aprende:**
+- **95 de 96 veces, si.** El hueco: **Gulacsi**, publicado sin parar desde
+  el 22/10, con oferta en las noches del 22 y el 24, ninguna la del 25 ni
+  la del 26, y otra vez la del 27 (y ninguna la del 28). Le falto oferta
+  unas 24 h, del 25/10 al 26/10: con la J10 en juego y el cambio de hora
+  esa misma noche. No se sabe cual de las dos cosas fue.
+- (Antes del 01/10 salen muchos «sin oferta», pero entonces Pepe
+  publicaba y retiraba a diario y el libro no distingue los ratos sin
+  publicar: no se cuenta.)
+- **Riesgo para el cierre:** ~1 de cada 100 ventas con plazo puede no
+  tener oferta la mañana que toca. Pequeño, no nulo.
+
+**Limites:** 96 pares de noches; el censo es una foto por noche (no ve
+ofertas que nazcan y mueran entre fotos); un solo caso fallido.
+
+**Veredicto: SE AGUANTA E42 con una excepcion.** Para el equipo rojo: el
+plan B no corre prisa, pero cuando el cierre cuente con UNA venta para
+salir del rojo, que tenga apuntada una segunda (otro publicado con oferta
+viva), por ese 1 %.
+
 ### E66 · 27/10/2026 17:18 de Madrid · Para una jornada, manda la titularidad de FF (y E65 se matiza)
 
 **Hipotesis:** E53 (el precio predice mejor que los puntos por partido) y
