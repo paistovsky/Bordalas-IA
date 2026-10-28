@@ -69,6 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E68 · 28/10/2026 17:18 de Madrid · Vender antes del reset que renueva la oferta: gana poco
+
+**El caso:** Luismi vendio hoy a las 05:27, antes del reset, y saco +9,8 %
+sobre el valor de despues. E42: el Computer renueva cada 48 h la oferta de
+cada publicado con el reset de las 07:00. Si el jugador baja, la oferta
+nueva saldra mas baja: venderle con la vieja (vueltas de 04:45/04:50)
+seria mejor que con la nueva (07:15).
+**Datos:** el censo de ofertas desde el 01/10: 87 pares de ofertas
+seguidas del mismo jugador (dos lotes de su turno, ~48 h), y el precio en
+esos dos dias.
+**Codigo:** `lab/ofertas/antes_del_reset.py`.
+
+    lo que hizo el precio     n    oferta nueva / vieja (mediana)   peor caso
+    bajo (-1,4 %)            54          -1,0 %                     -14,5 %
+    subio (+2,7 %)           25          +3,5 %                      -6,1 %
+    no cambio                 8          +0,9 %                      -8,9 %
+
+**Lo que se aprende:**
+- **La idea es cierta pero pequeña:** si el jugador baja, la oferta nueva
+  sale de mediana un 1 % por debajo de la vieja (~30.000 en uno de 3 M).
+  La oferta sigue al precio, con su ruido de siempre (E22: ±3-4 %), y a
+  veces cae mucho (-14,5 %): lo de Luismi fue un dia de esos.
+- Si el jugador sube, esperar a la nueva paga (+3,5 %).
+
+**Limites:** el censo ve una foto por noche; los pares mezclan turnos y
+dias de jornada; no separa la oferta del Computer por encima o por debajo
+del precio.
+
+**Veredicto: GANA POCO** (no pasa a «Listo para el plan» por si solo).
+Para cuando se toque la venta: si un publicado que hay que vender va
+bajando y es dia de renovacion, venderle en la vuelta de las 04:45/04:50
+con la oferta vieja; si va subiendo, esperar a la nueva. Es ~1 % por
+venta: bueno de tener, no urgente.
+
 ### E67 · 28/10/2026 11:17 de Madrid · ¿Se queda sin oferta un jugador publicado? Casi nunca (95 de 96)
 
 **El caso:** pendiente del equipo rojo (28/10 08:45): «el cierre no tiene
