@@ -52,6 +52,11 @@ QUE NO HACE
     ganar a los que suben, cerca de la jornada compra solo con caja, y
     aguanta lo que sube en vez de revenderlo antes de la jornada.
 
+    Con `ENV_SOLO_LO_QUE_PAGA` (LA RONDA, SOLO LO QUE PAGA, 28/10)
+    cambian 1 y 2 para los del Computer: solo el que pide menos de 1 M,
+    sube hoy el 2 % o más y a 64 h o más de la jornada, a la prima de la
+    cartera. A los managers y la salida, igual.
+
     Nace APAGADA: `BORDALAS_LA_RONDA_DE_LA_MANANA`. Nunca lanza.
 """
 
@@ -298,6 +303,71 @@ def el_suelo_de_la_cartera(pagado, incremento, valor):
         return None
 
 
+# LA RONDA, SOLO LO QUE PAGA (28/10/2026)
+#
+#     Laboratorio del 27/10 y su escéptico («ADOPTAR, MÁS ESTRECHO»):
+#     sobre 780 días-anuncio del Computer (17/09 a 26/10), revender al
+#     que sube menos del 2 % de su valor deja <= 0 a 7 días en las dos
+#     mitades y a cualquier prima (R1a, al precio que pide: -0,36 M en 22
+#     días-anuncio; R1b pierde con todas las primas). Del que sube el 2 %
+#     o más, solo paga el +12 % por debajo de 1 M; por encima, nada. Y a
+#     + 1 % por uno que sube el 4 % o más no se gana casi nunca (0 de 13).
+#
+#     El 28/10 a las 07:19 (a 61,7 h de la J11: sin prima) la ronda pujó
+#     + 1 % por Fortuño (1,83 M, +7 %) y por Nacho Pérez (830.000,
+#     +5,1 %): casi sin opciones de ganar, y con las dos ganadas la J11
+#     empezaba en -1.267.025 (el gestor retiró la de Fortuño con
+#     `no_pujar`).
+#
+#     Con `ENV_SOLO_LO_QUE_PAGA`, a los del Computer (a los managers, la
+#     puerta, como hoy) la ronda solo puja si (`lo_que_paga`):
+#       a) pide menos de `PRECIO_QUE_PAGA` (1 M);
+#       b) sube hoy al menos `SUBIDA_QUE_PAGA` (2 %) de su valor de hoy
+#          (la ficha; si no, lo que pide);
+#       c) faltan `HORAS_PRIMA` (64) o más para la jornada.
+#     Y entonces a `la_puja_de_la_cartera` (+12 %, en 9.900), con la
+#     cartera o sin ella. Las demás guardias siguen (estado, juega, la
+#     subida mínima, el colchón, el hueco, los topes, protegidos, pujas
+#     vivas, silencio, `HORAS_SIN_COMPRAR`); la salida no cambia.
+#     Volver a medirlo en 3-4 semanas (mediados de noviembre). Nace
+#     APAGADO; apagado, `decidir` es la de antes byte a byte.
+ENV_SOLO_LO_QUE_PAGA = "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA"
+PRECIO_QUE_PAGA = 1_000_000     # lo que pide, sin incluir
+SUBIDA_QUE_PAGA = 0.02          # `priceIncrement` sobre su valor de hoy
+
+
+def la_ronda_solo_lo_que_paga_activa() -> bool:
+    try:
+        return str(os.environ.get(ENV_SOLO_LO_QUE_PAGA, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def lo_que_paga(precio, sube, ficha, horas_jornada) -> bool:
+    """
+    ¿Paga pujar por este del Computer? Pide menos de `PRECIO_QUE_PAGA`,
+    sube hoy (`priceIncrement`) al menos `SUBIDA_QUE_PAGA` de su valor
+    de hoy (la ficha; si no, lo que pide) y faltan `HORAS_PRIMA` o más
+    para la jornada. Con basura o sin calendario, no. Pura. Nunca lanza.
+    """
+
+    try:
+        precio = _int(precio, 0) or 0
+        sube = _int(sube, 0) or 0
+        if precio <= 0 or precio >= PRECIO_QUE_PAGA or sube <= 0:
+            return False
+        if horas_jornada is None or not horas_jornada >= HORAS_PRIMA:
+            return False
+        ficha = ficha if isinstance(ficha, dict) else {}
+        valor = _int(ficha.get("price")) or precio
+        if valor <= 0:
+            return False
+        return sube >= math.ceil(round(valor * SUBIDA_QUE_PAGA, 6))
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 # UN SOLO COLCHÓN (17/10/2026). El motor viejo (AUTOPILOT V3,
 # ACQUISITION_BOARD, XI_UPGRADE) pujó 1.778.494 por Manu Sánchez con la
 # caja en -432.317: su presupuesto autoriza deuda hasta `MAX_SAFE_DEBT` y
@@ -515,6 +585,7 @@ def decidir(
     en_venta, maximo_de_puja, minutos_al_reset, horas_jornada, libro,
     protegidos=frozenset(), puede_escribir=True, en_curso=False,
     cartera=False, de_managers=frozenset(), saldo=None,
+    solo_lo_que_paga=False,
 ) -> list:
     """Qué hace la ronda en esta vuelta. Pura.
 
@@ -528,6 +599,9 @@ def decidir(
         de_managers  los del `mercado` que vende un manager (la puerta):
                  a esos, lo que piden + 1 %
         saldo    el de la foto: con la cartera, sin saldo no se compra
+        solo_lo_que_paga  LA RONDA, SOLO LO QUE PAGA
+                 (`ENV_SOLO_LO_QUE_PAGA`): a los del Computer, solo
+                 `lo_que_paga` y a `la_puja_de_la_cartera`
     """
 
     acciones = []
@@ -611,7 +685,14 @@ def decidir(
     tope = TOPE_POR_VIAJE
     for _, pid, precio, sube in sorted(candidatos, reverse=True):
         puja = la_puja(precio)
-        if (cartera and pid not in de_managers and puja <= tope
+        if solo_lo_que_paga and pid not in de_managers:
+            # LA RONDA, SOLO LO QUE PAGA (28/10): del Computer, solo el de
+            # menos de 1 M que sube el 2 % y lejos de la jornada, a la
+            # prima de la cartera. Los topes y el colchón, abajo, igual.
+            if not lo_que_paga(precio, sube, fichas.get(pid), horas_jornada):
+                continue
+            puja = la_puja_de_la_cartera(precio, sube)
+        elif (cartera and pid not in de_managers and puja <= tope
                 and horas_jornada >= HORAS_PRIMA):
             # La prima nunca deja fuera a uno que cabe a precio + 1 %.
             puja = min(la_puja_de_la_cartera(precio, sube), tope)
@@ -719,6 +800,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             en_curso=jornada_en_curso(ahora, CALENDARIO),
             cartera=la_cartera_activa(), de_managers=frozenset(vendedores),
             saldo=foto.get("saldo"),
+            solo_lo_que_paga=la_ronda_solo_lo_que_paga_activa(),
         )
         if la_cartera_activa():
             salida["cartera"] = {"activa": True, "saldo": foto.get("saldo"),

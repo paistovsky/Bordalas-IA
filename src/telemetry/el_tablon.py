@@ -291,6 +291,11 @@ QUE_HACE = {
         "deja a dos del mismo puesto a 10 puntos o menos, decide Jornada Perfecta "
         "(de la jornada que toca y de menos de 12 h) cuando da al de dentro en "
         "duda o peor.",
+    "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA":
+        "La ronda solo puja por un jugador del Computer si pide menos de 1 M, "
+        "su precio sube hoy un 2 % o más y faltan 64 h o más para la jornada, "
+        "y entonces puja su precio + 12 % (terminado en 9.900); a los de los "
+        "managers y la venta de lo comprado, igual que antes.",
     "BORDALAS_JORNADAS_POR_SU_FECHA":
         "Cuenta las jornadas por la fecha de los partidos, no por Biwenger.",
     "BORDALAS_LA_MONEDA_DE_LA_LIGA":
