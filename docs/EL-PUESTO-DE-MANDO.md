@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/10/2026, 07:20 de Madrid (rafaga de las 07:15).
+Actualizado: 28/10/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/10 14:15 (rafaga de la tarde).** Ciclos: verdes (#2547 a #2554).
+  Saldo +1.418.975; puja viva **Nacho Perez 838.000** (jue 07:00); la de
+  Fortuno la retiro la orden (sale aun PENDING en el libro, pero el
+  comprometido ya solo cuenta la de Nacho). Peor caso para la J11 (vie
+  30/10 15:00): **+580.975**. Cubierto. El chat del dueno dejo dos primas
+  nuevas APAGADAS (no se enciende nada en semana de cierre).
 
 - **28/10 12:30 (laboratorio de las 10:47: rivales + las primas,
   apagadas).** Workflow de 8 (2 miden, 2 construyen, 4 revisores).
