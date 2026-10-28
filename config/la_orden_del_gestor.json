@@ -9,6 +9,11 @@
       "player_id": 1721,
       "nombre": "Manu Sánchez",
       "por_que": "17/10, el gestor: el motor viejo (ACQUISITION_BOARD, XI_UPGRADE) pujó 1.778.494 (+7,8 % sobre 1.650.000) con el colchón de la cartera en -432.317. Ganada, la caja quedaría en -2,21 M a 4 días del aplazado del 21/10 (que es plazo de caja) y no mejora el once: 3,5 pts/partido, como Jonny (3,57) y Chust (3,63). Se retira; vuelve a ser candidato cuando la caja lo pague."
+    },
+    {
+      "player_id": 30334,
+      "nombre": "Fortuño",
+      "por_que": "28/10, el gestor: la ronda pujó 1.848.000 (+1 %) a las 07:19, despues del reset. Ganada el jue 07:00, la J11 (vie 21:00) empezaría en -1.267.025 y solo se salvaría si el Computer ofrece por él en el reset del vie 07:00: no hay plan B (el cierre no vende titulares). Dos revisores (traza + equipo rojo) piden retirarla; la de Nacho Pérez se queda (sola deja +580.975). Se quita después de que empiece la J11."
     }
   ],
   "vender_si_ficha": {

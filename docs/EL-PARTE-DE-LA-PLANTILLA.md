@@ -35,6 +35,35 @@ Ventanas de la J11 (vie 30/10 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 04:50 (40 h). Despues, solo lo que
 pague la caja entera.
 
+## 28/10/2026, 08:45 de Madrid (supervision; el parte completo, a las 18:37)
+
+**Cardona tras Manacor (0-5):** titular, cambiado en el 57' (le dosifican).
+FF J11 (pagina «Posible alineacion J11», leida a las 08:26): **Cardona 50**,
+Carlos Romero 50 (en duda), Mourino 40, Freeman 70, Foyth 70, Veiga 80.
+Gulacsi 90 (Luiz Junior jugo la Copa). Sigue en DUDA, sin bajar de 50.
+
+**Defensas del mercado de hoy (Computer):** ninguno pasa el liston.
+
+| Defensa | Precio | Tendencia | FF J11 | Pts/partido | Por que no |
+|---|---|---|---|---|---|
+| Nacho Perez (Levante, en Atletico) | 830.000 | +5,1 % | 60 | 4,0 | FF < 80. La ronda ya puja (838.000) |
+| Lejeune | 2.880.000 | baja | 95 | 2,0 | no suma sobre Cardona y no cabe en la caja |
+| De Haas | 1.520.000 | baja | 70 | 3,7 | FF < 80 |
+| Zubeldia | 1.000.000 | baja | 30 | 2,7 | suplente |
+| Sadick | 860.000 | baja | 70 | 2,8 | FF < 80 y suma menos |
+
+**Decision de la manana:** Cardona se queda por ahora. A las 18:37 se
+vuelve a mirar FF (actualiza la J11 tras la Copa). Si baja a <= 40 y aparece
+un defensa que pase el liston, se escribe con la prima de la regla del
+laboratorio y comprobando antes que Cardona tiene oferta viva del Computer
+para venderlo en cuanto llegue el relevo.
+
+**La caja de la J11:** la ronda pujo a las 07:19 por Fortuno (1.848.000) y
+Nacho Perez (838.000). Si ganaba las dos, la J11 empezaba en -1.267.025 y
+dependia de la oferta del Computer por Fortuno del vie 07:00. **Puja por
+Fortuno retirada** (`no_pujar`). Con la de Nacho sola, en el peor caso
++580.975. Lista de objetivos: ninguno en el mercado hoy.
+
 ## 27/10/2026, 19:15 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
 
 (La Copa no puntua para nosotros: solo se mira como pista de rotacion.)

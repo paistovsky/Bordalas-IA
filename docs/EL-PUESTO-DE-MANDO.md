@@ -352,6 +352,28 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **28/10 08:45 (supervision).** Reset de las 07:00: no entro ni salio
+  nadie (no habia pujas vivas); saldo +1.418.975. **La ronda pujo a las
+  07:19** (despues del reset, a +1 %) por Fortuno (POR, 1.830.000, +7 %) y
+  Nacho Perez (DEF, 830.000, +5 %): 2.686.000 comprometidos. Con las dos, el
+  cierre ve la J11 en -1.267.025 y la mejora se para (NADA, minimo 0). La
+  nota de las 07:15 («J11 cubierta») es de antes de esas pujas.
+  **Workflow de 2 (traza + equipo rojo, independientes):** si gana las dos el
+  jue 07:00, el cierre vende a Fortuno el vie 07:15 con suelo 0 (simulado en
+  4 variantes). Pero eso depende de que el Computer ofrezca por Fortuno en el
+  reset del vie, y no hay plan B: el cierre no vende titulares, y la palanca
+  de retirar pujas (<40 h) nunca llega antes del reset (las vueltas de 04:45
+  y 04:50 caen a 40,1-40,2 h). **Hecho:** Fortuno a `no_pujar` (la orden
+  retira la puja en la proxima vuelta; mismo mecanismo que Pablo Ramon 14/10
+  y Manu Sanchez 17/10). La de Nacho se queda: sola deja +580.975. A +1 %
+  sobre uno que sube >= 4 %, las dos iban a perder casi seguro (laboratorio
+  27/10). Quitar a Fortuno de `no_pujar` cuando empiece la J11. **Cardona:**
+  57' en Manacor; FF J11 50, Romero 50 (duda). Ningun defensa de hoy pasa el
+  liston; se queda. Se vuelve a mirar a las 18:37. **Pendiente (equipo
+  rojo):** la_ronda.json solo vive en la cache de Actions; el cierre no tiene
+  plan B si un jugador de inventario no recibe oferta. A estudiar despues de
+  la J11.
+
 - **28/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2538 a #2546;
   #2547 de las 07:15 en marcha). Saldo +1.418.975 (dato de las 04:53,
   antes del reset; no habia pujas vivas, asi que el reset no podia
