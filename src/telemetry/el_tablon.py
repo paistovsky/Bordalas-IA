@@ -202,6 +202,10 @@ QUE_HACE = {
     "BORDALAS_LA_PUJA_EN_9900":
         "La puja de la mejora del once termina en 9.900 (gana los empates: ninguna "
         "puja rival de las 186 más altas acaba entre 9.901 y 9.999).",
+    "BORDALAS_LA_MEJORA_A_LA_SALIDA":
+        "Cuando la mejora del once ficha del Computer a uno que hoy no sube, puja "
+        "lo que pide redondeado a 9.900 (casi nadie se lo disputa) en vez del "
+        "precio + 1 %.",
     "BORDALAS_LA_JORNADA_DE_CADA_PAGINA":
         "La mejora del once no saca a un titular sano ni mete a nadie por una "
         "alineación CONFIRMADA de FF de otra jornada (el 0 % o el 100 % de un "
