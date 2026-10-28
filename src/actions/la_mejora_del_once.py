@@ -157,6 +157,17 @@ LA JORNADA DE CADA PAGINA (25/10/2026, `BORDALAS_LA_JORNADA_DE_CADA_PAGINA`)
     `decidir(de_otra_jornada=...)`). Ver el bloque junto a
     `la_jornada_de_cada_pagina_activa`. Nace APAGADO.
 
+LA MEJORA A LA SALIDA (28/10/2026, `BORDALAS_LA_MEJORA_A_LA_SALIDA`)
+
+    Laboratorio del 27/10 (n = 688): el del Computer que no sube en el
+    reset de hoy casi nadie lo disputa (4 %) y la puja rival mediana es lo
+    que pide. Con el interruptor y LA PUJA EN 9.900 puesta, la puja por el
+    que no sube (`priceIncrement` sabido y <= 0) es lo que pide en 9.900
+    (`en_9900(precio)`), nunca por debajo; el que sube, el que no se sabe
+    y LA PUJA FUERTE, como siempre. La caja del cambio cuenta esa misma
+    puja. Ver el bloque junto a `la_mejora_a_la_salida_activa`. Nace
+    APAGADO.
+
 QUE NO HACE
 
     No toca a Yamal (salvo su llave de lesión), ni a los `proteger` de la
@@ -189,6 +200,7 @@ ENV_PUJA_FUERTE = "BORDALAS_LA_MEJORA_PUJA_FUERTE"          # nace APAGADO
 ENV_SOLO_SI_SUBE = "BORDALAS_LA_MEJORA_SOLO_SI_SUBE"        # nace APAGADO
 ENV_PUJA_EN_9900 = "BORDALAS_LA_PUJA_EN_9900"               # nace APAGADO
 ENV_LA_JORNADA_DE_CADA_PAGINA = "BORDALAS_LA_JORNADA_DE_CADA_PAGINA"   # nace APAGADO
+ENV_A_LA_SALIDA = "BORDALAS_LA_MEJORA_A_LA_SALIDA"          # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
 # El tablero de FF (`futbolfantasy_provider.BOARD_FILE`), para LA JORNADA
@@ -401,6 +413,90 @@ def la_puja_en_9900_activa() -> bool:
             "1", "true", "si", "yes"}
     except Exception:                               # noqa: BLE001
         return False
+
+
+# LA MEJORA A LA SALIDA (28/10/2026, laboratorio del 27/10 + el esceptico)
+#
+# Con LA PUJA EN 9.900 la mejora puja por el del Computer
+# `en_9900(precio + 1 %)`, suba o no. Medido sobre las subastas del
+# Computer (n = 688): el que NO sube en el reset de hoy (`priceIncrement`
+# <= 0) solo se lo disputa alguien el 4 % de las veces, y la puja rival
+# mediana es +0,0 % (lo que pide). Lo que pide redondeado al primer
+# ...9.900 (`en_9900(precio)`) gana el 98 % en la primera mitad y el
+# 100 % en la segunda: probado fuera de muestra.
+#
+# Lo que se ahorra por compra: nada por debajo de 1 M (el +1 % cae en el
+# mismo ...9.900), ~13.500 de 1 a 3 M y ~50.000 de 3 M para arriba. De
+# 3 M para arriba se esperan ~2 puntos mas de pujas perdidas ante las de
+# Pollo17 (lo que pide + 7.000 / + 27.000): aceptado.
+#
+# Con el interruptor, y SOLO con LA PUJA EN 9.900 puesta (sin ella, el
+# +1 % a miles de siempre), la puja por el del Computer que no sube hoy
+# es `en_9900(precio)`: nunca por debajo de lo que pide (`precio`, el del
+# mercado) ni por encima de la de siempre. "No sube" es una subida
+# SABIDA y <= 0 (`la_subida_de_hoy`): sin dato o con basura no se sabe, y
+# va la de siempre. El que sube, aunque sea poco, como siempre. Con LA
+# PUJA FUERTE (apagada en produccion) nada cambia: su vara compara contra
+# la puja de siempre. Lo que ya es nuestro (adoptar) no puja.
+#
+# La puja nueva es la del que entra (`entran`): de ella salen el `coste`,
+# la `caja` del cambio, lo que decide si cabe (`la_mejor_combinacion`),
+# la `caja_despues`, el importe de la accion y lo que `correr` apunta en
+# el libro. No hay otro sitio que la vuelva a calcular. El plan dice a
+# quienes de los elegidos se puja asi (`plan["a_la_salida"]`, sus ids).
+#
+# Nace APAGADO. Apagado, `decidir` es byte a byte el de antes.
+
+def la_mejora_a_la_salida_activa() -> bool:
+    """`BORDALAS_LA_MEJORA_A_LA_SALIDA`, leido como `activa` (al
+    llamarse). Nace APAGADO. Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_A_LA_SALIDA, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def la_subida_de_hoy(ficha) -> int | None:
+    """Lo que sube hoy el de `ficha` (`price_increment` de `todaLaLiga`
+    o, si falta o es basura, `priceIncrement` del catalogo), como
+    entero. None si no se sabe (sin dato o con basura). Pura, nunca
+    lanza."""
+    try:
+        if not isinstance(ficha, dict):
+            return None
+        for clave in ("price_increment", "priceIncrement"):
+            sube = _int(ficha.get(clave))
+            if sube is not None:
+                return sube
+        return None
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def la_puja_a_la_salida(precio, ficha, de_siempre):
+    """La puja por el del Computer con LA MEJORA A LA SALIDA: si `ficha`
+    NO sube hoy (`la_subida_de_hoy` sabida y <= 0), lo que pide en 9.900
+    (`en_9900(precio)`), nunca por debajo de `precio` ni por encima de
+    `de_siempre`. Si sube, si no se sabe o con basura, `de_siempre`.
+    Pura, nunca lanza."""
+    try:
+        sube = la_subida_de_hoy(ficha)
+        if sube is None or sube > 0:
+            return de_siempre
+        from src.actions.la_ronda_de_la_manana import en_9900
+
+        pide = _int(precio)
+        if pide is None or pide <= 0:
+            return de_siempre
+        puja = en_9900(pide)
+        if not isinstance(puja, int) or isinstance(puja, bool) or puja < pide:
+            return de_siempre
+        if isinstance(de_siempre, int) and not isinstance(de_siempre, bool):
+            return min(puja, de_siempre)
+        return puja
+    except Exception:                               # noqa: BLE001
+        return de_siempre
 
 
 def la_puja_fuerte_activa() -> bool:
@@ -671,7 +767,7 @@ def decidir(
     ya_pujados=frozenset(), caja, horas_jornada, puede_escribir=True,
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
     estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
-    en_9900=False, de_otra_jornada=frozenset(),
+    en_9900=False, de_otra_jornada=frozenset(), a_la_salida=False,
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -733,6 +829,12 @@ def decidir(
                         sin poder cambiarlos.
                     Cada clave, solo si hay algo. Vacio (lo de siempre):
                     byte a byte lo de antes.
+        a_la_salida  LA MEJORA A LA SALIDA (28/10): con `en_9900` y sin
+                    `puja_fuerte`, la puja por el del Computer que no sube
+                    hoy (`la_subida_de_hoy` sabida y <= 0) es lo que pide
+                    en 9.900 (`la_puja_a_la_salida`); su caja la cuenta y
+                    `plan["a_la_salida"]` dice a quienes de los elegidos
+                    (ids). False (lo de siempre): byte a byte lo de antes.
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -869,6 +971,10 @@ def decidir(
     # y los chollos (sin pujar: ya es nuestro).
     entran = []
     de_otra_entran = []
+    # LA MEJORA A LA SALIDA (28/10/2026): solo sobre la puja en 9.900 y
+    # sin la puja fuerte (ver el bloque junto a su interruptor).
+    a_la_salida = bool(a_la_salida and en_9900 and not puja_fuerte)
+    a_lo_que_piden = set()
     for c in escaparate or []:
         pid = _int(c.get("id"))
         lc = liga.get(pid) or {}
@@ -901,6 +1007,13 @@ def decidir(
         if en_9900:
             from src.actions.la_ronda_de_la_manana import en_9900 as _en_9900
             puja = _en_9900(puja)
+        if a_la_salida:
+            # El que no sube hoy, a lo que pide en 9.900. El `coste` (la
+            # caja del cambio) es esta misma puja.
+            de_siempre = puja
+            puja = la_puja_a_la_salida(precio, lc, de_siempre)
+            if puja != de_siempre:
+                a_lo_que_piden.add(pid)
         entran.append(_con_calendario(
             {"id": pid, "nombre": c.get("name"), "pos": c.get("position"),
              "esperado": e, "puja": puja, "coste": puja,
@@ -1017,6 +1130,10 @@ def decidir(
         plan["frenadas"] = frenadas
     if solo_si_sube:
         plan["sin_subir"] = sin_subir
+    if a_la_salida:
+        # LA MEJORA A LA SALIDA: los elegidos que se pujan a lo que piden.
+        plan["a_la_salida"] = [c["entra"] for c in elegidos
+                               if c["entra"] in a_lo_que_piden and not c["ya_es_nuestro"]]
     if de_otra:
         plan["de_otra_jornada"] = de_otra
     if de_otra_entran:
@@ -1668,6 +1785,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             calendario_de_puntos=ctx, puja_fuerte=la_puja_fuerte_activa(),
             solo_si_sube=la_mejora_solo_si_sube_activa(),
             en_9900=la_puja_en_9900_activa(),
+            a_la_salida=la_mejora_a_la_salida_activa(),
             probabilidades=las_probabilidades(status),
             estados=los_estados(snapshot, liga),
             vendidos=vendidos,
@@ -1752,6 +1870,8 @@ def main() -> int:
         print(f"  frenados por el margen del calendario: {calendario['frenados_por_el_margen']}")
     if plan.get("sin_subir"):
         print(f"  frenados por no subir (solo si sube): {plan['sin_subir']}")
+    if plan.get("a_la_salida"):
+        print(f"  a lo que piden en 9.900 (no suben hoy): {plan['a_la_salida']}")
     for o in plan.get("de_otra_jornada") or []:
         print(f"  no sale {o.get('nombre')} ({o.get('id')}): su {o.get('titularidad')} % "
               f"es de una confirmada de FF de otra jornada")

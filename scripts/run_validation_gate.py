@@ -594,6 +594,11 @@ TESTS = [
     # de que jornada es la pagina de cada equipo y la mejora no abre un
     # hueco con una titularidad de otra jornada. Apagado.
     "src.analysis.test_la_jornada_de_cada_pagina_v1",
+
+    # La mejora a la salida (28/10/2026): con la puja en 9.900, la
+    # mejora puja por el del Computer que no sube hoy lo que pide en
+    # 9.900, no el +1 %; su caja cuenta esa misma puja. Apagado.
+    "src.analysis.test_la_mejora_a_la_salida_v1",
 ]
 
 
