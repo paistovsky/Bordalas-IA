@@ -352,6 +352,39 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **28/10 12:30 (laboratorio de las 10:47: rivales + las primas,
+  apagadas).** Workflow de 8 (2 miden, 2 construyen, 4 revisores).
+  **Rivales desde anoche** (todos al Computer): Pollo17 compro a
+  Mikautadze a +13,3 % (subia; Luismi perdio a +3,9 %) y vendio a Robert
+  Navarro (+19,8 % en 35 dias) y a Kubo (+3,1 % en 7 dias), los dos en dia
+  de bajada. Luismi vendio a Villares (+80 mil) y a Carvajal (-468 mil)
+  a las 05:27, antes del reset: saco +9,8 % sobre el valor de despues. Con
+  la caja reconstruida en -13,5 M, puso a la venta 11 de sus 23 (6 del
+  once). Carrera: Pollo 432, Pepe 422, Luismi 388. Patrimonio: Pollo
+  115,1 M, Luismi 97,4 M, nosotros 59,4 M. **Nuestras tacticas:** la
+  cartera no ha comprado nada desde el 16/10 (con caja libre solo el 35 %
+  de las horas, y se la comian la orden, la mejora y el carril). La puerta
+  hizo 2 ofertas y ninguna salio (sigue apagada). Solo si sube frenaba hoy
+  19 parejas: 0 llegaban a +0,5. El colchon cuenta lo de la ronda al 92 %
+  aunque dentro de 64 h no se pueda revender (hoy dejo pasar 2,69 M con la
+  J11 en -1,27 M). **Trampa de esta noche:** si FF baja a Cardona de 50, la
+  mejora lo cambiaria por De Haas (FF 70, rotacion, 8 dias bajando)
+  vendiendo a Cardona a 1.589.600 (-8 %). **Hecho:** De Haas, Sadick y
+  Lejeune a `no_pujar` hasta el jue 08:22 (ninguno pasa el liston del
+  relevo); a las 23:30 se mira FF otra vez por si hay que levantarlo.
+  **Construido y en main, APAGADO:** (1)
+  **BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA**: del Computer solo menos de 1 M
+  que sube el 2 % o mas, a 64 h o mas, con la prima de la cartera; (2)
+  **BORDALAS_LA_MEJORA_A_LA_SALIDA**: el del Computer que no sube, a lo que
+  pide redondeado a 9.900. Revisores: SHIP_OFF los dos, solo hallazgos
+  bajos. Apagado = main (huella). **Encender:** despues de la J11, cada uno
+  en su rafaga (no jue/vie; el parte vende va el 03/11). **Pendientes del
+  lab:** el colchon de la ronda dentro de 64 h al 100 % (no al 92 %); un
+  libro de la ronda en git (hoy solo vive en la cache); el panel ensena
+  puntos viejos (383, 3.o). (El medidor dijo que nuestro once guardado
+  tenia 10: falso; la vuelta de las 10:07 lo lee de Biwenger con 11, Kike
+  Salas dentro, y coincide con el recomendado.)
+
 - **28/10 09:20 (comprobacion).** Vuelta de las 09:07: la orden retiro la
   puja por Fortuno (CANCELAR_PUJA). Queda solo la de Nacho Perez (838.000).
   Cierre EN_POSITIVO, caja de la J11 +580.975 y once de 11 con Cardona. La
