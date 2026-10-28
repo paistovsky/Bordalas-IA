@@ -2429882,13 +2429882,13 @@
       "price_at_prediction": 710000,
       "predicted_at": "2026-10-21T12:09:29.493462+00:00",
       "due_at": "2026-10-28T12:09:29.493462+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
+      "outcome": "FLAT",
+      "price_at_outcome": 570000,
+      "actual_direction": "DOWN",
+      "actual_percent": -19.718,
       "direction_hit": null,
-      "magnitude_error_percent": null,
-      "scored_at": null
+      "magnitude_error_percent": 19.718,
+      "scored_at": "2026-10-28T12:11:03.253215+00:00"
     },
     "31254|FUTBOLFANTASY|1|2026-10-21": {
       "player_id": "31254",
@@ -2429945,13 +2429945,13 @@
       "price_at_prediction": 180000,
       "predicted_at": "2026-10-21T12:09:29.493475+00:00",
       "due_at": "2026-10-28T12:09:29.493475+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
+      "outcome": "FLAT",
+      "price_at_outcome": 150000,
+      "actual_direction": "DOWN",
+      "actual_percent": -16.667,
       "direction_hit": null,
-      "magnitude_error_percent": null,
-      "scored_at": null
+      "magnitude_error_percent": 16.667,
+      "scored_at": "2026-10-28T12:11:03.253215+00:00"
     },
     "19508|FUTBOLFANTASY|1|2026-10-21": {
       "player_id": "19508",
@@ -2430008,13 +2430008,13 @@
       "price_at_prediction": 570000,
       "predicted_at": "2026-10-21T12:09:29.497567+00:00",
       "due_at": "2026-10-28T12:09:29.497567+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
+      "outcome": "FLAT",
+      "price_at_outcome": 580000,
+      "actual_direction": "UP",
+      "actual_percent": 1.754,
       "direction_hit": null,
-      "magnitude_error_percent": null,
-      "scored_at": null
+      "magnitude_error_percent": 1.754,
+      "scored_at": "2026-10-28T12:11:03.253215+00:00"
     },
     "42370|PRENSA_MARCA|3|2026-10-21": {
       "player_id": "42370",
