@@ -2576840,13 +2576840,13 @@
       "price_at_prediction": 550000,
       "predicted_at": "2026-10-25T03:48:43.753135+00:00",
       "due_at": "2026-10-28T03:48:43.753135+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 520000,
+      "actual_direction": "DOWN",
+      "actual_percent": -5.455,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-28T03:53:36.894192+00:00"
     },
     "41684|COMUNIATE|1|2026-10-25": {
       "player_id": "41684",
