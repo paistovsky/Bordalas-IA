@@ -599,6 +599,13 @@ TESTS = [
     # mejora puja por el del Computer que no sube hoy lo que pide en
     # 9.900, no el +1 %; su caja cuenta esa misma puja. Apagado.
     "src.analysis.test_la_mejora_a_la_salida_v1",
+
+    # La clasificacion de Biwenger (28/10/2026): la tabla de la liga,
+    # los rivales y la inteligencia de rivales de la pantalla pintan
+    # los puntos y el puesto de Biwenger con su hora, no los del
+    # perfil cacheado, y el valor es la plantilla sumada. Solo vista:
+    # el libro de rivales que leen los motores no se toca.
+    "src.telemetry.test_la_clasificacion_de_biwenger_v1",
 ]
 
 

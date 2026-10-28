@@ -45,6 +45,11 @@ from src.analysis.intelligent_bid_engine import (
     build_market_seller_lookup,
 )
 from src.telemetry.league_center import build_league_center
+from src.telemetry.la_clasificacion_de_biwenger import (
+    con_el_valor_de_las_plantillas,
+    con_los_puntos_de_biwenger,
+    el_sello as el_sello_de_la_clasificacion,
+)
 
 
 from src.telemetry.player_photo_resolver import (
@@ -3117,6 +3122,12 @@ def compact_biwenger_competition(
         "competition": league.get("competition"),
         "mode": league.get("mode"),
         "type": league.get("type"),
+
+        # DE CUANDO ES (28/10/2026). `rounds/league` se cachea
+        # desde el reset: sin la hora, una clasificacion de esta
+        # mañana se lee como de ahora.
+        **el_sello_de_la_clasificacion(snapshot),
+
         "standings": standings,
         "current_user_rank": (
             current_row.get("rank") if current_row else None
@@ -3959,10 +3970,33 @@ def build_dashboard_state() -> dict:
         own_user_id=board.get("current_user_id"),
     )
 
+    # LA CLASIFICACION DE BIWENGER, ANTES QUE LA TABLA (28/10/2026)
+    #
+    #     La tabla de la liga, los rivales y la inteligencia de
+    #     rivales pintaban los puntos del PERFIL, que solo se pide
+    #     cuando el manager ficha o vende: tras la J10 decian Pepe
+    #     383 y tercero con Biwenger diciendo 422 y segundo en la
+    #     misma foto. Ahora los tres leen esta, que se monta antes.
+    #
+    #     Y su valor de plantilla es el sumado de ahora: el
+    #     `teamValue` de `rounds/league` es de la cache del reset y
+    #     seguia contando a Kubo despues de venderlo Pollo17.
+    #
+    #     SOLO VISTA. `rival_intelligence` no se toca: ver
+    #     `la_clasificacion_de_biwenger`.
+    competition = con_el_valor_de_las_plantillas(
+        compact_biwenger_competition(
+            snapshot=snapshot,
+            current_user_id=board.get("current_user_id"),
+        ),
+        rival_intelligence.get("managers"),
+    )
+
     league_center = build_league_center(
         snapshot=snapshot,
         board=board,
         rival_intelligence=rival_intelligence,
+        competition=competition,
     )
 
     # Las plantillas de los siete, con la misma ficha. Se saca a
@@ -4013,10 +4047,8 @@ def build_dashboard_state() -> dict:
             "managers": [],
         }
 
-    competition = compact_biwenger_competition(
-        snapshot=snapshot,
-        current_user_id=board.get("current_user_id"),
-    )
+    # `competition` ya esta: se monta antes de la tabla de la liga,
+    # que lee sus puntos (28/10/2026).
 
     deadline = state.get("deadline", {}) or {}
     temporal_gate = state.get("temporal_gate", {}) or {}
@@ -5761,9 +5793,17 @@ def build_dashboard_state() -> dict:
 
     # Los rivales compactados, UNA vez: los miran el payload y
     # el bloque de la subasta, y tienen que ser la misma lista.
-    rivales_compactos = compact_rivals(
-        rival_intelligence,
-        board.get("current_user_id"),
+    #
+    #     LOS PUNTOS Y EL PUESTO, LOS DE BIWENGER (28/10/2026). La
+    #     fila guarda al lado `profile_points`, que es con lo que
+    #     el libro calculo su abono, su saldo y su tope. La
+    #     subasta de aqui solo mira `roster_count`.
+    rivales_compactos = con_los_puntos_de_biwenger(
+        compact_rivals(
+            rival_intelligence,
+            board.get("current_user_id"),
+        ),
+        competition,
     )
 
     # El XI, calculado UNA vez: lo leen dos bloques -`lineup`
@@ -6328,6 +6368,13 @@ def build_dashboard_state() -> dict:
                 (league_center or {}).get("fantasy_standings")
             ),
             plantillas=_toda_la_liga.get("plantillas"),
+        )
+
+        # DE DONDE SON LOS PUNTOS Y DE CUANDO (28/10/2026): los de
+        # la clasificacion de Biwenger, o los del perfil si no
+        # vino. Es el mismo bloque que lleva la tabla de la liga.
+        _los_rivales["fuente_de_los_puntos"] = (
+            (league_center or {}).get("fantasy_standings_source")
         )
 
     except Exception as error:                      # noqa: BLE001

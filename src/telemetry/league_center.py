@@ -121,45 +121,53 @@ def _event_icon_index(events: list[dict]) -> dict[int, str]:
     return result
 
 
+def la_tabla_de_la_liga(
+    *,
+    rival_intelligence: dict,
+    profiles: list[dict],
+    events: list[dict],
+    competition: dict | None = None,
+) -> dict:
+    """
+    `{filas, fuente}`: la clasificacion fantasy que se pinta.
+
+    LOS PUNTOS Y EL PUESTO, DE BIWENGER (28/10/2026)
+
+        Antes salian de `rival_intelligence.managers[].points`, que
+        es el PERFIL de cada manager, y el perfil solo se vuelve a
+        pedir cuando ese manager ficha o vende. Tras cerrar la J10
+        la tabla decia Pepe 383 y tercero; Biwenger, en la misma
+        foto, 422 y segundo.
+
+        Ahora salen de `competition` (la clasificacion de Biwenger
+        de esta foto, con su `as_of`). Sin ella, del perfil, y cada
+        fila dice de donde: ver `la_clasificacion_de_biwenger`.
+    """
+
+    from src.telemetry.la_clasificacion_de_biwenger import la_tabla
+
+    return la_tabla(
+        managers=list(rival_intelligence.get("managers", []) or []),
+        competition=competition,
+        perfiles=_profile_index(profiles),
+        iconos=_event_icon_index(events),
+    )
+
+
 def build_fantasy_standings(
     *,
     rival_intelligence: dict,
     profiles: list[dict],
     events: list[dict],
+    competition: dict | None = None,
 ) -> list[dict]:
 
-    profile_index = _profile_index(profiles)
-    event_icons = _event_icon_index(events)
-
-    managers = list(rival_intelligence.get("managers", []) or [])
-
-    managers.sort(
-        key=lambda item: (
-            -safe_int(item.get("points")),
-            -safe_int(item.get("net_worth")),
-            str(item.get("name", "")),
-        )
-    )
-
-    rows = []
-
-    for rank, manager in enumerate(managers, start=1):
-        user_id = safe_int(manager.get("user_id"))
-        profile = profile_index.get(user_id, {}) or {}
-
-        rows.append({
-            "rank": rank,
-            "user_id": user_id,
-            "name": manager.get("name", "?"),
-            "points": safe_int(manager.get("points")),
-            "balance": safe_int(manager.get("balance")),
-            "roster_value": safe_int(manager.get("roster_value")),
-            "net_worth": safe_int(manager.get("net_worth")),
-            "is_us": manager.get("threat_level") == "US",
-            "icon": profile.get("icon") or event_icons.get(user_id),
-        })
-
-    return rows
+    return la_tabla_de_la_liga(
+        rival_intelligence=rival_intelligence,
+        profiles=profiles,
+        events=events,
+        competition=competition,
+    )["filas"]
 
 
 def _owner_index(rival_intelligence: dict) -> dict[int, dict]:
@@ -649,9 +657,17 @@ def build_league_center(
     snapshot: dict,
     board: dict,
     rival_intelligence: dict,
+    competition: dict | None = None,
 ) -> dict:
 
     catalog = snapshot.get("catalog", {}) or {}
+
+    tabla = la_tabla_de_la_liga(
+        rival_intelligence=rival_intelligence,
+        profiles=board.get("profiles", []) or [],
+        events=board.get("events", []) or [],
+        competition=competition,
+    )
 
     laliga = fetch_laliga_standings()
 
@@ -661,11 +677,12 @@ def build_league_center(
     )
 
     return {
-        "fantasy_standings": build_fantasy_standings(
-            rival_intelligence=rival_intelligence,
-            profiles=board.get("profiles", []) or [],
-            events=board.get("events", []) or [],
-        ),
+        "fantasy_standings": tabla["filas"],
+
+        # DE DONDE SALEN LOS PUNTOS DE LA TABLA Y DE CUANDO SON.
+        # Sin esto, una tabla con puntos del perfil cacheado se
+        # leeria igual que una con los de Biwenger.
+        "fantasy_standings_source": tabla["fuente"],
         "top_players": build_top_players(
             catalog=catalog,
             rival_intelligence=rival_intelligence,

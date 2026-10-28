@@ -387,13 +387,41 @@ def build_rival_squads(
 
         user_id = safe_int(fila.get("id"))
 
+        # EL VALOR, EL DE LA PLANTILLA QUE SE PINTA (28/10/2026)
+        #
+        #     `teamValue` viene de `rounds/league`, que se cachea
+        #     desde el reset. Pollo17 vendio a Kubo el 28/10 y su
+        #     ficha seguia diciendo 105,74 M con una plantilla
+        #     debajo que sumaba 102,29 M.
+        #
+        #     Con la plantilla ENTERA (la del ledger) se suma ella.
+        #     Con la alineacion no: es el once, no lo que tiene, y
+        #     sumarla daria de menos. Ahi se queda el de Biwenger,
+        #     y se dice.
+        valor_de_biwenger = safe_int(fila.get("teamValue"))
+        subida_de_biwenger = safe_int(fila.get("teamValueInc"))
+
+        if fuente == "LEDGER" and jugadores:
+            valor = sum(safe_int(j.get("price")) for j in jugadores)
+            subida = sum(
+                safe_int(j.get("price_increment")) for j in jugadores
+            )
+            fuente_del_valor = "PLANTILLA_SUMADA"
+
+        else:
+            valor = valor_de_biwenger
+            subida = subida_de_biwenger
+            fuente_del_valor = "BIWENGER"
+
         managers.append({
             "user_id": user_id,
             "name": str(fila.get("name") or f"Mánager {indice}"),
             "rank": safe_int(fila.get("position"), default=indice),
             "points": safe_int(fila.get("points")),
-            "team_value": safe_int(fila.get("teamValue")),
-            "team_value_inc": safe_int(fila.get("teamValueInc")),
+            "team_value": valor,
+            "team_value_inc": subida,
+            "team_value_source": fuente_del_valor,
+            "team_value_biwenger": valor_de_biwenger,
             "icon": fila.get("icon"),
             "is_current_user": bool(mi_id and user_id == mi_id),
 
