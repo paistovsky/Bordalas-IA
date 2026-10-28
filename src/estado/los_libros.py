@@ -137,7 +137,11 @@ LIBROS = (
         "que_es": (
             "El marcador de la temporada: una entrada por "
             "jornada con la clasificacion, el once y los totales "
-            "de cada jugador en ese momento."
+            "de cada jugador en ese momento. Desde el 28/10 la "
+            "entrada va bajo la ronda EN JUEGO y su `mi_once` es "
+            "el bloqueado en su pitido; en las escritas entre el "
+            "14/09 y el 28/10 `mi_once` es el de la ronda "
+            "SIGUIENTE, y `marcador()` lo reasigna por la hora."
         ),
         "por_que_no_se_reconstruye": (
             "`/rounds/league` devuelve SOLO la jornada en curso. "

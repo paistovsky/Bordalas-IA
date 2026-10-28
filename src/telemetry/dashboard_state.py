@@ -3260,8 +3260,13 @@ def compact_acquisition_budget(budget: dict) -> dict:
     }
 
 
-def _el_cuaderno_del_once() -> dict:
-    """El cuaderno para el panel. Observador puro. Nunca lanza."""
+def _el_cuaderno_del_once(eventos=None, mi_user_id=None) -> dict:
+    """El cuaderno para el panel. Observador puro. Nunca lanza.
+
+    Con el tablon (28/10/2026) cada nota se cruza con lo que pago
+    Biwenger, y la jornada que lleva otra ronda dentro no se da
+    por nota.
+    """
 
     try:
         from src.analysis.el_cuaderno import (
@@ -3269,7 +3274,11 @@ def _el_cuaderno_del_once() -> dict:
             el_cuaderno,
         )
 
-        return el_cuaderno(*cargar_libros())
+        return el_cuaderno(
+            *cargar_libros(),
+            eventos=eventos,
+            mi_user_id=mi_user_id,
+        )
 
     except Exception as error:                      # noqa: BLE001
         return {
@@ -3821,11 +3830,20 @@ def build_dashboard_state() -> dict:
     # Observador puro: solo escribe su propio fichero. Si falla,
     # el dashboard sigue: un termometro roto no puede parar el
     # equipo.
+    #
+    # BAJO LA RONDA EN JUEGO (28/10/2026). Con el tablon, la foto
+    # se anota bajo la ronda que de verdad se esta jugando, no
+    # bajo el `round.id` de la cache, que va un pitido por detras
+    # y le colgaba a cada ronda el once de la siguiente. Ver
+    # `marcador.EL ONCE DESPLAZADO UNA JORNADA`.
+    _jornada_anotada = {}
+
     try:
-        anotar_jornada(
+        _jornada_anotada = anotar_jornada(
             snapshot,
             current_user_id=board.get("current_user_id"),
-        )
+            eventos=board.get("events"),
+        ) or {}
     except Exception as error:                      # noqa: BLE001
         print(f"Marcador: no se pudo anotar la jornada ({error}).")
 
@@ -4705,7 +4723,10 @@ def build_dashboard_state() -> dict:
 
             if alternativo.get("available"):
                 anotar_once_alternativo(
-                    jornada_en_curso(snapshot),
+                    # La MISMA ronda bajo la que se anoto la foto
+                    # (28/10/2026): la vara va con su once.
+                    (_jornada_anotada or {}).get("round_id")
+                    or jornada_en_curso(snapshot),
                     {
                         "formation": alternativo["formation"],
                         "players": alternativo["players"],
@@ -4825,6 +4846,21 @@ def build_dashboard_state() -> dict:
     except (OSError, ValueError, ImportError):
         _calendario_laliga = {}
 
+    # LO QUE CUADRA CON BIWENGER (28/10/2026). Los onces
+    # congelados y las fotos de cierre de LaLiga son los dos libros
+    # del cuaderno; se leen una vez y van a los dos.
+    try:
+        from src.analysis.el_cuaderno import (
+            cargar_libros as _cargar_libros_del_cuaderno,
+        )
+
+        _fotos_de_cierre, _onces_congelados = (
+            _cargar_libros_del_cuaderno()
+        )
+
+    except Exception:                               # noqa: BLE001
+        _fotos_de_cierre, _onces_congelados = [], []
+
     marcador_estado = build_marcador(
         calendario_desde_la_foto(
             snapshot,
@@ -4842,7 +4878,14 @@ def build_dashboard_state() -> dict:
             #     Detras de `BORDALAS_JORNADAS_POR_SU_FECHA`,
             #     apagado.
             eventos=_eventos_del_tablon,
-        )
+        ),
+
+        # EL ONCE QUE JUGO Y LO QUE PAGO BIWENGER (28/10/2026):
+        # el tablon da la verdad ronda a ronda (`roundFinished`)
+        # y el pitido con el que se repara el once desplazado.
+        eventos=_eventos_del_tablon,
+        onces_congelados=_onces_congelados,
+        fotos_de_cierre=_fotos_de_cierre,
     )
 
     try:
@@ -6799,7 +6842,10 @@ def build_dashboard_state() -> dict:
             # EL CUADERNO (27/09/2026). La nota del once por la
             # jornada de LaLiga, no por el round de Biwenger, que
             # salta a mitad de jornada. Ver `el_cuaderno.py`.
-            "cuaderno": _el_cuaderno_del_once(),
+            "cuaderno": _el_cuaderno_del_once(
+                eventos=_eventos_del_tablon,
+                mi_user_id=board.get("current_user_id"),
+            ),
         },
 
         # El once: los puntos sentados, el sesgo por posicion y

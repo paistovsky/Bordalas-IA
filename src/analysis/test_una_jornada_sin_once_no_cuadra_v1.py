@@ -148,10 +148,18 @@ def _jornada(
         "totales": {
             str(pid): totales for pid in LOS_ONCE
         },
+        # EL ONCE ES EL DE SU RONDA, Y SE DICE (28/10/2026). Una
+        # entrada con `escrito_en` y sin marca guarda el once que
+        # se VEIA a la hora de `datos_de`, que es el de la ronda
+        # en juego entonces, no forzosamente el suyo (ver
+        # `marcador.EL ONCE DESPLAZADO UNA JORNADA`). Este caso
+        # habla del cuadre, no del desplazamiento: sus onces son
+        # los de su ronda, con la marca que lo dice.
         "mi_once": (
             {
                 "formation": "3-5-2",
                 "players": list(LOS_ONCE),
+                "regla": M.REGLA_PRIMERA_VISTA,
             }
             if con_once
             else {}

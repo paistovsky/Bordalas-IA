@@ -433,6 +433,9 @@ TESTS = [
     "src.analysis.test_el_reloj_de_las_guardias_v1",
     "src.analysis.test_el_once_que_jugo_v1",
     "src.analysis.test_el_cuaderno_v1",
+    # EL MARCADOR CUADRA CON BIWENGER (28/10/2026): cada ronda
+    # con el once que la jugo, no el de la siguiente.
+    "src.analysis.test_el_marcador_cuadra_v1",
     "src.analysis.test_la_regla_de_la_rampa_v1",
     "src.analysis.test_la_verja_no_sale_a_la_red_v1",
     "src.analysis.test_el_orden_del_tiempo_v1",

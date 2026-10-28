@@ -66,7 +66,12 @@ def el_once_que_empezo(previo: dict | None, status: dict) -> list | None:
     try:
         js = (previo or {}).get("jornadas") or {}
         entrada = js[list(js)[-1]] if js else {}
-        ids = [str(i) for i in ((entrada.get("mi_once") or {}).get("players") or [])]
+        # Desde el 28/10 `mi_once` de una entrada nueva es el que
+        # JUGO su ronda (bloqueado en su pitido); el puesto ahora,
+        # el que se bloqueara en el proximo, va en `once_editable`.
+        # Las entradas de antes no lo traen y siguen como siempre.
+        once = entrada.get("once_editable") or entrada.get("mi_once") or {}
+        ids = [str(i) for i in (once.get("players") or [])]
         if len(ids) != 11:
             return None
         fichas = {}
