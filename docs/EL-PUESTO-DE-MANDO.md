@@ -352,6 +352,35 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **28/10 23:00 (laboratorio de las 20:47 + el patrimonio del mes).**
+  **Rivales:** nada desde las 10:11 (ni compras, ni ventas, ni ofertas).
+  **Patrimonio 28/09 -> hoy** (dos reconstrucciones independientes,
+  iguales; la nuestra cuadra al euro con el saldo real): Pollo17 96,5 ->
+  115,1 M (+18,6, +19 %). Se descompone en: revalorizacion +19,9, primas
+  pagadas -8,4 (+9 % de media; Diomande +22 %), ventas sobre valor +2,5,
+  premios + rachas +4,7. Luismi +8,1 (Camello +3,5; caja ~-13,5 M; perdio
+  la J6 3.a parte por empezar en rojo). Manzagool +8,4. **Nosotros +2,2**:
+  premios + rachas +4,5, trading -1,8 (primas +7,9 %: Roberto -1,18, Boye
+  -0,62), revalorizacion -0,45. Los otros cuatro, de -1,9 a -2,8. Pollo
+  nos saca 55,7 M (39,2 hace un mes) y 10 puntos (el 28/09 ibamos
+  primeros). **Lo aprendido:** Pollo no compra barato, compra al que va a
+  subir y lo aguanta. **Vender antes del reset (Luismi/Carvajal):** no es
+  adivinar la bajada (la racha la predice igual de dia que de noche, 97 %).
+  Es el reloj de las ofertas del Computer: viven 48 h, se renuevan cada 2
+  dias y la nueva va con el valor de DESPUES del reset. Las vueltas de
+  noche ya ven la oferta que muere. Para Pepe vale ~+44 mil en 61 dias: no
+  se construye. Util para otra cosa: «bajo en el ultimo reset» predice la
+  siguiente bajada al 90-95 % fuera de muestra. **Construido y en main,
+  solo panel** (ningun motor lo lee; sin interruptor): (1) el marcador
+  cuadra con Biwenger. Cada ronda lleva el once que la jugo: el round.id
+  de la cache va un pitido por detras y le colgaba el once de la
+  siguiente. El revisor encontro 3 fallos mas (la foto de cierre llega
+  antes del partido del lunes), arreglados. (2) La clasificacion del panel
+  con los puntos de Biwenger (Pepe 422, 2.o; antes 383, 3.o) y el valor de
+  plantilla sumado (Pollo 102,29, sin Kubo). Verja 228/228 sobre la union,
+  incluida la prueba que monta el panel entero. **Vigilar:** el paso del
+  panel no lleva `|| true`; mirar que la vuelta de las 23:07 sale verde.
+
 - **28/10 21:15 (rafaga de la noche; mi control de caja de la J11).**
   Ciclos: verdes (#2554 a #2561). Saldo +1.418.975, comprometido 838.000
   (Nacho Perez, jue 07:00): **peor caso +580.975, verde para el vie 30/10
