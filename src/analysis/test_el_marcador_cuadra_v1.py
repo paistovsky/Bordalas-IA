@@ -17,16 +17,30 @@ LA CAUSA, MEDIDA EN EL LIBRO DEL 28/10
     siguiente, y el once sale de `user_lineup`: con
     `lineupRoundChanges: 0`, a esa hora ya es el de la siguiente.
 
-        entrada   su mi_once            puntos en la ronda
-        4906      el de la J9 (4907)    49 en la J9  (Biwenger 49)
-        4907      el de la J6 parte 3   56 en la J9  (Biwenger 49)
+        entrada   su mi_once            puntos en la ronda (resta
+                                        de entradas, cache a cache)
+        4906      el de la J9 (4907)    48 en la J9  (Biwenger 49)
+        4907      el de la J6 parte 3   55 en la J9  (Biwenger 49)
         5176      el de la J10 (4908)   39 en la J10 (Biwenger 39)
         4908      el de la J11          no jugo la J10
 
     Y el 49 del cuaderno en la J10 es otra cosa: el once era el
-    bueno, pero su ventana (cierre J9 -> cierre J10) lleva dentro
-    la J6 aplazada del 21-22/10, donde Unai Lopez y Olasagasti
-    hicieron 5 cada uno. 49 = 39 + 10.
+    bueno, pero su ventana (cierre J9 -> cierre J10) lleva dos
+    cosas que no son la J10: la J6 aplazada (solo Levante-Athletic,
+    21/10: Olasagasti +5) y el lunes de la J9 (Getafe-Rayo, 19/10),
+    que la foto de la J9 aun no tenia (Unai Lopez, del Rayo, +5).
+    49 = 39 + 5 + 5.
+
+LA FOTO DE CIERRE SE HACE ANTES DE PUNTUAR EL LUNES (28/10, noche)
+
+    Cada foto de cierre se toma unas dos horas despues del ultimo
+    partido del lunes, antes de que Biwenger lo puntue: su ventana
+    lleva el lunes de la anterior y le falta el suyo. La J9 salia
+    «49 = 49» por dos errores que se anulaban (Olasagasti +6 del
+    lunes de la J8, Unai Lopez -5 del lunes de la J9). Con la resta
+    de entradas el once de la J9 suma 48: no cuadra por uno, y lo
+    dice. En la J11 el mismo fallo daba +7 (Kike Salas, lunes de la
+    J10).
 
 LO QUE VIGILAN ESTAS GUARDIAS
 
@@ -34,13 +48,20 @@ LO QUE VIGILAN ESTAS GUARDIAS
     2. El tablon da lo que pago cada ronda; en una partida, la
        resta del acumulado.
     3. Cada ronda lleva el once que la jugo, no el de su entrada.
-    4. El marcador cuadra en la J9 y la J10 y dice por que no en
-       las demas.
+    4. El marcador da la J9 48 contra 49 (no cuadra, con su
+       porque) y la J10 39 contra 39, que cuadra en cuanto el cero
+       de Jonny (vendido) se puede probar.
     5. Una ronda sin `roundFinished` no cuadra ni descuadra.
-    6. La ventana con una aplazada dentro no es una nota.
+    6. La ventana con una aplazada, o con el lunes de la anterior,
+       dentro no es una nota.
     7. La escritura: bajo la ronda en juego, once bloqueado al
        pitido, y la ronda anterior no se ensucia.
     8. Un once grabado tras el pitido no es el bloqueado.
+    9. El lunes que la foto no tenia (forma de la J11): los puntos
+       salen de la resta, no de la foto.
+    10. Un (0, 0) en una ventana con fugas no es un cero cierto.
+    11. El lector lee la hora de la entrada como el escritor: una
+        vista de antes del pitido no es de la ronda.
 
 REGLA 23, DOCTRINA 24
 
@@ -257,6 +278,40 @@ ONCES_CONGELADOS = [
 ]
 
 
+# LA FOTO DE LA J11, CON LA FORMA DE LAS DE VERDAD. Se hace el lunes
+# 02/11 a las 23:00, dos horas despues del ultimo partido, y lleva
+# el lunes de la J10 (Sevilla-Osasuna, 26/10) que la de la J10 aun
+# no tenia: Kike Salas, foto 28 y libro 35 (+7, un partido mas).
+# Los puntos de la J11 son de mentira (3 cada uno, Kike Salas 2):
+# lo que se mide es la fuga, no el numero.
+PUNTOS_J11 = {str(p): (2 if p == 28115 else 3) for p in ONCE_J11}
+LUNES_DE_LA_J10 = {"28115": 7}
+
+
+def _fotos_con_la_j11(jonny=None) -> list:
+
+    jugadores = {}
+
+    for pid, (puntos, jugados) in FOTOS_DE_CIERRE[-1]["players"].items():
+        jugadores[pid] = [
+            puntos + PUNTOS_J11.get(pid, 0) + LUNES_DE_LA_J10.get(pid, 0),
+            jugados + (pid in PUNTOS_J11) + (pid in LUNES_DE_LA_J10),
+        ]
+
+    if jonny is not None:
+        jugadores["1599"] = list(jonny)
+
+    return FOTOS_DE_CIERRE + [{
+        "jornada": 11,
+        "cerrada_en": "2026-11-02T23:00:00+01:00",
+        "players": jugadores,
+    }]
+
+
+# Jonny (vendido) no juega de la J9 a la J11.
+FOTOS_CON_LA_J11 = _fotos_con_la_j11()
+
+
 class libro_temporal:
     """Aparta el libro real y deja en su sitio el que se le de."""
 
@@ -298,12 +353,28 @@ def _filas(salida) -> dict:
     return {f["round_id"]: f for f in salida["jornadas"]}
 
 
-def _suma(previa, actual, once) -> int:
-    fotos = {f["jornada"]: f["players"] for f in FOTOS_DE_CIERRE}
+def _suma(previa, actual, once, fotos=None) -> int:
+    """La suma de un once por la foto de cierre de LaLiga."""
+
+    fotos = {f["jornada"]: f["players"] for f in (fotos or FOTOS_DE_CIERRE)}
     return sum(
         fotos[actual][str(p)][0] - fotos[previa][str(p)][0]
         for p in once
     )
+
+
+def _resta(previa, actual, once, libro=None) -> dict:
+    """`{id: puntos}` del once por la resta de dos entradas, solo
+    con los que estan en las dos."""
+
+    jornadas = (libro or LIBRO)["jornadas"]
+    antes, ahora = jornadas[previa]["totales"], jornadas[actual]["totales"]
+
+    return {
+        str(p): ahora[str(p)] - antes[str(p)]
+        for p in once
+        if str(p) in antes and str(p) in ahora
+    }
 
 
 # ============================================================
@@ -327,10 +398,18 @@ def test_el_libro_guarda_el_once_de_la_siguiente() -> None:
     # ...y la 5176 (J6 parte 3) el de la J10.
     assert jornadas["5176"]["mi_once"]["players"] == congelado[10]
 
-    # Con los puntos de la J9: el once de SU entrada (4907) no da
-    # lo que pago Biwenger; el de la entrada anterior, si.
-    assert _suma(8, 9, jornadas["4907"]["mi_once"]["players"]) == 56
-    assert _suma(8, 9, jornadas["4906"]["mi_once"]["players"]) == 49
+    # Con los puntos de la J9 (resta de entradas 4906 -> 4907): el
+    # once de la entrada anterior suma 48 con sus once (Diego Rico,
+    # vendido, no jugo: (0, 0) de la foto de la J8 a la de la J10);
+    # el de SU entrada lleva a Cardona (7 en la J9) por Diego Rico.
+    del_j9 = _resta("4906", "4907", jornadas["4906"]["mi_once"]["players"])
+
+    assert len(del_j9) == 10 and "5678" not in del_j9, del_j9
+    assert sum(del_j9.values()) == 48, del_j9
+
+    de_su_entrada = _resta("4906", "4907", jornadas["4907"]["mi_once"]["players"])
+
+    assert sum(de_su_entrada.values()) + 7 == 55, de_su_entrada
 
     pagado = M.cierres_del_tablon(EVENTOS)[4907]["puntos"][PEPE]
 
@@ -411,28 +490,43 @@ def test_el_marcador_cuadra_con_biwenger() -> None:
 
     j9, j10, j6p3 = filas[4907], filas[4908], filas[5176]
 
-    # LA J9: el once bueno, los puntos del cierre de LaLiga.
+    # LA J9: el once bueno, los puntos de la resta de entradas (la
+    # foto de cierre tiene fugas: lleva el lunes de la J8 y le
+    # falta el suyo). Con sus once medidos suma 48 y Biwenger pago
+    # 49: NO cuadra, y lo dice. Diego Rico (vendido) es un cero
+    # cierto: (0, 0) de la foto de la J8 a la de la J10, que cubre
+    # la J9 entera, lunes incluido.
     assert j9["medible"] is True, j9
     assert j9["once"] == ONCE_J9, j9
     assert j9["once_desplazado"] is True, j9
-    assert j9["puntos_fuente"] == M.PUNTOS_DEL_CIERRE, j9
-    assert j9["puntos_once"] == 49, j9
+    assert j9["puntos_fuente"] == M.PUNTOS_DE_LA_RESTA, j9
+    assert "2 o mas partidos" in str(j9["puntos_cierre_motivo"]), j9
+    assert j9["sin_partido"] == [5678], j9
+    assert j9["puntos_del_cierre"] == [], j9
+    assert j9["reconstruccion_completa"] is True, j9
+    assert j9["puntos_once"] == 48, j9
     assert j9["puntos_biwenger"] == 49, j9
     assert j9["puntos_biwenger_fuente"] == M.VERDAD_DEL_TABLON, j9
-    assert j9["cuadra"] is True, j9
+    assert j9["cuadra"] is False, j9
+    assert j9["descuadre"] == 1, j9
+    assert "retroactiva" in (j9["cuadra_motivo"] or ""), j9
 
     # LA J10: era «en curso» por ser la ultima del libro; el
-    # tablon dice que cerro. Su ventana de cierre lleva la J6
-    # aplazada dentro, asi que va por la resta de observaciones,
-    # y Jonny (vendido) no jugo: cero cierto.
+    # tablon dice que cerro. Va por la resta de observaciones y
+    # los diez que constan suman 39. Jonny (vendido) sale (0, 0)
+    # en la foto, pero su ventana lleva la J6 aplazada y se deja
+    # el lunes de la J10: no prueba que no jugara. Sin foto
+    # posterior al cierre, no se cuadra.
     assert j10["medible"] is True, j10
     assert j10["once"] == ONCE_J10, j10
     assert j10["puntos_fuente"] == M.PUNTOS_DE_LA_RESTA, j10
     assert "5176" in str(j10["puntos_cierre_motivo"]), j10
-    assert j10["sin_partido"] == [1599], j10
+    assert j10["sin_partido"] == [], j10
     assert j10["puntos_once"] == 39, j10
     assert j10["puntos_biwenger"] == 39, j10
-    assert j10["cuadra"] is True, j10
+    assert j10["cuadra"] is None, j10
+    assert "Jonny" in (j10["cuadra_motivo"] or ""), j10
+    assert "suman 39; Biwenger pago 39" in j10["cuadra_motivo"], j10
 
     # LA J6 PARTE 3: excepcion escrita, y sin cuadre falso. Dos
     # del once se vendieron antes de la foto.
@@ -443,14 +537,31 @@ def test_el_marcador_cuadra_con_biwenger() -> None:
 
     resumen = salida["resumen"]
 
-    assert resumen["jornadas_fiables"] == 2, resumen
-    assert resumen["eficiencia_media"] is not None, resumen
+    assert resumen["jornadas_fiables"] == 0, resumen
+    assert resumen["eficiencia_media"] is None, resumen
+    assert resumen["cuadra_todo"] is False, resumen
+    assert "1 no cuadran" in resumen["veredicto"], resumen
     assert resumen["verdad"] == M.VERDAD_DEL_TABLON, resumen
     assert resumen["jornadas_con_once_desplazado"] >= 3, resumen
 
     # LA LIGA, RONDA A RONDA: J9 49 contra 52, J10 39 contra 57.
     assert j9["media_rivales"] == 52, j9
     assert j10["diferencia_liga"] == -18, j10
+
+    # CON LA FOTO DE LA J11, Jonny sin partido de la J9 a la J11:
+    # el tramo cubre la J10 entera y su cero es cierto. La J10
+    # cuadra 39 = 39 y hay nota.
+    filas = _filas(_marcador(fotos=FOTOS_CON_LA_J11))
+    j10 = filas[4908]
+
+    assert j10["sin_partido"] == [1599], j10
+    assert j10["cuadra"] is True, j10
+    assert filas[4907]["cuadra"] is False, filas[4907]
+
+    # Si Jonny jugo la J11, el tramo ya no prueba nada.
+    j10 = _filas(_marcador(fotos=_fotos_con_la_j11(jonny=(30, 9))))[4908]
+
+    assert j10["cuadra"] is None, j10
 
 
 # ============================================================
@@ -473,8 +584,13 @@ def test_sin_cierre_en_el_tablon_no_hay_cuadre() -> None:
     assert j9["medible"] is True, j9
     assert j9["puntos_biwenger"] is None, j9
     assert j9["cuadra"] is None, j9
-    assert "roundFinished" in (j9["cuadra_motivo"] or ""), j9
+    assert "roundFinished" in (j9["excepcion"] or ""), j9
     assert j9["diferencia_liga"] is None, j9
+
+    # Y sin cierre, el cero de Diego Rico solo valdria con una
+    # ventana sin fugas, y la de la J9 las tiene: queda sin dato.
+    assert j9["sin_partido"] == [], j9
+    assert "Diego Rico" in (j9["cuadra_motivo"] or ""), j9
 
 
 # ============================================================
@@ -489,23 +605,62 @@ def test_la_ventana_con_una_aplazada_dentro_no_es_nota() -> None:
     pitidos = M._pitidos(_calendario(EVENTOS), M.cierres_del_tablon(EVENTOS))
     nombres = M._nombres_de_ronda(_calendario(EVENTOS), M.cierres_del_tablon(EVENTOS))
 
-    limpia = M.puntos_de_cierre(FOTOS_DE_CIERRE, 4907, pitidos, nombres)
+    # La J9 no lleva otra ronda dentro, pero tampoco esta limpia:
+    # la foto de la J8 se hizo antes de puntuar Levante-Sevilla
+    # (lunes 12/10), y esa ventana lo lleva: Olasagasti y Kike
+    # Salas con dos partidos. Y contra la resta de entradas,
+    # Olasagasti 9 contra 3 y Unai Lopez 0 contra 5 (su Getafe-Rayo
+    # del lunes 19/10 no estaba en la foto de la J9).
+    fugas = M.puntos_de_cierre(FOTOS_DE_CIERRE, 4907, pitidos, nombres)
+
+    assert fugas["limpia"] is False, fugas
+    assert fugas["fugas"]["dos_partidos"] == ["28115", "29661"], fugas
+
+    contra_la_resta = M.puntos_de_cierre(
+        FOTOS_DE_CIERRE, 4907, pitidos, nombres,
+        resta=_resta("4906", "4907", ONCE_J9),
+    )
+
+    assert {
+        (d["id"], d["foto"], d["resta"])
+        for d in contra_la_resta["fugas"]["desacuerdos"]
+    } == {("1969", 0, 5), ("29661", 9, 3)}, contra_la_resta
+
     sucia = M.puntos_de_cierre(FOTOS_DE_CIERRE, 4908, pitidos, nombres)
 
-    assert limpia["limpia"] is True, limpia
     assert sucia["limpia"] is False, sucia
     assert "5176" in sucia["motivo"], sucia
 
-    # Sin el tablon, el cuaderno de siempre: 49 en la J10.
+    # Y una ventana de verdad limpia (nadie con dos partidos, la
+    # foto igual que la resta) si rellena.
+    limpias = [
+        {"jornada": 8, "cerrada_en": "2026-10-12T23:00:00+02:00",
+         "players": {"5678": [6, 2], "1760": [29, 8]}},
+        {"jornada": 9, "cerrada_en": "2026-10-19T23:00:00+02:00",
+         "players": {"5678": [9, 3], "1760": [37, 9]}},
+    ]
+
+    limpia = M.puntos_de_cierre(
+        limpias, 4907, pitidos, nombres, resta={"1760": 8},
+    )
+
+    assert limpia["limpia"] is True, limpia
+    assert limpia["puntos"]["5678"] == 3, limpia
+
+    # EL CUADERNO, CON TABLON O SIN EL: ni la J9 ni la J10 son
+    # nota. Las dos ventanas llevan el lunes de la anterior; la de
+    # la J10, ademas, la J6 aplazada. 49 = 39 + 5 (Olasagasti en
+    # Levante-Athletic, 21/10) + 5 (Unai Lopez, lunes de la J9).
     viejo = {
         n["jornada"]: n
         for n in el_cuaderno(FOTOS_DE_CIERRE, ONCES_CONGELADOS)["jornadas"]
     }
 
-    assert viejo[10]["puntos_once"] == 49, viejo[10]
+    for jornada in (9, 10):
+        assert viejo[jornada]["medible"] is False, viejo[jornada]
+        assert viejo[jornada]["puntos_mezclados"] == 49, viejo[jornada]
+        assert "dos partidos" in viejo[jornada]["motivo"], viejo[jornada]
 
-    # Con el tablon: la J10 no es nota (49 = 39 + 10 de la J6
-    # aplazada) y la J9 cuadra.
     cuaderno = el_cuaderno(
         FOTOS_DE_CIERRE, ONCES_CONGELADOS,
         eventos=EVENTOS, mi_user_id=PEPE,
@@ -518,10 +673,15 @@ def test_la_ventana_con_una_aplazada_dentro_no_es_nota() -> None:
     assert notas[10]["puntos_mezclados"] == 49, notas[10]
     assert notas[10]["puntos_biwenger"] == 39, notas[10]
     assert "5176" in notas[10]["motivo"], notas[10]
+    assert "dos partidos" in notas[10]["motivo"], notas[10]
 
-    assert notas[9]["medible"] is True, notas[9]
-    assert notas[9]["puntos_once"] == 49, notas[9]
-    assert notas[9]["cuadra"] is True, notas[9]
+    # La J9 ya no publica un «cuadra» que sale de dos errores.
+    assert notas[9]["medible"] is False, notas[9]
+    assert notas[9]["puntos_once"] is None, notas[9]
+    assert notas[9]["puntos_mezclados"] == 49, notas[9]
+    assert notas[9]["puntos_biwenger"] == 49, notas[9]
+    assert notas[9]["cuadra"] is None, notas[9]
+    assert notas[9]["jugadores_con_dos_partidos"] == 2, notas[9]
 
 
 # ============================================================
@@ -669,9 +829,11 @@ def test_la_foto_se_anota_bajo_la_ronda_en_juego() -> None:
 
     filas = _filas(salida)
 
-    # La J10 sigue cuadrando con su once, y la J11 esta en curso.
+    # La J10 sigue con su once y sus 39 (el cero de Jonny, sin
+    # probar todavia), y la J11 esta en curso.
     assert filas[4908]["once"] == ONCE_J10, filas[4908]
-    assert filas[4908]["cuadra"] is True, filas[4908]
+    assert filas[4908]["puntos_once"] == 39, filas[4908]
+    assert filas[4908]["cuadra"] is None, filas[4908]
     assert filas[J11]["medible"] is False, filas[J11]
     assert "en curso" in filas[J11]["motivo"], filas[J11]
 
@@ -729,6 +891,178 @@ def test_un_once_grabado_tras_el_pitido_no_es_el_bloqueado() -> None:
     assert onces[J11]["fuente"] == M.ONCE_CONGELADO, onces[J11]
 
 
+# ============================================================
+# 9. EL LUNES QUE LA FOTO NO TENIA (forma de la J11)
+# ============================================================
+
+FIN_J11 = PITIDO_J11 + 4 * 86400 + 16 * 3600
+
+EVENTOS_J11_CERRADA = EVENTOS_CON_J11 + [
+    _ronda("roundFinished", FIN_J11, J11, "Jornada 11", None,
+           {MANZAGOOL: 35, PEPE: 32}),
+]
+
+
+def _libro_con_la_j11() -> dict:
+    """El libro del 28/10 y la entrada de la J11 como la escribe la
+    regla nueva: bajo su ronda, once bloqueado en el pitido, y la
+    ultima escritura de antes del pitido de la J12 (cache a cache:
+    los totales de la J10 mas lo de la J11, lunes incluido)."""
+
+    libro = copy.deepcopy(LIBRO)
+    totales = dict(libro["jornadas"]["4908"]["totales"])
+
+    entrada = _entrada(
+        J11, "2026-11-06T19:07:00+00:00", "2026-11-06T19:07:30",
+        "4-3-3", ONCE_J11,
+        {pid: puntos + PUNTOS_J11.get(pid, 0) for pid, puntos in totales.items()},
+        422 + 32, 365 + 35,
+    )
+
+    entrada["escritura"] = M.ESCRITURA_POR_LA_RONDA_EN_JUEGO
+    entrada["mi_once"]["regla"] = M.REGLA_PRIMERA_VISTA
+    entrada["mi_once"]["visto_en"] = "2026-10-30T21:07:00+00:00"
+
+    libro["jornadas"][str(J11)] = entrada
+
+    return libro
+
+
+def test_el_lunes_que_la_foto_no_tenia() -> None:
+    """
+    La foto de la J11 lleva el lunes de la J10 (Kike Salas +7) y
+    la ventana no tiene ninguna otra ronda dentro: el marcador de
+    antes la daba por limpia y publicaba 39 contra 32. Los puntos
+    salen de la resta de entradas.
+    """
+
+    libro = _libro_con_la_j11()
+
+    # La fuga, en los datos: por la foto, el once de la J11 suma
+    # 39; por la resta de entradas, 32, que es lo que pago.
+    assert _suma(10, 11, ONCE_J11, FOTOS_CON_LA_J11) == 39
+    assert sum(_resta("4908", str(J11), ONCE_J11, libro).values()) == 32
+
+    filas = _filas(_marcador(
+        libro, eventos=EVENTOS_J11_CERRADA, fotos=FOTOS_CON_LA_J11,
+    ))
+
+    j11 = filas[J11]
+
+    assert j11["medible"] is True, j11
+    assert j11["once"] == ONCE_J11, j11
+    assert j11["once_fuente"] == M.ONCE_PRIMERA_VISTA, j11
+    assert j11["puntos_fuente"] == M.PUNTOS_DE_LA_RESTA, j11
+    assert "2 o mas partidos" in str(j11["puntos_cierre_motivo"]), j11
+    assert "#28115: foto 9, resta 2" in str(j11["puntos_cierre_motivo"]), j11
+    assert j11["puntos_once"] == 32, j11
+    assert j11["puntos_biwenger"] == 32, j11
+    assert j11["cuadra"] is True, j11
+
+    # Y con la foto de la J11 delante, la J10 tambien: Jonny no
+    # jugo de la J9 a la J11.
+    assert filas[4908]["cuadra"] is True, filas[4908]
+
+
+# ============================================================
+# 10. UN (0, 0) CON FUGAS NO ES UN CERO CIERTO
+# ============================================================
+
+
+def test_un_cero_con_fugas_no_es_cierto() -> None:
+
+    cierres = M.cierres_del_tablon(EVENTOS)
+    pitido, termina = cierres[4907]["empieza"], cierres[4907]["termina"]
+
+    # Unai Lopez sale (0, 0) de la foto de la J8 a la de la J9...
+    assert M._resta_de_fotos(*FOTOS_DE_CIERRE[:2])["1969"] == (0, 0)
+
+    # ...y jugo la J9: su Getafe-Rayo del lunes 19/10, que la foto
+    # aun no tenia (+5 en la resta de entradas). Fiarse de la
+    # ventana lo daria por cero cierto.
+    assert _resta("4906", "4907", [1969]) == {"1969": 5}
+    assert M._sin_partido(FOTOS_DE_CIERRE, pitido, 1969, limpia=True) is True
+
+    # Con la guardia, no: ni con la ventana con fugas, ni con el
+    # tramo hasta la primera foto posterior al cierre (la J10).
+    assert M._sin_partido(FOTOS_DE_CIERRE, pitido, 1969) is False
+    assert M._sin_partido(
+        FOTOS_DE_CIERRE, pitido, 1969, termina=termina,
+    ) is False
+
+    # Diego Rico: (0, 0) de la J8 a la J10, que cubre la J9 entera.
+    assert M._sin_partido(
+        FOTOS_DE_CIERRE, pitido, 5678, termina=termina,
+    ) is True
+
+    # Jonny en la J10: no hay foto posterior al cierre (27/10).
+    pitido, termina = cierres[4908]["empieza"], cierres[4908]["termina"]
+
+    assert M._sin_partido(
+        FOTOS_DE_CIERRE, pitido, 1599, termina=termina,
+    ) is False
+    assert M._sin_partido(
+        FOTOS_CON_LA_J11, pitido, 1599, termina=termina,
+    ) is True
+
+    # Kike Salas en la J10: (0, 0) en la ventana de la J10, y jugo
+    # el lunes (Sevilla-Osasuna): el tramo hasta la J11 lo ve.
+    assert M._resta_de_fotos(*FOTOS_DE_CIERRE[1:3])["28115"] == (0, 0)
+    assert M._sin_partido(
+        FOTOS_CON_LA_J11, pitido, 28115, termina=termina,
+    ) is False
+
+    # Y con basura no lanza.
+    assert M._sin_partido([None, 3, {"jornada": "x"}], "basura", None) is False
+
+
+# ============================================================
+# 11. EL LECTOR LEE LA HORA COMO EL ESCRITOR
+# ============================================================
+
+
+def test_una_vista_de_antes_del_pitido_no_es_de_la_ronda() -> None:
+    """
+    `datos_de` es hora de Madrid con la etiqueta `+00:00`. La
+    ultima escritura de la 4908 antes de la J11 cae a las 20:07 de
+    Madrid (19:07 UTC), 53 minutos antes del pitido (20:00 UTC).
+    Leida como UTC, caia despues y su once se le colgaba a la J11.
+    """
+
+    libro = _libro_de_la_j10()
+    vista = libro["jornadas"]["4908"]
+
+    def onces():
+        return M.el_once_de_cada_ronda(
+            list(libro["jornadas"].values()),
+            calendario=_calendario(EVENTOS_CON_J11),
+            cierres=M.cierres_del_tablon(EVENTOS_CON_J11),
+        )
+
+    vista["datos_de"] = "2026-10-30T20:07:00+00:00"
+
+    assert J11 not in onces(), onces()[J11]
+
+    # A las 21:07 de Madrid ya habia pitado: ese si es el de la J11.
+    vista["datos_de"] = "2026-10-30T21:07:00+00:00"
+
+    assert onces()[J11]["players"] == ONCE_J11, onces()
+    assert onces()[J11]["fuente"] == M.ONCE_VISTO_EN_OTRA_ENTRADA
+
+    # La misma hora que el escritor, y una zona de verdad se respeta.
+    assert M._hora_del_sello("2026-10-30T20:07:00+00:00") == (
+        M._instante_de_la_foto({"timestamp": "2026-10-30T20:07:00"})
+    )
+    assert M._hora_del_sello("2026-10-30T20:07:00+00:00") == datetime(
+        2026, 10, 30, 19, 7, tzinfo=timezone.utc
+    )
+    assert M._hora_del_sello("2026-10-30T20:07:00+01:00") == datetime(
+        2026, 10, 30, 19, 7, tzinfo=timezone.utc
+    )
+    assert M._hora_del_sello("basura") is None
+    assert M._hora_del_sello(None) is None
+
+
 TESTS = [
     test_el_libro_guarda_el_once_de_la_siguiente,
     test_el_tablon_da_lo_que_pago_cada_ronda,
@@ -738,6 +1072,9 @@ TESTS = [
     test_la_ventana_con_una_aplazada_dentro_no_es_nota,
     test_la_foto_se_anota_bajo_la_ronda_en_juego,
     test_un_once_grabado_tras_el_pitido_no_es_el_bloqueado,
+    test_el_lunes_que_la_foto_no_tenia,
+    test_un_cero_con_fugas_no_es_cierto,
+    test_una_vista_de_antes_del_pitido_no_es_de_la_ronda,
 ]
 
 

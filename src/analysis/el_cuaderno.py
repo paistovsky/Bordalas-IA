@@ -47,8 +47,17 @@ Y CON EL TABLON (28/10/2026)
     Si se le pasan los eventos del tablon, cada nota se cruza con
     `roundFinished` de su ronda (`puntos_biwenger`, `cuadra`), y
     una jornada cuya ventana lleva dentro OTRA ronda —una aplazada
-    que se jugo entre dos cierres— no se publica como nota: era
-    el 49 de la J10 contra el 39 de Biwenger.
+    que se jugo entre dos cierres— no se publica como nota.
+
+Y LA FOTO QUE LLEGA ANTES DEL LUNES (28/10/2026)
+
+    La foto de cierre se hace unas dos horas despues del ultimo
+    partido del lunes, antes de que Biwenger lo puntue: cada
+    ventana lleva el lunes de la jornada anterior y le falta el
+    suyo. Una ventana con algun jugador de DOS partidos no se
+    publica como nota, con tablon o sin el. Era la J9 «49 = 49»:
+    +6 de Olasagasti (lunes de la J8) y -5 de Unai Lopez (lunes
+    de la J9, que la foto no tenia); el mismo once suma 48.
 
 QUE NO HACE
 
@@ -261,6 +270,33 @@ def la_nota_del_once(fotos, onces, jornada) -> dict:
             )
             return salida
 
+        # LA VENTANA CON EL LUNES DE LA ANTERIOR (28/10/2026). Un
+        # jugador con dos partidos en la ventana dice que la foto
+        # anterior se hizo antes de puntuar su lunes: esta ventana
+        # lo lleva, y casi seguro le falta el suyo. Los puntos por
+        # jugador no son los de la jornada; tampoco los «no jugo».
+        dos_partidos = sorted(
+            pid
+            for pid, (hechos, jugados) in medida["puntos"].items()
+            if jugados >= 2
+        )
+
+        salida["jugadores_con_dos_partidos"] = len(dos_partidos)
+
+        if dos_partidos:
+            salida["puntos_mezclados"] = sum(j["puntos"] for j in jugadores)
+            salida["motivo"] = (
+                f"La ventana de la jornada {jornada} lleva partidos "
+                f"de otra: {len(dos_partidos)} jugador(es) con dos "
+                f"partidos (el lunes de la anterior, porque la foto "
+                f"de cierre se hace antes de que Biwenger lo puntue, "
+                f"o una aplazada). Y la que se deja el lunes de la "
+                f"anterior se deja tambien el suyo: la suma "
+                f"({salida['puntos_mezclados']}) no es la de la "
+                f"jornada. No es una nota."
+            )
+            return salida
+
         salida["puntos_once"] = sum(j["puntos"] for j in jugadores)
         salida["medible"] = True
 
@@ -281,10 +317,17 @@ def la_nota_del_once(fotos, onces, jornada) -> dict:
 #     ERA el bueno (el congelado de la J10, el mismo que vio el
 #     marcador tras el pitido). Lo que sobraba eran los puntos:
 #     la resta va del cierre de la J9 (19/10) al de la J10
-#     (26/10), y en medio, el 21-22/10, se jugo la «Jornada 6
-#     (aplazada)» parte 3 (round 5176). Unai Lopez (+5) y
-#     Olasagasti (+5) puntuaron ahi, en una ronda que Biwenger
-#     cobra aparte y con OTRO once. 49 = 39 + 10.
+#     (26/10), y esa ventana lleva DOS cosas que no son la J10:
+#
+#         · la «Jornada 6 (aplazada)» parte 3 (round 5176), solo
+#           Levante-Athletic el 21/10: Olasagasti (Levante) +5,
+#           en una ronda que Biwenger cobra aparte;
+#         · el lunes de la J9 (Getafe-Rayo, 19/10 21:00), que la
+#           foto de la J9 aun no tenia: Unai Lopez (Rayo) +5.
+#
+#     49 = 39 + 5 + 5. Lo segundo no es de la J10 ni de ninguna
+#     aplazada: es la foto de cierre, que se hace antes de puntuar
+#     el lunes (ver `la_nota_del_once`), y le pasa a todas.
 #
 #     El tablon dice cuando empieza cada ronda. Si en la ventana
 #     de la jornada N empieza alguna que no sea «Jornada N», la
@@ -346,14 +389,22 @@ def _con_el_tablon(nota, fotos, cierres, mi_user_id) -> dict:
         nota["ronda"] = ventana["propia"]
         nota["rondas_dentro"] = ventana["otras"]
 
-        if ventana["otras"] and nota.get("medible"):
+        # La aplazada dentro se dice tambien cuando la nota ya se
+        # habia caido por el lunes de la anterior: son dos motivos.
+        if ventana["otras"] and (
+            nota.get("medible") or nota.get("puntos_mezclados") is not None
+        ):
 
             cuales = ", ".join(
                 f"{o['nombre'] or o['round_id']} ({o['round_id']})"
                 for o in ventana["otras"]
             )
 
-            nota["puntos_mezclados"] = nota.get("puntos_once")
+            if nota.get("medible"):
+                nota["puntos_mezclados"] = nota.get("puntos_once")
+
+            antes = None if nota.get("medible") else nota.get("motivo")
+
             nota["puntos_once"] = None
             nota["medible"] = False
             nota["motivo"] = (
@@ -361,6 +412,7 @@ def _con_el_tablon(nota, fotos, cierres, mi_user_id) -> dict:
                 f"lleva dentro {cuales}, que Biwenger puntua aparte "
                 f"y con otro once: la suma ({nota['puntos_mezclados']}) "
                 f"mezcla dos rondas. No es una nota."
+                + (f" {antes}" if antes else "")
             )
 
         cierre = (cierres or {}).get(ventana["propia"]) or {}
