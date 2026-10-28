@@ -71,8 +71,13 @@ QUE NO HACE
 
 import json
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:                                 # pragma: no cover
+    ZoneInfo = None
 
 
 STATE_DIRECTORY = (
@@ -712,6 +717,915 @@ def jornadas_en_medio(anterior, actual, calendario) -> list:
         return faltan
 
 
+# ================================================================
+# EL ONCE DESPLAZADO UNA JORNADA  (28/10/2026)
+# ================================================================
+#
+# EL SINTOMA
+#
+#     Nueve jornadas cerradas y medibles, CERO fiables, y
+#     `eficiencia_media: null` desde septiembre. La bitacora del
+#     24/10 ya lo habia visto: «marcador.json guarda mi_once
+#     desplazado una jornada desde la 4902».
+#
+# LA CAUSA: DOS RELOJES EN UNA MISMA ENTRADA
+#
+#     `observar()` guarda la entrada bajo `rounds.data.round.id`
+#     y la sobreescribe en cada vuelta. Ese id tiene DOS retrasos
+#     encima:
+#
+#         · Biwenger no lo pasa a la siguiente hasta su pitido.
+#         · La vuelta lo lee de la cache del reset (07/09): se
+#           refresca una vez al dia, por la mañana.
+#
+#     Asi que la ULTIMA escritura de la ronda R cae la mañana
+#     DESPUES del pitido de la siguiente. Y en esa escritura el
+#     once sale de `user_lineup`, que desde el 14/09 es la fuente
+#     (`once_del_dueno`). Con `lineupRoundChanges: 0` (tablon,
+#     11/08) el once se bloquea en el pitido, y a partir de ahi
+#     `user_lineup` ya es el once EDITABLE DE LA SIGUIENTE.
+#
+#     Resultado: `jornadas[R].mi_once` es el once de la ronda que
+#     va DESPUES de R. Medido en el libro del 28/10 contra el
+#     once congelado antes del pitido (`onces_de_la_jornada`):
+#
+#         entrada  escrita (Madrid) su mi_once es el de
+#         4906     17/10 04:52      J9  (4907)  = congelado J9  exacto
+#         5176     24/10 04:52      J10 (4908)  = congelado J10 exacto
+#         4908     28/10 20:10      J11         (el del parte de hoy)
+#
+#     (La J9 pito el 16/10 a las 21:00 y la J10 el 23/10 a las
+#     21:00: las dos entradas se escribieron unas ocho horas
+#     despues, con el once ya bloqueado.)
+#
+#     Y con los puntos: el once de la entrada 4906 suma 49 en la
+#     J9 (Biwenger: 49); el de la 4907 suma 56. El de la entrada
+#     5176 suma 39 en la J10 (Biwenger: 39); el de la 4908, el
+#     de la J11, no jugo la J10.
+#
+#     Hasta la 4902 la fuente era la `lineup` de `standings`,
+#     que viene en la MISMA respuesta que el id: esas entradas
+#     guardan el once de su propia ronda (J3 suma 61 = 61). El
+#     desplazamiento empieza con la primera escrita desde
+#     `user_lineup`, la 4903 (16/09).
+#
+# Y EL COMPARADOR TAMBIEN IBA DESPLAZADO
+#
+#     `puntos_biwenger` salia de restar la clasificacion de dos
+#     entradas. La clasificacion viaja en la misma cache: a la
+#     5125 le tocaban los 61 de la J5 y a la 4905 los 29+47 de la
+#     J6 y la J7 juntos. La verdad por ronda ya la publica el
+#     tablon: `roundFinished` trae los puntos de cada manager con
+#     el `round_id` dentro. En una ronda partida trae el
+#     ACUMULADO de la jornada (J1 aplazada: 41 = 29 + 12; J6
+#     parte 3: 40 = 29 + 11, cuadrado manager a manager contra la
+#     clasificacion), asi que la parte vale la resta.
+#
+# EL ARREGLO
+#
+#     1. LECTURA (repara el historico sin tocar `data/`). El once
+#        de cada entrada se le asigna a la ronda que estaba en
+#        juego cuando se VIO: la del ultimo pitido anterior a
+#        `datos_de` (hora de Madrid, ver `_hora_del_sello`), si
+#        no habia cerrado ya. La verdad, del tablon. Los puntos
+#        por jugador, de la resta de siempre entre dos entradas;
+#        la foto de cierre de LaLiga solo rellena a los que no
+#        estan en las dos, y solo si pasa la prueba de fugas (ver
+#        `LA FOTO DE CIERRE SE HACE ANTES DE PUNTUAR EL LUNES`).
+#
+#     2. ESCRITURA (para que no vuelva a pasar). La entrada se
+#        guarda bajo la ronda EN JUEGO segun el tablon, y el once
+#        de una entrada nueva se escribe UNA vez: la primera vista
+#        tras el pitido, que es el bloqueado.
+#
+# LO QUE NO SE ARREGLA, Y SE DICE EN LA FILA
+#
+#     · Rondas partidas (aplazadas): Biwenger las puntua con el
+#       once bloqueado en SU pitido, y si el once se toco esa
+#       misma noche para la siguiente, la vista de la mañana ya no
+#       es la buena (J6 parte 3: la puntuo el once de la J9).
+#     · Rondas sin `roundFinished` en el tablon: J8 (nadie la
+#       cobro) y J6 parte 1 (`splitRound: ignoreFirst`). Sin
+#       verdad no hay cuadre.
+#     · J5: su once no se guardo nunca (la 4902 guardaba el suyo
+#       y la 4903 ya el de la siguiente).
+#     · Vendidos antes de la foto y correcciones retroactivas de
+#       Biwenger: las de siempre.
+
+# De donde sale el once que se le asigna a cada ronda. Viajan en
+# la fila para que la pantalla diga cual es cual sin adivinar.
+ONCE_DE_SU_CLASIFICACION = "LA_CLASIFICACION_DE_SU_RONDA"
+ONCE_PRIMERA_VISTA = "PRIMERA_VISTA_TRAS_EL_PITIDO"
+ONCE_VISTO_EN_OTRA_ENTRADA = "VISTO_CON_LA_RONDA_EN_JUEGO"
+ONCE_CONGELADO = "CONGELADO_ANTES_DEL_PITIDO"
+
+# La marca de una entrada escrita con la regla nueva: su
+# `mi_once` es el de su ronda y no se reescribe.
+REGLA_PRIMERA_VISTA = "PRIMERA_VISTA"
+
+# De donde sale la verdad con la que se cuadra.
+VERDAD_DEL_TABLON = "TABLON_ROUND_FINISHED"
+VERDAD_DE_LA_CLASIFICACION = "CLASIFICACION_RESTADA"
+
+# De donde salen los puntos de cada jugador.
+PUNTOS_DEL_CIERRE = "CIERRE_DE_LA_JORNADA_DE_LALIGA"
+PUNTOS_DE_LA_RESTA = "RESTA_DE_OBSERVACIONES"
+
+
+def numero_de_jornada(nombre) -> int | None:
+    """«Jornada 6 (aplazada)» -> 6. `None` si no lo lleva."""
+
+    for trozo in str(nombre or "").replace("(", " ").split():
+
+        if trozo.isdigit():
+            return int(trozo)
+
+    return None
+
+
+def es_aplazada(nombre, part=None) -> bool:
+    """¿Es una parte de una jornada partida? Nunca lanza."""
+
+    return (
+        safe_int(part) >= 2
+        or "aplazad" in str(nombre or "").lower()
+    )
+
+
+def _contenido(evento) -> dict:
+
+    contenido = (evento or {}).get("content")
+
+    if isinstance(contenido, list):
+        contenido = contenido[0] if contenido else {}
+
+    return contenido if isinstance(contenido, dict) else {}
+
+
+def cierres_del_tablon(eventos) -> dict:
+    """Cuando empezo y cerro cada ronda, y lo que pago. Nunca lanza.
+
+    `{round_id: {"round_id", "nombre", "numero", "part",
+    "empieza", "termina", "acumulado", "puntos"}}`
+
+        empieza    `roundStarted` (el mas temprano)
+        termina    `roundFinished` (el mas temprano), o None
+        acumulado  `{user_id: puntos}` tal cual lo da el tablon
+        puntos     lo que pago ESTA ronda: en una parte de una
+                   jornada partida, el acumulado menos el de la
+                   parte anterior que cerro
+
+    Los eventos entran por la puerta (regla 23).
+    """
+
+    salida: dict[int, dict] = {}
+
+    try:
+
+        for evento in (eventos or []):
+
+            if not isinstance(evento, dict):
+                continue
+
+            tipo = evento.get("type")
+
+            if tipo not in ("roundStarted", "roundFinished"):
+                continue
+
+            contenido = _contenido(evento)
+            ronda = contenido.get("round") or {}
+            round_id = safe_int(ronda.get("id"))
+            momento = _momento(evento.get("date"))
+
+            if not round_id or momento is None:
+                continue
+
+            fila = salida.setdefault(round_id, {
+                "round_id": round_id,
+                "nombre": ronda.get("name") or "",
+                "numero": numero_de_jornada(ronda.get("name")),
+                "part": ronda.get("part"),
+                "empieza": None,
+                "termina": None,
+                "acumulado": None,
+                "puntos": None,
+            })
+
+            if tipo == "roundStarted":
+
+                if fila["empieza"] is None or momento < fila["empieza"]:
+                    fila["empieza"] = momento
+
+                continue
+
+            if fila["termina"] is not None and momento >= fila["termina"]:
+                continue
+
+            fila["termina"] = momento
+
+            acumulado = {}
+
+            for resultado in (contenido.get("results") or []):
+
+                if not isinstance(resultado, dict):
+                    continue
+
+                user_id = safe_int(
+                    (resultado.get("user") or {}).get("id")
+                )
+
+                if user_id:
+                    acumulado[user_id] = safe_int(resultado.get("points"))
+
+            fila["acumulado"] = acumulado
+
+        # LA PARTE VALE LA RESTA. Por numero de jornada y en orden
+        # de pitido: cada parte cerrada le resta a la anterior
+        # cerrada de su misma jornada.
+        por_numero: dict[int, list] = {}
+
+        for fila in salida.values():
+
+            if fila["numero"] is not None:
+                por_numero.setdefault(fila["numero"], []).append(fila)
+
+        for fila in salida.values():
+
+            if fila["acumulado"] is None:
+                continue
+
+            anterior = None
+
+            for otra in por_numero.get(fila["numero"], []):
+
+                if (
+                    otra is fila
+                    or otra["acumulado"] is None
+                    or otra["empieza"] is None
+                    or fila["empieza"] is None
+                    or otra["empieza"] >= fila["empieza"]
+                ):
+                    continue
+
+                if anterior is None or otra["empieza"] > anterior["empieza"]:
+                    anterior = otra
+
+            base = (anterior or {}).get("acumulado") or {}
+
+            fila["puntos"] = {
+                user_id: puntos - safe_int(base.get(user_id))
+                for user_id, puntos in fila["acumulado"].items()
+            }
+
+        return salida
+
+    except Exception:                               # noqa: BLE001
+        return salida
+
+
+def ronda_en_juego(cierres, momento) -> int | None:
+    """La ronda del ultimo pitido anterior a `momento`. Nunca lanza.
+
+    `cierres` es lo que devuelve `cierres_del_tablon`. Es la ronda
+    a la que pertenecen el once bloqueado y los puntos que se ven
+    en ese momento, diga lo que diga `rounds.data.round.id`.
+    """
+
+    try:
+
+        cuando = _momento(momento)
+
+        if cuando is None:
+            return None
+
+        mejor = None
+
+        for round_id, fila in (cierres or {}).items():
+
+            empieza = (fila or {}).get("empieza")
+
+            if empieza is None or empieza > cuando:
+                continue
+
+            if mejor is None or (empieza, round_id) > mejor:
+                mejor = (empieza, safe_int(round_id))
+
+        return mejor[1] if mejor else None
+
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def _pitidos(calendario, cierres) -> dict:
+    """`{round_id: datetime}` del pitido de cada ronda. Manda el
+    tablon; el calendario es el respaldo."""
+
+    salida = {}
+
+    for round_id, fila in (calendario or {}).items():
+
+        momento = _momento((fila or {}).get("primer_partido"))
+
+        if momento is not None and safe_int(round_id):
+            salida[safe_int(round_id)] = momento
+
+    for round_id, fila in (cierres or {}).items():
+
+        if (fila or {}).get("empieza") is not None:
+            salida[safe_int(round_id)] = fila["empieza"]
+
+    return salida
+
+
+def _nombres_de_ronda(calendario, cierres) -> dict:
+
+    salida = {}
+
+    for round_id, fila in (calendario or {}).items():
+        salida[safe_int(round_id)] = {
+            "nombre": (fila or {}).get("nombre") or "",
+            "part": (fila or {}).get("part"),
+        }
+
+    for round_id, fila in (cierres or {}).items():
+
+        if (fila or {}).get("nombre"):
+            salida[safe_int(round_id)] = {
+                "nombre": fila["nombre"],
+                "part": fila.get("part"),
+            }
+
+    return salida
+
+
+def _ids(once) -> list:
+
+    return [
+        safe_int(p.get("id") if isinstance(p, dict) else p)
+        for p in ((once or {}).get("players") or [])
+        if safe_int(p.get("id") if isinstance(p, dict) else p)
+    ]
+
+
+def el_once_de_cada_ronda(
+    entradas,
+    calendario=None,
+    cierres=None,
+    congelados=None,
+) -> dict:
+    """Que once jugo cada ronda, y de donde sale. Nunca lanza.
+
+    `{round_id: {"players", "formation", "fuente", "de_la_entrada",
+    "visto_en", "once_alternativo", "onces_por_vara"}}`
+
+    CUATRO FUENTES, POR ESTE ORDEN
+
+        1. Entrada de antes del 14/09 (sin `escrito_en`): su
+           `mi_once` salia de `standings`, en la misma respuesta
+           que el id. Es el de SU ronda.
+        2. Entrada escrita con la regla nueva (`regla:
+           PRIMERA_VISTA`): su once es el de su ronda.
+        3. Entrada de entre medias: su `mi_once` es el que se
+           veia en `datos_de`, y eso es el once de la ronda EN
+           JUEGO a esa hora, si no habia cerrado ya. Si hay
+           varias, la vista mas temprana: la mas cerca del
+           bloqueo.
+        4. El once congelado antes del pitido de la jornada de
+           LaLiga (`onces_de_la_jornada`), solo para las rondas
+           normales. Respaldo.
+
+    Si el once trae `guardado` (cuando lo grabo el dueño) y es
+    POSTERIOR al pitido, no es el bloqueado: se descarta.
+    """
+
+    salida: dict[int, dict] = {}
+
+    try:
+
+        pitidos = _pitidos(calendario, cierres)
+        cierres = cierres or {}
+
+        ordenados = sorted(
+            pitidos.items(),
+            key=lambda par: (par[1], par[0]),
+        )
+
+        def en_juego(cuando):
+            elegido = None
+            for round_id, momento in ordenados:
+                if momento <= cuando:
+                    elegido = round_id
+            return elegido
+
+        candidatos: dict[int, list] = {}
+
+        def proponer(round_id, entrada, once, fuente, prioridad, visto):
+
+            players = _ids(once)
+
+            if not round_id or not players:
+                return
+
+            guardado = _momento((once or {}).get("guardado"))
+            pitido = pitidos.get(round_id)
+
+            # Grabado DESPUES del pitido: con `lineupRoundChanges:
+            # 0` eso ya es el de la siguiente.
+            if (
+                guardado is not None
+                and pitido is not None
+                and guardado > pitido
+            ):
+                return
+
+            candidatos.setdefault(round_id, []).append({
+                "round_id": round_id,
+                "players": players,
+                "formation": (once or {}).get("formation"),
+                "fuente": fuente,
+                "de_la_entrada": safe_int((entrada or {}).get("round_id")) or None,
+                "visto_en": visto.isoformat() if visto else None,
+                "once_alternativo": (entrada or {}).get("once_alternativo"),
+                "onces_por_vara": (entrada or {}).get("onces_por_vara"),
+                "_orden": (
+                    prioridad,
+                    visto or datetime.max.replace(tzinfo=timezone.utc),
+                ),
+            })
+
+        for entrada in (entradas or []):
+
+            if not isinstance(entrada, dict):
+                continue
+
+            propia = safe_int(entrada.get("round_id"))
+            once = entrada.get("mi_once") or {}
+
+            if "escrito_en" not in entrada:
+                proponer(propia, entrada, once, ONCE_DE_SU_CLASIFICACION, 0, None)
+                continue
+
+            # LA HORA DE LA FOTO, COMO LA LEE QUIEN ESCRIBE. `datos_de`
+            # y `visto_en` son hora de Madrid con la etiqueta
+            # `+00:00`; leidos tal cual van una o dos horas tarde y
+            # una vista de antes del pitido se le colgaba a la ronda
+            # siguiente. Ver `_hora_del_sello`.
+            if once.get("regla") == REGLA_PRIMERA_VISTA:
+                proponer(
+                    propia, entrada, once, ONCE_PRIMERA_VISTA, 0,
+                    _hora_del_sello(once.get("visto_en") or entrada.get("datos_de")),
+                )
+                continue
+
+            visto = _hora_del_sello(entrada.get("datos_de"))
+
+            if visto is None:
+                continue
+
+            dueno = en_juego(visto)
+
+            if dueno is None:
+                continue
+
+            termina = (cierres.get(dueno) or {}).get("termina")
+
+            # Ya habia cerrado: lo que se veia era el once editable
+            # de la que viene, que todavia no tiene ronda.
+            if termina is not None and termina <= visto:
+                continue
+
+            proponer(dueno, entrada, once, ONCE_VISTO_EN_OTRA_ENTRADA, 1, visto)
+
+        # 4. EL CONGELADO, por numero de jornada de LaLiga y solo
+        # para la ronda normal de ese numero.
+        normal_de = {}
+
+        for round_id, fila in _nombres_de_ronda(calendario, cierres).items():
+
+            numero = numero_de_jornada(fila.get("nombre"))
+
+            if numero and not es_aplazada(fila.get("nombre"), fila.get("part")):
+                normal_de.setdefault(numero, round_id)
+
+        for linea in (congelados or []):
+
+            if not isinstance(linea, dict):
+                continue
+
+            round_id = normal_de.get(safe_int(linea.get("matchday")))
+
+            proponer(
+                round_id,
+                {"round_id": None},
+                {
+                    "players": linea.get("players"),
+                    "formation": linea.get("formation"),
+                    "guardado": linea.get("guardado_en"),
+                },
+                ONCE_CONGELADO,
+                2,
+                _momento(linea.get("anotado_en")),
+            )
+
+        for round_id, lista in candidatos.items():
+
+            lista.sort(key=lambda c: c["_orden"])
+
+            elegido = dict(lista[0])
+            elegido.pop("_orden", None)
+
+            # EL CRUCE: si tambien esta el congelado, se dice si
+            # coincide. Dos fuentes que dicen lo mismo valen mas
+            # que una.
+            congelado = next(
+                (c for c in lista if c["fuente"] == ONCE_CONGELADO),
+                None,
+            )
+
+            elegido["congelado_coincide"] = (
+                set(congelado["players"]) == set(elegido["players"])
+                if congelado is not None
+                and elegido["fuente"] != ONCE_CONGELADO
+                else None
+            )
+
+            salida[round_id] = elegido
+
+        return salida
+
+    except Exception:                               # noqa: BLE001
+        return salida
+
+
+def _ventana_de_cierre(fotos, momento):
+    """Las dos fotos de cierre de LaLiga entre las que cae
+    `momento`: `(previa, actual)`, o `None`."""
+
+    cuando = _momento(momento)
+
+    if cuando is None:
+        return None
+
+    por_jornada = {}
+
+    for foto in (fotos or []):
+
+        if isinstance(foto, dict) and safe_int(foto.get("jornada")):
+            por_jornada.setdefault(safe_int(foto["jornada"]), foto)
+
+    for numero, actual in por_jornada.items():
+
+        previa = por_jornada.get(numero - 1)
+
+        if previa is None:
+            continue
+
+        desde = _momento(previa.get("cerrada_en"))
+        hasta = _momento(actual.get("cerrada_en"))
+
+        if desde is None or hasta is None:
+            continue
+
+        if desde < cuando <= hasta:
+            return previa, actual
+
+    return None
+
+
+def _resta_de_fotos(previa, actual) -> dict:
+    """`{id: (puntos, jugados)}` entre dos fotos de cierre."""
+
+    antes = (previa or {}).get("players") or {}
+    salida = {}
+
+    for player_id, fila in ((actual or {}).get("players") or {}).items():
+
+        if player_id not in antes:
+            continue
+
+        try:
+            salida[str(player_id)] = (
+                safe_int(fila[0]) - safe_int(antes[player_id][0]),
+                safe_int(fila[1]) - safe_int(antes[player_id][1]),
+            )
+        except (TypeError, IndexError, KeyError):
+            continue
+
+    return salida
+
+
+# ================================================================
+# LA FOTO DE CIERRE SE HACE ANTES DE PUNTUAR EL LUNES  (28/10/2026)
+# ================================================================
+#
+#     La foto de cierre de LaLiga (`puntos_por_jornada.jsonl`) se
+#     toma unas dos horas despues del ultimo partido del lunes, a
+#     las 21:00, y Biwenger todavia no lo ha puntuado. Asi que cada
+#     ventana (cierre N-1, cierre N] lleva el lunes de la ronda
+#     ANTERIOR y le falta el suyo:
+#
+#         J8 -> J9   lleva Levante-Sevilla (lunes de la J8, 12/10)
+#                    y le falta Getafe-Rayo (lunes de la J9, 19/10):
+#                    26 jugadores con DOS partidos. Olasagasti 9 (6
+#                    del lunes de la J8 + 3), Unai Lopez 0.
+#         J9 -> J10  lleva Getafe-Rayo y la J6 aplazada: 56 con dos.
+#                    Le falta Sevilla-Osasuna (26/10): Kike Salas,
+#                    foto 28 y libro 35.
+#
+#     La J9 salia «49 = 49, cuadra» por dos errores que se anulan
+#     (+6 de Olasagasti, -5 de Unai Lopez). Con los puntos de la
+#     resta de entradas, que va de cache a cache (la mañana de un
+#     pitido a la del siguiente), el mismo once suma 48.
+#
+#     Por eso:
+#
+#         · Los puntos de la ronda son SIEMPRE la resta de dos
+#           entradas.
+#         · La foto solo rellena a quien no esta en las dos
+#           (vendido o fichado entre medias), y solo si la ventana
+#           pasa la prueba de fugas: nadie con dos partidos, y la
+#           foto dice lo mismo que la resta en todos los que estan
+#           en las dos.
+#         · Un cero cierto (`_sin_partido`), igual: o la ventana
+#           pasa esa prueba, o el (0, 0) va de una foto anterior
+#           al pitido a una posterior al cierre del tablon, que
+#           cubre la ronda entera pase lo que pase con el lunes.
+
+# Partidos que puede jugar un jugador en UNA ronda normal. Con
+# mas, la ventana lleva partidos de otra.
+PARTIDOS_POR_RONDA = 1
+
+
+def fugas_de_la_ventana(por_foto, por_entradas=None) -> dict:
+    """¿Lleva la ventana partidos de otra ronda, o le faltan los
+    suyos? Nunca lanza.
+
+    `por_foto` es `{id: (puntos, jugados)}` entre dos fotos de
+    cierre; `por_entradas`, `{id: puntos}` de la resta de dos
+    entradas, solo con los que estan en las dos.
+
+    `{"limpia", "dos_partidos", "desacuerdos", "motivo"}`
+    """
+
+    salida = {
+        "limpia": False,
+        "dos_partidos": [],
+        "desacuerdos": [],
+        "motivo": None,
+    }
+
+    try:
+        for player_id, valor in (por_foto or {}).items():
+
+            try:
+                jugados = safe_int(valor[1])
+            except (TypeError, IndexError, KeyError):
+                continue
+
+            if jugados > PARTIDOS_POR_RONDA:
+                salida["dos_partidos"].append(str(player_id))
+
+        for player_id, puntos in (por_entradas or {}).items():
+
+            valor = (por_foto or {}).get(str(player_id))
+
+            if valor is None:
+                continue
+
+            try:
+                de_la_foto = safe_int(valor[0])
+            except (TypeError, IndexError, KeyError):
+                continue
+
+            if de_la_foto != safe_int(puntos):
+                salida["desacuerdos"].append({
+                    "id": str(player_id),
+                    "foto": de_la_foto,
+                    "resta": safe_int(puntos),
+                })
+
+        salida["dos_partidos"].sort()
+        salida["desacuerdos"].sort(key=lambda d: d["id"])
+
+        motivos = []
+
+        if salida["dos_partidos"]:
+            motivos.append(
+                f"{len(salida['dos_partidos'])} jugador(es) con "
+                f"{PARTIDOS_POR_RONDA + 1} o mas partidos en la "
+                f"ventana: lleva el partido tardio de la ronda "
+                f"anterior (la foto se hace antes de que Biwenger "
+                f"puntue el lunes)."
+            )
+
+        if salida["desacuerdos"]:
+            ejemplo = salida["desacuerdos"][0]
+            motivos.append(
+                f"La foto no dice lo mismo que la resta de entradas "
+                f"en {len(salida['desacuerdos'])} jugador(es) (#"
+                f"{ejemplo['id']}: foto {ejemplo['foto']}, resta "
+                f"{ejemplo['resta']})."
+            )
+
+        salida["motivo"] = " ".join(motivos) or None
+        salida["limpia"] = not motivos
+
+        return salida
+
+    except Exception as error:                      # noqa: BLE001
+        salida["motivo"] = f"{type(error).__name__}: {error}"
+        return salida
+
+
+def puntos_de_cierre(fotos, round_id, pitidos, nombres=None, resta=None) -> dict:
+    """Los puntos de la ronda por la foto de cierre de LaLiga.
+
+    Forma fija, nunca lanza: `{"limpia", "puntos", "jugados",
+    "motivo", "fugas"}`.
+
+    Solo vale para una ronda NORMAL («Jornada N») cuya ventana
+    (cierre de la N-1, cierre de la N] no tenga dentro el pitido
+    de NINGUNA otra ronda —la J10 lleva dentro la J6 aplazada del
+    21-22/10— y que pase la prueba de fugas contra `resta` (la
+    resta de entradas, `{id: puntos}`): ver `LA FOTO DE CIERRE SE
+    HACE ANTES DE PUNTUAR EL LUNES`.
+    """
+
+    salida = {
+        "limpia": False,
+        "puntos": {},
+        "jugados": {},
+        "motivo": None,
+        "fugas": None,
+    }
+
+    try:
+
+        round_id = safe_int(round_id)
+        fila = (nombres or {}).get(round_id) or {}
+        pitido = (pitidos or {}).get(round_id)
+
+        if pitido is None or not fotos:
+            salida["motivo"] = "Sin foto de cierre o sin pitido."
+            return salida
+
+        if es_aplazada(fila.get("nombre"), fila.get("part")):
+            salida["motivo"] = (
+                "Ronda aplazada: la foto de cierre va por jornada "
+                "de LaLiga y no la separa."
+            )
+            return salida
+
+        ventana = _ventana_de_cierre(fotos, pitido)
+
+        if ventana is None:
+            salida["motivo"] = "Ninguna pareja de fotos de cierre la cubre."
+            return salida
+
+        previa, actual = ventana
+
+        desde = _momento(previa.get("cerrada_en"))
+        hasta = _momento(actual.get("cerrada_en"))
+
+        otras = sorted(
+            otro
+            for otro, momento in (pitidos or {}).items()
+            if otro != round_id and desde < momento <= hasta
+        )
+
+        if otras:
+            salida["motivo"] = (
+                f"La ventana de cierre de la jornada "
+                f"{safe_int(actual.get('jornada'))} lleva dentro el "
+                f"pitido de otra(s) ronda(s) ({otras}): la resta "
+                f"mezclaria sus puntos."
+            )
+            return salida
+
+        por_foto = _resta_de_fotos(previa, actual)
+
+        fugas = fugas_de_la_ventana(por_foto, resta)
+        salida["fugas"] = fugas
+
+        if not fugas["limpia"]:
+            salida["motivo"] = (
+                f"La ventana de cierre de la jornada "
+                f"{safe_int(actual.get('jornada'))} no esta limpia. "
+                f"{fugas['motivo']}"
+            )
+            return salida
+
+        salida["puntos"] = {
+            player_id: valor[0]
+            for player_id, valor in por_foto.items()
+        }
+        salida["jugados"] = {
+            player_id: valor[1]
+            for player_id, valor in por_foto.items()
+        }
+
+        salida["limpia"] = True
+
+        return salida
+
+    except Exception as error:                      # noqa: BLE001
+        salida["motivo"] = f"{type(error).__name__}: {error}"
+        return salida
+
+
+def _instantes_de_la_foto_de_cierre(foto) -> tuple:
+    """`(primero, ultimo)` de sus dos sellos: `cerrada_en` (el
+    cierre nominal) y `at` (cuando se escribio la linea)."""
+
+    momentos = [
+        m
+        for m in (
+            _momento((foto or {}).get("cerrada_en")),
+            _momento((foto or {}).get("at")),
+        )
+        if m is not None
+    ]
+
+    if not momentos:
+        return None, None
+
+    return min(momentos), max(momentos)
+
+
+def _sin_partido(fotos, pitido, player_id, termina=None, limpia=False) -> bool:
+    """¿Consta que no jugo ningun partido en la ronda? Entonces sus
+    puntos son cero, este o no en la plantilla. Nunca lanza.
+
+    DOS PRUEBAS, Y NINGUNA SE FIA DEL LUNES (28/10/2026)
+
+        1. Con el cierre del tablon (`termina`): (0, 0) desde la
+           ultima foto ANTERIOR al pitido hasta la primera
+           POSTERIOR al cierre. Ese tramo cubre la ronda entera,
+           lunes incluido, y un tramo mas ancho no puede esconder
+           un partido. Es la unica prueba con el tablon delante.
+        2. Sin cierre: (0, 0) en la ventana que contiene el
+           pitido, solo si esa ventana paso la prueba de fugas
+           (`limpia`).
+
+    Un (0, 0) en una ventana con fugas no prueba nada: el que
+    jugo el lunes que la foto aun no tenia sale (0, 0).
+    """
+
+    try:
+        clave = str(safe_int(player_id))
+        pitido = _momento(pitido)
+        termina = _momento(termina)
+
+        if pitido is None:
+            return False
+
+        if termina is not None:
+
+            antes = despues = None
+
+            for foto in (fotos or []):
+
+                if not isinstance(foto, dict):
+                    continue
+
+                primero, ultimo = _instantes_de_la_foto_de_cierre(foto)
+
+                if primero is None:
+                    continue
+
+                if ultimo < pitido and (
+                    antes is None or ultimo > antes[0]
+                ):
+                    antes = (ultimo, foto)
+
+                if primero > termina and (
+                    despues is None or primero < despues[0]
+                ):
+                    despues = (primero, foto)
+
+            if antes is None or despues is None:
+                return False
+
+            valor = _resta_de_fotos(antes[1], despues[1]).get(clave)
+
+            return valor is not None and valor == (0, 0)
+
+        if not limpia:
+            return False
+
+        ventana = _ventana_de_cierre(fotos, pitido)
+
+        if ventana is None:
+            return False
+
+        valor = _resta_de_fotos(*ventana).get(clave)
+
+        return valor is not None and valor == (0, 0)
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def ledger_vacio() -> dict:
     return {
         "version": 1,
@@ -833,20 +1747,196 @@ def sello_de_la_foto(snapshot) -> str | None:
     return momento.isoformat() if momento is not None else None
 
 
+# Las entradas que escribe la regla del 28/10 llevan esta marca.
+# Las de antes no: el lector las repara por la hora.
+ESCRITURA_POR_LA_RONDA_EN_JUEGO = 2
+
+CLAVE_RONDA_EN_JUEGO = "RONDA_EN_JUEGO"
+CLAVE_RONDA_DE_BIWENGER = "RONDA_DE_BIWENGER"
+
+
+def _instante_de_la_foto(snapshot):
+    """El instante REAL de la foto, con zona. `None` si no consta.
+
+    EL SELLO SIN ZONA ES HORA LOCAL (28/10/2026)
+
+        El recolector escribe `datetime.now().isoformat()`, sin
+        zona, y el workflow corre con `TZ: Europe/Madrid`: el
+        sello es hora de Madrid. `sello_de_la_foto` le pone
+        `+00:00` (la suposicion de la casa) y asi se guarda en
+        `datos_de`: medido, la entrada 4908 dice `20:10+00:00` y
+        el commit que la escribio es de las 20:11 +0100.
+
+        Para lo que se guarda no se cambia nada. Pero para decidir
+        si una ronda YA PITO, una o dos horas importan: con la
+        suposicion UTC, a las 20:10 de Madrid la J11 (21:00) ya
+        «habria empezado» y se bloquearia su once 50 minutos
+        antes del pitido. Aqui el sello sin zona se lee como lo
+        que es: hora de pared de la maquina que lo tomo, Madrid
+        (`_hora_del_recolector`, la misma que usa el lector).
+    """
+
+    marca = (snapshot or {}).get("timestamp")
+
+    if marca is None or isinstance(marca, (int, float, datetime)):
+        return _momento(marca)
+
+    try:
+        cuando = datetime.fromisoformat(str(marca).replace("Z", "+00:00"))
+
+    except (TypeError, ValueError):
+        return None
+
+    if cuando.tzinfo is not None:
+        return cuando
+
+    return _hora_del_recolector(cuando)
+
+
+# La zona del recolector: el workflow corre con `TZ: Europe/Madrid`.
+ZONA_DEL_RECOLECTOR = "Europe/Madrid"
+
+
+def _hora_del_recolector(cuando):
+    """Una hora de pared SIN zona del recolector, con su zona.
+
+    La misma regla para quien escribe (`_instante_de_la_foto`) y
+    para quien lee (`_hora_del_sello`), y escrita, no la del reloj
+    de la maquina: una guardia que corra en UTC lee lo mismo que
+    el ciclo.
+    """
+
+    try:
+        if ZoneInfo is not None:
+            return cuando.replace(tzinfo=ZoneInfo(ZONA_DEL_RECOLECTOR))
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+    try:
+        return cuando.astimezone()
+
+    except (OverflowError, OSError, ValueError):
+        return cuando.replace(tzinfo=timezone.utc)
+
+
+def _hora_del_sello(valor):
+    """`datos_de` / `visto_en` de una entrada, con su zona de verdad.
+
+    Nunca lanza.
+
+    EL LECTOR LEIA OTRA HORA QUE EL ESCRITOR (28/10/2026)
+
+        `sello_de_la_foto` guarda el sello sin zona del recolector
+        —hora de Madrid— con la etiqueta `+00:00`. El escritor ya
+        lo leia como hora local (`_instante_de_la_foto`); el
+        lector lo tomaba por UTC, una o dos horas tarde. Medido
+        sobre el libro: la ultima escritura de la 4908 antes de la
+        J11 cae a las 20:07 de Madrid (19:07 UTC), se guarda como
+        `20:07+00:00`, y el lector la ponia DESPUES del pitido
+        (20:00 UTC) y le asignaba a la J11 un once visto 53
+        minutos antes.
+
+        Aqui un `+00:00` (o sin zona) es esa etiqueta y se lee
+        como hora de pared de Madrid; una zona de verdad distinta
+        se respeta.
+    """
+
+    if not isinstance(valor, str):
+        return _momento(valor)
+
+    try:
+        cuando = datetime.fromisoformat(valor.replace("Z", "+00:00"))
+
+    except (TypeError, ValueError):
+        return None
+
+    if cuando.tzinfo is not None and cuando.utcoffset() != timedelta(0):
+        return cuando
+
+    return _hora_del_recolector(cuando.replace(tzinfo=None))
+
+
+def la_ronda_de_la_foto(snapshot, cierres=None) -> tuple:
+    """`(round_id, clave)`: bajo que ronda se anota esta foto.
+
+    Nunca lanza.
+
+    `rounds.data.round.id` va retrasado —Biwenger lo pasa en el
+    pitido de la siguiente y la vuelta lo lee de la cache del
+    reset—, asi que la mañana despues de un pitido todavia dice
+    la ronda ANTERIOR mientras los totales y el once ya son de la
+    nueva. Con el tablon delante manda la ronda EN JUEGO: la del
+    ultimo `roundStarted` anterior a la foto.
+
+    Sin tablon, o si el tablon no conoce la del id, manda el id:
+    exactamente lo de antes.
+    """
+
+    de_biwenger = jornada_en_curso(snapshot or {})
+
+    try:
+        cierres = cierres or {}
+
+        en_juego = ronda_en_juego(
+            cierres,
+            _instante_de_la_foto(snapshot),
+        )
+
+        if not en_juego:
+            return de_biwenger, CLAVE_RONDA_DE_BIWENGER
+
+        if not de_biwenger:
+            return en_juego, CLAVE_RONDA_EN_JUEGO
+
+        suya = (cierres.get(de_biwenger) or {}).get("empieza")
+
+        if suya is None:
+            return de_biwenger, CLAVE_RONDA_DE_BIWENGER
+
+        if cierres[en_juego]["empieza"] > suya:
+            return en_juego, CLAVE_RONDA_EN_JUEGO
+
+        return de_biwenger, CLAVE_RONDA_DE_BIWENGER
+
+    except Exception:                               # noqa: BLE001
+        return de_biwenger, CLAVE_RONDA_DE_BIWENGER
+
+
 def observar(
     snapshot: dict,
     current_user_id=None,
     once_alternativo: dict | None = None,
     escrito_en=None,
+    eventos=None,
 ) -> dict:
     """Anota la jornada en curso tal y como se ve ahora mismo.
 
     Se llama en cada ciclo. Sobreescribe la observacion de esa
     jornada, de modo que la que queda es siempre la ultima antes
     de que Biwenger salte a la siguiente: la definitiva.
+
+    CON EL TABLON (28/10/2026), `eventos`:
+
+        · la foto se anota bajo la ronda EN JUEGO, no bajo el id
+          retrasado (`la_ronda_de_la_foto`). Asi la ultima
+          escritura de una ronda es la de antes del pitido de la
+          siguiente: totales de la ronda entera y nada de la otra.
+
+        · en una entrada nueva, el once se escribe UNA vez: la
+          primera vista tras el pitido de su ronda, que con
+          `lineupRoundChanges: 0` es el bloqueado. Lo que se vea
+          despues es el editable de la siguiente y no se escribe
+          encima (`regla: PRIMERA_VISTA`).
+
+        Las entradas de antes no se tocan de regla: siguen
+        sobreescribiendo el once, y el lector las repara por la
+        hora (`el_once_de_cada_ronda`).
     """
 
-    round_id = jornada_en_curso(snapshot)
+    cierres = cierres_del_tablon(eventos) if eventos else {}
+
+    round_id, clave_de_ronda = la_ronda_de_la_foto(snapshot, cierres)
 
     if not round_id:
         return {
@@ -980,8 +2070,86 @@ def observar(
         _momento(escrito_en) or datetime.now()
     ).isoformat()
 
+    # ============================================================
+    # EL ONCE DE ESTA RONDA, UNA VEZ  (28/10/2026)
+    # ============================================================
+    #
+    #     Ver `EL ONCE DESPLAZADO UNA JORNADA`. Tres casos:
+    #
+    #         · Entrada de la regla nueva con el once ya bloqueado:
+    #           no se toca. Lo que se ve ahora es el editable de
+    #           la siguiente.
+    #         · Entrada de la regla nueva, y el tablon dice que su
+    #           ronda ya pito: se bloquea con lo que se ve ahora.
+    #         · Cualquier otra (las de antes, o sin tablon): se
+    #           sobreescribe como siempre, y el lector la repara
+    #           por la hora.
+    previa_entrada = (ledger.get("jornadas") or {}).get(str(round_id))
+    nueva = not isinstance(previa_entrada, dict)
+    previa_entrada = previa_entrada if not nueva else {}
+
+    regla_nueva = (
+        nueva
+        or safe_int(previa_entrada.get("escritura"))
+        >= ESCRITURA_POR_LA_RONDA_EN_JUEGO
+    )
+
+    once_previo = previa_entrada.get("mi_once") or {}
+
+    guardado = _momento(alineacion.get("date"))
+
+    once_de_ahora = {
+        "formation": alineacion.get("type"),
+        "players": list(once_de_hoy),
+
+        # Cuando lo grabo el dueño. Si es DESPUES del pitido de
+        # la ronda, no es el bloqueado: el lector lo descarta.
+        "guardado": guardado.isoformat() if guardado else None,
+    }
+
+    pitido = (cierres.get(round_id) or {}).get("empieza")
+    ahora_de_la_foto = _instante_de_la_foto(snapshot)
+
+    bloqueado = (
+        regla_nueva
+        and once_previo.get("regla") == REGLA_PRIMERA_VISTA
+        and bool(_ids(once_previo))
+    )
+
+    if bloqueado:
+        mi_once = once_previo
+
+    elif (
+        regla_nueva
+        and pitido is not None
+        and ahora_de_la_foto is not None
+        and ahora_de_la_foto >= pitido
+        and once_de_ahora["players"]
+    ):
+        mi_once = {
+            **once_de_ahora,
+            "regla": REGLA_PRIMERA_VISTA,
+            "visto_en": sello_de_la_foto(snapshot),
+        }
+
+    else:
+        mi_once = once_de_ahora
+
+    congelado = mi_once.get("regla") == REGLA_PRIMERA_VISTA
+
     ledger["jornadas"][str(round_id)] = {
         "round_id": round_id,
+
+        # BAJO QUE RONDA Y POR QUE (28/10/2026). La del tablon si
+        # la sabia; si no, la del id. Y el id, al lado, para que
+        # se vea cuando iba retrasado.
+        "clave": clave_de_ronda,
+        "ronda_de_biwenger": jornada_en_curso(snapshot) or None,
+        **(
+            {"escritura": ESCRITURA_POR_LA_RONDA_EN_JUEGO}
+            if regla_nueva
+            else {}
+        ),
         # DOS FECHAS, PORQUE SON DOS HECHOS (14/09/2026)
         #
         #     `visto` era `datetime.now()` al escribir y se leia
@@ -1007,9 +2175,16 @@ def observar(
         "escrito_en": escritura,
         "clasificacion": clasificacion,
         "mi_user_id": safe_int(current_user_id),
-        "mi_once": {
-            "formation": alineacion.get("type"),
-            "players": list(once_de_hoy),
+        "mi_once": mi_once,
+
+        # EL QUE HAY PUESTO AHORA, aparte (28/10/2026). Con el
+        # once de la ronda bloqueado, quien quiera el editable —el
+        # que se bloqueara en el proximo pitido, p. ej.
+        # `scripts/la_jornada_en_vivo.py`— lo tiene aqui, y no lo
+        # confunde con el que jugo.
+        "once_editable": {
+            **once_de_ahora,
+            "visto_en": sello_de_la_foto(snapshot),
         },
         "plantilla": plantilla,
         "totales": totales,
@@ -1045,9 +2220,25 @@ def observar(
         ),
 
         # Nombre de todo el que sale en la foto, incluidos los
-        # que ya no estan en la plantilla.
-        "nombres": nombres,
+        # que ya no estan en la plantilla. Los de antes se quedan:
+        # un vendido sigue necesitando su nombre en la fila.
+        "nombres": {
+            **(previa_entrada.get("nombres") or {}),
+            **nombres,
+        },
     }
+
+    # CON EL ONCE BLOQUEADO, SUS COMPAÑEROS TAMBIEN. Los onces de
+    # las varas se anotaron con el, a la misma hora: lo que se
+    # calcule despues es para la siguiente.
+    if congelado:
+
+        for campo in ("once_alternativo", "onces_por_vara"):
+
+            if previa_entrada.get(campo):
+                ledger["jornadas"][str(round_id)][campo] = (
+                    previa_entrada[campo]
+                )
 
     ledger["updated_at"] = escritura
 
@@ -1056,6 +2247,8 @@ def observar(
     return {
         "anotada": True,
         "round_id": round_id,
+        "clave": clave_de_ronda,
+        "once_bloqueado": congelado,
         "jugadores": len(plantilla),
         "once": len(
             ledger["jornadas"][str(round_id)]["mi_once"]["players"]
@@ -1099,6 +2292,23 @@ def anotar_once_alternativo(
             return {
                 "anotado": False,
                 "motivo": f"La jornada {clave} no esta observada.",
+            }
+
+        # EL ONCE BLOQUEADO NO SE COMPARA CON UNO DE DESPUES
+        # (28/10/2026). Si la entrada ya tiene su once bloqueado y
+        # su vara anotada, lo que se calcule ahora es para la
+        # siguiente ronda.
+        if (
+            (jornada.get("mi_once") or {}).get("regla")
+            == REGLA_PRIMERA_VISTA
+            and _ids(jornada.get("once_alternativo"))
+        ):
+            return {
+                "anotado": False,
+                "motivo": (
+                    f"La jornada {clave} ya tiene su once bloqueado "
+                    f"y el de la vara anotado con el."
+                ),
             }
 
         jornada["once_alternativo"] = {
@@ -1423,6 +2633,46 @@ def _sello_del_cuadre(fila: dict) -> str:
     return "" if cuadre else "  [NO CUADRA]"
 
 
+def _por_que_no_cuadra(mios, puntos_once, aplazada=False) -> str | None:
+    """El motivo de un «no cuadra» con el once completo. `None` si
+    cuadra o no hay verdad.
+
+    UN ROJO TAMBIEN LLEVA SU PORQUE (28/10/2026). La J9 sale 48
+    con el once que jugo, entero, y Biwenger pago 49. Un punto o
+    dos con todo medido es lo que deja una correccion retroactiva
+    (Biwenger retoca a un jugador despues de cobrar la ronda, y el
+    total que se resta ya es el corregido): se dice, con su
+    tamaño, y no se maquilla.
+    """
+
+    if mios is None or mios == puntos_once:
+        return None
+
+    diferencia = safe_int(mios) - safe_int(puntos_once)
+
+    if aplazada:
+        return (
+            f"No cuadra por {diferencia:+d}: ronda partida, ver la "
+            f"excepcion."
+        )
+
+    if abs(diferencia) <= -CORRECCION_MAS_GRANDE:
+        return (
+            f"No cuadra por {diferencia:+d} con el once completo: "
+            f"Biwenger pago {mios} y sus once suman {puntos_once} "
+            f"en la resta de entradas. Con todo medido, {abs(diferencia)} "
+            f"punto(s) es el tamaño de una correccion retroactiva "
+            f"de Biwenger (retoca a un jugador despues de cobrar la "
+            f"ronda): lo mas probable, no probado."
+        )
+
+    return (
+        f"No cuadra por {diferencia:+d} con el once completo: o el "
+        f"once no es el que puntuo, o los puntos de algun jugador "
+        f"no son los de la ronda."
+    )
+
+
 def _puntos_de_la_jornada(
     actual: dict,
     previa: dict | None,
@@ -1700,8 +2950,33 @@ def _fechas_de(jornada) -> dict:
     }
 
 
-def marcador(calendario: dict | None = None) -> dict:
+def marcador(
+    calendario: dict | None = None,
+    eventos=None,
+    onces_congelados=None,
+    fotos_de_cierre=None,
+) -> dict:
     """Lee el ledger y contesta las tres preguntas.
+
+    LO QUE CUADRA CON BIWENGER (28/10/2026)
+
+        `eventos` (el tablon), `onces_congelados` (el libro de
+        onces) y `fotos_de_cierre` (los totales de cierre de
+        LaLiga) entran por la puerta y son opcionales. Con ellos:
+
+            · el once de cada ronda es el que JUGO, no el de la
+              siguiente (`el_once_de_cada_ronda`);
+            · la verdad es la de `roundFinished`, ronda a ronda;
+            · una ronda cerrada en el tablon se mide aunque sea
+              la ultima del libro;
+            · los puntos por jugador salen de la resta de
+              entradas; el cierre de LaLiga solo rellena a los
+              vendidos y fichados, y solo con su ventana sin
+              fugas (la foto se hace antes de puntuar el lunes).
+
+        Sin ellos se comporta como antes, salvo el once: ese se
+        repara siempre, porque el que se guardaba era el de otra
+        ronda.
 
     EL ORDEN SALE DEL CALENDARIO, NO DEL ID (14/09/2026)
 
@@ -1724,12 +2999,33 @@ def marcador(calendario: dict | None = None) -> dict:
 
     ledger = cargar_ledger()
 
-    colocadas = orden_en_el_tiempo(
-        list((ledger.get("jornadas") or {}).values()),
-        calendario,
-    )
+    entradas = [
+        entrada
+        for entrada in (ledger.get("jornadas") or {}).values()
+        if isinstance(entrada, dict)
+    ]
+
+    colocadas = orden_en_el_tiempo(entradas, calendario)
 
     jornadas = [item["jornada"] for item in colocadas["ordenadas"]]
+
+    # LO QUE CUADRA CON BIWENGER (28/10/2026). Ver la cabecera de
+    # `EL ONCE DESPLAZADO UNA JORNADA`.
+    cierres = cierres_del_tablon(eventos)
+    pitidos = _pitidos(calendario, cierres)
+    nombres_de_ronda = _nombres_de_ronda(calendario, cierres)
+
+    onces = el_once_de_cada_ronda(
+        entradas,
+        calendario=calendario,
+        cierres=cierres,
+        congelados=onces_congelados,
+    )
+
+    por_ronda = {
+        safe_int(entrada.get("round_id")): entrada
+        for entrada in entradas
+    }
 
     filas = [
         {
@@ -1750,7 +3046,17 @@ def marcador(calendario: dict | None = None) -> dict:
         # La ultima observada todavia no ha cerrado: sus puntos
         # de clasificacion siguen a cero y contarla hundiria la
         # media. Solo se miden las que ya tienen sucesora.
-        cerrada = indice < len(jornadas) - 1
+        #
+        # SALVO QUE EL TABLON DIGA QUE CERRO (28/10/2026). La J10
+        # cerro el 27/10 y es la ultima del libro: sin esto se
+        # quedaba «en curso» hasta el pitido de la J11.
+        cerrada = (
+            indice < len(jornadas) - 1
+            or bool(
+                (cierres.get(safe_int(actual.get("round_id"))) or {})
+                .get("termina")
+            )
+        )
 
         anterior = previa
 
@@ -1867,25 +3173,128 @@ def marcador(calendario: dict | None = None) -> dict:
             })
             continue
 
-        posiciones = {
-            str(j.get("id")): safe_int(j.get("position"))
-            for j in (actual.get("plantilla") or [])
+        round_id = safe_int(actual.get("round_id"))
+
+        # ========================================================
+        # EL ONCE QUE JUGO ESTA RONDA (28/10/2026)
+        # ========================================================
+        #
+        #     Ya no es `actual["mi_once"]`: ese, desde la 4903, es
+        #     el de la ronda SIGUIENTE. Sale de
+        #     `el_once_de_cada_ronda`, con su fuente.
+        asignado = onces.get(round_id) or {}
+
+        # La entrada en la que se VIO ese once. Su plantilla es la
+        # de mientras se jugaba la ronda, que es la que vale para
+        # el techo: la de `actual` ya trae los fichajes de despues.
+        vista = por_ronda.get(safe_int(asignado.get("de_la_entrada"))) or actual
+
+        alineados = [str(p) for p in (asignado.get("players") or [])]
+
+        once = {
+            "formation": asignado.get("formation"),
+            "players": alineados,
         }
 
-        once = actual.get("mi_once") or {}
-
-        alineados = [
-            str(p)
-            for p in (once.get("players") or [])
+        anotado_aqui = [
+            str(safe_int(p))
+            for p in _ids(actual.get("mi_once"))
         ]
 
+        # ========================================================
+        # LOS PUNTOS DE CADA JUGADOR EN ESTA RONDA
+        # ========================================================
+        #
+        #     La resta de siempre entre dos entradas: va de cache a
+        #     cache, la mañana de un pitido a la del siguiente, y
+        #     no se deja el lunes. La foto de cierre de LaLiga se
+        #     hace ANTES de puntuar el lunes (ver `LA FOTO DE CIERRE
+        #     SE HACE ANTES DE PUNTUAR EL LUNES`): solo rellena a
+        #     quien no esta en las dos entradas, y solo si su
+        #     ventana pasa la prueba de fugas.
+        puntos_ronda = dict(puntos)
+        fuente_puntos = PUNTOS_DE_LA_RESTA
+
+        totales_ahora = actual.get("totales") or {}
+        totales_antes = (anterior or {}).get("totales") or {}
+
+        # UN FICHADO A MITAD NO ES UN CERO. `_puntos_de_la_
+        # jornada` le pone 0 al que no estaba en la previa;
+        # para el once eso es un hueco, no un dato. En la
+        # primera jornada no hay previa: el total ES la ronda.
+        def tiene_dato(player_id):
+            return player_id in totales_ahora and (
+                anterior is None
+                or player_id in totales_antes
+            )
+
+        cierre_laliga = puntos_de_cierre(
+            fotos_de_cierre,
+            round_id,
+            pitidos,
+            nombres_de_ronda,
+            resta={
+                player_id: valor
+                for player_id, valor in puntos.items()
+                if tiene_dato(player_id)
+            },
+        )
+
+        faltan = []
+        sin_partido = []
+        del_cierre = []
+
+        for player_id in alineados:
+
+            if tiene_dato(player_id):
+                continue
+
+            # EL VENDIDO, DE LA FOTO LIMPIA. Solo si jugo en la
+            # ventana: un (0, 0) no es un dato de la foto, es la
+            # pregunta de abajo.
+            if (
+                cierre_laliga["limpia"]
+                and player_id in cierre_laliga["puntos"]
+                and safe_int(cierre_laliga["jugados"].get(player_id)) > 0
+            ):
+                puntos_ronda[player_id] = cierre_laliga["puntos"][player_id]
+                del_cierre.append(player_id)
+                continue
+
+            # SIN PARTIDO NO HAY PUNTOS. Si consta que no jugo
+            # ninguno en la ronda, su ronda es un cero cierto,
+            # aunque ya no este en la plantilla. Con la misma
+            # guardia que la foto: un (0, 0) en una ventana con
+            # fugas no prueba nada.
+            if _sin_partido(
+                fotos_de_cierre,
+                pitidos.get(round_id),
+                player_id,
+                termina=(cierres.get(round_id) or {}).get("termina"),
+                limpia=cierre_laliga["limpia"],
+            ):
+                puntos_ronda[player_id] = 0
+                sin_partido.append(player_id)
+                continue
+
+            faltan.append(player_id)
+
+        posiciones = {
+            str(j.get("id")): safe_int(j.get("position"))
+            for j in (vista.get("plantilla") or actual.get("plantilla") or [])
+        }
+
         puntos_alineados = sum(
-            safe_int(puntos.get(p))
+            safe_int(puntos_ronda.get(p))
             for p in alineados
         )
 
         techo = mejor_once(
-            puntos,
+            {
+                player_id: valor
+                for player_id, valor in puntos_ronda.items()
+                if player_id in posiciones
+            },
             posiciones,
             alineados=alineados,
             formacion_usada=once.get("formation"),
@@ -1893,12 +3302,39 @@ def marcador(calendario: dict | None = None) -> dict:
 
         mi_user_id = safe_int(actual.get("mi_user_id"))
 
-        # POR DIFERENCIA, COMO LOS JUGADORES (17/09/2026)
+        # ========================================================
+        # LA VERDAD: LO QUE PAGO BIWENGER EN ESTA RONDA
+        # ========================================================
         #
-        #     `points` de la clasificacion es el acumulado de la
-        #     temporada. Compararlo con el once de UNA jornada
-        #     es comparar 60 con 17.
-        oficiales = _puntos_de_la_clasificacion(actual, anterior)
+        #     Con tablon, `roundFinished` ronda a ronda. Si el
+        #     tablon conoce la ronda y no la cerro (J8; J6 parte
+        #     1, que la liga ignora), no hay verdad y se dice.
+        #     Sin tablon, la resta de la clasificacion de siempre.
+        cierre_tablon = cierres.get(round_id)
+
+        motivo_sin_verdad = None
+
+        if cierre_tablon is not None:
+
+            oficiales = cierre_tablon.get("puntos")
+            fuente_verdad = VERDAD_DEL_TABLON if oficiales is not None else None
+
+            if oficiales is None:
+                motivo_sin_verdad = (
+                    f"Biwenger no publico el cierre de "
+                    f"{cierre_tablon.get('nombre') or round_id} en el "
+                    f"tablon (sin `roundFinished`): no hay verdad "
+                    f"con la que cuadrar."
+                )
+
+        else:
+            # POR DIFERENCIA, COMO LOS JUGADORES (17/09/2026)
+            #
+            #     `points` de la clasificacion es el acumulado de
+            #     la temporada. Compararlo con el once de UNA
+            #     jornada es comparar 60 con 17.
+            oficiales = _puntos_de_la_clasificacion(actual, anterior)
+            fuente_verdad = VERDAD_DE_LA_CLASIFICACION
 
         mios = (
             oficiales.get(mi_user_id)
@@ -1907,8 +3343,8 @@ def marcador(calendario: dict | None = None) -> dict:
         )
 
         rivales = [
-            puntos
-            for user_id, puntos in (oficiales or {}).items()
+            puntos_rival
+            for user_id, puntos_rival in (oficiales or {}).items()
             if user_id != mi_user_id
         ]
 
@@ -1934,16 +3370,75 @@ def marcador(calendario: dict | None = None) -> dict:
             for p in list(rivales) + [mios if mios is not None else 0]
         )
 
+        # Sin once no hay nota: un 0 % seria la nota de nadie.
         eficiencia = (
             round(100 * puntos_alineados / techo["points"], 1)
-            if techo.get("points")
+            if techo.get("points") and alineados
             else None
         )
 
-        completa, motivo_incompleta = _reconstruccion_completa(actual)
+        nombres = {
+            **(vista.get("nombres") or {}),
+            **(actual.get("nombres") or {}),
+        }
+
+        if not alineados:
+            completa, motivo_incompleta = False, (
+                "No se anoto que once jugo esa jornada."
+            )
+
+        elif faltan:
+            quienes = ", ".join(
+                str(nombres.get(p) or f"#{p}")
+                for p in faltan
+            )
+
+            completa, motivo_incompleta = False, (
+                f"{len(faltan)} de los {len(alineados)} que "
+                f"alinearon no tienen los puntos de esta ronda "
+                f"({quienes}): se vendieron o se ficharon entre "
+                f"las dos fotos, asi que el once reconstruido sale "
+                f"corto."
+                + (
+                    f" La foto de cierre no los rellena: "
+                    f"{cierre_laliga['motivo']}"
+                    if cierre_laliga.get("motivo")
+                    else ""
+                )
+            )
+
+        else:
+            completa, motivo_incompleta = True, None
+
+        aplazada = es_aplazada(
+            (nombres_de_ronda.get(round_id) or {}).get("nombre"),
+            (nombres_de_ronda.get(round_id) or {}).get("part"),
+        )
+
+        # LAS EXCEPCIONES, ESCRITAS EN LA FILA. No cambian el
+        # cuadre: dicen por que puede no darse.
+        excepciones = []
+
+        if aplazada:
+            excepciones.append(
+                "Ronda partida (aplazada): Biwenger la puntua con "
+                "el once bloqueado en SU pitido. Si esa misma noche "
+                "se toco el once para la siguiente, el que se vio "
+                "por la mañana ya no es el que puntuo, y la resta "
+                "de observaciones mezcla horas de dos rondas."
+            )
+
+        if motivo_sin_verdad:
+            excepciones.append(motivo_sin_verdad)
+
+        if not alineados:
+            excepciones.append(
+                "El once de esta ronda no se guardo en ninguna "
+                "entrada: no se reconstruye a ojo."
+            )
 
         filas.append({
-            "round_id": safe_int(actual.get("round_id")),
+            "round_id": round_id,
             "medible": True,
             "liga_medida": liga_medida,
             **_fechas_de(actual),
@@ -1955,7 +3450,34 @@ def marcador(calendario: dict | None = None) -> dict:
             "reconstruccion_completa": completa,
             "motivo_incompleta": motivo_incompleta,
 
+            # EL ONCE QUE JUGO, Y DE DONDE SALE (28/10/2026)
             "formacion": once.get("formation"),
+            "once": [safe_int(p) for p in alineados],
+            "once_fuente": asignado.get("fuente"),
+            "once_de_la_entrada": asignado.get("de_la_entrada"),
+            "once_visto_en": asignado.get("visto_en"),
+            "once_congelado_coincide": asignado.get("congelado_coincide"),
+
+            # El que guardaba ESTA entrada. Si no coincide con el
+            # de arriba, es el desplazamiento: se ve en la fila.
+            "once_anotado_en_la_entrada": [
+                safe_int(p) for p in anotado_aqui
+            ],
+            "once_desplazado": (
+                bool(anotado_aqui)
+                and set(anotado_aqui) != set(alineados)
+            ),
+
+            "puntos_fuente": fuente_puntos,
+            "puntos_cierre_motivo": (
+                None if cierre_laliga["limpia"]
+                else cierre_laliga.get("motivo")
+            ),
+            # Los que no estaban en las dos entradas y salen de la
+            # foto de cierre limpia (`PUNTOS_DEL_CIERRE`).
+            "puntos_del_cierre": [safe_int(p) for p in del_cierre],
+            "sin_partido": [safe_int(p) for p in sin_partido],
+
             "puntos_once": puntos_alineados,
 
             "mejor_formacion": techo.get("formation"),
@@ -1968,11 +3490,11 @@ def marcador(calendario: dict | None = None) -> dict:
             ),
 
             "detalle": _detalle(
-                puntos,
-                actual.get("plantilla") or [],
+                puntos_ronda,
+                vista.get("plantilla") or actual.get("plantilla") or [],
                 alineados,
                 techo.get("players") or [],
-                actual.get("nombres") or {},
+                nombres,
             ),
 
             # LOS TRES NUMEROS JUNTOS (18/09/2026)
@@ -1980,31 +3502,34 @@ def marcador(calendario: dict | None = None) -> dict:
             #     Alineamos / habria alineado la vara vieja /
             #     mejor posible. Sin los tres no se puede saber
             #     si los factores por posicion suman o restan.
-            # Los tres onces, cada uno con sus puntos, para que
-            # el efecto de los factores y el de la calidad se
-            # puedan separar en vez de ir mezclados.
+            #
+            #     Y DE LA MISMA VISTA QUE EL ONCE (28/10/2026): el
+            #     once de la vara vieja se anoto en la misma
+            #     entrada y a la misma hora que el nuestro, asi que
+            #     va con el a la ronda que jugo.
             "puntos_por_vara": {
                 nombre: _puntos_del_once(
-                    puntos, (datos or {}).get("players")
+                    puntos_ronda, (datos or {}).get("players")
                 )
                 for nombre, datos in (
-                    actual.get("onces_por_vara") or {}
+                    asignado.get("onces_por_vara") or {}
                 ).items()
             },
 
             "puntos_vara_vieja": _puntos_del_once(
-                puntos,
-                (actual.get("once_alternativo") or {}).get(
+                puntos_ronda,
+                (asignado.get("once_alternativo") or {}).get(
                     "players"
                 ),
             ),
             "formacion_vara_vieja": (
-                (actual.get("once_alternativo") or {}).get(
+                (asignado.get("once_alternativo") or {}).get(
                     "formation"
                 )
             ),
 
             "puntos_biwenger": mios,
+            "puntos_biwenger_fuente": fuente_verdad,
             "puntos_biwenger_acumulado": next(
                 (
                     safe_int(f.get("points"))
@@ -2026,12 +3551,11 @@ def marcador(calendario: dict | None = None) -> dict:
             #     cuadre no es falso: es que NO ES MEDIBLE, y
             #     eso se dice con un `None`, no con un `true`.
             #
-            #     La fila sigue siendo `medible`: la resta de
-            #     totales SI funciono. Lo que no se puede medir
-            #     es el cuadre.
+            #     Y SIN VERDAD TAMPOCO (28/10/2026): una ronda que
+            #     Biwenger no cerro no cuadra ni descuadra.
             "cuadra": (
                 None
-                if not completa
+                if not completa or (mios is None and motivo_sin_verdad)
                 else (
                     mios is not None
                     and mios == puntos_alineados
@@ -2045,9 +3569,21 @@ def marcador(calendario: dict | None = None) -> dict:
                     else "Cuadre no medible: la reconstruccion "
                          "del once quedo incompleta."
                 )
+                + (
+                    f" Con los que constan suman {puntos_alineados}; "
+                    f"Biwenger pago {mios}."
+                    if mios is not None and faltan
+                    else ""
+                )
                 if not completa
-                else None
+                else (
+                    f"Cuadre no medible: {motivo_sin_verdad}"
+                    if mios is None and motivo_sin_verdad
+                    else _por_que_no_cuadra(mios, puntos_alineados, aplazada)
+                )
             ),
+
+            "excepcion": " ".join(excepciones) or None,
 
             # CUANTO FALTA PARA CUADRAR (17/09/2026)
             #
@@ -2144,6 +3680,16 @@ def marcador(calendario: dict | None = None) -> dict:
         "jornadas_medibles": len(medibles),
         "jornadas_fiables": len(fiables),
         "jornadas_descartadas": len(medibles) - len(fiables),
+
+        # EL DESPLAZAMIENTO, CONTADO (28/10/2026): en cuantas
+        # filas el once que guardaba la entrada NO es el que jugo
+        # su ronda. Y contra que verdad se cuadra.
+        "jornadas_con_once_desplazado": len([
+            f for f in medibles if f.get("once_desplazado")
+        ]),
+        "verdad": (
+            VERDAD_DEL_TABLON if cierres else VERDAD_DE_LA_CLASIFICACION
+        ),
         "eficiencia_media": None,
         "diferencia_media": None,
         "diferencia_media_n": 0,
@@ -2231,8 +3777,10 @@ def marcador(calendario: dict | None = None) -> dict:
         elif resumen["jornadas_descartadas"]:
             resumen["veredicto"] = (
                 f"{resumen['jornadas_descartadas']} jornada(s) "
-                f"cerrada(s), pero ninguna cuadra con Biwenger: "
-                f"el once que anotamos no es el que jugo. Sin "
+                f"cerrada(s), pero ninguna cuadra con Biwenger "
+                f"({len([f for f in medibles if f.get('cuadra') is False])} "
+                f"no cuadran y el resto no se pueden cuadrar: cada "
+                f"fila dice por que). Sin "
                 f"nota hasta que coincidan — ni eficiencia media "
                 f"ni diferencia con la liga: las dos se quedan "
                 f"sin valor a proposito, porque una media de "
@@ -2347,7 +3895,12 @@ def _veredicto(eficiencia, cuantas: int) -> str:
 # ============================================================
 
 
-def estado_para_dashboard(calendario: dict | None = None) -> dict:
+def estado_para_dashboard(
+    calendario: dict | None = None,
+    eventos=None,
+    onces_congelados=None,
+    fotos_de_cierre=None,
+) -> dict:
     """El marcador tal y como lo consume la seccion MARCADOR.
 
     Se declara `available` siempre que se pueda leer el ledger,
@@ -2356,11 +3909,17 @@ def estado_para_dashboard(calendario: dict | None = None) -> dict:
 
     `calendario` entra por la puerta (regla 23): lo construye
     quien tiene la foto y el calendario de LaLiga delante, no
-    este modulo.
+    este modulo. Y lo mismo el tablon, los onces congelados y las
+    fotos de cierre (28/10/2026): ver `marcador()`.
     """
 
     try:
-        datos = marcador(calendario)
+        datos = marcador(
+            calendario,
+            eventos=eventos,
+            onces_congelados=onces_congelados,
+            fotos_de_cierre=fotos_de_cierre,
+        )
     except Exception as error:                      # noqa: BLE001
         return {
             "available": False,
