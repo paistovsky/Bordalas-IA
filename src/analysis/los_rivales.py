@@ -160,6 +160,14 @@ def los_rivales(
                     "icon": fila.get("icon"),
                     "is_us": bool(fila.get("is_us")),
                     "points": puntos,
+
+                    # DE DONDE SON ESOS PUNTOS Y DE CUANDO
+                    # (28/10/2026): de la clasificacion de Biwenger
+                    # o, si no vino, del perfil cacheado. Se pasan
+                    # tal cual; aqui no se decide nada con ellos.
+                    "points_source": fila.get("points_source"),
+                    "points_as_of": fila.get("points_as_of"),
+
                     "balance": safe_int(fila.get("balance")),
                     "roster_value": valor,
                     "net_worth": safe_int(fila.get("net_worth")),

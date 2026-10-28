@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from src.biwenger import cache_del_reset as cache
@@ -27,8 +27,15 @@ def collect_league_snapshot() -> None:
 
     guardada = cache.leer("jornada")
 
+    # LA HORA DE LA CLASIFICACION (28/10/2026)
+    #
+    #     `rounds/league` trae tambien la clasificacion, y de la
+    #     cache sale con la hora en que se pidio, no con la de la
+    #     foto. Se apunta para que la pantalla diga de cuando son
+    #     los puntos y el valor que pinta. Epoch, sin dudas de zona.
     if guardada["fresco"]:
         rounds_data = guardada["valor"]
+        rounds_as_of = guardada.get("guardado_en")
         print("  (de la cache: no cambia entre resets)")
 
     else:
@@ -37,6 +44,7 @@ def collect_league_snapshot() -> None:
         )
         rounds.raise_for_status()
         rounds_data = rounds.json()
+        rounds_as_of = int(datetime.now(timezone.utc).timestamp())
 
         cache.escribir("jornada", rounds_data)
 
@@ -187,6 +195,7 @@ def collect_league_snapshot() -> None:
         "league": league,
 
         "rounds": rounds_data,
+        "rounds_as_of": rounds_as_of,
 
         # El once de la jornada que viene, leido donde se escribe.
         "user_lineup": user_lineup,

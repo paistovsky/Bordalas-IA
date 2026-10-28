@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from src.biwenger import cache_del_reset as cache
@@ -149,12 +149,23 @@ def fetch_user_profiles(
             continue
 
         try:
-            profiles.append(
-                fetch_user_profile(
-                    client,
-                    int(user_id),
-                )
+            perfil = fetch_user_profile(
+                client,
+                int(user_id),
             )
+
+            # LA HORA DEL PERFIL (28/10/2026). El perfil se reutiliza
+            # de la cache hasta que el manager ficha o vende, y sus
+            # puntos no se enteran de que se cierra una jornada. Con
+            # la hora, la pantalla puede decir de cuando son cuando
+            # tiene que caer a ellos. Epoch, como `_fetch_error`: lo
+            # que empieza por `_` lo pone la casa, no Biwenger.
+            if isinstance(perfil, dict):
+                perfil["_fetched_at"] = int(
+                    datetime.now(timezone.utc).timestamp()
+                )
+
+            profiles.append(perfil)
 
         except Exception as error:
             profiles.append(
