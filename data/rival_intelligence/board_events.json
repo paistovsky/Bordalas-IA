@@ -218525,5 +218525,100 @@
         "amount": 3513500
       }
     ]
+  },
+  {
+    "event_id": "38018a12421d118ea199a861",
+    "date": 1793180908,
+    "type": "playerMovements",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "type": "position",
+        "player": 32135,
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          3,
+          2,
+          4
+        ]
+      },
+      {
+        "type": "position",
+        "player": 34196,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 43171,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 35851,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 41416,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 37723,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 37416,
+        "from": 3,
+        "to": [
+          3,
+          4
+        ]
+      },
+      {
+        "type": "position",
+        "player": 27960,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "leave",
+        "player": 33789,
+        "from": {
+          "id": 7,
+          "name": "Espanyol",
+          "slug": "espanyol"
+        }
+      }
+    ]
   }
 ]
