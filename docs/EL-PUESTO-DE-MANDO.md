@@ -352,6 +352,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **28/10 09:20 (comprobacion).** Vuelta de las 09:07: la orden retiro la
+  puja por Fortuno (CANCELAR_PUJA). Queda solo la de Nacho Perez (838.000).
+  Cierre EN_POSITIVO, caja de la J11 +580.975 y once de 11 con Cardona. La
+  mejora, con la caja en positivo, sigue en NADA (19 frenados por no subir).
+
 - **28/10 08:45 (supervision).** Reset de las 07:00: no entro ni salio
   nadie (no habia pujas vivas); saldo +1.418.975. **La ronda pujo a las
   07:19** (despues del reset, a +1 %) por Fortuno (POR, 1.830.000, +7 %) y
