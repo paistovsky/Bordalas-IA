@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E70 · 29/10/2026 17:36 de Madrid · E69 estaba mal: con la caja parada no se pierde casi nada
+### E70 · 29/10/2026 17:30 de Madrid · E69 estaba mal: con la caja parada no se pierde casi nada
 
 **Que paso:** el backtest del gestor de esta mañana (29/10 12:00: «la
 cartera con presupuesto fijo, NO»; los cohetes Osorio, Aitor, Mayol se los
