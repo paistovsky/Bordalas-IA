@@ -2723952,6 +2723952,27 @@
       "direction_hit": null,
       "magnitude_error_percent": null,
       "scored_at": null
+    },
+    "35770|PRENSA_MUNDO_DEPORTIVO|3|2026-10-29": {
+      "player_id": "35770",
+      "player_name": "Antony",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "UP",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 7420000,
+      "predicted_at": "2026-10-29T23:11:12.515530+00:00",
+      "due_at": "2026-11-01T23:11:12.515530+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
     }
   }
 }
