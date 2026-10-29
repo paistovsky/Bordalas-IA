@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **29/10 12:40 (un defensa suplente para cubrir a Cardona en la J11: NO).**
+  Plan + esceptico. Cardona (FF 50) juega el partido que abre la J11 y su
+  once sale a las ~20:00. La idea era fichar hoy un defensa del mercado
+  (llega el vie 07:00) para que entre si Cardona no es titular. El plan
+  proponia a Sadick (869.900; FF 70; caja tras el reset +549.075).
+  **Esceptico: NO.** (1) Todos bajan de precio: Pablo Ramon lleva 41 dias
+  cayendo (-47 %) y Sadick ~-1,2 %/dia; comprar y vender tras la J11
+  cuesta 40-96 mil. (2) La J11 da como mucho +1,1 pts (~33 mil); y si un
+  jugador al 50 % de FF juega el 82 % de las veces (E65), el cambio de por
+  la manana hasta resta. (3) El cambio automatico depende de que FF tenga
+  el once oficial antes de la vuelta de las 20:07 (otros viernes decidio a
+  las 20:09-20:11), y un cambio a mano hecho antes de que acabe esa vuelta
+  lo deshace Pepe. Con 12, si Yamal, Roberto o Boye salen «doubt», Pepe no
+  escribe el once. **Decision:** la J11 empieza con los 11 de ahora, saldo
+  1.418.975 y 0 pujas. El vie por la tarde no hay nada que tocar a mano. La
+  caja se gasta desde el mar 03/11 en un titular que suba, no en un
+  suplente que baja.
+
 - **29/10 12:00 (laboratorio de las 10:47: la cartera con presupuesto, NO).**
   **Rivales:** el reset ya en la supervision. Luismi vendio a las 06:14
   4 jugadores por 11,32 M (+2,3 % sobre valor, +504 mil sobre lo pagado),
