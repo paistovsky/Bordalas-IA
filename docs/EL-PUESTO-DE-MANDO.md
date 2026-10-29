@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 29/10/2026, 14:50 de Madrid (rafaga de las 14:15).
+Actualizado: 29/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **29/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2577 a #2584).
+  Saldo +1.418.975, 0 comprometido. Diez titulares y Cardona en duda (50 %).
+  Manana, cierre de la J11 (vie 30/10 21:00; plazo 15:00): turnos 12:45 y
+  12:50.
 
 - **29/10 14:15 (rafaga de la tarde, llego a las 14:44).** Ciclos: verdes
   (#2570 a #2577). Saldo +1.418.975, 0 comprometido, sin movimientos. El
