@@ -2467031,13 +2467031,13 @@
       "price_at_prediction": 2410000,
       "predicted_at": "2026-10-22T12:10:31.547195+00:00",
       "due_at": "2026-10-29T12:10:31.547195+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
-      "magnitude_error_percent": null,
-      "scored_at": null
+      "outcome": "HIT",
+      "price_at_outcome": 2270000,
+      "actual_direction": "DOWN",
+      "actual_percent": -5.809,
+      "direction_hit": true,
+      "magnitude_error_percent": 6.872,
+      "scored_at": "2026-10-29T12:11:00.220138+00:00"
     },
     "41413|PRENSA_MUNDO_DEPORTIVO|3|2026-10-22": {
       "player_id": "41413",
