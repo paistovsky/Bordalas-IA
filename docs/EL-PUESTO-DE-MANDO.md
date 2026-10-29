@@ -352,6 +352,31 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **29/10 22:30 (laboratorio de las 20:47: ¿quien va a subir?).**
+  **Rivales:** nada entre las 10:11 y las 20:11 (ni compras, ni ventas, ni
+  ofertas). Luismi sigue a **-4,48 M** reconstruido: necesita vender ~4,5 M
+  antes del vie 21:00. En las 9 jornadas normales llego a ~0 al empezar;
+  solo fallo en las dos partes aplazadas de la J6. Los demas, en positivo.
+  **Investigacion + esceptico (ADOPTA «nada nuevo»):** lo que predice la
+  subida a 7-14 dias es la subida de HOY en % del precio. Fuera de
+  muestra: «sube de verdad» acierta el 86 % (+10 % de media a 7 dias); si
+  sube un 2 % o mas, el 90 % (+23 %; mediana +17 %). Los que no suben
+  pierden un 5-7 % a la semana. Ni un modelo de 16 variables ni la
+  titularidad, los puntos, las compras de rivales o Comuniate mejoran eso.
+  Esa palanca ya esta en produccion (SOLO SI SUBE y los tramos de la
+  ronda). **Lo nuevo y serio:** los 42 de 42 jugadores del Computer que
+  «suben de verdad» se los llevo un manager, con +11,5 % de prima mediana
+  (+18 % si suben 2 % o mas), y a 7 dias valen lo mismo que lo pagado (media
+  +0,3 %, mediana -1,6 %). La subasta se come la ganancia: comprar al que
+  sube no da patrimonio si hay que pelearlo. Lo de Pollo es esa ley mas
+  pagar para ganar. **Para el gestor:** acerto la direccion 14 de 14 veces,
+  pero perdio con las primas: Roberto +15,2 % subiendo +1,2 %/dia, Boye
+  +12,2 % a +0,9 %, Kike +9,2 % por debajo del minimo de su tramo. Antes de
+  escribir una puja, mirar el tramo de subida (laboratorio 27/10).
+  **Aplicado:** nada en produccion (jueves). **Pendiente tras la J11:**
+  guardar en el artefacto las parejas de candidatos de la mejora
+  (la_mejora.json solo vive en la cache) para poder medirla.
+
 - **29/10 21:15 (rafaga de la noche).** Ciclos: verdes (#2577 a #2584).
   Saldo +1.418.975, 0 comprometido. Diez titulares y Cardona en duda (50 %).
   Manana, cierre de la J11 (vie 30/10 21:00; plazo 15:00): turnos 12:45 y
