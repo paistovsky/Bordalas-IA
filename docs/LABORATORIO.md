@@ -69,6 +69,46 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E69 · 29/10/2026 11:17 de Madrid · Lo que cuesta la caja parada
+
+**El caso:** Pepe tiene +1,42 M libres y no compra para revender desde el
+16/10 (la cartera, 0 compras). Las pujas a +1 % por los que suben >= 4 %
+se pierden siempre (hoy Nacho Perez y Fortuno). ¿Que habria hecho una
+regla sencilla con la caja que habia?
+**Regla probada:** cada dia, por cada jugador del escaparate del Computer
+que subio la vispera y vale menos de 1,5 M, pujar precio x 1,01 terminado
+en 9.900; se gana si en el tablon nadie pago mas; se vende al Computer el
+primer dia que no sube (precio x 1,007); tope de caja 1,4 M.
+**Datos:** escaparate (17/09-29/10), tablon e historial de precios.
+**Codigo:** `lab/caja/dinero_quieto.py`.
+
+    desde      compras ganadas   perdidas contra rival   resultado
+    17/09            6                    5              +1.934.140
+    16/10            1 (Cardona)          2                +943.050
+
+    las 6: Salinas -33 mil, Szczesny -28 mil, Osorio +589 mil,
+           Aitor Fernandez +950 mil, Villares +55 mil, Moi Gomez +401 mil
+
+**Lo que se aprende:**
+- **Con poca caja y prima corta, la regla gana: ~+1,9 M en seis semanas**
+  (~+0,3 M por semana), casi todo en tres compras baratas que se
+  dispararon. Las que salen mal pierden poco (-30 mil): el viaje se corta
+  el primer dia que no suben.
+- Se gana lo que nadie pelea (6 de 11): exactamente la mitad barata y
+  callada del mercado que E41/E57 describen.
+
+**Limites:** n = 6 compras, muy concentrado (tres hacen todo); supone que
+los rivales habrian pujado igual; no cuenta que la caja de la jornada
+manda (cada compra debe dejar la J en verde, E36/E47); Cardona ya es de
+Pepe (la compra de verdad fue del dueño).
+
+**Veredicto: AVISO, con cautela.** El dinero quieto tiene coste: con la
+caja de la jornada cubierta, pujar a +1 % (9.900) por los baratos que suben
+gana de media. Es lo que hace «la ronda solo lo que paga» (apagada desde
+el 28/10, con prima de la cartera y solo <1 M que suben >= 2 %); cuando el
+gestor la mida, que mire tambien esta version mas ancha (<1,5 M, cualquier
+subida, +1 %).
+
 ### E68 · 28/10/2026 17:18 de Madrid · Vender antes del reset que renueva la oferta: gana poco
 
 **El caso:** Luismi vendio hoy a las 05:27, antes del reset, y saco +9,8 %
