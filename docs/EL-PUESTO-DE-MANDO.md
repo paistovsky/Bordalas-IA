@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 29/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 29/10/2026, 14:50 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **29/10 14:15 (rafaga de la tarde, llego a las 14:44).** Ciclos: verdes
+  (#2570 a #2577). Saldo +1.418.975, 0 comprometido, sin movimientos. El
+  chat del dueno decidio no fichar suplente para Cardona (revisado con un
+  esceptico). Manana vie 30/10, cierre de la J11: turnos a las 12:45
+  (chat del dueno) y 12:50 (yo).
 
 - **29/10 12:40 (un defensa suplente para cubrir a Cardona en la J11: NO).**
   Plan + esceptico. Cardona (FF 50) juega el partido que abre la J11 y su
