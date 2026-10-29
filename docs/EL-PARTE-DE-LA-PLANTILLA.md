@@ -35,6 +35,27 @@ Ventanas de la J11 (vie 30/10 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 04:50 (40 h). Despues, solo lo que
 pague la caja entera.
 
+## 29/10/2026, 19:15 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
+
+| Jugador | Veredicto | J11 % | J11 (Madrid) | Fuente | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 90 | Villarreal-Espanyol, vie 21:00 | FF 90; Inigo (29/10): «el resto esta disponible» | = |
+| Kike Salas (DEF) | TITULAR | 88 | Getafe-Sevilla, dom 14:00 | FF 90; fuera de la Copa de esta noche por descanso | = |
+| Chust (DEF) | TITULAR | 92 | Elche-Valencia, dom 18:30 | FF 90; previa FF con el | = |
+| Gaya (DEF) | TITULAR | 84 | Elche-Valencia, dom 18:30 | FF 80; entreno con el grupo | = |
+| **Sergi Cardona (DEF)** | **DUDA** | **50** | Villarreal-Espanyol, vie 21:00 | FF 50 tras la rueda de prensa: Romero «recuperado» (FF 16:16), pero FF y JP dan ventaja a Cardona; Comuniate 60 -> 50 | = |
+| Olasagasti (MED) | TITULAR | 85 | Levante-Atletico, sab 14:00 | FF 80; la rueda de prensa de Castro aun no se ha dado | = |
+| Pablo Ibanez (MED) | TITULAR | 84 | Barcelona-Alaves, sab 21:00 | FF 80; El Correo: Quique «modulara las cargas» (riesgo de minutos, no de banquillo) | = |
+| Unai Lopez (MED) | TITULAR | 82 | Rayo-Celta, sab 16:15 | FF 70; FF: «plaza bien encaminada»; Ciss sancionado | = |
+| Yamal (DEL) | TITULAR | 95 | Barcelona-Alaves, sab 21:00 | FF 95, sin rotaciones | = |
+| Roberto Fernandez (DEL) | TITULAR | 87 | Villarreal-Espanyol, vie 21:00 | FF 90 tras la rueda de prensa del interino; unico 9 sano | 85 -> 87 |
+| Boye (DEL) | TITULAR | 88 | Barcelona-Alaves, sab 21:00 | FF 90; el golpe, sin novedad | = |
+
+**Caja J11:** +1.418.975 y 0 pujas. Once guardado: 11/11, coincide con el
+recomendado. **Hecho:** nada; no hay riesgo nuevo. Cardona sigue
+siendo una moneda al aire. Esta manana se decidio no fichar suplente (ver
+la bitacora de las 12:40). El vie por la tarde no hay nada que tocar a mano.
+
 ## 28/10/2026, 19:15 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
 
 (La Copa no puntua para nosotros. Hoy el RFEF aplazo los 24 partidos de
