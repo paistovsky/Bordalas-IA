@@ -220145,5 +220145,24 @@
         ]
       }
     ]
+  },
+  {
+    "event_id": "c897de495bb294a97e78ad1b",
+    "date": 1793271696,
+    "type": "playerMovements",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "type": "join",
+        "player": 38236,
+        "team": {
+          "id": 7,
+          "name": "Espanyol",
+          "slug": "espanyol"
+        }
+      }
+    ]
   }
 ]
