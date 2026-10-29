@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **29/10 08:30 (supervision).** Reset de las 07:00: perdimos a **Nacho
+  Perez** (838.000, +1 %). Se lo llevo Mex a 930.000 (+12 %), con
+  Manzagool a +7,7 % y Luismi a +1,4 %. **Fortuno** (nuestra puja estaba
+  retirada) se lo llevo Luismi a 2.256.000 (+23 %); Pollo pujo +19 %. Las
+  dos confirman el laboratorio del 27/10: a +1 % sobre uno que sube >= 4 %
+  no se gana nunca. Pollo compro a Gabriel Jesus (6.077.000). Luismi vendio
+  al Computer a las 05:14 a Raba, Catena, Fornals y Recio (11,3 M), para
+  salir del rojo antes de la J11. **Nosotros:** 0 pujas vivas, saldo
+  +1.418.975, cierre EN_POSITIVO, once 11/11 con Cardona (FF 50). Mejora,
+  ronda, chollos y orden en NADA. **Orden limpia:** fuera De Haas, Sadick,
+  Lejeune y Fortuno de `no_pujar` (queda Manu Sanchez). Lista de objetivos:
+  ninguno en el mercado hoy.
+
 - **29/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2561 a #2570,
   la de las 07:15 incluida). Reset: **Nacho Perez PERDIDO** (838.000
   contra 930.000) y Fortuno (ya retirada) se lo llevo otro por 2.256.000.

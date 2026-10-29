@@ -9,26 +9,6 @@
       "player_id": 1721,
       "nombre": "Manu Sánchez",
       "por_que": "17/10, el gestor: el motor viejo (ACQUISITION_BOARD, XI_UPGRADE) pujó 1.778.494 (+7,8 % sobre 1.650.000) con el colchón de la cartera en -432.317. Ganada, la caja quedaría en -2,21 M a 4 días del aplazado del 21/10 (que es plazo de caja) y no mejora el once: 3,5 pts/partido, como Jonny (3,57) y Chust (3,63). Se retira; vuelve a ser candidato cuando la caja lo pague."
-    },
-    {
-      "player_id": 30334,
-      "nombre": "Fortuño",
-      "por_que": "28/10, el gestor: la ronda pujó 1.848.000 (+1 %) a las 07:19, despues del reset. Ganada el jue 07:00, la J11 (vie 21:00) empezaría en -1.267.025 y solo se salvaría si el Computer ofrece por él en el reset del vie 07:00: no hay plan B (el cierre no vende titulares). Dos revisores (traza + equipo rojo) piden retirarla; la de Nacho Pérez se queda (sola deja +580.975). Se quita después de que empiece la J11."
-    },
-    {
-      "player_id": 42271,
-      "nombre": "De Haas",
-      "por_que": "28/10, el gestor (laboratorio 10:47): si FF baja a Sergi Cardona de 50 antes del jue 05:00, la mejora lo trata como hueco y lo cambiaria por un defensa del mercado de hoy, vendiendo a Cardona a la oferta del Computer (1.589.600, -8 % de su valor). Ninguno pasa el liston del relevo (FF J11 >= 80 y +1 pt sobre Cardona): De Haas FF 70 rotacion, Sadick FF 70 rotacion, Lejeune 2,0 pts/partido; los tres bajan de precio. Se quitan el jue 08:22 (el mercado cambia en el reset)."
-    },
-    {
-      "player_id": 43267,
-      "nombre": "Sadick",
-      "por_que": "28/10, el gestor (laboratorio 10:47): si FF baja a Sergi Cardona de 50 antes del jue 05:00, la mejora lo trata como hueco y lo cambiaria por un defensa del mercado de hoy, vendiendo a Cardona a la oferta del Computer (1.589.600, -8 % de su valor). Ninguno pasa el liston del relevo (FF J11 >= 80 y +1 pt sobre Cardona): De Haas FF 70 rotacion, Sadick FF 70 rotacion, Lejeune 2,0 pts/partido; los tres bajan de precio. Se quitan el jue 08:22 (el mercado cambia en el reset)."
-    },
-    {
-      "player_id": 2476,
-      "nombre": "Lejeune",
-      "por_que": "28/10, el gestor (laboratorio 10:47): si FF baja a Sergi Cardona de 50 antes del jue 05:00, la mejora lo trata como hueco y lo cambiaria por un defensa del mercado de hoy, vendiendo a Cardona a la oferta del Computer (1.589.600, -8 % de su valor). Ninguno pasa el liston del relevo (FF J11 >= 80 y +1 pt sobre Cardona): De Haas FF 70 rotacion, Sadick FF 70 rotacion, Lejeune 2,0 pts/partido; los tres bajan de precio. Se quitan el jue 08:22 (el mercado cambia en el reset)."
     }
   ],
   "vender_si_ficha": {
