@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 29/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **29/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2561 a #2570,
+  la de las 07:15 incluida). Reset: **Nacho Perez PERDIDO** (838.000
+  contra 930.000) y Fortuno (ya retirada) se lo llevo otro por 2.256.000.
+  Saldo **+1.418.975** a las 07:20, 0 comprometido. La J11 (manana vie
+  30/10, plazo 15:00) cubierta con margen. Jueves: no se enciende nada.
 
 - **28/10 23:00 (laboratorio de las 20:47 + el patrimonio del mes).**
   **Rivales:** nada desde las 10:11 (ni compras, ni ventas, ni ofertas).
