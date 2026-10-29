@@ -58,17 +58,23 @@ if __name__ == "__main__":
                 abiertos.remove(v)
         libre = tope - sum(v["coste"] for v in abiertos)
         for j in sorted(r["players"], key=lambda j: j["price"]):
-            p0, p_1 = P.en(j["id"], d), P.en(j["id"], d - D)
+            # El escaparate del dia d se escribe ~05:20 UTC, justo despues del
+            # reset: es la lista del dia anterior, cuya subasta YA se resolvio en
+            # ese reset (dia de mercado d). Corregido el 29/10 tras E69.
+            p0, p_1 = P.en(j["id"], d - D), P.en(j["id"], d - 2 * D)
             if not (p0 and p_1) or p0 <= p_1 or p0 >= 1.5e6:
                 continue
             puja = int(p0 * 1.01) // 10_000 * 10_000 + 9_900
             if puja > libre:
                 continue
-            otro = ganador.get((j["id"], d + D))
+            # una salida del Computer dura dos dias (E61): la subasta puede
+            # resolverse en este reset o en el siguiente
+            otros = [ganador.get((j["id"], d)), ganador.get((j["id"], d + D))]
+            otro = max((o for o in otros if o is not None), default=None)
             if otro is not None and otro >= puja:
                 perdidas += 1
                 continue
-            v = viaje(P, j["id"], d + D, puja)
+            v = viaje(P, j["id"], d, puja)
             if v is None:
                 continue
             res, vende = v

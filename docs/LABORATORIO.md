@@ -69,7 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E69 · 29/10/2026 11:17 de Madrid · Lo que cuesta la caja parada
+### E70 · 29/10/2026 17:36 de Madrid · E69 estaba mal: con la caja parada no se pierde casi nada
+
+**Que paso:** el backtest del gestor de esta mañana (29/10 12:00: «la
+cartera con presupuesto fijo, NO»; los cohetes Osorio, Aitor, Mayol se los
+llevaron rivales a +16-56 %) contradecia E69. Lo he comprobado en el
+tablon y **E69 tenia dos errores de fechas**:
+1. El escaparate del dia d se escribe a las ~05:20 UTC, **justo despues
+   del reset**: es la lista del dia anterior, ya resuelta. E69 la trataba
+   como la lista que se resuelve mañana.
+2. Una salida del Computer **dura dos dias** (E61): la subasta se resuelve
+   al final, no en el primer reset. E69 daba por ganada la puja si nadie
+   se lo llevaba el primer dia. Asi «gano» a Osorio y a Aitor, que Luismi
+   compro a +54 % y +56 %.
+**Codigo:** `lab/caja/dinero_quieto.py`, corregido (fechas y dos dias).
+
+    misma regla (+1 %, 9.900, <1,5 M que suben, tope 1,4 M), bien contada:
+    desde 17/09:  3 ganadas, 18 perdidas contra un rival   ->  +69.830
+    desde 16/10:  0 ganadas                                ->       0
+
+**Lo que se aprende:** **E69 no vale.** Pujar +1 % por los baratos que
+suben gana 3 de 21 y deja +70.000 en seis semanas: la caja parada no
+cuesta casi nada en reventa. Lo que importa ya lo decia el gestor: el
+mismo dinero rinde mas en el once (E48: ~0,7-1,0 pts por millon).
+
+**Leccion para el laboratorio:** con el escaparate, la subasta de la
+lista del dia d ya se resolvio en el reset del dia d, y puede resolverse
+tambien en el del d+1. Los experimentos que usaron el escaparate con la
+fecha de otra forma (E46, E61) hay que mirarlos: E61 (cuanto dura en la
+lista) no depende de esto; E46 (la rotacion) si podria: queda apuntado.
+
+**Veredicto: ANULA E69.** Coincide con el gestor: no se aparta caja para
+revender; la caja va al once.
+
+### E69 · 29/10/2026 11:17 de Madrid · Lo que cuesta la caja parada (ANULADO por E70: error de fechas)
 
 **El caso:** Pepe tiene +1,42 M libres y no compra para revender desde el
 16/10 (la cartera, 0 compras). Las pujas a +1 % por los que suben >= 4 %
