@@ -352,6 +352,28 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **29/10 12:00 (laboratorio de las 10:47: la cartera con presupuesto, NO).**
+  **Rivales:** el reset ya en la supervision. Luismi vendio a las 06:14
+  4 jugadores por 11,32 M (+2,3 % sobre valor, +504 mil sobre lo pagado),
+  pero sigue con la caja en **-4,48 M** reconstruida: si no vende ~4,5 M
+  antes del vie 21:00, hace 0 en la J11. Suele arreglarlo a ultima hora;
+  la J6 la perdio. Patrimonio: Pollo 116,0, Luismi 97,7, Manzagool 67,2,
+  nosotros 59,6. Ojo: el «once guardado» de los rivales en el panel es el
+  de la J10 congelado, no el de la J11 (el nuestro sale ahi con 10 y en
+  Biwenger tenemos 11). **La cartera con presupuesto fijo (lo que propuse
+  ayer al dueno): NO.** Backtest 17/09-28/10 (820 dias de mercado) y un
+  esceptico que lo rehizo con su propio codigo: la regla «solo lo que
+  paga» habria hecho 2 viajes en 6 semanas (+157 mil, todo de Rosier en
+  septiembre; en octubre, -29 mil). Con los demas filtros del codigo, 0
+  compras. Variantes mas amplias: +224-342 mil, pero siempre negativas en
+  octubre y colgadas de una sola subasta. Los cohetes (Mayol, Osorio,
+  Aitor) se los llevaron rivales pagando +16 a +56 %. **El mismo dinero en
+  el once o el banquillo rinde ~0,55-0,65 pts/jornada por millon (17-20
+  mil/jornada) y gano en la segunda mitad.** Decision: no se aparta caja
+  para la cartera. Prueba sin coste solo en el parón (07-17/11) con caja
+  libre y <= 1 M, apuntando cada puja. **Corrige** lo que dije ayer al
+  dueno («merece la pena el presupuesto»).
+
 - **29/10 08:30 (supervision).** Reset de las 07:00: perdimos a **Nacho
   Perez** (838.000, +1 %). Se lo llevo Mex a 930.000 (+12 %), con
   Manzagool a +7,7 % y Luismi a +1,4 %. **Fortuno** (nuestra puja estaba
