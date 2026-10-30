@@ -352,6 +352,28 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **30/10 10:00 (supervision, dia de la J11).** Reset de las 07:00: **los
+  chollos ganaron a Ramon Enriquez** (MED, Malaga, 369.000; vale ya
+  390.000, sube). Saldo **+1.049.975**, 0 pujas: la J11 empieza en
+  positivo. El once escrito pasa a 3-4-3 con Ramon (FF 70) y Cardona (FF
+  50) al banquillo. Si FF publica el once del Villarreal con Cardona antes
+  de la vuelta de las 20:07, Pepe lo vuelve a meter. Los chollos no venden
+  con la jornada en juego (solo publican): Ramon juega la J11 con nosotros
+  (Betis-Malaga, sab 18:30). Es el suplente que ayer se descarto por caro,
+  pero gratis, porque sube. Luismi compro a Oyarzabal por 10.541.000 con la
+  caja reconstruida en -4,48 M: tiene que vender ~15 M antes de las 21:00
+  o hace 0. **Lista de objetivos: sale Ndukwe** (1,29 M, sube 1,55 %, 4,67
+  pts/partido). Plan + esceptico: **no se puja**. Es el 4.o central en FF
+  (su 80 % depende de que falte Dela), la subida se apaga y aporta menos de
+  +1 pt sobre Gaya. Una puja viva a las 21:00 dejaria la J11 en rojo; tras
+  el cierre se podria, pero no compensa. **Hallazgo:** a las 21:07, ya con
+  la J12 a 168 h, la ronda (cartera) pujaria 5,08 M: Ndukwe 1.349.900,
+  Febas 2.729.900, Macia 779.900 y Angel Ortiz 219.900. Si no, la mejora se
+  llevaria a Ndukwe vendiendo a Gaya. **Hecho:** Ndukwe y Febas a
+  `no_pujar` (los dos suben menos del 2 %: revenderlos pierde, probado el
+  27/10). Macia (+9,5 %) y Ortiz (+5,6 %), por debajo de 1 M, se dejan:
+  entran en la regla buena. Quitar los dos vetos cuando salgan del mercado.
+
 - **30/10 07:15 (rafaga de la manana, DIA DEL CIERRE DE LA J11).** Ciclos:
   verdes (#2584 a #2593, la de las 07:15 incluida). Reset: **Ramon
   Enriquez GANADO** (369.000; 12 en plantilla). Saldo **+1.049.975** a las
