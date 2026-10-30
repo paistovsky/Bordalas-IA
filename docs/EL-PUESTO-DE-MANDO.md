@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 29/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 30/10/2026, 07:30 de Madrid (rafaga de las 07:15, dia de la J11).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **30/10 07:15 (rafaga de la manana, DIA DEL CIERRE DE LA J11).** Ciclos:
+  verdes (#2584 a #2593, la de las 07:15 incluida). Reset: **Ramon
+  Enriquez GANADO** (369.000; 12 en plantilla). Saldo **+1.049.975** a las
+  07:18, 0 comprometido: el plazo de las 15:00 cubierto. Turnos de hoy:
+  12:45 (chat del dueno) y 12:50 (yo). Viernes: no se enciende nada.
 
 - **29/10 22:30 (laboratorio de las 20:47: ¿quien va a subir?).**
   **Rivales:** nada entre las 10:11 y las 20:11 (ni compras, ni ventas, ni
