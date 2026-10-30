@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E72 · 30/10/2026 17:25 de Madrid · E63 fuera de muestra con la J10: se cumple
+### E72 · 30/10/2026 17:22 de Madrid · E63 fuera de muestra con la J10: se cumple
 
 **Hipotesis:** lo de E63 (el precio va una semana por detras de los
 puntos; entre los que suben el martes, los que hicieron 8+ suben el
