@@ -352,6 +352,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **30/10 11:00 (laboratorio de las 10:47, dia de la J11: solo medir).**
+  **Rivales:** solo el reset. Luismi compro a **Oyarzabal** por 10.541.000
+  (+9,6 % sobre 9,62 M; perdieron Manzagool a +8,6 % y Pollo a +5,1 %).
+  Sin ventas suyas desde entonces: su caja reconstruida queda en **~-15,0
+  M** (-4,48 M - 10,54 M). O vende ~15 M antes de las 21:00, o hace 0 en
+  la J11. Los demas, en positivo (Pollo +6,7 M). **Nuestras tacticas:**
+  los chollos funcionaron como estaban pensados: Ramon Enriquez comprado
+  por debajo de su valor (369.000; vale 390.000 y sube), y de paso es el
+  suplente del once. **Aplicado hoy:** los vetos de Ndukwe y Febas
+  (10:00). Nada mas: hoy no se construye.
+
 - **30/10 10:00 (supervision, dia de la J11).** Reset de las 07:00: **los
   chollos ganaron a Ramon Enriquez** (MED, Malaga, 369.000; vale ya
   390.000, sube). Saldo **+1.049.975**, 0 pujas: la J11 empieza en
