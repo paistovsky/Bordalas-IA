@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 30/10/2026, 15:10 de Madrid (rafaga de las 14:15, llego a las 15:07).
+Actualizado: 30/10/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **30/10 21:15 (rafaga de la noche; la J11 ya ha empezado).** Ciclos:
+  verdes (#2601 a #2606; #2607 de las 21:07 en marcha). Saldo +1.049.975
+  al empezar la J11: puntua. Once 11/11 titulares (Cardona dentro, segun
+  la mirada de las 20:20). Si Luismi no vendio, empieza la J11 en -15 M y
+  hace 0. Nada que tocar en viernes; manana sabado, sin construir nada
+  hasta ver la J11.
 
 - **30/10 20:50 (laboratorio de las 20:47, minutos antes de la J11).**
   **Rivales:** ningun movimiento en el tablon desde el reset de las 07:05.
