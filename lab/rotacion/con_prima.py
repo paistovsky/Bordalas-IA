@@ -65,12 +65,16 @@ if __name__ == "__main__":
     for linea in open(ESCAPARATE):
         r = json.loads(linea)
         dia = dt.date.fromisoformat(r["dia_de_mercado"])
+        # Corregido el 30/10 (E71): el escaparate del dia d se escribe tras el
+        # reset; es la lista de la vispera, cuya puja se hizo con el precio de
+        # d-1 y sabiendo solo la subida de d-1 (antes miraba la del propio
+        # reset: dato del futuro). Se compra en el reset de d.
         for j in r["players"]:
-            t1 = pct(P.en(j["id"], dia), P.en(j["id"], dia - D))
+            t1 = pct(P.en(j["id"], dia - D), P.en(j["id"], dia - 2 * D))
             if t1 is None or t1 <= 0:
                 continue
-            p0 = P.en(j["id"], dia)
-            viajes.append((t1, j["id"], dia + D, p0))
+            p0 = P.en(j["id"], dia - D)
+            viajes.append((t1, j["id"], dia, p0))
     print(f"Candidatos que suben en el escaparate: {len(viajes)} (31 dias)\n")
     # tasa de victoria por prima y tramo de subida (E41, tablon)
     GANA = {"<2%": {0.01: 0.41, 0.03: 0.47, 0.05: 0.58, 0.08: 0.76, 0.12: 0.88},

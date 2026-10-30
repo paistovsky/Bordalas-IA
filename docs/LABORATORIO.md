@@ -69,6 +69,41 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E71 · 30/10/2026 11:18 de Madrid · E46 (la rotacion) revisado tras el error de E69: se aguanta
+
+**Por que:** E70 encontro que el escaparate se escribe justo despues del
+reset (es la lista de la vispera, ya resuelta) y E70 dejo apuntado mirar
+E46, que tambien lo usa. **Habia el mismo fallo, y otro peor:** E46
+elegia «los que suben» mirando la subida del PROPIO reset que resuelve la
+puja (un dato que al pujar aun no existe) y compraba al precio de despues.
+**Arreglo:** la subida que cuenta es la de la vispera, la puja se hace al
+precio de la vispera y se compra en el reset del dia. Mismo resto (tasas
+de victoria de E41, viaje hasta el primer dia sin subir, deriva del que
+lleva 2 dias sin subir). Ahora con 39 dias de escaparate (107 candidatos).
+**Codigo:** `lab/rotacion/con_prima.py` (corregido).
+
+    prima fija   subio <2 % (n=51)          subio >=2 % (n=20)
+                 se gana   cambio            se gana   cambio
+    +1 %          41 %     +4,4 %             2 %     +26,7 %
+    +5 %          58 %     +0,5 %            17 %     +22,0 %
+    +8 %          76 %     -2,2 %            28 %     +18,8 %
+    +12 %         88 %     -5,6 %            43 %     +14,7 %
+
+    con las primas de la cartera por precio: positivo en las 5 casillas
+    (<2 %: +4,2 / +2,0 / +3,1 %; >=2 %: +20,5 / +22,6 %)
+
+**Lo que se aprende:** **las conclusiones de E46 se mantienen** (incluso
+algo mejores): con las primas por precio la rotacion gana en todos los
+tramos; una prima fija alta pierde en los que suben poco (desde +8 %);
+casi todo lo da vender al que cae (-0,7 % al dia). La «se gana» sigue
+saliendo del tablon (E41), y E70 recuerda que los cohetes baratos se los
+llevan rivales a +16-56 %: en el tramo >= 2 % la ganancia es de pocas
+pujas ganadas.
+
+**Veredicto: SE AGUANTA E46** con los datos bien fechados. Revisados los
+demas que usan el escaparate: E61 (cuanto dura en la lista, no depende de
+la fecha) y E41/E49/E57 (usan el tablon con su fecha de resolucion, bien).
+
 ### E70 · 29/10/2026 17:30 de Madrid · E69 estaba mal: con la caja parada no se pierde casi nada
 
 **Que paso:** el backtest del gestor de esta mañana (29/10 12:00: «la
