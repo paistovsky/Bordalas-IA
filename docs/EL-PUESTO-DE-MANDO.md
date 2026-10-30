@@ -352,6 +352,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **30/10 21:30 (J11 empezada).** A las 21:00 el saldo era 1.049.975 y
+  no habia pujas: puntuamos la J11. **Once fijado** (3-4-3, leido de
+  Biwenger a las 21:10): Gulacsi; Chust, Kike Salas, Cardona (titular en
+  el Villarreal-Espanyol); Olasagasti, Pablo Ibanez, Unai Lopez, Ramon
+  Enriquez; Yamal, Roberto Fernandez, Boye. Gaya, en el banquillo: el
+  cambio opcional no se hizo. **Vuelta de las 21:07 (verde):** la ronda
+  pujo solo por Macia (709.900) y Angel Ortiz (219.900). Ndukwe y Febas,
+  vetados, sin puja; mejora, orden y chollos en NADA. **Caja J12** (vie
+  06/11 21:00): si se ganan las dos en el reset del sab, el saldo queda en
+  ~120.175, y el mar entra el premio de la J11 (30 mil/pt). Holgado. **Sab
+  08:22:** quitar los vetos de Ndukwe y Febas si ya no estan en el mercado.
+
 - **30/10 21:15 (rafaga de la noche; la J11 ya ha empezado).** Ciclos:
   verdes (#2601 a #2606; #2607 de las 21:07 en marcha). Saldo +1.049.975
   al empezar la J11: puntua. Once 11/11 titulares (Cardona dentro, segun
