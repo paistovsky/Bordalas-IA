@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E71 · 30/10/2026 11:18 de Madrid · E46 (la rotacion) revisado tras el error de E69: se aguanta
+### E71 · 30/10/2026 11:15 de Madrid · E46 (la rotacion) revisado tras el error de E69: se aguanta
 
 **Por que:** E70 encontro que el escaparate se escribe justo despues del
 reset (es la lista de la vispera, ya resuelta) y E70 dejo apuntado mirar
