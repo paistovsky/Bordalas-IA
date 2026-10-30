@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **30/10 20:20 (segunda mirada del cierre de la J11).** Once oficial
+  del Villarreal (ESPN): **Cardona TITULAR**; Romero, suplente. Gulacsi y
+  Roberto, titulares. La vuelta de las 20:07 (verde) vio a Cardona al 100 %
+  y escribio SAVE_LINEUP: 3-4-3 con Cardona y Ramon Enriquez; **Gaya al
+  banquillo**, no Ramon. Saldo 1.049.975 y 0 pujas: la J11 empieza en
+  positivo. **Choque de modelos:** el once escrito (vara sin calendario)
+  pone a Ramon (0,39) por delante de Gaya (0,36). El xP del cierre (con
+  calendario) pone a Gaya 2,53 y deja fuera a Ramon. Pts/partido: Gaya
+  3,38 y Ramon 2,44. FF: Gaya 80 en Elche y Ramon 70 en el Betis.
+  Propuesto al dueno como cambio opcional a mano antes de las 20:59: Gaya
+  por Ramon (4-3-3). Pendiente tras la J11: que el once escrito use el
+  mismo xP con calendario que el cierre (EL_ONCE_MIRA_EL_CALENDARIO).
+
 - **30/10 14:15 (rafaga de la tarde, llego a las 15:07).** Ciclos: verdes
   (#2598 a #2600; #2601 de las 15:07 en marcha). Saldo +1.049.975 a las
   14:11, 0 comprometido: **el plazo de las 15:00 de la J11 se ha pasado en
