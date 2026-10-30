@@ -352,6 +352,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **30/10 20:50 (laboratorio de las 20:47, minutos antes de la J11).**
+  **Rivales:** ningun movimiento en el tablon desde el reset de las 07:05.
+  Luismi, segun la reconstruccion de las 20:11, esta en **-15.021.618**
+  (compro a Oyarzabal sin vender nada). Si no vende antes de las 21:00,
+  hace 0 en la J11; lo vemos en el tablon de mañana. Pollo +6,7 M,
+  patrimonio 116,9 M. **Nuestras tacticas:** sin cambios desde la manana
+  (los chollos con Ramon; vetos de Ndukwe y Febas para las 21:07). Hoy no
+  se construye nada.
+
 - **30/10 20:20 (segunda mirada del cierre de la J11).** Once oficial
   del Villarreal (ESPN): **Cardona TITULAR**; Romero, suplente. Gulacsi y
   Roberto, titulares. La vuelta de las 20:07 (verde) vio a Cardona al 100 %
