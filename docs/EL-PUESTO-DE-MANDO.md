@@ -352,6 +352,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **30/10 12:50 (turno del cierre de la J11).** **Solvencia:** saldo
+  +1.049.975, 0 pujas (vueltas de 10:10, 11:10 y 12:10): pasa el plazo de
+  las 15:00 sin hacer nada. **Once:** 3-4-3 escrito en Biwenger, 11 «ok»
+  (70-95 %): Gulacsi; Chust, Kike Salas, Gaya; Olasagasti, Pablo Ibanez,
+  Unai Lopez, Ramon Enriquez; Yamal, Roberto Fernandez, Boye. Cardona (50)
+  en el banquillo. Kike Salas sale «VIGILAR» en el panel (Biwenger ok, FF
+  90). **Ciclos:** verdes todo el dia. **Calendario:** J11 vie 30/10
+  21:00 -> lun 02/11 21:00; J12 vie 06/11 21:00 (Sevilla-Alaves). El
+  aplazado Rayo-Athletic de la J8 sigue sin fecha. **Hecho:** segunda
+  mirada a las 20:15, tras la vuelta de las 20:07 (si Cardona es titular y
+  no esta en el once, cambio a mano antes de las 20:59); mirada de las
+  21:25 (once con el que empezamos y pujas de la ronda de las 21:07);
+  turno del cierre de la J12 (vie 06/11 12:45). Nada que hacer a mano.
+
 - **30/10 11:00 (laboratorio de las 10:47, dia de la J11: solo medir).**
   **Rivales:** solo el reset. Luismi compro a **Oyarzabal** por 10.541.000
   (+9,6 % sobre 9,62 M; perdieron Manzagool a +8,6 % y Pollo a +5,1 %).
