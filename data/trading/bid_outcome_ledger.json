@@ -1908,6 +1908,30 @@
    "margin": 408000,
    "event_id": "5a5e3964cd492250ad6efb03",
    "recorded_by": "TABLON"
+  },
+  "41411:2026-10-30T06:05:37+00:00": {
+   "player_id": 41411,
+   "player_name": "Ramón Enríquez",
+   "amount": 369000,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": null,
+   "recommended_bid": null,
+   "intent": null,
+   "target_source": "DESCONOCIDO",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-10-30T06:05:37+00:00",
+   "outcome": "WON",
+   "resolved_at": "2026-10-30T06:05:37+00:00",
+   "winning_amount": null,
+   "margin": 0,
+   "event_id": null,
+   "resolved_by": "EN_LA_PLANTILLA",
+   "recorded_by": "PLANTILLA",
+   "placed_at_is_resolution": true
   }
  }
 }
