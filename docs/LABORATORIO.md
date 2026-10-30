@@ -69,6 +69,37 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E72 · 30/10/2026 17:25 de Madrid · E63 fuera de muestra con la J10: se cumple
+
+**Hipotesis:** lo de E63 (el precio va una semana por detras de los
+puntos; entre los que suben el martes, los que hicieron 8+ suben el
+doble) se repite en una jornada que E63 no vio.
+**Datos:** J10 (bloque 23-26/10), 241 jugadores que jugaron (fuera
+Athletic, Rayo y Levante, como en E63); precio hasta hoy (3 dias despues
+del martes, no 6).
+**Codigo:** `lab/precio/tras_la_jornada.py` (añadida la J10; `DIAS_DESPUES`).
+
+    Spearman puntos de la J10 - cambio de precio de cada dia
+      vie +0,28  sab +0,33  dom +0,39  lun +0,65 | mar +0,65  mie +0,67  jue +0,67  vie +0,64
+
+    comprar al precio del martes y mirar 3 dias despues (mediana)
+                                  J8        J9        J10
+    subio el martes, 8+ pts      +3,7 %    +5,0 %    +6,7 %  (n=28)
+    subio el martes, <8 pts      +2,1 %    +3,0 %    +2,3 %  (n=71)
+    no subio                     -2,3 %    -2,2 %    -2,2 %
+
+**Lo que se aprende:** **se cumple igual:** con la jornada terminada, el
+precio sigue a los puntos de martes a viernes (+0,64 a +0,67) y, entre los
+que suben el martes, los de 8+ puntos suben el doble o el triple en tres
+dias. Tres jornadas de tres.
+
+**Limites:** 28 casos en el grupo bueno; y E64 sigue en pie: por esos
+jugadores hay pelea en la subasta (+9-13 % de prima).
+
+**Veredicto: CONFIRMA E63** (su linea de «Listo para el plan» queda
+igual: para el once, elegir entre los que suben al que mas puntuo; para
+revender, solo con prima corta).
+
 ### E71 · 30/10/2026 11:15 de Madrid · E46 (la rotacion) revisado tras el error de E69: se aguanta
 
 **Por que:** E70 encontro que el escaparate se escribe justo despues del

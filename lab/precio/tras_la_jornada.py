@@ -23,7 +23,9 @@ FOTO = RAIZ / "data/fotos/2026-09-18.json"
 FUERA = {1, 70, 10}  # aplazados y fotos a medias (E43/E45)
 # jornada: (antes, despues, primer dia del bloque, ultimo dia del bloque)
 J = {8: (7, 8, dt.date(2026, 10, 9), dt.date(2026, 10, 12)),
-     9: (8, 9, dt.date(2026, 10, 16), dt.date(2026, 10, 19))}
+     9: (8, 9, dt.date(2026, 10, 16), dt.date(2026, 10, 19)),
+     10: (9, 10, dt.date(2026, 10, 23), dt.date(2026, 10, 26))}
+DIAS_DESPUES = int(__import__("os").environ.get("DIAS_DESPUES", "7"))
 
 if __name__ == "__main__":
     L = {json.loads(l)["jornada"]: json.loads(l)["players"] for l in open(LIBRO)}
@@ -46,9 +48,9 @@ if __name__ == "__main__":
 
     # ¿Añaden algo los puntos a «subio ayer»? Compra el miercoles al precio del
     # martes (la puja del martes se resuelve el miercoles), vende el lunes.
-    print("\nComprar al precio del martes y mirar el lunes siguiente (6 dias):")
+    print(f"\nComprar al precio del martes y mirar {DIAS_DESPUES - 1} dias despues:")
     for j, (a, b, ini, fin) in J.items():
-        mar, lun = fin + dt.timedelta(days=1), fin + dt.timedelta(days=7)
+        mar, lun = fin + dt.timedelta(days=1), fin + dt.timedelta(days=DIAS_DESPUES)
         filas = []
         for pid in L[b]:
             if pid not in L[a] or L[b][pid][1] - L[a][pid][1] != 1 or equipo.get(pid) in FUERA:
@@ -62,4 +64,4 @@ if __name__ == "__main__":
                           ("no subio, 8+ pts", [f for f in filas if not f[1] and f[0] >= 8]),
                           ("no subio, <8 pts", [f for f in filas if not f[1] and f[0] < 8])):
             if g:
-                print(f"   J{j} {nombre:24} n={len(g):>3}  +6 dias: mediana {st.median(f[2] for f in g):+.1%}")
+                print(f"   J{j} {nombre:24} n={len(g):>3}  despues: mediana {st.median(f[2] for f in g):+.1%}")
