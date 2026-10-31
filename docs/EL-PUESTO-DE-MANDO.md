@@ -352,6 +352,48 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **31/10 22:30 (laboratorio de rivales de la noche). ENCENDIDO
+  `BORDALAS_SIN_SUBASTA`.** **Rivales:** ni una compra ni una venta desde
+  el reset de las 07:05; solo la racha de Pollo (+250 mil). Caja: Alvaro
+  17,7 M, Pollo 3,8 M, Prinzipote 3,3 M, Mex 2,5 M, Manzagool 1,0 M,
+  DiosMande 0,5 M, nosotros -0,94 M, Luismi -4,2 M (tiene que vender ~4,2 M
+  antes del vie o la J12 le da 0: esta semana saldran chollos suyos). J11
+  con los puntos por jugador de Biwenger (20:53, sin capitan): Pollo 33,
+  nosotros 25, Manzagool 24, Luismi 21; acumulado Pollo 465, nosotros 447.
+  Patrimonio: Pollo 117,7 M, Luismi 97,8 M, Manzagool 67,9 M, nosotros
+  60,0 M. **Lo aprendido:** (1) **Dani Lorenzo no lo compro la cartera:**
+  lo compro la cesta del reset del motor viejo (SUBASTA_CARTERA), que no
+  mira el colchon de la casa (habria sido ~1,18 M contra 2,03 M) ni lo
+  cerca que esta la jornada; el freno lo dio por SIN_DEUDA porque no ve la
+  cesta ni las pujas vivas. Nos llevo de +1,30 M a -0,94 M. Su historial
+  desde el 22/09: 2 pujas, unos -305 mil; solo el cubo de <1,5 M gano.
+  (2) **E74 corregido:** la mejora ya tiene apuntada la venta de Unai Lopez
+  (Ramon por Unai, -0,68 pts) para pagar a Juan Iglesias. Con eso Pepe
+  solo deja la J12 en verde: el vie 15:00, **+0,99 M si entra Iglesias,
+  +2,99 M si no** (premio minimo 870 mil). NO hace falta vender a Dani.
+  Nada se vende hasta el mar 00:07 (la J11 cuenta viva hasta lun 24:00);
+  Gaya, el mar 07:15; el cierre abre el mie 05:00 (primera vuelta real,
+  07:15) y venderia antes a Pablo Ibanez (sin prevision de FF; hoy
+  suplente en el Camp Nou). Ojo: si Iglesias se pierde, Unai se vende
+  igual (la venta que pagaba la puja no se suelta): es una perdida de
+  0,68 pts por jornada sin motivo; mirarlo el dom en la supervision.
+  (3) Angel Ortiz (la ronda): -13,6 % (prima del 12 % en un jugador de
+  190 mil sin rivales). La puerta: apagada desde el 20/10, sin libro.
+  El reloj de solvencia dice «CUBIERTO» contando ofertas por titulares.
+  **Aplicado:** `BORDALAS_SIN_SUBASTA="1"` (738b94ce), solo cierra la
+  cesta del reset; con la caja en verde desde el mar/mie podia pujar hasta
+  ~3 x saldo y dejar la J12 en rojo. Revision adversarial (seguridad y
+  valor): encender, con la frase de QUE_HACE (sin ella la verja se ponia
+  roja y paraba todas las vueltas). Ensayo #41241074316 verde; paso 0
+  (58 probados); verja 229 en 3.11 y en 3.13. **Se quita con el arreglo,
+  no por fecha:** `BORDALAS_LA_SUBASTA_EN_EL_COLCHON` (nace apagado; en
+  `plan_desde_el_estado`: colchon acumulado y nada a menos de 40 h de la
+  jornada); si no esta, se decide antes de la J13 (lun 16/11) y se
+  enciende a la vez `BORDALAS_CESTA_SOLO_EL_SUELO`. **Leccion de la vuelta
+  roja #2623 (14:07):** las guardias con huella se miden en 3.11 Y 3.13;
+  la verja se pasa en las dos antes de subir codigo
+  (venv en el scratchpad, `uv venv -p /usr/bin/python3.13`).
+
 - **31/10 21:15 (rafaga de la noche).** Ciclos: verdes desde el arreglo
   (#2624 a #2630). Saldo -944.976, puja viva Juan Iglesias 3.769.900 (dom
   07:00). **Decision del gestor sobre E74:** si Iglesias entra, la J12 solo
