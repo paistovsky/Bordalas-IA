@@ -2797053,6 +2797053,48 @@
       "direction_hit": null,
       "magnitude_error_percent": null,
       "scored_at": null
+    },
+    "42794|PRENSA_MUNDO_DEPORTIVO|3|2026-10-31": {
+      "player_id": "42794",
+      "player_name": "Van Oevelen",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 230000,
+      "predicted_at": "2026-10-31T14:11:44.089892+00:00",
+      "due_at": "2026-11-03T14:11:44.089892+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
+    },
+    "19506|PRENSA_MUNDO_DEPORTIVO|3|2026-10-31": {
+      "player_id": "19506",
+      "player_name": "Bordalás",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "UP",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 760000,
+      "predicted_at": "2026-10-31T14:11:43.744211+00:00",
+      "due_at": "2026-11-03T14:11:43.744211+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
     }
   }
 }
