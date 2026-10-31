@@ -225196,5 +225196,124 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "906b43ff3b4d02e5cfe1e6d0",
+    "date": 1793426750,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 41418,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 2025051,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 2010001
+          }
+        ]
+      },
+      {
+        "player": 39357,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 730090,
+        "bids": [
+          {
+            "user": {
+              "id": 14175949,
+              "name": "Pepe Bordalás",
+              "icon": "i/u/14175949.png"
+            },
+            "amount": 709900
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 656000
+          }
+        ]
+      },
+      {
+        "player": 19860,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2680000,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 2591000
+          }
+        ]
+      },
+      {
+        "player": 18945,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3020001
+      },
+      {
+        "player": 4753,
+        "to": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 2610000
+      },
+      {
+        "player": 35765,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 219900
+      },
+      {
+        "player": 24255,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 450000
+      },
+      {
+        "player": 42757,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1291000
+      }
+    ]
   }
 ]
