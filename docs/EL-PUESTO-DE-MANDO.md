@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **31/10 08:40 (supervision).** **Reset de las 07:00:** ganamos a **Dani
+  Lorenzo** (MED, Malaga, 2.025.051; Luismi pujo 2.010.001). Lo pujo «la
+  subasta del reset» del motor viejo a las 04:45 («se lo lleva 61 %»).
+  Tiene 35 pts en 9 partidos (3,9). Tambien ganamos a **Angel Ortiz** (la
+  ronda, 219.900; ya publicado). Perdimos a Macia: Manzagool 730.090 contra
+  nuestros 709.900. Saldo **-944.976** (con la racha +250 mil); la J12 es
+  el vie 06/11 21:00, a 156 h. Plantilla de 14. **La mejora pujo a las
+  07:15 por Juan Iglesias** (lista de objetivos; Sevilla, FF 90 «Clave»,
+  51 pts en 10) a 3.769.900 (+1,07 %), para cambiarlo por Gaya: +1,54
+  pts/jornada con calendario. Se resuelve el dom 07:00. Si sale, Gaya se
+  vende cuando la mejora pueda, tras la J11, y la caja de la J12 la cuadran
+  el premio de la J11 (mar) y el cierre (desde el mie). **Luismi** vendio 7
+  jugadores (15,1 M) a las 20:48 del vie y empezo la J11 en ~0: puntua. Hoy
+  compro a Ndukwe (1.291.000) y a Kounde. Pollo compro a Febas y a Farinas.
+  **Orden:** fuera de `no_pujar` Ndukwe y Febas (ya son de rivales).
+  Objetivos hoy: Juan Iglesias (ya con puja de la mejora) e Ivan Martin
+  (2,77 M, no sube; no cabe con la caja en rojo).
+
 - **31/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2607 a #2616,
   la de las 07:15 incluida). Reset: **Angel Ortiz GANADO** (219.900, la
   ronda), **Dani Lorenzo GANADO** (2.025.051, la cartera, puesta a las
