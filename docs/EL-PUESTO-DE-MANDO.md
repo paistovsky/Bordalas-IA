@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 30/10/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 31/10/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **31/10 07:15 (rafaga de la manana).** Ciclos: verdes (#2607 a #2616,
+  la de las 07:15 incluida). Reset: **Angel Ortiz GANADO** (219.900, la
+  ronda), **Dani Lorenzo GANADO** (2.025.051, la cartera, puesta a las
+  04:48 como especulacion), Macia perdido. Saldo **-944.976**, 0
+  comprometido. La J11 ya empezo en positivo (no le afecta). **Para la
+  J12 (vie 06/11, plazo 15:00) hay que recuperar ~0,95 M:** la cartera
+  vende el primer dia que no sube y llega el premio de la J11 (~mar 03/11).
+  Mi control: mie 04/11 21:15. **Lo debato:** la cartera compro 2 M en
+  especulacion con la caja a +1,05 M y la dejo en rojo; dentro de su
+  colchon, pero merece mirar si el colchon cuenta bien la J12.
 
 - **30/10 21:30 (J11 empezada).** A las 21:00 el saldo era 1.049.975 y
   no habia pujas: puntuamos la J11. **Once fijado** (3-4-3, leido de
