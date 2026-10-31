@@ -352,6 +352,31 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **31/10 13:00 (laboratorio de rivales).** **Rivales:** nada desde las
+  08:40; el ultimo movimiento es el reset de las 07:05. Caja reconstruida
+  (cuadra al euro con el artefacto): Alvaro 17,7 M, Pollo 3,6 M, Prinzipote
+  3,3 M, Mex 2,5 M, Manzagool 1,0 M, DiosMande 0,5 M, nosotros -0,94 M,
+  Luismi -4,2 M. J11: solo se ha jugado el Villarreal-Espanyol; estimacion
+  propia (no de Biwenger, sin capitan): Luismi +11 (Fortuno), nosotros +8,
+  DiosMande +8, Alvaro +7, Pollo +4. **El fallo del once, entendido:** con
+  un delantero en duda (Yamal, Roberto o Boye) o el portero en duda, el
+  motor elige un once con el dudoso, el ejecutor lo rechaza
+  (BLOCKED_INVALID_LINEUP) y en Biwenger se queda el once viejo, con el
+  lesionado dentro si lo hay. Con la plantilla real, en todos los pares de
+  estados: 140 guardados bloqueados de 1.513 (14 jugadores). El caso de la
+  J12: Boye en duda y Kike Salas lesionado dejan a Kike en el once.
+  **Construido apagado:** `BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR`
+  (8d704491). Encendido: el mejor once completo con solo sanos (mas un
+  Dios en duda, regla del 18/08); si no lo hay, el de menos dudosos.
+  Bloqueos 140 -> 0; lo que queda es solo el portero lesionado (no hay
+  segundo). Apagado es identico a main (huellas de 102 escenarios en la
+  verja; bateria larga de 5.284 a mano). Dos revisores adversariales:
+  SHIP_OFF. Verja 229 en verde, normal y con el interruptor. **Ojo al
+  encenderlo:** un Dios en duda juega aunque el banquillo cubra, y el
+  panel dira «Faltan 1» con un dudoso autorizado (solo texto; no frena el
+  guardado). **Plan:** encenderlo el mie 04/11 (el mar va EL_PARTE_VENDE),
+  con paso 0, ensayo y revision, antes del cierre de la J12.
+
 - **31/10 08:40 (supervision).** **Reset de las 07:00:** ganamos a **Dani
   Lorenzo** (MED, Malaga, 2.025.051; Luismi pujo 2.010.001). Lo pujo «la
   subasta del reset» del motor viejo a las 04:45 («se lo lleva 61 %»).
