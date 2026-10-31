@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E73 · 31/10/2026 11:17 de Madrid · Como redondea cada rival: la terminacion 9.900 vale, y no todos los motores la usan
+### E73 · 31/10/2026 11:15 de Madrid · Como redondea cada rival: la terminacion 9.900 vale, y no todos los motores la usan
 
 **El caso:** hoy Pepe gano a Dani Lorenzo por 15.050 sobre Luismi y perdio
 a Macia por 20.190 contra Manzagool. ¿Tiene cada rival su forma de
@@ -3127,7 +3127,7 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
-- **(E73, 31/10 11:17) Todas las pujas, de cualquier motor, terminadas en
+- **(E73, 31/10 11:15) Todas las pujas, de cualquier motor, terminadas en
   9.900.** Los rivales redondean a miles (Luismi, Pollo17) o a decenas de
   mil (Manzagool, DiosMande, Mex...); el 15 % de las subastas con pelea se
   decide por menos de un 0,5 %. La subasta del reset (2.025.051), la
