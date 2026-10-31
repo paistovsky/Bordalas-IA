@@ -2234,11 +2234,34 @@ def _todas_las_formaciones(
     return formation_results
 
 
+def _buscar_en_un_dibujo(
+    players: list[dict],
+    formation: dict[int, int],
+    allow_warning_players: bool,
+) -> dict:
+    """
+    La busqueda de un dibujo, con la memoria del once
+    (`el_once_se_busca_una_vez`): la misma que `evaluate_formation`.
+    Para el once que se puede escribir
+    (`el_once_que_se_puede_escribir.ordenar`).
+    """
+
+    from src.analysis.el_once_se_busca_una_vez import buscar
+
+    return buscar(
+        players,
+        formation,
+        allow_warning_players,
+        search_best_lineup_for_formation,
+    )
+
+
 def build_lineup(
     snapshot: dict,
     lineup_intelligence: dict | None = None,
     con_calendario: bool = False,
     sin_los_que_se_van: bool = False,
+    que_se_puede_escribir: bool = False,
 ) -> dict:
     """
     El mejor once de la plantilla.
@@ -2255,6 +2278,13 @@ def build_lineup(
     del cierre no se alinea si hay otro de fiar que pueda jugar, y
     Jornada Perfecta desempata entre dos que FF deja a 10 puntos o menos
     (`el_once_sin_los_que_se_van`). Sin el, ni una linea nueva corre.
+
+    `que_se_puede_escribir=True`, igual: SOLO el once que se escribe,
+    con `BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR` puesto. El once es
+    siempre uno que el ejecutor acepta: con alguien en duda, el mejor
+    once completo sin dudosos (un Dios en duda juega); si no lo hay, el
+    que lleva menos; y la salida trae la marca que lee el ejecutor
+    (`el_once_que_se_puede_escribir`). Sin el, ni una linea nueva corre.
     """
 
     if lineup_intelligence is None:
@@ -2311,8 +2341,44 @@ def build_lineup(
         except Exception:                           # noqa: BLE001
             preparado = None
 
+    # EL ONCE QUE SE PUEDE ESCRIBIR (31/10/2026)
+    #
+    #     Solo con `que_se_puede_escribir` (el monitor, con el
+    #     interruptor puesto). Si no (o si no se puede importar),
+    #     `_escribible` es None, la busqueda es `_todas_las_formaciones`
+    #     y nada de lo de abajo corre: el once de hoy, byte a byte
+    #     (`test_el_once_que_se_puede_escribir_v1`). Con el, la misma
+    #     busqueda y despues las que se pueden escribir primero; la
+    #     busqueda sin los que se van usa la misma.
+    _escribible = None
+
+    if que_se_puede_escribir:
+
+        try:
+            from src.analysis import (
+                el_once_que_se_puede_escribir as _escribible,
+            )
+
+        except Exception:                           # noqa: BLE001
+            _escribible = None
+
+    buscar_formaciones = _todas_las_formaciones
+
+    if _escribible is not None:
+
+        def buscar_formaciones(lista):
+
+            return _escribible.ordenar(
+                lista,
+                _todas_las_formaciones(
+                    lista
+                ),
+                FORMATIONS,
+                _buscar_en_un_dibujo,
+            )
+
     formation_results = (
-        _todas_las_formaciones(
+        buscar_formaciones(
             players
         )
     )
@@ -2331,7 +2397,7 @@ def build_lineup(
             preparado,
             players,
             formation_results,
-            _todas_las_formaciones,
+            buscar_formaciones,
         )
 
     best = (
@@ -2808,6 +2874,21 @@ def build_lineup(
 
         salida["el_once_sin_los_que_se_van"] = (
             informe_de_los_que_se_van
+        )
+
+    # LA MARCA DEL ONCE QUE SE PUEDE ESCRIBIR (31/10/2026)
+    #
+    #     Solo con `_escribible` (si no, la salida es la de siempre).
+    #     Sobre el once ya rematado: dice si se puede escribir, por que,
+    #     y que dudosos van autorizados. Es lo unico que lee el ejecutor
+    #     para dejar pasar un once con `playable_count` < 11
+    #     (`el_once_que_se_puede_escribir.admite`).
+    if _escribible is not None:
+
+        salida[_escribible.CLAVE] = _escribible.marca(
+            players,
+            best_lineup,
+            formation_results,
         )
 
     return salida

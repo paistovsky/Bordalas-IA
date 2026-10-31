@@ -212,6 +212,10 @@ TESTS = [
     # El once que se escribe no alinea al que se esta vendiendo si hay
     # otro que pueda jugar, y JP desempata a 10 puntos de FF. Apagado.
     "src.analysis.test_el_once_sin_los_que_se_van_v1",
+    # El once que se escribe es siempre uno que el ejecutor acepta: con
+    # un dudoso, el once sano de cualquier dibujo (un Dios en duda juega);
+    # sin once sano, el que lleva menos dudosos. Apagado.
+    "src.analysis.test_el_once_que_se_puede_escribir_v1",
     "src.analysis.test_el_cierre_de_la_jornada_v1",
     "src.analysis.test_el_reroll_respeta_a_los_demas_v1",
     "src.analysis.test_la_puerta_a_precio_de_mercado_v1",

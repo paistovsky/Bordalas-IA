@@ -295,6 +295,12 @@ QUE_HACE = {
         "deja a dos del mismo puesto a 10 puntos o menos, decide Jornada Perfecta "
         "(de la jornada que toca y de menos de 12 h) cuando da al de dentro en "
         "duda o peor.",
+    "BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR":
+        "El once que se escribe es siempre uno que se puede guardar: con alguien "
+        "en duda, juega el mejor once sin dudosos de cualquier dibujo (un Dios en "
+        "duda juega igual); si ningún dibujo se llena sin ellos, el que lleva "
+        "menos dudosos. Así no se queda puesto el once viejo con un lesionado "
+        "dentro.",
     "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA":
         "La ronda solo puja por un jugador del Computer si pide menos de 1 M, "
         "su precio sube hoy un 2 % o más y faltan 64 h o más para la jornada, "

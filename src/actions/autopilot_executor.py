@@ -533,6 +533,23 @@ def validate_temporal_write_gate(
     return None
 
 
+def _el_once_se_puede_escribir(lineup) -> bool:
+    """
+    Si un once con menos de 11 alineables sin aviso se puede escribir
+    igual: solo con la marca del once que se puede escribir y sus
+    dudosos autorizados (`el_once_que_se_puede_escribir.admite`). No lee
+    el interruptor: sin la marca, False. Nunca lanza.
+    """
+
+    try:
+        from src.analysis.el_once_que_se_puede_escribir import admite
+
+        return bool(admite(lineup))
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def execute_autopilot_decision(
     decision: dict,
     execute: bool = False,
@@ -2743,13 +2760,21 @@ def execute_autopilot_decision(
                     None,
             }
 
+        # EL ONCE QUE SE PUEDE ESCRIBIR (31/10/2026)
+        #
+        #     Un once con menos de 11 alineables sin aviso pasa SOLO si
+        #     trae la marca del once que se puede escribir y cada dudoso
+        #     dentro es alineable y va autorizado: un Dios en duda, o los
+        #     menos dudosos posibles cuando ningun dibujo se llena sin
+        #     ellos (`el_once_que_se_puede_escribir.admite`). Sin la marca
+        #     -interruptor apagado- el bloqueo de siempre.
         if int(
             lineup.get(
                 "playable_count",
                 0,
             )
             or 0
-        ) < 11:
+        ) < 11 and not _el_once_se_puede_escribir(lineup):
 
             return {
                 "action":
