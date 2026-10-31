@@ -31,9 +31,40 @@ caja de la jornada) y puede entrar en modo deficit.
 | Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90 |
 | Zabiri (Racing) | DEL | 7,54 M | Roberto Fernandez | +10-20 % | solo en el parón (09-19/11), si no esta apercibido (4 amarillas) y la caja lo paga |
 
-Ventanas de la J11 (vie 30/10 21:00): la mejora y la orden con venta
-emparejada pujan hasta la vuelta del jue 04:50 (40 h). Despues, solo lo que
-pague la caja entera.
+Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
+emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
+lo que pague la caja entera.
+
+## 31/10/2026, 18:40 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
+
+La J11 se esta jugando (once bloqueado: Cardona y Ramon dentro, Gaya
+fuera). El once guardado para la J12 (3-4-3) ya es otro: Gaya por Cardona
+y Dani Lorenzo por Ramon. Puja viva: Juan Iglesias, 3.769.900, se resuelve
+el dom 01/11 a las 07:00. Saldo -944.976.
+
+| Jugador | Veredicto | J12 % | J12 (Madrid) | Fuente | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 90 | Villarreal-Getafe, dom 08/11 18:30 | FF 90 (ya en J12); J11: 90', sin golpe | 92 -> 90 |
+| Kike Salas (DEF) | TITULAR | 85 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; Diario de Sevilla 31/10 titular; Luis Garcia: «nivel muy alto» | 88 -> 85 (falta su J11, dom 14:00) |
+| Chust (DEF) | TITULAR | 88 | Elche-Betis, dom 08/11 14:00 | FF 90, 900 de 900 min | 92 -> 88 (falta su J11, dom 18:30) |
+| Gaya (DEF) | TITULAR | 78 | Valencia-Real Madrid, sab 07/11 21:00 | FF 80; Aguirre lo ensaya de lateral izquierdo (30/10) | 84 -> 78 (rival duro) |
+| Olasagasti (MED) | TITULAR | 80 | Celta-Levante, dom 08/11 18:30 | FF 80 (once posible J12); J11: 90' | 83 -> 80; Castro le culpa del 0-1 en publico; Copa el jue |
+| Pablo Ibanez (MED) | TITULAR | 80 | Sevilla-Alaves, vie 06/11 21:00 | FF 80; sin incidencias | 85 -> 80 (falta su J11, hoy 21:00; Copa el mar) |
+| Unai Lopez (MED) | TITULAR | 85 | Real Sociedad-Rayo, dom 08/11 16:15 | FF 100; J11: gol, amarilla (3.a), cambio tactico en el 79' | 82 -> 85 |
+| Dani Lorenzo (MED) | TITULAR | 80 | Malaga-Racing, sab 07/11 14:00 | FF: titular hoy en Betis-Malaga; Importante | nuevo |
+| Yamal (DEL) | TITULAR | 95 | Atletico-Barcelona, dom 08/11 21:00 | FF 95, Dios; Champions el mar | = |
+| Roberto Fernandez (DEL) | TITULAR | 88 | Espanyol-Deportivo, sab 07/11 16:15 | FF 90 (ya en J12); J11: 90'; tira los penaltis | = |
+| Boye (DEL) | TITULAR | 87 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; convocado sin incidencias | 89 -> 87 (falta su J11, hoy 21:00) |
+| *Sergi Cardona (DEF, banquillo)* | DUDA | 50 | Villarreal-Getafe, dom 08/11 18:30 | FF 50/50 con Romero; J11: amarilla y cambio tecnico en el 59' | 65 -> 50 |
+| *Ramon Enriquez (MED, banquillo)* | TITULAR | 68 | Malaga-Racing, sab 07/11 14:00 | FF: titular hoy (2.a seguida), aun «Revulsivo» | 72 -> 68 |
+| *Angel Ortiz (DEF, banquillo)* | DUDA | 40 | Elche-Betis, dom 08/11 14:00 | FF: suplente hoy (Bellerin titular); Champions el mie | nuevo |
+| *Juan Iglesias (DEF, puja viva)* | TITULAR | 87 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; Diario de Sevilla 31/10 titular; no jugo la Copa | nuevo; 3 amarillas (con 4, apercibido, sin sancion en la J12) |
+
+**Hecho:** nada. Ningun titular de la J12 esta por debajo de 70 % ni en
+riesgo; nadie ha perdido el puesto; la puja por Juan Iglesias sigue (sano y
+fijo). Falta mirar: hoy 21:00 Barcelona-Alaves (Yamal, Boye, Ibanez) y el
+dom Getafe-Sevilla (Kike, Iglesias) y Elche-Valencia (Chust, Gaya):
+minutos, golpes y tarjetas. Ninguno esta cerca de la 5.a amarilla.
 
 ## 30/10/2026, 18:50 de Madrid (J11: hoy 21:00; cierre 20:45)
 
