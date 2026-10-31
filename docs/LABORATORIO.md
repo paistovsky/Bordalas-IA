@@ -69,6 +69,41 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E74 · 31/10/2026 17:14 de Madrid · La caja de la J12 si entra Juan Iglesias: hace falta vender a Dani Lorenzo
+
+**El caso:** la mejora puja 3.769.900 por Juan Iglesias (se resuelve mañana
+dom 07:00) con la caja en -944.976. Si entra: -4.714.876 hasta vender. La
+J12 empieza el vie 06/11 a las 21:00 (plazo de la casa: 15:00).
+**Datos:** la foto del ciclo de las 17:11 de hoy (saldo, ofertas,
+precios); el reloj del premio (E43/E52: martes por la tarde; minimo de
+Pepe, 29 pts = 870.000) y la racha (E47: mie 05/11 ~00:10, +250.000).
+**Codigo:** `lab/caja/cuentas_j12.py`.
+
+    con el premio minimo (870 mil)        con un premio tipico (40 pts, 1,2 M)
+    solo premio y racha       -3.594.876          -3.264.876
+    + Gaya                    -1.824.876          -1.494.876
+    + Gaya, Ortiz, Enriquez   -1.225.676            -895.676
+    + Gaya y Dani Lorenzo       +195.124            +525.124
+
+**Lo que se aprende:**
+- **Con Iglesias dentro, la J12 solo empieza en verde si se venden Gaya Y
+  Dani Lorenzo** (el de la cartera, 2,02 M, comprado hoy). Gaya solo, o
+  Gaya con los dos baratos, deja la J12 en rojo (-0,9 a -1,8 M): 0 puntos
+  (E29).
+- **El margen es fino:** con el premio minimo quedan +195.000. Y Dani
+  Lorenzo no sube hoy (0): la cartera lo venderia el primer dia que no
+  sube, pero hay que contar con que lo haga antes del viernes.
+- Las ofertas se renuevan cada 48 h (E42) y casi nunca faltan (E67, 95 de
+  96): Gaya y Dani tienen que estar publicados ANTES del reset en que
+  nazca su oferta (martes o miercoles 07:00) para venderse a tiempo.
+
+**Limites:** precios de hoy; Gaya no tiene oferta viva (no esta
+publicado); el premio de la J11 depende de lo que haga el once.
+
+**Veredicto: AVISO para el gestor** (no es regla nueva): si Iglesias entra
+el domingo, publicar a Gaya y a Dani Lorenzo el lunes o martes, y que el
+cierre cuente con los dos. Si no entra, nada cambia.
+
 ### E73 · 31/10/2026 11:15 de Madrid · Como redondea cada rival: la terminacion 9.900 vale, y no todos los motores la usan
 
 **El caso:** hoy Pepe gano a Dani Lorenzo por 15.050 sobre Luismi y perdio
