@@ -1976,6 +1976,27 @@
    "margin": null,
    "event_id": null,
    "recorded_by": "TABLON"
+  },
+  "41418:2026-10-31T03:48:53.070781+00:00": {
+   "player_id": 41418,
+   "player_name": "Dani Lorenzo",
+   "amount": 2025051,
+   "our_value": null,
+   "win_probability": 0.61,
+   "market_price": 2020000,
+   "recommended_bid": 2025051,
+   "intent": "SPECULATION",
+   "target_source": "SUBASTA_CARTERA",
+   "market_rate_percent_per_day": 0.495,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-10-31T03:48:53.070781+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null
   }
  }
 }
