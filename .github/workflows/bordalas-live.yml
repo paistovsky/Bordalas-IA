@@ -508,19 +508,29 @@ jobs:
       #       mirar el EUR/punto que piden los que pasan.
       BORDALAS_LA_MONEDA_DE_LA_LIGA: "1"
 
-      # QUITADO 22/09 — BORDALAS_SIN_SUBASTA
+      # ENCENDIDO 31/10 — BORDALAS_SIN_SUBASTA (el gestor, laboratorio de la noche)
       #
-      #   Estuvo puesto desde la noche del 21/09 como apagado PROVISIONAL,
-      #   para que el reset de las 07:00 no comprase otros cinco suplentes
-      #   mientras no hubiera filtro. Ya hay filtro: el de arriba.
+      #   Cierra SOLO `plan_del_reset` (la_subasta.py, `_sin_subasta`): la cesta
+      #   de reventa de las 04:45 y 04:50. La ronda, la mejora, los chollos, el
+      #   carril y el tablero de fichajes siguen pujando con lo suyo.
       #
-      #   Y para que conste, porque su mensaje enganaba: este interruptor
-      #   NO cerraba la puerta de fichar. Solo cerraba `plan_del_reset`,
-      #   cuyo unico modo es la cesta de reventa. El tablero de fichajes y
-      #   el carril siguieron pujando todo el tiempo.
+      #   POR QUE. El 31/10 a las 04:48 la cesta pujo 2.025.051 por Dani Lorenzo
+      #   con el saldo en 1.299.975 y 929.800 en pujas vivas: el freno de la
+      #   solvencia lo dio por SIN_DEUDA porque no ve la cesta ni las pujas
+      #   vivas, el tope es min(presupuesto, 3 x saldo) y no mira lo cerca que
+      #   esta la jornada ni el colchon de la casa (UN_SOLO_COLCHON solo vive en
+      #   el ejecutor). Dejo el saldo en -944.976. Las dos pujas desde el 22/09
+      #   pasaron la caja libre en mas de 1,5 M; su historial: unos -305 mil.
+      #   Con la J12 (vie 06/11) en +0,2 a +3 M, una cesta ganada la deja en rojo.
       #
-      #   EL CODIGO SIGUE VIVO en `la_subasta.py` (1469, 1477, 1587) y ahi
-      #   se queda: es el freno de mano. Lo que se quito fue esta linea.
+      #   SE QUITA CON EL ARREGLO, NO POR FECHA: BORDALAS_LA_SUBASTA_EN_EL_COLCHON
+      #   (nace apagado; en plan_desde_el_estado: cabe_en_el_colchon acumulado y
+      #   nada a menos de 40 h de la jornada). Si no esta, se decide otra vez
+      #   antes de la J13 (lun 16/11). Al quitarlo, encender a la vez
+      #   BORDALAS_CESTA_SOLO_EL_SUELO (solo el cubo de <1,5 M gano dinero).
+      #
+      #   Historia: estuvo puesto del 21/09 al 22/09 como apagado provisional.
+      BORDALAS_SIN_SUBASTA: "1"
 
     steps:
       - name: Checkout

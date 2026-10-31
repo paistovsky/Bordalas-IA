@@ -257,6 +257,13 @@ QUE_HACE = {
         "especulación del tablero) tiene que caber en el mismo colchón que la "
         "ronda: saldo menos todas las pujas vivas más el 92 % de lo de la cartera. "
         "Lo suyo cuenta entero; si no cabe, no puja.",
+    "BORDALAS_SIN_SUBASTA":
+        "Apaga la subasta del reset del motor viejo (la cesta de reventa de las "
+        "04:45 y 04:50): esa no puja. La ronda, la mejora, los chollos, el "
+        "carril y el tablero de fichajes siguen pujando con lo suyo, y las "
+        "ventas, el once y el cierre no cambian. Puesto el 31/10 para la semana "
+        "de la J12: la cesta pujaba sin mirar el colchón ni lo cerca que está la "
+        "jornada.",
     "BORDALAS_EL_PARTE_VENDE":
         "Vende a los suplentes que Biwenger da en duda o lesionados (caen un "
         "3-5 % en la semana): los publica a su valor y acepta la oferta del "
