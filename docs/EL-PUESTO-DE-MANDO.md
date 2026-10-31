@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 31/10/2026, 14:40 de Madrid (rafaga de las 14:15).
+Actualizado: 31/10/2026, 21:25 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **31/10 21:15 (rafaga de la noche).** Ciclos: verdes desde el arreglo
+  (#2624 a #2630). Saldo -944.976, puja viva Juan Iglesias 3.769.900 (dom
+  07:00). **Decision del gestor sobre E74:** si Iglesias entra, la J12 solo
+  empieza en verde vendiendo a **Gaya y a Dani Lorenzo** (+195.124 con el
+  premio minimo). Eso queda como plan: el domingo a las 07:15 miro si
+  entro; si entro, el lunes la orden tiene que llevar a los dos a vender
+  (publicados antes del reset del martes 07:00, para que su oferta nazca a
+  tiempo) y el cierre contarlos. **Lo debato:** comprar a Iglesias por
+  3,77 M obliga a vender un titular recien fichado (Gaya) y la especulacion
+  de hoy (Dani); el margen final es de 0,2 M. Si el chat del dueno no ve
+  claro que Iglesias suma mas puntos que Gaya, retirar la puja antes de
+  las 07:00 es la opcion prudente.
 
 - **31/10 14:15 (rafaga de la tarde). VUELTA ROJA #2623 (14:07), ARREGLADA.**
   Fallaba una sola guardia de 229: `test_el_once_que_se_puede_escribir_v1`
