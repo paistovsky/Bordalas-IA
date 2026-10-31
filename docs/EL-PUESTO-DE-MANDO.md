@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 31/10/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 31/10/2026, 14:40 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,25 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **31/10 14:15 (rafaga de la tarde). VUELTA ROJA #2623 (14:07), ARREGLADA.**
+  Fallaba una sola guardia de 229: `test_el_once_que_se_puede_escribir_v1`
+  (codigo nuevo del chat del dueno, APAGADO, fusionado a las 13:00; la
+  #2623 fue la primera vuelta que la corrio). No era un fallo del once:
+  la guardia guardaba la huella de main medida en **Python 3.11**, y la
+  vuelta corre en **3.13**, donde `build_lineup` da otra salida. Lo
+  reproduje en 3.13 (misma huella que la vuelta, 84df35a0...) y medi el
+  `lineup_engine` de main@fee1f551 en 3.13: da la misma, asi que apagado
+  sigue siendo main letra a letra. **Arreglo:** la guardia guarda la
+  huella de cada version (3.11 y 3.13) y falla claro si no hay huella para
+  la que corre. Verja 229/229 en 3.11 y en 3.13, ensayo #41205820973
+  verde en `arreglo/huella-313`, fusionado (45d66cf9). Vigilo la vuelta de
+  las 15:07. **Leccion para todos:** la verja local hay que pasarla tambien
+  con Python 3.13 (uv venv -p /usr/bin/python3.13), que es el de la vuelta.
+  **Caja:** saldo -944.976, puja viva **Juan Iglesias 3.769.900** (la
+  mejora; dom 07:00): si entra, -4,71 M hasta lo que venda la orden; la J12
+  es el vie 06/11 15:00. Lo miro en cada rafaga; control fuerte el mie
+  04/11 21:15.
 
 - **31/10 13:00 (laboratorio de rivales).** **Rivales:** nada desde las
   08:40; el ultimo movimiento es el reset de las 07:05. Caja reconstruida
