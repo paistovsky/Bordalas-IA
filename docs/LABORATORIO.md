@@ -69,6 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E73 · 31/10/2026 11:17 de Madrid · Como redondea cada rival: la terminacion 9.900 vale, y no todos los motores la usan
+
+**El caso:** hoy Pepe gano a Dani Lorenzo por 15.050 sobre Luismi y perdio
+a Macia por 20.190 contra Manzagool. ¿Tiene cada rival su forma de
+redondear, y se decide mucho por poco?
+**Datos:** todas las pujas del tablon (ganadoras y perdedoras): 545
+pujas, 157 subastas con pelea.
+**Codigo:** `lab/subasta/terminaciones.py`.
+
+    manager        pujas   como terminan
+    Luismi_Haz      171    en miles (...x.000) 84 %, «salida + 1» 12 %
+    Pollo17         166    en miles 81 %, otras 15 %
+    Manzagool        71    en decenas de mil (...0.000) 46 %, otras 41 %
+    DiosMande        31    en decenas de mil 42 %
+    Mex, Prinzipote, Alvaro: casi siempre en decenas de mil
+
+    subastas con pelea decididas por menos de un 0,5 %: 23 de 157 (15 %);
+    por menos de un 1 %: 40 (25 %)
+
+**Lo que se aprende:**
+- **Los rivales redondean a miles o a decenas de mil:** una puja que
+  termina en **9.900** gana a cualquiera de ellos dentro del mismo tramo de
+  10.000 (lo que el gestor ya midio el 17/10: 24 de 109 contra 6). Y 1 de
+  cada 7 subastas con pelea se decide por menos de un 0,5 %.
+- **No todos los motores de Pepe la usan:** desde el 15/10 ha pujado
+  2.025.051 (la subasta del reset), 1.711.008 (la rendija), 1.029.000 y
+  369.000 (los chollos). Ganaron casi todas, pero por suerte de tramo.
+
+**Limites:** las «otras» terminaciones mezclan de todo; no se ve el
+importe exacto de las pujas que no salen en el tablon.
+
+**Veredicto: GANA POCO** (pasa a «Listo para el plan» como limpieza):
+que todas las pujas de Pepe, de cualquier motor, terminen en 9.900.
+
 ### E72 · 30/10/2026 17:22 de Madrid · E63 fuera de muestra con la J10: se cumple
 
 **Hipotesis:** lo de E63 (el precio va una semana por detras de los
@@ -3093,6 +3127,11 @@ el plan».
 (ideas que han ganado con datos y estan listas para que un turno del gestor
 las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
 
+- **(E73, 31/10 11:17) Todas las pujas, de cualquier motor, terminadas en
+  9.900.** Los rivales redondean a miles (Luismi, Pollo17) o a decenas de
+  mil (Manzagool, DiosMande, Mex...); el 15 % de las subastas con pelea se
+  decide por menos de un 0,5 %. La subasta del reset (2.025.051), la
+  rendija (1.711.008) y los chollos (1.029.000, 369.000) aun no lo hacen.
 - **(E65, 27/10 11:16) La vara de puntos: cambiar FF/100 por un factor
   calibrado** (medido en la J10, n = 459; repetir con la J11 antes de
   encender). Con FF la vispera: 0-30 % -> x0,25; 30-50 % -> x0,85;
