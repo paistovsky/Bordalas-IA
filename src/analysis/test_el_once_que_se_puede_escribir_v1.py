@@ -332,6 +332,15 @@ def _resumen(huellas) -> str:
 # PYTHONHASHSEED 3 y 11. Si algun dia se cambia el motor A PROPOSITO,
 # se rehace con el interruptor apagado y se dice en el commit.
 HUELLA_DE_MAIN = "6b2e87b70378ace38d8618f68d3f779c466462ced7349756ee096594d734b72b"
+# La misma medida en Python 3.13, el de la vuelta (bordalas-live.yml): la
+# salida cambia de version a version y la huella con ella. Medida tambien
+# con el `lineup_engine` de main@fee1f551 en 3.13 (el gestor, 31/10/2026,
+# tras la vuelta roja #2623): sale esta, asi que apagado sigue siendo lo
+# mismo letra a letra; solo faltaba la huella de 3.13.
+HUELLAS_DE_MAIN = {
+    (3, 11): HUELLA_DE_MAIN,
+    (3, 13): "84df35a06263706794a3f80f91ae1d9a5acab7401a4cec74c6afa3bc35e9ba41",
+}
 
 # La larga (`bateria_larga`), por tamaño de plantilla. No cabe en la
 # verja (unos 15 minutos con 15 jugadores): se corre a mano,
@@ -455,7 +464,9 @@ def test_apagado_el_once_es_el_de_hoy():
     assert j12["formation_name"] == "3-4-3", j12["formation_name"]
     assert 12494 in _ids(j12) and j12["playable_count"] == 10, j12["playable_count"]
     assert "el_once_que_se_puede_escribir" not in j12
-    assert _resumen(hoy) == HUELLA_DE_MAIN, _resumen(hoy)
+    esperada = HUELLAS_DE_MAIN.get(sys.version_info[:2])
+    assert esperada is not None, f"sin huella medida para Python {sys.version_info[:2]}"
+    assert _resumen(hoy) == esperada, _resumen(hoy)
 
     por_escenario = dict(zip(range(len(BATERIA_CORTA)), hoy))
     assert con_false == [por_escenario[i] for i in subconjunto]
