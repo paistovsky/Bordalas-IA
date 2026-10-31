@@ -2687384,13 +2687384,13 @@
       "price_at_prediction": 14490000,
       "predicted_at": "2026-10-28T08:10:28.109060+00:00",
       "due_at": "2026-10-31T08:10:28.109060+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 15160000,
+      "actual_direction": "UP",
+      "actual_percent": 4.624,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-10-31T08:10:28.617877+00:00"
     },
     "19513|PRENSA_MARCA|3|2026-10-28": {
       "player_id": "19513",
