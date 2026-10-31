@@ -363,8 +363,8 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   sigue siendo main letra a letra. **Arreglo:** la guardia guarda la
   huella de cada version (3.11 y 3.13) y falla claro si no hay huella para
   la que corre. Verja 229/229 en 3.11 y en 3.13, ensayo #41205820973
-  verde en `arreglo/huella-313`, fusionado (45d66cf9). Vigilo la vuelta de
-  las 15:07. **Leccion para todos:** la verja local hay que pasarla tambien
+  verde en `arreglo/huella-313`, fusionado (45d66cf9). **La vuelta de las
+  15:07 (#2624, con el arreglo) salio VERDE.** **Leccion para todos:** la verja local hay que pasarla tambien
   con Python 3.13 (uv venv -p /usr/bin/python3.13), que es el de la vuelta.
   **Caja:** saldo -944.976, puja viva **Juan Iglesias 3.769.900** (la
   mejora; dom 07:00): si entra, -4,71 M hasta lo que venda la orden; la J12
