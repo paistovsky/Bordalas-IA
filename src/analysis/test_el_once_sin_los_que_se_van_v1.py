@@ -76,6 +76,10 @@ for _nombre in (
     ENV, ENV_UNA_VEZ, ENV_ORDEN, ENV_MEJORA, ENV_ROTACION,
     "BORDALAS_EL_CALENDARIO_EN_EL_ONCE", "BORDALAS_CALIDAD_ETIQUETA",
     "BORDALAS_VARA_PLANA",
+    # EL ONCE QUE SE PUEDE ESCRIBIR TAMPOCO (31/10/2026). Puesto, el once
+    # del monitor trae su marca y la huella de main no cuadra
+    # (`--con BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR`).
+    "BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR",
 ):
     os.environ.pop(_nombre, None)
 

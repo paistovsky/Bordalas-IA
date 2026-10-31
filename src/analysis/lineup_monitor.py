@@ -1041,6 +1041,43 @@ def _el_once_sin_los_que_se_van() -> bool:
         return False
 
 
+def _el_once_que_se_puede_escribir() -> bool:
+    """
+    Si el once QUE SE ESCRIBE es siempre uno que el ejecutor acepta
+    (`BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR`). El UNICO sitio donde se
+    lee el interruptor: el motor recibe el argumento y el ejecutor solo
+    mira la marca. Nunca lanza: si no se puede saber, no.
+    """
+
+    try:
+        from src.analysis.el_once_que_se_puede_escribir import activa
+
+        return bool(activa())
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def _no_se_puede_escribir(lineup: dict) -> bool:
+    """
+    True solo si el once trae la marca del once que se puede escribir
+    (interruptor puesto) y el ejecutor NO lo aceptaria
+    (`el_once_que_se_puede_escribir.admite`). Sin la marca, False: el
+    monitor de siempre. Nunca lanza.
+    """
+
+    try:
+        from src.analysis import el_once_que_se_puede_escribir as escribible
+
+        if not isinstance(lineup, dict) or escribible.CLAVE not in lineup:
+            return False
+
+        return not escribible.admite(lineup)
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def build_lineup_monitor_state(
     snapshot: dict,
     persist: bool = False,
@@ -1059,11 +1096,20 @@ def build_lineup_monitor_state(
     #     vez de a Cardona. De este once beben SAVE_LINEUP, `live_lineup`,
     #     el panel, el `once_escrito` del cierre y el `once` de la mejora:
     #     pedirlo aqui lo cambia para todos ellos, y para nadie mas.
+    #
+    # EL ONCE QUE SE PUEDE ESCRIBIR, TAMBIEN SOLO AQUI (31/10/2026)
+    #
+    #     Un 3-4-3 con Boyé en duda ganaba al 3-5-2 sano y el ejecutor lo
+    #     bloqueaba (`playable_count` < 11): se quedaba el once viejo, con
+    #     el lesionado dentro. Pedido aqui, el once que llega a
+    #     SAVE_LINEUP es uno que el ejecutor acepta. Apagado, la llamada
+    #     de siempre (`que_se_puede_escribir=False`).
     lineup = (
         build_lineup(
             snapshot,
             con_calendario=_el_once_mira_el_calendario(),
             sin_los_que_se_van=_el_once_sin_los_que_se_van(),
+            que_se_puede_escribir=_el_once_que_se_puede_escribir(),
         )
     )
 
@@ -1166,6 +1212,21 @@ def build_lineup_monitor_state(
 
         action = (
             "KEEP_LINEUP"
+        )
+
+        should_save = False
+
+    # UN ONCE QUE NO SE PUEDE ESCRIBIR NO SE PIDE (31/10/2026)
+    #
+    #     Solo con la marca del once que se puede escribir (interruptor
+    #     puesto): si el ejecutor no lo aceptaria, no se pide el
+    #     SAVE_LINEUP. Un guardado bloqueado no apunta fallo y se quedaba
+    #     el primero de la cola, vuelta tras vuelta, comiendose la unica
+    #     escritura. Sin la marca, ni se mira.
+    if should_save and _no_se_puede_escribir(lineup):
+
+        action = (
+            "BLOCKED_INVALID_LINEUP"
         )
 
         should_save = False
