@@ -371,6 +371,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   (Ramon por Unai, -0,68 pts) para pagar a Juan Iglesias. Con eso Pepe
   solo deja la J12 en verde: el vie 15:00, **+0,99 M si entra Iglesias,
   +2,99 M si no** (premio minimo 870 mil). NO hace falta vender a Dani.
+  **Para el gestor (corrige el plan de la rafaga de las 21:15):** si entra
+  Iglesias, NO se pone a Dani ni a Gaya en la orden: Gaya ya lo vende la
+  mejora y la caja la cierra la venta de Unai. Vender a Dani cuesta ~3,3
+  pts de la J12 por caja que no hace falta. La puja se queda: Iglesias por
+  Gaya +1,54 pts/jornada, menos Ramon por Unai -0,68 = +0,86 neto, con la
+  J12 en verde (lo comprobo un esceptico, archivo por archivo).
   Nada se vende hasta el mar 00:07 (la J11 cuenta viva hasta lun 24:00);
   Gaya, el mar 07:15; el cierre abre el mie 05:00 (primera vuelta real,
   07:15) y venderia antes a Pablo Ibanez (sin prevision de FF; hoy
