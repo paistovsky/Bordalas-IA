@@ -2019,6 +2019,28 @@
    "margin": 0,
    "event_id": "0b4f7cacb7d2325502c5e360",
    "recorded_by": "TABLON"
+  },
+  "12403:2026-11-01T08:11:11+00:00": {
+   "player_id": 12403,
+   "player_name": "Iván Martín",
+   "amount": 2779900,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 2770000,
+   "recommended_bid": null,
+   "intent": null,
+   "target_source": "DESCONOCIDO",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-11-01T08:11:11+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null,
+   "recorded_by": "TABLON"
   }
  }
 }
