@@ -131,6 +131,25 @@ LOS `conservar`
     ultimo recurso, va por su cuenta). Lo que no se publica nunca son
     los protegidos (`proteger` y `fichar`) y Yamal.
 
+EL RELEVO NO SE VENDE (01/11/2026, `BORDALAS_EL_RELEVO_NO_SE_VENDE`)
+
+    Con el interruptor, el que ENTRA por un cambio vivo de la mejora del
+    once (`la_mejora_del_once.el_relevo`, con la plantilla de la vuelta
+    y solo con la mejora encendida) no se elige para cobrar: si se
+    vendiera, la mejora soltaria el cambio y el que sale ya no se
+    venderia (Ramon Enriquez por Unai Lopez, el mie 04/11, con la caja de
+    la J12 en rojo). Se PUBLICA como cualquier suplente (publicar no es
+    vender, y asi tiene oferta si hace falta el ultimo recurso).
+    EL ULTIMO RECURSO (revision del 01/11): si a menos de
+    `HORAS_SOLVENCIA` (20 h) aun FALTA despues de todos los candidatos y
+    del ultimo recurso de LA CARTERA, el relevo pasa a candidato como
+    cualquier suplente (`ultimo_recurso_relevo`): sin oferta del Computer
+    para el que sale, con la oferta bajo su suelo o con la mejora parada,
+    perder el cambio cuesta menos que empezar la ronda en rojo. El plan
+    lo dice (`el_relevo`: motivo, a quien, por que y el ultimo recurso;
+    sin libro que leer o con la mejora apagada, nadie, como siempre).
+    Apagado, el cierre de siempre byte a byte.
+
 QUE NO HACE
 
     No compra, no sube pujas, no pone el once (SAVE_LINEUP es del
@@ -561,6 +580,7 @@ def decidir(
     especulativas=frozenset(), intocables=INTOCABLES, protegidos=frozenset(),
     no_vender=frozenset(), se_van=frozenset(), once_escrito=frozenset(),
     no_retirar=frozenset(), inventario=frozenset(), cartera=False,
+    relevos=frozenset(),
 ) -> dict:
     """
     Que hace el cierre en esta vuelta. Pura: ni red, ni disco, ni reloj.
@@ -601,6 +621,14 @@ def decidir(
                        vende antes de la jornada lo que sube; en rojo, lo
                        del `inventario` no entra en el once y se puede
                        vender como cualquier suplente
+        relevos        EL RELEVO NO SE VENDE (01/11/2026): los que entran
+                       por un cambio vivo de la mejora del once. Se
+                       publican como cualquier suplente pero no se eligen
+                       para cobrar; solo a menos de `HORAS_SOLVENCIA` y si
+                       aun falta tras todos los demas (y el ultimo recurso
+                       de la cartera) pasan a candidatos
+                       (`ultimo_recurso_relevo`). Vacio (apagado), lo de
+                       siempre: ni una clave nueva en la salida
     """
 
     salida = {
@@ -640,6 +668,7 @@ def decidir(
         protegidos, no_vender, se_van = _ids(protegidos), _ids(no_vender), _ids(se_van)
         once_escrito, inventario = _ids(once_escrito), _ids(inventario)
         especulativas = _ids(especulativas) - protegidos - _ids(no_retirar)
+        relevos = _ids(relevos)
         vendidos = {_int(k): v for k, v in _dict(vendidos).items() if _int(k) is not None}
         ofertas = {_int(k): v for k, v in _dict(ofertas).items()
                    if _int(k) is not None and isinstance(v, dict)}
@@ -719,7 +748,9 @@ def decidir(
 
         # Los candidatos: fuera del once, ni Yamal, ni protegidos, ni lo
         # que vende otro, ni un titular del once escrito que pueda jugar.
-        candidatos, titulares = [], []
+        # EL RELEVO NO SE VENDE (01/11/2026): el que entra por un cambio
+        # vivo de la mejora, aparte (se publica, no se elige).
+        candidatos, titulares, aparte = [], [], []
         for f in fichas:
             pid = f["id"]
             if (pid in xi or _nombre(f) in nunca or pid in protegidos
@@ -733,6 +764,11 @@ def decidir(
             # que esta en duda (o sin estado) puede serlo, y no se vende.
             if not once_escrito and estado not in FUERA_SEGURO | {"ok", "warned"}:
                 titulares.append(pid)
+                continue
+            if pid in relevos:
+                aparte.append({"id": pid, "name": f.get("name"), "valor": f["valor"],
+                               "cobro": int(f["valor"] * VENTA),
+                               "quedarse": round(f["quedarse"], 3), "relevo": True})
                 continue
             candidatos.append({"id": pid, "name": f.get("name"), "valor": f["valor"],
                                "cobro": int(f["valor"] * VENTA),
@@ -760,10 +796,25 @@ def decidir(
                 salida["titulares_que_no_se_venden"] = sorted(titulares)
                 salida["ultimo_recurso"] = sorted(ids)
                 elegidos, falta = a_quien_vender(candidatos, deficit)
+
+        # EL RELEVO, EL ULTIMO RECURSO (revision del 01/11/2026). Guardar al
+        # que entra por un cambio de la mejora no puede dejar la ronda en
+        # rojo: si a menos de `HORAS_SOLVENCIA` aun falta (el que sale sin
+        # oferta, bajo su suelo, o la mejora parada), el relevo pasa a
+        # candidato como cualquier suplente. Perder el cambio cuesta menos
+        # que empezar la ronda en rojo (0 puntos el once entero).
+        if relevos:
+            salida["relevos_aparte"] = sorted(c["id"] for c in aparte)
+        if aparte and falta > 0 and horas < HORAS_SOLVENCIA:
+            candidatos = candidatos + aparte
+            salida["ultimo_recurso_relevo"] = sorted(c["id"] for c in aparte)
+            aparte = []
+            elegidos, falta = a_quien_vender(candidatos, deficit)
         vender = {c["id"] for c in elegidos}
         salida["vender"] = [c["id"] for c in elegidos]
         salida["falta"] = falta
-        salida["candidatos"] = [{**c, "elegido": c["id"] in vender} for c in candidatos]
+        salida["candidatos"] = [{**c, "elegido": c["id"] in vender}
+                                for c in candidatos + aparte]
 
         # LA ADOPCION (13/10/2026), despues de la caja y las ventas. El
         # adoptado sale de los libros de la ronda y los chollos (ya no lo
@@ -794,9 +845,11 @@ def decidir(
         salida["no_adoptados"] = no_adoptados
 
         # 5. LAS ESCRITURAS: una por jugador. Cobrar a los elegidos;
-        # publicar a todo candidato que no lo este.
+        # publicar a todo candidato que no lo este (tambien al relevo
+        # apartado: publicar no es vender, y asi tiene oferta si llega el
+        # ultimo recurso).
         ventas = []
-        for c in sorted(candidatos, key=lambda c: (c["id"] not in vender, c["id"])):
+        for c in sorted(candidatos + aparte, key=lambda c: (c["id"] not in vender, c["id"])):
             pid, valor = c["id"], c["valor"]
             oferta = ofertas.get(pid)
             if pid in vender and oferta:
@@ -1341,6 +1394,30 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         except Exception:                           # noqa: BLE001
             pass
         de_la_mejora = la_mejora(libros.get("mejora"), plantilla, pujas)
+        # EL RELEVO NO SE VENDE (01/11/2026, `la_mejora_del_once.el_relevo`):
+        # el que ENTRA por un cambio vivo de la mejora no se elige para
+        # cobrar (`decidir(relevos=...)`: se publica, y solo a menos de
+        # `HORAS_SOLVENCIA` y con la caja aun en rojo pasa a candidato, el
+        # ultimo recurso). Si se vendiera, la mejora soltaria el cambio y
+        # el que sale ya no se venderia: Ramon Enriquez por Unai Lopez, el
+        # mie 04/11. Con la plantilla de esta vuelta: con el que sale ya
+        # vendido, el relevo es uno mas. El libro, el mismo que
+        # `libros["mejora"]`: de su fichero en produccion (asi se sabe si
+        # no se puede leer y el plan lo dice), el dado si no (sin el,
+        # ninguno, como `la_mejora`: quien da los libros no lee los de
+        # produccion). Con la mejora apagada, ninguno (nadie venderia al
+        # que sale). Apagado, nadie y sin abrir nada: el cierre de siempre.
+        from src.actions.la_mejora_del_once import el_relevo
+
+        if de_produccion:
+            relevo = el_relevo(ruta=rutas["mejora"], plantilla=plantilla)
+        else:
+            dado = libros.get("mejora")
+            relevo = el_relevo({} if dado is None else dado, plantilla=plantilla)
+        if relevo["activo"]:
+            salida["el_relevo"] = {"motivo": relevo["motivo"],
+                                   "no_se_venden": sorted(relevo["entran"]),
+                                   "detalle": relevo["detalle"]}
         # LA ROTACION (17/10/2026): el que sale de una pareja ganada (su
         # relevo ya esta dentro) tampoco juega; fuera del once del cierre
         # (si sobra, lo puede vender: es lo que quiere la rotacion).
@@ -1379,9 +1456,11 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
                     | de_la_rotacion["se_van"]),
             once_escrito=once_escrito, no_retirar=no_retirar,
             inventario=de_la_ronda_y_los_chollos & plantilla,
-            cartera=_la_cartera(),
+            cartera=_la_cartera(), relevos=relevo["entran"],
         )
         salida["decision"] = d
+        if relevo["activo"] and d.get("ultimo_recurso_relevo"):
+            salida["el_relevo"]["ultimo_recurso"] = list(d["ultimo_recurso_relevo"])
         salida["acciones"] = d["acciones"]
 
         # Lo de la ronda y los chollos que entra en el once, adoptado
@@ -1402,6 +1481,8 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         if salida.get("credito_de_sus_ventas"):
             salida["plan"]["credito_de_sus_ventas"] = {
                 str(k): v for k, v in salida["credito_de_sus_ventas"].items()}
+        if salida.get("el_relevo"):
+            salida["plan"]["el_relevo"] = dict(salida["el_relevo"])
         publicar(salida["plan"], plan_ruta)
         salida["motivo"] = d["motivo"]
 
@@ -1456,6 +1537,14 @@ def el_parte(r) -> list:
         if d.get("titulares_que_no_se_venden"):
             lineas.append(f"  Titulares del once escrito que no se venden: "
                           f"{d.get('titulares_que_no_se_venden')}")
+        relevo = _dict(r.get("el_relevo"))
+        if relevo:
+            lineas.append(f"  El relevo no se vende ({relevo.get('motivo')}): "
+                          f"{relevo.get('no_se_venden') or 'nadie'}"
+                          + (f"  ({relevo.get('detalle')})" if relevo.get("detalle") else ""))
+            if relevo.get("ultimo_recurso"):
+                lineas.append(f"  EL RELEVO, ULTIMO RECURSO (a menos de {HORAS_SOLVENCIA} h y "
+                              f"aun en rojo): {relevo.get('ultimo_recurso')} pasa a candidato")
         lineas.append(f"  Caja al empezar la ronda: {_euros(d.get('caja'))}"
                       f"  (saldo - pujas vivas enteras + cobrado en la vuelta)")
         for fid, menos in _dict(r.get("credito_de_sus_ventas")).items():
@@ -1467,13 +1556,17 @@ def el_parte(r) -> list:
         if d.get("deficit"):
             lineas.append(f"  Deficit: {_euros(d.get('deficit'))}")
         for c in _lista(d.get("candidatos")):
-            marca = "VENDER " if c.get("elegido") else "publicar"
+            marca = "VENDER " if c.get("elegido") else (
+                "relevo  " if c.get("relevo") else "publicar")
             lineas.append(f"      {marca} {str(c.get('name'))[:24]:<24} valor "
                           f"{_euros(c.get('valor'))}  cobro {_euros(c.get('cobro'))}  "
                           f"xP {HORIZONTE_DE_QUEDARSE} rondas {c.get('quedarse')}")
         if d.get("falta"):
             lineas.append(f"  FALTA {_euros(d.get('falta'))}: ni todo el banquillo llega "
                           "(los cambios del once son de la mejora o del dueño)")
+            if d.get("relevos_aparte"):
+                lineas.append(f"  Sin contar los relevos de la mejora {d.get('relevos_aparte')}: "
+                              f"solo se venden a menos de {HORAS_SOLVENCIA} h si aun falta")
         for a in _lista(r.get("acciones")):
             lineas.append(f"  -> {a.get('accion')} {a.get('player_id')} {a.get('nombre') or ''} "
                           f"{_euros(a.get('importe') or a.get('precio')) if (a.get('importe') or a.get('precio')) else ''}"

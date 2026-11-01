@@ -505,6 +505,49 @@ def execute_competitive_live_action(
             },
         )
 
+    # EL RELEVO NO SE VENDE (revision del 01/11/2026,
+    # `la_mejora_del_once.los_que_entran`): ni aceptar ni contraofertar
+    # (una contraoferta aceptada por el rival tambien es vender) la oferta
+    # de un rival por el que entra por un cambio vivo de la mejora del
+    # once: vendido, la mejora soltaria el cambio y el que sale ya no se
+    # venderia. Apagado, vacio y sin abrir nada: lo de siempre.
+    try:
+        from src.actions.la_mejora_del_once import los_que_entran as _relevo
+
+        es_el_relevo = fresh_player_id > 0 and fresh_player_id in _relevo()
+    except Exception:                               # noqa: BLE001
+        es_el_relevo = False
+
+    if es_el_relevo:
+
+        return noop(
+            action=
+                action,
+
+            status=
+                "COMPETITIVE_BLOCKED_EL_RELEVO",
+
+            reason=(
+                "EL_RELEVO: la oferta es por el que entra por un cambio vivo "
+                "de la mejora del once; vendido, la mejora soltaria el cambio "
+                "y el que sale ya no se venderia."
+            ),
+
+            success=
+                False,
+
+            extra={
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+
+                "player_id":
+                    fresh_player_id,
+
+                "guardia":
+                    "EL_RELEVO",
+            },
+        )
+
     # =====================================================
     # ESCRITURA UNICA
     # =====================================================

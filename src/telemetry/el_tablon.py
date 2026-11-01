@@ -276,6 +276,16 @@ QUE_HACE = {
         "La cesta del reset del motor viejo solo compra para revender jugadores "
         "de menos de 1.500.000 €: por encima perdía (9 operaciones, un millón "
         "perdido; por debajo, 8 de 8 en verde). Los fichajes no cambian.",
+    "BORDALAS_EL_RELEVO_NO_SE_VENDE":
+        "Cuando la mejora del once ha fichado a uno para que entre por otro (el "
+        "que sale se vende para pagarlo), nadie vende al que entra mientras el "
+        "que sale siga en la plantilla: ni el cierre de la jornada, ni el parte "
+        "vende, ni el motor viejo, ni las ofertas de otros mánagers. Si se "
+        "vendiera, la mejora deshace el cambio, el que sale se queda sin vender "
+        "y la caja de la jornada puede quedar en rojo. Solo si a menos de 20 "
+        "horas de la jornada aún falta dinero, el cierre lo vende como último "
+        "recurso. Hecho el cambio (o con la mejora apagada), el que entró es "
+        "uno más.",
     "BORDALAS_EL_PARTE_VENDE":
         "Vende a los suplentes que Biwenger da en duda o lesionados (caen un "
         "3-5 % en la semana): los publica a su valor y acepta la oferta del "

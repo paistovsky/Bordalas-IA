@@ -435,8 +435,10 @@ def _entorno(**valores):
 
 
 # Los interruptores que esta guardia lee, puestos por ella (doctrina 104).
+# EL RELEVO NO SE VENDE (01/11/2026) tambien lo lee el parte: aqui se
+# mide el parte, apagado; encendido lo mide `test_el_relevo_no_se_vende_v1`.
 ENCENDIDO = {ENV: "1", "BORDALAS_LA_ORDEN_DEL_GESTOR": "1", "BORDALAS_LA_CARTERA": "1",
-             "GITHUB_RUN_ID": None}
+             "GITHUB_RUN_ID": None, "BORDALAS_EL_RELEVO_NO_SE_VENDE": None}
 
 
 def _ficheros(carpeta, **en_la_orden):
