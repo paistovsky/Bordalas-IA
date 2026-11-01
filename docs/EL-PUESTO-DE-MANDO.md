@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 01/11/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 01/11/2026, 13:10 de Madrid (laboratorio de rivales de la manana).
 
 ## El mandato
 
@@ -351,6 +351,57 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **01/11 13:10 (laboratorio de rivales de la manana). CONSTRUIDO, APAGADO,
+  `BORDALAS_LA_SUBASTA_EN_EL_COLCHON`.** **Rivales:** Pollo compra a
+  Valentin Gomez (1.547.000, +2,4 %; sube 7 dias seguidos, +43 %) y ya lo
+  tiene a la venta a 1.540.000: especula. Vende a Riedel a la maquina
+  (732.900; lo tuvo 11 dias, -274 mil, -27 %). Luismi RECOMPRA a Drkusic
+  (1.156.000, +12,2 %): lo habia vendido a la maquina el 30/10 a las 20:48
+  por 958.600, 12 minutos antes del Villarreal-Espanyol; se perdio sus 8
+  puntos y la ida y vuelta le cuesta 197 mil. Caja (cuadra al euro):
+  Alvaro 17,7 M, Prinzipote 3,3 M, Pollo 3,0 M, Mex 2,5 M, Manzagool 1,0 M,
+  DiosMande 0,5 M, nosotros -4,71 M, Luismi -5,39 M. A Luismi le faltan
+  ~3,6-4,1 M antes del vie 20:59 (con el premio): tiene a la venta Kang-in
+  Lee 9,01 M, Gerard Martin 5,27 M, Kounde 2,96 M, Thiago Fernandez 1,64 M
+  y Ndukwe 1,30 M (estos dos, bajo mercado). J11 a mitad (puntos por
+  jugador, sin capitan): Pollo 48, nosotros 45 (Yamal 21), Luismi 28 con 5
+  titulares por jugar; acumulado Pollo 480, nosotros 467. **Lo aprendido:**
+  el rojo de Luismi no es apuro: vende a la MAQUINA, al euro, minutos antes
+  del inicio, y recompra despues. Sus jugadores anunciados no esperan a
+  nuestra puja: se los lleva la oferta de Biwenger y vuelven al mercado a
+  precio de mercado, no rebajados. No hay chollo que cazarle. **Lo
+  aplicado:** el arreglo de la cesta del reset que compro a Dani, NACIDO
+  APAGADO (merge c1ec3117). Encendido: (1) no puja a menos de 40 h de la
+  jornada ni sin reloj (CERCA_DE_LA_JORNADA); (2) solo lo que sube de
+  verdad (Dani +10 mil sobre 2,02 M no llega al minimo de 22 mil); (3) la
+  cesta, acumulada, tiene que caber en el colchon de la casa contando las
+  pujas vivas, las del libro desde que abrio la ventana y la foto de
+  `post_action` si el motor viejo ya pujo; si no se puede calcular, no
+  puja (SIN_COLCHON); (4) lo que puja la cesta se apunta en la foto de la
+  vuelta, para que la orden, los chollos y la ronda no vuelvan a gastar
+  el mismo colchon. El 31/10 a las 04:48 habria dado NO_SUBE_DE_VERDAD; con
+  Dani subiendo, SIN_COLCHON (1.179.775 contra 2.025.051). Apagado es main
+  byte a byte (70.056 llamadas iguales en 3.11 y 3.13). Dos revisores
+  adversariales: SHIP_OFF los dos; un tercero arreglo sus seis hallazgos
+  (634edf03). Tambien tiene ya su frase `BORDALAS_CESTA_SOLO_EL_SUELO`.
+  **Para encenderlo (despues de la J12, no antes; no jue/vie):** UN solo
+  commit que quite `BORDALAS_SIN_SUBASTA`, ponga
+  `BORDALAS_LA_SUBASTA_EN_EL_COLCHON` y `BORDALAS_CESTA_SOLO_EL_SUELO`, y
+  regenere `config/paso_0.json` (`--paso-0`, 59 probados). Probado en una
+  copia: paso 0 y verja 230/230 en 3.11 y 3.13; el parche de referencia
+  esta en el scratch del laboratorio
+  (`objetivo0111_logs/encendido_de_referencia.patch`). Antes, un ensayo
+  con el calendario restaurado y una revision adversarial del arreglo del
+  tercero. OJO: `--con` no prueba el encendido mientras SIN_SUBASTA siga
+  puesto (el plan sale INTERRUPTOR sin pujas); hay que probar con el YAML
+  final. Siguen sin ver la cesta (como en main): el V10 BUY y el carril.
+  **Incidente del laboratorio:** un `set -e` de un agente no paro dentro
+  de una lista `&&`, y durante unos dos minutos dejo la copia principal en
+  un commit suelto con la linea 533 del YAML cambiada; lo deshizo el
+  mismo agente, sin commit ni push. Comprobado: arbol limpio en `main`.
+  Leccion: los agentes no tocan la copia principal; sus comandos van con
+  `cd` absoluto al worktree y con `|| exit` en cada paso.
 
 - **01/11 09:00 (supervision).** **Reset de las 07:00:** Juan Iglesias
   GANADO (3.769.900, a un rival). Saldo **-4.714.876**, 0 comprometido.
