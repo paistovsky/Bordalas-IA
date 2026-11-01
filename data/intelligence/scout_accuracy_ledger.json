@@ -2723966,13 +2723966,13 @@
       "price_at_prediction": 7420000,
       "predicted_at": "2026-10-29T23:11:12.515530+00:00",
       "due_at": "2026-11-01T23:11:12.515530+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 7330000,
+      "actual_direction": "DOWN",
+      "actual_percent": -1.213,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-11-01T23:11:13.655206+00:00"
     },
     "742|FUTBOLFANTASY|1|2026-10-30": {
       "player_id": "742",
