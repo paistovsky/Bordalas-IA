@@ -352,6 +352,27 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **01/11 09:00 (supervision).** **Reset de las 07:00:** Juan Iglesias
+  GANADO (3.769.900, a un rival). Saldo **-4.714.876**, 0 comprometido.
+  Rivales: Pollo ficha a Valentin Gomez (1.547.000) y vende a Riedel
+  (732.900); Luismi ficha a Drkusic (1.156.000) con -4,2 M. Ronda, chollos
+  y orden: NADA_QUE_HACER. La mejora: caja de la jornada -259.376 (minimo
+  -1 M; cuenta las ventas de Gaya, Unai y Ortiz desde el mar 00:07).
+  Anoche, Barcelona 6-1: Yamal 2 goles y 1 asistencia; Pablo Ibanez
+  suplente, entro en el 55' (amarilla). **Lista de objetivos: sale Ivan
+  Martin** (Racing, MED, 2.770.000, no sube, FF 90 Clave). Plan y
+  esceptico: xP J12-J14 3,93 contra 3,09 de Pablo al 80 % (+0,45 a +0,84
+  por jornada; Pablo sigue en el once tipo, fue dosificacion). **Orden:**
+  `fichar` Ivan Martin a 2.779.900 (lo que pide en 9.900; el +5-8 % de la
+  lista pasa el tope de prima) y `vender_si_ficha` Pablo Ibanez (suelo
+  2.410.000) si llega; se vende el mar 00:07 o 07:15. Caja de la J12 (vie
+  15:00, con racha): +0,88 M con el premio minimo, +0,61 M con Pablo al
+  suelo; la mejora no baja de -495.388 (no entra en deficit). **Pendiente:**
+  hoy Racing-Real Madrid 16:15: si Ivan se lesiona o le expulsan, pasa a
+  `no_pujar` (asi se retira la puja; quitarlo de `fichar` NO la retira)
+  antes de la vuelta de las 04:50, y se vacia el `vender_si_ficha`. Lun
+  por la manana: ganado, a `conservar`; perdido, fuera las dos lineas.
+
 - **01/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2630 a #2639,
   la de las 07:15 incluida). **Juan Iglesias GANADO** (3.769.900). Saldo
   **-4.714.876**, 0 comprometido. Acepto la correccion del chat del dueno
