@@ -282,6 +282,10 @@ def test_la_pantalla_tampoco_anuncia_al_vetado() -> None:
     plan_falso = {"bids": [{"id": LEJEUNE, "name": "Lejeune"},
                            {"id": 7, "name": "Otro"}], "execute": False}
     antes_env = os.environ.get(orden_mod.ENV)
+    # Esta mide la orden, no el colchon (doctrina 104): con
+    # `BORDALAS_LA_SUBASTA_EN_EL_COLCHON` puesto, el plan falso -sin foto,
+    # sin saldo- no cabria y no quedaria nada que vetar.
+    antes_colchon = os.environ.pop(sub.EN_EL_COLCHON_ENV, None)
     reales = (sub.plan_del_reset, sub.lectura_del_estado)
     with tempfile.TemporaryDirectory() as tmp:
         ruta = Path(tmp) / "orden.json"
@@ -306,6 +310,8 @@ def test_la_pantalla_tampoco_anuncia_al_vetado() -> None:
                 os.environ.pop(orden_mod.ENV, None)
             else:
                 os.environ[orden_mod.ENV] = antes_env
+            if antes_colchon is not None:
+                os.environ[sub.EN_EL_COLCHON_ENV] = antes_colchon
 
 
 def test_subir_la_puja() -> None:

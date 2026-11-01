@@ -3461,7 +3461,7 @@ def bloque_de_la_subasta(
             lectura_del_estado(state, snapshot)
         )
 
-        return {
+        bloque = {
             "available": bool(plan.get("available")),
             "would_bid": bool(plan.get("execute")),
             "sombra": sombra_de_la_puja,
@@ -3554,6 +3554,22 @@ def bloque_de_la_subasta(
             #     que la portada tiene que evitar.
             "bids_book": _libro_de_pujas(),
         }
+
+        # LA SUBASTA EN EL COLCHON (01/11/2026): lo que quito y por
+        # que, solo si el colchon miro la cesta (con su interruptor y
+        # con pujas que mirar). Apagado el plan no trae estas claves y
+        # el bloque sale con las de siempre. La sombra no pasa por el
+        # colchon: es la cesta sin candados.
+        if "en_el_colchon" in plan:
+            bloque["dropped_by_colchon"] = safe_int(
+                plan.get("dropped_by_colchon")
+            )
+            bloque["dropped_by_no_sube_de_verdad"] = safe_int(
+                plan.get("dropped_by_no_sube_de_verdad")
+            )
+            bloque["en_el_colchon"] = plan.get("en_el_colchon")
+
+        return bloque
 
     except Exception as error:                      # noqa: BLE001
         return {
