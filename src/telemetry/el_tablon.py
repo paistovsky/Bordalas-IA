@@ -264,6 +264,13 @@ QUE_HACE = {
         "ventas, el once y el cierre no cambian. Puesto el 31/10 para la semana "
         "de la J12: la cesta pujaba sin mirar el colchón ni lo cerca que está la "
         "jornada.",
+    "BORDALAS_LA_SUBASTA_EN_EL_COLCHON":
+        "La cesta del reset del motor viejo (04:45 y 04:50) solo puja si faltan "
+        "40 h o más para la jornada (sin calendario, no puja), por jugadores que "
+        "suben de verdad hoy (la subida mínima de su tramo, la misma vara que la "
+        "mejora) y si cada puja, sumada a las de delante, cabe en el colchón de "
+        "la casa: saldo menos todas las pujas vivas más el 92 % de lo de la "
+        "cartera. Lo que no cabe no se puja; sin saldo en la foto, nada.",
     "BORDALAS_EL_PARTE_VENDE":
         "Vende a los suplentes que Biwenger da en duda o lesionados (caen un "
         "3-5 % en la semana): los publica a su valor y acepta la oferta del "

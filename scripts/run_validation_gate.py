@@ -236,6 +236,11 @@ TESTS = [
     # Un solo colchon: con la cartera, lo que puja el motor viejo tiene
     # que caber en el colchon de la ronda, y cuenta entero. Apagado.
     "src.analysis.test_un_solo_colchon_v1",
+    # La subasta en el colchon (la cesta del 31/10 04:48 por Dani Lorenzo):
+    # la cesta del reset solo puja a 40 h o mas de la jornada, por lo que
+    # sube de verdad y si cabe, acumulado, en el colchon de la casa. Apagado,
+    # la cesta de main byte a byte (huella por version de Python).
+    "src.analysis.test_la_subasta_en_el_colchon_v1",
     # El motor viejo: no puja a los vetados de la orden y, con su
     # interruptor, solo por el que sube. Apagado.
     "src.analysis.test_el_motor_viejo_v1",

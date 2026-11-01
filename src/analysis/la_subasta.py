@@ -1659,6 +1659,44 @@ def _sin_subasta() -> bool:
     ).strip().lower() in {"1", "true", "si", "yes"}
 
 
+# ============================================================
+# LA SUBASTA EN EL COLCHON (01/11/2026)
+# ============================================================
+#
+#     El 31/10 a las 04:48 esta cesta pujo 2.025.051 por Dani Lorenzo con
+#     el saldo en 1.299.975 y 929.800 en pujas vivas de la ronda. El freno
+#     de la solvencia dijo SIN_DEUDA (no ve ni la cesta ni las pujas
+#     vivas), el tope es min(presupuesto, 3 x saldo), nadie miraba lo
+#     cerca que estaba la jornada y el colchon de la casa solo lo mira el
+#     ejecutor. El colchon era 1.179.775: no cabia.
+#
+#     Con el interruptor, `plan_desde_el_estado` -por donde pasan el ciclo
+#     y la pantalla- pasa la cesta por
+#     `la_subasta_en_el_colchon.en_el_colchon`: nada a menos de 40 h de la
+#     jornada (ni sin calendario), solo lo que sube de verdad, y cada puja
+#     tiene que caber en el colchon contando las de delante. Ver aquel
+#     modulo.
+#
+#     SE LEE AQUI Y SOLO AQUI. NACE APAGADO: apagado, el plan es el de
+#     antes letra a letra y el modulo no se llama. Si no se puede leer el
+#     entorno, apagado, como todos los de la casa.
+EN_EL_COLCHON_ENV = "BORDALAS_LA_SUBASTA_EN_EL_COLCHON"
+
+
+def _en_el_colchon() -> bool:
+    """Si la cesta pasa por el colchon de la casa. Nunca lanza."""
+
+    try:
+        import os
+
+        return str(
+            os.environ.get(EN_EL_COLCHON_ENV, "")
+        ).strip().lower() in {"1", "true", "si", "yes"}
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def mira_si_va_a_jugar_de_verdad(candidatos: list | None) -> dict:
     """
     La regla de compra, sobre los candidatos de la cesta.
@@ -2427,6 +2465,15 @@ def plan_desde_el_estado(
     en_vivo: bool = False,
     max_pujas: int = MAX_PUJAS_PRIMER_DIA,
     ya_pujados: list | None = None,
+
+    # LA HORA, EL CALENDARIO Y EL LIBRO DE LA RONDA (01/11/2026). Solo los
+    # mira el colchon, y solo con `BORDALAS_LA_SUBASTA_EN_EL_COLCHON`.
+    # `None` es el reloj de verdad, `los_chollos.CALENDARIO` y
+    # `la_ronda_de_la_manana.LIBRO`; las guardias los pasan para no leer
+    # el mundo. Apagado no se miran.
+    ahora=None,
+    calendario=None,
+    libro_ruta=None,
 ) -> dict:
     """
     El plan del reset a partir del estado del ciclo.
@@ -2435,8 +2482,10 @@ def plan_desde_el_estado(
     pasando por el mismo sitio.
     """
 
+    lectura = lectura_del_estado(state, snapshot)
+
     plan = plan_del_reset(
-        **lectura_del_estado(state, snapshot),
+        **lectura,
         ya_pujados=ya_pujados,
         en_vivo=en_vivo,
         max_pujas=max_pujas,
@@ -2462,6 +2511,45 @@ def plan_desde_el_estado(
             }
     except Exception:                               # noqa: BLE001
         pass
+
+    # LA SUBASTA EN EL COLCHON (01/11/2026)
+    #
+    #     Despues de la orden: lo vetado no ocupa sitio en el colchon. Aqui
+    #     y no en `plan_del_reset` porque es aqui donde estan la foto (el
+    #     saldo y las pujas vivas) y por donde pasan el ciclo y la
+    #     pantalla. Encendido, si no se puede mirar, no se puja.
+    if _en_el_colchon():
+        try:
+            from src.analysis.la_subasta_en_el_colchon import (
+                en_el_colchon,
+            )
+
+            plan = en_el_colchon(
+                plan,
+                snapshot,
+                plantilla=(lectura or {}).get("plantilla"),
+                ahora=ahora,
+                calendario=calendario,
+                libro_ruta=libro_ruta,
+            )
+
+        except Exception as error:                  # noqa: BLE001
+            plan = {
+                **(plan if isinstance(plan, dict) else {}),
+                "execute": False,
+                "bids": [],
+                "committed": 0,
+                "expected": 0,
+                "all_won": 0,
+                "slots_used": 0,
+                "worst_case": None,
+                "blocked_by": "SIN_COLCHON",
+                "reason": (
+                    f"No se pudo mirar el colchon de la casa "
+                    f"({EN_EL_COLCHON_ENV}): {type(error).__name__}: "
+                    f"{error}. No se puja."
+                ),
+            }
 
     return plan
 
