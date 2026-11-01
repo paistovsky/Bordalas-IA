@@ -69,6 +69,32 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E76 · 01/11/2026 17:16 de Madrid · El Computer no elige a los que suben: ~2 al dia que merezcan la pena
+
+**Hipotesis:** el Computer pone en el mercado a jugadores que estan
+subiendo (E61 solo miro el precio y vio que elige casi al azar).
+**Datos:** 46 dias de escaparate (514 entradas nuevas, el primer dia de
+cada salida; la lista del dia d es la de d-1, E70) contra todos los
+jugadores con precio esos dias (n = 24.807 jugador-dia).
+**Codigo:** `lab/mercado/sube_el_que_sale.py`.
+
+    subio la vispera de entrar en la lista:  18 %   (el resto ese dia: 22 %)
+    dos dias despues de entrar: mediana -0,9 %, suben 20 %
+
+**Lo que se aprende:**
+- **No:** el Computer no elige a los que suben; si acaso algo menos (18 %
+  contra 22 %). Lo que sale es, sobre todo, gente que baja.
+- **Cuenta util:** de los ~11 nuevos de cada dia, solo ~2 suben. Las
+  oportunidades «buenas» para la cartera, la rotacion o la mejora (el que
+  sube, E1/E41/E63) son ~2 al dia, y por ellas pujan los rivales (E41:
+  pelea en 64-83 %). No hay mas de donde sacar.
+
+**Limites:** «el resto» incluye jugadores de los managers; la subida que
+cuenta es la de la vispera del primer dia de la salida.
+
+**Veredicto: SE AGUANTA E61** con un dato mas. Poco nuevo: confirma que
+las compras que pagan son pocas y disputadas (E69/E70).
+
 ### E75 · 01/11/2026 11:16 de Madrid · E57 fuera de muestra (n pequeño): la vispera sigue tranquila
 
 **Hipotesis:** lo de E57 (en el reset del dia de la jornada hay la mitad
