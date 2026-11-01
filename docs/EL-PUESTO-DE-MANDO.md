@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 31/10/2026, 21:25 de Madrid (rafaga de las 21:15).
+Actualizado: 01/11/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **01/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2630 a #2639,
+  la de las 07:15 incluida). **Juan Iglesias GANADO** (3.769.900). Saldo
+  **-4.714.876**, 0 comprometido. Acepto la correccion del chat del dueno
+  a mi plan de anoche: con Iglesias no se vende a Dani; la caja la cierran
+  la venta de **Gaya** (la mejora) y la de **Unai** (Ramon Enriquez entra
+  por el), mas el premio de la J11 y la racha; neto +0,86 pts/jornada,
+  revisado por un esceptico. Tambien el chat del dueno encendio
+  `BORDALAS_SIN_SUBASTA` para la semana de la J12 (cierra solo la cesta de
+  las 04:45/04:50, la que compro a Dani): un interruptor que QUITA compras,
+  bien. **Mi control:** cada rafaga miro que las dos ventas esten en
+  marcha; el mie 04/11 21:15, si la caja del vie 15:00 no sale en verde en
+  el peor caso, aviso al dueno con a quien mas vender.
 
 - **31/10 22:30 (laboratorio de rivales de la noche). ENCENDIDO
   `BORDALAS_SIN_SUBASTA`.** **Rivales:** ni una compra ni una venta desde
