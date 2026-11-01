@@ -2583,3 +2583,6 @@
 {"dia":"2026-11-01","id":34111,"name":"Gerard Martín","value":0,"price":5250000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-01","id":1721,"name":"Manu Sánchez","value":0,"price":1640000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-01","id":42557,"name":"Adeyemi","value":0,"price":9250000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-01","id":30495,"name":"Moleiro","value":10774266,"price":10590000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-01","id":19860,"name":"Febas","value":2685936,"price":2640000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-01","id":38318,"name":"Valentín Gómez","value":1624880,"price":1540000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
