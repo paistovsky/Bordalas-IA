@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 01/11/2026, 13:10 de Madrid (laboratorio de rivales de la manana).
+Actualizado: 01/11/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **01/11 14:15 (rafaga de la tarde).** Ciclos: verdes (#2639 a #2646).
+  Saldo -4.714.876; puja viva **Ivan Martin 2.779.900** (la orden; lun
+  07:00), con `vender_si_ficha` Pablo Ibanez (suelo 2.410.000). Revisada
+  la cuenta del chat del dueno: J12 a +0,61 M en el peor caso (premio
+  minimo, Pablo al suelo), con las ventas de Gaya, Unai y Ortiz que hace
+  la mejora desde el mar 00:07. **Comprobado:** Gaya y Unai estan en
+  `conservar`, pero `conservar` solo frena a el parte vende y a la
+  rotacion; la mejora no lo lee, asi que sus ventas no quedan bloqueadas.
+  Aun asi lo dejo dicho: que el mismo jugador este en `conservar` y en el
+  plan de venta confunde a quien lea la orden. Mi control fuerte, mie
+  04/11 21:15.
 
 - **01/11 13:10 (laboratorio de rivales de la manana). CONSTRUIDO, APAGADO,
   `BORDALAS_LA_SUBASTA_EN_EL_COLCHON`.** **Rivales:** Pollo compra a
