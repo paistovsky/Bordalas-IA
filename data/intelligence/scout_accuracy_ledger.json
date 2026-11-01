@@ -2723903,13 +2723903,13 @@
       "price_at_prediction": 14730000,
       "predicted_at": "2026-10-29T10:11:08.435592+00:00",
       "due_at": "2026-11-01T10:11:08.435592+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 15330000,
+      "actual_direction": "UP",
+      "actual_percent": 4.073,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-11-01T11:12:11.200439+00:00"
     },
     "19513|PRENSA_MARCA|3|2026-10-29": {
       "player_id": "19513",
@@ -2723924,13 +2723924,13 @@
       "price_at_prediction": 2260000,
       "predicted_at": "2026-10-29T10:11:09.319834+00:00",
       "due_at": "2026-11-01T10:11:09.319834+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "MISS",
+      "price_at_outcome": 2230000,
+      "actual_direction": "DOWN",
+      "actual_percent": -1.327,
+      "direction_hit": false,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-11-01T11:12:11.200439+00:00"
     },
     "34527|PRENSA_MUNDO_DEPORTIVO|3|2026-10-29": {
       "player_id": "34527",
@@ -2723945,13 +2723945,13 @@
       "price_at_prediction": 8160000,
       "predicted_at": "2026-10-29T10:11:21.255843+00:00",
       "due_at": "2026-11-01T10:11:21.255843+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 7830000,
+      "actual_direction": "DOWN",
+      "actual_percent": -4.044,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-11-01T11:12:11.200439+00:00"
     },
     "35770|PRENSA_MUNDO_DEPORTIVO|3|2026-10-29": {
       "player_id": "35770",
