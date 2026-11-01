@@ -7,7 +7,7 @@ Del tablon: cada subasta del Computer (se resuelve en el reset de las
 07:00), las horas hasta el siguiente roundStarted, cuantos pujaron y la
 prima del ganador sobre el precio de la vispera. Por tramos de horas.
 
-Uso:  python3 lab/subasta/vispera_de_jornada.py
+Uso:  python3 lab/subasta/vispera_de_jornada.py [desde AAAA-MM-DD]
 """
 import bisect
 import datetime as dt
@@ -23,6 +23,7 @@ from viajes import TABLON, Precios, dia_de_mercado, pct  # noqa: E402
 D = dt.timedelta(days=1)
 
 if __name__ == "__main__":
+    desde = dt.date.fromisoformat(sys.argv[1]) if len(sys.argv) > 1 else dt.date(2000, 1, 1)
     ev = json.load(open(TABLON))
     inicios = sorted(e["date"] for e in ev if e["type"] == "roundStarted")
     P = Precios()
@@ -32,7 +33,7 @@ if __name__ == "__main__":
             continue
         for x in e["content"]:
             t = x.get("date", e["date"])
-            if (x["player"], x["amount"]) in vistos:
+            if (x["player"], x["amount"]) in vistos or dia_de_mercado(t) < desde:
                 continue
             vistos.add((x["player"], x["amount"]))
             i = bisect.bisect_right(inicios, t)

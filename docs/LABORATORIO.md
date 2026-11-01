@@ -69,6 +69,30 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E75 · 01/11/2026 11:16 de Madrid · E57 fuera de muestra (n pequeño): la vispera sigue tranquila
+
+**Hipotesis:** lo de E57 (en el reset del dia de la jornada hay la mitad
+de pelea) se repite en las subastas que E57 no vio (desde el 23/10).
+**Datos:** las 21 subastas del Computer resueltas del 23/10 al 01/11; 4 en
+el reset del dia de la jornada (J10 y J11).
+**Codigo:** `lab/subasta/vispera_de_jornada.py` (ahora acepta `desde`).
+
+    reset del dia de la jornada (n=4):  con pelea 1 (25 %)   [E57: 31 %]
+    resto (n=17):                        con pelea 10 (59 %)  [E57: 50-57 %]
+
+    las cuatro: Boye (Pepe) +12,2 % sin rival; el 241.000 de Luismi
+    +20,5 % sin rival; un 369.000 de Pepe -0,3 % sin rival; el 10,5 M de
+    Luismi +9,6 % con 2 rivales.
+
+**Lo que se aprende:** **E57 se repite** (n muy pequeño): 3 de 4 sin rival
+la vispera. Y dos de esas tres se pagaron caras sin necesidad (Boye a
++12,2 %, Luismi a +20,5 %): es justo lo que la regla de E57 ahorra.
+
+**Limites:** n = 4. Es una comprobacion, no una medida nueva.
+
+**Veredicto: SE AGUANTA E57** (su linea de «Listo para el plan» sigue).
+No he aprendido nada nuevo aparte de que se cumple.
+
 ### E74 · 31/10/2026 17:14 de Madrid · La caja de la J12 si entra Juan Iglesias: hace falta vender a Dani Lorenzo
 
 **El caso:** la mejora puja 3.769.900 por Juan Iglesias (se resuelve mañana
