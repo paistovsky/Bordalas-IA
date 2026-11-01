@@ -352,6 +352,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **01/11 18:30 (Ivan Martin tras el Racing-Real Madrid).** Titular, 0-3,
+  cambiado en el 82' por Andre Almeida (cambio normal, sin tarjeta ni
+  lesion; el lesionado del Racing fue Mantilla). FF: 100 %, Clave. La puja
+  (2.779.900) y el `vender_si_ficha` de Pablo se quedan como estan.
+
 - **01/11 13:10 (laboratorio de rivales de la manana). CONSTRUIDO, APAGADO,
   `BORDALAS_LA_SUBASTA_EN_EL_COLCHON`.** **Rivales:** Pollo compra a
   Valentin Gomez (1.547.000, +2,4 %; sube 7 dias seguidos, +43 %) y ya lo
