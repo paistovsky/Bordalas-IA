@@ -168,6 +168,17 @@ LA MEJORA A LA SALIDA (28/10/2026, `BORDALAS_LA_MEJORA_A_LA_SALIDA`)
     puja. Ver el bloque junto a `la_mejora_a_la_salida_activa`. Nace
     APAGADO.
 
+EL RELEVO NO SE VENDE (01/11/2026, `BORDALAS_EL_RELEVO_NO_SE_VENDE`)
+
+    Si otro vende al que ENTRA por un cambio antes de que se venda el
+    que sale, este modulo suelta el cambio y el que sale ya no se vende
+    (Ramon Enriquez por Unai Lopez, la caja de la J12). Con el
+    interruptor, `el_relevo` da los que entran por un cambio vivo de
+    este libro, leido como lo lee `decidir`, y el cierre de la jornada,
+    el parte vende y las dos aceptaciones del motor viejo no los venden.
+    Aqui no cambia nada. Ver el bloque junto a
+    `el_relevo_no_se_vende_activo`. Nace APAGADO.
+
 QUE NO HACE
 
     No toca a Yamal (salvo su llave de lesión), ni a los `proteger` de la
@@ -201,6 +212,7 @@ ENV_SOLO_SI_SUBE = "BORDALAS_LA_MEJORA_SOLO_SI_SUBE"        # nace APAGADO
 ENV_PUJA_EN_9900 = "BORDALAS_LA_PUJA_EN_9900"               # nace APAGADO
 ENV_LA_JORNADA_DE_CADA_PAGINA = "BORDALAS_LA_JORNADA_DE_CADA_PAGINA"   # nace APAGADO
 ENV_A_LA_SALIDA = "BORDALAS_LA_MEJORA_A_LA_SALIDA"          # nace APAGADO
+ENV_EL_RELEVO = "BORDALAS_EL_RELEVO_NO_SE_VENDE"            # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
 # El tablero de FF (`futbolfantasy_provider.BOARD_FILE`), para LA JORNADA
@@ -545,6 +557,147 @@ def el_calendario_activo() -> bool:
             "1", "true", "si", "yes"}
     except Exception:                               # noqa: BLE001
         return False
+
+
+# EL RELEVO NO SE VENDE (01/11/2026, `BORDALAS_EL_RELEVO_NO_SE_VENDE`;
+# el parte de la plantilla de las 19:10 y el laboratorio del 01/11)
+#
+# EL FALLO. Un cambio de este libro es «X entra por Y» ({X: {"sale": Y}}):
+# Y se vende cuando X ya esta dentro. Si otro vende a X antes de que se
+# venda Y, `decidir` suelta el cambio ("sin relevo, el que sale se
+# queda") e Y NO se vende: la caja de la jornada se queda sin lo que iba a
+# dar y la ronda puede empezar en rojo (0 puntos el once entero). Y nadie
+# guardaba a X: el cierre lee este libro pero solo aparta a Y
+# (`el_cierre_de_la_jornada.la_mejora`), y para los demas X es un
+# suplente mas. El caso: Ramon Enriquez entra por Unai Lopez (adoptado de
+# los chollos el 30/10). El mie 04/11 a las 07:15, con Ivan perdido y Unai
+# sin vender (caja -1.990.776), el unico candidato del cierre era Ramon,
+# con una oferta de 409.200 que pasa el 90 %; y el motor viejo podia
+# aceptarla de madrugada (el cluster que caduca), porque Ramon no esta en
+# `conservar`.
+#
+# LA REGLA. Con el interruptor, `el_relevo` da los que ENTRAN por un
+# cambio vivo de este libro, y no los venden: el cierre de la jornada
+# (van con sus protegidos: ni se publican ni se aceptan), el parte vende
+# (`EL_RELEVO`) y las dos aceptaciones del motor viejo
+# (`autopilot_executor`: la oferta de solvencia y la de antes de caducar,
+# junto a `_conservados`, `_aguanta` y `_rota`). La rotacion ya no los
+# tocaba (`los_que_otros_venden._de_la_mejora` trae las claves); la ronda
+# y los chollos solo venden lo de sus libros, y la adopcion lo saca de
+# ellos; la mejora no vende a sus `vivos`.
+#
+# VIVO, COMO LO LEE LA MEJORA (`decidir`, 5. SALIDA): la clave es el que
+# entra y `sale` el que sale. Con `plantilla` (el cierre y el parte la
+# saben), solo cuenta el cambio cuyo que sale y cuyo que entra son
+# nuestros: con el que sale ya vendido el cambio esta hecho y el relevo
+# vuelve a ser uno mas; el que entra con la puja aun viva no se puede
+# vender. Sin `plantilla` (el motor viejo solo ve la oferta), todo el que
+# entra del libro: la mejora lo limpia en su vuelta (corre despues del
+# motor viejo), asi que el relevo de un cambio que ella acaba de cerrar
+# queda guardado como mucho una vuelta mas. Del lado del plan.
+#
+# SIN LIBRO QUE LEER. Sin fichero no hay cambios vivos: nadie
+# (`SIN_LIBRO`). Si no se puede leer o no es un libro, no se sabe quien
+# entra: lo de main (nadie) y el motivo, para el log y el plan del cierre
+# (`LIBRO_ILEGIBLE`, `NO_ES_UN_LIBRO`). No se guarda «a todos por si
+# acaso»: la mejora lo lee igual (`_leer` da {}), suelta todos sus
+# cambios en su vuelta y ya no vende a ninguno de los que salen; guardar
+# al relevo de un cambio que ya no existe solo le quitaria al cierre lo
+# que necesita para la caja. Un cambio cuya clave o cuyo `sale` no es un
+# numero no existe para la mejora (lo suelta o no lo lee), y aqui
+# tampoco.
+#
+# Nace APAGADO. Apagado, vacio y sin abrir nada: los tres enganches son
+# main byte a byte (`test_el_relevo_no_se_vende_v1`, una huella por
+# version de Python).
+
+def el_relevo_no_se_vende_activo() -> bool:
+    """`BORDALAS_EL_RELEVO_NO_SE_VENDE`, leido como `activa` (al
+    llamarse). Es el UNICO sitio que lo lee: los enganches llaman a
+    `el_relevo` o `los_que_entran`. Nace APAGADO. Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_EL_RELEVO, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def el_relevo(libro=None, *, ruta=None, plantilla=None) -> dict:
+    """
+    EL RELEVO NO SE VENDE: los que entran por un cambio vivo del libro de
+    la mejora (ver el bloque de arriba).
+
+        libro      el libro ya leido ({entra: {"sale", ...}}); None: se
+                   lee de `ruta` (por defecto `LIBRO`, al llamar)
+        plantilla  los ids nuestros (sin lo vendido en esta vuelta): con
+                   ella solo cuenta el cambio cuyo que sale y cuyo que
+                   entra son nuestros; None, todo el que entra del libro
+
+    `{"activo", "motivo", "entran": frozenset, "detalle"}`. `motivo`:
+    APAGADO (y no se abre nada), SIN_LIBRO, LIBRO_ILEGIBLE,
+    NO_ES_UN_LIBRO, LEIDO o ERROR; sin LEIDO, `entran` vacio (lo de
+    main). Nunca lanza.
+    """
+    salida = {"activo": False, "motivo": "APAGADO", "entran": frozenset(), "detalle": None}
+    try:
+        if not el_relevo_no_se_vende_activo():
+            return salida
+        salida["activo"] = True
+        if libro is None:
+            camino = Path(LIBRO if ruta is None else ruta)
+            try:
+                texto = camino.read_text(encoding="utf-8")
+            except FileNotFoundError:
+                salida["motivo"] = "SIN_LIBRO"
+                return salida
+            except (OSError, ValueError) as error:
+                salida["motivo"] = "LIBRO_ILEGIBLE"
+                salida["detalle"] = f"{camino.name}: {type(error).__name__}: {error}"
+                return salida
+            try:
+                libro = json.loads(texto)
+            except ValueError as error:
+                salida["motivo"] = "LIBRO_ILEGIBLE"
+                salida["detalle"] = f"{camino.name}: {type(error).__name__}: {error}"
+                return salida
+        if not isinstance(libro, dict):
+            salida["motivo"] = "NO_ES_UN_LIBRO"
+            salida["detalle"] = f"un {type(libro).__name__}, no un dict"
+            return salida
+
+        def _id(x):
+            try:
+                return _int(x)
+            except Exception:                       # noqa: BLE001
+                return None
+
+        nuestros = None
+        if plantilla is not None:
+            nuestros = {i for i in (_id(x) for x in plantilla) if i is not None}
+        entran = set()
+        for clave, cambio in libro.items():
+            entra = _id(clave)
+            sale = _id(cambio.get("sale")) if isinstance(cambio, dict) else None
+            if entra is None or sale is None:
+                continue
+            if nuestros is not None and (entra not in nuestros or sale not in nuestros):
+                continue
+            entran.add(entra)
+        salida["motivo"] = "LEIDO"
+        salida["entran"] = frozenset(entran)
+        return salida
+    except Exception as error:                      # noqa: BLE001
+        return {"activo": bool(salida.get("activo")), "motivo": "ERROR",
+                "entran": frozenset(), "detalle": f"{type(error).__name__}: {error}"}
+
+
+def los_que_entran(libro=None, *, ruta=None, plantilla=None) -> frozenset:
+    """Solo los ids de `el_relevo`: lo que leen el motor viejo y quien no
+    necesite el motivo. Apagado, vacio y sin abrir nada. Nunca lanza."""
+    try:
+        return el_relevo(libro, ruta=ruta, plantilla=plantilla)["entran"]
+    except Exception:                               # noqa: BLE001
+        return frozenset()
 
 
 def _int(x, defecto=None):

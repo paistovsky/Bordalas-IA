@@ -789,9 +789,13 @@ def execute_autopilot_decision(
         # de la jornada la cuadra el cierre.
         # LA ROTACION (17/10/2026): ni el que sale de una pareja con la puja
         # viva (hasta saber si llega el que entra).
+        # EL RELEVO NO SE VENDE (01/11/2026): ni el que entra por un cambio
+        # vivo de la mejora del once (vendido, la mejora suelta el cambio y
+        # el que sale ya no se vende). Apagado, nadie.
         from src.actions.la_orden_del_gestor import conservados as _conservados
         from src.actions.la_ronda_de_la_manana import los_que_aguanta as _aguanta
         from src.actions.la_rotacion import los_que_rota as _rota
+        from src.actions.la_mejora_del_once import los_que_entran as _relevo
 
         if (
             offer.get(
@@ -799,7 +803,8 @@ def execute_autopilot_decision(
             )
             == "NEVER_AUTO_SELL"
             or (offer.get("player_id") is not None
-                and int(offer.get("player_id")) in (_conservados() | _aguanta() | _rota()))
+                and int(offer.get("player_id"))
+                in (_conservados() | _aguanta() | _rota() | _relevo()))
         ):
 
             return {
@@ -1104,17 +1109,19 @@ def execute_autopilot_decision(
 
         # LA ORDEN DEL GESTOR (29/09/2026): `conservar`. Y LA CARTERA
         # (16/10/2026): lo que aguanta la ronda. Y LA ROTACION (17/10/2026):
-        # el que sale de una pareja con la puja viva.
+        # el que sale de una pareja con la puja viva. Y EL RELEVO NO SE
+        # VENDE (01/11/2026): el que entra por un cambio vivo de la mejora.
         from src.actions.la_orden_del_gestor import conservados as _conservados
         from src.actions.la_ronda_de_la_manana import los_que_aguanta as _aguanta
         from src.actions.la_rotacion import los_que_rota as _rota
+        from src.actions.la_mejora_del_once import los_que_entran as _relevo
 
         if (
             offer_id is None
             or
             player_id is None
             or
-            int(player_id) in (_conservados() | _aguanta() | _rota())
+            int(player_id) in (_conservados() | _aguanta() | _rota() | _relevo())
         ):
 
             return {

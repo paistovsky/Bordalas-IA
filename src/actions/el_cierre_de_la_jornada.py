@@ -131,6 +131,17 @@ LOS `conservar`
     ultimo recurso, va por su cuenta). Lo que no se publica nunca son
     los protegidos (`proteger` y `fichar`) y Yamal.
 
+EL RELEVO NO SE VENDE (01/11/2026, `BORDALAS_EL_RELEVO_NO_SE_VENDE`)
+
+    Con el interruptor, el que ENTRA por un cambio vivo de la mejora del
+    once (`la_mejora_del_once.el_relevo`, con la plantilla de la vuelta)
+    va con los protegidos: ni se publica ni se le acepta una oferta. Si
+    se vendiera, la mejora soltaria el cambio y el que sale ya no se
+    venderia (Ramon Enriquez por Unai Lopez, el mie 04/11, con la caja de
+    la J12 en rojo). El plan lo dice (`el_relevo`: motivo, a quien y por
+    que; sin libro que leer, nadie, como siempre). Apagado, el cierre de
+    siempre byte a byte.
+
 QUE NO HACE
 
     No compra, no sube pujas, no pone el once (SAVE_LINEUP es del
@@ -1341,6 +1352,31 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         except Exception:                           # noqa: BLE001
             pass
         de_la_mejora = la_mejora(libros.get("mejora"), plantilla, pujas)
+        # EL RELEVO NO SE VENDE (01/11/2026, `la_mejora_del_once.el_relevo`):
+        # el que ENTRA por un cambio vivo de la mejora va con los protegidos
+        # (ni se publica ni se le acepta la oferta). Si se vendiera, la
+        # mejora soltaria el cambio y el que sale ya no se venderia: Ramon
+        # Enriquez por Unai Lopez, el mie 04/11. Con la plantilla de esta
+        # vuelta: con el que sale ya vendido, el relevo es uno mas. El libro,
+        # el mismo que `libros["mejora"]`: de su fichero en produccion (asi
+        # se sabe si no se puede leer y el plan lo dice), el dado si no (sin
+        # el, ninguno, como `la_mejora`: quien da los libros no lee los de
+        # produccion). Apagado, nadie y sin abrir nada: los protegidos de
+        # siempre.
+        from src.actions.la_mejora_del_once import el_relevo
+
+        if de_produccion:
+            relevo = el_relevo(ruta=rutas["mejora"], plantilla=plantilla)
+        else:
+            dado = libros.get("mejora")
+            relevo = el_relevo({} if dado is None else dado, plantilla=plantilla)
+        protegidos_del_cierre = protegidos(orden_ruta, ahora)
+        if relevo["entran"]:
+            protegidos_del_cierre = set(protegidos_del_cierre) | set(relevo["entran"])
+        if relevo["activo"]:
+            salida["el_relevo"] = {"motivo": relevo["motivo"],
+                                   "no_se_venden": sorted(relevo["entran"]),
+                                   "detalle": relevo["detalle"]}
         # LA ROTACION (17/10/2026): el que sale de una pareja ganada (su
         # relevo ya esta dentro) tampoco juega; fuera del once del cierre
         # (si sobra, lo puede vender: es lo que quiere la rotacion).
@@ -1373,7 +1409,7 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
             vendidos=vuelta["vendidos"], ofertas=foto["ofertas_del_computer"],
             en_venta=set(foto["en_venta"]) | vuelta["listados"],
             especulativas=de_la_ronda_y_los_chollos, intocables=de_la_orden["intocables"],
-            protegidos=protegidos(orden_ruta, ahora),
+            protegidos=protegidos_del_cierre,
             no_vender=de_la_orden["vende"] | de_la_mejora["vende"],
             se_van=(de_la_orden["se_van"] | de_la_mejora["se_van"]
                     | de_la_rotacion["se_van"]),
@@ -1402,6 +1438,8 @@ def correr(status=None, snapshot=None, v10=None, libros=None, calendario=None,
         if salida.get("credito_de_sus_ventas"):
             salida["plan"]["credito_de_sus_ventas"] = {
                 str(k): v for k, v in salida["credito_de_sus_ventas"].items()}
+        if salida.get("el_relevo"):
+            salida["plan"]["el_relevo"] = dict(salida["el_relevo"])
         publicar(salida["plan"], plan_ruta)
         salida["motivo"] = d["motivo"]
 
@@ -1456,6 +1494,11 @@ def el_parte(r) -> list:
         if d.get("titulares_que_no_se_venden"):
             lineas.append(f"  Titulares del once escrito que no se venden: "
                           f"{d.get('titulares_que_no_se_venden')}")
+        relevo = _dict(r.get("el_relevo"))
+        if relevo:
+            lineas.append(f"  El relevo no se vende ({relevo.get('motivo')}): "
+                          f"{relevo.get('no_se_venden') or 'nadie'}"
+                          + (f"  ({relevo.get('detalle')})" if relevo.get("detalle") else ""))
         lineas.append(f"  Caja al empezar la ronda: {_euros(d.get('caja'))}"
                       f"  (saldo - pujas vivas enteras + cobrado en la vuelta)")
         for fid, menos in _dict(r.get("credito_de_sus_ventas")).items():

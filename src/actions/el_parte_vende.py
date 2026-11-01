@@ -52,6 +52,10 @@ LA REGLA
          - a lo que aguanta LA CARTERA de la ronda
            (`la_ronda_de_la_manana.los_que_aguanta`): tiene su propia
            salida;
+         - (01/11/2026, con `BORDALAS_EL_RELEVO_NO_SE_VENDE`) al que
+           ENTRA por un cambio vivo de la mejora del once
+           (`la_mejora_del_once.el_relevo`, `EL_RELEVO`): vendido, la
+           mejora soltaria el cambio y el que sale ya no se venderia;
          - a lo que esta vuelta ya vendio (el estado de v10, la vuelta
            de la mejora y el plan del cierre, solo si son de ESTA
            vuelta, como los cuenta el cierre).
@@ -823,7 +827,7 @@ def decidir(
     protegidos=frozenset(), conservados=frozenset(), aguanta=frozenset(),
     vendidos=frozenset(), fichajes=None, ahora=None, rondas=None,
     en_curso=False, puede_escribir=True, sin_calendario=False,
-    de_la_orden=frozenset(),
+    de_la_orden=frozenset(), relevos=frozenset(),
 ) -> dict:
     """
     Que vende el parte en esta vuelta. Pura: ni red, ni disco, ni reloj.
@@ -846,6 +850,12 @@ def decidir(
                               (27/10/2026, F1 y LOS VIAJES): los vende
                               ella (`los_que_vende_la_orden`)
         aguanta               lo de LA CARTERA de la ronda
+        relevos               EL RELEVO NO SE VENDE (01/11/2026): los que
+                              entran por un cambio vivo de la mejora del
+                              once (`la_mejora_del_once.el_relevo`): si se
+                              vendieran, la mejora soltaria el cambio y el
+                              que sale ya no se venderia (`EL_RELEVO`).
+                              Vacio (apagado), lo de siempre
         vendidos              {player_id} vendidos en esta vuelta
         fichajes              {player_id: datetime} desde cuando es
                               nuestro (`las_fechas_de_fichaje`); quien
@@ -882,7 +892,7 @@ def decidir(
         precios, ofertas = _por_id(precios), _por_id(ofertas_del_computer)
         en_venta, vendidos = _ids(en_venta), _ids(vendidos)
         protegidos, conservados, aguanta = _ids(protegidos), _ids(conservados), _ids(aguanta)
-        de_la_orden = _ids(de_la_orden)
+        de_la_orden, relevos = _ids(de_la_orden), _ids(relevos)
         fichajes = {pid: f for pid, f in ((p, _fecha(v)) for p, v in _por_id(fichajes).items())
                     if f is not None}
         ahora = _fecha(ahora)
@@ -918,6 +928,8 @@ def decidir(
                 por = "LA_ORDEN"
             elif pid in aguanta:
                 por = "LA_CARTERA"
+            elif pid in relevos:
+                por = "EL_RELEVO"
             elif estado == SANCIONADO:
                 por = "SANCION"
             elif fichado is None or ahora is None:
@@ -1028,7 +1040,8 @@ def lo_vendido_y_publicado(v10, vuelta_mejora, plan_cierre, ahora, run_id=None) 
 
 def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
            status=None, calendario=None, orden_ruta=None, libro_ronda_ruta=None,
-           v10=None, vuelta_mejora=None, plan_cierre=None, tablon=None) -> dict:
+           v10=None, vuelta_mejora=None, plan_cierre=None, tablon=None,
+           libro_mejora_ruta=None) -> dict:
     """
     El parte, en esta vuelta. Nunca lanza.
 
@@ -1037,7 +1050,10 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
     del panel, el calendario de los chollos, la orden del gestor
     (`orden_ruta`), el libro de la ronda (`libro_ronda_ruta`), lo que
     esta vuelta ya hizo (`v10`, `vuelta_mejora`, `plan_cierre`) y los
-    eventos del tablon (`tablon`, la lista de `TABLON`).
+    eventos del tablon (`tablon`, la lista de `TABLON`). El libro de la
+    mejora del once (EL RELEVO NO SE VENDE, solo con su interruptor), de
+    `libro_mejora_ruta`; sin ella y con `libro_ronda_ruta`, el de junto
+    al de la ronda (quien mueve los libros no lee los de produccion).
     Apagado, no lee ni escribe nada. Sin la orden del gestor encendida y
     valida (27/10/2026, F2), tampoco escribe nada (`ORDEN_APAGADA`,
     `ORDEN_NO_VALIDA`).
@@ -1175,6 +1191,22 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
                 precios[_int(k)] = _int(_dict(ficha).get("price"))
         precios.update(_por_id(foto.get("precios")))
 
+        # EL RELEVO NO SE VENDE (01/11/2026, `la_mejora_del_once.el_relevo`):
+        # el que entra por un cambio vivo de la mejora no se vende (si no,
+        # la mejora suelta el cambio y el que sale ya no se vende). Con la
+        # plantilla sin lo vendido en esta vuelta: con el que sale ya
+        # vendido, el relevo es uno mas. Apagado, nadie y sin abrir nada.
+        from src.actions.la_mejora_del_once import LIBRO as LIBRO_MEJORA, el_relevo
+
+        if libro_mejora_ruta is None and libro_ronda_ruta is not None:
+            libro_mejora_ruta = Path(libro_ronda_ruta).with_name(LIBRO_MEJORA.name)
+        relevo = el_relevo(ruta=libro_mejora_ruta,
+                           plantilla=set(foto["plantilla"]) - set(vuelta["vendidos"]))
+        if relevo["activo"]:
+            salida["el_relevo"] = {"motivo": relevo["motivo"],
+                                   "no_se_venden": sorted(relevo["entran"]),
+                                   "detalle": relevo["detalle"]}
+
         d = decidir(
             plantilla=foto["plantilla"], estados=leer_los_estados(snapshot),
             nombres=nombres, precios=precios,
@@ -1187,6 +1219,7 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
             vendidos=vuelta["vendidos"], fichajes=fichajes["fechas"], ahora=ahora,
             rondas=rondas, en_curso=en_curso, puede_escribir=puede_escribir,
             sin_calendario=sin_calendario, de_la_orden=de_la_orden,
+            relevos=relevo["entran"],
         )
         salida["decision"] = d
         salida["acciones"] = d["acciones"]
@@ -1228,6 +1261,11 @@ def el_parte(r) -> list:
             lineas.append(f"  Fechas de fichaje: {r.get('aviso_del_tablon')}"
                           + (f": {r.get('detalle_del_tablon')}"
                              if r.get("detalle_del_tablon") else ""))
+        relevo = _dict(r.get("el_relevo"))
+        if relevo:
+            lineas.append(f"  El relevo no se vende ({relevo.get('motivo')}): "
+                          f"{relevo.get('no_se_venden') or 'nadie'}"
+                          + (f"  ({relevo.get('detalle')})" if relevo.get("detalle") else ""))
         d = _dict(r.get("decision"))
         if d.get("malos"):
             lineas.append(f"  Con parte malo en la plantilla: {d.get('malos')}")
