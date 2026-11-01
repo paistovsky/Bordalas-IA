@@ -2535,3 +2535,5 @@
 {"dia":"2026-10-31","id":1721,"name":"Manu Sánchez","value":0,"price":1670000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-31","id":34483,"name":"Pedro Díaz","value":0,"price":960000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-10-31","id":42557,"name":"Adeyemi","value":0,"price":9300000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-10-31","id":42757,"name":"Ndukwe","value":1322132,"price":1300000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-10-31","id":18945,"name":"Koundé","value":0,"price":2960000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
