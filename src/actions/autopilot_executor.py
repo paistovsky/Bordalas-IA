@@ -204,6 +204,34 @@ def find_own_pending_bid(
     return None
 
 
+# EL RELEVO NO SE VENDE (revision del 01/11/2026): cuando lo que bloquea
+# una aceptacion es SOLO el relevo de un cambio de la mejora del once,
+# el bloqueo lo dice (`EL_RELEVO`) en vez del generico. Mismo estado
+# (BLOCKED_PROTECTED_PLAYER / INVALID_SELECTED_OFFER), solo otro motivo y
+# la clave `guardia`. Apagado (`los_que_entran` vacio) no se llega nunca.
+MOTIVO_EL_RELEVO = (
+    "EL_RELEVO: la oferta es del que entra por un cambio vivo de la mejora "
+    "del once; vendido, la mejora soltaria el cambio y el que sale ya no se "
+    "venderia (BORDALAS_EL_RELEVO_NO_SE_VENDE)."
+)
+
+
+def _solo_por_el_relevo(player_id) -> bool:
+    """True si `player_id` esta bloqueado SOLO por EL RELEVO NO SE VENDE
+    (no por `conservar`, la cartera ni la rotacion). Nunca lanza."""
+    try:
+        from src.actions.la_mejora_del_once import los_que_entran
+        from src.actions.la_orden_del_gestor import conservados
+        from src.actions.la_ronda_de_la_manana import los_que_aguanta
+        from src.actions.la_rotacion import los_que_rota
+
+        pid = int(player_id)
+        return (pid in los_que_entran() and pid not in conservados()
+                and pid not in los_que_aguanta() and pid not in los_que_rota())
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def refresh_snapshot_for_write_revalidation() -> tuple[str, dict]:
     """
     Read-before-write obligatorio para operaciones delicadas.
@@ -807,7 +835,7 @@ def execute_autopilot_decision(
                 in (_conservados() | _aguanta() | _rota() | _relevo()))
         ):
 
-            return {
+            bloqueo = {
                 "action":
                     action,
 
@@ -831,6 +859,15 @@ def execute_autopilot_decision(
                 "response":
                     None,
             }
+
+            if (
+                offer.get("protection") != "NEVER_AUTO_SELL"
+                and _solo_por_el_relevo(offer.get("player_id"))
+            ):
+                bloqueo["reason"] = MOTIVO_EL_RELEVO
+                bloqueo["guardia"] = "EL_RELEVO"
+
+            return bloqueo
 
         offer_id = (
             offer.get(
@@ -1124,7 +1161,7 @@ def execute_autopilot_decision(
             int(player_id) in (_conservados() | _aguanta() | _rota() | _relevo())
         ):
 
-            return {
+            bloqueo = {
                 **build_noop_result(
                     decision=decision,
                     status="INVALID_SELECTED_OFFER",
@@ -1141,6 +1178,18 @@ def execute_autopilot_decision(
                 "selection":
                     selection,
             }
+
+            if (
+                offer_id is not None
+                and player_id is not None
+                and _solo_por_el_relevo(player_id)
+            ):
+                bloqueo["reason"] = (
+                    "Accept-Before-Expiry bloqueado: " + MOTIVO_EL_RELEVO
+                )
+                bloqueo["guardia"] = "EL_RELEVO"
+
+            return bloqueo
 
         # ----------------------------------------------------
         # UNICA ESCRITURA REAL DEL CICLO

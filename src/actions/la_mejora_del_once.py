@@ -174,9 +174,11 @@ EL RELEVO NO SE VENDE (01/11/2026, `BORDALAS_EL_RELEVO_NO_SE_VENDE`)
     que sale, este modulo suelta el cambio y el que sale ya no se vende
     (Ramon Enriquez por Unai Lopez, la caja de la J12). Con el
     interruptor, `el_relevo` da los que entran por un cambio vivo de
-    este libro, leido como lo lee `decidir`, y el cierre de la jornada,
-    el parte vende y las dos aceptaciones del motor viejo no los venden.
-    Aqui no cambia nada. Ver el bloque junto a
+    este libro, leido como lo lee `decidir` (y solo con este modulo
+    encendido), y el cierre de la jornada (salvo como ultimo recurso, a
+    menos de 20 h y con la caja aun en rojo), el parte vende, las dos
+    aceptaciones del motor viejo y el ejecutor competitivo no los
+    venden. Aqui no cambia nada. Ver el bloque junto a
     `el_relevo_no_se_vende_activo`. Nace APAGADO.
 
 QUE NO HACE
@@ -578,10 +580,13 @@ def el_calendario_activo() -> bool:
 #
 # LA REGLA. Con el interruptor, `el_relevo` da los que ENTRAN por un
 # cambio vivo de este libro, y no los venden: el cierre de la jornada
-# (van con sus protegidos: ni se publican ni se aceptan), el parte vende
-# (`EL_RELEVO`) y las dos aceptaciones del motor viejo
+# (se publican como cualquier suplente, publicar no es vender, pero no
+# se eligen para cobrar salvo como ultimo recurso, ver abajo), el parte
+# vende (`EL_RELEVO`), las dos aceptaciones del motor viejo
 # (`autopilot_executor`: la oferta de solvencia y la de antes de caducar,
-# junto a `_conservados`, `_aguanta` y `_rota`). La rotacion ya no los
+# junto a `_conservados`, `_aguanta` y `_rota`) y el ejecutor competitivo
+# (`competitive_live_executor`: ni aceptar ni contraofertar la oferta de
+# un rival por el). La rotacion ya no los
 # tocaba (`los_que_otros_venden._de_la_mejora` trae las claves); la ronda
 # y los chollos solo venden lo de sus libros, y la adopcion lo saca de
 # ellos; la mejora no vende a sus `vivos`.
@@ -607,8 +612,29 @@ def el_calendario_activo() -> bool:
 # numero no existe para la mejora (lo suelta o no lo lee), y aqui
 # tampoco.
 #
-# Nace APAGADO. Apagado, vacio y sin abrir nada: los tres enganches son
-# main byte a byte (`test_el_relevo_no_se_vende_v1`, una huella por
+# SOLO MIENTRAS LA MEJORA CORRE (revision del 01/11). Guardar al que
+# entra solo tiene sentido si alguien va a vender al que sale, y ese es
+# este modulo. Con `BORDALAS_LA_MEJORA_DEL_ONCE` apagado (su
+# interruptor de parada) el libro se queda viejo y nadie vende al que
+# sale: guardar tambien al que entra los congelaba a los dos (y al motor
+# viejo, que no sabe la plantilla, para siempre). Asi que con la mejora
+# apagada, nadie (`MEJORA_APAGADA`). Un ERROR de una vuelta de la mejora
+# NO suelta la guardia: su fichero de la vuelta no trae el motivo, y una
+# vuelta fallida suelta es justo el hueco del fallo (otro vende al que
+# entra y la vuelta siguiente la mejora suelta el cambio); si la mejora
+# falla siempre, a menos de `HORAS_SOLVENCIA` el cierre vende al que
+# entra como ultimo recurso (`el_cierre_de_la_jornada.decidir`).
+#
+# EL ULTIMO RECURSO ES DEL CIERRE (revision del 01/11). Guardar al que
+# entra no puede dejar la ronda en rojo: si a menos de 20 h aun falta
+# caja y el que sale no se ha vendido (sin oferta del Computer, con la
+# oferta bajo su suelo, o la mejora parada por EL PARTE DEL RELEVO o con
+# el saldo en positivo y la caja en rojo por una puja viva), el cierre
+# vende al que entra como vende cualquier suplente. Lo de main, pero a
+# ultima hora y solo si hace falta.
+#
+# Nace APAGADO. Apagado, vacio y sin abrir nada: los cuatro enganches
+# son main byte a byte (`test_el_relevo_no_se_vende_v1`, una huella por
 # version de Python).
 
 def el_relevo_no_se_vende_activo() -> bool:
@@ -634,15 +660,21 @@ def el_relevo(libro=None, *, ruta=None, plantilla=None) -> dict:
                    entra son nuestros; None, todo el que entra del libro
 
     `{"activo", "motivo", "entran": frozenset, "detalle"}`. `motivo`:
-    APAGADO (y no se abre nada), SIN_LIBRO, LIBRO_ILEGIBLE,
-    NO_ES_UN_LIBRO, LEIDO o ERROR; sin LEIDO, `entran` vacio (lo de
-    main). Nunca lanza.
+    APAGADO (y no se abre nada), MEJORA_APAGADA (la mejora del once
+    apagada: nadie vende al que sale, asi que no se guarda al que entra;
+    tampoco se abre nada), SIN_LIBRO, LIBRO_ILEGIBLE, NO_ES_UN_LIBRO,
+    LEIDO o ERROR; sin LEIDO, `entran` vacio (lo de main). Nunca lanza.
     """
     salida = {"activo": False, "motivo": "APAGADO", "entran": frozenset(), "detalle": None}
     try:
         if not el_relevo_no_se_vende_activo():
             return salida
         salida["activo"] = True
+        if not activa():
+            salida["motivo"] = "MEJORA_APAGADA"
+            salida["detalle"] = (f"{ENV} apagado: nadie vende al que sale, "
+                                 "el que entra es uno mas")
+            return salida
         if libro is None:
             camino = Path(LIBRO if ruta is None else ruta)
             try:

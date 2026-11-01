@@ -1,9 +1,10 @@
 """
 EL RELEVO NO SE VENDE (01/11/2026). Guardias de
 `BORDALAS_EL_RELEVO_NO_SE_VENDE` (`la_mejora_del_once.el_relevo`) y de
-sus tres enganches: el cierre de la jornada, el parte vende y las dos
+sus cuatro enganches: el cierre de la jornada, el parte vende, las dos
 aceptaciones del motor viejo (`autopilot_executor`: la oferta de
-solvencia y la de antes de caducar).
+solvencia y la de antes de caducar) y el ejecutor competitivo (las
+ofertas de otros managers).
 
 EL CASO (parte del 01/11 19:10 y la medida del laboratorio del 01/11)
 
@@ -30,23 +31,34 @@ QUE SE COMPRUEBA
     2. Apagado, los tres vendedores son los de main byte a byte: la
        huella de la bateria (el cierre, el parte y las dos aceptaciones
        del motor viejo, en 22 escenarios) medida en main@85e052e3 ANTES
-       de tocar el codigo, una por version de Python (3.11 y 3.13).
+       de tocar el codigo, una por version de Python (3.11 y 3.13); y
+       el ejecutor competitivo llega al escritor como en main.
     3. El libro se lee como lo lee la mejora (claves = el que entra,
        `sale` = el que sale), y con la plantilla, solo cuenta el cambio
-       VIVO: el que entra es nuestro y el que sale aun tambien.
+       VIVO: el que entra es nuestro y el que sale aun tambien. Con la
+       mejora apagada, nadie (`MEJORA_APAGADA`).
     4. Encendido, el mie 04/11 07:15 con la caja en rojo el cierre no
-       vende a Ramon (apagado, si: lo de main).
-    5. Con el cambio hecho (Unai vendido antes, o en esta misma vuelta)
+       vende a Ramon (apagado, si: lo de main); lo deja publicado.
+    5. EL ULTIMO RECURSO (revision del 01/11): el vie 06/11 07:15, a
+       13,75 h, si aun falta (Unai sin oferta; o el saldo en positivo y
+       la caja en rojo por una puja viva, con Ramon en duda), el cierre
+       vende a Ramon como cualquier suplente; si otro cubre, no.
+    6. Con el cambio hecho (Unai vendido antes, o en esta misma vuelta)
        Ramon vuelve a ser uno mas y se vende como siempre.
-    6. Uno que no esta en ningun cambio (Ortiz, de la cartera) se vende
+    7. Uno que no esta en ningun cambio (Ortiz, de la cartera) se vende
        como siempre, encendido o no.
-    7. Sin libro que leer (basura, o un fichero que no es JSON), lo de
+    8. Sin libro que leer (basura, o un fichero que no es JSON), lo de
        main, y el plan lo dice.
-    8. El parte vende (apagado en produccion) no vende al relevo en duda
-       el viernes; con el cambio hecho, si.
-    9. El motor viejo no acepta la oferta del relevo, ni la de
-       solvencia ni la de antes de caducar; la de otro, si.
-   10. Nunca lanza.
+    9. Con la mejora apagada (su interruptor de parada) el relevo no se
+       guarda: el cierre, el parte y el motor viejo, lo de main.
+   10. El parte vende (apagado en produccion) no vende al relevo en duda
+       el viernes; con el cambio hecho, si; con una ruta de la ronda
+       que no deja sacar la de la mejora ('/'), no se cae.
+   11. El motor viejo no acepta la oferta del relevo, ni la de
+       solvencia ni la de antes de caducar, y lo dice (`EL_RELEVO`);
+       la de otro, si.
+   12. El ejecutor competitivo ni acepta ni contraoferta por el relevo.
+   13. Nunca lanza.
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -135,7 +147,11 @@ PUESTO = {**VENDEDORES, ENV: "1"}
 # `_conservados`, `_aguanta` y `_rota` leerian la orden y los libros de
 # produccion (`config/`, `data/`). Asi solo pesa lo que se mide.
 MOTOR_APAGADO = {ENV_ORDEN: None, ENV_CARTERA: None, ENV_ROTACION: None, ENV: None}
-MOTOR_PUESTO = {**MOTOR_APAGADO, ENV: "1"}
+# Encendido, con la mejora del once encendida (como en produccion): con
+# ella apagada el relevo no se guarda (`MEJORA_APAGADA`).
+MOTOR_PUESTO = {**MOTOR_APAGADO, ENV: "1", ENV_MEJORA: "1"}
+# Los de produccion con la mejora apagada (su interruptor de parada).
+SIN_MEJORA = {**PUESTO, ENV_MEJORA: None}
 
 
 # ============================================================
@@ -288,7 +304,7 @@ def _el_status(plantilla, once):
 
 
 def _la_foto(plantilla, saldo, ofertas, publicados, estados=None, once_de_biwenger=None,
-             proximo_reset=None):
+             proximo_reset=None, pujas=None):
     estados = estados or {}
     ventas = [{"player": {"id": p}, "user": {"id": YO}, "price": POR_ID[p]["price"]}
               for p in sorted(publicados) if any(j["id"] == p for j in plantilla)]
@@ -305,7 +321,11 @@ def _la_foto(plantilla, saldo, ofertas, publicados, estados=None, once_de_biweng
             "offers": [{"id": o, "status": "waiting", "amount": a,
                         "requestedPlayers": [{"id": p}], "from": None}
                        for p, (o, a) in sorted(ofertas.items())
-                       if any(j["id"] == p for j in plantilla)],
+                       if any(j["id"] == p for j in plantilla)]
+                      # Nuestras pujas vivas {player_id: (offer_id, importe)}.
+                      + [{"id": o, "status": "waiting", "amount": a,
+                          "requestedPlayers": [{"id": p}], "from": {"id": YO}}
+                         for p, (o, a) in sorted((pujas or {}).items())],
         },
         "my_team": [{"id": j["id"], "price": j["price"]} for j in plantilla],
         "catalog": {"data": {"players": {
@@ -337,12 +357,14 @@ def _sin(plantilla, *fuera):
 
 def _el_cierre(*, plantilla=None, saldo=SALDO_E1, once=None, libro=None, estados=None,
                ofertas=None, publicados=None, inventario=None, vuelta_mejora=None,
-               run_id=None, en_ficheros=False, libro_crudo=None, sin_mejora=False):
+               run_id=None, en_ficheros=False, libro_crudo=None, sin_mejora=False,
+               ahora=None, pujas=None):
     """
-    `el_cierre_de_la_jornada.correr` el mie 04/11 07:15, con todo dado.
-    `en_ficheros`: los libros se leen de sus ficheros (como en
+    `el_cierre_de_la_jornada.correr` el mie 04/11 07:15 (o `ahora`), con
+    todo dado. `en_ficheros`: los libros se leen de sus ficheros (como en
     produccion), en la carpeta temporal; `libro_crudo`, el texto del de
-    la mejora; `sin_mejora`, los libros dados sin el de la mejora.
+    la mejora; `sin_mejora`, los libros dados sin el de la mejora;
+    `pujas`, nuestras pujas vivas {player_id: (offer_id, importe)}.
     Devuelve la salida, el plan escrito y las escrituras.
     """
     plantilla = PLANTILLA_MIE if plantilla is None else plantilla
@@ -359,9 +381,9 @@ def _el_cierre(*, plantilla=None, saldo=SALDO_E1, once=None, libro=None, estados
         plan = carpeta / "el_cierre.json"
         comun = dict(
             status=_el_status(plantilla, once),
-            snapshot=_la_foto(plantilla, saldo, ofertas, publicados, estados),
+            snapshot=_la_foto(plantilla, saldo, ofertas, publicados, estados, pujas=pujas),
             v10={}, calendario=CAL, orden_ruta=orden, escritor_factory=_Escritor,
-            ahora=MIE, plan_ruta=plan,
+            ahora=MIE if ahora is None else ahora, plan_ruta=plan,
         )
         if en_ficheros:
             rutas = {n: carpeta / f"{n}.json" for n in ("ronda", "chollos", "mejora",
@@ -410,10 +432,11 @@ def _el_tablon(hoy):
 
 
 def _el_parte(*, plantilla=None, estados=None, libro=None, once=None, ahora=VIE,
-              ofertas=None, publicados=None):
+              ofertas=None, publicados=None, ronda_ruta=None):
     """`el_parte_vende.correr` el vie 06/11 07:15 (Ramon en duda), con todo
     dado. El libro de la mejora va junto al de la ronda (quien mueve los
-    libros no lee los de produccion)."""
+    libros no lee los de produccion). `ronda_ruta`: la ruta que se le da
+    como libro de la ronda en vez de la de la carpeta temporal."""
     plantilla = PLANTILLA_MIE if plantilla is None else plantilla
     estados = {41411: "doubt"} if estados is None else estados
     once = ONCE_343 if once is None else once
@@ -437,7 +460,8 @@ def _el_parte(*, plantilla=None, estados=None, libro=None, once=None, ahora=VIE,
                                         once_de_biwenger=once,
                                         proximo_reset=reset + timedelta(days=1))},
             escritor_factory=_Escritor, ahora=ahora, status=status, calendario=CAL,
-            orden_ruta=orden, libro_ronda_ruta=ronda, v10={}, vuelta_mejora={},
+            orden_ruta=orden, libro_ronda_ruta=ronda if ronda_ruta is None else ronda_ruta,
+            v10={}, vuelta_mejora={},
             plan_cierre={}, tablon=_el_tablon(reset),
         )
     return {"salida": r, "parte": parte.el_parte(r), "escrituras": list(_Escritor.llamadas)}
@@ -672,7 +696,8 @@ def test_nace_apagado():
     import re
 
     for modulo in ("src/actions/el_cierre_de_la_jornada.py", "src/actions/el_parte_vende.py",
-                   "src/actions/autopilot_executor.py"):
+                   "src/actions/autopilot_executor.py",
+                   "src/analysis/competitive_live_executor.py"):
         texto = (RAIZ / modulo).read_text(encoding="utf-8")
         assert "ENV_EL_RELEVO" not in texto, modulo
         assert not re.search(r"environ[^\n]*" + ENV, texto), modulo
@@ -697,9 +722,12 @@ def test_apagado_los_tres_vendedores_son_los_de_main():
     assert len(hoy) == (len(ESCENARIOS_DEL_CIERRE) + len(ESCENARIOS_DEL_PARTE)
                         + len(ESCENARIOS_DEL_MOTOR))
     assert _resumen(hoy.values()) == esperada, _resumen(hoy.values())
-    # Puesto a "0", lo mismo.
+    # Puesto a "0", lo mismo. Y con la mejora del once encendida en el
+    # motor viejo (como en produccion): main no la mira ahi.
     cero = la_bateria({**APAGADO, ENV: "0"}, {**MOTOR_APAGADO, ENV: "0"})
     assert cero == hoy
+    con_mejora = la_bateria(APAGADO, {**MOTOR_APAGADO, ENV_MEJORA: "1"})
+    assert con_mejora == hoy
     # Y lo que mueve el arreglo, dicho antes que la huella: apagado, el
     # mie 04/11 el cierre vende a Ramon.
     with _Interruptores(APAGADO):
@@ -732,7 +760,17 @@ def test_el_libro_se_lee_como_lo_lee_la_mejora():
             assert los_que_entran(LIBRO_MEJORA, plantilla=nuestros) == frozenset()
             assert los_que_entran(ruta=ruta) == frozenset()
 
-        with _Interruptores({ENV: "1"}):
+        # Encendido pero con la mejora del once apagada: nadie vende al que
+        # sale, asi que no se guarda al que entra (y no se abre nada).
+        with _Interruptores({ENV: "1", ENV_MEJORA: None}):
+            r = el_relevo(ruta=ilegible)
+            assert (r["activo"], r["motivo"], r["entran"]) == (
+                True, "MEJORA_APAGADA", frozenset()), r
+            assert r["detalle"], r
+            assert los_que_entran(LIBRO_MEJORA) == frozenset()
+            assert los_que_entran(ruta=ruta) == frozenset()
+
+        with _Interruptores({ENV: "1", ENV_MEJORA: "1"}):
             # Sin plantilla: todo el que entra del libro.
             assert los_que_entran(ruta=ruta) == frozenset({23840, 41411})
             assert los_que_entran(LIBRO_MEJORA) == frozenset({23840, 41411})
@@ -799,10 +837,14 @@ def test_ramon_por_unai_el_miercoles_con_la_caja_en_rojo():
     assert [c["id"] for c in d_hoy["candidatos"]] == [41411], d_hoy["candidatos"]
     assert _vender(hoy) == [41411] and _aceptadas(hoy) == [41411]
     assert {"offer_id": 70411, "execute": True} in hoy["escrituras"], hoy["escrituras"]
-    # Encendido: Ramon no es candidato, no se publica ni se acepta; lo que
-    # falta se dice (FALTA) y Unai sigue siendo de la mejora.
+    # Encendido: Ramon no se elige (a 61,75 h no hay ultimo recurso): ya
+    # estaba publicado, asi que nada que escribir; lo que falta se dice
+    # (FALTA) y Unai sigue siendo de la mejora.
     assert d["caja"] == SALDO_E1 and d["once"] == d_hoy["once"], d
-    assert d["candidatos"] == [] and d["vender"] == [] and d["acciones"] == [], d
+    assert [(c["id"], c.get("relevo"), c["elegido"]) for c in d["candidatos"]] == [
+        (41411, True, False)], d["candidatos"]
+    assert d["vender"] == [] and d["acciones"] == [], d
+    assert d["relevos_aparte"] == [41411] and "ultimo_recurso_relevo" not in d, d
     assert d["motivo"] == "FALTA" and d["falta"] == -SALDO_E1, d
     assert puesto["escrituras"] == [], puesto["escrituras"]
     assert puesto["salida"]["el_relevo"] == {"motivo": "LEIDO", "no_se_venden": [41411],
@@ -811,6 +853,15 @@ def test_ramon_por_unai_el_miercoles_con_la_caja_en_rojo():
     assert puesto["plan"]["vender"] == [] and puesto["plan"]["falta"] == -SALDO_E1
     assert any("relevo" in linea.lower() and "41411" in linea for linea in puesto["parte"]), \
         puesto["parte"]
+    assert any("solo se venden a menos de 20 h" in linea for linea in puesto["parte"]), \
+        puesto["parte"]
+    # Sin publicar, se publica (publicar no es vender: asi tendra oferta si
+    # llega el ultimo recurso), pero no se le acepta la oferta.
+    with _Interruptores(PUESTO):
+        sin_publicar = _el_cierre(publicados={1969})
+    assert [(a["accion"], a["player_id"]) for a in sin_publicar["salida"]["acciones"]] == [
+        ("PONER_A_LA_VENTA", 41411)], sin_publicar["salida"]["acciones"]
+    assert _vender(sin_publicar) == [] and _aceptadas(sin_publicar) == []
     # Lo que se evita (main, la vuelta siguiente): Ramon vendido, la mejora
     # soltó su cambio y Unai se queda; con Cardona en el once escrito no
     # queda nadie que vender: FALTA 1.581.576 y la J12 empieza en rojo.
@@ -828,6 +879,109 @@ def test_ramon_por_unai_el_miercoles_con_la_caja_en_rojo():
         ficheros = _el_cierre(en_ficheros=True)
     assert _vender(ficheros) == [] and ficheros["escrituras"] == []
     assert ficheros["salida"]["el_relevo"]["no_se_venden"] == [41411]
+
+
+# ============================================================
+# 4b. EL ULTIMO RECURSO ES DEL CIERRE (revision del 01/11)
+# ============================================================
+#
+# Guardar al que entra no puede dejar la J12 en rojo. El vie 06/11 a las
+# 07:15 (13,75 h, menos de `HORAS_SOLVENCIA`) ya no queda otro reset
+# antes del partido: si aun falta y el que sale no se ha vendido, el
+# cierre vende al relevo como a cualquier suplente (lo de main, a
+# ultima hora y solo si hace falta).
+
+def test_el_ultimo_recurso_es_del_cierre():
+    # (a) Unai sin oferta del Computer en el ultimo reset: la mejora no lo
+    # puede cobrar. Main vende a Ramon; encendido, tambien (ultimo recurso)
+    # y a lo que haya (suelo 0).
+    k = dict(ahora=VIE, saldo=-300_000, ofertas={41411: (70411, 409_200)})
+    with _Interruptores(APAGADO):
+        hoy = _el_cierre(**k)
+    with _Interruptores(PUESTO):
+        puesto = _el_cierre(**k)
+    d_hoy, d = hoy["salida"]["decision"], puesto["salida"]["decision"]
+    assert d_hoy["horas"] < cierre.HORAS_SOLVENCIA, d_hoy["horas"]
+    assert d_hoy["motivo"] == "EN_ROJO_SE_VENDE" and _vender(hoy) == [41411], d_hoy
+    assert d["motivo"] == "EN_ROJO_SE_VENDE" and d["falta"] == 0, d
+    assert _vender(puesto) == [41411] and _aceptadas(puesto) == [41411], d
+    assert d["ultimo_recurso_relevo"] == [41411] and d["relevos_aparte"] == [41411], d
+    assert {"offer_id": 70411, "execute": True} in puesto["escrituras"], puesto["escrituras"]
+    venta = next(a for a in d["acciones"] if a["accion"] == "ACEPTAR_OFERTA_DEL_COMPUTER")
+    assert venta["suelo"] == 0 and venta["importe"] == 409_200, venta
+    assert puesto["salida"]["el_relevo"]["ultimo_recurso"] == [41411], puesto["salida"]
+    assert puesto["plan"]["el_relevo"]["ultimo_recurso"] == [41411], puesto["plan"]
+    assert any("ULTIMO RECURSO" in linea for linea in puesto["parte"]), puesto["parte"]
+
+    # (b) El saldo en positivo pero la caja en rojo por una puja viva que
+    # el cierre no retira (12403, la de un `fichar`) y Ramon en duda: la
+    # mejora no cobra a Unai (su rojo mira el saldo, y EL PARTE DEL RELEVO
+    # la frena). El cierre, a 13,75 h, vende a Ramon.
+    k = dict(ahora=VIE, saldo=100_000, estados={41411: "doubt"},
+             pujas={12403: (80001, 400_000)})
+    with _Interruptores(APAGADO):
+        hoy = _el_cierre(**k)
+    with _Interruptores(PUESTO):
+        puesto = _el_cierre(**k)
+    d = puesto["salida"]["decision"]
+    assert d["caja"] == -300_000 and hoy["salida"]["decision"]["caja"] == -300_000, d
+    assert _vender(hoy) == [41411] and _aceptadas(hoy) == [41411]
+    assert _vender(puesto) == [41411] and _aceptadas(puesto) == [41411], d
+    assert d["ultimo_recurso_relevo"] == [41411] and d["falta"] == 0, d
+
+    # (c) Si otro cubre, el relevo no se toca ni a ultima hora: Ortiz (la
+    # cartera) cubre los 150.000 que faltan.
+    k = dict(ahora=VIE, saldo=-150_000, plantilla=PLANTILLA_MIE + [ORTIZ],
+             inventario={35765: 219_900}, ofertas={**OFERTAS_MIE, 35765: (73576, 182_100)},
+             publicados=PUBLICADOS | {35765})
+    with _Interruptores(PUESTO):
+        puesto = _el_cierre(**k)
+    d = puesto["salida"]["decision"]
+    assert _vender(puesto) == [35765] and _aceptadas(puesto) == [35765], d
+    assert "ultimo_recurso_relevo" not in d and d["falta"] == 0, d
+    assert {"offer_id": 70411, "execute": True} not in puesto["escrituras"]
+
+    # (d) A mas de 20 h, aunque falte, no: el miercoles (E1) lo dice FALTA.
+    with _Interruptores(PUESTO):
+        mie = _el_cierre()
+    assert mie["salida"]["decision"]["horas"] > cierre.HORAS_SOLVENCIA
+    assert "ultimo_recurso_relevo" not in mie["salida"]["decision"]
+
+    # (e) La pura: sin relevos (apagado), ni una clave nueva en la salida.
+    base = dict(plantilla=[], ctx={}, horas=10, saldo=-1)
+    assert "relevos_aparte" not in cierre.decidir(**base)
+    assert "relevos_aparte" not in cierre.decidir(**base, relevos=frozenset())
+
+
+def test_con_la_mejora_apagada_el_relevo_no_se_guarda():
+    # La mejora parada (su interruptor de parada): nadie vendera a Unai, asi
+    # que guardar a Ramon los congelaba a los dos. Lo de main, y se dice.
+    with _Interruptores(APAGADO):
+        hoy = _el_cierre()
+    with _Interruptores(SIN_MEJORA):
+        sin = _el_cierre()
+        sin_ficheros = _el_cierre(en_ficheros=True)
+    with _Interruptores({**APAGADO, ENV_MEJORA: None}):
+        hoy_sin = _el_cierre()
+    assert sin["salida"]["decision"] == hoy_sin["salida"]["decision"]
+    assert sin["escrituras"] == hoy_sin["escrituras"]
+    assert _vender(sin) == _vender(hoy) == [41411], _vender(sin)
+    assert sin["salida"]["el_relevo"]["motivo"] == "MEJORA_APAGADA", sin["salida"]
+    assert sin["salida"]["el_relevo"]["no_se_venden"] == []
+    assert sin["plan"]["el_relevo"]["motivo"] == "MEJORA_APAGADA"
+    assert sin_ficheros["salida"]["el_relevo"]["motivo"] == "MEJORA_APAGADA"
+    assert _vender(sin_ficheros) == [41411]
+    # El parte y el motor viejo, igual.
+    with _Interruptores({**APAGADO, ENV_MEJORA: None}):
+        parte_hoy = _el_parte(libro=LIBRO_MEJORA)
+    with _Interruptores(SIN_MEJORA):
+        parte_sin = _el_parte(libro=LIBRO_MEJORA)
+    assert parte_sin["salida"]["decision"] == parte_hoy["salida"]["decision"]
+    assert parte_sin["escrituras"] == parte_hoy["escrituras"] and parte_sin["escrituras"]
+    assert parte_sin["salida"]["el_relevo"]["motivo"] == "MEJORA_APAGADA"
+    with _Interruptores({**MOTOR_PUESTO, ENV_MEJORA: None}):
+        assert _solvencia(RAMON, 70411, 409_200)["status"] == "WOULD_WRITE"
+        assert _antes_de_caducar(RAMON, 70411, 409_200)["status"] == "WOULD_WRITE"
 
 
 def test_con_el_cambio_hecho_el_relevo_es_uno_mas():
@@ -874,7 +1028,8 @@ def test_el_que_no_es_relevo_se_vende_como_siempre():
         puesto = _el_cierre(**ESCENARIOS_DEL_CIERRE["en_positivo"])
     assert hoy["salida"]["decision"]["motivo"] == "EN_POSITIVO" == puesto["salida"]["motivo"]
     assert [c["id"] for c in hoy["salida"]["decision"]["candidatos"]] == [41411]
-    assert puesto["salida"]["decision"]["candidatos"] == []
+    assert [(c["id"], c.get("relevo")) for c in puesto["salida"]["decision"]["candidatos"]] == [
+        (41411, True)]
     assert hoy["escrituras"] == puesto["escrituras"] == []
 
 
@@ -948,6 +1103,30 @@ def test_el_parte_no_vende_al_relevo_en_duda():
         assert puesto["salida"]["decision"] == hoy["salida"]["decision"], k
         assert puesto["escrituras"] == hoy["escrituras"], k
         assert hoy["escrituras"], k
+    # Una ruta de la ronda de la que no sale la de la mejora ('/'): la
+    # vuelta no se cae (apagado, lo de main: vende a Ramon) y encendido no
+    # se va a buscar el libro de produccion (`LIBRO`, aqui uno temporal con
+    # el cambio de Ramon que no se tiene que leer): nadie, y lo dice. (Con
+    # '' pasa lo mismo, pero la ronda de main lee entonces SU libro de
+    # produccion, `data/`: aqui no se prueba.)
+    antes = mejora.LIBRO
+    with tempfile.TemporaryDirectory() as carpeta:
+        mejora.LIBRO = Path(carpeta) / "la_mejora.json"
+        mejora.LIBRO.write_text(json.dumps(LIBRO_MEJORA))
+        try:
+            for rara in ("/",):
+                with _Interruptores(APAGADO):
+                    hoy = _el_parte(ronda_ruta=rara)
+                with _Interruptores(PUESTO):
+                    puesto = _el_parte(ronda_ruta=rara)
+                assert hoy["salida"]["motivo"] == "EJECUTADA", (rara, hoy["salida"]["motivo"])
+                assert "el_relevo" not in hoy["salida"]
+                assert puesto["salida"]["motivo"] == "EJECUTADA", (rara, puesto["salida"])
+                assert puesto["salida"]["decision"] == hoy["salida"]["decision"], rara
+                assert puesto["escrituras"] == hoy["escrituras"] and hoy["escrituras"], rara
+                assert puesto["salida"]["el_relevo"]["motivo"] == "SIN_RUTA", puesto["salida"]
+        finally:
+            mejora.LIBRO = antes
 
 
 # ============================================================
@@ -965,6 +1144,20 @@ def test_el_motor_viejo_no_acepta_por_el_relevo():
             puesto = llamada()
         assert hoy == {"status": "WOULD_WRITE", "offer_id": 70411, "execute": True}, hoy
         assert puesto["status"] == bloqueo and puesto["write_performed"] is False, puesto
+        # Lo dice: es EL_RELEVO, no el generico.
+        assert puesto["guardia"] == "EL_RELEVO" and "EL_RELEVO" in puesto["reason"], puesto
+    # Si ademas es un `conservar`, el bloqueo de siempre (sin `guardia`).
+    from src.actions import la_orden_del_gestor as orden_mod
+
+    real = orden_mod.conservados
+    orden_mod.conservados = lambda *a, **k: {41411}
+    try:
+        with _Interruptores(MOTOR_PUESTO):
+            r = _solvencia(RAMON, 70411, 409_200)
+    finally:
+        orden_mod.conservados = real
+    assert r["status"] == "BLOCKED_PROTECTED_PLAYER" and "guardia" not in r, r
+    assert r["reason"] == "La oferta pertenece a un jugador NEVER_AUTO_SELL.", r
     # El motor viejo no sabe la plantilla: guarda a todo el que entra del
     # libro hasta que la mejora lo limpia (corre despues, en la misma
     # vuelta). Al que sale y a otro cualquiera, como siempre; sin libro, igual.
@@ -982,6 +1175,69 @@ def test_el_motor_viejo_no_acepta_por_el_relevo():
 
 
 # ============================================================
+# 6b. EL EJECUTOR COMPETITIVO TAMPOCO (las ofertas de otros managers)
+# ============================================================
+
+def _el_competitivo(jugador, accion, libro=LIBRO_MEJORA):
+    """`competitive_live_executor.execute_competitive_live_action` con la
+    foto fresca y la decision fresca suplantadas, el libro de la mejora en
+    una carpeta temporal y un escritor que revienta antes de la red."""
+    from src.analysis import competitive_live_executor as competitivo
+
+    class _Escritor:
+        def accept_offer(self, offer_id, execute=False):
+            _EscritorQueNoSale.ultimo = {"offer_id": int(offer_id), "accion": "aceptar"}
+            raise _Escribiria()
+
+        def counter_offer(self, offer_id, amount, execute=False):
+            _EscritorQueNoSale.ultimo = {"offer_id": int(offer_id), "accion": "contraoferta"}
+            raise _Escribiria()
+
+    fresca = {"amount": 500_000, "player_id": jugador["id"], "counterparty_id": 77,
+              "competitive_observer": {"decision": accion, "strategic_sell_price": 450_000,
+                                       "counter_amount": 600_000}}
+    antes = (mejora.LIBRO, competitivo.BiwengerWriteClient, competitivo.refresh_snapshot,
+             competitivo.find_fresh_manager_decision)
+    _EscritorQueNoSale.ultimo = None
+    with tempfile.TemporaryDirectory() as carpeta:
+        ruta = Path(carpeta) / "la_mejora.json"
+        if libro is not None:
+            ruta.write_text(json.dumps(libro))
+        mejora.LIBRO = ruta
+        competitivo.BiwengerWriteClient = _Escritor
+        competitivo.refresh_snapshot = lambda: ("foto_fresca.json", {})
+        competitivo.find_fresh_manager_decision = lambda **k: dict(fresca)
+        try:
+            return competitivo.execute_competitive_live_action(
+                selected_offer={"authoritative_decision": accion, "offer_id": 90001,
+                                "amount": 500_000, "player_id": jugador["id"],
+                                "rival_user_id": 77, "counter_amount": 600_000},
+                rival_intelligence={}, execute=True)
+        except _Escribiria:
+            return {"status": "WOULD_WRITE", **_EscritorQueNoSale.ultimo}
+        finally:
+            (mejora.LIBRO, competitivo.BiwengerWriteClient, competitivo.refresh_snapshot,
+             competitivo.find_fresh_manager_decision) = antes
+
+
+def test_el_competitivo_no_vende_al_relevo():
+    for accion, escritura in (("ACCEPT_NOW", "aceptar"), ("COUNTER_OFFER", "contraoferta")):
+        # Apagado (y con la mejora apagada), lo de main: llega al escritor.
+        for entorno in (MOTOR_APAGADO, {**MOTOR_PUESTO, ENV_MEJORA: None}):
+            with _Interruptores(entorno):
+                r = _el_competitivo(RAMON, accion)
+            assert r == {"status": "WOULD_WRITE", "offer_id": 90001, "accion": escritura}, r
+        with _Interruptores(MOTOR_PUESTO):
+            r = _el_competitivo(RAMON, accion)
+            otro = _el_competitivo(CARDONA, accion)
+            sin_libro = _el_competitivo(RAMON, accion, libro=None)
+        assert r["status"] == "COMPETITIVE_BLOCKED_EL_RELEVO", r
+        assert r["write_performed"] is False and r["guardia"] == "EL_RELEVO", r
+        assert r["player_id"] == 41411 and r["success"] is False, r
+        assert otro["status"] == "WOULD_WRITE" and sin_libro["status"] == "WOULD_WRITE"
+
+
+# ============================================================
 # 7. NUNCA LANZA
 # ============================================================
 
@@ -989,7 +1245,8 @@ def test_nunca_lanza():
     # Sin libro dado se lee `LIBRO`: aqui, uno que no existe en la carpeta
     # temporal (la guardia no abre `data/`).
     antes = mejora.LIBRO
-    with tempfile.TemporaryDirectory() as carpeta, _Interruptores({ENV: "1"}):
+    with tempfile.TemporaryDirectory() as carpeta, \
+            _Interruptores({ENV: "1", ENV_MEJORA: "1"}):
         mejora.LIBRO = Path(carpeta) / "la_mejora.json"
         try:
             for basura in (None, "x", 5, [1, 2], {"a": object()}, {"1": {"sale": object()}},
@@ -1007,6 +1264,9 @@ def test_nunca_lanza():
                               precios={7: 1_000_000}, once_escrito={1}, once_de_biwenger={1},
                               relevos="basura")
             assert isinstance(d, dict), d
+            for basura in (None, "x", 5, [None], {"a": 1}, object()):
+                d = cierre.decidir(plantilla=[], ctx={}, horas=10, saldo=-1, relevos=basura)
+                assert isinstance(d, dict), d
         finally:
             mejora.LIBRO = antes
     assert cierre.el_parte({"el_relevo": object()})
@@ -1018,11 +1278,14 @@ TESTS = [
     test_apagado_los_tres_vendedores_son_los_de_main,
     test_el_libro_se_lee_como_lo_lee_la_mejora,
     test_ramon_por_unai_el_miercoles_con_la_caja_en_rojo,
+    test_el_ultimo_recurso_es_del_cierre,
+    test_con_la_mejora_apagada_el_relevo_no_se_guarda,
     test_con_el_cambio_hecho_el_relevo_es_uno_mas,
     test_el_que_no_es_relevo_se_vende_como_siempre,
     test_sin_libro_que_leer_lo_de_main_y_lo_dice,
     test_el_parte_no_vende_al_relevo_en_duda,
     test_el_motor_viejo_no_acepta_por_el_relevo,
+    test_el_competitivo_no_vende_al_relevo,
     test_nunca_lanza,
 ]
 

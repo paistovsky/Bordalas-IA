@@ -1196,12 +1196,27 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
         # la mejora suelta el cambio y el que sale ya no se vende). Con la
         # plantilla sin lo vendido en esta vuelta: con el que sale ya
         # vendido, el relevo es uno mas. Apagado, nadie y sin abrir nada.
+        # Nada de esto puede tumbar la vuelta (revision del 01/11: con un
+        # `libro_ronda_ruta` de '' o '/' la ruta junto a la de la ronda no
+        # existe): sin ruta, ninguno y nunca el de produccion; sin
+        # plantilla, todo el que entra del libro.
         from src.actions.la_mejora_del_once import LIBRO as LIBRO_MEJORA, el_relevo
 
+        libro_mejora, sin_ruta = None, None
+        try:
+            nuestros = set(foto["plantilla"]) - set(vuelta["vendidos"])
+        except Exception:                           # noqa: BLE001
+            nuestros = None
         if libro_mejora_ruta is None and libro_ronda_ruta is not None:
-            libro_mejora_ruta = Path(libro_ronda_ruta).with_name(LIBRO_MEJORA.name)
-        relevo = el_relevo(ruta=libro_mejora_ruta,
-                           plantilla=set(foto["plantilla"]) - set(vuelta["vendidos"]))
+            try:
+                libro_mejora_ruta = Path(libro_ronda_ruta).with_name(LIBRO_MEJORA.name)
+            except Exception as error:              # noqa: BLE001
+                libro_mejora = {}
+                sin_ruta = (f"sin ruta al libro de la mejora junto al de la ronda: "
+                            f"{type(error).__name__}: {error}")
+        relevo = el_relevo(libro_mejora, ruta=libro_mejora_ruta, plantilla=nuestros)
+        if sin_ruta and relevo["motivo"] == "LEIDO":
+            relevo = {**relevo, "motivo": "SIN_RUTA", "detalle": sin_ruta}
         if relevo["activo"]:
             salida["el_relevo"] = {"motivo": relevo["motivo"],
                                    "no_se_venden": sorted(relevo["entran"]),
