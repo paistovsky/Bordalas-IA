@@ -1674,8 +1674,11 @@ def _sin_subasta() -> bool:
 #     y la pantalla- pasa la cesta por
 #     `la_subasta_en_el_colchon.en_el_colchon`: nada a menos de 40 h de la
 #     jornada (ni sin calendario), solo lo que sube de verdad, y cada puja
-#     tiene que caber en el colchon contando las de delante. Ver aquel
-#     modulo.
+#     tiene que caber en el colchon contando las de delante. Y el ciclo
+#     (`_pujar_en_el_reset`) le deja a la orden, los chollos y la ronda de
+#     la misma vuelta la foto con lo que la cesta pujo
+#     (`la_subasta_en_el_colchon.con_lo_pujado`), preguntando AQUI si esta
+#     puesto. Ver aquel modulo.
 #
 #     SE LEE AQUI Y SOLO AQUI. NACE APAGADO: apagado, el plan es el de
 #     antes letra a letra y el modulo no se llama. Si no se puede leer el
@@ -2474,6 +2477,17 @@ def plan_desde_el_estado(
     ahora=None,
     calendario=None,
     libro_ruta=None,
+
+    # LA FOTO MAS FRESCA Y EL LIBRO DE PUJAS (01/11/2026). Tambien solo
+    # para el colchon, y solo con el interruptor: el plan sigue saliendo
+    # de `snapshot`. `foto_del_colchon` es la de `post_action` si el motor
+    # viejo ya escribio en la vuelta; `pujas_desde`, el comienzo de la
+    # ventana (lo que el libro apunta desde ahi y la foto no trae cuenta
+    # delante); `libro_de_pujas`, el libro (`None`, el de la casa). La
+    # pantalla no pasa ninguno.
+    foto_del_colchon=None,
+    pujas_desde=None,
+    libro_de_pujas=None,
 ) -> dict:
     """
     El plan del reset a partir del estado del ciclo.
@@ -2531,6 +2545,9 @@ def plan_desde_el_estado(
                 ahora=ahora,
                 calendario=calendario,
                 libro_ruta=libro_ruta,
+                foto_del_colchon=foto_del_colchon,
+                pujas_desde=pujas_desde,
+                libro_de_pujas=libro_de_pujas,
             )
 
         except Exception as error:                  # noqa: BLE001

@@ -37,6 +37,12 @@ QUE SE COMPRUEBA
        escritor cambiado por uno que apunta) y la pantalla
        (`bloque_de_la_subasta`) ven lo mismo.
     5. Nunca lanza: si algo falla, no se puja y se dice por que.
+    6. Un solo colchon en la vuelta (los revisores, 01/11): la foto del
+       colchon es la mas fresca (`post_action`, si el motor viejo ya
+       escribio), lo del libro de pujas de la ventana que la foto no trae
+       cuenta delante, una foto en la que no se reconocen nuestras pujas
+       no deja pujar, y lo que la cesta pujo queda en la foto de la vuelta
+       para la ronda que puja detras (cesta + ronda no pasan del colchon).
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -493,11 +499,12 @@ class _Libro:
 
 
 def _plan(estado, foto, entorno=PUESTO, ahora=AHORA_3110, calendario=CALENDARIO,
-          libro=None, en_vivo=True) -> dict:
+          libro=None, en_vivo=True, **extra) -> dict:
     with _Interruptores(entorno), _Libro(libro) as ruta:
         return sub.plan_desde_el_estado(
             copy.deepcopy(estado), copy.deepcopy(foto), en_vivo=en_vivo,
-            ahora=ahora, calendario=calendario, libro_ruta=ruta)
+            ahora=ahora, calendario=calendario, libro_ruta=ruta,
+            **copy.deepcopy(extra))
 
 
 def _ids(plan) -> list:
@@ -524,6 +531,10 @@ def test_nace_apagado():
     # que se enciende (leccion del 26/10).
     from src.telemetry.el_tablon import QUE_HACE
     assert str(QUE_HACE.get(ENV) or "").strip(), "sin frase en QUE_HACE"
+    # Y el que se enciende con el (el comentario del YAML: con
+    # `BORDALAS_CESTA_SOLO_EL_SUELO`), tambien: sin frase, la verja del
+    # encendido se pondria roja (el revisor, 01/11).
+    assert str(QUE_HACE.get(sub.ENV_SOLO_EL_SUELO) or "").strip(), "el suelo, sin frase"
     # Se lee en UN sitio, al llamarse: `la_subasta._en_el_colchon`.
     from scripts.los_interruptores import lectores
     quien = {}
@@ -648,6 +659,7 @@ def test_el_corte_de_las_40_horas():
     estado = _vuelta_3110((MACIA, ORTIZ, BARATO))
     jueves = _plan(estado, FOTO_3110, ahora=JUEVES_0511_0445)
     assert abs(_detalle(jueves)["horas_a_la_jornada"] - 40.25) < 1e-6
+    assert _detalle(jueves)["sin_reloj"] is False
     assert _ids(jueves) == [90001] and jueves["execute"] is True
 
     viernes = _plan(estado, FOTO_3110, ahora=VIERNES_0611_0445)
@@ -676,6 +688,9 @@ def test_sin_reloj_no_se_puja():
             assert _ids(plan) == [] and plan["execute"] is False, calendario
             assert plan["blocked_by"] == "CERCA_DE_LA_JORNADA", plan["blocked_by"]
             assert _detalle(plan)["horas_a_la_jornada"] is None
+            # El codigo es el del encargo; el detalle dice que es el reloj
+            # que falta y no la jornada que se acerca.
+            assert _detalle(plan)["sin_reloj"] is True
             assert "no se sabe" in plan["reason"].lower(), plan["reason"]
 
 
@@ -690,6 +705,35 @@ def test_sin_colchon_no_se_puja():
     # Con saldo de sobra, la misma sale.
     rica = _foto(5_000_000, PUJAS_3110, PLANTILLA_3110, CATALOGO_3110)
     assert _ids(_plan(estado, rica)) == [90001]
+
+    # UNA FOTO EN LA QUE NO SE RECONOCEN NUESTRAS PUJAS (el revisor, 01/11):
+    # con saldo pero sin `yo` o sin la lista de ofertas, el colchon saldria
+    # sin restarlas. Una puja viva nuestra de 1.000.000 deja el colchon en
+    # 299.975: la pareja A (701.751) no cabe. Rota, antes cabia.
+    pareja = _vuelta_3110((MACIA, ORTIZ, PAREJA_A))
+    buena = _foto(SALDO_3110, {55555: 1_000_000}, PLANTILLA_3110, CATALOGO_3110)
+    plan = _plan(pareja, buena)
+    assert _ids(plan) == [] and plan["blocked_by"] == "SIN_COLCHON"
+    assert _detalle(plan)["colchon"] == 299_975, _detalle(plan)
+    rotas = []
+    for quita in (("league",), ("league", "user"), ("market", "offers")):
+        rota = copy.deepcopy(buena)
+        donde = rota
+        for clave in quita[:-1]:
+            donde = donde[clave]
+        donde.pop(quita[-1])
+        rotas.append(rota)
+    sin_lista = copy.deepcopy(buena)
+    sin_lista["market"]["offers"] = None
+    rotas.append(sin_lista)
+    for rota in rotas:
+        plan = _plan(pareja, rota)
+        assert _ids(plan) == [] and plan["execute"] is False, rota.keys()
+        assert plan["blocked_by"] == "SIN_COLCHON", plan["blocked_by"]
+        assert "no deja ver nuestras pujas" in plan["reason"], plan["reason"]
+        assert _detalle(plan)["colchon"] is None
+        # Apagado, la cesta de main tal cual.
+        assert _ids(_plan(pareja, rota, entorno=APAGADO)) == [90002]
 
 
 def test_el_colchon_se_cuenta_acumulado():
@@ -785,10 +829,23 @@ def _el_ciclo(estado, foto, entorno, libro=None) -> tuple:
     """`_pujar_en_el_reset` de verdad, con el escritor cambiado por uno que
     apunta. El calendario y el libro de la ronda, en una carpeta temporal
     (`_la_casa`)."""
+
+    plan, enviadas, _ = _la_vuelta(estado, {"snapshot": copy.deepcopy(foto)}, entorno,
+                                   libro)
+    return plan, enviadas
+
+
+LIBRO_DE_PUJAS_VACIO = {"version": "V1.0", "bids": {}}
+
+
+def _la_vuelta(estado, cycle, entorno, libro=None, libro_de_pujas=None) -> tuple:
+    """Lo mismo, con el `cycle` entero (`post_action` incluido) y el libro de
+    pujas cambiado por `libro_de_pujas` (ni `data/`). Devuelve tambien el
+    `cycle` como queda: lo que veran los que pujan detras."""
     import src.actions.la_ronda_de_la_manana as ronda
     import src.actions.los_chollos as chollos
     import src.biwenger.write_client as escritura
-    import src.intelligence.bid_outcome_ledger as libro_de_pujas
+    import src.intelligence.bid_outcome_ledger as libro_de_pujas_mod
     import src.v10_full_autonomous_live as ciclo
 
     enviadas = []
@@ -801,24 +858,26 @@ def _el_ciclo(estado, foto, entorno, libro=None) -> tuple:
             enviadas.append((int(player_id), int(amount)))
             return {"sent": False}
 
+    libro_falso = LIBRO_DE_PUJAS_VACIO if libro_de_pujas is None else libro_de_pujas
     antes = (ciclo._estado_publicado, ciclo._anotar_en_el_libro,
-             libro_de_pujas.pujados_desde, escritura.BiwengerWriteClient,
-             chollos.CALENDARIO, ronda.LIBRO)
+             libro_de_pujas_mod.pujados_desde, libro_de_pujas_mod.load_ledger,
+             escritura.BiwengerWriteClient, chollos.CALENDARIO, ronda.LIBRO)
     with tempfile.TemporaryDirectory() as d:
         calendario, ruta = _la_casa(d, libro)
         try:
             ciclo._estado_publicado = lambda cycle: copy.deepcopy(estado)
             ciclo._anotar_en_el_libro = lambda enviadas: None
-            libro_de_pujas.pujados_desde = lambda desde: []
+            libro_de_pujas_mod.pujados_desde = lambda desde: []
+            libro_de_pujas_mod.load_ledger = lambda *a, **k: copy.deepcopy(libro_falso)
             escritura.BiwengerWriteClient = _Escritor
             chollos.CALENDARIO, ronda.LIBRO = calendario, ruta
             with _Interruptores(entorno):
-                plan = ciclo._pujar_en_el_reset({"snapshot": copy.deepcopy(foto)})
+                plan = ciclo._pujar_en_el_reset(cycle)
         finally:
             (ciclo._estado_publicado, ciclo._anotar_en_el_libro,
-             libro_de_pujas.pujados_desde, escritura.BiwengerWriteClient,
-             chollos.CALENDARIO, ronda.LIBRO) = antes
-    return plan, enviadas
+             libro_de_pujas_mod.pujados_desde, libro_de_pujas_mod.load_ledger,
+             escritura.BiwengerWriteClient, chollos.CALENDARIO, ronda.LIBRO) = antes
+    return plan, enviadas, cycle
 
 
 def _la_pantalla(estado, foto, entorno, libro=None) -> dict:
@@ -855,9 +914,17 @@ def test_el_ciclo_y_la_pantalla_ven_lo_mismo():
 
     pantalla = _la_pantalla(sube, FOTO_3110, APAGADO)
     assert pantalla["would_bid"] is True and [b["id"] for b in pantalla["bids"]] == [41418]
+    # Apagado, el bloque de siempre: sin las claves del colchon.
+    for clave in ("dropped_by_colchon", "dropped_by_no_sube_de_verdad", "en_el_colchon"):
+        assert clave not in pantalla, clave
     pantalla = _la_pantalla(sube, FOTO_3110, PUESTO)
     assert pantalla["would_bid"] is False and pantalla["bids"] == []
     assert pantalla["blocked_by"] == "SIN_COLCHON" and "1.179.775" in pantalla["reason"]
+    # Encendido, el panel dice cuantas quito y por que (el revisor, 01/11).
+    assert pantalla["dropped_by_colchon"] == 1, pantalla.get("dropped_by_colchon")
+    assert pantalla["dropped_by_no_sube_de_verdad"] == 0
+    assert pantalla["en_el_colchon"]["colchon"] == COLCHON_3110
+    assert pantalla["en_el_colchon"]["foto"] == "LA_DE_LA_VUELTA"
     pantalla = _la_pantalla(con_barato, FOTO_3110, PUESTO)
     assert [b["id"] for b in pantalla["bids"]] == [90001]
     assert pantalla["committed"] == 300_751 and pantalla["would_bid"] is True
@@ -932,6 +999,200 @@ def test_nunca_lanza():
         builtins.__import__ = original_import
 
 
+# ============================================================
+# 6. UN SOLO COLCHON EN LA VUELTA (los revisores, 01/11)
+# ============================================================
+
+# El motor viejo ya pujo en `run_cycle` (900.000 por el 77777): la foto de
+# `post_action` lo trae y la de la vuelta no.
+PUJA_DEL_EJECUTOR = {77777: 900_000}
+FOTO_POST_3110 = _foto(SALDO_3110, {**PUJAS_3110, **PUJA_DEL_EJECUTOR}, PLANTILLA_3110,
+                       CATALOGO_3110)
+
+
+def _nuestras_en(foto) -> dict:
+    from src.actions.la_orden_del_gestor import leer_la_foto
+
+    return {pid: fila["amount"]
+            for pid, fila in leer_la_foto(foto, YO)["nuestras_pujas"].items()}
+
+
+def test_la_foto_mas_fresca_de_la_vuelta():
+    pareja = _vuelta_3110((MACIA, ORTIZ, PAREJA_A))
+    # Directo: con la foto de `post_action`, el colchon ya no es 1.179.775
+    # sino 279.775, y la pareja A no cabe.
+    plan = _plan(pareja, FOTO_3110, foto_del_colchon=FOTO_POST_3110)
+    assert _ids(plan) == [] and plan["blocked_by"] == "SIN_COLCHON", plan["reason"]
+    assert _detalle(plan)["colchon"] == COLCHON_3110 - 900_000 == 279_775
+    assert _detalle(plan)["foto"] == "POST_ACTION"
+    assert _detalle(plan)["de_otra_foto"] == [{"id": 77777, "amount": 900_000}]
+    sin = _plan(pareja, FOTO_3110)
+    assert _ids(sin) == [90002] and _detalle(sin)["foto"] == "LA_DE_LA_VUELTA"
+    # Apagado no se mira: la de main, con foto fresca o sin ella.
+    assert _plan(pareja, FOTO_3110, entorno=APAGADO, foto_del_colchon=FOTO_POST_3110) \
+        == _plan(pareja, FOTO_3110, entorno=APAGADO)
+
+    # El ciclo de verdad le pasa la de `post_action` (P3 del revisor).
+    vuelta = {"snapshot": copy.deepcopy(FOTO_3110),
+              "post_action": {"snapshot": copy.deepcopy(FOTO_POST_3110)}}
+    plan, enviadas, _ = _la_vuelta(pareja, copy.deepcopy(vuelta), PUESTO)
+    assert enviadas == [] and plan["blocked_by"] == "SIN_COLCHON", plan.get("reason")
+    assert _detalle(plan)["colchon"] == 279_775
+    _, enviadas, _ = _la_vuelta(pareja, copy.deepcopy(vuelta), APAGADO)
+    assert enviadas == [(90002, 701_751)], enviadas
+    # Sin `post_action` (no escribio nadie), la de la vuelta.
+    _, enviadas, _ = _la_vuelta(pareja, {"snapshot": copy.deepcopy(FOTO_3110),
+                                         "post_action": None}, PUESTO)
+    assert enviadas == [(90002, 701_751)], enviadas
+
+
+def test_el_libro_de_la_ventana_cuenta_delante():
+    pareja = _vuelta_3110((MACIA, ORTIZ, PAREJA_A))
+    abierta = AHORA_3110 - timedelta(minutes=4)
+
+    def _entrada(pid, importe, cuando, outcome="PENDING"):
+        return {"player_id": pid, "amount": importe, "outcome": outcome,
+                "placed_at": cuando.isoformat(), "target_source": "SUBASTA_CARTERA"}
+
+    libro = {"version": "V1.0", "bids": {
+        # puesta en esta ventana y la foto aun no la trae: cuenta
+        "a": _entrada(55555, 600_000, AHORA_3110 - timedelta(minutes=1)),
+        # antes de abrir la ventana: la foto tendria que traerla
+        "b": _entrada(55556, 900_000, AHORA_3110 - timedelta(hours=3)),
+        # la foto ya la trae (Macia, de la ronda): no se cuenta dos veces
+        "c": _entrada(39357, 709_900, AHORA_3110 - timedelta(minutes=1)),
+        # ya resuelta
+        "d": _entrada(55557, 900_000, AHORA_3110 - timedelta(minutes=1), "LOST"),
+        # basura
+        "e": {"player_id": "x", "amount": None}, "f": 7,
+    }}
+    plan = _plan(pareja, FOTO_3110, pujas_desde=abierta, libro_de_pujas=libro)
+    # 1.179.775 - 600.000 = 579.775 < 701.751: no cabe.
+    assert _ids(plan) == [] and plan["blocked_by"] == "SIN_COLCHON", plan["reason"]
+    assert [f["id"] for f in _detalle(plan)["sin_foto"]] == [55555], _detalle(plan)
+    assert _detalle(plan)["fuera"][0]["acumulado"] == 600_000
+    assert "que la foto aun no trae (600.000 EUR)" in plan["reason"], plan["reason"]
+    # Sin la de esta ventana, cabe; y sin `pujas_desde` (la pantalla) no se
+    # mira el libro.
+    del libro["bids"]["a"]
+    assert _ids(_plan(pareja, FOTO_3110, pujas_desde=abierta, libro_de_pujas=libro)) == [90002]
+    libro["bids"]["a"] = _entrada(55555, 600_000, AHORA_3110 - timedelta(minutes=1))
+    assert _ids(_plan(pareja, FOTO_3110, libro_de_pujas=libro)) == [90002]
+
+    # El ciclo de verdad le pasa el comienzo de la ventana y el libro de la
+    # casa (aqui cambiado): una marca muy lejana cae dentro de la ventana y
+    # una muy antigua no, sin mirar el reloj.
+    lejana = datetime(2099, 1, 1, tzinfo=timezone.utc)
+    antigua = datetime(2000, 1, 1, tzinfo=timezone.utc)
+    for cuando, sale in ((lejana, []), (antigua, [(90002, 701_751)])):
+        libro_casa = {"version": "V1.0", "bids": {"a": _entrada(55555, 600_000, cuando)}}
+        plan, enviadas, _ = _la_vuelta(pareja, {"snapshot": copy.deepcopy(FOTO_3110)},
+                                       PUESTO, libro_de_pujas=libro_casa)
+        assert enviadas == sale, (cuando, enviadas, plan.get("reason"))
+
+
+# La vuelta del revisor (misma_vuelta_2.py): la cesta puja por X y, en la
+# misma vuelta, la ronda compraria Y al Computer.
+X_CESTA = (90010, 'Barato que sube', 1_150_000, 40_000, 5, 'BID', False, None, False,
+           80.0, 40, 'DISPONIBLE', 'SPECULATION', 'COMPUTER_RESALE', None, 40)
+Y_RONDA = 90020
+
+
+def _foto_de_la_misma_vuelta() -> dict:
+    foto = copy.deepcopy(FOTO_3110)
+    foto["market"]["sales"] = [
+        {"player": {"id": X_CESTA[0]}, "user": None, "price": 1_150_000},
+        {"player": {"id": Y_RONDA}, "user": None, "price": 1_000_000}]
+    for pid in (X_CESTA[0], Y_RONDA):
+        foto["catalog"]["data"]["players"][str(pid)] = {
+            "id": pid, "price": X_CESTA[2] if pid == X_CESTA[0] else 1_000_000,
+            "priceIncrement": 40_000, "status": "ok", "points": 40,
+            "playedHome": 4, "playedAway": 4}
+    return foto
+
+
+def _la_ronda_detras(foto, libro=LIBRO_3110) -> list:
+    """Lo que la ronda pujaria con esta foto (su `decidir`, con la cartera y
+    a 40,25 h): [(jugador, importe)]."""
+    import src.actions.la_ronda_de_la_manana as ronda
+    from src.actions.la_orden_del_gestor import leer_la_foto
+
+    f = leer_la_foto(foto, YO)
+    fichas = {int(k): v for k, v in foto["catalog"]["data"]["players"].items()}
+    acciones = ronda.decidir(
+        mercado=dict(f["mercado"]), fichas=fichas, nuestras_pujas=f["nuestras_pujas"],
+        plantilla=f["plantilla"], ofertas_del_computer=f["ofertas_del_computer"],
+        en_venta=f["en_venta"], maximo_de_puja=f["maximo_de_puja"], minutos_al_reset=133,
+        horas_jornada=40.25, libro=dict(libro), puede_escribir=True, cartera=True,
+        saldo=f["saldo"])
+    return [(a["player_id"], a["importe"]) for a in acciones if a["accion"] == "PUJAR"]
+
+
+def test_lo_que_la_cesta_puja_lo_ve_la_ronda():
+    import src.actions.la_ronda_de_la_manana as ronda
+
+    estado = _vuelta_3110((MACIA, ORTIZ, X_CESTA))
+    foto = _foto_de_la_misma_vuelta()
+    # La ronda, sola, con esta foto, compraria Y (y X, que tambien sube).
+    assert Y_RONDA in [p for p, _ in _la_ronda_detras(foto)], _la_ronda_detras(foto)
+
+    # Encendido: la cesta puja por X y la foto de la vuelta queda con su puja.
+    vuelta = {"snapshot": foto}
+    plan, enviadas, despues = _la_vuelta(estado, vuelta, PUESTO)
+    assert [p for p, _ in enviadas] == [X_CESTA[0]], (enviadas, plan.get("reason"))
+    puja = enviadas[0][1]
+    assert despues["snapshot"] is not foto, "la foto de la vuelta no se cambio"
+    assert _nuestras_en(despues["snapshot"]) == {**PUJAS_3110, X_CESTA[0]: puja}
+    assert _nuestras_en(foto) == PUJAS_3110, "la foto vieja no se toca"
+    # Y la ronda que puja detras ya no ve el colchon entero: no compra.
+    libro = LIBRO_3110
+    f = __import__("src.actions.la_orden_del_gestor", fromlist=["x"]).leer_la_foto(
+        despues["snapshot"], YO)
+    fichas = {int(k): v for k, v in despues["snapshot"]["catalog"]["data"]["players"].items()}
+    queda = ronda.el_colchon(f["saldo"], f["nuestras_pujas"], libro, f["plantilla"], fichas)
+    assert queda == COLCHON_3110 - puja, queda
+    assert _la_ronda_detras(despues["snapshot"]) == []
+    # Lo vivo despues de la vuelta no pasa del colchon de la casa.
+    assert puja <= COLCHON_3110
+
+    # Apagado: la foto de la vuelta es la misma (el objeto), y la ronda
+    # volveria a comprar Y.
+    vuelta = {"snapshot": _foto_de_la_misma_vuelta()}
+    original = vuelta["snapshot"]
+    plan, enviadas, despues = _la_vuelta(estado, vuelta, APAGADO)
+    assert [p for p, _ in enviadas] == [X_CESTA[0]], enviadas
+    assert despues["snapshot"] is original
+    assert Y_RONDA in [p for p, _ in _la_ronda_detras(despues["snapshot"])]
+
+    # Lo que el colchon conto sin estar en la foto de la vuelta (la puja del
+    # ejecutor en `post_action`, la del libro) tambien queda: la ronda la
+    # tiene que ver igual.
+    pareja = _vuelta_3110((MACIA, ORTIZ, PAREJA_A))
+    post = _foto(SALDO_3110, {**PUJAS_3110, 77777: 100_000}, PLANTILLA_3110, CATALOGO_3110)
+    libro_casa = {"version": "V1.0", "bids": {"z": {
+        "player_id": 66666, "amount": 50_000, "outcome": "PENDING",
+        "placed_at": "2099-01-01T00:00:00+00:00"}}}
+    plan, enviadas, despues = _la_vuelta(
+        pareja, {"snapshot": copy.deepcopy(FOTO_3110), "post_action": {"snapshot": post}},
+        PUESTO, libro_de_pujas=libro_casa)
+    assert enviadas == [(90002, 701_751)], (enviadas, plan.get("reason"))
+    assert _nuestras_en(despues["snapshot"]) == {
+        **PUJAS_3110, 77777: 100_000, 66666: 50_000, 90002: 701_751}
+
+    # `con_lo_pujado`, sola: la que ya estaba cambia su importe, la nueva se
+    # apunta con `id` None; sin `yo` o sin ofertas, la misma foto.
+    from src.analysis.la_subasta_en_el_colchon import con_lo_pujado
+
+    nueva = con_lo_pujado(FOTO_3110, [(39357, 750_000), (5, 10), ("x", 3), (6, -1)])
+    assert _nuestras_en(nueva) == {39357: 750_000, 35765: 219_900, 5: 10}
+    assert [o for o in nueva["market"]["offers"] if o.get("id") is None][0][
+        "reservada_por"] == "LA_SUBASTA_EN_EL_COLCHON"
+    assert _nuestras_en(FOTO_3110) == PUJAS_3110
+    for rota in ({}, None, {"league": {}}, {"league": {"user": {"id": YO}}, "market": {}}):
+        assert con_lo_pujado(rota, [(5, 10)]) is rota
+    assert con_lo_pujado(FOTO_3110, []) is FOTO_3110
+
+
 TESTS = [
     test_nace_apagado,
     test_apagado_es_main_byte_a_byte,
@@ -945,6 +1206,9 @@ TESTS = [
     test_los_dos_caminos_pasan_por_el_colchon,
     test_el_ciclo_y_la_pantalla_ven_lo_mismo,
     test_nunca_lanza,
+    test_la_foto_mas_fresca_de_la_vuelta,
+    test_el_libro_de_la_ventana_cuenta_delante,
+    test_lo_que_la_cesta_puja_lo_ve_la_ronda,
 ]
 
 

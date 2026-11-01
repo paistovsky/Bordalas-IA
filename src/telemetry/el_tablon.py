@@ -270,7 +270,12 @@ QUE_HACE = {
         "suben de verdad hoy (la subida mínima de su tramo, la misma vara que la "
         "mejora) y si cada puja, sumada a las de delante, cabe en el colchón de "
         "la casa: saldo menos todas las pujas vivas más el 92 % de lo de la "
-        "cartera. Lo que no cabe no se puja; sin saldo en la foto, nada.",
+        "cartera. Lo que no cabe no se puja; sin saldo en la foto, nada. Lo que "
+        "puja lo ven la orden, los chollos y la ronda de la misma vuelta.",
+    "BORDALAS_CESTA_SOLO_EL_SUELO":
+        "La cesta del reset del motor viejo solo compra para revender jugadores "
+        "de menos de 1.500.000 €: por encima perdía (9 operaciones, un millón "
+        "perdido; por debajo, 8 de 8 en verde). Los fichajes no cambian.",
     "BORDALAS_EL_PARTE_VENDE":
         "Vende a los suplentes que Biwenger da en duda o lesionados (caen un "
         "3-5 % en la semana): los publica a su valor y acepta la oferta del "

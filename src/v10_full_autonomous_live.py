@@ -469,9 +469,21 @@ def _pujar_en_el_reset(cycle: dict | None) -> dict:
         except (TypeError, ValueError):
             abierta_hace = 0
 
-        ya_pujados = pujados_desde(
+        desde = (
             datetime.now(timezone.utc)
             - timedelta(seconds=abierta_hace)
+        )
+
+        ya_pujados = pujados_desde(desde)
+
+        # SOLO PARA EL COLCHON (01/11/2026), y solo con su
+        # interruptor: el plan sigue saliendo de la foto de la
+        # vuelta. Si el motor viejo ya escribio en `run_cycle`, la
+        # foto de `post_action` trae su puja; y lo que el libro
+        # apunta desde que se abrio la ventana y la foto no trae
+        # tambien cuenta. Apagado no se miran.
+        despues = (
+            cycle.get("post_action") if isinstance(cycle, dict) else None
         )
 
         plan = plan_desde_el_estado(
@@ -479,6 +491,12 @@ def _pujar_en_el_reset(cycle: dict | None) -> dict:
             (cycle or {}).get("snapshot"),
             en_vivo=True,
             ya_pujados=ya_pujados,
+            foto_del_colchon=(
+                despues.get("snapshot")
+                if isinstance(despues, dict)
+                else None
+            ),
+            pujas_desde=desde,
         )
 
         # LA ORDEN DEL GESTOR MANDA (29/09/2026): lo que dice
@@ -574,6 +592,12 @@ def _pujar_en_el_reset(cycle: dict | None) -> dict:
         # no se podria medir nunca si esto funciona.
         _anotar_en_el_libro(enviadas)
 
+        # UN SOLO COLCHON EN LA VUELTA (01/11/2026): con el colchon
+        # puesto, la orden, los chollos y la ronda, que pujan
+        # despues con `cycle["snapshot"]`, ven lo que la cesta acaba
+        # de pujar. Apagado no hace nada.
+        _reservar_lo_pujado(cycle, plan)
+
         return {
             **plan,
             "available": True,
@@ -589,6 +613,56 @@ def _pujar_en_el_reset(cycle: dict | None) -> dict:
                 f"{type(error).__name__}: {error}"
             ),
         }
+
+
+def _reservar_lo_pujado(cycle: dict | None, plan: dict | None) -> None:
+    """
+    Con `BORDALAS_LA_SUBASTA_EN_EL_COLCHON` (preguntado a
+    `la_subasta._en_el_colchon`, el unico que lo lee), cambia
+    `cycle["snapshot"]` por la misma foto con lo que la cesta
+    pujo, y lo que el colchon conto sin estar en ella, como pujas
+    vivas nuestras (`la_subasta_en_el_colchon.con_lo_pujado`).
+
+    POR QUE (el revisor, 01/11/2026)
+
+        La orden, los chollos y la ronda pujan DESPUES en la
+        misma vuelta, y cada uno saca su colchon de esa foto. Sin
+        esto, ninguno ve la cesta y cada uno vuelve a gastar el
+        colchon entero: cesta 1.152.876 y ronda 1.010.000 sobre un
+        colchon de 1.179.775.
+
+    Es lo que traeria una foto nueva, sin pedirla. La foto vieja
+    no se toca: se cambia la que cuelga de `cycle`. Lo que se
+    intento pujar cuenta aunque no se sepa si entro. Nunca lanza.
+    """
+
+    try:
+        from src.analysis.la_subasta import _en_el_colchon
+
+        if not _en_el_colchon() or not isinstance(cycle, dict):
+            return
+
+        from src.analysis.la_subasta import _euros
+        from src.analysis.la_subasta_en_el_colchon import (
+            con_lo_pujado,
+            lo_que_reservar,
+        )
+
+        pujas = lo_que_reservar(plan)
+
+        if not pujas or not isinstance(cycle.get("snapshot"), dict):
+            return
+
+        cycle["snapshot"] = con_lo_pujado(cycle["snapshot"], pujas)
+
+        print(
+            f"  Reservado en la foto de la vuelta: {len(pujas)} "
+            f"puja(s), {_euros(sum(i for _, i in pujas))} EUR (la "
+            f"orden, los chollos y la ronda lo ven)."
+        )
+
+    except Exception:                               # noqa: BLE001
+        pass
 
 
 def _anotar_en_el_libro(enviadas: list | None) -> None:
