@@ -35,6 +35,63 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 01/11/2026, 19:10 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
+
+La J11 sigue: Elche-Valencia en juego (Chust y Gaya titulares; sin nada
+hasta el 12'), Athletic-Real Sociedad 21:00 y lun Osasuna-Deportivo.
+Juan Iglesias ya es nuestro (07:00). Once guardado para la J12 (3-4-3):
+Gulacsi; Iglesias, Kike Salas, Chust; Olasagasti, Unai, Pablo, Dani
+Lorenzo; Yamal, Roberto, Boye. Puja viva: Ivan Martin, 2.779.900 (lun
+07:00). Saldo -4.714.876. Ventas previstas desde el mar: Gaya, Unai (entra
+Ramon), Ortiz, y Pablo solo si llega Ivan.
+
+| Jugador | Veredicto | J12 % | J12 (Madrid) | Fuente | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 90 | Villarreal-Getafe, dom 08/11 18:30 | FF 90; 7 de 7 en Liga; Champions mar con el PSG | = |
+| Juan Iglesias (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; J11: 90', sin tarjeta; 11 de 11 titular | 87 -> 90 (ya nuestro); 3 amarillas |
+| Kike Salas (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; J11: 90' y gol (19'); Luis Garcia le elogia (01/11) | 85 -> 90 |
+| Chust (DEF) | TITULAR | 88 | Elche-Betis, dom 08/11 14:00 | FF 90; titular hoy | = (falta acabar su J11) |
+| Olasagasti (MED) | TITULAR | 80 | Celta-Levante, dom 08/11 18:30 | FF 80; entreno con el grupo (01/11); Copa el jue | = |
+| Unai Lopez (MED) | TITULAR | 82 | Real Sociedad-Rayo, dom 08/11 16:15 | FF 80 (vuelve Ciss; Valentin tocado de rodilla); se vende el mar | 85 -> 82; 3 amarillas |
+| Pablo Ibanez (MED) | TITULAR | 70 | Sevilla-Alaves, vie 06/11 21:00 | FF 60; suplente en el Camp Nou por rotacion pedida por Quique (31/10), con Blanco y Alena | 80 -> 70; Copa el mar: si juega mucho, baja |
+| Dani Lorenzo (MED) | TITULAR | 76 | Malaga-Racing, sab 07/11 14:00 | FF 70; J11: 90'; 3 titularidades seguidas | 80 -> 76 |
+| Yamal (DEL) | TITULAR | 95 | Atletico-Barcelona, dom 08/11 21:00 | FF 95, Dios; Flick dosifica minutos (cambio en el 74'); Champions mar | = |
+| Roberto Fernandez (DEL) | TITULAR | 87 | Espanyol-Deportivo, sab 07/11 16:15 | FF 90; Sarabia, nuevo entrenador (01/11), lo tiene en la sesion | 88 -> 87 |
+| Boye (DEL) | TITULAR | 88 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; cambio tactico en el 74' (6-1) | 87 -> 88 |
+| *Ramon Enriquez (MED, entra por Unai)* | DUDA | 58 | Malaga-Racing, sab 07/11 14:00 | FF 60, Revulsivo; J11: cambio tactico en el 60' | TITULAR 68 -> DUDA 58 |
+| *Sergi Cardona (DEF, banquillo)* | DUDA | 50 | Villarreal-Getafe, dom 08/11 18:30 | FF 50/50 con Romero; Champions mar | = |
+| *Gaya (DEF, se vende el mar)* | TITULAR | 78 | Valencia-Real Madrid, sab 07/11 21:00 | FF 80; titular hoy de lateral izquierdo | = (falta acabar su J11) |
+| *Angel Ortiz (DEF, se vende)* | DUDA | 30 | Elche-Betis, dom 08/11 14:00 | FF 30; Bellerin titular | 40 -> 30 |
+| *Ivan Martin (MED, puja viva)* | TITULAR | 85 | Malaga-Racing, sab 07/11 14:00 | FF 100; J11: titular, cambio tactico en el 82', sin golpe | nuevo; 2 amarillas |
+
+Nadie lesionado, sancionado ni apercibido para la J12; nadie ha perdido el
+puesto.
+
+**Hecho:** nada. El unico en riesgo es Ramon (DUDA 58), y esta cubierto:
+Cardona entra con un 4-3-3 valido. En el mercado de la maquina no hay un
+centrocampista que pague la caja y le mejore (la J12 sale a +0,61 M en el
+peor caso). Lo reviso un esceptico.
+
+**Pendiente:**
+- **Mar 03/11, supervision:** despues de las vueltas de las 07:15 y 08:07,
+  mirar si Ramon esta en el once guardado. Si no esta (Unai, o Pablo con
+  Ivan, siguen siendo nuestros), poner a Ramon (41411) en `proteger` antes
+  del mie 05:00, para que el cierre no lo venda. Si se vendiera, la mejora
+  suelta el cambio Ramon por Unai, Unai no se vende y la caja de la J12
+  puede salir en rojo. Quitarlo cuando este en el once escrito o pasado el
+  cierre.
+- **Mar 03/11 por la noche:** Copa Anaitasuna-Alaves (19:00). Si Pablo es
+  titular y juega mucho, baja para el vie.
+- **Vie 06/11:** cambiar a Ramon por Cardona a mano solo si el FF del
+  viernes da a Cardona por encima de Ramon, o hay noticia fechada de que
+  Ramon no sale. Hacerlo despues de la vuelta de las 20:07 y antes de las
+  20:45.
+- **Hoy, al acabar el Elche-Valencia (~20:20):** tarjetas o golpes de Chust
+  y Gaya.
+- **Mie 04/11:** comprobar en `data/trading/el_cierre.json` que el cierre no
+  deja a Cardona fuera de su once (si lo dejara, con la caja en rojo podria
+  venderlo, y es el unico defensa de recambio).
+
 ## 31/10/2026, 18:40 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
 
 La J11 se esta jugando (once bloqueado: Cardona y Ramon dentro, Gaya

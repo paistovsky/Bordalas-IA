@@ -352,6 +352,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **01/11 19:10 (parte de la plantilla).** Nadie en riesgo para la J12
+  salvo Ramon Enriquez (DUDA 58), cubierto por Cardona (4-3-3). No se
+  toca nada. **Para la supervision del mar 03/11:** si tras las vueltas de
+  las 07:15 y 08:07 Ramon no esta en el once guardado, ponerlo en
+  `proteger` antes del mie 05:00 (si el cierre lo vende, la mejora suelta
+  Ramon por Unai y la caja de la J12 se va al rojo). Detalle en
+  `docs/EL-PARTE-DE-LA-PLANTILLA.md`.
+
 - **01/11 18:30 (Ivan Martin tras el Racing-Real Madrid).** Titular, 0-3,
   cambiado en el 82' por Andre Almeida (cambio normal, sin tarjeta ni
   lesion; el lesionado del Racing fue Mantilla). FF: 100 %, Clave. La puja
