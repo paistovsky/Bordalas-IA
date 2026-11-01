@@ -352,6 +352,62 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **01/11 23:10 (laboratorio de rivales de la noche). CONSTRUIDO, APAGADO,
+  `BORDALAS_EL_RELEVO_NO_SE_VENDE`; APLICADO: Ramon Enriquez a `proteger`.**
+  **Rivales:** sin movimientos desde las 13:10 (lo ultimo, Pollo vende a
+  Riedel a las 07:54). Las cajas no cambian: Alvaro 17,7 M, Prinzipote 3,3 M,
+  Pollo 3,0 M, Mex 2,5 M, Manzagool 1,0 M, DiosMande 0,5 M, nosotros
+  -4,71 M, Luismi -5,39 M. Luismi no ha vendido nada: tras su premio (mar
+  ~17:00, 1,2-1,8 M) le faltan 3,6-4,2 M antes del vie 20:59 (en venta: Lee
+  9,01 M, Gerard Martin 5,27 M, Kounde 2,96 M, Thiago 1,64 M, Ndukwe 1,30 M).
+  J11 por puntos de jugador, sin capitan: nosotros 64 (falta Chust), Pollo
+  63 (falta Lemar), Manzagool 46, Luismi 39 (le juegan 4). General: Pollo
+  495, nosotros 486 (a 9; antes a 10), Luismi 427, Manzagool 411.
+  Patrimonio: Pollo 118,5 M, Luismi 98,4 M, Manzagool 68,3 M, nosotros
+  60,0 M. **Leccion:** los numeros de la J11 de esta manana estaban mal. La
+  pagina publica de la jornada da a quien no tiene sesion puntos
+  inventados y distintos en cada descarga (Gulacsi salio 6, 2, 0, 0, 4, 1
+  y -2 en 7 descargas). Los puntos se toman SOLO de la lista de jugadores
+  (`competitions/la-liga/data?score=5`): la ultima puntuacion de cada uno,
+  si cuadra con lo que sube su total.
+  **Nuestras tacticas:** la ronda, 6 pujas y 1 ganada (Ortiz, -13,6 %); la
+  puerta, 2 ofertas en su vida y 0 aceptadas; entre managers no se ha
+  movido nadie en 44 dias. La mejora: Iglesias por Gaya +1,54 pts por
+  jornada, Ramon por Unai -0,68 (paga a Iglesias), neto +0,86. Caja de la
+  J12 (vie 15:00): +1,36 M con Ivan perdido, +1,27 M con Ivan ganado; en el
+  peor caso +0,46 M y +0,09 M.
+  **Defecto confirmado y arreglado apagado:** el mie 04/11 07:15, con la
+  caja en rojo, el cierre vende a Ramon (su unico candidato), la mejora
+  suelta el cambio, Unai no se vende y la J12 empieza con 1,58 M de
+  agujero. `BORDALAS_EL_RELEVO_NO_SE_VENDE`: el que entra por un cambio de
+  la mejora no lo venden el cierre, el parte, el motor viejo ni el
+  competitivo mientras el cambio viva; el cierre lo recupera como ultimo
+  recurso a menos de 20 h si sigue faltando caja; con la mejora apagada no
+  protege a nadie. Revision apagada: SHIP_OFF (600 escenarios x 8 valores
+  x 2 perfiles x 2 Pythons, 0 diferencias). Revision encendida: FIX_FIRST,
+  con 2 medios y 3 bajos, ya arreglados. Verja 231/231 en 3.11 y 3.13,
+  normal y con `--con`. Huella apagada 87bcc700...97e. **Antes de
+  encenderlo:** que los rescates en rojo de la mejora miren la caja
+  (saldo menos pujas vivas) y no solo el saldo; decidir el bloqueo
+  `EL_PARTE_VENDE` + relevo lesionado; subir `data/trading/la_mejora.json`
+  al artefacto. Encendido: linea del yml + paso 0 (60, certifica tambien
+  el colchon) + ensayo, en un commit.
+  **Aplicado hoy:** el motor viejo tenia a Ramon y Boye en su cluster de
+  ofertas que caducan el lun 07:00 (Ramon, 409.200). Boye esta en
+  `conservar`; Ramon no. Ramon (41411) pasa a `proteger` (fc43e412). Se
+  quita cuando se venda a Unai, o el jue 05/11 por la noche si Unai sigue
+  sin vender y la caja esta en rojo (`proteger` no deja al cierre usarlo
+  de ultimo recurso). Sustituye a lo que el parte de las 19:10 dejaba para
+  el martes.
+  **Revision de 634edf03 (el colchon): FIX_FIRST.** Lo que corre despues
+  en la misma vuelta (la mejora y la rotacion, que pujan; el cierre y el
+  parte, en sus cuentas) no ve lo que acaba de pujar la cesta: son
+  procesos aparte y el estado no lleva bloque `subasta`. Arreglo, solo
+  encendido: bloque `subasta` con `hechas` en el estado y leerlo en la
+  mejora. Ademas 3 bajos (no baja `maximumBid`; puede pisar una puja viva
+  con menos; no reserva en la salida SIN_COLCHON). **El colchon no se
+  enciende hasta construir eso.**
+
 - **01/11 21:15 (rafaga de la noche).** Ciclos: verdes (#2646 a #2653).
   Saldo -4.714.876, puja viva Ivan Martin 2.779.900 (lun 07:00; salio bien
   del Racing-Real Madrid). Sin movimientos. Control fuerte mie 04/11 21:15.
