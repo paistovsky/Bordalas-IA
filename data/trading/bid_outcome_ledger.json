@@ -2013,11 +2013,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-10-31T06:20:38+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "WON",
+   "resolved_at": "2026-11-01T06:20:35.245476+00:00",
+   "winning_amount": 3769900,
+   "margin": 0,
+   "event_id": "0b4f7cacb7d2325502c5e360",
    "recorded_by": "TABLON"
   }
  }
