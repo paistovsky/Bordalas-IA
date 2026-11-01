@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 01/11/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 01/11/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **01/11 21:15 (rafaga de la noche).** Ciclos: verdes (#2646 a #2653).
+  Saldo -4.714.876, puja viva Ivan Martin 2.779.900 (lun 07:00; salio bien
+  del Racing-Real Madrid). Sin movimientos. Control fuerte mie 04/11 21:15.
 
 - **01/11 19:10 (parte de la plantilla).** Nadie en riesgo para la J12
   salvo Ramon Enriquez (DUDA 58), cubierto por Cardona (4-3-3). No se
