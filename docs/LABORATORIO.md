@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E76 · 01/11/2026 17:16 de Madrid · El Computer no elige a los que suben: ~2 al dia que merezcan la pena
+### E76 · 01/11/2026 17:14 de Madrid · El Computer no elige a los que suben: ~2 al dia que merezcan la pena
 
 **Hipotesis:** el Computer pone en el mercado a jugadores que estan
 subiendo (E61 solo miro el precio y vio que elige casi al azar).
