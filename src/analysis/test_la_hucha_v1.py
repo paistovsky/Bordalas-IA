@@ -13,7 +13,8 @@ QUE SE COMPRUEBA
 
     1. Nace apagada, se lee en UN sitio (al llamarse), tiene frase en
        QUE_HACE, no hace nada al importarse y `config/la_hucha.json`, si
-       esta, esta bien escrito (vale justo entre `desde` y `caduca`).
+       esta, la hucha lo entiende (vale justo entre `desde` y `caduca`;
+       su formato a mano no pone la verja roja).
     2. Apagada es main byte a byte: la huella de 570 llamadas (la orden,
        los chollos, la ronda, la mejora, la rotacion, el carril y
        `execute_bid`, sus `decidir` y sus `correr`) sobre estados del
@@ -28,7 +29,13 @@ QUE SE COMPRUEBA
        la ronda (el colchon de la cartera no basta), la mejora, la
        rotacion, el carril (tambien la suma de la vuelta), el BUY V10 y
        las CLI (`execute_bid`), el motor viejo (el ejecutor y el
-       orquestador) y la cesta.
+       orquestador) y la cesta. Con lo libre negativo (saldo por debajo
+       de las pujas vivas), lo que se paga solo sigue pasando en la
+       mejora (tambien su deficit).
+    4b. El dia de Raphinha (en el mercado del Computer o con nuestra puja
+       viva): solo puja la orden por el; nadie mas baja `maximumBid`, ni
+       con un cambio que se paga solo. El deficit de la mejora, solo con
+       nuestra puja por el ya viva.
     5. El trinquete: dos vueltas con saldo - pujas = 10 M y objetivo 16 M:
        ninguna compra sin venta emparejada pasa y lo libre se queda en 0.
     6. La exencion: la orden ficha a Raphinha con el `maximumBid` real y la
@@ -42,6 +49,8 @@ QUE SE COMPRUEBA
        de delante (la cesta, el BUY, el carril, la orden, los chollos), el
        estado lleva el bloque `hucha`; apagada, ni argumento ni bloque.
     9. Nunca lanza.
+    10. El entorno no la decide (doctrina 104): con todo lo de fuera
+       puesto (BORDALAS_SIN_REVENTA, la sal, los del tablon), lo mismo.
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -80,8 +89,11 @@ if str(RAIZ) not in sys.path:
 ENV = "BORDALAS_LA_HUCHA"
 
 # EL ENTORNO NO DECIDE ESTA GUARDIA (doctrina 104): cada prueba pone lo
-# suyo con `_Interruptores`, y lo que no nombra lo quita. Los de los
-# motores que se miran aqui:
+# suyo con `_Interruptores`, y TODO otro `BORDALAS_*` del entorno (menos
+# el vigilante de `data/`, que es de la verja) se quita dentro y vuelve
+# al salir. El paso 0 los enciende todos (con BORDALAS_SIN_REVENTA el
+# carril no pujaba y esta guardia se ponia roja: revision del 02/11).
+# Los de los motores que se miran aqui (quitados aunque no se nombren):
 DE_LOS_MOTORES = (
     ENV,
     "BORDALAS_LA_ORDEN_DEL_GESTOR",
@@ -114,29 +126,37 @@ DE_LOS_MOTORES = (
 )
 
 
+# Los `BORDALAS_*` que no son del bot sino de la verja (el vigilante de
+# `data/`): no se tocan.
+DE_LA_VERJA = frozenset({"BORDALAS_VIGILA_DATA"})
+
+
+def _de_fuera() -> list:
+    return [k for k in os.environ if k.startswith("BORDALAS_") and k not in DE_LA_VERJA]
+
+
 class _Interruptores:
     """Pone (valor) o quita (None) interruptores solo dentro del `with`.
-    Los de `DE_LOS_MOTORES` que no se nombran, quitados."""
+    Cualquier otro `BORDALAS_*` del entorno (menos `DE_LA_VERJA`), quitado
+    dentro; al salir, el entorno de antes, tal cual."""
 
     def __init__(self, valores: dict | None = None):
         self.valores = {n: None for n in DE_LOS_MOTORES}
         self.valores.update(valores or {})
 
     def __enter__(self):
-        self.antes = {n: os.environ.get(n) for n in self.valores}
+        self.antes = {k: os.environ[k] for k in _de_fuera()}
+        for k in self.antes:
+            os.environ.pop(k, None)
         for nombre, valor in self.valores.items():
-            if valor is None:
-                os.environ.pop(nombre, None)
-            else:
+            if valor is not None:
                 os.environ[nombre] = valor
         return self
 
     def __exit__(self, *_):
-        for nombre, valor in self.antes.items():
-            if valor is None:
-                os.environ.pop(nombre, None)
-            else:
-                os.environ[nombre] = valor
+        for k in _de_fuera():
+            os.environ.pop(k, None)
+        os.environ.update(self.antes)
         return False
 
 
@@ -890,6 +910,38 @@ def _nadas_de_la_hucha(acciones):
 # 1. NACE APAGADA, UN LECTOR, SU FRASE Y SU FICHERO
 # ============================================================
 
+def _lo_que_falla_en_el_fichero(texto: str) -> list:
+    """Lo que la hucha no entenderia de `config/la_hucha.json` (vacio:
+    nada). Solo lo que ella mira: un objeto JSON con `player_id` y
+    `objetivo` enteros > 0 y `desde` < `caduca`, fechas con zona (si no,
+    seria MAL_ESCRITA o no valdria nunca). Ni la sangria, ni el orden, ni
+    `nombre` / `por_que`."""
+    from src.analysis import la_hucha
+
+    try:
+        cfg = json.loads(texto)
+    except ValueError as error:
+        return [f"no es JSON: {error}"]
+    if not isinstance(cfg, dict):
+        return ["no es un objeto"]
+    fallos = []
+    if la_hucha.vigente(cfg, datetime(2000, 1, 1, tzinfo=_UTC)) == la_hucha.MAL_ESCRITA:
+        fallos.append("MAL_ESCRITA: player_id u objetivo no son enteros > 0, o una fecha sin zona")
+        return fallos
+    desde = la_hucha._con_zona(cfg.get("desde"))
+    caduca = la_hucha._con_zona(cfg.get("caduca"))
+    if not desde < caduca:
+        fallos.append(f"desde ({desde}) no es antes que caduca ({caduca}): no valdria nunca")
+        return fallos
+    if la_hucha.vigente(cfg, desde - timedelta(seconds=1)) != la_hucha.AUN_NO:
+        fallos.append("antes de desde no es AUN_NO")
+    if la_hucha.vigente(cfg, desde) is not None:
+        fallos.append("en desde no vale")
+    if la_hucha.vigente(cfg, caduca) != la_hucha.CADUCADA:
+        fallos.append("en caduca no caduca")
+    return fallos
+
+
 def test_nace_apagada_un_lector_y_su_frase():
     from src.analysis import la_hucha
 
@@ -927,24 +979,24 @@ def test_nace_apagada_un_lector_y_su_frase():
         if isinstance(nodo, ast.Assign):
             assert isinstance(nodo.value, (ast.Constant, ast.BinOp)), ast.dump(nodo)[:80]
     # El fichero del gestor, si esta (el gestor lo cambia o lo borra: si un
-    # rival ficha a Raphinha, se borra y la hucha queda en SIN_HUCHA): bien
-    # escrito, con sus fechas con zona y valiendo justo entre `desde` y
-    # `caduca`. Sus numeros no se fijan aqui: la verja no se pone roja
-    # porque el gestor mueva el objetivo.
+    # rival ficha a Raphinha, se borra y la hucha queda en SIN_HUCHA): que
+    # la hucha lo entienda (`_lo_que_falla_en_el_fichero`). Ni su formato
+    # ni sus numeros se fijan aqui: la verja corre en cada vuelta de
+    # produccion y no se pone roja porque el gestor lo reescriba a mano
+    # (con otra sangria, en una linea) o mueva el objetivo.
     ruta = RAIZ / "config" / "la_hucha.json"
     if ruta.exists():
-        texto = ruta.read_text(encoding="utf-8")
-        cfg = json.loads(texto)
-        assert texto == json.dumps(cfg, indent=2, ensure_ascii=False) + "\n"
-        assert la_hucha._int(cfg.get("player_id"), 0) > 0, cfg
-        assert la_hucha._int(cfg.get("objetivo"), 0) > 0, cfg
-        assert str(cfg.get("nombre") or "").strip() and str(cfg.get("por_que") or "").strip()
-        desde = datetime.fromisoformat(cfg["desde"])
-        caduca = datetime.fromisoformat(cfg["caduca"])
-        assert desde.tzinfo is not None and caduca.tzinfo is not None and desde < caduca
-        assert la_hucha.vigente(cfg, desde - timedelta(seconds=1)) == la_hucha.AUN_NO
-        assert la_hucha.vigente(cfg, desde) is None
-        assert la_hucha.vigente(cfg, caduca) == la_hucha.CADUCADA
+        fallos = _lo_que_falla_en_el_fichero(ruta.read_text(encoding="utf-8"))
+        assert fallos == [], fallos
+    # Lo mismo escrito de otras maneras: vale; sin zona o al reves, no.
+    bien = {**CFG, "objetivo": "16000000"}
+    for texto in (json.dumps(bien, indent=4), json.dumps(bien), json.dumps(bien, indent=2,
+                                                                          ensure_ascii=False)):
+        assert _lo_que_falla_en_el_fichero(texto) == [], texto
+    for roto in ("{no es json", "[1]", json.dumps({**CFG, "desde": "2026-11-10T00:00:00"}),
+                 json.dumps({**CFG, "caduca": CFG["desde"]}),
+                 json.dumps({**CFG, "player_id": 0}), json.dumps({**CFG, "objetivo": "mucho"})):
+        assert _lo_que_falla_en_el_fichero(roto), roto
 
 
 # ============================================================
@@ -1032,6 +1084,14 @@ def test_lo_apartado_y_la_puerta():
             {"accion": "PUJAR", "importe": 1_000_000, "exito": False},
             {"accion": "PUJAR", "importe": 700_000, "exito": True, "sustituye": None},
             {"accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "importe": 9, "exito": True}]) == 1_700_000
+        # La que reviento al mandarse (un timeout despues del POST) o se
+        # mando sin saber si entro, pudo entrar: cuenta (como el carril).
+        # La que Biwenger rechazo o ni se mando ni fallo (el ensayo), no.
+        assert H.lo_pujado_en([
+            {"accion": "PUJAR", "importe": 3_000_000, "enviada": False, "error": "ReadTimeout"},
+            {"accion": "PUJAR", "importe": 400_000, "enviada": True, "exito": None},
+            {"accion": "PUJAR", "importe": 50_000, "enviada": False},
+            {"accion": "PUJAR", "importe": 6_000, "enviada": True, "exito": False}]) == 3_400_000
         assert H.lo_pujado_por_el_carril({"bids": [
             {"amount": 1_000_000, "sent": True, "success": True},
             {"amount": 2_000_000, "sent": True, "success": None},
@@ -1154,16 +1214,25 @@ def test_la_orden_ficha_a_raphinha_y_frena_lo_demas():
 
         # Vender uno para comprar otro: Sancet por Pablo (oferta firme del
         # Computer de 2.505.300 >= su suelo). Pujando 2.500.000 se paga sola
-        # y pasa sin un euro libre; pujando 3.800.000, no.
+        # y pasa sin un euro libre; pujando 3.800.000, no. (Sin Raphinha en
+        # el mercado: el dia de Raphinha no pasa ninguna, ver
+        # `test_el_dia_de_raphinha_solo_puja_la_orden`.)
+        _, sin_raphinha = _foto_de(OBJETIVO)
+        sin_raphinha.pop("de_managers", None)
+        h_sin = H.de_la_foto(sin_raphinha, ahora=AHORA)
+        assert (h_sin["libre"], h_sin["en_juego"], h["en_juego"]) == (0, False, True)
         for puja, pasa in ((2_500_000, True), (3_800_000, False)):
             cambio = {"caduca": orden["caduca"],
                       "fichar": [{"player_id": 17057, "nombre": "Sancet", "puja": puja}],
                       "vender_si_ficha": {"si_esta": 17057, "jugadores": [
                           {"player_id": 14800, "nombre": "Pablo Ibanez", "suelo": 2_400_000}]}}
-            a = O.decidir(cambio, **copy.deepcopy(foto), **comun, hucha=h)
+            a = O.decidir(copy.deepcopy(cambio), **copy.deepcopy(sin_raphinha), **comun,
+                          hucha=h_sin)
             assert (_pujas(a) == [(17057, puja)]) is pasa, (puja, a)
-            assert _pujas(O.decidir(copy.deepcopy(cambio), **copy.deepcopy(foto), **comun)) == [
-                (17057, puja)]
+            assert _pujas(O.decidir(copy.deepcopy(cambio), **copy.deepcopy(sin_raphinha),
+                                    **comun)) == [(17057, puja)]
+            a = O.decidir(copy.deepcopy(cambio), **copy.deepcopy(foto), **comun, hucha=h)
+            assert _pujas(a) == [] and _nadas_de_la_hucha(a) == [17057], (puja, a)
 
         # Los viajes: sin venta emparejada.
         viajes = dict(ORDENES)["viajes"]
@@ -1273,9 +1342,10 @@ def test_la_ronda_ni_con_el_colchon():
 
 
 def _la_mejora(precio_del_que_sale, *, caja=10_000_000, saldo=10_000_000, maximo=26_000_000,
-               horas=HORAS_PARON, hucha=None):
+               horas=HORAS_PARON, hucha=None, adopta=False):
     """Un cambio de la mejora: entra B (del Computer, 4 M, puja 4.040.000)
-    por A (nuestro, `precio_del_que_sale`)."""
+    por A (nuestro, `precio_del_que_sale`). Con `adopta`, tambien C (ya
+    nuestro, del inventario: sin puja), un poco peor que B."""
     from src.actions import la_mejora_del_once as M
 
     once = [{"id": 1, "name": "A", "position": 3, "starter_probability": 80,
@@ -1291,6 +1361,12 @@ def _la_mejora(precio_del_que_sale, *, caja=10_000_000, saldo=10_000_000, maximo
             "en_venta": set(), "maximo_de_puja": maximo, "saldo": saldo,
             "mercado": {2: 4_000_000}}
     kw = {} if hucha is None else {"hucha": hucha}
+    if adopta:
+        liga[3] = {"id": 3, "name": "C", "tasa": 5.5, "status": "ok", "price": 2_000_000,
+                   "de_quien": "nuestro", "position": 3, "played": 10, "points": 55,
+                   "starter_probability": 90}
+        foto["plantilla"] = {1, 3}
+        kw["inventario"] = frozenset({3})
     return M.decidir(once=once, liga=liga, escaparate=escaparate, foto=foto, libro={},
                      caja=caja, horas_jornada=horas, **kw)
 
@@ -1338,6 +1414,31 @@ def test_la_mejora_un_cambio_que_se_paga_solo_si():
         elegidos = M.la_mejor_combinacion(copy.deepcopy(cambios), 5_000_000, -1_000_000,
                                           9_000_000, libre=600_000)
         assert sorted(c["entra"] for c in elegidos) == [11, 12, 13], elegidos
+        # LIBRE NEGATIVO (revision del 02/11): saldo por debajo de las pujas
+        # vivas, la hucha no guarda nada (apartado 0). Lo que no saca de la
+        # caja pasa igual: el que se paga solo, la adopcion y el deficit.
+        for libre in (-1, -2_000_000, -13_000_000):
+            elegidos = M.la_mejor_combinacion(copy.deepcopy(cambios), 5_000_000, -1_000_000,
+                                              9_000_000, libre=libre)
+            assert sorted(c["entra"] for c in elegidos) == [11, 13], (libre, elegidos)
+        caro_por_barato = [{"entra": 21, "sale": 5, "puntos": -0.4, "caja": 2_600_000,
+                            "puja": 1_000_000, "ya_es_nuestro": False}]
+        for libre in (None, -2_000_000):
+            elegidos = M.la_mejor_combinacion(copy.deepcopy(caro_por_barato), -2_000_000, 0,
+                                              9_000_000, deficit=True, libre=libre)
+            assert [c["entra"] for c in elegidos] == [21], (libre, elegidos)
+        # Por `decidir`: 2,5 M de saldo y una puja viva de 3 M (libre
+        # -500.000; la caja de la mejora, que cuenta esa puja a su manera,
+        # +500.000). A vale 5 M: se paga solo y pasa; A vale 3 M (saca
+        # 1.190.000): apagada pasa con la deuda tolerada; encendida, no.
+        h_neg = H.de_la_foto({"saldo": 2_500_000, "nuestras_pujas": {99: {"amount": 3_000_000}},
+                              "plantilla": {1}, "maximo_de_puja": 26_000_000}, ahora=AHORA)
+        assert (h_neg["apartado"], h_neg["libre"]) == (0, -500_000), h_neg
+        for precio, pasa in ((5_000_000, True), (3_000_000, False)):
+            assert _pujas(_la_mejora(precio, caja=500_000, saldo=2_500_000)["acciones"]) == [
+                (2, 4_040_000)], precio
+            d = _la_mejora(precio, caja=500_000, saldo=2_500_000, hucha=h_neg)
+            assert (_pujas(d["acciones"]) == [(2, 4_040_000)]) is pasa, (precio, d["plan"])
 
 
 def test_la_rotacion_la_que_se_paga_sola_si_la_que_paga_otra_no():
@@ -1395,6 +1496,15 @@ def test_la_rotacion_la_que_se_paga_sola_si_la_que_paga_otra_no():
         assert _pujas(encendida["acciones"]) == [uno], encendida["acciones"]
         # El rojo sigue con el saldo real: la caja de siempre, sin la hucha.
         assert encendida["caja"] == apagada["caja"] | {"despues": encendida["caja"]["despues"]}
+        # EL DIA DE RAPHINHA (en el mercado del Computer): ni la que se paga
+        # sola, aunque sobren 24 M libres.
+        h_dia = H.de_la_foto({"saldo": 40_000_000, "nuestras_pujas": {}, "plantilla": {1, 2},
+                              "maximo_de_puja": 40_000_000 + VALOR_PLANTILLA // 4,
+                              "mercado": {RAPHINHA: 24_720_000}}, ahora=AHORA)
+        assert h_dia["en_juego"] and h_dia["libre"] == 0, h_dia
+        assert _pujas(_decidir(40_000_000)["acciones"]) == [uno, dos]
+        d = _decidir(40_000_000, h_dia)
+        assert _pujas(d["acciones"]) == [] and len(d["hucha"]["frenadas"]) == 2, d
 
 
 def test_el_carril_solo_lo_libre_y_sumado():
@@ -1516,6 +1626,127 @@ def test_el_motor_viejo_mira_la_hucha_antes_de_escribir_y_de_elegir():
     texto = (RAIZ / "src" / "analysis" / "la_subasta.py").read_text(encoding="utf-8")
     cuerpo = texto[texto.index("def plan_desde_el_estado("):texto.index("def para_la_pantalla(")]
     assert "la_cesta_con_la_hucha(" in cuerpo
+
+
+# ============================================================
+# 4b. EL DIA DE RAPHINHA: SOLO PUJA LA ORDEN POR EL
+# ============================================================
+
+def test_el_dia_de_raphinha_solo_puja_la_orden():
+    """Revision del 02/11. La hucha guarda caja, pero la puja por Raphinha
+    la limita `maximumBid` (saldo + 25 % del valor - pujas vivas), donde
+    cuenta entera cualquier otra puja viva, tambien la de un cambio que se
+    paga solo. Con 16 M apartados `maximumBid` es 32,9 M; con una puja de
+    8 M viva, 24,9 M, y la orden ya no puja 29 M. Mientras Raphinha esta
+    en el mercado del Computer o con nuestra puja viva, nadie mas puja; el
+    deficit de la mejora, solo con nuestra puja por el ya viva."""
+    from src.actions import la_orden_del_gestor as O
+    from src.actions import la_ronda_de_la_manana as R
+    from src.actions import los_chollos as C
+    from src.analysis import la_hucha as H
+
+    orden = dict(ORDENES)["raphinha"]
+    comun = dict(ahora=AHORA, horas_jornada=HORAS_PARON, estados=None, en_curso=False)
+    with _LaHucha(CFG):
+        # La hucha llena (16 M) y Raphinha en el mercado.
+        s, foto = _foto_de(OBJETIVO, raphinha=True)
+        foto.pop("de_managers", None)
+        h = H.de_la_foto(foto, ahora=AHORA)
+        assert (h["en_juego"], h["su_puja_viva"], h["apartado"], h["libre"]) == (
+            True, False, OBJETIVO, 0), h
+        assert foto["maximo_de_puja"] == OBJETIVO + VALOR_PLANTILLA // 4 == 32_892_500
+        # La puerta: un cambio de 8 M que se paga solo (cobra 8,5 M) NO
+        # pasa; fuera del dia, si. La exencion, siempre.
+        assert not H.cabe(h, 8_000_000, credito=8_500_000)
+        assert H.cabe(h, 29_000_000, player_id=RAPHINHA)
+        _, sin = _foto_de(OBJETIVO)
+        h_sin = H.de_la_foto(sin, ahora=AHORA)
+        assert not h_sin["en_juego"] and H.cabe(h_sin, 8_000_000, credito=8_500_000)
+        # Por que: con esa puja de 8 M viva, la orden ya no puede (main).
+        _, con_8 = _foto_de(OBJETIVO, {17057: 8_000_000}, raphinha=True)
+        con_8.pop("de_managers", None)
+        assert con_8["maximo_de_puja"] == 24_892_500
+        a = O.decidir(copy.deepcopy(orden), **copy.deepcopy(con_8), **comun,
+                      hucha=H.de_la_foto(con_8, ahora=AHORA))
+        assert _pujas(a) == [] and "supera el tope" in a[0]["motivo"], a
+        # Sin ella, la orden puja 29 M por Raphinha (lo mismo que apagada) y
+        # el cambio que se paga solo (Sancet por Pablo), NADA LA_HUCHA.
+        con_cambio = copy.deepcopy(orden)
+        con_cambio["fichar"].append({"player_id": 17057, "nombre": "Sancet", "puja": 2_500_000})
+        con_cambio["vender_si_ficha"] = [con_cambio["vender_si_ficha"], {
+            "si_esta": 17057, "jugadores": [
+                {"player_id": 14800, "nombre": "Pablo Ibanez", "suelo": 2_400_000}]}]
+        solo_raphinha = O.decidir(copy.deepcopy(orden), **copy.deepcopy(foto), **comun)
+        a = O.decidir(copy.deepcopy(orden), **copy.deepcopy(foto), **comun, hucha=h)
+        assert a == solo_raphinha and _pujas(a) == [(RAPHINHA, 29_000_000)], a
+        sancet = {"caduca": orden["caduca"],
+                  "fichar": [{"player_id": 17057, "nombre": "Sancet", "puja": 2_500_000}],
+                  "vender_si_ficha": {"si_esta": 17057, "jugadores": [
+                      {"player_id": 14800, "nombre": "Pablo Ibanez", "suelo": 2_400_000}]}}
+        assert _pujas(O.decidir(copy.deepcopy(sancet), **copy.deepcopy(foto), **comun)) == [
+            (17057, 2_500_000)]
+        a = O.decidir(copy.deepcopy(sancet), **copy.deepcopy(foto), **comun, hucha=h)
+        assert _pujas(a) == [] and _nadas_de_la_hucha(a) == [17057], a
+        assert "solo puja la orden" in a[0]["motivo"], a
+
+        # Con 40 M (24 M libres fuera del dia): lo libre es 0 y nadie mas puja.
+        s40, f40 = _foto_de(40_000_000, raphinha=True)
+        h40 = H.de_la_foto(f40, ahora=AHORA)
+        assert (h40["apartado"], h40["libre"], H.lo_libre(h40)) == (OBJETIVO, 0, 0), h40
+        # Los chollos.
+        kw_chollos = dict(mercado={41609: 820_000}, valores={41609: 870_000},
+                          estados={41609: "ok"}, nuestras_pujas={}, plantilla=f40["plantilla"],
+                          ofertas_del_computer={}, en_venta=set(),
+                          maximo_de_puja=f40["maximo_de_puja"], saldo=f40["saldo"],
+                          minutos_al_reset=30, horas_jornada=50.0, libro={})
+        assert _pujas(C.decidir(**kw_chollos)) == [(41609, 869_000)]
+        assert _pujas(C.decidir(**kw_chollos, hucha=h40)) == []
+        # La ronda.
+        kw_ronda = dict(mercado={7: 1_000_000}, fichas=copy.deepcopy(RONDA_FICHAS),
+                        nuestras_pujas={}, plantilla={1, 2, 3}, ofertas_del_computer={},
+                        en_venta=set(), maximo_de_puja=f40["maximo_de_puja"],
+                        minutos_al_reset=200, horas_jornada=HORAS_PARON, libro={},
+                        cartera=True, saldo=f40["saldo"])
+        assert len(_pujas(R.decidir(**copy.deepcopy(kw_ronda)))) == 1
+        assert _pujas(R.decidir(**copy.deepcopy(kw_ronda), hucha=h40)) == []
+        # El motor viejo, el BUY V10 / las CLI y la cesta.
+        assert H.frena_la_especulacion(s40, 17731, 1, ahora=AHORA) is not None
+        assert "solo puja la orden" in H.la_puja_toca_la_hucha(s40["market"], YO, 17731, 1,
+                                                                ahora=AHORA)
+        plan = {"execute": True, "bids": [{"id": 1, "bid": 1}], "committed": 1}
+        assert H.la_cesta_con_la_hucha(plan, s40, ahora=AHORA)["bids"] == []
+        # La mejora: el cambio que se paga solo, no; la adopcion (sin puja), si.
+        dia = {"saldo": 40_000_000, "nuestras_pujas": {}, "plantilla": {1},
+               "maximo_de_puja": 26_000_000, "mercado": {RAPHINHA: 24_720_000}}
+        h_dia = H.de_la_foto(dia, ahora=AHORA)
+        assert _pujas(_la_mejora(5_000_000)["acciones"]) == [(2, 4_040_000)]
+        d = _la_mejora(5_000_000, hucha=h_dia)
+        assert _pujas(d["acciones"]) == [] and d["plan"]["hucha"]["en_juego"] is True, d["plan"]
+        apagada = _la_mejora(5_000_000, adopta=True)
+        assert [c["entra"] for c in apagada["plan"]["cambios"]] == [2], apagada["plan"]
+        d = _la_mejora(5_000_000, adopta=True, hucha=h_dia)
+        assert [c["entra"] for c in d["plan"]["cambios"]] == [3] and _pujas(d["acciones"]) == []
+        # Su deficit (caro por barato): espera mientras la orden no ha
+        # pujado por Raphinha; con nuestra puja viva por el, lo de siempre.
+        deficit = dict(caja=-2_000_000, saldo=40_000_000, horas=50.0)
+        apagada = _la_mejora(7_000_000, **deficit)
+        assert apagada["plan"]["deficit"] and _pujas(apagada["acciones"]) == [(2, 4_040_000)]
+        assert _pujas(_la_mejora(7_000_000, **deficit, hucha=h_dia)["acciones"]) == []
+        h_puja = H.de_la_foto({**dia, "saldo": 30_000_000, "mercado": {},
+                               "nuestras_pujas": {RAPHINHA: {"amount": 29_000_000}}},
+                              ahora=AHORA)
+        assert (h_puja["en_juego"], h_puja["su_puja_viva"], h_puja["libre"]) == (True, True, 0)
+        assert _pujas(_la_mejora(7_000_000, **deficit, hucha=h_puja)["acciones"]) == [
+            (2, 4_040_000)]
+        assert _pujas(_la_mejora(5_000_000, hucha=h_puja)["acciones"]) == []
+        # El bloque de la vuelta lo dice.
+        b = H.el_bloque(h40, f40["mercado"])["hucha"]
+        assert (b["en_juego"], b["en_el_mercado_hoy"], b["libre"]) == (True, True, 0), b
+        # Perdido (ni en el mercado ni con nuestra puja): la hucha de siempre.
+        _, perdido = _foto_de(40_000_000)
+        h_perdido = H.de_la_foto(perdido, ahora=AHORA)
+        assert (h_perdido["en_juego"], h_perdido["libre"]) == (False, 24_000_000), h_perdido
+        assert H.cabe(h_perdido, 8_000_000)
 
 
 # ============================================================
@@ -1885,6 +2116,43 @@ def test_nunca_lanza():
         assert H.frena_la_especulacion({"market": {"status": {"balance": 1}}}, 1, 5) is not None
 
 
+# ============================================================
+# 10. EL ENTORNO NO DECIDE (doctrina 104)
+# ============================================================
+
+def test_el_entorno_no_decide_esta_guardia():
+    """Revision del 02/11: el paso 0 enciende todos los interruptores y,
+    con BORDALAS_SIN_REVENTA puesto, el carril no pujaba y esta guardia se
+    ponia roja (y con ella el paso 0: no se podia encender la hucha). Con
+    todo lo de fuera puesto (los del tablon, SIN_REVENTA, la sal del
+    desvio, uno que no existe), cada prueba da lo mismo, y al salir el
+    entorno es el de antes."""
+    from src.telemetry.el_tablon import QUE_HACE
+
+    de_fuera = {n: "1" for n in QUE_HACE if n.startswith("BORDALAS_")}
+    de_fuera.update({"BORDALAS_SIN_REVENTA": "1", "BORDALAS_BID_SALT": "otra-sal",
+                     "BORDALAS_UNO_QUE_NO_EXISTE": "si", ENV: "1"})
+    antes = {k: os.environ.get(k) for k in de_fuera}
+    os.environ.update(de_fuera)
+    try:
+        with _Interruptores({"BORDALAS_LA_ORDEN_DEL_GESTOR": "1"}):
+            dentro = sorted(k for k in os.environ
+                            if k.startswith("BORDALAS_") and k not in DE_LA_VERJA)
+            assert dentro == ["BORDALAS_LA_ORDEN_DEL_GESTOR"], dentro
+        assert {k: os.environ.get(k) for k in de_fuera} == de_fuera
+        for test in TESTS:
+            if test in (test_apagada_es_main_byte_a_byte, test_el_entorno_no_decide_esta_guardia):
+                continue
+            test()
+            assert {k: os.environ.get(k) for k in de_fuera} == de_fuera, test.__name__
+    finally:
+        for k, v in antes.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
 TESTS = [
     test_nace_apagada_un_lector_y_su_frase,
     test_apagada_es_main_byte_a_byte,
@@ -1899,11 +2167,13 @@ TESTS = [
     test_el_carril_solo_lo_libre_y_sumado,
     test_el_buy_v10_y_las_cli_no_tocan_la_hucha,
     test_el_motor_viejo_mira_la_hucha_antes_de_escribir_y_de_elegir,
+    test_el_dia_de_raphinha_solo_puja_la_orden,
     test_el_trinquete_dos_vueltas_sin_gastar_lo_apartado,
     test_los_que_venden_no_ven_la_hucha,
     test_los_correr_la_sacan_de_su_foto,
     test_la_vuelta_de_v10_lleva_la_cuenta,
     test_nunca_lanza,
+    test_el_entorno_no_decide_esta_guardia,
 ]
 
 

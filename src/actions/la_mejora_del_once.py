@@ -902,9 +902,11 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
 
     Con `libre` (LA HUCHA, 02/11/2026): lo que los cambios que no son ya
     nuestros sacan de la caja (`max(0, -caja)` de cada uno: su propia
-    venta ya va en `caja`) no puede pasar de `libre`. Un cambio con caja
-    >= 0 se paga solo y pasa siempre; uno no paga a otro. None: lo de
-    siempre.
+    venta ya va en `caja`) no puede pasar de `libre`. Una combinacion que
+    no saca nada (cambios con caja >= 0, adopciones, el deficit) pasa
+    siempre, tambien con `libre` negativo (saldo por debajo de las pujas
+    vivas: la hucha no guarda nada y no puede frenar lo que se paga
+    solo); uno no paga a otro. None: lo de siempre.
     """
 
     mejoras = sorted((c for c in cambios if c["puntos"] >= GANANCIA_MINIMA),
@@ -946,9 +948,10 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
                 continue
             if sum(c["puja"] for c in combo) > disponible:
                 continue
-            if libre is not None and sum(
-                    max(0, -c["caja"]) for c in combo if not c.get("ya_es_nuestro")) > libre:
-                continue
+            if libre is not None:
+                saca = sum(max(0, -c["caja"]) for c in combo if not c.get("ya_es_nuestro"))
+                if saca > 0 and saca > libre:
+                    continue
             k = (round(puntos, 6), caja + sum(c["caja"] for c in combo))
             if clave is None or k > clave:
                 mejor, clave = list(combo), k
@@ -1039,8 +1042,14 @@ def decidir(
                     cambios que se pagan solos y lo que cabe en lo
                     libre. La caja, el minimo y el deficit siguen con el
                     saldo REAL (el deficit vende: la hucha nunca lo
-                    enciende). Va en `plan["hucha"]`. None o no activa:
-                    byte a byte lo de antes.
+                    enciende). El dia de su jugador (`en_juego`: en el
+                    mercado o con nuestra puja viva) solo se adopta lo
+                    que ya es nuestro: ninguna puja baja la puja maxima
+                    que necesita la orden. El deficit tambien espera
+                    hasta que la orden puja por el (`su_puja_viva`):
+                    sus ventas llegarian tarde para Raphinha. Va en
+                    `plan["hucha"]`. None o no activa: byte a byte lo de
+                    antes.
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -1324,14 +1333,18 @@ def decidir(
     # En rojo, cambiar caro por barato solo a partir de `HORAS_DEFICIT`:
     # antes puede entrar el premio de la jornada que acaba de jugarse.
     deficit = caja < minimo and horas_jornada < HORAS_DEFICIT
-    con_la_hucha = {}
+    con_la_hucha, para_elegir = {}, cambios
     if hucha is not None:
         from src.analysis import la_hucha as _la_hucha
 
         if _la_hucha.esta_activa(hucha):
             disponible -= _int(hucha.get("apartado"), 0) or 0
             con_la_hucha["libre"] = _la_hucha.lo_libre(hucha)
-    elegidos = la_mejor_combinacion(cambios, caja, minimo, disponible, deficit=deficit,
+            # EL DIA DE RAPHINHA: ni una puja (el deficit, solo con
+            # nuestra puja por el ya viva).
+            if hucha.get("en_juego") and not (deficit and hucha.get("su_puja_viva")):
+                para_elegir = [c for c in cambios if c.get("ya_es_nuestro")]
+    elegidos = la_mejor_combinacion(para_elegir, caja, minimo, disponible, deficit=deficit,
                                     **con_la_hucha)
     plan = {"caja": caja, "minimo": minimo, "disponible": disponible, "deficit": deficit,
             "cambios": elegidos,
@@ -1341,6 +1354,9 @@ def decidir(
                          "libre": con_la_hucha["libre"],
                          "saca_de_la_caja": sum(max(0, -c["caja"]) for c in elegidos
                                                 if not c.get("ya_es_nuestro"))}
+        if hucha.get("en_juego"):
+            plan["hucha"]["en_juego"] = True
+            plan["hucha"]["frenados"] = len(cambios) - len(para_elegir)
     if calendario_de_puntos is not None:
         plan["calendario"] = el_plan_del_calendario(calendario_de_puntos)
         if ctx is not None:

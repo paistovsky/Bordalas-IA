@@ -358,8 +358,9 @@ QUE_HACE = {
         "puja con ese dinero: ni la mejora, ni la ronda, ni los chollos, ni el "
         "carril, ni la rotación, ni el motor viejo. Solo pasan los cambios que se "
         "pagan solos (vender uno para comprar otro) y la orden del gestor cuando "
-        "ficha a ese jugador. No vende a nadie: el cierre y la solvencia siguen "
-        "viendo el saldo de verdad.",
+        "ficha a ese jugador. El día que ese jugador sale al mercado, solo puja la "
+        "orden por él: nadie más baja la puja máxima. No vende a nadie: el cierre y "
+        "la solvencia siguen viendo el saldo de verdad.",
     "BORDALAS_REVISA_LAS_PUJAS_VIVAS":
         "Antes de las 07:00 retira las pujas por jugadores que se han lesionado.",
     "BORDALAS_SOLVENCIA_POR_SU_PLAZO":
