@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 02/11/2026, 14:50 de Madrid (rafaga de las 14:15).
+Actualizado: 02/11/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **02/11 21:15 (rafaga de la noche).** Ciclos: verdes (#2669 a #2676).
+  Saldo -7.494.776, 0 comprometido; esta noche (00:07) empiezan las ventas
+  de la J12. Leida la operacion Raphinha (chat del dueno, 18:05): de
+  acuerdo con la hucha desde el premio de la J12 y con que la orden la
+  escriba el gestor el dia que salga. **Lo que miro yo:** que la hucha no
+  empiece hasta que la J12 este en verde (primero la caja de esta semana) y
+  que su interruptor siga apagado hasta despues del vie 06/11.
 
 - **02/11 18:05 (chat del dueno). DECISION DEL CEO: OPERACION RAPHINHA, CON
   HUCHA.** El dueno: «tu decides como hacerlo». Raphinha (26930, Barcelona,
