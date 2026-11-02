@@ -352,6 +352,31 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **02/11 18:05 (chat del dueno). DECISION DEL CEO: OPERACION RAPHINHA, CON
+  HUCHA.** El dueno: «tu decides como hacerlo». Raphinha (26930, Barcelona,
+  144 pts en 10: 14,4 por partido; Roberto 6,3) con Yamal suma ~8 pts por
+  jornada, ~200 en lo que queda. Pide 24,72 M; hoy solo Alvaro puede pujar
+  eso (puja maxima 25,46 M; Luismi 23,28, Manzagool 18,15, Pollo 13,80 y
+  ~29 M cuando venda). Nuestra puja maxima: 9,4 M (saldo + 25 % de la
+  plantilla). No ha salido al mercado en 47 dias (solo un jugador de mas de
+  15 M: Rodri, el 01/11). Ganarlo costara 27-30 M.
+  **Decidido:** (1) LA HUCHA desde el premio de la J12 (mar 10/11): ningun
+  motor gasta lo apartado (objetivo 16 M); siguen los cambios que se pagan
+  solos. (2) Roberto y Boye, siempre publicados con oferta (~12,9 M de
+  liquidez inmediata). (3) Con ~16 M, puja de ~29 M + venta de Roberto y
+  Boye: la jornada siguiente en verde con el once completo (Gulacsi;
+  Iglesias, Kike, Chust, Cardona; Olasagasti, Ivan, Dani Lorenzo, Ramon;
+  Yamal, Raphinha). (4) Si sale ANTES: ese dia se hace la cuenta (pujas
+  maximas de los rivales, nuestra caja y ofertas en mano) y se puja si la
+  jornada siguiente puede empezar en verde con 11 (portero incluido),
+  vendiendo lo que haga falta menos Yamal; el paron (09-19/11) es la mejor
+  ventana. (5) La orden la escribe el gestor el dia que salga: fichar 26930
+  + vender_si_ficha; la hucha no frena nunca ese fichaje.
+  **Construyendo (apagado):** `BORDALAS_LA_HUCHA` (lab-0211-la-hucha):
+  un solo lector y config/la_hucha.json; los que gastan ven su presupuesto
+  menos lo apartado; los que venden o miran la solvencia ven el saldo real.
+  Se enciende despues de la J12 (lun 09/11 o mar 10/11), nunca jue/vie.
+
 - **02/11 16:30 (chat del dueno). ORDEN: Roberto no se vende de momento.**
   Oferta del Computer de 7.474.000 (+4,4 % sobre 7.160.000; caduca el mie
   07:00): NO. Roberto sale cuando entre Fer Nino (Elche, 6,37 M, 70 pts),

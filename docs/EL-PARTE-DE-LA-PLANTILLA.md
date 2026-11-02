@@ -37,7 +37,7 @@ hay caja y habra competencia.
 | Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90. **NUESTRO** desde el 02/11 (2.779.900; sale Pablo Ibanez) |
 | Zabiri (Racing) | DEL | 7,54 M (02/11: 7,98 M, +20 k) | Roberto Fernandez | +10-20 % | 77 pts en 11 (ult. 5: 0, 11, 3, 9, 2); APERCIBIDO hoy; solo en el parón (09-19/11), si no esta apercibido y la caja lo paga |
 | Fer Nino (Elche) | DEL | 02/11: 6,37 M, +20 k | Roberto Fernandez | +10-15 % | 70 pts en 11 (ult. 5: 3, 7, 3, 2, 17), iguala a Roberto (69) y cuesta ~0,8 M menos; anadido por el dueno el 02/11 |
-| Raphinha (Barcelona) | DEL | 02/11: 24,72 M | Roberto Fernandez | sin caja | 144 pts en 10: el ideal del dueno, pero no hay dinero y habra mucha competencia |
+| **Raphinha (Barcelona)** | DEL | 02/11: 24,72 M | Roberto Fernandez y Boye | ~29 M (+15-20 %) | **OBJETIVO PRINCIPAL: OPERACION RAPHINHA (02/11).** 144 pts en 10. Hucha desde el mar 10/11 (objetivo 16 M). Si sale al mercado del Computer: AVISAR y hacer la cuenta ese mismo dia (ver la bitacora del 02/11 18:05) |
 
 Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
