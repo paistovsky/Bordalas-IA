@@ -352,6 +352,15 @@ QUE_HACE = {
         "En la subasta de las 07:00 solo compra para revender a quien va a jugar.",
     "BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL":
         "Durante el día, lo mismo: solo compra para revender a quien va a jugar.",
+    "BORDALAS_LA_HUCHA":
+        "Guarda dinero para un fichaje grande (config/la_hucha.json, hoy Raphinha). "
+        "Lo apartado es el saldo menos las pujas vivas, hasta el objetivo. Nadie "
+        "puja con ese dinero: ni la mejora, ni la ronda, ni los chollos, ni el "
+        "carril, ni la rotación, ni el motor viejo. Solo pasan los cambios que se "
+        "pagan solos (vender uno para comprar otro) y la orden del gestor cuando "
+        "ficha a ese jugador. El día que ese jugador sale al mercado, solo puja la "
+        "orden por él: nadie más baja la puja máxima. No vende a nadie: el cierre y "
+        "la solvencia siguen viendo el saldo de verdad.",
     "BORDALAS_REVISA_LAS_PUJAS_VIVAS":
         "Antes de las 07:00 retira las pujas por jugadores que se han lesionado.",
     "BORDALAS_SOLVENCIA_POR_SU_PLAZO":

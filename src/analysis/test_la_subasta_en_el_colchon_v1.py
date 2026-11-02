@@ -133,6 +133,10 @@ DE_LA_CESTA = (
     "BORDALAS_SIN_REVENTA",
     "BORDALAS_PRIMA_POR_TRAMO",
     "BORDALAS_LA_ORDEN_DEL_GESTOR",
+    # LA HUCHA (02/11/2026): con ella puesta y vigente, la cesta y la
+    # vuelta de v10 cambian (la cesta se cierra si no cabe en lo libre y
+    # los motores reciben la hucha). Esta guardia mide el colchon.
+    "BORDALAS_LA_HUCHA",
 )
 for _nombre in DE_LA_CESTA:
     os.environ.pop(_nombre, None)

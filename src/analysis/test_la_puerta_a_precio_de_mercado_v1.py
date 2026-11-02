@@ -130,11 +130,15 @@ def test_la_puja_va_a_nombre_del_vendedor():
 
 
 def _correr(puerta: bool):
-    entorno = {k: os.environ.get(k) for k in (ronda.ENV, ronda.ENV_PUERTA)}
+    # LA HUCHA (02/11/2026): la ronda la mira con su interruptor puesto y
+    # esta guardia mide la puerta, no la hucha (doctrina 104): se quita.
+    entorno = {k: os.environ.get(k)
+               for k in (ronda.ENV, ronda.ENV_PUERTA, "BORDALAS_LA_HUCHA")}
     viejos = (ronda.horas_a_la_jornada, ronda._puede_escribir, proxima.jornada_en_curso)
     e = _Escritor()
     try:
         os.environ[ronda.ENV] = "1"
+        os.environ.pop("BORDALAS_LA_HUCHA", None)
         if puerta:
             os.environ[ronda.ENV_PUERTA] = "1"
         else:

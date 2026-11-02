@@ -2570,6 +2570,39 @@ def execute_autopilot_decision(
                         colchon,
                 }
 
+        # LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`). El colchon
+        # cuenta el 92 % de la cartera y el presupuesto de fichar, deuda:
+        # un solo XI_UPGRADE se podria gastar la hucha entera. Con
+        # `BORDALAS_LA_HUCHA` y la hucha activa, la puja tiene que caber
+        # en lo libre de la foto fresca (sin credito ni exencion: es una
+        # compra sin venta emparejada). Apagada, None y nada cambia.
+        from src.analysis.la_hucha import frena_la_especulacion
+
+        sin_hucha = frena_la_especulacion(
+            fresh_snapshot,
+            requested_player_id,
+            bid_amount,
+        )
+
+        if sin_hucha is not None:
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="SPECULATION_SIN_HUCHA",
+                    reason=(
+                        f"La puja de {bid_amount:,} EUR tocaria la "
+                        f"hucha (libre "
+                        f"{(sin_hucha.get('hucha') or {}).get('libre')})."
+                    ).replace(",", "."),
+                    success=True,
+                ),
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+                "hucha":
+                    sin_hucha,
+            }
+
         seller = (
             fresh_sale.get(
                 "user",

@@ -221,6 +221,7 @@ def decidir(
     horas_jornada: float | None = math.inf,
     estados: dict | None = None,
     en_curso: bool = False,
+    hucha: dict | None = None,
 ) -> list:
     """
     Las escrituras que tocan en esta vuelta. Pura: ni red ni disco.
@@ -242,10 +243,32 @@ def decidir(
                        pujar por el. Sin pasarlo (None), no se mira.
         en_curso       hay una jornada jugandose: no se acepta ninguna
                        oferta del Computer.
+
+    LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`):
+
+        hucha          la de `la_hucha.de_la_foto` (`correr` la pasa con
+                       el interruptor puesto). None o no activa: nada
+                       cambia. Activa: el `fichar` de SU jugador sigue el
+                       camino de siempre (saldo real, `maximumBid` real,
+                       el reloj); cualquier otro `fichar` y los viajes
+                       tienen de tope `maximo_para_gastar` y tienen que
+                       caber en lo libre (`la_hucha.cabe`), con el credito
+                       de sus propias ventas (`lo_que_cobran_sus_ventas`;
+                       los viajes, sin credito). Si no: NADA, guardia
+                       LA_HUCHA. El saldo de la foto no se toca: lo usan
+                       tambien el ultimo recurso y el rojo, que venden.
     """
 
     acciones = []
     retiradas = set()
+
+    _la_hucha = None
+    gastado_de_la_hucha = 0
+    if hucha is not None:
+        from src.analysis import la_hucha as _la_hucha
+
+        if not _la_hucha.esta_activa(hucha):
+            hucha, _la_hucha = None, None
 
     # 1. FICHAR
     for f in orden.get("fichar") or []:
@@ -357,6 +380,27 @@ def decidir(
                 "motivo": f"la puja {puja} supera el tope {tope}",
             })
             continue
+
+        # LA HUCHA (02/11/2026): el de la hucha pasa como siempre; los
+        # demas, con su tope y su puerta (ver el docstring).
+        if hucha is not None:
+            ya_importe = _int((ya or {}).get("amount"), 0) or 0
+            credito = lo_que_cobran_sus_ventas(orden, f, plantilla, ofertas_del_computer, ahora)
+            if pid != _int(hucha.get("player_id")):
+                pujado_aqui = sum(
+                    (_int(x.get("importe"), 0) or 0)
+                    - (_int((x.get("sustituye") or {}).get("amount"), 0) or 0)
+                    for x in acciones if x.get("accion") == "PUJAR")
+                maximo_h = _int(hucha.get("maximo_para_gastar"))
+                tope_h = None if maximo_h is None else maximo_h - pujado_aqui + ya_importe
+                if (tope_h is not None and puja > tope_h) or not _la_hucha.cabe(
+                        hucha, puja, sustituye=ya_importe, credito=credito,
+                        ya=gastado_de_la_hucha):
+                    acciones.append(_la_hucha.la_nada(
+                        {"player_id": pid, "nombre": f.get("nombre"), "importe": puja},
+                        hucha))
+                    continue
+            gastado_de_la_hucha += max(0, puja - ya_importe - credito)
 
         accion = {
             "accion": "PUJAR", "player_id": pid,
@@ -559,6 +603,21 @@ def decidir(
         )
         if tope is not None and puja > tope:
             continue
+        # LA HUCHA (02/11/2026): un viaje no tiene venta emparejada.
+        if hucha is not None:
+            ya_importe = _int((ya or {}).get("amount"), 0) or 0
+            pujado_aqui = sum(
+                (_int(x.get("importe"), 0) or 0)
+                - (_int((x.get("sustituye") or {}).get("amount"), 0) or 0)
+                for x in acciones if x.get("accion") == "PUJAR")
+            maximo_h = _int(hucha.get("maximo_para_gastar"))
+            tope_h = None if maximo_h is None else maximo_h - pujado_aqui + ya_importe
+            if (tope_h is not None and puja > tope_h) or not _la_hucha.cabe(
+                    hucha, puja, sustituye=ya_importe, ya=gastado_de_la_hucha):
+                acciones.append(_la_hucha.la_nada(
+                    {"player_id": pid, "nombre": nombre, "importe": puja}, hucha))
+                continue
+            gastado_de_la_hucha += max(0, puja - ya_importe)
         gastado += puja
         acciones.append({
             "accion": "PUJAR", "player_id": pid, "nombre": nombre,
@@ -962,6 +1021,7 @@ def correr(
     ruta: Path | str | None = None,
     ahora: datetime | None = None,
     calendario: Path | str | None = None,
+    hucha: dict | None = None,
 ) -> dict:
     """
     La orden, en esta vuelta. Devuelve lo que hizo. Nunca lanza.
@@ -969,6 +1029,11 @@ def correr(
     Las guardias (reloj, parte del relevo, jornada en curso) salen de
     `calendario` (el de los chollos si no se pasa) y del catalogo de la
     foto; lo que vio el reloj queda en `salida["reloj"]`.
+
+    LA HUCHA (02/11/2026): con `BORDALAS_LA_HUCHA`, `decidir` la recibe:
+    la que pasa la vuelta de v10 (`hucha`, con lo ya pujado en ella) o,
+    sin pasarla, la de la foto. Lo que vio queda en `salida["hucha"]`.
+    Apagada no se lee nada y la salida es la de siempre.
     """
 
     salida = {"activa": activa(), "motivo": None, "acciones": [], "hechas": []}
@@ -999,11 +1064,20 @@ def correr(
         foto.pop("de_managers", None)
         reloj = el_reloj(ahora, calendario)
         salida["reloj"] = reloj
+        con_la_hucha = {}
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.activa():
+            h = hucha if isinstance(hucha, dict) else _la_hucha.de_la_foto(foto, ahora=ahora)
+            if _la_hucha.esta_activa(h):
+                con_la_hucha["hucha"] = h
+                salida["hucha"] = _la_hucha.el_resumen(h)
         acciones = decidir(
             orden, **foto, ahora=ahora,
             horas_jornada=reloj["horas_jornada"],
             en_curso=reloj["en_curso"],
             estados=leer_los_estados(snapshot),
+            **con_la_hucha,
         )
         salida["acciones"] = acciones
 

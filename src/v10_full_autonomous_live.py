@@ -747,6 +747,110 @@ def _el_bloque_de_la_subasta(subasta) -> dict:
         return {}
 
 
+# ============================================================
+# LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`)
+# ============================================================
+#
+#     Con `BORDALAS_LA_HUCHA` puesto, la vuelta lleva la cuenta de la
+#     hucha: se saca de la foto mas fresca de `run_cycle` (la de
+#     `post_action` si el motor viejo ya escribio; si no, la de la
+#     vuelta), ANTES de la cesta, y cada motor que puja despues (el
+#     carril, la orden, los chollos y la ronda) la recibe con lo que
+#     los de delante ya pujaron encima: la cesta, el BUY V10, el carril,
+#     la orden y los chollos. Es lo que daria una foto nueva sin
+#     pedirla: nadie gasta dos veces lo mismo libre. El estado de la
+#     vuelta lleva el bloque `hucha` para el panel.
+#
+#     Apagada: `_la_hucha_de_la_vuelta` es None, a nadie se le pasa
+#     nada, no hay bloque y la vuelta es la de siempre, byte a byte.
+
+def _la_foto_de_la_hucha(cycle) -> dict | None:
+    """La foto mas fresca de `run_cycle`. Nunca lanza."""
+
+    try:
+        c = cycle if isinstance(cycle, dict) else {}
+        post = c.get("post_action")
+        post = post if isinstance(post, dict) else {}
+        foto = post.get("snapshot")
+        return foto if isinstance(foto, dict) else c.get("snapshot")
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def _la_hucha_de_la_vuelta(cycle) -> dict | None:
+    """None apagada; encendida, la hucha de la foto mas fresca.
+    Nunca lanza."""
+
+    try:
+        from src.analysis import la_hucha
+
+        if not la_hucha.activa():
+            return None
+
+        return la_hucha.de_la_snapshot(_la_foto_de_la_hucha(cycle))
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def _con_la_hucha(hucha) -> dict:
+    """El argumento `hucha` para los que pujan, solo si esta activa
+    (encendida y vigente); si no, {} y a nadie se le pasa nada."""
+
+    try:
+        from src.analysis import la_hucha
+
+        return {"hucha": hucha} if la_hucha.esta_activa(hucha) else {}
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
+def _mas_lo_pujado(hucha, importe):
+    """La hucha con lo que acaba de pujar un motor. Apagada, None."""
+
+    if hucha is None:
+        return None
+
+    try:
+        from src.analysis import la_hucha
+
+        return la_hucha.mas_lo_pujado(hucha, importe)
+    except Exception:                               # noqa: BLE001
+        return hucha
+
+
+def _lo_pujado_por_la_cesta(subasta) -> int:
+    """Lo que la cesta mando en esta vuelta. Nunca lanza."""
+
+    try:
+        return sum(
+            int(e.get("amount") or 0)
+            for e in (subasta or {}).get("sent") or []
+            if isinstance(e, dict) and e.get("sent")
+        )
+    except Exception:                               # noqa: BLE001
+        return 0
+
+
+def _el_bloque_de_la_hucha(hucha, cycle) -> dict:
+    """`{"hucha": ...}` encendida (con el mercado del Computer de la
+    foto, para saber si su jugador esta hoy); apagada, {}. Nunca lanza."""
+
+    if hucha is None:
+        return {}
+
+    try:
+        from src.actions.la_orden_del_gestor import _pid, leer_la_foto
+        from src.analysis import la_hucha
+
+        foto = _la_foto_de_la_hucha(cycle) or {}
+        yo = _pid((foto.get("league") or {}).get("user"))
+        mercado = leer_la_foto(foto, yo).get("mercado") if foto else None
+
+        return la_hucha.el_bloque(hucha, mercado)
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
 def _anotar_en_el_libro(enviadas: list | None) -> None:
     """
     Cada puja enviada, al libro. Nunca lanza.
@@ -848,7 +952,7 @@ def _escaparate_en_vivo() -> bool:
         return False
 
 
-def _correr_el_carril(cycle: dict, accion_principal):
+def _correr_el_carril(cycle: dict, accion_principal, hucha=None):
     """
     El carril de la rendija. Nunca lanza: si algo falla, el ciclo
     sigue y el motivo queda escrito.
@@ -898,10 +1002,22 @@ def _correr_el_carril(cycle: dict, accion_principal):
 
         UN SOLO SITIO decide que es "el tablero de esta vuelta".
         Las dos rutas leen de ahi, y los mismos campos.
+
+    LA HUCHA (02/11/2026): con la hucha de la vuelta activa (`hucha`,
+    con lo pujado antes encima), el carril solo gasta lo libre
+    (`hucha_libre`). Sin ella, lo de siempre.
     """
 
     try:
         from src.actions.carril_executor import correr
+
+        con_la_hucha = {}
+
+        if hucha is not None:
+            from src.analysis import la_hucha
+
+            if la_hucha.esta_activa(hucha):
+                con_la_hucha["hucha_libre"] = la_hucha.lo_libre(hucha)
 
         # EL MISMO PLATO QUE `_pujar_en_el_reset`. No se arma
         # aqui nada por cuenta propia.
@@ -961,6 +1077,7 @@ def _correr_el_carril(cycle: dict, accion_principal):
             #     no mirarlo salieron 16 escrituras reales contra
             #     Biwenger para 4 operaciones distintas.
             speculation=especulacion,
+            **con_la_hucha,
         )
 
     except Exception as error:                      # noqa: BLE001
@@ -1383,6 +1500,9 @@ def run_full_autonomous_cycle() -> dict:
         competitive_live=True,
     )
 
+    # LA HUCHA (02/11/2026): apagada, None y nada cambia.
+    hucha = _la_hucha_de_la_vuelta(cycle)
+
     execution_source, cycle_execution = _cycle_write_execution(cycle)
     write_used = _write_used(cycle)
     action_taken = (
@@ -1413,6 +1533,7 @@ def run_full_autonomous_cycle() -> dict:
     #     El balance no se mueve hasta el reset, asi que el resto
     #     del ciclo puede seguir haciendo su unica accion.
     subasta = _pujar_en_el_reset(cycle)
+    hucha = _mas_lo_pujado(hucha, _lo_pujado_por_la_cesta(subasta))
 
     # La renovacion apunta la entrada en la ventana con lo que
     # hicieron LAS DOS, asi que necesita ver esto.
@@ -1458,6 +1579,11 @@ def run_full_autonomous_cycle() -> dict:
             live_confirmation="BORDALAS",
         )
         print_controlled_buy(buy)
+
+        if hucha is not None:
+            from src.analysis.la_hucha import lo_pujado_por_el_buy
+
+            hucha = _mas_lo_pujado(hucha, lo_pujado_por_el_buy(buy))
 
         if buy.get("writes_biwenger"):
             write_used = True
@@ -1567,7 +1693,12 @@ def run_full_autonomous_cycle() -> dict:
     #     la pantalla decia EN VIVO sobre codigo que no corria.
     #
     #     Si revienta, no tumba el ciclo: `correr` nunca lanza.
-    carril = _correr_el_carril(cycle, action_taken)
+    carril = _correr_el_carril(cycle, action_taken, **_con_la_hucha(hucha))
+
+    if hucha is not None:
+        from src.analysis.la_hucha import lo_pujado_por_el_carril
+
+        hucha = _mas_lo_pujado(hucha, lo_pujado_por_el_carril(carril))
 
     # Y EL ESCAPARATE, DESPUES DE COMPRAR.
     #
@@ -1612,7 +1743,12 @@ def run_full_autonomous_cycle() -> dict:
     #     `BORDALAS_LA_ORDEN_DEL_GESTOR`. Nunca lanza.
     from src.actions.la_orden_del_gestor import correr as _la_orden
 
-    orden_del_gestor = _la_orden(cycle)
+    orden_del_gestor = _la_orden(cycle, **_con_la_hucha(hucha))
+
+    if hucha is not None:
+        from src.analysis.la_hucha import lo_pujado_en
+
+        hucha = _mas_lo_pujado(hucha, lo_pujado_en(orden_del_gestor.get("hechas")))
     print(
         f"La orden del gestor: {orden_del_gestor.get('motivo')} "
         f"{[(a.get('accion'), a.get('nombre')) for a in orden_del_gestor.get('acciones') or []]}"
@@ -1632,7 +1768,12 @@ def run_full_autonomous_cycle() -> dict:
     except Exception:                                   # noqa: BLE001
         _min_reset = None
 
-    chollos = _los_chollos(cycle, _min_reset)
+    chollos = _los_chollos(cycle, _min_reset, **_con_la_hucha(hucha))
+
+    if hucha is not None:
+        from src.analysis.la_hucha import lo_pujado_en
+
+        hucha = _mas_lo_pujado(hucha, lo_pujado_en(chollos.get("hechas")))
     print(
         f"Los chollos: {chollos.get('motivo')} "
         f"{[(a.get('accion'), a.get('player_id'), a.get('importe')) for a in chollos.get('acciones') or []]}"
@@ -1648,7 +1789,12 @@ def run_full_autonomous_cycle() -> dict:
     #     `BORDALAS_LA_RONDA_DE_LA_MANANA`. Nunca lanza.
     from src.actions.la_ronda_de_la_manana import correr as _la_ronda
 
-    ronda = _la_ronda(cycle, _min_reset)
+    ronda = _la_ronda(cycle, _min_reset, **_con_la_hucha(hucha))
+
+    if hucha is not None:
+        from src.analysis.la_hucha import lo_pujado_en
+
+        hucha = _mas_lo_pujado(hucha, lo_pujado_en(ronda.get("hechas")))
     print(
         f"La ronda de la mañana: {ronda.get('motivo')} "
         f"{[(a.get('accion'), a.get('player_id'), a.get('importe')) for a in ronda.get('acciones') or []]}"
@@ -1694,6 +1840,9 @@ def run_full_autonomous_cycle() -> dict:
         "revision_de_pujas": revision_de_pujas,
         "chollos": chollos,
         "ronda": ronda,
+        # LA HUCHA (02/11/2026): solo con `BORDALAS_LA_HUCHA`; apagada
+        # no esta y el estado es el de siempre.
+        **_el_bloque_de_la_hucha(hucha, cycle),
     }
 
     STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)

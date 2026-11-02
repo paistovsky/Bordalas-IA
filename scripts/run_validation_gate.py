@@ -241,6 +241,12 @@ TESTS = [
     # sube de verdad y si cabe, acumulado, en el colchon de la casa. Apagado,
     # la cesta de main byte a byte (huella por version de Python).
     "src.analysis.test_la_subasta_en_el_colchon_v1",
+    # La hucha (operacion Raphinha, 02/11): lo apartado (saldo - pujas
+    # vivas, hasta el objetivo) no lo gasta ningun motor que puja; solo los
+    # cambios que se pagan solos y la orden cuando ficha a SU jugador. Los
+    # que venden no la ven. Apagado, main byte a byte (huella por version
+    # de Python).
+    "src.analysis.test_la_hucha_v1",
     # El relevo no se vende (el mie 04/11, Ramon Enriquez por Unai Lopez): el
     # que entra por un cambio vivo de la mejora no lo venden el cierre, el
     # parte ni el motor viejo; si se vendiera, la mejora suelta el cambio y
