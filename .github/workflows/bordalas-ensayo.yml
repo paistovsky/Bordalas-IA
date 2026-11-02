@@ -17,7 +17,13 @@ name: Bordalas IA Ensayo
 #
 #   LOS INTERRUPTORES SON LOS DE PRODUCCION, leidos del YAML de
 #   produccion en cada ensayo (no se copian: una copia se desincroniza).
-#   Con `interruptores` se SUMAN otros para probarlos antes de encender.
+#   Con `interruptores` se SUMAN otros para probarlos antes de encender,
+#   y con un `-` delante se QUITAN (02/11/2026): sumar no basta para
+#   probar algo que otro cierra antes, como la cesta del colchon con
+#   `BORDALAS_SIN_SUBASTA` puesto. Para la cesta:
+#     -BORDALAS_SIN_SUBASTA BORDALAS_LA_SUBASTA_EN_EL_COLCHON BORDALAS_CESTA_SOLO_EL_SUELO
+#   `BORDALAS_ENSAYO` no se quita nunca. La verja del ensayo corre con los
+#   del YAML, como en produccion; solo los pasos de despues ven el cambio.
 #
 #   CUIDADO CON BIWENGER: cada ensayo hace las mismas peticiones que una
 #   vuelta de verdad. Se lanza a mano, no en bucle.
@@ -26,7 +32,7 @@ on:
   workflow_dispatch:
     inputs:
       interruptores:
-        description: "BORDALAS_* que se suman a los de produccion, separados por espacios"
+        description: "BORDALAS_* que se suman a los de produccion, separados por espacios (-BORDALAS_* los quita)"
         required: false
         default: ""
 
@@ -113,14 +119,17 @@ jobs:
           prod = los_de_produccion()
           if not prod["ok"]:
               raise SystemExit("No se pudieron leer los interruptores de produccion: " + str(prod["reason"]))
-          extra = [x for x in os.environ.get("EXTRA", "").split() if x.startswith("BORDALAS_")]
-          todos = sorted(set(prod["interruptores"]) | set(extra))
+          fichas = os.environ.get("EXTRA", "").split()
+          extra = [x for x in fichas if x.startswith("BORDALAS_")]
+          quitados = [x[1:] for x in fichas if x.startswith("-BORDALAS_") and x[1:] != "BORDALAS_ENSAYO"]
+          todos = sorted((set(prod["interruptores"]) | set(extra)) - set(quitados))
           with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as f:
               for nombre in todos:
                   if nombre != "BORDALAS_ENSAYO":
                       f.write(f"{nombre}=1\n")
           print("Produccion:", " ".join(prod["interruptores"]))
           print("Sumados en el ensayo:", " ".join(extra) or "(ninguno)")
+          print("Quitados en el ensayo:", " ".join(quitados) or "(ninguno)")
           PY
 
       - name: Validate (la verja)

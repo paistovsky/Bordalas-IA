@@ -1459,7 +1459,12 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False, vistas=None) 
     puede traerla ya: con `vistas` ({id: importe} de nuestras pujas en la
     foto), de cada una solo cuenta lo que la foto aún no trae (ni dos
     veces en `maximumBid` ni más baja de lo que hay); si la foto ya la
-    trae entera, solo `ya_pujados`. Pura, nunca lanza.
+    trae entera, solo `ya_pujados`. Si después la orden, los chollos o
+    la ronda pujan por el mismo, a `gastado` solo va lo que crece sobre
+    la de la cesta (una puja por jugador). Las del libro que la foto no
+    trae (`subasta.sin_foto`) solo van a `ya_pujados`: casi siempre son
+    rechazadas o retiradas, y la caja de la mejora también decide
+    ventas (los revisores, 02/11). Pura, nunca lanza.
     """
     salida = {"ya_pujados": set(), "gastado": 0, "pujas": {}, "solas": set(), "cobros": {},
               "canceladas": set(),
@@ -1469,7 +1474,20 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False, vistas=None) 
             salida["descartado"] = es_de_esta_vuelta(v10, ahora, run_id)
             if salida["descartado"]:
                 return salida
+        # {id: lo comprometido tras la cesta}: si un bloque de despues
+        # puja otra vez por el mismo, Biwenger deja una puja por jugador
+        # y solo baja `maximumBid` lo que crece (solo hay cesta con su
+        # colchon puesto).
+        cesta = {}
         for bloque in ("subasta", "orden_del_gestor", "chollos", "ronda"):
+            if bloque == "subasta":
+                # Lo del libro que la foto no trae (`sin_foto`): no va en
+                # `hechas` ni en la caja (casi siempre rechazada o
+                # retirada), pero no se vuelve a pujar por ellos.
+                for f in ((v10 or {}).get(bloque) or {}).get("sin_foto") or []:
+                    q = _int(f.get("id")) if isinstance(f, dict) else None
+                    if q is not None:
+                        salida["ya_pujados"].add(q)
             for h in ((v10 or {}).get(bloque) or {}).get("hechas") or []:
                 if not isinstance(h, dict) or not h.get("exito"):
                     continue
@@ -1480,13 +1498,18 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False, vistas=None) 
                         continue
                     ya = _int((vistas or {}).get(pid), 0) or 0
                     salida["ya_pujados"].add(pid)
+                    cesta[pid] = max(ya, importe)
                     if importe > ya:
                         salida["gastado"] += importe - ya
                         salida["pujas"][pid] = importe
                     continue
                 if h.get("accion") == "PUJAR":
                     salida["ya_pujados"].add(pid)
-                    salida["gastado"] += importe
+                    if pid in cesta:
+                        salida["gastado"] += max(0, importe - cesta[pid])
+                        cesta[pid] = max(cesta[pid], importe)
+                    else:
+                        salida["gastado"] += importe
                     if pid is not None:
                         salida["pujas"][pid] = importe
                         # Con LA CARTERA (16/10) la ronda ya no revende

@@ -61,6 +61,22 @@ QUE SE COMPRUEBA
            foto que ven la orden, los chollos y la ronda, y lo que sacan la
            mejora, el cierre, la rotacion y el parte, son los de main:
            huella medida en main ANTES del cambio, en 3.11 y en 3.13.
+    8. Las revisiones de adc4eaa4 (02/11: OK_TO_SWITCH_ON y SHIP_OFF):
+         - la puja que Biwenger rechaza (un 4xx) no se reserva ni la
+           cuenta nadie; lo que no se sabe (un 5xx, un 200 con pagina de
+           mantenimiento) sigue contando;
+         - lo del libro que la foto no trae (`sin_foto`) no baja
+           `maximumBid` ni entra en la caja de la mejora ni del cierre
+           (que venden), y la mejora no vuelve a pujar por ello;
+         - con un 429 despues de la cesta, `main` deja un estado minimo
+           con el bloque y la mejora y el cierre lo cuentan; apagado no
+           escribe nada;
+         - una puja de despues por el mismo jugador solo resta del
+           `maximumBid` de la mejora lo que crece;
+         - la cesta no se abre en el YAML sin el colchon y el suelo
+           encendidos para su lector de verdad ("1" literal);
+         - y las vueltas enteras no miran el reloj: con el reloj en 2100,
+           la cesta puja igual.
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -473,6 +489,41 @@ class _Nada:
         return self
 
     def __exit__(self, *_):
+        return False
+
+
+class _LaHoraDelCiclo:
+    """`la_subasta.plan_desde_el_estado` con la hora fija: el ciclo
+    (`_pujar_en_el_reset`) no se la pasa y el colchon miraria el reloj de
+    verdad (el revisor, 02/11: con el reloj en 2100 fallaban siete). El
+    comienzo de la ventana (`pujas_desde`), tambien desde esa hora, como lo
+    saca el ciclo. Apagado no se miran: las huellas no cambian."""
+
+    def __init__(self, hora):
+        self.hora = hora
+
+    def __enter__(self):
+        original, hora = sub.plan_desde_el_estado, self.hora
+
+        def _con_la_hora(state, *a, **k):
+            if k.get("ahora") is None:
+                k["ahora"] = hora
+            if k.get("pujas_desde") is not None:
+                try:
+                    segundos = int(((state or {}).get("market_clock") or {})
+                                   .get("seconds_to_reset") or 0)
+                except Exception:                   # noqa: BLE001
+                    segundos = 0
+                k["pujas_desde"] = hora - timedelta(
+                    seconds=max(0, sub.VENTANA_MINUTOS * 60 - segundos))
+            return original(state, *a, **k)
+
+        self._antes = original
+        sub.plan_desde_el_estado = _con_la_hora
+        return self
+
+    def __exit__(self, *_):
+        sub.plan_desde_el_estado = self._antes
         return False
 
 
@@ -889,7 +940,7 @@ def _la_vuelta(estado, cycle, entorno, libro=None, libro_de_pujas=None) -> tuple
             libro_de_pujas_mod.load_ledger = lambda *a, **k: copy.deepcopy(libro_falso)
             escritura.BiwengerWriteClient = _Escritor
             chollos.CALENDARIO, ronda.LIBRO = calendario, ruta
-            with _Interruptores(entorno):
+            with _Interruptores(entorno), _LaHoraDelCiclo(AHORA_3110):
                 plan = ciclo._pujar_en_el_reset(cycle)
         finally:
             (ciclo._estado_publicado, ciclo._anotar_en_el_libro,
@@ -911,7 +962,7 @@ def _la_pantalla(estado, foto, entorno, libro=None) -> dict:
             pantalla.bid_outcome_summary = lambda **k: {"available": False}
             pantalla._libro_de_pujas = lambda *a, **k: []
             chollos.CALENDARIO, ronda.LIBRO = calendario, ruta
-            with _Interruptores(entorno):
+            with _Interruptores(entorno), _LaHoraDelCiclo(AHORA_3110):
                 return pantalla.bloque_de_la_subasta(copy.deepcopy(estado),
                                                      copy.deepcopy(foto))
         finally:
@@ -1258,15 +1309,20 @@ def _lo_que_ve(cycle) -> dict:
 
 
 def _la_vuelta_entera(estado, cycle, entorno, libro_de_pujas=None, veta=None,
-                      demas=None) -> dict:
+                      demas=None, *, escritor=None, buy=None, por_main=False,
+                      de_antes=None) -> dict:
     """
     `run_full_autonomous_cycle` con la cesta de verdad (`_pujar_en_el_reset`)
     y lo demas cambiado: `run_cycle` devuelve `cycle`; BUY, posiciones,
     contraofertas, carril, escaparate, renovacion y racha no hacen nada; la
     orden, la revision, los chollos y la ronda apuntan la foto que ven y
     dejan `demas` (por defecto, nada). El escritor apunta: la puja par
-    entra; la impar revienta (no se sabe si entro). El estado, en una
-    carpeta temporal. Devuelve {texto, pantalla, enviadas, cycle, vistos}.
+    entra; la impar revienta (no se sabe si entro); con `escritor`
+    (jugador, importe) -> lo que contesta. `buy`, el BUY de v10 (por
+    defecto no escribe). Con `por_main`, por `main()` (la salida del 429)
+    y con el estado de otra vuelta ya en disco (`de_antes`). La hora del
+    colchon, fija (`_LaHoraDelCiclo`). El estado, en una carpeta temporal.
+    Devuelve {texto, pantalla, enviadas, cycle, vistos, rc}.
     """
     import contextlib
     import io
@@ -1289,6 +1345,8 @@ def _la_vuelta_entera(estado, cycle, entorno, libro_de_pujas=None, veta=None,
 
         def place_bid(self, player_id, amount, seller_user_id=None, execute=False):
             enviadas.append((int(player_id), int(amount)))
+            if escritor is not None:
+                return escritor(int(player_id), int(amount))
             if int(player_id) % 2:
                 raise RuntimeError("se corta la red")
             return {"sent": True, "success": True, "http_status": 200}
@@ -1307,16 +1365,20 @@ def _la_vuelta_entera(estado, cycle, entorno, libro_de_pujas=None, veta=None,
 
     libro_falso = LIBRO_DE_PUJAS_VACIO if libro_de_pujas is None else libro_de_pujas
     pantalla = io.StringIO()
-    texto = None
+    texto, rc = None, None
     with tempfile.TemporaryDirectory() as d:
         calendario, ruta = _la_casa(d)
+        if de_antes is not None:
+            (Path(d) / "v10_full_autonomous_status.json").write_text(
+                json.dumps(de_antes), encoding="utf-8")
         cambios = [
             (ciclo, "run_cycle", lambda **k: cycle),
             (ciclo, "_estado_publicado", lambda c: copy.deepcopy(estado)),
             (ciclo, "_anotar_en_el_libro", lambda x: None),
             (ciclo, "_renovar_en_la_ventana", lambda c: {"available": False}),
-            (ciclo, "build_controlled_run", lambda **k: {"writes_biwenger": False}),
+            (ciclo, "build_controlled_run", buy or (lambda **k: {"writes_biwenger": False})),
             (ciclo, "print_controlled_buy", lambda *a, **k: None),
+            (ciclo, "_publicar_peticiones", lambda: None),
             (ciclo, "sync_position_manager", lambda **k: {"board": {}}),
             (ciclo, "print_position_manager", lambda *a, **k: None),
             (ciclo, "sync_counter_repricing", lambda **k: {"board": {}}),
@@ -1348,8 +1410,12 @@ def _la_vuelta_entera(estado, cycle, entorno, libro_de_pujas=None, veta=None,
             os.environ["GITHUB_RUN_ID"] = RUN_ID
             with _Interruptores(entorno), \
                     (_LaOrdenVeta(veta) if veta else _Nada()), \
+                    _LaHoraDelCiclo(LA_HORA_DEL_ESTADO), \
                     contextlib.redirect_stdout(pantalla):
-                ciclo.run_full_autonomous_cycle()
+                if por_main:
+                    rc = ciclo.main()
+                else:
+                    ciclo.run_full_autonomous_cycle()
             estado_ruta = Path(d) / "v10_full_autonomous_status.json"
             texto = estado_ruta.read_text(encoding="utf-8") if estado_ruta.exists() else None
         finally:
@@ -1360,18 +1426,20 @@ def _la_vuelta_entera(estado, cycle, entorno, libro_de_pujas=None, veta=None,
             else:
                 os.environ["GITHUB_RUN_ID"] = run_id_antes
     return {"texto": texto, "pantalla": pantalla.getvalue(), "enviadas": enviadas,
-            "cycle": cycle, "vistos": vistos}
+            "cycle": cycle, "vistos": vistos, "rc": rc}
 
 
 def _la_cesta(estado=None, foto=None, post=None, entorno=PUESTO, libro_de_pujas=None,
-              demas=None) -> tuple:
+              demas=None, **como) -> tuple:
     """La vuelta entera de la pareja A (por defecto): (estado de v10 leido
-    del disco, la vuelta)."""
+    del disco, la vuelta). `como`: lo de `_la_vuelta_entera` (escritor,
+    buy, por_main, de_antes)."""
     cycle = {"snapshot": copy.deepcopy(FOTO_3110 if foto is None else foto)}
     if post is not None:
         cycle["post_action"] = {"snapshot": copy.deepcopy(post)}
     vuelta = _la_vuelta_entera(_vuelta_3110((MACIA, ORTIZ, PAREJA_A)) if estado is None
-                               else estado, cycle, entorno, libro_de_pujas, demas=demas)
+                               else estado, cycle, entorno, libro_de_pujas, demas=demas,
+                               **como)
     assert vuelta["texto"], vuelta["pantalla"][-400:]
     return json.loads(vuelta["texto"]), vuelta
 
@@ -1425,15 +1493,19 @@ def test_el_estado_de_la_vuelta_lleva_la_cesta():
     assert _nuestras_en(vuelta["cycle"]["snapshot"]) == {**PUJAS_3110, **dict(vuelta["enviadas"])}
 
     # Sin pujar (SIN_COLCHON: el motor viejo ya pujo 900.000 en `post_action`)
-    # y con una del libro de esta ventana que la foto no trae: el bloque las
-    # lleva igual, marcadas, y la foto de la vuelta tambien.
+    # y con una del libro de esta ventana que la foto no trae: el bloque
+    # lleva la del motor viejo, marcada, y la del libro aparte (02/11: no va
+    # a ninguna caja); la foto de la vuelta, las dos.
     estado, vuelta = _la_cesta(post=FOTO_POST_3110, libro_de_pujas=LIBRO_DE_LA_VENTANA)
     assert vuelta["enviadas"] == [], vuelta["enviadas"]
     assert [(h["player_id"], h["importe"], h["reservada"], h["exito"], h["enviada"])
             for h in estado["subasta"]["hechas"]] == [
-        (66666, 50_000, "SIN_FOTO", True, False), (77777, 900_000, "DE_OTRA_FOTO", True, False)]
+        (77777, 900_000, "DE_OTRA_FOTO", True, False)], estado["subasta"]["hechas"]
     assert estado["subasta"]["de_otra_foto"] == [{"id": 77777, "amount": 900_000}]
     assert estado["subasta"]["sin_foto"] == [{"id": 66666, "amount": 50_000}]
+    assert estado["subasta"]["reservado"] == 900_000
+    assert _nuestras_en(vuelta["cycle"]["snapshot"]) == {
+        **PUJAS_3110, **PUJA_DEL_EJECUTOR, 66666: 50_000}
 
     # Apagado no hay bloque.
     estado, _ = _la_cesta(entorno=APAGADO)
@@ -1641,12 +1713,353 @@ def test_sin_pujar_tambien_se_reserva():
     with _Interruptores(PUESTO):
         bloque = ciclo._reservar_lo_pujado(cycle, sin_vivo, None)
     assert _nuestras_en(cycle["snapshot"]) == {**PUJAS_3110, 55555: 60_000}
-    assert [(h["player_id"], h["importe"]) for h in bloque["hechas"]] == [(55555, 60_000)]
+    # (02/11: la del libro, como puja viva para los que pujan detras, pero
+    # sin bajar el tope ni ir a las `hechas` que leen los que venden.)
+    assert cycle["snapshot"]["market"]["status"]["maximumBid"] == 8_675_224
+    assert bloque["hechas"] == [] and bloque["sin_foto"] == [{"id": 55555, "amount": 60_000}]
     with _Interruptores(APAGADO):
         cycle = {"snapshot": copy.deepcopy(FOTO_3110)}
         original = cycle["snapshot"]
         assert ciclo._reservar_lo_pujado(cycle, sin_vivo, None) is None
         assert cycle["snapshot"] is original
+
+
+# ============================================================
+# 8. LAS REVISIONES DE adc4eaa4 (02/11)
+# ============================================================
+
+RECHAZO_400 = {"sent": True, "success": False, "http_status": 400,
+               "response": {"status": 400, "message": "No tienes dinero suficiente"}}
+
+
+def _despues(v10, foto=None) -> dict:
+    """Lo que ven la mejora y el cierre (otros procesos) con ese estado de
+    la vuelta y la foto del disco (por defecto, la de antes de la cesta)."""
+    from src.actions import el_cierre_de_la_jornada as cierre
+    from src.actions import la_mejora_del_once as mejora
+    from src.actions.la_orden_del_gestor import leer_la_foto
+
+    disco = leer_la_foto(copy.deepcopy(FOTO_3110 if foto is None else foto), YO)
+    ev = mejora.lo_de_esta_vuelta(v10, AHORA_DESPUES, RUN_ID, cartera=True,
+                                  vistas=_importes(disco))
+    vc = cierre.lo_de_esta_vuelta(v10)
+    vivas = cierre.las_pujas_vivas(disco, vc)
+    return {"descartado": ev["descartado"], "pujas": ev["pujas"], "gastado": ev["gastado"],
+            "ya_pujados": ev["ya_pujados"], "caja": mejora.la_caja(disco, esta_vuelta=ev),
+            "cierre": {p: f["amount"] for p, f in vivas.items()},
+            "caja_del_cierre": cierre.la_caja(disco["saldo"], vivas, {})}
+
+
+def test_la_que_biwenger_rechaza_no_cuenta():
+    # Biwenger contesta 400 a la puja de la pareja A: no existe. Ni se
+    # reserva en la foto de la vuelta (ni su tope), ni la cuentan la mejora
+    # ni el cierre, que vende en rojo (el revisor: caja -331.576 de una
+    # puja que no hay; la de verdad, 370.175).
+    v10, vuelta = _la_cesta(escritor=lambda pid, importe: copy.deepcopy(RECHAZO_400))
+    assert vuelta["enviadas"] == [(90002, PUJA_DE_LA_PAREJA)], vuelta["enviadas"]
+    filas = v10["subasta"]["hechas"]
+    assert [(h["player_id"], h["exito"], h.get("rechazada"), h["http_status"]) for h in filas] \
+        == [(90002, False, "HTTP 400", 400)], filas
+    assert v10["subasta"]["reservado"] == 0
+    assert _nuestras_en(vuelta["cycle"]["snapshot"]) == PUJAS_3110
+    assert vuelta["cycle"]["snapshot"]["market"]["status"]["maximumBid"] == 8_675_224
+    assert vuelta["vistos"]["ronda"]["maximo"] == 8_675_224, vuelta["vistos"]
+    sin_cesta = SALDO_3110 - 929_800
+    for foto in (None, FOTO_3110):
+        d = _despues(v10, foto)
+        assert d["descartado"] is None and d["pujas"] == {} and d["gastado"] == 0, d
+        assert d["caja"] == sin_cesta == 370_175, d
+        assert 90002 not in d["cierre"] and d["caja_del_cierre"] == sin_cesta, d
+    # Un 200 con {"status": 409} en el cuerpo tambien es una respuesta.
+    v10, _ = _la_cesta(escritor=lambda pid, importe: {
+        "sent": True, "success": False, "http_status": 200, "response": {"status": 409}})
+    assert [h["exito"] for h in v10["subasta"]["hechas"]] == [False]
+
+    # Lo que NO se sabe sigue contando entero: un 200 con una pagina de
+    # mantenimiento, un 5xx, un 429 que la sesion no pudo con el, lo que el
+    # ensayo no manda.
+    for duda in ({"sent": True, "success": False, "http_status": 200,
+                  "response": "<html>mantenimiento</html>"},
+                 {"sent": True, "success": False, "http_status": 502},
+                 {"sent": False, "success": False}):
+        v10, vuelta = _la_cesta(escritor=lambda pid, importe, d=duda: copy.deepcopy(d))
+        assert [(h["player_id"], h["exito"], h["importe"]) for h in v10["subasta"]["hechas"]] \
+            == [(90002, True, PUJA_DE_LA_PAREJA)], (duda, v10["subasta"]["hechas"])
+        assert _nuestras_en(vuelta["cycle"]["snapshot"])[90002] == PUJA_DE_LA_PAREJA
+        assert _despues(v10)["caja"] == sin_cesta - PUJA_DE_LA_PAREJA == -331_576
+
+    # La vara, sola.
+    from src.analysis.la_subasta_en_el_colchon import la_rechazada
+
+    assert la_rechazada(RECHAZO_400) == "HTTP 400"
+    for duda in ({"sent": True, "success": False, "http_status": 200, "response": "<html>"},
+                 {"sent": True, "success": False, "http_status": 503},
+                 {"sent": True, "success": False, "http_status": True},
+                 {"sent": True, "success": True, "http_status": 400},
+                 {"sent": False, "success": False, "http_status": 400},
+                 {"sent": True, "success": None, "http_status": 400},
+                 None, "x", [], {}):
+        assert la_rechazada(duda) is None, duda
+
+
+def test_lo_del_libro_no_baja_el_tope_ni_vende():
+    from src.actions import la_orden_del_gestor as orden
+
+    # SIN_COLCHON: el motor viejo pujo 900.000 en `post_action` (de verdad:
+    # su foto la trae) y el libro de la ventana apunta 50.000 por el 66666
+    # que ninguna foto trae (casi siempre, rechazada o retirada). En la foto
+    # de la vuelta, las dos como pujas vivas (los que pujan detras no se
+    # gastan ese colchon); el tope de Biwenger solo baja la de verdad (el
+    # revisor: la orden no fichaba por un tope 50.000 por debajo del real).
+    v10, vuelta = _la_cesta(post=FOTO_POST_3110, libro_de_pujas=LIBRO_DE_LA_VENTANA)
+    reservada = vuelta["cycle"]["snapshot"]
+    assert _nuestras_en(reservada) == {**PUJAS_3110, **PUJA_DEL_EJECUTOR, 66666: 50_000}
+    real = 8_675_224 - 900_000
+    assert reservada["market"]["status"]["maximumBid"] == real, \
+        reservada["market"]["status"]["maximumBid"]
+    assert vuelta["vistos"]["orden"]["maximo"] == real
+
+    def _decide(foto, puja):
+        f = copy.deepcopy(foto)
+        f["market"]["sales"].append({"player": {"id": 90002}, "user": None, "price": 700_000})
+        f["catalog"]["data"]["players"]["90002"] = {
+            "id": 90002, "price": 700_000, "priceIncrement": 30_000, "status": "ok",
+            "points": 40, "playedHome": 4, "playedAway": 4}
+        lf = orden.leer_la_foto(f, YO)
+        lf.pop("de_managers", None)
+        return [a["accion"] for a in orden.decidir(
+            {"fichar": [{"player_id": 90002, "nombre": "F", "puja": puja}]}, **lf,
+            horas_jornada=64.0, estados={90002: "ok"}, en_curso=False)]
+
+    de_verdad = copy.deepcopy(FOTO_POST_3110)
+    de_verdad["market"]["status"]["maximumBid"] = real
+    assert _decide(de_verdad, real - 20_000) == _decide(reservada, real - 20_000) == ["PUJAR"]
+
+    # Los otros procesos: la del motor viejo cuenta (la foto del disco es
+    # de antes); la del libro, ni en la caja de la mejora ni en la del
+    # cierre (los dos venden), pero la mejora no vuelve a pujar por ella.
+    d = _despues(v10)
+    assert d["pujas"] == PUJA_DEL_EJECUTOR and d["gastado"] == 900_000, d
+    assert {66666, 77777} <= d["ya_pujados"], d["ya_pujados"]
+    assert d["caja"] == SALDO_3110 - 929_800 - 900_000, d
+    assert d["cierre"] == {**PUJAS_3110, **PUJA_DEL_EJECUTOR}, d["cierre"]
+
+
+def test_un_429_despues_de_la_cesta_deja_su_bloque():
+    from src.biwenger.peticiones import LimiteDePeticiones
+
+    def _429(**k):
+        raise LimiteDePeticiones("429 Too Many Requests")
+
+    de_antes = {"run_id": "la-de-antes", "timestamp": "2026-11-05T02:45:00+00:00",
+                "orden_del_gestor": {"hechas": [{"accion": "PUJAR", "player_id": 4242,
+                                                 "importe": 10_000, "exito": True}]}}
+
+    # La cesta puja y el BUY de v10 se lleva un 429 que no cede: `main` sale
+    # con 0 y, encendido, deja un estado minimo de ESTA vuelta con el bloque
+    # (antes la cache dejaba el de la anterior y la mejora y el cierre
+    # veian la caja de antes de la cesta: 370.175 contra -331.576).
+    v10, vuelta = _la_cesta(buy=_429, por_main=True, de_antes=de_antes)
+    assert vuelta["rc"] == 0 and vuelta["enviadas"] == [(90002, PUJA_DE_LA_PAREJA)]
+    assert v10.get("run_id") == RUN_ID, v10
+    assert (v10.get("retirada") or {}).get("motivo") == "LIMITE_DE_PETICIONES", v10
+    assert [(h["player_id"], h["importe"], h["exito"]) for h in v10["subasta"]["hechas"]] \
+        == [(90002, PUJA_DE_LA_PAREJA, True)]
+    assert "orden_del_gestor" not in v10 and "carril" not in v10, list(v10)
+    d = _despues(v10)
+    assert d["descartado"] is None and d["pujas"] == {90002: PUJA_DE_LA_PAREJA}, d
+    assert d["caja"] == d["caja_del_cierre"] == -331_576, d
+    assert d["cierre"][90002] == PUJA_DE_LA_PAREJA
+
+    # Apagado, como siempre: no se escribe nada (queda el de la anterior).
+    v10, vuelta = _la_cesta(entorno=APAGADO, buy=_429, por_main=True, de_antes=de_antes)
+    assert vuelta["rc"] == 0 and vuelta["enviadas"] == [(90002, PUJA_DE_LA_PAREJA)]
+    assert v10 == de_antes, v10
+    # Encendido, sin nada de la cesta (fuera de la ventana), tampoco.
+    fuera = _estado(TABLERO_3110 + (PAREJA_A,), BOLSILLOS_3110, 9_000, SIN_DEUDA, FICHAS_3110)
+    v10, vuelta = _la_cesta(estado=fuera, buy=_429, por_main=True, de_antes=de_antes)
+    assert vuelta["enviadas"] == [] and v10 == de_antes, v10
+    # Y un 429 ANTES de la cesta (en `run_cycle`) no deja la de otra
+    # llamada: solo cuenta la cesta de esta.
+    import src.v10_full_autonomous_live as ciclo
+
+    with tempfile.TemporaryDirectory() as d, _Interruptores(PUESTO):
+        ruta = Path(d) / "v10_full_autonomous_status.json"
+        antes = (ciclo.run_cycle, ciclo.STATUS_PATH, ciclo._publicar_peticiones,
+                 ciclo.__dict__.get("_ultima_subasta"))
+        try:
+            ciclo.run_cycle = lambda **k: (_ for _ in ()).throw(LimiteDePeticiones("429"))
+            ciclo.STATUS_PATH, ciclo._publicar_peticiones = ruta, (lambda: None)
+            ciclo._ultima_subasta = {"bloque_de_la_vuelta": {"hechas": [{"player_id": 1}]}}
+            import contextlib
+            import io
+
+            with contextlib.redirect_stdout(io.StringIO()):
+                assert ciclo.main() == 0
+            assert not ruta.exists()
+        finally:
+            ciclo.run_cycle, ciclo.STATUS_PATH, ciclo._publicar_peticiones = antes[:3]
+            if antes[3] is None:
+                ciclo.__dict__.pop("_ultima_subasta", None)
+            else:
+                ciclo._ultima_subasta = antes[3]
+
+
+def test_la_misma_puja_despues_cuenta_lo_que_crece():
+    from src.actions import la_mejora_del_once as mejora
+
+    # La cesta puja 701.751 por la pareja A y despues la orden sube la misma
+    # a 1.000.000 (una puja por jugador): el `maximumBid` de la mejora baja
+    # 1.000.000, no 1.701.751 (el revisor). La caja y el cierre, por
+    # jugador, ya estaban bien.
+    sube = {"orden": {"hechas": [{
+        "accion": "PUJAR", "player_id": 90002, "importe": 1_000_000, "exito": True,
+        "sustituye": {"offer_id": None, "amount": PUJA_DE_LA_PAREJA}}]}}
+    v10, _ = _la_cesta(demas=sube)
+    d = _despues(v10)
+    assert d["gastado"] == 1_000_000, d
+    assert d["pujas"] == {90002: 1_000_000} and d["cierre"][90002] == 1_000_000, d
+    # Si la de despues es mas baja, no se devuelve nada (de mas, del lado de
+    # no pujar); con la foto que ya trae la de la cesta, solo lo que crece.
+    baja = {"orden": {"hechas": [{"accion": "PUJAR", "player_id": 90002,
+                                  "importe": 500_000, "exito": True}]}}
+    v10_baja, _ = _la_cesta(demas=baja)
+    assert _despues(v10_baja)["gastado"] == PUJA_DE_LA_PAREJA
+    ev = mejora.lo_de_esta_vuelta(v10, AHORA_DESPUES, RUN_ID, cartera=True,
+                                  vistas={90002: PUJA_DE_LA_PAREJA})
+    assert ev["gastado"] == 1_000_000 - PUJA_DE_LA_PAREJA, ev
+    # Sin cesta, la orden como siempre (entera).
+    solo = {k: v for k, v in v10.items() if k != "subasta"}
+    assert mejora.lo_de_esta_vuelta(solo, AHORA_DESPUES, RUN_ID, cartera=True)["gastado"] \
+        == 1_000_000
+
+
+# LA CESTA NO SE ABRE SIN SUS CANDADOS (el revisor de apagado, 02/11). El
+# dia que se quite `BORDALAS_SIN_SUBASTA`, el colchon y el suelo tienen que
+# quedar ENCENDIDOS para su lector de verdad; quitar el colchon para
+# apagarlo devolveria la cesta del 31/10 (2.025.051 por Dani Lorenzo). Y
+# el valor, "1": el paso 0 y la verja dan "on" o "si" por encendido y estos
+# lectores no. Se apaga volviendo a poner `BORDALAS_SIN_SUBASTA: "1"`.
+WORKFLOW = RAIZ / ".github" / "workflows" / "bordalas-live.yml"
+SUELO = "BORDALAS_CESTA_SOLO_EL_SUELO"
+SIN_SUBASTA = "BORDALAS_SIN_SUBASTA"
+
+
+def _los_literales(texto) -> dict:
+    """{interruptor: valor tal cual} de las lineas sin comentar del YAML."""
+    from src.analysis.el_paso_0 import LINEA
+
+    salida = {}
+    for linea in str(texto or "").splitlines():
+        m = LINEA.match(linea)
+        if m and not linea.strip().startswith("#"):
+            salida[m.group("nombre")] = m.group("valor")
+    return salida
+
+
+def los_candados_de_la_cesta(texto) -> list:
+    """Lo que esta mal en el YAML para la cesta (vacio: bien). Pregunta a
+    los lectores de verdad (`_sin_subasta`, `_en_el_colchon`,
+    `solo_el_suelo`) con el valor del YAML en el entorno, y al del paso 0
+    (`interruptores_encendidos_en`)."""
+    from src.analysis.el_paso_0 import _limpio, interruptores_encendidos_en
+
+    lectores = {SIN_SUBASTA: sub._sin_subasta, ENV: sub._en_el_colchon,
+                SUELO: sub.solo_el_suelo}
+    literales = _los_literales(texto)
+    del_paso_0 = interruptores_encendidos_en(texto)
+    lee, mal = {}, []
+    for nombre, lector in lectores.items():
+        literal = literales.get(nombre)
+        with _Interruptores({nombre: None if literal is None else _limpio(literal)}):
+            lee[nombre] = bool(lector())
+        if (nombre in del_paso_0) != lee[nombre]:
+            mal.append(f"{nombre}: {literal} es {'encendido' if nombre in del_paso_0 else 'apagado'} "
+                       f"para el paso 0 y la verja y {'encendido' if lee[nombre] else 'apagado'} "
+                       f"para su lector de verdad: escribir \"1\"")
+    if not lee[SIN_SUBASTA]:
+        for nombre in (ENV, SUELO):
+            if not lee[nombre]:
+                mal.append(f"la cesta esta abierta (sin {SIN_SUBASTA}) y {nombre} no esta "
+                           f"encendido: la cesta del 31/10 otra vez. Para apagarla se vuelve a "
+                           f"poner {SIN_SUBASTA}: \"1\"; el colchon y el suelo no se quitan")
+    return mal
+
+
+def test_la_cesta_no_se_abre_sin_sus_candados():
+    from src.analysis.el_paso_0 import LINEA
+
+    def _yaml(**lineas):
+        return "env:\n  BORDALAS_LA_CARTERA: \"1\"\n" + "".join(
+            f"  {n}: {v}\n" for n, v in lineas.items())
+
+    bien = {
+        "hoy, cerrada": {SIN_SUBASTA: '"1"'},
+        "encendida": {ENV: '"1"', SUELO: '"1"'},
+        "apagada otra vez": {SIN_SUBASTA: '"1"', ENV: '"1"', SUELO: '"1"'},
+        "con comentario": {ENV: '"1"   # el colchon', SUELO: "'1'"},
+        "cerrada, con el colchon a 0": {SIN_SUBASTA: '"1"', ENV: '"0"'},
+    }
+    for caso, lineas in bien.items():
+        assert los_candados_de_la_cesta(_yaml(**lineas)) == [], caso
+    mal = {
+        "sin el colchon": {SUELO: '"1"'},
+        "sin los dos": {},
+        "el colchon a 0": {ENV: '"0"', SUELO: '"1"'},
+        "el colchon en on": {ENV: '"on"', SUELO: '"1"'},
+        "cerrada, el colchon en si": {SIN_SUBASTA: '"1"', ENV: '"sí"'},
+        "la de cerrar en on": {SIN_SUBASTA: "on", ENV: '"1"'},
+        "comentada": {"#" + SIN_SUBASTA: '"1"'},
+    }
+    for caso, lineas in mal.items():
+        assert los_candados_de_la_cesta(_yaml(**lineas)), caso
+    assert any(ENV in m for m in los_candados_de_la_cesta(_yaml(**{SUELO: '"1"'})))
+
+    # El YAML de verdad; y la linea del dia que se encienda, sobre el.
+    real = WORKFLOW.read_text(encoding="utf-8")
+    assert los_candados_de_la_cesta(real) == [], los_candados_de_la_cesta(real)
+
+    def _sin(texto, nombre):
+        return "".join(l for l in texto.splitlines(True)
+                       if not (LINEA.match(l) and LINEA.match(l).group("nombre") == nombre))
+
+    cerrada = [l for l in real.splitlines(True)
+               if LINEA.match(l) and LINEA.match(l).group("nombre") == SIN_SUBASTA]
+    encendida = real
+    if cerrada:
+        sangria = LINEA.match(cerrada[0]).group("sangria")
+        encendida = real.replace(cerrada[0], f'{sangria}{ENV}: "1"\n{sangria}{SUELO}: "1"\n')
+    assert los_candados_de_la_cesta(encendida) == [], los_candados_de_la_cesta(encendida)
+    assert los_candados_de_la_cesta(_sin(encendida, ENV))
+    assert los_candados_de_la_cesta(_sin(_sin(encendida, ENV), SUELO))
+
+
+def test_la_vuelta_no_mira_el_reloj():
+    import datetime as reloj
+
+    # Con el reloj en 2100 (pasada la jornada del calendario de la casa), la
+    # vuelta entera puja igual: la hora del colchon es la de la vuelta, no
+    # la del sistema (el revisor: sin esto fallaban siete).
+    real = reloj.datetime
+
+    class _En2100(real):
+        @classmethod
+        def now(cls, tz=None):
+            cuando = real(2100, 1, 1, 12, tzinfo=timezone.utc)
+            return cuando if tz else cuando.replace(tzinfo=None)
+
+    try:
+        reloj.datetime = _En2100
+        v10, vuelta = _la_cesta()
+        plan, enviadas, _ = _la_vuelta(_vuelta_3110((MACIA, ORTIZ, PAREJA_A)),
+                                       {"snapshot": copy.deepcopy(FOTO_3110)}, PUESTO)
+        panel = _la_pantalla(_vuelta_3110((MACIA, ORTIZ, PAREJA_A)), FOTO_3110, PUESTO)
+    finally:
+        reloj.datetime = real
+    assert vuelta["enviadas"] == [(90002, PUJA_DE_LA_PAREJA)], vuelta["pantalla"][-600:]
+    assert [h["player_id"] for h in v10["subasta"]["hechas"]] == [90002]
+    assert enviadas == [(90002, PUJA_DE_LA_PAREJA)], plan.get("reason")
+    assert [b["id"] for b in panel["bids"]] == [90002], panel.get("reason")
 
 
 # APAGADO, EL ESTADO DE LA VUELTA ES EL DE MAIN. La bateria: estos casos en
@@ -1760,6 +2173,12 @@ TESTS = [
     test_con_lo_pujado_baja_el_maximo_de_puja,
     test_una_puja_viva_no_baja,
     test_sin_pujar_tambien_se_reserva,
+    test_la_que_biwenger_rechaza_no_cuenta,
+    test_lo_del_libro_no_baja_el_tope_ni_vende,
+    test_un_429_despues_de_la_cesta_deja_su_bloque,
+    test_la_misma_puja_despues_cuenta_lo_que_crece,
+    test_la_cesta_no_se_abre_sin_sus_candados,
+    test_la_vuelta_no_mira_el_reloj,
     test_apagado_el_estado_de_la_vuelta_es_el_de_main,
 ]
 

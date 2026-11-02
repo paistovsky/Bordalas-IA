@@ -654,6 +654,11 @@ def _reservar_lo_pujado(
                     solo lo que el colchon conto sin estar en la foto
                     (`sin_foto`, `de_otra_foto`).
 
+    Lo que se reserva es `la_subasta_en_el_colchon.la_reserva`, la
+    misma cuenta que el bloque: no la que Biwenger rechazo sin duda
+    (un 4xx), y lo de `sin_foto` como puja viva pero sin bajar
+    `maximumBid` (los revisores, 02/11).
+
     POR QUE (el revisor, 01/11/2026)
 
         La orden, los chollos y la ronda pujan DESPUES en la
@@ -680,13 +685,12 @@ def _reservar_lo_pujado(
         from src.analysis.la_subasta_en_el_colchon import (
             con_lo_pujado,
             el_bloque_de_la_vuelta,
-            lo_que_reservar,
+            la_reserva,
         )
 
         plan = plan if isinstance(plan, dict) else {}
-        pujas = lo_que_reservar(
-            plan if respuestas is not None else {**plan, "bids": []}
-        )
+        reserva = la_reserva(plan, respuestas)
+        pujas = reserva["pujas"]
         bloque = el_bloque_de_la_vuelta(plan, respuestas)
 
         if (
@@ -694,14 +698,15 @@ def _reservar_lo_pujado(
             and isinstance(cycle, dict)
             and isinstance(cycle.get("snapshot"), dict)
         ):
-            cycle["snapshot"] = con_lo_pujado(cycle["snapshot"], pujas)
+            cycle["snapshot"] = con_lo_pujado(
+                cycle["snapshot"], pujas, reserva["sin_tope"]
+            )
 
             print(
                 f"  Reservado en la foto de la vuelta: {len(pujas)} "
                 f"puja(s), {_euros(sum(i for _, i in pujas))} EUR (la "
-                f"orden, los chollos y la ronda lo ven; la mejora, la "
-                f"rotacion, el cierre y el parte, por el estado de la "
-                f"vuelta)."
+                f"orden, los chollos y la ronda lo ven; la mejora y el "
+                f"cierre lo cuentan por el estado de la vuelta)."
             )
 
         return bloque
@@ -1718,6 +1723,70 @@ def run_full_autonomous_cycle() -> dict:
     return payload
 
 
+def _lo_que_la_cesta_dejo(limite, cesta_de_antes=None) -> None:
+    """
+    UN SOLO COLCHON ENTRE PROCESOS, TAMBIEN CON UN 429 (02/11/2026)
+
+    Si un 429 que no cede sale de la vuelta DESPUES de la cesta (las
+    escrituras del paso 5 de v10 no lo paran), `main` se retira con
+    0 sin escribir el estado de la vuelta y la cache deja el de la
+    anterior. La mejora y el cierre lo descartan (es de otra vuelta)
+    y trabajan con la foto del disco, de antes de la cesta: no ven
+    lo que acaba de pujar (el revisor, 02/11: caja 370.175 contra
+    -331.576 de verdad).
+
+    Con el colchon puesto, y solo si la cesta de ESTA llamada dejo
+    algo (`hechas` o `sin_foto`), se escribe un estado minimo de esta
+    vuelta: `run_id`, hora, `retirada` y el bloque `subasta`. El
+    resto de la vuelta no se sabe y no se inventa. Apagado no hay
+    bloque y no se escribe nada, como siempre. Nunca lanza.
+    """
+
+    try:
+        subasta = globals().get("_ultima_subasta")
+
+        if subasta is cesta_de_antes:
+            return
+
+        bloque = _el_bloque_de_la_subasta(subasta)
+        dentro = bloque.get("subasta") or {}
+
+        if not (dentro.get("hechas") or dentro.get("sin_foto")):
+            return
+
+        payload = {
+            "version": "V10.13.1",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "run_id": os.environ.get("GITHUB_RUN_ID"),
+            "full_autonomous_live": True,
+            "retirada": {
+                "motivo": "LIMITE_DE_PETICIONES",
+                "detalle": str(limite),
+            },
+            **bloque,
+        }
+
+        STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        STATUS_PATH.write_text(
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                indent=2,
+                default=_json_default,
+            ),
+            encoding="utf-8",
+        )
+
+        print(
+            "La cesta ya habia pujado en esta vuelta: el estado de "
+            "la vuelta se escribe solo con su bloque `subasta`, para "
+            "que la mejora y el cierre lo cuenten."
+        )
+
+    except Exception:                               # noqa: BLE001
+        pass
+
+
 def main() -> int:
     """
     El ciclo, con una sola salida especial: el limite de
@@ -1741,7 +1810,15 @@ def main() -> int:
         Cualquier OTRA excepcion sigue subiendo igual que
         siempre y sigue poniendo el paso en rojo. Aqui solo se
         aparta el caso que no es un error.
+
+    Y si la cesta ya habia pujado en esta llamada, con su colchon
+    puesto, se deja su bloque en el estado de la vuelta
+    (`_lo_que_la_cesta_dejo`). Apagado, como siempre: nada.
     """
+
+    # La cesta de ESTA llamada, no la de otra anterior en el mismo
+    # proceso: solo se mira si `_ultima_subasta` cambia.
+    cesta_de_antes = globals().get("_ultima_subasta")
 
     try:
         run_full_autonomous_cycle()
@@ -1758,6 +1835,8 @@ def main() -> int:
             "vuelta."
         )
         print("=" * 100)
+
+        _lo_que_la_cesta_dejo(limite, cesta_de_antes)
 
         _publicar_peticiones()
 

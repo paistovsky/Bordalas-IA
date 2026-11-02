@@ -1582,7 +1582,8 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
         # leer nada mas). De 04:45 a 07:00 nunca, tampoco en las vueltas
         # puestas a proposito (04:45 y 04:50, que `_puede_escribir` deja
         # pasar): son de la ventana, y la subasta del reset que v10 puja en
-        # ellas no esta en ningun fichero de la vuelta (la caja no la ve).
+        # ellas solo esta en el estado de la vuelta (bloque `subasta`) con
+        # `BORDALAS_LA_SUBASTA_EN_EL_COLCHON`; aqui no se llega a leer.
         cal = CALENDARIO if calendario is None else calendario
         reloj = el_reloj(ahora, cal, bool(_puede_escribir(ahora)) and not en_la_franja(ahora))
         salida["reloj"] = reloj

@@ -81,6 +81,14 @@ UN SOLO COLCHON EN LA VUELTA: LO PUJADO SE RESERVA
     conto sin estar en la foto (`sin_foto`, `de_otra_foto`) existe
     igual (los revisores, 01/11).
 
+    Lo que se reserva es `la_reserva` (02/11): no la puja que Biwenger
+    rechazo sin duda (`la_rechazada`: se mando y contesto un 4xx; lo
+    que no se sabe sigue contando), y lo de `sin_foto` cuenta como puja
+    viva pero no baja `maximumBid`: una puja del libro que una foto
+    fresca no trae casi siempre es una rechazada o retirada, y el tope
+    de Biwenger ya es el de verdad (sin esto la orden no fichaba por un
+    tope 50.000 por debajo del real).
+
 UN SOLO COLCHON ENTRE PROCESOS (02/11/2026)
 
     Lo que corre despues en el mismo workflow (la mejora del once y la
@@ -89,13 +97,19 @@ UN SOLO COLCHON ENTRE PROCESOS (02/11/2026)
     que la vuelta ya hizo, del estado de v10. Encendido, el estado lleva
     un bloque `subasta` (`el_bloque_de_la_vuelta`) con `hechas` de la
     misma forma que las de la ronda: lo mismo que se reservo en
-    `cycle["snapshot"]`, cuente o no se sepa si entro. La mejora lo lee
-    con la orden, los chollos y la ronda; el cierre, el parte y la
-    rotacion leen todos los bloques con `hechas`. Una puja que la foto
-    del disco ya trae (una foto sacada despues de la cesta) no se cuenta
-    dos veces: el cierre y la rotacion cuentan por jugador, y la mejora
-    solo resta del `maximumBid` lo que la foto aun no trae. Apagado no
-    hay bloque y el estado es el de siempre, byte a byte.
+    `cycle["snapshot"]`, cuente o no se sepa si entro, menos lo de
+    `sin_foto` (que va aparte: la mejora no vuelve a pujar por ellos,
+    pero no entra en ninguna caja, porque el cierre y la mejora tambien
+    venden); la rechazada va con `exito` False. La mejora lo lee con la
+    orden, los chollos y la ronda; el cierre (y la rotacion, que en la
+    franja no escribe) leen todos los bloques con `hechas`; el parte solo
+    lo vendido y lo publicado. Una puja que la foto del disco ya trae
+    (una foto sacada despues de la cesta) no se cuenta dos veces: el
+    cierre y la rotacion cuentan por jugador, y la mejora solo resta del
+    `maximumBid` lo que la foto aun no trae, y de una puja de despues por
+    el mismo, solo lo que crece. Si un 429 retira la vuelta despues de la
+    cesta, `main` deja un estado minimo con el bloque. Apagado no hay
+    bloque y el estado es el de siempre, byte a byte.
 
     Siguen sin verlo (no sacan su colchon de esa foto, y en main
     tampoco): el V10 BUY (`build_controlled_run`, lee la foto del disco)
@@ -120,6 +134,41 @@ EL INTERRUPTOR
     `la_subasta._en_el_colchon`, desde `plan_desde_el_estado`, por donde
     pasan el ciclo y la pantalla. Este modulo no lo lee. Nace APAGADO, y
     apagado no se llama.
+
+    ENCENDERLO (los revisores, 02/11). No antes del jue 05/11 05:00 (la
+    cesta aun podria pujar para la J12 el mie 04/11 y el jue 05/11 a las
+    04:45). Un solo commit con las tres cosas:
+
+        1. el YAML: fuera `BORDALAS_SIN_SUBASTA`, y
+           `BORDALAS_LA_SUBASTA_EN_EL_COLCHON: "1"` y
+           `BORDALAS_CESTA_SOLO_EL_SUELO: "1"`, con "1" literal (el
+           paso 0 da "on" o "si" por encendido; este lector, no);
+        2. `python scripts/run_validation_gate.py --paso-0` sobre ese
+           mismo arbol;
+        3. `config/paso_0.json`, el que deja el paso 0.
+
+    Sin el 3, `test_el_paso_0_no_se_olvida_v1` pone roja la verja de
+    CI, que es el primer paso de cada vuelta: v10, la mejora y el
+    cierre no corren hasta arreglarlo. Una verja que cambia los
+    interruptores en memoria no lo ve: esa guardia lee el YAML del
+    disco. Despues, la verja normal en 3.11 y 3.13.
+
+    EL ENSAYO, en la rama de ese commit o, antes, en main con
+    `interruptores: -BORDALAS_SIN_SUBASTA BORDALAS_LA_SUBASTA_EN_EL_COLCHON
+    BORDALAS_CESTA_SOLO_EL_SUELO` (el `-` quita). Sumar sin quitar no
+    prueba nada: `BORDALAS_SIN_SUBASTA` cierra la cesta antes del
+    colchon. Y dentro de la ventana (135 min antes del reset de las
+    07:00) pero lejos de las vueltas de las 04:45 y 04:50 (05:05-06:30):
+    dos sesiones a la vez son un 429. Mirar que el estado de v10 del
+    artefacto lleve `subasta.hechas` y que `escrituras_no_enviadas`
+    traiga las pujas de la cesta.
+
+    APAGARLO ES VOLVER A PONER `BORDALAS_SIN_SUBASTA: "1"` (ya pasa el
+    paso 0). NUNCA quitando el colchon o el suelo: sin el colchon, la
+    cesta vuelve a ser la del 31/10 (2.025.051 por Dani Lorenzo). Lo
+    vigila `test_la_subasta_en_el_colchon_v1` (la cesta no se abre sin
+    sus candados): si el YAML abre la cesta, el colchon y el suelo
+    tienen que estar encendidos para su lector de verdad.
 
 QUE NO HACE
 
@@ -231,7 +280,7 @@ def _las_del_libro(libro, desde, vistas) -> list:
     return [salida[pid] for pid in sorted(salida)]
 
 
-def con_lo_pujado(snapshot, pujas) -> dict | None:
+def con_lo_pujado(snapshot, pujas, sin_tope=None) -> dict | None:
     """
     La foto de la vuelta con `pujas` ([(jugador, importe)]) como pujas
     vivas nuestras: lo que traeria una foto nueva despues de pujar. La
@@ -245,7 +294,12 @@ def con_lo_pujado(snapshot, pujas) -> dict | None:
     crece. Es lo que traeria la foto nueva; sin esto, la orden sumaba la
     reservada a un tope viejo (tope = maximo + lo ya pujado) y pujaba
     donde main no, y los chollos de 72 h y la ronda no veian la cesta en
-    el tope (el revisor, 01/11).
+    el tope (el revisor, 01/11). Los de `sin_tope` ({jugador}: los que
+    solo estan por `sin_foto`) entran como pujas vivas pero NO bajan
+    `maximumBid`: una puja del libro que una foto fresca no trae casi
+    siempre es una que Biwenger rechazo o que se retiro, y su tope ya es
+    el de verdad (el revisor, 02/11: la orden no fichaba por un tope
+    50.000 por debajo del de Biwenger).
 
     Devuelve una foto NUEVA y no toca la que se le pasa. Si no se puede
     (sin `yo`, sin ofertas), la misma. Nunca lanza.
@@ -265,6 +319,7 @@ def con_lo_pujado(snapshot, pujas) -> dict | None:
                 nuevas[pid] = max(nuevas.get(pid, 0), importe)
         if not nuevas:
             return snapshot
+        sin_tope = {_int(p) for p in sin_tope or ()}
 
         salida = []
         sube = 0
@@ -275,13 +330,15 @@ def con_lo_pujado(snapshot, pujas) -> dict | None:
                     and _pid(oferta.get("from")) == yo):
                 habia = _int(oferta.get("amount"), 0) or 0
                 queda = max(habia, nuevas.pop(pid))
-                sube += queda - habia
+                if pid not in sin_tope:
+                    sube += queda - habia
                 salida.append({**oferta, "amount": queda})
                 continue
             salida.append(oferta)
 
         for pid, importe in nuevas.items():
-            sube += importe
+            if pid not in sin_tope:
+                sube += importe
             salida.append({
                 "id": None, "from": {"id": yo}, "status": "waiting",
                 "amount": importe, "requestedPlayers": [{"id": pid}],
@@ -326,6 +383,108 @@ def lo_que_reservar(plan) -> list:
         return []
 
 
+def _la_respuesta(fila) -> tuple:
+    """(puja, resultado, error) de una fila de `respuestas`; lo que no se
+    lee, None. Pura, nunca lanza."""
+
+    try:
+        puja, resultado, error = (tuple(fila) + (None, None, None))[:3] \
+            if isinstance(fila, (list, tuple)) else (None, None, None)
+        return (puja if isinstance(puja, dict) else None,
+                resultado if isinstance(resultado, dict) else None, error)
+    except Exception:                               # noqa: BLE001
+        return None, None, None
+
+
+def la_rechazada(resultado) -> str | None:
+    """
+    El motivo si Biwenger RECHAZO la puja sin duda; si no, None.
+
+    Rechazada es: se mando (`sent` True), `success` False y un 4xx, en el
+    HTTP o en el `status` del cuerpo (un 200 con {"status": 400, ...}).
+    Eso es una respuesta, no una duda: la puja no existe y no se reserva
+    (el revisor, 02/11: una 400 contaba entera en la caja del cierre, que
+    vende en rojo). Lo que NO se sabe sigue contando: una excepcion (la
+    red, un 429 que no cede), un 5xx, un 200 con una pagina de
+    mantenimiento (`success` False sin 4xx: puede haber entrado), y lo
+    que no se mando (`sent` False: el ensayo; ahi se mira lo que haria).
+    Pura, nunca lanza.
+    """
+
+    try:
+        if (not isinstance(resultado, dict) or resultado.get("sent") is not True
+                or resultado.get("success") is not False):
+            return None
+
+        def _4xx(valor):
+            return (isinstance(valor, int) and not isinstance(valor, bool)
+                    and 400 <= valor < 500)
+
+        if _4xx(resultado.get("http_status")):
+            return f"HTTP {resultado.get('http_status')}"
+        cuerpo = resultado.get("response")
+        if isinstance(cuerpo, dict) and _4xx(cuerpo.get("status")):
+            return f"status {cuerpo.get('status')} en la respuesta"
+        return None
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def la_reserva(plan, respuestas=None) -> dict:
+    """
+    Lo que la vuelta reserva despues de la cesta. UNA cuenta para la foto
+    de la vuelta (`_reservar_lo_pujado` -> `con_lo_pujado`) y para el
+    estado de la vuelta (`el_bloque_de_la_vuelta`):
+
+        pujas       [(jugador, importe)], como `lo_que_reservar`: las del
+                    plan que se mandaron (con `respuestas` None, ninguna:
+                    no se mando nada) menos las que Biwenger rechazo sin
+                    duda (`la_rechazada`; con varias por el mismo, si las
+                    rechazo todas), y lo de `sin_foto` y `de_otra_foto`.
+        sin_tope    {jugador} que solo estan por `sin_foto`: cuentan como
+                    pujas vivas para los que pujan en la vuelta (de mas cae
+                    del lado de no pujar), pero no bajan `maximumBid` ni
+                    van al estado, donde las leen el cierre y la mejora,
+                    que tambien venden: una puja del libro que una foto
+                    fresca no trae casi siempre es una rechazada o
+                    retirada (el revisor, 02/11).
+        rechazadas  {jugador: motivo}
+
+    Nunca lanza.
+    """
+
+    try:
+        from src.actions.la_orden_del_gestor import _int
+
+        plan = plan if isinstance(plan, dict) else {}
+        detalle = plan.get("en_el_colchon") if isinstance(plan.get("en_el_colchon"), dict) else {}
+
+        motivos = {}
+        for fila in respuestas or ():
+            puja, resultado, _ = _la_respuesta(fila)
+            pid = _int(puja.get("id")) if puja else None
+            if pid is not None:
+                motivos.setdefault(pid, []).append(la_rechazada(resultado))
+        rechazadas = {pid: m[0] for pid, m in motivos.items() if m and all(m)}
+
+        bids = [] if respuestas is None else [
+            b for b in plan.get("bids") or []
+            if not (isinstance(b, dict) and _int(b.get("id")) in rechazadas)]
+
+        del_plan = lo_que_reservar({"bids": bids})
+        sin_foto = lo_que_reservar({"en_el_colchon": {"sin_foto": detalle.get("sin_foto")}})
+        de_otra = lo_que_reservar({"en_el_colchon": {"de_otra_foto": detalle.get("de_otra_foto")}})
+
+        return {
+            "pujas": del_plan + sin_foto + de_otra,
+            "sin_tope": {p for p, _ in sin_foto} - {p for p, _ in del_plan + de_otra},
+            "rechazadas": rechazadas,
+        }
+
+    except Exception:                               # noqa: BLE001
+        return {"pujas": [], "sin_tope": set(), "rechazadas": {}}
+
+
 def el_bloque_de_la_vuelta(plan, respuestas=None) -> dict:
     """
     El bloque `subasta` del estado de la vuelta
@@ -340,23 +499,29 @@ def el_bloque_de_la_vuelta(plan, respuestas=None) -> dict:
                     no se mando nada (la salida sin ejecutar) y de las
                     del plan no va ninguna.
 
-    `hechas` es UNA fila por jugador con lo mismo que
-    `_reservar_lo_pujado` deja en `cycle["snapshot"]` (`lo_que_reservar`
-    y, por jugador, la mayor, como `con_lo_pujado`): las pujas de la
-    cesta y lo que el colchon conto sin estar en la foto de la vuelta
-    (`sin_foto`, `de_otra_foto`, marcadas en `reservada`). Con la forma
-    de las `hechas` de la ronda y los chollos (`la_orden_del_gestor.
-    ejecutar`): `accion` PUJAR, `player_id`, `importe`, `sustituye`
-    None, `enviada`, `exito`, `http_status`, y `subasta` True donde la
-    ronda pone `ronda` True. `exito` es True en TODAS: cuentan aunque no
-    se sepa si entraron (un 200 con una pagina de mantenimiento sale
-    `success` False y puede haber entrado), lo mismo que cuenta
-    `_reservar_lo_pujado`; contarla de mas cae del lado de no pujar. Lo
-    que contesto Biwenger va en `enviada`, `http_status`,
-    `exito_de_biwenger` y `error`.
+    `hechas` es UNA fila por jugador, con la forma de las `hechas` de la
+    ronda y los chollos (`la_orden_del_gestor.ejecutar`): `accion`
+    PUJAR, `player_id`, `importe`, `sustituye` None, `enviada`, `exito`,
+    `http_status`, y `subasta` True donde la ronda pone `ronda` True.
+    Con `exito` True va lo mismo que `_reservar_lo_pujado` deja en
+    `cycle["snapshot"]` (`la_reserva`, por jugador la mayor, como
+    `con_lo_pujado`) menos lo que solo esta por `sin_foto`:
 
-    Tambien `de_otra_foto` y `sin_foto` ([{id, amount}], las del
-    colchon) y `reservado` (la suma). Nunca lanza.
+        - las pujas de la cesta, aunque no se sepa si entraron (una
+          excepcion, un 5xx, un 200 con una pagina de mantenimiento);
+          contarla de mas cae del lado de no pujar;
+        - lo que el colchon conto en la foto de `post_action` y no en
+          la de la vuelta (`de_otra_foto`: el motor viejo pujo en
+          `run_cycle`), marcadas `reservada`.
+
+    Una que Biwenger rechazo sin duda (`la_rechazada`) va con `exito`
+    False y `rechazada`: no la cuenta nadie. Lo que contesto Biwenger va
+    en `enviada`, `http_status`, `exito_de_biwenger` y `error`.
+
+    `sin_foto` no va en `hechas` (ver `la_reserva`): va aparte, con
+    `de_otra_foto` ([{id, amount}], las del colchon), y la mejora no
+    vuelve a pujar por ellos. `reservado` es la suma de las de `exito`.
+    Nunca lanza.
     """
 
     try:
@@ -364,52 +529,59 @@ def el_bloque_de_la_vuelta(plan, respuestas=None) -> dict:
 
         plan = plan if isinstance(plan, dict) else {}
         detalle = plan.get("en_el_colchon") if isinstance(plan.get("en_el_colchon"), dict) else {}
-        mandadas = respuestas is not None
-        reservar = lo_que_reservar(plan if mandadas else {**plan, "bids": []})
+        reserva = la_reserva(plan, respuestas)
 
-        importes, orden = {}, []
-        for pid, importe in reservar:
-            if pid not in importes:
-                orden.append(pid)
-            importes[pid] = max(importes.get(pid, 0), importe)
+        importes = {}
+        for pid, importe in reserva["pujas"]:
+            if pid not in reserva["sin_tope"]:
+                importes[pid] = max(importes.get(pid, 0), importe)
 
-        de_la_cesta = {}
+        de_la_cesta, orden = {}, []
         for fila in respuestas or ():
-            puja, resultado, error = (tuple(fila) + (None, None, None))[:3] \
-                if isinstance(fila, (list, tuple)) else (None, None, None)
-            pid = _int(puja.get("id")) if isinstance(puja, dict) else None
+            puja, resultado, error = _la_respuesta(fila)
+            pid = _int(puja.get("id")) if puja else None
             if pid is not None and pid not in de_la_cesta:
-                de_la_cesta[pid] = (puja, resultado if isinstance(resultado, dict) else {}, error)
+                de_la_cesta[pid] = (puja, resultado or {}, error)
+                orden.append(pid)
+        orden += [pid for pid in importes if pid not in de_la_cesta]
 
         marcas = {}
-        for clave, marca in (("sin_foto", "SIN_FOTO"), ("de_otra_foto", "DE_OTRA_FOTO")):
-            for f in detalle.get(clave) or []:
-                pid = _int(f.get("id")) if isinstance(f, dict) else None
-                if pid is not None:
-                    marcas.setdefault(pid, marca)
+        for f in detalle.get("de_otra_foto") or []:
+            pid = _int(f.get("id")) if isinstance(f, dict) else None
+            if pid is not None:
+                marcas.setdefault(pid, "DE_OTRA_FOTO")
 
         hechas = []
         for pid in orden:
             if pid in de_la_cesta:
                 puja, resultado, error = de_la_cesta[pid]
+                rechazo = None if pid in importes else reserva["rechazadas"].get(pid)
+                if pid not in importes and not rechazo:
+                    continue
                 fila = {
-                    "accion": "PUJAR", "player_id": pid, "importe": importes[pid],
+                    "accion": "PUJAR", "player_id": pid,
+                    "importe": importes[pid] if pid in importes
+                    else (_int(puja.get("bid"), 0) or 0),
                     "nombre": puja.get("name"),
                     "pide": _int(puja.get("market_price")),
                     "sube": _int(puja.get("price_increment")),
                     "sustituye": None, "subasta": True,
                     "enviada": bool(resultado.get("sent")),
-                    "exito": True,
+                    "exito": rechazo is None,
                     "http_status": resultado.get("http_status"),
                     "exito_de_biwenger": resultado.get("success"),
                 }
+                if rechazo:
+                    fila["rechazada"] = rechazo
+                elif pid in marcas and reserva["rechazadas"].get(pid):
+                    fila["reservada"] = marcas[pid]
                 if error:
                     fila["error"] = str(error)
             else:
                 fila = {
                     "accion": "PUJAR", "player_id": pid, "importe": importes[pid],
                     "sustituye": None, "subasta": True,
-                    "reservada": marcas.get(pid, "SIN_FOTO"),
+                    "reservada": marcas.get(pid, "DE_OTRA_FOTO"),
                     "enviada": False, "exito": True, "http_status": None,
                 }
             hechas.append(fila)
