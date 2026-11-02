@@ -111,7 +111,7 @@ def decidir(
     *, mercado, valores, estados, nuestras_pujas, plantilla,
     ofertas_del_computer, en_venta, maximo_de_puja, saldo,
     minutos_al_reset, horas_jornada, libro, puede_escribir=True,
-    en_curso=False,
+    en_curso=False, hucha=None,
 ) -> list:
     """
     Qué hacer con los chollos. Pura.
@@ -120,6 +120,11 @@ def decidir(
                     acepta ninguna oferta (el que se vende deja de
                     puntuar para nosotros si su partido está por jugar);
                     publicar sí se puede.
+        hucha       LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`):
+                    activa, se puja solo con lo libre (sin el 25 % de
+                    `maximumBid` ni deuda: un chollo no lleva venta
+                    emparejada) y cada puja lo va gastando. None o no
+                    activa: lo de siempre. Revender no cambia.
     """
 
     acciones = []
@@ -160,6 +165,11 @@ def decidir(
     else:
         disponible = (_int(maximo_de_puja, 0) or 0) - RESERVA
     disponible = min(disponible, TOPE_POR_DIA)
+    if hucha is not None:
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.esta_activa(hucha):
+            disponible = min(disponible, _la_hucha.lo_libre(hucha))
 
     # 1-2. Los que valen más de lo que piden, el mayor hueco primero.
     candidatos = []
@@ -204,8 +214,12 @@ def leer_libro(ruta: Path | str | None = None) -> dict:
 
 
 def correr(cycle, minutos_al_reset, escritor_factory=None,
-           ahora: datetime | None = None, libro_ruta=None) -> dict:
-    """Los chollos, en esta vuelta. Nunca lanza."""
+           ahora: datetime | None = None, libro_ruta=None, hucha=None) -> dict:
+    """Los chollos, en esta vuelta. Nunca lanza.
+
+    LA HUCHA (02/11/2026): con `BORDALAS_LA_HUCHA`, `decidir` recibe la
+    que pasa la vuelta de v10 (`hucha`) o, sin pasarla, la de la foto.
+    Apagada, como siempre."""
 
     salida = {"activa": activa(), "motivo": None, "acciones": [], "hechas": []}
 
@@ -236,6 +250,14 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
         mercado = {p: v for p, v in foto["mercado"].items() if p not in veto}
 
         libro = leer_libro(libro_ruta)
+        con_la_hucha = {}
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.activa():
+            h = hucha if isinstance(hucha, dict) else _la_hucha.de_la_foto(foto, ahora=ahora)
+            if _la_hucha.esta_activa(h):
+                con_la_hucha["hucha"] = h
+                salida["hucha"] = _la_hucha.el_resumen(h)
         acciones = decidir(
             mercado=mercado, valores=valores, estados=estados,
             nuestras_pujas=foto["nuestras_pujas"], plantilla=foto["plantilla"],
@@ -245,6 +267,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             horas_jornada=horas_a_la_jornada(ahora), libro=libro,
             puede_escribir=_puede_escribir(ahora),
             en_curso=jornada_en_curso(ahora, CALENDARIO),
+            **con_la_hucha,
         )
         salida["acciones"] = acciones
 

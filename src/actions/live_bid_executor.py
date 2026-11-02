@@ -258,6 +258,20 @@ def execute_bid(
             f"actual ({maximum_bid:,} €)."
         )
 
+    # LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`): con
+    # `BORDALAS_LA_HUCHA` y la hucha activa, la puja tiene que caber en
+    # lo libre del mercado fresco (saldo - pujas vivas - lo apartado):
+    # el BUY V10 y las CLI no emparejan ventas. Apagada, None y nada
+    # cambia. `build_controlled_run` lo ve como un bloqueo de lectura.
+    from src.analysis.la_hucha import la_puja_toca_la_hucha
+
+    toca_la_hucha = la_puja_toca_la_hucha(
+        market, getattr(writer, "user_id", None), player_id, amount,
+    )
+
+    if toca_la_hucha:
+        raise RuntimeError(toca_la_hucha)
+
     # V10.4D: el suelo técnico real es, como mínimo, el valor oficial
     # Biwenger. Si el listing del manager fuese superior, conservamos también
     # ese suelo económico.

@@ -128,6 +128,16 @@ def correr(
     #     mirar y NO deja escribir: un fallo de lectura no es via
     #     libre.
     speculation: dict | None = None,
+
+    # LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`)
+    #
+    #     Lo que se puede gastar contra la hucha (`la_hucha.lo_libre`),
+    #     ya descontado lo pujado antes en la vuelta. Solo lo pasa la
+    #     vuelta de v10 con `BORDALAS_LA_HUCHA` puesto y la hucha
+    #     activa: el tope del bolsillo no pasa de ahi y las pujas de la
+    #     vuelta, sumadas, tampoco (el carril no empareja ventas). None:
+    #     lo de siempre.
+    hucha_libre: int | None = None,
 ) -> dict:
     """
     Una vuelta del carril. Forma fija, nunca lanza.
@@ -366,6 +376,20 @@ def correr(
             caja, comprometido=comprometido
         )
 
+        if hucha_libre is not None:
+            libre_de_la_hucha = max(0, safe_int(hucha_libre))
+            if safe_int(bolsillo.get("tope")) > libre_de_la_hucha:
+                bolsillo = {
+                    **bolsillo,
+                    "available": libre_de_la_hucha > 0,
+                    "tope": libre_de_la_hucha,
+                    "limitado_por": "LA_HUCHA",
+                    "reason": (
+                        f"La hucha: solo se puede gastar lo libre "
+                        f"({libre_de_la_hucha} EUR)."
+                    ),
+                }
+
         tope_por_operacion = (
             bolsillo["tope"]
             if tope_por_operacion is None
@@ -588,6 +612,8 @@ def correr(
 
         _fuera = _vetados()
 
+        gastado_de_la_hucha = 0
+
         for fila in elegidos:
 
             pid = safe_int(fila.get("player_id"))
@@ -665,6 +691,21 @@ def correr(
                         "name": fila.get("name"),
                         "error": cuanto.get("reason")
                         or "Sin id no se puja.",
+                    }
+                )
+                continue
+
+            # LA HUCHA: las pujas de la vuelta, sumadas, en lo libre.
+            if hucha_libre is not None and (
+                importe > safe_int(hucha_libre) - gastado_de_la_hucha
+            ):
+                fallidas.append(
+                    {
+                        "name": fila.get("name"),
+                        "error": (
+                            f"LA_HUCHA: {importe} no cabe en lo libre "
+                            f"({safe_int(hucha_libre) - gastado_de_la_hucha})."
+                        ),
                     }
                 )
                 continue
@@ -793,6 +834,7 @@ def correr(
                     continue
 
                 puestas.append(anotacion)
+                gastado_de_la_hucha += importe
 
             except Exception as error:              # noqa: BLE001
                 fallidas.append(

@@ -2570,6 +2570,20 @@ def plan_desde_el_estado(
                 ),
             }
 
+    # LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`). Hoy la cesta
+    # esta cerrada (`BORDALAS_SIN_SUBASTA`); si se reabre con la hucha
+    # viva, el colchon no la protege (cuenta el 92 % de la cartera): con
+    # `BORDALAS_LA_HUCHA` y la hucha activa, la cesta puja solo si TODAS
+    # sus pujas caben en lo libre de la foto mas fresca. Apagada, el
+    # mismo plan.
+    from src.analysis.la_hucha import la_cesta_con_la_hucha
+
+    plan = la_cesta_con_la_hucha(
+        plan,
+        foto_del_colchon if isinstance(foto_del_colchon, dict) else snapshot,
+        ahora=ahora,
+    )
+
     return plan
 
 

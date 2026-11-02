@@ -585,7 +585,7 @@ def decidir(
     en_venta, maximo_de_puja, minutos_al_reset, horas_jornada, libro,
     protegidos=frozenset(), puede_escribir=True, en_curso=False,
     cartera=False, de_managers=frozenset(), saldo=None,
-    solo_lo_que_paga=False,
+    solo_lo_que_paga=False, hucha=None,
 ) -> list:
     """Qué hace la ronda en esta vuelta. Pura.
 
@@ -602,6 +602,14 @@ def decidir(
         solo_lo_que_paga  LA RONDA, SOLO LO QUE PAGA
                  (`ENV_SOLO_LO_QUE_PAGA`): a los del Computer, solo
                  `lo_que_paga` y a `la_puja_de_la_cartera`
+        hucha    LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`):
+                 activa, `disponible` sale de `maximo_para_gastar`
+                 (`maximumBid` menos lo apartado) y cada puja tiene que
+                 caber entera en lo libre, que va gastando (la ronda no
+                 empareja ventas: sin credito). El colchon de la cartera
+                 no basta: su 92 % pagaria con el dinero de la hucha. Las
+                 salidas (aceptar, publicar) no cambian. None o no
+                 activa: lo de siempre.
     """
 
     acciones = []
@@ -665,6 +673,14 @@ def decidir(
         elif pid in plantilla:
             expuesto += _int(pagado, 0) or 0
     disponible = (_int(maximo_de_puja, 0) or 0) - RESERVA
+    libre_de_la_hucha = None
+    if hucha is not None:
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.esta_activa(hucha):
+            libre_de_la_hucha = _la_hucha.lo_libre(hucha)
+            disponible = min(disponible,
+                             (_int(hucha.get("maximo_para_gastar"), 0) or 0) - RESERVA)
 
     # 1. Los que suben de verdad, están bien y juegan; el que más sube
     # (en proporción a su precio) primero. La subida mínima va por el
@@ -698,6 +714,8 @@ def decidir(
             puja = min(la_puja_de_la_cartera(precio, sube), tope)
         if puja > tope or (TOPE_TOTAL is not None and expuesto + puja > TOPE_TOTAL) or puja > disponible:
             continue
+        if libre_de_la_hucha is not None and puja > libre_de_la_hucha:
+            continue
         if hueco is not None and hueco <= 0:
             break
         if colchon is not None:
@@ -708,6 +726,8 @@ def decidir(
             colchon -= coste
         expuesto += puja
         disponible -= puja
+        if libre_de_la_hucha is not None:
+            libre_de_la_hucha -= puja
         if hueco is not None:
             hueco -= 1
         acciones.append({
@@ -747,8 +767,12 @@ def leer_libro(ruta: Path | str | None = None) -> dict:
 
 
 def correr(cycle, minutos_al_reset, escritor_factory=None,
-           ahora: datetime | None = None, libro_ruta=None) -> dict:
-    """La ronda, en esta vuelta. Nunca lanza."""
+           ahora: datetime | None = None, libro_ruta=None, hucha=None) -> dict:
+    """La ronda, en esta vuelta. Nunca lanza.
+
+    LA HUCHA (02/11/2026): con `BORDALAS_LA_HUCHA`, `decidir` recibe la
+    que pasa la vuelta de v10 (`hucha`) o, sin pasarla, la de la foto.
+    Apagada, como siempre."""
 
     salida = {"activa": activa(), "motivo": None, "acciones": [], "hechas": []}
 
@@ -789,6 +813,14 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             salida["puerta"] = {"abierta": True, "a_precio_de_mercado": sorted(piden)}
 
         libro = leer_libro(libro_ruta)
+        con_la_hucha = {}
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.activa():
+            h = hucha if isinstance(hucha, dict) else _la_hucha.de_la_foto(foto, ahora=ahora)
+            if _la_hucha.esta_activa(h):
+                con_la_hucha["hucha"] = h
+                salida["hucha"] = _la_hucha.el_resumen(h)
         acciones = decidir(
             mercado=mercado, fichas=fichas,
             nuestras_pujas=foto["nuestras_pujas"], plantilla=foto["plantilla"],
@@ -801,6 +833,7 @@ def correr(cycle, minutos_al_reset, escritor_factory=None,
             cartera=la_cartera_activa(), de_managers=frozenset(vendedores),
             saldo=foto.get("saldo"),
             solo_lo_que_paga=la_ronda_solo_lo_que_paga_activa(),
+            **con_la_hucha,
         )
         if la_cartera_activa():
             salida["cartera"] = {"activa": True, "saldo": foto.get("saldo"),

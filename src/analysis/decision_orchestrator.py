@@ -3125,6 +3125,30 @@ def build_global_decision_uncached(
             )
             motivo_objetivo = mejor.get("reason")
 
+        # LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`). Con
+        # `BORDALAS_LA_HUCHA` y la hucha activa, el objetivo que no cabe
+        # en lo libre de la foto de la vuelta no se elige para comprar:
+        # queda en observacion (SPECULATION_WATCH, LA_HUCHA). Si se
+        # eligiera, el ejecutor lo pararia igual (SPECULATION_SIN_HUCHA)
+        # pero la compra (400) le quitaria cada vuelta el hueco a renovar
+        # sin prisa (350). Apagada, None y nada cambia.
+        frenado_por_la_hucha = None
+
+        if objetivo is not None:
+            try:
+                from src.analysis.la_hucha import frena_la_especulacion
+
+                frenado_por_la_hucha = frena_la_especulacion(
+                    snapshot,
+                    objetivo.get("id"),
+                    max(
+                        int(puja_recomendada or 0),
+                        int(objetivo.get("price") or 0),
+                    ),
+                )
+            except Exception:                       # noqa: BLE001
+                frenado_por_la_hucha = None
+
         if objetivo is None:
 
             candidates.append(
@@ -3155,6 +3179,46 @@ def build_global_decision_uncached(
                     "data": {
                         "already_bid":
                             sorted(ya_pujados),
+                    },
+                }
+            )
+
+        elif frenado_por_la_hucha is not None:
+
+            candidates.append(
+                {
+                    "type":
+                        "SPECULATION_WATCH",
+
+                    "priority":
+                        PRIORITY[
+                            "SPECULATION_WATCH"
+                        ],
+
+                    "action":
+                        "WATCH_SPECULATION",
+
+                    "executable":
+                        False,
+
+                    "executor":
+                        None,
+
+                    "reason": (
+                        f"{objetivo.get('name')}: no cabe en lo libre "
+                        "de la hucha. No se compra con el dinero "
+                        "apartado."
+                    ),
+
+                    "data": {
+                        "motivo":
+                            "LA_HUCHA",
+
+                        "player":
+                            objetivo,
+
+                        "hucha":
+                            frenado_por_la_hucha,
                     },
                 }
             )

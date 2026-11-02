@@ -887,7 +887,7 @@ def el_plan_del_calendario(ctx) -> dict:
 
 
 def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
-                         disponible: int, deficit: bool = False) -> list:
+                         disponible: int, deficit: bool = False, libre=None) -> list:
     """
     De los cambios posibles (cada uno con `entra`, `sale`, `puntos`,
     `caja`, `puja`), la combinación sin repetir jugador que más puntos
@@ -899,6 +899,12 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
     combinación que pierde puntos si es la que menos pierde de las que
     devuelven la caja a `minimo_de_caja` («fichar y luego ver con quién
     nos quedamos y vender para quedarnos en positivo», el dueño, 12/10).
+
+    Con `libre` (LA HUCHA, 02/11/2026): lo que los cambios que no son ya
+    nuestros sacan de la caja (`max(0, -caja)` de cada uno: su propia
+    venta ya va en `caja`) no puede pasar de `libre`. Un cambio con caja
+    >= 0 se paga solo y pasa siempre; uno no paga a otro. None: lo de
+    siempre.
     """
 
     mejoras = sorted((c for c in cambios if c["puntos"] >= GANANCIA_MINIMA),
@@ -940,6 +946,9 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
                 continue
             if sum(c["puja"] for c in combo) > disponible:
                 continue
+            if libre is not None and sum(
+                    max(0, -c["caja"]) for c in combo if not c.get("ya_es_nuestro")) > libre:
+                continue
             k = (round(puntos, 6), caja + sum(c["caja"] for c in combo))
             if clave is None or k > clave:
                 mejor, clave = list(combo), k
@@ -953,6 +962,7 @@ def decidir(
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
     estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
     en_9900=False, de_otra_jornada=frozenset(), a_la_salida=False,
+    hucha=None,
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -1020,6 +1030,17 @@ def decidir(
                     en 9.900 (`la_puja_a_la_salida`); su caja la cuenta y
                     `plan["a_la_salida"]` dice a quienes de los elegidos
                     (ids). False (lo de siempre): byte a byte lo de antes.
+        hucha       LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`): la
+                    de `correr`, con las pujas vivas del cierre (carril
+                    incluido) y lo cobrado en la vuelta. Activa,
+                    `disponible` baja lo apartado y la combinacion no
+                    puede sacar de la caja mas de lo libre
+                    (`la_mejor_combinacion(libre=...)`): solo pasan los
+                    cambios que se pagan solos y lo que cabe en lo
+                    libre. La caja, el minimo y el deficit siguen con el
+                    saldo REAL (el deficit vende: la hucha nunca lo
+                    enciende). Va en `plan["hucha"]`. None o no activa:
+                    byte a byte lo de antes.
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -1303,10 +1324,23 @@ def decidir(
     # En rojo, cambiar caro por barato solo a partir de `HORAS_DEFICIT`:
     # antes puede entrar el premio de la jornada que acaba de jugarse.
     deficit = caja < minimo and horas_jornada < HORAS_DEFICIT
-    elegidos = la_mejor_combinacion(cambios, caja, minimo, disponible, deficit=deficit)
+    con_la_hucha = {}
+    if hucha is not None:
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.esta_activa(hucha):
+            disponible -= _int(hucha.get("apartado"), 0) or 0
+            con_la_hucha["libre"] = _la_hucha.lo_libre(hucha)
+    elegidos = la_mejor_combinacion(cambios, caja, minimo, disponible, deficit=deficit,
+                                    **con_la_hucha)
     plan = {"caja": caja, "minimo": minimo, "disponible": disponible, "deficit": deficit,
             "cambios": elegidos,
             "caja_despues": caja + sum(c["caja"] for c in elegidos)}
+    if con_la_hucha:
+        plan["hucha"] = {"apartado": _int(hucha.get("apartado"), 0) or 0,
+                         "libre": con_la_hucha["libre"],
+                         "saca_de_la_caja": sum(max(0, -c["caja"]) for c in elegidos
+                                                if not c.get("ya_es_nuestro"))}
     if calendario_de_puntos is not None:
         plan["calendario"] = el_plan_del_calendario(calendario_de_puntos)
         if ctx is not None:
@@ -1977,6 +2011,31 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             foto["saldo"] = ((_int(foto.get("saldo"), 0) or 0)
                              + sum(esta_vuelta["cobros"].values()))
 
+        # LA HUCHA (02/11/2026), solo con su interruptor: con el saldo de
+        # la foto mas lo cobrado en la vuelta y las pujas vivas como las
+        # cuenta el cierre (`las_pujas_vivas` con su `lo_de_esta_vuelta`,
+        # que trae tambien el carril); `maximumBid`, el de arriba menos lo
+        # del carril. Apagada, ni se lee.
+        con_la_hucha = {}
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.activa():
+            from src.actions.el_cierre_de_la_jornada import (
+                las_pujas_vivas, lo_de_esta_vuelta as _lo_del_cierre,
+            )
+
+            de_v10 = {} if esta_vuelta["descartado"] else (v10 if isinstance(v10, dict) else {})
+            vuelta_del_cierre = _lo_del_cierre(de_v10)
+            del_carril = _la_hucha.lo_pujado_por_el_carril(de_v10.get("carril"))
+            maximo_h = _int(foto.get("maximo_de_puja"))
+            h = _la_hucha.de_la_foto(
+                foto, pujas=las_pujas_vivas(foto, vuelta_del_cierre),
+                maximo_de_puja=None if maximo_h is None else maximo_h - del_carril,
+                ahora=ahora)
+            if _la_hucha.esta_activa(h):
+                con_la_hucha["hucha"] = h
+                salida["hucha"] = _la_hucha.el_resumen(h)
+
         # EL CALENDARIO, una vez por vuelta y solo con su interruptor.
         ctx = el_contexto(status, calendario, ahora) if el_calendario_activo() else None
 
@@ -2022,6 +2081,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             estados=los_estados(snapshot, liga),
             vendidos=vendidos,
             de_otra_jornada=de_otra_jornada,
+            **con_la_hucha,
         )
         salida["acciones"], salida["plan"] = d["acciones"], d["plan"]
 

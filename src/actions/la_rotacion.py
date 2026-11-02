@@ -753,7 +753,7 @@ def decidir(
     en_venta=frozenset(), parejas=(), protegidos=frozenset(), no_rotar=frozenset(),
     aguanta=frozenset(), vetados=frozenset(), otros_venden=frozenset(),
     vendidos=frozenset(), listados=frozenset(), once=None, once_de_la_foto=None,
-    reloj=None, equipos=None,
+    reloj=None, equipos=None, hucha=None,
 ) -> dict:
     """
     Que hace la rotacion en esta vuelta. Pura: ni red, ni disco, ni reloj.
@@ -799,6 +799,15 @@ def decidir(
     salen de parejas ganadas cuya venta esta frenada (su cobro no cuenta
     en la caja). Una PUJAR con `cuenta_con_lo_aceptado` solo cabe con las
     aceptaciones de esta vuelta: `escribir` no la manda si alguna falla.
+
+    LA HUCHA (02/11/2026, `src/analysis/la_hucha.py`): `hucha`, la de
+    `correr`. Activa, `disponible` (`maximumBid`) baja lo apartado y cada
+    pareja nueva, ademas de la regla de la caja de siempre, tiene que
+    caber en lo libre con el credito de SU venta (`la_hucha.cabe(puja,
+    credito=venta)`): la que se paga sola pasa; los cobros de otras
+    parejas no pagan contra la hucha. El rojo (`en_rojo`, `con_prisa`)
+    sigue con el saldo real. Las frenadas van en `salida["hucha"]`. None
+    o no activa: lo de siempre.
     """
 
     salida = {"activo": False, "motivo": None, "acciones": [], "caidos": [],
@@ -1096,6 +1105,15 @@ def decidir(
         # 5. UNO POR OTRO.
         quedan = cupo["quedan"]
         disponible = _int(maximo_de_puja)
+        _la_hucha, gastado_de_la_hucha, frenadas_por_la_hucha = None, 0, []
+        if hucha is not None:
+            from src.analysis import la_hucha as _la_hucha
+
+            if _la_hucha.esta_activa(hucha):
+                if disponible is not None:
+                    disponible -= _int(hucha.get("apartado"), 0) or 0
+            else:
+                _la_hucha = None
         cobra = se_cobra_antes(reloj, HORAS_PARA_COBRAR)
         pujar, usados = [], set()
         for c in caidos:
@@ -1116,6 +1134,14 @@ def decidir(
                 despues = caja - e["puja"] + venta
                 if not (despues >= 0 or despues >= caja):
                     continue
+                if _la_hucha is not None and not _la_hucha.cabe(
+                        hucha, e["puja"], credito=venta, ya=gastado_de_la_hucha):
+                    frenadas_por_la_hucha.append({"sale": c["player_id"],
+                                                  "entra": e["player_id"],
+                                                  "puja": e["puja"], "venta": venta})
+                    continue
+                if _la_hucha is not None:
+                    gastado_de_la_hucha += max(0, e["puja"] - venta)
                 despues_sin = caja_sin - e["puja"] + venta
                 cuenta_con = not (despues_sin >= 0 or despues_sin >= caja_sin)
                 caja, caja_sin = despues, despues_sin
@@ -1143,6 +1169,10 @@ def decidir(
                 })
                 break
         salida["caja"]["despues"] = caja
+        if _la_hucha is not None:
+            salida["hucha"] = {**_la_hucha.el_resumen(hucha),
+                               "gastado": gastado_de_la_hucha,
+                               "frenadas": frenadas_por_la_hucha}
         salida["acciones"] = acciones + pujar + nada
         return salida
     except Exception as error:                      # noqa: BLE001
@@ -1666,6 +1696,26 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
         except Exception:                           # noqa: BLE001
             once_de_la_foto = None
 
+        # LA HUCHA (02/11/2026), solo con su interruptor: el saldo de la
+        # foto con lo cobrado en la vuelta y las pujas vivas de todos los
+        # motores (las de arriba); `maximumBid`, menos lo pujado en la
+        # vuelta. Apagada, ni se lee.
+        con_la_hucha = {}
+        from src.analysis import la_hucha as _la_hucha
+
+        if _la_hucha.activa():
+            saldo_h = _int(foto.get("saldo"))
+            if saldo_h is not None:
+                saldo_h += sum(_int(v, 0) or 0 for v in _dict(vuelta.get("vendidos")).values())
+            maximo_h = _int(foto.get("maximo_de_puja"))
+            if maximo_h is not None:
+                maximo_h -= sum(_int(v, 0) or 0 for v in _dict(vuelta.get("pujas")).values())
+            h = _la_hucha.de_la_foto(foto, saldo=saldo_h, pujas=pujas_vivas,
+                                     maximo_de_puja=maximo_h, ahora=ahora)
+            if _la_hucha.esta_activa(h):
+                con_la_hucha["hucha"] = h
+                salida["hucha"] = _la_hucha.el_resumen(h)
+
         base = dict(
             plantilla=foto["plantilla"], fichas=fichas, mercado=foto["mercado"],
             subidas_de_ayer=subidas_de_ayer, rondas_jugadas=rondas_jugadas,
@@ -1677,7 +1727,7 @@ def correr(cycle=None, escritor_factory=None, ahora: datetime | None = None, *,
             aguanta=los_que_aguanta(libro_ronda_ruta), vetados=vetados(orden_ruta, ahora),
             otros_venden=otros_venden, vendidos=set(vuelta["vendidos"]),
             listados=set(vuelta["listados"]), once_de_la_foto=once_de_la_foto, reloj=reloj,
-            equipos=equipos,
+            equipos=equipos, **con_la_hucha,
         )
         d = decidir(**base, once=None)
 
