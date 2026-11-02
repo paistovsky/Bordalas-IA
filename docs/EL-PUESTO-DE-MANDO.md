@@ -352,6 +352,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **02/11 16:30 (chat del dueno). ORDEN: Roberto no se vende de momento.**
+  Oferta del Computer de 7.474.000 (+4,4 % sobre 7.160.000; caduca el mie
+  07:00): NO. Roberto sale cuando entre Fer Nino (Elche, 6,37 M, 70 pts),
+  Zabiri (Racing, 7,98 M, 77 pts, apercibido) u otro delantero titular que
+  este dando buenos puntos; Raphinha (24,72 M) seria el ideal, sin caja.
+  Sigue en `conservar` (por_que actualizado). Cuando uno salga al mercado del
+  Computer: `fichar` + `vender_si_ficha` (si_esta el nuevo, vende Roberto),
+  con esceptico y sin empezar una J en rojo. Lista de objetivos actualizada
+  en EL-PARTE-DE-LA-PLANTILLA.
+
 - **02/11 14:15 (rafaga de la tarde, llego a las 14:44).** Ciclos: verdes
   (#2662 a #2669). Saldo -7.494.776, 0 comprometido, sin movimientos (las
   ventas empiezan el mar 00:07). El chat del dueno fusiono otra pieza

@@ -20,6 +20,12 @@ deja una orden esperando a un jugador que no esta en el mercado: la mejora
 resta la puja entera si un dia lee el mercado vacio (la_mejora_del_once.py,
 caja de la jornada) y puede entrar en modo deficit.
 
+**02/11, el dueno:** Roberto NO se vende de momento (oferta de 7.474.000,
+caduca el mie 07:00: no se acepta). Sale cuando entre Fer Nino, Zabiri u
+otro delantero titular que este dando buenos puntos (Adrian Nino sigue
+siendo el de mejor forma: 8, 11, 10, 10, 2). Raphinha seria ideal, pero no
+hay caja y habra competencia.
+
 | Objetivo | Puesto | Precio 25/10 | Por quien | Puja | Nota |
 |---|---|---|---|---|---|
 | Adrian Nino (Malaga) | DEL | 2,93 M, +340 k/dia (02/11: 4,21 M, +170 k) | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana |
@@ -29,7 +35,9 @@ caja de la jornada) y puede entrar en modo deficit.
 | Exposito (Espanyol) | MED | 4,47 M | el peor medio | +5-8 % | lo vendimos el 23/10 por Boye |
 | Agoume (Sevilla) | MED | 3,36 M | el peor medio | +5-8 % | 9 de 9 titular |
 | Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90. **NUESTRO** desde el 02/11 (2.779.900; sale Pablo Ibanez) |
-| Zabiri (Racing) | DEL | 7,54 M | Roberto Fernandez | +10-20 % | solo en el parón (09-19/11), si no esta apercibido (4 amarillas) y la caja lo paga |
+| Zabiri (Racing) | DEL | 7,54 M (02/11: 7,98 M, +20 k) | Roberto Fernandez | +10-20 % | 77 pts en 11 (ult. 5: 0, 11, 3, 9, 2); APERCIBIDO hoy; solo en el parón (09-19/11), si no esta apercibido y la caja lo paga |
+| Fer Nino (Elche) | DEL | 02/11: 6,37 M, +20 k | Roberto Fernandez | +10-15 % | 70 pts en 11 (ult. 5: 3, 7, 3, 2, 17), iguala a Roberto (69) y cuesta ~0,8 M menos; anadido por el dueno el 02/11 |
+| Raphinha (Barcelona) | DEL | 02/11: 24,72 M | Roberto Fernandez | sin caja | 144 pts en 10: el ideal del dueno, pero no hay dinero y habra mucha competencia |
 
 Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
