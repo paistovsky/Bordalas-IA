@@ -235083,5 +235083,23 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "3a84e57e5c15b212f0512eae",
+    "date": 1793645947,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14178736,
+          "name": "Mex"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
