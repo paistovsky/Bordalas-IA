@@ -235770,5 +235770,24 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "c468247cdd70dcd5c4aacba4",
+    "date": 1793661079,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 14800,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 2505300
+      }
+    ]
   }
 ]
