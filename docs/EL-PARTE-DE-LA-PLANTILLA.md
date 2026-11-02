@@ -22,13 +22,13 @@ caja de la jornada) y puede entrar en modo deficit.
 
 | Objetivo | Puesto | Precio 25/10 | Por quien | Puja | Nota |
 |---|---|---|---|---|---|
-| Adrian Nino (Malaga) | DEL | 2,93 M, +340 k/dia | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana |
-| Juan Iglesias (Sevilla) | DEF | 3,62 M | Sergi Cardona | +8-10 % | 9 de 9 titular, FF 90 |
+| Adrian Nino (Malaga) | DEL | 2,93 M, +340 k/dia (02/11: 4,21 M, +170 k) | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana |
+| Juan Iglesias (Sevilla) | DEF | 3,62 M | Sergi Cardona | +8-10 % | 9 de 9 titular, FF 90. **NUESTRO** desde el 01/11 (3.769.900; entra por Gaya en la mejora) |
 | Ndukwe (Levante) | DEF | 1,07 M | Sergi Cardona | +12 % | gano el puesto a Mandi |
 | Remiro (Real Sociedad) | POR | 3,72 M | Gulacsi | +5-8 % | 6,0 pts/partido, 8 de 9 |
 | Exposito (Espanyol) | MED | 4,47 M | el peor medio | +5-8 % | lo vendimos el 23/10 por Boye |
 | Agoume (Sevilla) | MED | 3,36 M | el peor medio | +5-8 % | 9 de 9 titular |
-| Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90 |
+| Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90. **NUESTRO** desde el 02/11 (2.779.900; sale Pablo Ibanez) |
 | Zabiri (Racing) | DEL | 7,54 M | Roberto Fernandez | +10-20 % | solo en el parón (09-19/11), si no esta apercibido (4 amarillas) y la caja lo paga |
 
 Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta

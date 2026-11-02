@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **02/11 08:40 (supervision de las 08:22).** Vuelta de las 08:07 (#41404213345):
+  ronda y chollos NADA_QUE_HACER; la orden, NADA con Pablo (jornada en
+  curso: se cobra el mar 00:07). **Ivan Martin GANADO** (2.779.900): sale
+  de `fichar` y pasa a `conservar`; `vender_si_ficha` de Pablo se queda
+  hasta cobrarlo (solo pide que Ivan este en la plantilla). Saldo
+  -7.494.776, 0 pujas vivas, plantilla de 16. Ofertas del reset de las
+  07:00 (caducan el mie 07:00): Pablo 2.505.300 (suelo 2.410.000: cobra),
+  **Unai 2.851.800** (+228 mil sobre la de ayer), Ramon 411.300 (en
+  `proteger`). La mejora: caja de la jornada -419.388 (minimo -1 M),
+  NADA_QUE_HACER. El cierre: JORNADA_EN_CURSO (108,8 h). Caja de la J12
+  (vie 15:00) con Pablo y Unai a sus ofertas de hoy, Gaya al 90 % y Ortiz
+  sin vender: +0,57 M con el premio minimo (870 mil) y la racha; mas con
+  el premio real de la J11. **Lista de objetivos:** ninguno en el mercado
+  del Computer hoy (Remiro, Exposito, Agoume, Zabiri y Adrian Nino libres
+  pero no a la venta; Ndukwe es de Luismi). Adrian Nino ya vale 4,21 M
+  (+170 mil al dia). Iglesias e Ivan marcados como nuestros en la lista.
+
 - **02/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2653 a #2662,
   la de las 07:15 incluida). **Ivan Martin GANADO** (2.779.900). Saldo
   **-7.494.776**, 0 comprometido. Para el vie 06/11 15:00 hacen falta ~7,5
