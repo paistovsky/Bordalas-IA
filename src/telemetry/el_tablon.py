@@ -271,7 +271,10 @@ QUE_HACE = {
         "mejora) y si cada puja, sumada a las de delante, cabe en el colchón de "
         "la casa: saldo menos todas las pujas vivas más el 92 % de lo de la "
         "cartera. Lo que no cabe no se puja; sin saldo en la foto, nada. Lo que "
-        "puja lo ven la orden, los chollos y la ronda de la misma vuelta.",
+        "puja lo ven en la misma vuelta la orden, los chollos y la ronda, y por "
+        "el estado de la vuelta la mejora del once y el cierre lo cuentan en su "
+        "caja: nadie gasta dos veces el mismo colchón. Lo que Biwenger rechaza "
+        "no cuenta.",
     "BORDALAS_CESTA_SOLO_EL_SUELO":
         "La cesta del reset del motor viejo solo compra para revender jugadores "
         "de menos de 1.500.000 €: por encima perdía (9 operaciones, un millón "
