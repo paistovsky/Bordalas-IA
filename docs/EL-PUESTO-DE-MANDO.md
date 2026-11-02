@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 02/11/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 02/11/2026, 14:50 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **02/11 14:15 (rafaga de la tarde, llego a las 14:44).** Ciclos: verdes
+  (#2662 a #2669). Saldo -7.494.776, 0 comprometido, sin movimientos (las
+  ventas empiezan el mar 00:07). El chat del dueno fusiono otra pieza
+  APAGADA (el colchon de la cesta entre procesos); nada se enciende en la
+  semana de la J12.
 
 - **02/11 13:30 (laboratorio de rivales de la manana). FUSIONADO, APAGADO:
   el colchon de la cesta entre procesos (cierra el FIX_FIRST del 01/11).
