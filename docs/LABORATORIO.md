@@ -69,6 +69,42 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E77 · 02/11/2026 11:19 de Madrid · La carrera otra vez: el once de Pepe ya iguala al de Pollo17 (hasta las ventas de la J12)
+
+**Hipotesis:** los fichajes desde el 18/10 (Boye, Kike Salas, Juan
+Iglesias, Ivan Martin, Gaya) han cerrado la diferencia que media E48
+(Pollo17 +5,7 puntos esperados por jornada).
+**Datos:** foto del ciclo de las 11:10 de hoy; la misma vara que E20/E48
+(puntos por partido x titularidad FF, estado ok).
+**Codigo:** `lab/carrera/proyeccion.py` y `lab/carrera/once_detalle.py`.
+
+    once esperado      18/10 (E48)   hoy     clasificacion hoy
+    Luismi_Haz            59,1       56,1        388
+    Pollo17               53,3       55,6        432
+    Pepe                  47,5       55,0        422
+
+    el once de Pepe sin los que el plan de caja de la J12 vende
+    (Pablo Ibanez, Unai Lopez, Gaya, Angel Ortiz):         52,0
+    y si ademas sale Dani Lorenzo:                          50,8
+
+**Lo que se aprende:**
+- **El once de Pepe ha pasado de 47,5 a 55,0** (+7,5 por jornada) y queda
+  a 0,6 de Pollo17 y a 1,1 de Luismi. Es lo que pedia E48 (~7-8 M mas en
+  el once: hoy vale 60,2 M, antes 56,6 M).
+- **Pero parte esta pagada a cuenta:** con la caja en -7,49 M, el plan de
+  la J12 vende a Unai (4,2 esperados) y a Gaya (3,3), dos titulares. Tras
+  esas ventas el once baja a **52,0: Pollo17 vuelve a sacar ~3,6 por
+  jornada** (~100 puntos en la temporada).
+- La mejora neta desde el 18/10, contando las ventas, es de +4,5 por
+  jornada: el camino es bueno, pero la caja en rojo se come un tercio.
+
+**Limites:** la vara sobreestima (81-104 %, E20) y su nivel va corto
+(E66); es una foto; la J11 no esta cerrada.
+
+**Veredicto: AVISO para la carrera.** Cuando la caja lo permita (premio
+de la J11, mas resets), el siguiente paso es recuperar las plazas de Unai
+y Gaya con titulares que suban (E63/E66), no apartar caja para revender.
+
 ### E76 · 01/11/2026 17:14 de Madrid · El Computer no elige a los que suben: ~2 al dia que merezcan la pena
 
 **Hipotesis:** el Computer pone en el mercado a jugadores que estan
