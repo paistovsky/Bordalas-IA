@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 01/11/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 02/11/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **02/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2653 a #2662,
+  la de las 07:15 incluida). **Ivan Martin GANADO** (2.779.900). Saldo
+  **-7.494.776**, 0 comprometido. Para el vie 06/11 15:00 hacen falta ~7,5
+  M: Pablo Ibanez (vender_si_ficha, suelo 2,41 M), Gaya, Unai y Ortiz (la
+  mejora, desde el mar 00:07), el premio de la J11 (~mar tarde) y la racha
+  (mie). Peor caso del chat del dueno: +0,61 M. Es un margen fino con
+  CUATRO ventas que tienen que salir; el mie 04/11 21:15 compruebo cuantas
+  se han cobrado y, si falta alguna sin oferta, aviso al dueno.
 
 - **01/11 23:10 (laboratorio de rivales de la noche). CONSTRUIDO, APAGADO,
   `BORDALAS_EL_RELEVO_NO_SE_VENDE`; APLICADO: Ramon Enriquez a `proteger`.**
