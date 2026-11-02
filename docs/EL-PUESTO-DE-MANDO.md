@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 02/11/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 02/11/2026, 22:30 de Madrid (laboratorio de rivales de la noche).
 
 ## El mandato
 
@@ -351,6 +351,81 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **02/11 22:30 (laboratorio de rivales de la noche). FUSIONADA, APAGADA:
+  LA HUCHA. DECIDIDO: A POLLO NO SE LE OFERTA POR BRUGUE.**
+  **Rivales (11:00 a 20:07):** nadie compro ni vendio; solo la racha de Mex
+  (+250 mil). Manzagool tuvo la plantilla entera anunciada (14 jugadores,
+  66,91 M) y caduco a las 16:39 sin venta; Pollo sigue con 10 anunciados
+  hasta el mie 08:28 (Brugue, Moleiro, Mikautadze...). J11 cerrada para
+  nosotros: 71 (Pollo 66, Luismi 55, Manzagool 54); general Pollo 498,
+  nosotros 493. Con el premio del martes: Pollo -18,10 M (tiene que vender
+  ~18,1 M antes del vie 20:59), Luismi -0,32 M. Patrimonio igual que por la
+  manana (Pollo nos saca 55,36 M). Pujas maximas tras el premio: Luismi
+  24,93 M, Manzagool 19,77, Pollo 15,78 (~29,4 si vende), nosotros 11,53.
+  **Leccion:** un anuncio que desaparece no es una venta: mirar su fecha de
+  fin y el tablon antes de contarlo.
+  **Nuestras tacticas:** la ronda solo tiene a Ortiz (oferta 182.100, bajo
+  su suelo de 184.300); la puerta apagada (0 de 2 en su vida; ningun
+  traspaso entre managers desde el 18/09); la mejora NADA_QUE_HACER (caja
+  -419.388; los unicos cambios de +0,5 pts son dos porteros, Soria y Joan
+  Garcia, que bajan de precio y dejarian la J12 en ~-3 M: bien frenados).
+  Caja de la J12 (vie 15:00): base +1,91 M, peor +0,57 M. **Correccion:** la
+  racha es el jue 05/11 ~00:10, no el miercoles. La oferta de 7.474.000 por
+  Roberto seguramente muere en la renovacion del mar ~04:50 (renovar mata la
+  oferta viva): da igual, Roberto se queda.
+  **LA PRIMA QUE GANA, recontada** (33 subastas disputadas que ganaron los
+  rivales en 30 dias): prima mediana +11,5 % (p75 +18,3 %); 1-3 M +11,5 %
+  (+14,2 % si el titular sube), 3-8 M +11,7 %, mas de 8 M +16 %. El esbozo de
+  la manana (+4 a +7 % entre 1 y 3 M) NO se sostiene: ganaria 4-6 de 17.
+  Nuevo esbozo: ~+12 % desde 1 M, en 9.900, y contar con ganar ~1 de cada 2;
+  hasta ~+18 % solo si el cambio suma 1 pt por jornada o mas; las de mas de
+  8 M, fuera. De nuestras 7 disputadas perdidas, con +12 % habriamos ganado 6.
+  Se construye despues de la J12.
+  **Brugue** (Levante, 69 pts en 10; Pollo lo anuncia a 5,22 M sobre 4,83).
+  El ojeador: mejor que Roberto, pero por poco (5,6 frente a 4,6 pts por
+  jornada en J12-J17), y todo sale de sus partidos en casa (52 en 5; fuera
+  17 en 5). En la J12 juega fuera, en Balaidos, con Copa el jueves: ahi rinde
+  mas Roberto (5,0 frente a 3,8). Tres escepticos: uno REJECT (la ventaja es
+  ruido: +0,63 por partido con un error de 2,45; con su historial, Roberto
+  4,65 y Brugue 4,4) y dos WAIT_FOR_COMPUTER. Una oferta a un manager hay
+  que aceptarla a mano, Pepe no sabe retirarla solo y le daria al lider una
+  opcion gratis sobre nuestra caja hasta el viernes: si sigue viva, la J12
+  empieza en -3,31 M (0 puntos). Pollo acepta ofertas de managers ~25 % de
+  las veces. **Decidido: no se le oferta.** Se mira otra vez en el paron
+  (09-19/11) si (a) Roberto pierde el puesto con Sarabia (FF por debajo del
+  70 % o menos de 60' contra el Deportivo), (b) Brugue sale en el Computer o
+  se puede cerrar por 4,9 M o menos despues de la J12 (para cobrar la J13 y
+  la J14, las dos en casa), o (c) puntua fuera. Si sale Adrian Nino en el
+  Computer es el mejor relevo (6,6 en la J12, en casa contra el Racing).
+  Sigue la regla: NO se escribe `fichar` para quien no esta en el mercado.
+  **Fusionada APAGADA (dea0f31a): LA HUCHA (`BORDALAS_LA_HUCHA`).** Un solo
+  lector (src/analysis/la_hucha.py) y config/la_hucha.json (Raphinha 26930,
+  16 M, desde el mar 10/11 00:00, caduca el 31/12). Encendida, todos los que
+  gastan (la orden salvo el fichaje de Raphinha, chollos, ronda, mejora,
+  rotacion, carril, BUY V10, motor viejo y cesta) solo gastan lo libre
+  (saldo - pujas vivas - lo apartado); los que venden y la solvencia ven el
+  saldo real. El dia que Raphinha esta en el mercado, solo puja la orden.
+  Revisiones encendida y apagada: FIX_FIRST, con dos altos (la mejora se
+  congelaba con lo libre negativo; el paso 0 se ponia rojo por el entorno) y
+  los medios: arreglados. Apagada es main byte a byte (huella 8d4c301e... en
+  3.11 y 3.13; bateria de 1641 llamadas, 0 diferencias). Verja 232/232 en
+  3.11 y 3.13, normal y con `--con BORDALAS_LA_HUCHA`.
+  **Las cuentas de la hucha:** a 1,45 M de premio por jornada, 12 M hacia el
+  22/12 y 16 M hacia el 12/01 (no antes del 31/12: **ampliar `caduca` al
+  31/01 antes de fin de ano**). Probabilidad de que Raphinha salga antes de
+  que podamos pagarlo: ~53 %. Regla de puja: B = min(presupuesto verde,
+  max(25,5 M, puja maxima del rival mas alto + 2 M), 30,3 M). **Correccion
+  al punto (4) del 18:05:** en el paron tendremos ~3,6-4,1 M y el presupuesto
+  verde no pasa de ~20 M: si sale entonces, NO se puja (no llega ni a lo que
+  pide). Huecos que quedan: no hay motivo LO_TIENE_OTRO (si lo ficha un
+  rival, se borra config/la_hucha.json) y el bloque `hucha` solo va en el
+  estado de la vuelta, no en el panel.
+  **Encendido:** el mar 10/11 por la manana, antes del premio de la J12
+  (~17:05): ensayo 05:05-06:30 con `BORDALAS_LA_HUCHA`, `--paso-0` en el
+  reloj real (desde el 10/11 00:00), y YAML con `BORDALAS_LA_HUCHA: "1"`
+  (exactamente "1") + config/paso_0.json + QUE_HACE en UN commit. El colchon
+  de la cesta, el lun 09/11. Un interruptor por rafaga.
 
 - **02/11 21:15 (rafaga de la noche).** Ciclos: verdes (#2669 a #2676).
   Saldo -7.494.776, 0 comprometido; esta noche (00:07) empiezan las ventas

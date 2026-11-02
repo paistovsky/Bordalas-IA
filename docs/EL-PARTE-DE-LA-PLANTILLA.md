@@ -28,7 +28,7 @@ hay caja y habra competencia.
 
 | Objetivo | Puesto | Precio 25/10 | Por quien | Puja | Nota |
 |---|---|---|---|---|---|
-| Adrian Nino (Malaga) | DEL | 2,93 M, +340 k/dia (02/11: 4,21 M, +170 k) | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana |
+| Adrian Nino (Malaga) | DEL | 2,93 M, +340 k/dia (02/11: 4,21 M, +170 k) | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana. 02/11: 52 pts en 7, 5 goles (un 33 % de acierto que no va a durar); el MEJOR RELEVO si sale en el Computer (J12 en casa contra el Racing, ~6,6 pts) |
 | Juan Iglesias (Sevilla) | DEF | 3,62 M | Sergi Cardona | +8-10 % | 9 de 9 titular, FF 90. **NUESTRO** desde el 01/11 (3.769.900; entra por Gaya en la mejora) |
 | Ndukwe (Levante) | DEF | 1,07 M | Sergi Cardona | +12 % | gano el puesto a Mandi |
 | Remiro (Real Sociedad) | POR | 3,72 M | Gulacsi | +5-8 % | 6,0 pts/partido, 8 de 9 |
@@ -36,7 +36,8 @@ hay caja y habra competencia.
 | Agoume (Sevilla) | MED | 3,36 M | el peor medio | +5-8 % | 9 de 9 titular |
 | Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90. **NUESTRO** desde el 02/11 (2.779.900; sale Pablo Ibanez) |
 | Zabiri (Racing) | DEL | 7,54 M (02/11: 7,98 M, +20 k) | Roberto Fernandez | +10-20 % | 77 pts en 11 (ult. 5: 0, 11, 3, 9, 2); APERCIBIDO hoy; solo en el parón (09-19/11), si no esta apercibido y la caja lo paga |
-| Fer Nino (Elche) | DEL | 02/11: 6,37 M, +20 k | Roberto Fernandez | +10-15 % | 70 pts en 11 (ult. 5: 3, 7, 3, 2, 17), iguala a Roberto (69) y cuesta ~0,8 M menos; anadido por el dueno el 02/11 |
+| Fer Nino (Elche) | DEL | 02/11: 6,37 M, +20 k | Roberto Fernandez | +10-15 % | 70 pts en 11 (ult. 5: 3, 7, 3, 2, 17), iguala a Roberto (69) y cuesta ~0,8 M menos; anadido por el dueno el 02/11. Ojeador 02/11: 4,1 pts por jornada J12-J17 (Roberto 4,6): el peor de los tres |
+| Brugue (Levante) | DEL | 02/11: 4,83 M, plano | Roberto Fernandez | tope 4,9 M | 69 pts en 10, pero 52 en 5 en casa y 17 en 5 fuera; no tira penaltis. Lo anuncia **Pollo17** a 5,22 M (hasta el mie 04/11 08:28). 02/11: NO se le oferta a Pollo (ver la bitacora del 02/11 22:30). Se mira en el paron: si sale al Computer, si Roberto pierde el puesto con Sarabia o si puntua fuera |
 | **Raphinha (Barcelona)** | DEL | 02/11: 24,72 M | Roberto Fernandez y Boye | ~29 M (+15-20 %) | **OBJETIVO PRINCIPAL: OPERACION RAPHINHA (02/11).** 144 pts en 10. Hucha desde el mar 10/11 (objetivo 16 M). Si sale al mercado del Computer: AVISAR y hacer la cuenta ese mismo dia (ver la bitacora del 02/11 18:05) |
 
 Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
