@@ -3874,7 +3874,7 @@
         "5771": {
           "player_name": "Yeray",
           "team": "Athletic",
-          "appearances_at_prediction": 5,
+          "appearances_at_prediction": 6,
           "sources": {
             "FUTBOLFANTASY": 70.0,
             "ANALITICA_FANTASY": 70.0
@@ -3893,7 +3893,7 @@
         "17482": {
           "player_name": "Dituro",
           "team": "Elche",
-          "appearances_at_prediction": 10,
+          "appearances_at_prediction": 11,
           "sources": {},
           "consensus": "UNCERTAIN",
           "consensus_probability": 50.0
@@ -3942,7 +3942,7 @@
         "37898": {
           "player_name": "Hugo Rincón",
           "team": "Athletic",
-          "appearances_at_prediction": 5,
+          "appearances_at_prediction": 6,
           "sources": {
             "FUTBOLFANTASY": 50.0,
             "ANALITICA_FANTASY": 25.0
@@ -3953,7 +3953,7 @@
         "38194": {
           "player_name": "Gabriel Suazo",
           "team": "Sevilla",
-          "appearances_at_prediction": 10,
+          "appearances_at_prediction": 11,
           "sources": {
             "ANALITICA_FANTASY": 80.0
           },
@@ -4003,7 +4003,7 @@
         "41606": {
           "player_name": "Mangala",
           "team": "Getafe",
-          "appearances_at_prediction": 7,
+          "appearances_at_prediction": 8,
           "sources": {
             "ANALITICA_FANTASY": 70.0
           },
