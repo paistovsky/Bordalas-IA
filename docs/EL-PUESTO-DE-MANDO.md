@@ -352,6 +352,70 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **02/11 13:30 (laboratorio de rivales de la manana). FUSIONADO, APAGADO:
+  el colchon de la cesta entre procesos (cierra el FIX_FIRST del 01/11).
+  ESBOZADO PARA COPIAR: la prima que gana.**
+  **Rivales (reset de las 07:00):** Pollo gana a Rodri por 21.007.000
+  (+22,5 % sobre 17,15 M; Luismi pujo 20.153.000 y Manzagool 17.550.000) y
+  a Isaac Romero por 2.107.000 (+7 %); hoy pierde 3,85 M y 117 mil en
+  papel. Luismi vende a Ilaix al Computer a las 06:30 (3.416.800, +5,1 % en
+  6 dias, justo antes de bajar 70 mil) y juega la J11 con 10; sus 5
+  anuncios caducan sin venta. Pollo vuelve a anunciar 10 (46,56 M pedidos
+  sobre 43,71 M; Isaac a valor hora y media despues de pagarlo). Cajas:
+  Alvaro 17,7 M, Prinzipote 3,3 M, Mex 2,5 M, Manzagool 1,2 M, DiosMande
+  0,5 M, Luismi -1,97 M, nosotros -7,49 M, **Pollo -20,08 M** (tras su
+  premio le faltan ~18 M en ventas antes del vie 20:59). J11 (lista de
+  jugadores, sin capitan): nosotros 71, Pollo 66, Luismi 55, Manzagool 54;
+  general Pollo 498, nosotros 493 (a 5; anoche a 9). Patrimonio: Pollo
+  115,44 M (-3,07), Luismi 99,03 M, Manzagool 68,94 M, nosotros 60,08 M
+  (+0,11); Pollo nos saca 55,36 M (anoche 58,55).
+  **Leccion:** en el reset la caja no frena a nadie: Pollo pujo 23,1 M
+  con 3,0 M, Luismi 20,15 M estando en -1,97 M y Manzagool 17,55 M con
+  0,98 M. Para pujar, un rival en rojo sigue siendo competidor.
+  **Tactica que copiar (no construida):** de las 63 compras de rivales en
+  30 dias (todas al Computer), la que paga es ganar la subasta DISPUTADA
+  del titular que sube y aguantarlo 3 dias o mas: n 26, +2,99 M y 198 pts;
+  Pollo, 10 veces, +3,58 M y 124 pts con prima mediana +8,2 %. Nosotros
+  pujamos +1 % y en 30 dias le perdimos 3 a Pollo (Ivan Romero, Moi Gomez,
+  Lemar: +3,02 M y 64 pts para el). El flip en 7 dias no paga (Pollo
+  -0,15 M) y vender la vispera de la ronda tampoco (esos jugadores hicieron
+  70 pts). Esbozo `BORDALAS_LA_PRIMA_QUE_GANA`: en la mejora, solo para
+  cambios que suman 0,5 pts/jornada o mas, la prima que paga la liga por
+  tramo (~+10 % desde 3 M, +4 a +7 % entre 1 y 3 M, tope +12 %), solo si
+  saldo - todas las pujas vivas - esta puja >= 0, a 64 h o mas, nunca
+  jue/vie; sustituye a `BORDALAS_LA_MEJORA_PUJA_FUERTE`. Se construye
+  despues de la J12: hoy no pujaria por nada.
+  **Nuestras tacticas:** la ronda solo tiene a Ortiz (219.900; oferta
+  182.100, bajo su suelo de 184.300); la puerta sigue apagada (0 ofertas de
+  managers); la mejora, NADA_QUE_HACER, con 6 cambios frenados por SOLO SI
+  SUBE y 2 por el margen del calendario: no perdemos ninguna mejora real.
+  Caja de la J12 (vie 15:00): **+2,09 M base, +0,58 M en el peor caso**
+  (Pablo y Unai el mar 00:07, Gaya el mar 07:15, premio de la J11 por 74
+  pts ~2,22 M o el minimo de 870 mil, racha). Ojo: la publicacion de Unai
+  caduca el mar ~18:00; si no se cobra el martes, hay que renovarla.
+  **Fusionado APAGADO (22784015):** el colchon de la cesta tambien entre
+  procesos. Bloque `subasta` en el estado de la vuelta, para que la mejora
+  y el cierre cuenten en su caja lo que la cesta pujo; maximumBid baja con
+  lo pujado; una puja viva no se baja; se reserva tambien sin pujar; lo que
+  Biwenger rechaza (4xx) no cuenta; lo del libro que no esta en la foto no
+  baja ni el tope ni la caja; un 429 despues de la cesta deja su bloque.
+  Guardia nueva: la cesta no se abre sin sus candados (sin
+  `BORDALAS_SIN_SUBASTA`, el colchon y el suelo tienen que estar con "1").
+  El ensayo ahora puede QUITAR interruptores (`-BORDALAS_X`). Revisiones:
+  encendida OK_TO_SWITCH_ON (5 bajos, arreglados); apagada SHIP_OFF (3
+  medios de despliegue: 2 arreglados y 1 con receta). Huellas apagadas
+  ee6e1bce... y a8a1f177..., iguales en 3.11 y 3.13. Verja 231/231 en 3.11
+  y 3.13, normal y con el entorno objetivo. **Encendido (despues de la
+  J12, nunca jue/vie), en UN commit:** quitar `BORDALAS_SIN_SUBASTA`,
+  poner `BORDALAS_LA_SUBASTA_EN_EL_COLCHON: "1"` y
+  `BORDALAS_CESTA_SOLO_EL_SUELO: "1"`, `--paso-0` sobre ese arbol y
+  config/paso_0.json; luego la verja normal en 3.11 y 3.13 (verja_objetivo
+  no ve el paso 0). Ensayo antes, entre las 05:05 y las 06:30, con
+  `-BORDALAS_SIN_SUBASTA BORDALAS_LA_SUBASTA_EN_EL_COLCHON
+  BORDALAS_CESTA_SOLO_EL_SUELO`: el estado tiene que traer `subasta.hechas`.
+  Marcha atras: volver a poner `BORDALAS_SIN_SUBASTA: "1"`, nunca quitar
+  el colchon (reabre la cesta sin tope).
+
 - **02/11 08:40 (supervision de las 08:22).** Vuelta de las 08:07 (#41404213345):
   ronda y chollos NADA_QUE_HACER; la orden, NADA con Pablo (jornada en
   curso: se cobra el mar 00:07). **Ivan Martin GANADO** (2.779.900): sale
