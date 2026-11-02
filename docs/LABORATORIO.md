@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E77 · 02/11/2026 11:19 de Madrid · La carrera otra vez: el once de Pepe ya iguala al de Pollo17 (hasta las ventas de la J12)
+### E77 · 02/11/2026 11:18 de Madrid · La carrera otra vez: el once de Pepe ya iguala al de Pollo17 (hasta las ventas de la J12)
 
 **Hipotesis:** los fichajes desde el 18/10 (Boye, Kike Salas, Juan
 Iglesias, Ivan Martin, Gaya) han cerrado la diferencia que media E48
