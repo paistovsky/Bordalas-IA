@@ -43,6 +43,63 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 02/11/2026, 19:20 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
+
+La J11 esta acabada para los nuestros: 71 puntos (Yamal 19, Unai 14, Kike
+Salas 12). Ivan Martin es nuestro desde las 07:00. Ventas desde el mar:
+Pablo (00:07, entra Ivan), Unai (00:07, entra Ramon), Gaya (~07:15, entra
+Iglesias) y Ortiz si llega al suelo. Once esperado para la J12 (3-4-3):
+Gulacsi; Iglesias, Kike Salas, Chust; Olasagasti, Ivan, Ramon, Dani
+Lorenzo; Yamal, Roberto, Boye. Banquillo: Cardona. Saldo -7.494.776.
+
+| Jugador | Veredicto | J12 % | J12 (Madrid) | Fuente | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 90 | Villarreal-Getafe, dom 08/11 18:30 | FF 90 (02/11); entrena con el grupo; Champions mar con el PSG | = |
+| Juan Iglesias (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; J11: 90' en Getafe; 11 de 11 titular | =; 3 amarillas |
+| Kike Salas (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; J11: 90' y gol; presente el lun (FF 12:50) | = |
+| Chust (DEF) | TITULAR | 90 | Elche-Betis, dom 08/11 14:00 | FF 90; J11: 90', amarilla (2.a); presente el lun | 88 -> 90 |
+| Olasagasti (MED) | TITULAR | 80 | Celta-Levante, dom 08/11 18:30 | FF 80; descanso el lun; Copa el jue en Tarancon (Castro rotara) | = |
+| Ivan Martin (MED) | TITULAR | 82 | Malaga-Racing, sab 07/11 14:00 | FF 80 (su cifra de principio de semana); sano | 85 -> 82; 2 amarillas |
+| *Ramon Enriquez (MED, entra por Unai)* | DUDA | 55 | Malaga-Racing, sab 07/11 14:00 | FF 60, Revulsivo; en el once FF solo porque Pablo Martinez sigue fuera; Diario Sur le puso un 3 en la J11 | 58 -> 55; 3 amarillas |
+| Dani Lorenzo (MED) | TITULAR | 76 | Malaga-Racing, sab 07/11 14:00 | FF 70; 4 titularidades seguidas | = |
+| Yamal (DEL) | TITULAR | 95 | Atletico-Barcelona, dom 08/11 21:00 | FF 95, Dios; Champions mar con el Aston Villa; Flick dosifica minutos | = |
+| Roberto Fernandez (DEL) | TITULAR | 88 | Espanyol-Deportivo, sab 07/11 16:15 | FF 90; sin competencia en la punta | 87 -> 88 |
+| Boye (DEL) | TITULAR | 88 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; entreno el lun; descansara en la Copa del mar | = |
+| *Sergi Cardona (DEF, banquillo)* | DUDA | 50 | Villarreal-Getafe, dom 08/11 18:30 | FF 50, Rotacion, con Carlos Romero al 50; J11: amarilla y cambio en el 59'; FF le pone titular ante el PSG el mar | = |
+| *Pablo Ibanez (MED, se vende mar 00:07)* | DUDA | 60 | Sevilla-Alaves, vie 06/11 21:00 | FF 60; Copa el mar en Azkoitia con rotaciones | 70 -> 60 |
+| *Unai Lopez (MED, se vende mar 00:07)* | TITULAR | 82 | Real Sociedad-Rayo, dom 08/11 16:15 | FF 80; J11: gol, 14 pts | = |
+| *Gaya (DEF, se vende mar ~07:15)* | TITULAR | 82 | Valencia-Real Madrid, sab 07/11 21:00 | FF 90 | 78 -> 82 |
+| *Angel Ortiz (DEF, se vende)* | DUDA | 30 | Elche-Betis, dom 08/11 14:00 | FF 30 | = |
+
+Nadie lesionado, sancionado ni apercibido para la J12 (listas de FF del
+01/11); nadie ha perdido el puesto.
+
+**Hecho:** nada. El unico en riesgo es Ramon (DUDA 55), y esta cubierto:
+Cardona entra con un 4-3-3 valido. Es casi un empate en puntos esperados
+(~1,4 Ramon, ~1,8 Cardona). En el mercado de la maquina el unico medio
+mejor es Gonzalo Villar (Elche, 2,52 M y bajando, 4 amarillas: una mas y
+no juega la J13); con la puja la J12 empezaria en rojo. Lo reviso un
+esceptico: rechazado el fichaje, rechazado `no_pujar` (el motor ya lo deja
+fuera por apercibido), rechazada la correccion de jerarquia; aprobado no
+hacer nada.
+
+**Pendiente:**
+- **Mar 03/11, despues de la vuelta de las 08:07:** comprobar que el once
+  guardado es el 3-4-3 con Ramon (mientras Gaya siga siendo nuestro, un
+  4-3-3 con Gaya puede ganarle).
+- **Mar 03/11 por la noche:** Barca-Aston Villa (Yamal: golpes),
+  Villarreal-PSG (Cardona y Gulacsi: minutos) y Copa Anaitasuna-Alaves.
+- **Mar/mie:** el Malaga vuelve el mar 10:30. Si Pablo Martinez vuelve al
+  grupo o FF mete a Rafa Rodriguez en su once, Ramon cae a ~40.
+- **Vie 06/11:** cambiar a Ramon por Cardona a mano si Pablo Martinez
+  vuelve, si FF pone a Rafa Rodriguez o si el FF del viernes da a Cardona
+  por encima de Ramon. Al reves: si Cardona juega los 90' ante el PSG, baja
+  para el domingo. El cambio solo cuando la vuelta de las 20:07 aparezca
+  COMPLETADA en Actions y antes de las 20:45; si a las 20:35 sigue
+  corriendo, no se toca.
+- **Operacion Raphinha:** FF puso a Raphinha «al margen» en la sesion del
+  lun 02/11 sin decir por que; Flick no hablo de ningun problema. Vigilar.
+
 ## 01/11/2026, 19:10 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
 
 La J11 sigue: Elche-Valencia en juego (Chust y Gaya titulares; sin nada
