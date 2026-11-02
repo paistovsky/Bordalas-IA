@@ -69,6 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E78 · 02/11/2026 17:22 de Madrid · Un delantero para cambiar a Roberto: sale uno cada dos o tres semanas
+
+**El caso:** orden del dueño de hoy: Roberto no se vende hasta que entre
+Fer Nino, Zabiri u otro delantero titular que este dando buenos puntos.
+E61 dice que un jugador concreto sale uno de cada ~40 dias. ¿Y «otro
+delantero que valga»?
+**Datos:** 47 dias de escaparate (la lista del dia d es la de d-1, E70):
+delanteros con 4+ partidos, titularidad FF de 70 % o mas, de 4 a 10 M, y
+puntos por partido por encima de un umbral (Roberto hoy: 6,3).
+**Codigo:** `lab/mercado/delantero_por_roberto.py`.
+
+    umbral        dias con alguno   delanteros distintos en 47 dias
+    6,3 pts/p          5               3: Robert Navarro, Roberto Fernandez, Boye
+    5,5 pts/p         10               5: + Gerard Moreno, Angel Perez
+
+**Lo que se aprende:**
+- **Un delantero mejor que Roberto sale ~1 vez cada 16 dias** (3 en 47;
+  cada uno esta dos dias en la lista). En una semana, ~35 % de que salga
+  alguno. Bajando el liston a 5,5 pts/partido, ~1 cada 9 dias (~55 % en
+  una semana).
+- **Dos de los tres los fichó Pepe** (Roberto el 29/09 y Boye el 07/10);
+  el otro (Robert Navarro) se lo llevo Pollo17. Cuando sale uno, hay que
+  ganarlo: suben y tienen pelea (E41/E64).
+- Para Fer Nino o Zabiri en concreto, E61: uno de cada ~40 dias cada uno.
+
+**Limites:** 47 dias; FF y puntos son los del dia de la lista; no se ve
+cuantos de esos los peleo un rival.
+
+**Veredicto: AVISO para la orden del dueño** (no es regla): contar con
+semanas, no dias, y tener el `fichar` + `vender_si_ficha` listo para el
+dia que salga, con la prima de E41/E57 (sube: pelea) y la caja de la
+jornada en verde. Ampliar la lista a «delantero titular con 5,5+ pts por
+partido» duplica las ocasiones.
+
 ### E77 · 02/11/2026 11:18 de Madrid · La carrera otra vez: el once de Pepe ya iguala al de Pollo17 (hasta las ventas de la J12)
 
 **Hipotesis:** los fichajes desde el 18/10 (Boye, Kike Salas, Juan
