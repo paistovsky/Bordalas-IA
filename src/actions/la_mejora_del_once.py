@@ -1430,10 +1430,10 @@ def es_de_esta_vuelta(v10, ahora, run_id=None) -> str | None:
         return f"el estado de la vuelta no se puede fechar: {type(error).__name__}"
 
 
-def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False) -> dict:
+def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False, vistas=None) -> dict:
     """
     Lo que ESTA vuelta ya hizo antes que la mejora (la foto es de antes),
-    de los bloques `orden_del_gestor`, `chollos` y `ronda` de
+    de los bloques `subasta`, `orden_del_gestor`, `chollos` y `ronda` de
     `v10_full_autonomous_status.json`, solo lo que salió bien (`exito`):
 
         ya_pujados  {id} pujados (no se vuelve a pujar por ellos)
@@ -1449,7 +1449,17 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False) -> dict:
 
     El 12/10 la orden pujó 3.777.000 por Iván Romero y 4.989.000 por
     Gerard Martín y la ronda 1.101.000 por el 1462 en la misma vuelta: la
-    caja de la mejora solo veía `maximumBid` bajar. Pura, nunca lanza.
+    caja de la mejora solo veía `maximumBid` bajar.
+
+    LA CESTA (`subasta`, 02/11/2026). Solo está con el colchón de la
+    cesta puesto (`la_subasta_en_el_colchon.el_bloque_de_la_vuelta`): lo
+    que la cesta del reset pujó y lo que reservó, como pujas de la orden
+    (cuentan enteras, no se revenden solas). La cesta va ANTES de la foto
+    que se saca tras una escritura de v10, así que la foto del disco
+    puede traerla ya: con `vistas` ({id: importe} de nuestras pujas en la
+    foto), de cada una solo cuenta lo que la foto aún no trae (ni dos
+    veces en `maximumBid` ni más baja de lo que hay); si la foto ya la
+    trae entera, solo `ya_pujados`. Pura, nunca lanza.
     """
     salida = {"ya_pujados": set(), "gastado": 0, "pujas": {}, "solas": set(), "cobros": {},
               "canceladas": set(),
@@ -1459,12 +1469,21 @@ def lo_de_esta_vuelta(v10, ahora=None, run_id=None, cartera=False) -> dict:
             salida["descartado"] = es_de_esta_vuelta(v10, ahora, run_id)
             if salida["descartado"]:
                 return salida
-        for bloque in ("orden_del_gestor", "chollos", "ronda"):
+        for bloque in ("subasta", "orden_del_gestor", "chollos", "ronda"):
             for h in ((v10 or {}).get(bloque) or {}).get("hechas") or []:
                 if not isinstance(h, dict) or not h.get("exito"):
                     continue
                 pid = _int(h.get("player_id"))
                 importe = _int(h.get("importe"), 0) or 0
+                if bloque == "subasta":
+                    if h.get("accion") != "PUJAR" or pid is None or importe <= 0:
+                        continue
+                    ya = _int((vistas or {}).get(pid), 0) or 0
+                    salida["ya_pujados"].add(pid)
+                    if importe > ya:
+                        salida["gastado"] += importe - ya
+                        salida["pujas"][pid] = importe
+                    continue
                 if h.get("accion") == "PUJAR":
                     salida["ya_pujados"].add(pid)
                     salida["gastado"] += importe
@@ -1854,8 +1873,13 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         # si el estado es de ESTA vuelta (con un 429 queda el de otra).
         from src.actions.la_ronda_de_la_manana import la_cartera_activa
         cartera = la_cartera_activa()
-        esta_vuelta = lo_de_esta_vuelta(v10, ahora, os.environ.get("GITHUB_RUN_ID"),
-                                        cartera=cartera)
+        # `vistas`: lo que la foto del disco ya trae, para no contar dos
+        # veces la cesta si la foto es de despues (solo hay cesta con su
+        # colchon puesto).
+        esta_vuelta = lo_de_esta_vuelta(
+            v10, ahora, os.environ.get("GITHUB_RUN_ID"), cartera=cartera,
+            vistas={q: _int((p or {}).get("amount"), 0) or 0
+                    for q, p in (foto.get("nuestras_pujas") or {}).items()})
         salida["v10_descartado"] = esta_vuelta["descartado"]
         ya_pujados = esta_vuelta["ya_pujados"]
         vendidos = set(esta_vuelta["cobros"])

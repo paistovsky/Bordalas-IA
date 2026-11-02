@@ -1677,8 +1677,10 @@ def _sin_subasta() -> bool:
 #     tiene que caber en el colchon contando las de delante. Y el ciclo
 #     (`_pujar_en_el_reset`) le deja a la orden, los chollos y la ronda de
 #     la misma vuelta la foto con lo que la cesta pujo
-#     (`la_subasta_en_el_colchon.con_lo_pujado`), preguntando AQUI si esta
-#     puesto. Ver aquel modulo.
+#     (`la_subasta_en_el_colchon.con_lo_pujado`), y a los pasos de despues
+#     (la mejora, la rotacion, el cierre, el parte: otros procesos) el
+#     bloque `subasta` del estado de la vuelta (`el_bloque_de_la_vuelta`),
+#     preguntando AQUI si esta puesto. Ver aquel modulo.
 #
 #     SE LEE AQUI Y SOLO AQUI. NACE APAGADO: apagado, el plan es el de
 #     antes letra a letra y el modulo no se llama. Si no se puede leer el
