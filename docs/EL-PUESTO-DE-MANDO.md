@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/11/2026, 13:30 de Madrid (laboratorio de la manana).
+Actualizado: 03/11/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/11 14:15 (rafaga de la tarde).** Ciclos: verdes (#2685 a #2692,
+  tres de ellas con el parte vende ya encendido). Vendidos tambien Gaya
+  (1.782.000) y Ortiz (191.400). Saldo **-164.276**, puja viva **Adrian
+  Nino 4.909.900** (la orden; mie 07:00) con vender_si_ficha Roberto
+  (suelo 6,2 M). Revisada la cuenta: ganado y Roberto vendido ~+4,3 M;
+  perdido +2,2 M (con el premio de la J11, ~2,13 M hoy ~17:05). **El
+  riesgo que miro:** si entra Adrian y la oferta de Roberto no se cobra
+  antes del vie 15:00, la J12 empezaria en ~-2,7 M (0 puntos); la red es la
+  venta de Roberto desde el vie 07:00 y el cierre. El mie 21:15 compruebo
+  que Roberto este vendido o con oferta viva por encima del suelo.
 
 - **03/11 13:30 (laboratorio de rivales de la manana). FUSIONADA, APAGADA:
   LA PRIMA QUE GANA.**
