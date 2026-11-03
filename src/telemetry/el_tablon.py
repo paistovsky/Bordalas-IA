@@ -243,6 +243,13 @@ QUE_HACE = {
         "Cuando un fichaje mejora el once, puja más que el precio + 1 %: un 4 % "
         "más por cada punto por jornada que suma (hasta un 12 %), porque un "
         "punto por jornada vale más que lo que se paga de más.",
+    "BORDALAS_LA_PRIMA_QUE_GANA":
+        "Cuando la mejora del once ficha del Computer a uno que hoy sube y pide "
+        "entre 1 y 8 M, puja lo que pide más un 12 % redondeado a 9.900 (más un "
+        "18 % si el cambio suma 1 punto por jornada o más), porque eso es lo que "
+        "pagan los rivales cuando nos ganan la subasta. Solo a 64 h o más de la "
+        "jornada y solo si, ganado el fichaje, la caja de la jornada sigue en "
+        "positivo; si no, puja como siempre. Manda sobre la puja fuerte.",
     "BORDALAS_EL_CIERRE_DE_LA_JORNADA":
         "Desde 64 h antes de cada jornada elige el mejor once con el calendario "
         "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "

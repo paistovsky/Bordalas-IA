@@ -253,6 +253,12 @@ TESTS = [
     # el que sale ya no se vende. Apagado, los tres vendedores de main byte
     # a byte (huella por version de Python).
     "src.analysis.test_el_relevo_no_se_vende_v1",
+    # La prima que gana (laboratorio del 02/11, Adrian Nino el 03/11): la
+    # mejora puja por el del Computer que sube, de 1 a 8 M y a 64 h o mas,
+    # lo que pide + 12 % en 9.900 (+ 18 % si el cambio suma 1 punto o mas),
+    # solo si ganado la caja de la jornada queda >= 0. Apagado, la mejora
+    # de main byte a byte (huella por version de Python).
+    "src.analysis.test_la_prima_que_gana_v1",
     # El motor viejo: no puja a los vetados de la orden y, con su
     # interruptor, solo por el que sube. Apagado.
     "src.analysis.test_el_motor_viejo_v1",

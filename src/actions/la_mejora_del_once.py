@@ -181,6 +181,19 @@ EL RELEVO NO SE VENDE (01/11/2026, `BORDALAS_EL_RELEVO_NO_SE_VENDE`)
     venden. Aqui no cambia nada. Ver el bloque junto a
     `el_relevo_no_se_vende_activo`. Nace APAGADO.
 
+LA PRIMA QUE GANA (03/11/2026, `BORDALAS_LA_PRIMA_QUE_GANA`)
+
+    Laboratorio del 02/11 22:30: en las 33 subastas disputadas del
+    Computer que ganaron los rivales en 30 dias, el ganador pago +11,5 %
+    de mediana sobre lo que pedia (p75 +18,3 %); de nuestras 7 disputadas
+    perdidas, con +12 % habriamos ganado 6. Con el interruptor, por el del
+    Computer que SUBE hoy (o del que no se sabe) y pide de 1 a 8 M, a 64 h
+    o mas de la jornada, la mejora puja `en_9900(precio x 1,12)` (x 1,18
+    si el cambio suma 1 punto por jornada o mas), nunca por debajo de la
+    de siempre, y solo si, ganado ese cambio, la caja de la jornada queda
+    >= 0; si no, la de siempre. Manda sobre LA PUJA FUERTE donde toca.
+    Ver el bloque junto a `la_prima_que_gana_activa`. Nace APAGADO.
+
 QUE NO HACE
 
     No toca a Yamal (salvo su llave de lesión), ni a los `proteger` de la
@@ -215,6 +228,7 @@ ENV_PUJA_EN_9900 = "BORDALAS_LA_PUJA_EN_9900"               # nace APAGADO
 ENV_LA_JORNADA_DE_CADA_PAGINA = "BORDALAS_LA_JORNADA_DE_CADA_PAGINA"   # nace APAGADO
 ENV_A_LA_SALIDA = "BORDALAS_LA_MEJORA_A_LA_SALIDA"          # nace APAGADO
 ENV_EL_RELEVO = "BORDALAS_EL_RELEVO_NO_SE_VENDE"            # nace APAGADO
+ENV_LA_PRIMA_QUE_GANA = "BORDALAS_LA_PRIMA_QUE_GANA"        # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
 # El tablero de FF (`futbolfantasy_provider.BOARD_FILE`), para LA JORNADA
@@ -549,6 +563,135 @@ def con_puja_fuerte(cambio: dict, precio) -> dict:
                 "puja": puja, "prima": round(puja / int(precio) - 1, 4)}
     except Exception:                               # noqa: BLE001
         return cambio
+
+
+# LA PRIMA QUE GANA (03/11/2026, laboratorio del 02/11 22:30 y la puja
+# por Adrian Nino del 03/11)
+#
+# El tablon de 30 dias: en las 33 subastas disputadas del Computer que
+# ganaron los rivales, el ganador pago +11,5 % de mediana sobre lo que
+# pedia el Computer (p75 +18,3 %): +14,2 % por los titulares que suben de
+# 1 a 3 M, +10,1 % de 3 a 8 M y +16 % por encima de 8 M. Contra los que
+# suben fuerte, +10 % gana el 31 %, +12 % el 46 %, +14 % el 54 % y +18 %
+# el 62 %. La mejora pujaba +1 % (o lo que pide en 9.900 por el que no
+# sube) y de nuestras 7 disputadas perdidas, con +12 % habriamos ganado
+# 6. El 03/11 pujo 4.429.900 (+1,1 %) por Adrian Nino, que subia 170.000
+# al dia.
+#
+# Con el interruptor, la puja por el del Computer que SUBE hoy, o del que
+# no se sabe (`la_subida_de_hoy` sin saber o > 0: la misma vara que LA
+# MEJORA A LA SALIDA usa para el que no sube), y pide de `PRIMA_DESDE` a
+# `PRIMA_HASTA` (los dos bordes dentro), es `en_9900(precio x 1,12)`, y
+# `en_9900(precio x 1,18)` si el cambio suma `PUNTOS_DE_LA_PRIMA_FUERTE`
+# o mas por jornada (`la_puja_de_la_prima`): nunca por debajo de lo que
+# pide ni de la puja de siempre. Solo a `HORAS_DE_LA_PRIMA` o mas de la
+# jornada (dos resets por delante para arreglar lo que salga mal). Por
+# debajo de 1 M, por encima de 8 M, el que no sube, lo que ya es nuestro
+# y a menos de 64 h: lo de siempre.
+#
+# La caja. Cada cambio que puede llevar la prima entra en la combinacion
+# DOS veces: con la puja de siempre y con la prima (`con_la_prima`, que
+# lleva `prima_que_gana` y su `caja` con la puja nueva), y
+# `la_mejor_combinacion` elige una o ninguna. Con la prima, GANADO ese
+# cambio, la caja de la jornada tiene que quedar >= 0, no solo >= el
+# minimo, con lo peor del resto de la combinacion (los que dan caja,
+# perdidos; los que la quitan, ganados: un cambio que da caja no paga la
+# prima de otro). Las pujas, dentro de `maximumBid` disponible (ya sin
+# las pujas vivas) y de lo libre de la hucha, como siempre. Si no cabe,
+# ese cambio va con la puja de siempre. A igualdad de puntos gana la
+# combinacion con mas primas y despues la que deja mas caja: la prima
+# nunca hace perder un cambio. La puja elegida es la de todo: la `caja`
+# del cambio, la `caja_despues`, el importe del PUJAR y lo que `correr`
+# apunta en el libro. El plan dice a quien se puja con prima
+# (`plan["prima_que_gana"]`: {id: prima}) y a quien no le cupo
+# (`plan["prima_que_no_cabe"]`: ids, solo si hay).
+#
+# Manda sobre LA PUJA FUERTE (que queda como esta para cuando este
+# interruptor esta apagado): donde toca la prima, la prima (nunca por
+# debajo de la fuerte); donde no toca, o no cabe, la fuerte como siempre.
+# Con LA MEJORA A LA SALIDA no se cruza (es para el que no sube). LA
+# HUCHA: el dia de su jugador (`en_juego`), ninguna prima; lo libre y el
+# deficit, como siempre.
+#
+# Nace APAGADO. Apagado, `decidir` y `la_mejor_combinacion` son byte a
+# byte los de antes.
+PRIMA_QUE_GANA = 12                 # % sobre lo que pide
+PRIMA_QUE_GANA_FUERTE = 18          # % si el cambio suma >= PUNTOS_DE_LA_PRIMA_FUERTE
+PUNTOS_DE_LA_PRIMA_FUERTE = 1.0     # puntos por jornada
+PRIMA_DESDE = 1_000_000
+PRIMA_HASTA = 8_000_000
+HORAS_DE_LA_PRIMA = 64
+
+
+def la_prima_que_gana_activa() -> bool:
+    """`BORDALAS_LA_PRIMA_QUE_GANA`, leido como `activa` (al llamarse,
+    solo desde `correr`). Nace APAGADO. Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_LA_PRIMA_QUE_GANA, "")).strip().lower() in {
+            "1", "true", "si", "yes"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def la_puja_de_la_prima(precio, puntos, de_siempre=None) -> int | None:
+    """La puja de LA PRIMA QUE GANA por uno que pide `precio`:
+    `en_9900(precio x 1,12)`, o `x 1,18` si `puntos` (por jornada) llega a
+    `PUNTOS_DE_LA_PRIMA_FUERTE`; nunca por debajo de `precio` ni de
+    `de_siempre`. None si `precio` no esta de `PRIMA_DESDE` a
+    `PRIMA_HASTA` o es basura. En enteros (ni un euro de coma flotante).
+    Pura, nunca lanza."""
+    try:
+        pide = _int(precio)
+        if pide is None or not PRIMA_DESDE <= pide <= PRIMA_HASTA:
+            return None
+        try:
+            fuerte = puntos is not None and float(puntos) >= PUNTOS_DE_LA_PRIMA_FUERTE
+        except (TypeError, ValueError):
+            fuerte = False
+        pct = PRIMA_QUE_GANA_FUERTE if fuerte else PRIMA_QUE_GANA
+        from src.actions.la_ronda_de_la_manana import en_9900
+
+        puja = en_9900(-(-pide * (100 + pct) // 100))
+        if not isinstance(puja, int) or isinstance(puja, bool):
+            return None
+        puja = max(puja, pide)
+        siempre = _int(de_siempre)
+        return puja if siempre is None else max(puja, siempre)
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def con_la_prima(cambio, precio, ficha, horas_jornada) -> dict | None:
+    """La otra cara de `cambio` con LA PRIMA QUE GANA, o None si no le
+    toca: lo que ya es nuestro, sin puja, el que no sube hoy (`ficha`, la
+    de `todaLaLiga`: `la_subida_de_hoy` sabida y <= 0), lo que pide
+    (`precio`) fuera de 1 a 8 M, a menos de `HORAS_DE_LA_PRIMA` de la
+    jornada o una puja que no pasa de la de siempre. La nueva lleva su
+    `puja`, su `caja` con esa puja, `prima_que_gana` (sobre lo que pide)
+    y `puja_de_siempre`. Pura, nunca lanza."""
+    try:
+        if not isinstance(cambio, dict) or cambio.get("ya_es_nuestro"):
+            return None
+        if horas_jornada is None or not float(horas_jornada) >= HORAS_DE_LA_PRIMA:
+            return None
+        sube = la_subida_de_hoy(ficha)
+        if sube is not None and sube <= 0:
+            return None
+        de_siempre = _int(cambio.get("puja"))
+        caja = _int(cambio.get("caja"))
+        if de_siempre is None or de_siempre <= 0 or caja is None:
+            return None
+        puja = la_puja_de_la_prima(precio, cambio.get("puntos"), de_siempre)
+        if puja is None or puja <= de_siempre:
+            return None
+        # La `prima` de LA PUJA FUERTE es la de la puja de siempre: aqui
+        # manda la de la prima que gana.
+        otra = {k: v for k, v in cambio.items() if k != "prima"}
+        return {**otra, "caja": caja + de_siempre - puja, "puja": puja,
+                "prima_que_gana": round(puja / _int(precio) - 1, 4),
+                "puja_de_siempre": de_siempre}
+    except Exception:                               # noqa: BLE001
+        return None
 
 
 def el_calendario_activo() -> bool:
@@ -907,14 +1050,36 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
     siempre, tambien con `libre` negativo (saldo por debajo de las pujas
     vivas: la hucha no guarda nada y no puede frenar lo que se paga
     solo); uno no paga a otro. None: lo de siempre.
+
+    LA PRIMA QUE GANA (03/11/2026): un cambio con `prima_que_gana` es la
+    otra cara de uno de siempre (`con_la_prima`: el mismo `entra` y
+    `sale`, mas puja y menos caja). Las listas de candidatos salen de los
+    de siempre, como antes, y a cada uno que esta en ellas se le suma su
+    cara con prima; nunca van las dos juntas. Con prima, ganado ese
+    cambio, la caja tiene que quedar >= 0 con lo peor del resto (los que
+    dan caja, perdidos; lo que ya es nuestro, como es). A igualdad de
+    puntos gana la que lleva mas primas, y despues la que deja mas caja.
+    Sin ninguno con `prima_que_gana`: byte a byte lo de antes.
     """
 
-    mejoras = sorted((c for c in cambios if c["puntos"] >= GANANCIA_MINIMA),
+    hay_prima = any(c.get("prima_que_gana") is not None for c in cambios)
+    de_siempre = ([c for c in cambios if c.get("prima_que_gana") is None]
+                  if hay_prima else cambios)
+    mejoras = sorted((c for c in de_siempre if c["puntos"] >= GANANCIA_MINIMA),
                      key=lambda c: -c["puntos"])[:CANDIDATOS]
-    financian = sorted((c for c in cambios
+    financian = sorted((c for c in de_siempre
                         if PEOR_FINANCIACION <= c["puntos"] < GANANCIA_MINIMA and c["caja"] > 0),
                        key=lambda c: -c["caja"])[:CANDIDATOS]
     todos = mejoras + financian
+    if hay_prima:
+        # LA PRIMA QUE GANA: la cara con prima de cada candidato, si sigue
+        # siendo candidata (una que financia tiene que seguir dando caja).
+        en_juego = {(c["entra"], c["sale"]) for c in todos}
+        todos = todos + [
+            c for c in cambios
+            if c.get("prima_que_gana") is not None and (c["entra"], c["sale"]) in en_juego
+            and (c["puntos"] >= GANANCIA_MINIMA
+                 or (PEOR_FINANCIACION <= c["puntos"] and c["caja"] > 0))]
 
     mejor, clave = [], None
     for n in range(1, MAXIMO_POR_VUELTA + 1):
@@ -953,6 +1118,15 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
                 if saca > 0 and saca > libre:
                     continue
             k = (round(puntos, 6), caja + sum(c["caja"] for c in combo))
+            if hay_prima:
+                # LA PRIMA QUE GANA: ganado el cambio con prima y lo peor
+                # del resto, la caja de la jornada no baja de 0.
+                primas = [c for c in combo if c.get("prima_que_gana") is not None]
+                if primas:
+                    peor = sum(_seguro(c) for c in combo)
+                    if any(caja + peor - _seguro(p) + p["caja"] < 0 for p in primas):
+                        continue
+                k = (k[0], len(primas), k[1])
             if clave is None or k > clave:
                 mejor, clave = list(combo), k
     return mejor
@@ -965,7 +1139,7 @@ def decidir(
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
     estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
     en_9900=False, de_otra_jornada=frozenset(), a_la_salida=False,
-    hucha=None,
+    hucha=None, prima_que_gana=False,
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -1050,6 +1224,17 @@ def decidir(
                     sus ventas llegarian tarde para Raphinha. Va en
                     `plan["hucha"]`. None o no activa: byte a byte lo de
                     antes.
+        prima_que_gana  LA PRIMA QUE GANA (03/11/2026): a `HORAS_DE_LA_PRIMA`
+                    o mas, cada cambio por uno del Computer que sube hoy
+                    (o del que no se sabe) y pide de 1 a 8 M entra
+                    tambien con la prima (`con_la_prima`) y la combinacion
+                    elige: con prima solo si, ganado, la caja de la
+                    jornada queda >= 0. Manda sobre `puja_fuerte` donde
+                    toca. El dia del jugador de la hucha, ninguna. Va en
+                    `plan["prima_que_gana"]` ({id: prima}) y, si alguno
+                    elegido no la lleva porque no cabe,
+                    `plan["prima_que_no_cabe"]`. False (lo de siempre):
+                    byte a byte lo de antes.
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -1344,8 +1529,22 @@ def decidir(
             # nuestra puja por el ya viva).
             if hucha.get("en_juego") and not (deficit and hucha.get("su_puja_viva")):
                 para_elegir = [c for c in cambios if c.get("ya_es_nuestro")]
-    elegidos = la_mejor_combinacion(para_elegir, caja, minimo, disponible, deficit=deficit,
-                                    **con_la_hucha)
+    # LA PRIMA QUE GANA (con su interruptor): cada cambio por uno del
+    # Computer que sube, de 1 a 8 M y a 64 h o mas, entra tambien con la
+    # prima y la combinacion elige (ver el bloque junto a
+    # `la_prima_que_gana_activa`). El dia del jugador de la hucha, ninguna.
+    con_prima = []
+    if prima_que_gana and not (con_la_hucha and hucha.get("en_juego")):
+        lo_que_piden = {e["id"]: e.get("precio") for e in entran if not e["ya_es_nuestro"]}
+        for c in para_elegir:
+            if c.get("ya_es_nuestro") or c["entra"] not in lo_que_piden:
+                continue
+            otra = con_la_prima(c, lo_que_piden[c["entra"]], liga.get(c["entra"]),
+                                horas_jornada)
+            if otra is not None:
+                con_prima.append(otra)
+    elegidos = la_mejor_combinacion(para_elegir + con_prima if con_prima else para_elegir,
+                                    caja, minimo, disponible, deficit=deficit, **con_la_hucha)
     plan = {"caja": caja, "minimo": minimo, "disponible": disponible, "deficit": deficit,
             "cambios": elegidos,
             "caja_despues": caja + sum(c["caja"] for c in elegidos)}
@@ -1369,6 +1568,16 @@ def decidir(
         # LA MEJORA A LA SALIDA: los elegidos que se pujan a lo que piden.
         plan["a_la_salida"] = [c["entra"] for c in elegidos
                                if c["entra"] in a_lo_que_piden and not c["ya_es_nuestro"]]
+    if prima_que_gana:
+        # LA PRIMA QUE GANA: a quien se puja con prima y a quien no le
+        # cupo (tenia cara con prima y va con la de siempre).
+        plan["prima_que_gana"] = {c["entra"]: c["prima_que_gana"] for c in elegidos
+                                  if c.get("prima_que_gana") is not None}
+        con_cara = {(c["entra"], c["sale"]) for c in con_prima}
+        no_cabe = [c["entra"] for c in elegidos
+                   if c.get("prima_que_gana") is None and (c["entra"], c["sale"]) in con_cara]
+        if no_cabe:
+            plan["prima_que_no_cabe"] = no_cabe
     if de_otra:
         plan["de_otra_jornada"] = de_otra
     if de_otra_entran:
@@ -1386,11 +1595,14 @@ def decidir(
         if c["ya_es_nuestro"]:
             adoptar.append(c)
         else:
-            acciones.append({
+            accion = {
                 "accion": "PUJAR", "player_id": c["entra"], "importe": c["puja"],
                 "sustituye": None, "sale": c["sale"], "suelo": c["suelo"],
                 "puntos": c["puntos"], "mejora": True,
-            })
+            }
+            if c.get("prima_que_gana") is not None:
+                accion["prima_que_gana"] = c["prima_que_gana"]
+            acciones.append(accion)
 
     return {"acciones": acciones, "soltar": soltar, "adoptar": adoptar, "plan": plan}
 
@@ -2097,6 +2309,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             estados=los_estados(snapshot, liga),
             vendidos=vendidos,
             de_otra_jornada=de_otra_jornada,
+            prima_que_gana=la_prima_que_gana_activa(),
             **con_la_hucha,
         )
         salida["acciones"], salida["plan"] = d["acciones"], d["plan"]
@@ -2129,6 +2342,10 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
                         "sale": h.get("sale"), "suelo": h.get("suelo"),
                         "puja": h.get("importe"), "puntos": h.get("puntos"),
                     }
+                    # LA PRIMA QUE GANA: la puja ya es la de verdad; se
+                    # apunta tambien su prima (solo encendida).
+                    if h.get("prima_que_gana") is not None:
+                        libro[str(h["player_id"])]["prima_que_gana"] = h["prima_que_gana"]
 
         try:
             ruta = Path(libro_ruta or LIBRO)
@@ -2180,6 +2397,11 @@ def main() -> int:
         print(f"  frenados por no subir (solo si sube): {plan['sin_subir']}")
     if plan.get("a_la_salida"):
         print(f"  a lo que piden en 9.900 (no suben hoy): {plan['a_la_salida']}")
+    if plan.get("prima_que_gana"):
+        print(f"  con la prima que gana (sobre lo que piden): {plan['prima_que_gana']}")
+    if plan.get("prima_que_no_cabe"):
+        print(f"  sin la prima que gana (la caja de la jornada quedaria en rojo o no "
+              f"cabe en la puja maxima): {plan['prima_que_no_cabe']}")
     for o in plan.get("de_otra_jornada") or []:
         print(f"  no sale {o.get('nombre')} ({o.get('id')}): su {o.get('titularidad')} % "
               f"es de una confirmada de FF de otra jornada")
