@@ -69,6 +69,38 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E80 · 03/11/2026 17:16 de Madrid · Adrian Nino a +12,1 %: una moneda al aire
+
+**El caso:** la orden puja 4.909.900 (+12,1 % sobre su precio) por Adrian
+Nino, que sube ~4 % al dia; se resuelve mañana mie 07:00, a 62 h de la
+J12 (no es la vispera de E57). Si entra, sale Roberto.
+**Datos:** las subastas del Computer del tablon de jugadores que subieron
+la vispera 3 % o mas (n = 33) y 2 % o mas (n = 46); la prima que pago el
+ganador (fechas del tablon, bien: E70).
+**Codigo:** `lab/subasta/probabilidad_de_ganar.py` (sirve para cualquier
+puja: prima y subida como argumentos).
+
+    subio >= 3 % la vispera     n    prima del ganador        P(ganar a +12,1 %)
+    todas                       33   mediana +16,2 %, p75 +31 %       39 %
+    de 2 a 8 M                   8   mediana +14,9 %                  50 %
+    desde el 15/10              16   mediana +14,0 %, p75 +23 %       44 %
+    (subio >= 2 %: 52-67 %)
+
+**Lo que se aprende:**
+- **A +12,1 %, ganar a Nino es ~40-50 %**: una moneda al aire. Para tres
+  de cada cuatro haria falta +23 a +31 %, ~1 M mas.
+- Si se pierde no pasa nada malo (la caja queda en +2,2 M con el premio
+  de la J11); si se gana, el riesgo es el que ya mira el gestor (cobrar a
+  Roberto antes del vie 15:00).
+- Encaja con E49/E78: por los delanteros que suben, los rivales pagan
+  +14-33 %.
+
+**Limites:** n pequeño (8-33); supone que los rivales pujan como antes.
+
+**Veredicto: DATO PARA LA ORDEN** (no es regla nueva). El script da la
+probabilidad de cualquier puja antes de ponerla; util para la «prima que
+gana» que el gestor dejo apagada hoy.
+
 ### E79 · 03/11/2026 11:15 de Madrid · La titularidad de FF con la J11 (fuera de muestra): E65/E66 se aguantan, el medio se ajusta a la baja
 
 **Hipotesis:** lo que E65 midio con la J10 (un 50 % de FF juega 8 de cada
