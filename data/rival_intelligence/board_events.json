@@ -230095,6 +230095,254 @@
     }
   },
   {
+    "event_id": "a592af5e6962646131a971a5",
+    "date": 1793210423,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 640787,
+        "until": 1793390400,
+        "expired": true,
+        "mode": "1x2",
+        "games": [
+          {
+            "id": 50818,
+            "date": 1793390400,
+            "status": "finished",
+            "home": {
+              "id": 19,
+              "name": "Villarreal",
+              "slug": "villarreal",
+              "score": 0
+            },
+            "away": {
+              "id": 7,
+              "name": "Espanyol",
+              "slug": "espanyol",
+              "score": 1
+            }
+          },
+          {
+            "id": 50815,
+            "date": 1793451600,
+            "status": "finished",
+            "home": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": 0
+            },
+            "away": {
+              "id": 2,
+              "name": "Atlético",
+              "slug": "atletico",
+              "score": 2
+            }
+          },
+          {
+            "id": 50817,
+            "date": 1793459700,
+            "status": "finished",
+            "home": {
+              "id": 70,
+              "name": "Rayo Vallecano",
+              "slug": "rayo-vallecano",
+              "score": 3
+            },
+            "away": {
+              "id": 5,
+              "name": "Celta",
+              "slug": "celta",
+              "score": 0
+            }
+          },
+          {
+            "id": 50810,
+            "date": 1793467800,
+            "status": "finished",
+            "home": {
+              "id": 87,
+              "name": "Betis",
+              "slug": "betis",
+              "score": 2
+            },
+            "away": {
+              "id": 65,
+              "name": "Málaga",
+              "slug": "malaga",
+              "score": 1
+            }
+          },
+          {
+            "id": 50813,
+            "date": 1793476800,
+            "status": "finished",
+            "home": {
+              "id": 3,
+              "name": "Barcelona",
+              "slug": "barcelona",
+              "score": 6
+            },
+            "away": {
+              "id": 91,
+              "name": "Alavés",
+              "slug": "alaves",
+              "score": 1
+            }
+          },
+          {
+            "id": 50814,
+            "date": 1793538000,
+            "status": "finished",
+            "home": {
+              "id": 8,
+              "name": "Getafe",
+              "slug": "getafe",
+              "score": 3
+            },
+            "away": {
+              "id": 17,
+              "name": "Sevilla",
+              "slug": "sevilla",
+              "score": 1
+            }
+          },
+          {
+            "id": 50816,
+            "date": 1793546100,
+            "status": "finished",
+            "home": {
+              "id": 812,
+              "name": "Racing",
+              "slug": "racing",
+              "score": 0
+            },
+            "away": {
+              "id": 15,
+              "name": "Real Madrid",
+              "slug": "real-madrid",
+              "score": 3
+            }
+          },
+          {
+            "id": 50812,
+            "date": 1793554200,
+            "status": "finished",
+            "home": {
+              "id": 75,
+              "name": "Elche",
+              "slug": "elche",
+              "score": 0
+            },
+            "away": {
+              "id": 18,
+              "name": "Valencia",
+              "slug": "valencia",
+              "score": 1
+            }
+          },
+          {
+            "id": 50809,
+            "date": 1793563200,
+            "status": "finished",
+            "home": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": 2
+            },
+            "away": {
+              "id": 13,
+              "name": "Real Sociedad",
+              "slug": "real-sociedad",
+              "score": 1
+            }
+          },
+          {
+            "id": 50811,
+            "date": 1793649600,
+            "status": "finished",
+            "home": {
+              "id": 6,
+              "name": "Deportivo",
+              "slug": "deportivo",
+              "score": 2
+            },
+            "away": {
+              "id": 93,
+              "name": "Osasuna",
+              "slug": "osasuna",
+              "score": 1
+            }
+          }
+        ],
+        "prizes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          13,
+          27,
+          46
+        ],
+        "competition": "la-liga",
+        "round": {
+          "id": 4909,
+          "name": "Jornada 11",
+          "short": "J11",
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "responses": [],
+        "global": true,
+        "winners": [
+          "-",
+          16,
+          83,
+          514,
+          2482,
+          4304,
+          3226,
+          1378,
+          427,
+          58,
+          3
+        ],
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": {
+          "es": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
+          "en": "<p style='text-align: center'>Send us your <strong>predictions</strong> for the round's matches and you could <strong>win credits</strong></p>",
+          "ca": "<p style='text-align: center'>Envia'ns el teu <strong>pronòstic</strong> per als partits de la jornada i podràs <strong>guanyar crèdits</strong></p>",
+          "gl": "<p style='text-align: center'>Envíanos o teu <strong>prognóstico</strong> para os partidos da xornada e poderás <strong>gañar créditos</strong></p>",
+          "eu": "<p style='text-align: center'>Bidal iezaguzu jardunaldiko partidetarako zure <strong>iragarpena</strong> eta <strong>kredituak irabazi</strong> ahal izango dituzu</p>",
+          "hr": "<p style='text-align: center'>Pošalji nam svoju <strong>prognozu</strong> za utakmice kola i možeš <strong>osvojiti kredite</strong></p>",
+          "de": "<p style='text-align: center'>Sende uns deine <strong>Vorhersage</strong> für die Spiele des Spieltags und du kannst <strong>Credits gewinnen</strong></p>",
+          "it": "<p style='text-align: center'>Inviaci il tuo <strong>pronostico</strong> per le partite della giornata e potrai <strong>vincere crediti</strong></p>",
+          "fr": "<p style='text-align: center'>Envoie-nous ton <strong>pronostic</strong> pour les matchs de la journée et tu pourras <strong>gagner des crédits</strong></p>",
+          "pt": "<p style='text-align: center'>Envia-nos o teu <strong>prognóstico</strong> para os jogos da jornada e poderás <strong>ganhar créditos</strong></p>",
+          "ru": "<p style='text-align: center'>Отправьте нам свой <strong>прогноз</strong> на матчи тура, и вы сможете <strong>выиграть кредиты</strong></p>",
+          "tr": "<p style='text-align: center'>Turun maçları için bize <strong>tahminini</strong> gönder ve <strong>kredi kazan</strong></p>",
+          "he": "<p style='text-align: center'>שלח לנו את ה<strong>תחזית</strong> שלך למשחקי המחזור ותוכל <strong>לזכות בקרדיטים</strong></p>",
+          "el": "<p style='text-align: center'>Στείλε μας την <strong>πρόβλεψή</strong> σου για τους αγώνες της αγωνιστικής και θα μπορείς να <strong>κερδίσεις πιστώσεις</strong></p>",
+          "ar": "<p style='text-align: center'>أرسل لنا <strong>توقعك</strong> لمباريات الجولة وستتمكن من <strong>ربح أرصدة</strong></p>"
+        }
+      }
+    }
+  },
+  {
     "event_id": "a93bfe8a26b1716b655f7cbb",
     "date": 1793210423,
     "type": "bettingPool",
@@ -236007,5 +236255,132 @@
         "amount": 280900
       }
     ]
+  },
+  {
+    "event_id": "924952806adb7f8d3332d517",
+    "date": 1793720376,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 15396,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 5044800
+      }
+    ]
+  },
+  {
+    "event_id": "6275ff384ea67b6a03a9ce3f",
+    "date": 1793721791,
+    "type": "roundFinished",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "round": {
+        "id": 4909,
+        "name": "Jornada 11"
+      },
+      "scoreID": 5,
+      "results": [
+        {
+          "user": {
+            "id": 14175949,
+            "name": "Pepe Bordalás",
+            "icon": "i/u/14175949.png"
+          },
+          "points": 73,
+          "bonus": 2190000
+        },
+        {
+          "user": {
+            "id": 14145555,
+            "name": "Pollo17",
+            "icon": "icons/13.png"
+          },
+          "points": 69,
+          "bonus": 2070000
+        },
+        {
+          "user": {
+            "id": 14156489,
+            "name": "Luismi_Haz",
+            "icon": "icons/11.png"
+          },
+          "points": 66,
+          "bonus": 1980000
+        },
+        {
+          "user": {
+            "id": 14178736,
+            "name": "Mex"
+          },
+          "points": 57,
+          "bonus": 1710000
+        },
+        {
+          "user": {
+            "id": 14176382,
+            "name": "Manzagool"
+          },
+          "points": 55,
+          "bonus": 1650000
+        },
+        {
+          "user": {
+            "id": 14151726,
+            "name": "DiosMande a Rodri al Palancas",
+            "icon": "i/u/14151726.png"
+          },
+          "points": 35,
+          "bonus": 1150000,
+          "reason": {
+            "bonusPoint": 1050000,
+            "bonusRoundPosition": 100000
+          }
+        },
+        {
+          "user": {
+            "id": 14154203,
+            "name": "Prinzipote"
+          },
+          "points": 34,
+          "bonus": 1270000,
+          "reason": {
+            "bonusPoint": 1020000,
+            "bonusRoundPosition": 250000
+          }
+        },
+        {
+          "user": {
+            "id": 14456960,
+            "name": "Alvaro Retamosa Sanguino",
+            "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+          },
+          "points": 33,
+          "bonus": 1490000,
+          "reason": {
+            "bonusPoint": 990000,
+            "bonusRoundPosition": 500000
+          }
+        }
+      ],
+      "article": {
+        "id": 730148,
+        "source": "blog",
+        "title": "Lamine Yamal solo sabe hacer dobletes",
+        "url": "https://biwenger.as.com/blog/lamine-yamal-solo-sabe-hacer-dobletes/",
+        "date": 1793715848,
+        "photo": "https://cdn.biwenger.com/wp/2023/09/yamal.jpg",
+        "video": "",
+        "comments": 0
+      }
+    }
   }
 ]
