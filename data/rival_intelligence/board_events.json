@@ -235817,5 +235817,111 @@
         "amount": 2851800
       }
     ]
+  },
+  {
+    "event_id": "7e672aa56a9b203e747c7e60",
+    "date": 1793686002,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 17057,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3856000,
+        "bids": [
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 3599000
+          },
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 3477000
+          }
+        ]
+      },
+      {
+        "player": 11677,
+        "to": {
+          "id": 14178736,
+          "name": "Mex"
+        },
+        "amount": 2690000
+      },
+      {
+        "player": 33694,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 1686250
+      },
+      {
+        "player": 17482,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2607000,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 2533000
+          },
+          {
+            "user": {
+              "id": 14176382,
+              "name": "Manzagool"
+            },
+            "amount": 2470000
+          }
+        ]
+      },
+      {
+        "player": 2044,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 2980001
+      }
+    ]
+  },
+  {
+    "event_id": "d10f094debaf9b1b12f9641d",
+    "date": 1793686825,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 35765,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 191400
+      }
+    ]
   }
 ]

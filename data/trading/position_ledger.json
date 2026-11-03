@@ -1,6 +1,6 @@
 {
   "version": "V10.5",
-  "updated_at": "2026-11-03T03:54:36.341597+00:00",
+  "updated_at": "2026-11-03T06:20:22.732447+00:00",
   "positions": [
     {
       "position_id": "BID-4138078754",
@@ -199,7 +199,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-16T18:44:52.454534+00:00",
-      "updated_at": "2026-11-03T03:54:36.070129+00:00",
+      "updated_at": "2026-11-03T06:20:22.436594+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -444,7 +444,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-17T19:57:28.828214+00:00",
-      "updated_at": "2026-11-03T03:54:36.070144+00:00",
+      "updated_at": "2026-11-03T06:20:22.436610+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -579,7 +579,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-18T11:40:21.466744+00:00",
-      "updated_at": "2026-11-03T03:54:36.070148+00:00",
+      "updated_at": "2026-11-03T06:20:22.436614+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -782,7 +782,7 @@
       "realized_roi_percent": null,
       "thesis_source": "LIVE_DECISION_EXACT",
       "created_at": "2026-08-18T12:01:03.975162+00:00",
-      "updated_at": "2026-11-03T03:54:36.070150+00:00",
+      "updated_at": "2026-11-03T06:20:22.436617+00:00",
       "events": [
         {
           "type": "BID_SENT",
@@ -1141,7 +1141,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T10:49:10.880549+00:00",
-      "updated_at": "2026-11-03T03:54:36.070153+00:00",
+      "updated_at": "2026-11-03T06:20:22.436619+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1266,7 +1266,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-19T13:11:38.127443+00:00",
-      "updated_at": "2026-11-03T03:54:36.070155+00:00",
+      "updated_at": "2026-11-03T06:20:22.436621+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -1691,7 +1691,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-21T23:12:10.013730+00:00",
-      "updated_at": "2026-11-03T03:54:36.070157+00:00",
+      "updated_at": "2026-11-03T06:20:22.436624+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2030,7 +2030,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-22T12:58:05.170012+00:00",
-      "updated_at": "2026-11-03T03:54:36.070159+00:00",
+      "updated_at": "2026-11-03T06:20:22.436626+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2419,7 +2419,7 @@
       "realized_roi_percent": null,
       "thesis_source": "CURRENT_RECONSTRUCTION",
       "created_at": "2026-08-26T22:28:55.623930+00:00",
-      "updated_at": "2026-11-03T03:54:36.070162+00:00",
+      "updated_at": "2026-11-03T06:20:22.436629+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -2825,7 +2825,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-08-29T00:02:10.740691+00:00",
-      "updated_at": "2026-11-03T03:54:36.070164+00:00",
+      "updated_at": "2026-11-03T06:20:22.436632+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3547,7 +3547,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764569+00:00",
-      "updated_at": "2026-11-03T03:54:36.070168+00:00",
+      "updated_at": "2026-11-03T06:20:22.436635+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3636,7 +3636,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T02:52:15.764612+00:00",
-      "updated_at": "2026-11-03T03:54:36.070170+00:00",
+      "updated_at": "2026-11-03T06:20:22.436637+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3725,7 +3725,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T14:50:32.666545+00:00",
-      "updated_at": "2026-11-03T03:54:36.070172+00:00",
+      "updated_at": "2026-11-03T06:20:22.436639+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -3814,7 +3814,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-12T20:09:49.948144+00:00",
-      "updated_at": "2026-11-03T03:54:36.070174+00:00",
+      "updated_at": "2026-11-03T06:20:22.436641+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4012,7 +4012,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-14T20:11:05.102108+00:00",
-      "updated_at": "2026-11-03T03:54:36.070176+00:00",
+      "updated_at": "2026-11-03T06:20:22.436643+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4102,7 +4102,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T02:54:37.362776+00:00",
-      "updated_at": "2026-11-03T03:54:36.070179+00:00",
+      "updated_at": "2026-11-03T06:20:22.436645+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4191,7 +4191,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-15T12:02:13.172318+00:00",
-      "updated_at": "2026-11-03T03:54:36.070181+00:00",
+      "updated_at": "2026-11-03T06:20:22.436647+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4331,7 +4331,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-17T03:03:05.858859+00:00",
-      "updated_at": "2026-11-03T03:54:36.070183+00:00",
+      "updated_at": "2026-11-03T06:20:22.436649+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4420,7 +4420,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T00:12:39.103782+00:00",
-      "updated_at": "2026-11-03T03:54:36.070185+00:00",
+      "updated_at": "2026-11-03T06:20:22.436652+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4509,7 +4509,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510843+00:00",
-      "updated_at": "2026-11-03T03:54:36.070187+00:00",
+      "updated_at": "2026-11-03T06:20:22.436654+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4598,7 +4598,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510907+00:00",
-      "updated_at": "2026-11-03T03:54:36.070189+00:00",
+      "updated_at": "2026-11-03T06:20:22.436656+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4687,7 +4687,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T02:53:29.510947+00:00",
-      "updated_at": "2026-11-03T03:54:36.070191+00:00",
+      "updated_at": "2026-11-03T06:20:22.436658+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4776,7 +4776,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-18T06:18:56.178648+00:00",
-      "updated_at": "2026-11-03T03:54:36.070193+00:00",
+      "updated_at": "2026-11-03T06:20:22.436660+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4865,7 +4865,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T02:53:28.328041+00:00",
-      "updated_at": "2026-11-03T03:54:36.070195+00:00",
+      "updated_at": "2026-11-03T06:20:22.436662+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -4955,16 +4955,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 2560000,
-      "unrealized_profit": 673000,
-      "unrealized_roi_percent": 35.67,
+      "current_value": 2640000,
+      "unrealized_profit": 753000,
+      "unrealized_roi_percent": 39.9,
       "opened_at": "2026-09-20T05:27:25.921059+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T12:14:41.399274+00:00",
-      "updated_at": "2026-11-03T03:54:36.070202+00:00",
+      "updated_at": "2026-11-03T06:20:22.436670+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5066,13 +5066,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337271+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728024+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
         "confidence": "LOW",
-        "profit": 673000,
-        "roi_percent": 35.67,
+        "profit": 753000,
+        "roi_percent": 39.9,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 43.0,
         "scores": {
@@ -5084,7 +5084,7 @@
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
           "Jugador en XI; protección deportiva 43.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -5120,7 +5120,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-19T12:14:41.399314+00:00",
-      "updated_at": "2026-11-03T03:54:36.070205+00:00",
+      "updated_at": "2026-11-03T06:20:22.436673+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5218,7 +5218,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-23T03:19:41.972654+00:00",
-      "updated_at": "2026-11-03T03:54:36.070207+00:00",
+      "updated_at": "2026-11-03T06:20:22.436676+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5380,7 +5380,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-23T09:39:39.218808+00:00",
-      "updated_at": "2026-11-03T03:54:36.070209+00:00",
+      "updated_at": "2026-11-03T06:20:22.436678+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5526,7 +5526,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-25T13:12:49.500390+00:00",
-      "updated_at": "2026-11-03T03:54:36.070211+00:00",
+      "updated_at": "2026-11-03T06:20:22.436680+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5658,16 +5658,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 7160000,
-      "unrealized_profit": -2490000,
-      "unrealized_roi_percent": -25.8,
+      "current_value": 7070000,
+      "unrealized_profit": -2580000,
+      "unrealized_roi_percent": -26.74,
       "opened_at": "2026-09-30T05:18:31.516630+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-29T10:09:50.607785+00:00",
-      "updated_at": "2026-11-03T03:54:36.070215+00:00",
+      "updated_at": "2026-11-03T06:20:22.436685+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -5787,13 +5787,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337282+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728034+00:00",
         "action": "CUT_LOSS",
         "priority": 90,
         "decision_basis": "LOSS_AND_DETERIORATION",
         "confidence": "LOW",
-        "profit": -2490000,
-        "roi_percent": -25.8,
+        "profit": -2580000,
+        "roi_percent": -26.74,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 70.0,
         "scores": {
@@ -5805,7 +5805,7 @@
         "reasons": [
           "La pérdida y el deterioro superan el valor de seguir esperando.",
           "Jugador en XI; protección deportiva 70.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -5841,7 +5841,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-09-30T13:09:25.340152+00:00",
-      "updated_at": "2026-11-03T03:54:36.070218+00:00",
+      "updated_at": "2026-11-03T06:20:22.436688+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -6068,16 +6068,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 2290000,
-      "unrealized_profit": -147000,
-      "unrealized_roi_percent": -6.03,
+      "current_value": 2260000,
+      "unrealized_profit": -177000,
+      "unrealized_roi_percent": -7.26,
       "opened_at": "2026-10-02T05:18:13.804584+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-01T08:09:46.935683+00:00",
-      "updated_at": "2026-11-03T03:54:36.070222+00:00",
+      "updated_at": "2026-11-03T06:20:22.436693+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -6179,25 +6179,25 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337289+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728041+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": -147000,
-        "roi_percent": -6.03,
+        "profit": -177000,
+        "roi_percent": -7.26,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 90.0,
         "scores": {
           "hold": 59.5,
           "take_profit": 0.0,
-          "cut_loss": 15.0,
+          "cut_loss": 35.0,
           "rotate_capital": 0.0
         },
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 90.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -6437,7 +6437,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-13T06:08:55.215310+00:00",
-      "updated_at": "2026-11-03T03:54:36.070224+00:00",
+      "updated_at": "2026-11-03T06:20:22.436696+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -6643,16 +6643,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 2130000,
-      "unrealized_profit": 1211000,
-      "unrealized_roi_percent": 131.77,
+      "current_value": 2160000,
+      "unrealized_profit": 1241000,
+      "unrealized_roi_percent": 135.04,
       "opened_at": "2026-10-17T05:19:43.520727+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-16T20:10:22.110075+00:00",
-      "updated_at": "2026-11-03T03:54:36.070228+00:00",
+      "updated_at": "2026-11-03T06:20:22.436701+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -6772,13 +6772,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337294+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728046+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
         "confidence": "LOW",
-        "profit": 1211000,
-        "roi_percent": 131.77,
+        "profit": 1241000,
+        "roi_percent": 135.04,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 8.0,
         "scores": {
@@ -6789,7 +6789,7 @@
         },
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -6918,16 +6918,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 1760000,
-      "unrealized_profit": 48992,
-      "unrealized_roi_percent": 2.86,
+      "current_value": 1770000,
+      "unrealized_profit": 58992,
+      "unrealized_roi_percent": 3.45,
       "opened_at": "2026-10-22T05:18:26.429139+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-21T06:09:58.784912+00:00",
-      "updated_at": "2026-11-03T03:54:36.070232+00:00",
+      "updated_at": "2026-11-03T06:20:22.436705+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -6993,13 +6993,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337298+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728051+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
         "confidence": "LOW",
-        "profit": 48992,
-        "roi_percent": 2.86,
+        "profit": 58992,
+        "roi_percent": 3.45,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 43.0,
         "scores": {
@@ -7011,7 +7011,7 @@
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
           "Jugador en XI; protección deportiva 43.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -7038,16 +7038,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 5480000,
-      "unrealized_profit": -509900,
-      "unrealized_roi_percent": -8.51,
+      "current_value": 5440000,
+      "unrealized_profit": -549900,
+      "unrealized_roi_percent": -9.18,
       "opened_at": "2026-10-23T05:19:27.569622+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-22T10:10:19.954246+00:00",
-      "updated_at": "2026-11-03T03:54:36.070235+00:00",
+      "updated_at": "2026-11-03T06:20:22.436709+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -7113,13 +7113,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337302+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728055+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": -509900,
-        "roi_percent": -8.51,
+        "profit": -549900,
+        "roi_percent": -9.18,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 70.0,
         "scores": {
@@ -7131,7 +7131,7 @@
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 70.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -7260,16 +7260,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 3360000,
-      "unrealized_profit": -79900,
-      "unrealized_roi_percent": -2.32,
+      "current_value": 3420000,
+      "unrealized_profit": -19900,
+      "unrealized_roi_percent": -0.58,
       "opened_at": "2026-10-25T06:18:23.319685+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-24T12:10:27.240680+00:00",
-      "updated_at": "2026-11-03T03:54:36.070239+00:00",
+      "updated_at": "2026-11-03T06:20:22.436713+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -7317,13 +7317,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337306+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728059+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
         "confidence": "LOW",
-        "profit": -79900,
-        "roi_percent": -2.32,
+        "profit": -19900,
+        "roi_percent": -0.58,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 43.0,
         "scores": {
@@ -7335,7 +7335,7 @@
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
           "Jugador en XI; protección deportiva 43.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -7422,7 +7422,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-30T21:11:24.514197+00:00",
-      "updated_at": "2026-11-03T03:54:36.070242+00:00",
+      "updated_at": "2026-11-03T06:20:22.436716+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -7452,7 +7452,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337309+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728062+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "NO_EXIT_EDGE",
@@ -7469,7 +7469,7 @@
         },
         "reasons": [
           "No existe una ventaja suficiente para cerrar o rotar la posición.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -7556,7 +7556,7 @@
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-31T03:52:42.227884+00:00",
-      "updated_at": "2026-11-03T03:54:36.070246+00:00",
+      "updated_at": "2026-11-03T06:20:22.436720+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -7586,7 +7586,7 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337313+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728066+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
@@ -7604,7 +7604,7 @@
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 55.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -7631,16 +7631,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 3770000,
-      "unrealized_profit": 100,
-      "unrealized_roi_percent": 0.0,
+      "current_value": 3790000,
+      "unrealized_profit": 20100,
+      "unrealized_roi_percent": 0.53,
       "opened_at": "2026-11-01T06:20:37.340924+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-10-31T07:10:34.377162+00:00",
-      "updated_at": "2026-11-03T03:54:36.070249+00:00",
+      "updated_at": "2026-11-03T06:20:22.436723+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -7670,13 +7670,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337316+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728069+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": 100,
-        "roi_percent": 0.0,
+        "profit": 20100,
+        "roi_percent": 0.53,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 63.0,
         "scores": {
@@ -7688,7 +7688,7 @@
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 63.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     },
@@ -7715,16 +7715,16 @@
       "expected_profit_at_bid": 0,
       "expected_roi_at_bid_percent": 0.0,
       "t15_after_bid": 0,
-      "current_value": 2760000,
-      "unrealized_profit": -19900,
-      "unrealized_roi_percent": -0.72,
+      "current_value": 2730000,
+      "unrealized_profit": -49900,
+      "unrealized_roi_percent": -1.8,
       "opened_at": "2026-11-02T06:20:59.168062+00:00",
       "closed_at": null,
       "realized_profit": null,
       "realized_roi_percent": null,
       "thesis_source": "UNKNOWN_ACTIVE_BID",
       "created_at": "2026-11-01T09:11:44.026347+00:00",
-      "updated_at": "2026-11-03T03:54:36.070252+00:00",
+      "updated_at": "2026-11-03T06:20:22.436727+00:00",
       "events": [
         {
           "type": "BID_IMPORTED",
@@ -7754,13 +7754,13 @@
       "management_v106": {
         "version": "V10.6",
         "mode": "SHADOW",
-        "last_evaluated_at": "2026-11-03T03:54:36.337320+00:00",
+        "last_evaluated_at": "2026-11-03T06:20:22.728073+00:00",
         "action": "HOLD",
         "priority": 20,
         "decision_basis": "HOLD_SPORTING_VALUE",
         "confidence": "LOW",
-        "profit": -19900,
-        "roi_percent": -0.72,
+        "profit": -49900,
+        "roi_percent": -1.8,
         "market_outlook": "NEUTRAL",
         "sporting_protection_score": 55.0,
         "scores": {
@@ -7772,7 +7772,7 @@
         "reasons": [
           "El coste deportivo de liberar la posición sigue siendo alto.",
           "Jugador en XI; protección deportiva 55.0/100.",
-          "Fase NORMAL | T-15 tras buffer 5222024 EUR."
+          "Fase NORMAL | T-15 tras buffer 6697624 EUR."
         ]
       }
     }
