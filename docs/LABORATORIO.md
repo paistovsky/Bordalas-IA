@@ -69,6 +69,41 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E79 · 03/11/2026 11:19 de Madrid · La titularidad de FF con la J11 (fuera de muestra): E65/E66 se aguantan, el medio se ajusta a la baja
+
+**Hipotesis:** lo que E65 midio con la J10 (un 50 % de FF juega 8 de cada
+10 y hace casi sus puntos por partido) y lo que E66 concluyo (la vara de
+Pepe ordena bien pero se queda corta de nivel) se repiten en la J11.
+**Datos:** FF del 30/10 (vispera de la J11) y lo sabido tras la J10, contra
+la J11 (foto del 02/11). 480 jugadores con FF; 391 con 3+ partidos.
+**Codigo:** `lab/puntos/vara_jornada.py` (general: jornada y dia de FF).
+
+    FF la vispera    jugo (J11)  [J10]     puntos / pts por partido (J11)  [J10]
+      0-30 %           18 %      [19 %]          x0,18                    [x0,23]
+     30-50 %           59 %      [65 %]          x0,52                    [x0,84]
+     50-60 %           80 %      [82 %]          x0,75                    [x0,99]
+     60-80 %           96 %      [93 %]          x1,13                    [x1,22]
+     80-100 %          96 %      [97 %]          x1,09                    [x1,13]
+
+    Spearman con los puntos de la J11: vara de Pepe +0,59 | curva E65 +0,57 |
+    FF sola +0,57 | precio +0,42 | pts/partido +0,36
+    nivel medio: real 3,16 | vara 2,19 | curva E65 3,40
+
+**Lo que se aprende:**
+- **Cuanto juega cada tramo se repite casi igual** (un 50-60 % juega el
+  80 %): E65 se sostiene.
+- **La vara de Pepe sigue siendo la que mejor ordena** (+0,59), como dijo
+  E66; para elegir el once no hay que tocarla.
+- **El nivel del medio baila entre jornadas:** un 30-50 % hizo el 84 % de
+  sus puntos por partido en la J10 y el 52 % en la J11. La curva de E65
+  sobrestima el medio en la J11. Con las dos jornadas: <30 % x0,2;
+  30-50 % x0,7; 50-60 % x0,85; 60 % o mas x1,1.
+
+**Limites:** dos jornadas; «jugo» incluye salir del banquillo.
+
+**Veredicto: SE AGUANTAN E65/E66, con factores corregidos** (se cambia su
+linea de «Listo para el plan»).
+
 ### E78 · 02/11/2026 17:22 de Madrid · Un delantero para cambiar a Roberto: sale uno cada dos o tres semanas
 
 **El caso:** orden del dueño de hoy: Roberto no se vende hasta que entre
@@ -3288,9 +3323,10 @@ las meta en Pepe; al pasarlas, se mueven al plan de EL-PUESTO-DE-MANDO.md)
   decide por menos de un 0,5 %. La subasta del reset (2.025.051), la
   rendija (1.711.008) y los chollos (1.029.000, 369.000) aun no lo hacen.
 - **(E65, 27/10 11:16) La vara de puntos: cambiar FF/100 por un factor
-  calibrado** (medido en la J10, n = 459; repetir con la J11 antes de
-  encender). Con FF la vispera: 0-30 % -> x0,25; 30-50 % -> x0,85;
-  50-60 % -> x1,0; 60 % o mas -> x1,1 (sobre los puntos por partido). Hoy
+  calibrado** (J10 y J11, E65/E79). Con FF la vispera: 0-30 % -> x0,2;
+  30-50 % -> x0,7; 50-60 % -> x0,85; 60 % o mas -> x1,1 (sobre los
+  puntos por partido; el medio baila entre jornadas: J10 x0,84/x0,99,
+  J11 x0,52/x0,75). Hoy
   la vara da a un 50 % la mitad de lo que hace (1,85 contra 3,67) y empuja
   a la mejora a cambiar dudosos por fijos ganando la mitad de lo que dice.
   Donde: `esperado` de la mejora (tasa x titularidad / 100) y
