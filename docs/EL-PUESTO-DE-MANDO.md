@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/11/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 03/11/2026, 21:35 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/11 21:15 (rafaga de la noche).** Ciclos: verdes (#2692 a #2699).
+  **Entro el premio de la J11:** saldo **+2.025.724**. Pero hay **DOS
+  pujas vivas** (9.089.800 comprometidos, mie 07:00): Adrian Nino
+  4.909.900 (la orden, sale Roberto) y **Unai Simon 4.179.900**, que la
+  sombra no aviso: la puso **la mejora** sola en la vuelta de las 17:07
+  (log de la run 41670873866: «Unai Simon por Gulacsi: +1,04 pts por
+  jornada, caja -2.032.900»; caja de la jornada 2.025.724). **Cuenta del
+  peor caso para el vie 15:00:** si entran las dos, 2.025.724 - 9.089.800
+  = -7,06 M hasta cobrar a Roberto (suelo 6,2 M) y a Gulacsi (~2,2 M) +
+  racha 0,25 M => ~+1,5 M, pero con DOS ventas que tienen que salir entre
+  el mie y el vie. Si entra solo Simon: ~+0,3 M (justo). **Lo debato:**
+  Gulacsi esta en `conservar` y la mejora lo vende igual (no lee
+  `conservar`): es la segunda vez que esa lista no hace lo que parece. Lo
+  dejo dicho al chat del dueno. Mi control: mie 07:15 (que entro) y mie
+  21:15 (que ventas tienen oferta viva).
 
 - **03/11 14:15 (rafaga de la tarde).** Ciclos: verdes (#2685 a #2692,
   tres de ellas con el parte vende ya encendido). Vendidos tambien Gaya
