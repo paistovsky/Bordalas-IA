@@ -259,6 +259,12 @@ TESTS = [
     # solo si ganado la caja de la jornada queda >= 0. Apagado, la mejora
     # de main byte a byte (huella por version de Python).
     "src.analysis.test_la_prima_que_gana_v1",
+    # La orden manda en el cambio (el 03/11, Adrian Nino por Boye en el
+    # libro de la mejora y por Roberto en la orden): si la orden ficha al
+    # que entra por un cambio de la mejora, la mejora lo suelta, su caja
+    # no cuenta esa venta y un fichaje no vende a dos. Apagado, la mejora
+    # de main byte a byte (huella por version de Python).
+    "src.analysis.test_la_orden_manda_en_el_cambio_v1",
     # El motor viejo: no puja a los vetados de la orden y, con su
     # interruptor, solo por el que sube. Apagado.
     "src.analysis.test_el_motor_viejo_v1",

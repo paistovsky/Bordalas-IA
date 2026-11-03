@@ -251,6 +251,14 @@ QUE_HACE = {
         "nos ganan la subasta. Solo a 64 h o más de la jornada y solo si, ganado el "
         "fichaje, la caja de la jornada no queda en rojo; si no, puja como siempre. "
         "Con la puja fuerte puesta, manda la prima donde toca la prima.",
+    "BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO":
+        "Cuando la orden del gestor ficha a un jugador por el que la mejora del "
+        "once ya pujaba para un cambio y además vende a alguien por ese fichaje, "
+        "manda la orden: la mejora suelta su cambio y ya no vende a nadie por ese "
+        "fichaje (el que iba a salir por él ya no sale por eso); solo vende la "
+        "orden, a quien ella diga, y la caja de la mejora no cuenta la venta que ya "
+        "no hace. Si la orden ficha sin vender a nadie por él, el cambio sigue "
+        "siendo de la mejora.",
     "BORDALAS_EL_CIERRE_DE_LA_JORNADA":
         "Desde 64 h antes de cada jornada elige el mejor once con el calendario "
         "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "
