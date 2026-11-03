@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E79 · 03/11/2026 11:19 de Madrid · La titularidad de FF con la J11 (fuera de muestra): E65/E66 se aguantan, el medio se ajusta a la baja
+### E79 · 03/11/2026 11:15 de Madrid · La titularidad de FF con la J11 (fuera de muestra): E65/E66 se aguantan, el medio se ajusta a la baja
 
 **Hipotesis:** lo que E65 midio con la J10 (un 50 % de FF juega 8 de cada
 10 y hace casi sus puntos por partido) y lo que E66 concluyo (la vara de
