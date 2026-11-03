@@ -196,6 +196,21 @@ LA PRIMA QUE GANA (03/11/2026, `BORDALAS_LA_PRIMA_QUE_GANA`)
     no, la puja fuerte sigue como siempre. Ver el bloque junto a
     `la_prima_que_gana_activa` (tambien COMO SE ENCIENDE). Nace APAGADO.
 
+LA ORDEN MANDA EN EL CAMBIO (03/11/2026, `BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO`)
+
+    El 03/11 la mejora pujo por Adrian Nino y apunto «entra Adrian, sale
+    Boye»; el dueno dijo Roberto. Si la orden del gestor ficha a Adrian
+    (su puja sustituye a la de la mejora) y vende por el a otro
+    (`vender_si_ficha` Roberto), la mejora guardaba su cambio (la puja
+    por Adrian seguia viva): al llegar Adrian se vendian Roberto Y Boye, y
+    la caja de la jornada contaba las dos ventas contra una sola puja.
+    Con el interruptor, si el que entra por un cambio del libro esta en
+    `fichar` de la orden viva, el cambio es de la orden: la mejora lo
+    suelta en su SALIDA (el que iba a salir vuelve a ser uno mas), su caja
+    no cuenta esa venta, no lo vuelve a apuntar mientras este en `fichar`
+    y lo dice (`LA_ORDEN_MANDA: suelta ...`). Ver el bloque junto a
+    `la_orden_manda`. Nace APAGADO.
+
 QUE NO HACE
 
     No toca a Yamal (salvo su llave de lesión), ni a los `proteger` de la
@@ -231,6 +246,7 @@ ENV_LA_JORNADA_DE_CADA_PAGINA = "BORDALAS_LA_JORNADA_DE_CADA_PAGINA"   # nace AP
 ENV_A_LA_SALIDA = "BORDALAS_LA_MEJORA_A_LA_SALIDA"          # nace APAGADO
 ENV_EL_RELEVO = "BORDALAS_EL_RELEVO_NO_SE_VENDE"            # nace APAGADO
 ENV_LA_PRIMA_QUE_GANA = "BORDALAS_LA_PRIMA_QUE_GANA"        # nace APAGADO
+ENV_LA_ORDEN_MANDA = "BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO"   # nace APAGADO
 RAIZ = Path(__file__).parents[2]
 LIBRO = RAIZ / "data" / "trading" / "la_mejora.json"
 # El tablero de FF (`futbolfantasy_provider.BOARD_FILE`), para LA JORNADA
@@ -957,6 +973,135 @@ def los_que_entran(libro=None, *, ruta=None, plantilla=None) -> frozenset:
         return frozenset()
 
 
+# LA ORDEN MANDA EN EL CAMBIO (03/11/2026, `BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO`;
+# la supervision del 03/11 12:20 y la revision encendida de LA PRIMA QUE
+# GANA)
+#
+# EL FALLO. Un cambio de este libro es «X entra por B» ({X: {"sale": B}}).
+# Si el gestor coge a X con la orden (`fichar` X: su puja SUSTITUYE a la
+# de la mejora, `la_orden_del_gestor.decidir`) y vende por el a OTRO
+# (`vender_si_ficha` A con `si_esta` X), la mejora no soltaba su cambio:
+# su SALIDA (5. de `decidir`) lo guarda mientras haya una puja viva por
+# X, y la hay (la de la orden). Al llegar X se vendian A (la orden) y B
+# (la mejora) por un solo fichaje; `la_caja_de_la_jornada` contaba las
+# dos ventas contra la misma puja (la mejora podia gastar dinero que no
+# existe); y el cierre, el parte, la rotacion y el motor viejo seguian
+# viendo a B de salida por X. El 03/11 (Adrian Nino: la mejora por Boye,
+# el dueno por Roberto) el gestor lo hizo en dos pasos: Adrian a
+# `no_pujar` para que la mejora soltara el cambio, y `fichar` una vuelta
+# despues.
+#
+# LA REGLA. Con el interruptor, si X esta en `fichar` de la orden VIVA
+# (encendida, `BORDALAS_LA_ORDEN_DEL_GESTOR`, y valida a `ahora`,
+# `la_orden_del_gestor.validar`: la que de verdad puja por X), el cambio
+# es de la orden:
+#
+#     - `decidir` lo suelta en su SALIDA (`soltar`), antes de mirar si X
+#       llego o si su puja sigue viva: B vuelve a ser uno mas (ni se
+#       publica ni se cobra por X) y el plan lo dice
+#       (`plan["la_orden_manda"]`, con la linea «LA_ORDEN_MANDA: suelta X
+#       por B», que `main` imprime). Soltar no escribe en Biwenger:
+#       tambien en la zona de silencio y con la jornada en curso;
+#     - `la_caja_de_la_jornada` no cuenta la venta de B por X: por el
+#       fichaje cuenta solo lo que vende la orden (y si la orden no vende
+#       a nadie, la caja paga la puja entera);
+#     - la mejora no vuelve a apuntar a X mientras este en `fichar` (ya es
+#       de `pendientes`: ni puja por el ni lo adopta);
+#     - lo que lee el libro (el cierre, `la_mejora`; el relevo; la
+#       rotacion y el motor viejo, `los_que_otros_venden`) ya no ve el
+#       cambio desde que `correr` reescribe el libro en esa vuelta. El
+#       cierre, el parte y la rotacion corren despues: la misma vuelta.
+#       El motor viejo corre antes: lo ve una vuelta mas como mucho.
+#
+# SIN FANTASMAS. Quitado `fichar` con la puja aun viva, X es uno mas: el
+# libro ya no lo tiene, la mejora no puja por el (ya hay puja nuestra) y,
+# si llega, no vende a nadie por el. Con la orden apagada, caducada, que
+# no vale o que no ficha a X, nada cambia: el cambio sigue siendo de la
+# mejora, como siempre.
+#
+# QUIEN DECIDE «LA ORDEN MANDA»: `la_orden_manda`, una vez por vuelta,
+# desde `correr`; la caja y `decidir` reciben lo que dice
+# (`manda_la_orden`). El interruptor se lee en UN sitio
+# (`la_orden_manda_activa`, solo desde `la_orden_manda`) y vale lo mismo
+# que el paso 0, el tablon y el ensayo dan por encendido (`ENCENDIDA`).
+#
+# Nace APAGADO. Apagado, `la_orden_manda` da vacio sin mirar nada, y
+# `decidir`, `la_caja_de_la_jornada` y `correr` son main byte a byte
+# (`test_la_orden_manda_en_el_cambio_v1`, una huella por version de
+# Python).
+
+def la_orden_manda_activa() -> bool:
+    """`BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO`, leido al llamarse y solo
+    desde `la_orden_manda`. Encendido con lo que el paso 0 da por
+    encendido (`ENCENDIDA`); cualquier otra cosa, apagado. Nace APAGADO.
+    Nunca lanza."""
+    try:
+        return str(os.environ.get(ENV_LA_ORDEN_MANDA, "")).strip().lower() in ENCENDIDA
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def la_orden_manda(orden, libro, ahora=None) -> frozenset:
+    """
+    LA ORDEN MANDA EN EL CAMBIO: los que ENTRAN por un cambio de `libro`
+    (sus claves, como enteros) que la orden del gestor esta fichando: en
+    `fichar` de `orden`, con la orden encendida y valida a `ahora`
+    (`la_orden_del_gestor.activa` y `validar`). Esos cambios son de la
+    orden: la mejora los suelta y su caja no cuenta su venta (ver el
+    bloque de arriba). Es el UNICO sitio que lo decide.
+
+    Apagado, vacio sin mirar nada mas. Sin orden, sin libro, sin hora (un
+    `datetime`; sin zona, UTC), con la orden apagada, caducada o que no
+    vale, o con basura: vacio (lo de siempre). Pura salvo el entorno (el
+    interruptor y el de la orden). Nunca lanza.
+    """
+    try:
+        if not la_orden_manda_activa():
+            return frozenset()
+        if not isinstance(orden, dict) or not isinstance(libro, dict) or not libro:
+            return frozenset()
+        if not isinstance(ahora, datetime):
+            return frozenset()
+        if ahora.tzinfo is None:
+            ahora = ahora.replace(tzinfo=timezone.utc)
+        from src.actions import la_orden_del_gestor as _la_orden
+
+        if not _la_orden.activa() or _la_orden.validar(orden, ahora) is not None:
+            return frozenset()
+        fichar = set()
+        for f in orden.get("fichar") or []:
+            pid = _int(f.get("player_id")) if isinstance(f, dict) else None
+            if pid is not None:
+                fichar.add(pid)
+        return frozenset(e for e in (_int(k) for k in libro)
+                         if e is not None and e in fichar)
+    except Exception:                               # noqa: BLE001
+        return frozenset()
+
+
+def _el_cambio_cedido(entra, sale, cambio, liga) -> dict:
+    """Lo que el plan dice de un cambio que la mejora suelta porque manda
+    la orden: quien entra y quien sale (con su nombre de `liga`), la puja
+    apuntada y la linea para el log. Pura, nunca lanza."""
+    try:
+        def _nombre(pid):
+            ficha = (liga or {}).get(pid) if isinstance(liga, dict) else None
+            nombre = ficha.get("name") if isinstance(ficha, dict) else None
+            return str(nombre) if nombre else f"jugador {pid}"
+
+        de_entra, de_sale = _nombre(entra), _nombre(sale)
+        return {
+            "entra": entra, "entra_nombre": de_entra, "sale": sale, "sale_nombre": de_sale,
+            "puja": _int((cambio if isinstance(cambio, dict) else {}).get("puja")),
+            "linea": (f"LA_ORDEN_MANDA: suelta {de_entra} ({entra}) por {de_sale} "
+                      f"({sale}): lo ficha la orden del gestor, que vende a quien ella "
+                      f"diga; {de_sale} ya no sale por el"),
+        }
+    except Exception:                               # noqa: BLE001
+        return {"entra": entra, "sale": sale,
+                "linea": f"LA_ORDEN_MANDA: suelta {entra} por {sale}"}
+
+
 def _int(x, defecto=None):
     try:
         if x is None or isinstance(x, bool):
@@ -1225,7 +1370,7 @@ def decidir(
     en_curso=False, calendario_de_puntos=None, probabilidades=None,
     estados=None, vendidos=frozenset(), puja_fuerte=None, solo_si_sube=False,
     en_9900=False, de_otra_jornada=frozenset(), a_la_salida=False,
-    hucha=None, prima_que_gana=False,
+    hucha=None, prima_que_gana=False, manda_la_orden=frozenset(),
 ) -> dict:
     """
     Qué hace la mejora del once en esta vuelta. Pura.
@@ -1324,9 +1469,18 @@ def decidir(
                     no podia pujar, por que
                     (`plan["prima_que_gana_quieta"]`, `la_prima_quieta`).
                     False (lo de siempre): byte a byte lo de antes.
+        manda_la_orden  LA ORDEN MANDA EN EL CAMBIO (03/11/2026): {id} de
+                    los que entran por un cambio del libro que la orden
+                    viva esta fichando (lo que da `la_orden_manda`). Esos
+                    cambios se sueltan en la SALIDA (el que iba a salir
+                    vuelve a ser uno mas) y van en
+                    `plan["la_orden_manda"]` ({entra, sale, sus nombres,
+                    puja, linea}), tambien en la zona de silencio. Vacio
+                    (lo de siempre): byte a byte lo de antes.
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
+    cedidos = []
     plantilla = foto.get("plantilla") or set()
     if vendidos:
         plantilla = set(plantilla) - set(vendidos)
@@ -1341,6 +1495,13 @@ def decidir(
         entra, sale = _int(k), _int(c.get("sale"))
         if sale not in plantilla:
             soltar.append(k)                         # ya vendido
+            continue
+        # LA ORDEN MANDA EN EL CAMBIO (03/11/2026): el que entra lo ficha
+        # la orden viva; el cambio es suyo y el que sale ya no sale por el
+        # (ver el bloque junto a `la_orden_manda`). Vacio: lo de siempre.
+        if manda_la_orden and entra in manda_la_orden:
+            soltar.append(k)
+            cedidos.append(_el_cambio_cedido(entra, sale, c, liga))
             continue
         if entra not in plantilla:
             if entra not in (foto.get("nuestras_pujas") or {}):
@@ -1392,6 +1553,8 @@ def decidir(
         plan["calendario"] = el_plan_del_calendario(calendario_de_puntos)
     if frenadas:
         plan["frenadas"] = frenadas
+    if cedidos:
+        plan["la_orden_manda"] = cedidos
     if not puede_escribir or horas_jornada is None or horas_jornada < HORAS_SIN_COMPRAR:
         if prima_que_gana:
             # LA PRIMA QUE GANA: encendida y sin poder pujar, lo dice.
@@ -1656,6 +1819,8 @@ def decidir(
             plan["calendario"]["frenados_por_el_margen"] = frenados_por_el_margen
     if frenadas:
         plan["frenadas"] = frenadas
+    if cedidos:
+        plan["la_orden_manda"] = cedidos
     if solo_si_sube:
         plan["sin_subir"] = sin_subir
     if a_la_salida:
@@ -1927,7 +2092,7 @@ def las_ventas_de_la_orden(orden, *, plantilla, pujadas, mercado=None) -> list:
 
 
 def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
-                          esta_vuelta=None) -> int:
+                          esta_vuelta=None, manda_la_orden=frozenset()) -> int:
     """
     La caja de la jornada como la monta `correr`: `la_caja` con el
     inventario de la ronda y los chollos y las ventas pendientes (las de
@@ -1948,6 +2113,12 @@ def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
     puja se resta solo si el jugador sigue en el mercado del Computer (la
     orden puede volver a pujar): perdido ante un rival, ya no se paga. Un
     mercado vacío es no saberlo: se resta, como antes. Pura.
+
+    LA ORDEN MANDA EN EL CAMBIO (03/11/2026): `manda_la_orden` ({id} de
+    `la_orden_manda`) son los que entran por un cambio del libro que la
+    orden viva esta fichando. Ese cambio ya no es de la mejora: la venta
+    del que salia por el no cuenta (por ese fichaje, solo lo que vende la
+    orden). Vacio (sin pasarlo): lo de antes, byte a byte.
     """
     esta = esta_vuelta or {}
     vendidos = set(esta.get("cobros") or {})
@@ -1991,6 +2162,10 @@ def la_caja_de_la_jornada(foto: dict, *, liga, orden, libro, solos, inventario,
     por_el_que_sale = {}
     for k, c in (libro or {}).items():
         sale, entra = _int(c.get("sale")), _int(k)
+        # LA ORDEN MANDA EN EL CAMBIO: el cambio cuyo que entra ficha la
+        # orden es de la orden; su venta, la que ella diga (arriba).
+        if manda_la_orden and entra in manda_la_orden:
+            continue
         if sale not in plantilla or sale in de_la_orden:
             continue
         if not (entra in plantilla or entra in pujadas):
@@ -2327,9 +2502,15 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
         solos = ({_int(k) for k in libro_chollos} if cartera else libros)
 
         libro = _leer(libro_ruta or LIBRO, {})
+        # LA ORDEN MANDA EN EL CAMBIO (03/11/2026), solo con su interruptor:
+        # los cambios del libro cuyo que entra ficha la orden viva. Se
+        # decide aqui, una vez por vuelta, y lo usan la caja y `decidir`.
+        # Apagado (o sin ninguno), ni se pasa: lo de siempre.
+        manda = la_orden_manda(orden, libro, ahora)
+        con_la_orden = {"manda_la_orden": manda} if manda else {}
         caja = la_caja_de_la_jornada(
             foto, liga=liga, orden=orden, libro=libro, solos=solos,
-            inventario=inventario, esta_vuelta=esta_vuelta,
+            inventario=inventario, esta_vuelta=esta_vuelta, **con_la_orden,
         )
         # El saldo de la foto, con lo ya cobrado en esta vuelta (para el
         # suelo en rojo y el parte del relevo).
@@ -2408,6 +2589,7 @@ def correr(status=None, snapshot=None, v10=None, escritor_factory=None,
             vendidos=vendidos,
             de_otra_jornada=de_otra_jornada,
             prima_que_gana=la_prima_que_gana_activa(),
+            **con_la_orden,
             **con_la_hucha,
         )
         salida["acciones"], salida["plan"] = d["acciones"], d["plan"]
@@ -2525,6 +2707,8 @@ def main() -> int:
         print(f"  lo de esta vuelta, sin contar: {r['v10_descartado']}")
     for f in plan.get("frenadas") or []:
         print(f"  frenada {f.get('guardia')} {f.get('player_id')}: {f.get('motivo')}")
+    for c in plan.get("la_orden_manda") or []:
+        print(f"  {c.get('linea')}")
     for a in r.get("acciones") or []:
         print(f"  -> {a.get('accion')} {a.get('player_id')} {a.get('importe') or a.get('precio')}")
     for h in r.get("hechas") or []:
