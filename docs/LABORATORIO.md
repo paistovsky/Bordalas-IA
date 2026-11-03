@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E80 · 03/11/2026 17:16 de Madrid · Adrian Nino a +12,1 %: una moneda al aire
+### E80 · 03/11/2026 17:15 de Madrid · Adrian Nino a +12,1 %: una moneda al aire
 
 **El caso:** la orden puja 4.909.900 (+12,1 % sobre su precio) por Adrian
 Nino, que sube ~4 % al dia; se resuelve mañana mie 07:00, a 62 h de la
