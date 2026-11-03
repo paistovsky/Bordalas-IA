@@ -103,6 +103,8 @@ ENV_MEJORA = "BORDALAS_LA_MEJORA_DEL_ONCE"
 for _nombre in (
     ENV, ENV_CIERRE, ENV_PARTE, ENV_ORDEN, ENV_CARTERA, ENV_ROTACION, ENV_MEJORA,
     "BORDALAS_LA_PUJA_EN_9900", "GITHUB_RUN_ID",
+    # LA PRIMA QUE GANA (03/11/2026): la puja de la mejora, la de siempre.
+    "BORDALAS_LA_PRIMA_QUE_GANA",
 ):
     os.environ.pop(_nombre, None)
 

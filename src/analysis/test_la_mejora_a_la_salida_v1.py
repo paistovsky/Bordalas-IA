@@ -341,7 +341,9 @@ def _correr(subida):
 def test_correr_lo_lee_del_entorno():
     comunes = {mejora.ENV: "1", mejora.ENV_CALENDARIO: None, mejora.ENV_PUJA_FUERTE: None,
                "BORDALAS_LA_CARTERA": None, mejora.ENV_SOLO_SI_SUBE: None,
-               mejora.ENV_LA_JORNADA_DE_CADA_PAGINA: None, "GITHUB_RUN_ID": None}
+               mejora.ENV_LA_JORNADA_DE_CADA_PAGINA: None, "GITHUB_RUN_ID": None,
+               # LA PRIMA QUE GANA (03/11/2026): mide la puja de siempre.
+               "BORDALAS_LA_PRIMA_QUE_GANA": None}
     casos = (
         ({ENV_A_LA_SALIDA: None, mejora.ENV_PUJA_EN_9900: "1"}, -10_000, 2_029_900),
         ({ENV_A_LA_SALIDA: "1", mejora.ENV_PUJA_EN_9900: "1"}, -10_000, 2_009_900),

@@ -830,6 +830,8 @@ def _correr(encendido, tablero=None, de_otra=None, avisos=None):
         mejora.ENV: "1", mejora.ENV_CALENDARIO: None, mejora.ENV_PUJA_FUERTE: None,
         mejora.ENV_PUJA_EN_9900: None, mejora.ENV_SOLO_SI_SUBE: "1",
         "BORDALAS_LA_CARTERA": None,
+        # LA PRIMA QUE GANA (03/11/2026): mide quien entra, no la puja.
+        "BORDALAS_LA_PRIMA_QUE_GANA": None,
     }
     with tempfile.TemporaryDirectory() as carpeta, base._interruptores(interruptores), \
             _interruptor("1" if encendido else None):

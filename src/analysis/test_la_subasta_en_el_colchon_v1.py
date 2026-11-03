@@ -137,6 +137,9 @@ DE_LA_CESTA = (
     # vuelta de v10 cambian (la cesta se cierra si no cabe en lo libre y
     # los motores reciben la hucha). Esta guardia mide el colchon.
     "BORDALAS_LA_HUCHA",
+    # LA PRIMA QUE GANA (03/11/2026): con ella, la puja de la mejora por
+    # el que sube cambia. Esta guardia mide el colchon.
+    "BORDALAS_LA_PRIMA_QUE_GANA",
 )
 for _nombre in DE_LA_CESTA:
     os.environ.pop(_nombre, None)
