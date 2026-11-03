@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/11/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 03/11/2026, 12:20 de Madrid (supervision y encendido del parte vende).
 
 ## El mandato
 
@@ -351,6 +351,46 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/11 12:20 (supervision de las 08:22 y encendido de las 10:30).
+  ENCENDIDO: EL PARTE VENDE. PUJA POR ADRIAN NINO (sale Roberto si llega).**
+  **Lo que hizo Pepe solo:** vendio a Pablo (2.505.300, la orden) y a Unai
+  (2.851.800, la mejora) a las 00:07, a Gaya (1.782.000, la mejora) y a
+  Ortiz (191.400, la ronda; comprado a 219.900: -28.500) a las 07:15.
+  Plantilla de 12, saldo -164.276; premio de la J11 (~2,13 M) hoy ~17:05.
+  **Adrian Nino** (lista de objetivos) salio hoy en el Computer a 4.380.000
+  (+170 mil/dia, FF 80 %). La mejora pujo sola 4.429.900 (+1,1 %, gana un
+  3-6 %: las 13 salidas de titulares que suben tuvieron puja rival) y
+  emparejo a **Boye**. El dueno dijo **Roberto**. Plan, mecanica y
+  esceptico (APPROVE_WITH_CHANGES): si la orden sustituye la puja en un solo
+  paso, la mejora no suelta su cambio y se venderian Roberto Y Boye
+  (la_mejora_del_once.py:1068-1076; ni conservar ni proteger frenan su
+  SALIDA). **Paso A** (08:55): Adrian a no_pujar (CANCELAR_PUJA a las 09:07,
+  exito 204; a las 10:07 0 comprometido y la mejora sin cambio), Boye a
+  proteger hasta el lun 09/11, Ramon de proteger a conservar (Unai vendido),
+  vender_si_ficha Roberto con si_esta Adrian (suelo 6.200.000; red desde el
+  vie 07:00 con saldo en rojo). **Paso B** (10:18): fichar Adrian a
+  **4.909.900** (+12,1 %, la prima de la liga; gana ~30-40 %), puesta a las
+  11:07 (exito 200); la mejora sigue en -164.276, sin deficit. Se resuelve
+  el mie 07:00. J12 (vie 15:00): ganado y Roberto vendido ~+4,3 M; perdido
+  +2,2 M. Los 7.474.000 por Roberto caducan antes (no se cobran).
+  **Encendido BORDALAS_EL_PARTE_VENDE** (04840bd8): dos revisiones
+  adversariales OK_TO_SWITCH_ON (no vende a nadie en ningun escenario hasta
+  el vie 20:07), ensayo #41611727643 verde (NADA_QUE_HACER, once de 11),
+  paso 0 PASADO con 62, verja 232/232 con 26 en 3.11 y 3.13. Primera
+  vuelta (12:07, #41624874403): verde, NADA_QUE_HACER; su salida va en
+  data/trading/el_parte_vuelta.txt del artefacto. Marcha atras: quitar la
+  linea del YAML.
+  **Pendiente:** mie 08:22, si se gana a Adrian, pasarlo de fichar a
+  conservar (nunca borrarlo sin mas: el parte podria venderlo desde el
+  11/11) y mirar que el once guardado cambie a Roberto por Adrian antes del
+  vie 20:45; si se pierde, limpiar fichar y vender_si_ficha. Lun 09/11:
+  Boye fuera de proteger; decidir si Iglesias y Dani Lorenzo van a
+  conservar (desde el 09/11 00:07 el parte puede venderlos si se ponen en
+  duda y salen de los dos onces). Renovar `caduca` de la orden entre el
+  24 y el 26/11. Ojo: test_la_hucha_v1.py:2134 escribe
+  "BORDALAS_UNO_QUE_NO_EXISTE" en literal (el paso 0 lo cuenta como
+  probado; arreglarlo con PREFIJO + ...).
 
 - **03/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2676 a #2685,
   la de las 07:15 incluida). **Vendidos Pablo Ibanez y Unai Lopez** (ya no
