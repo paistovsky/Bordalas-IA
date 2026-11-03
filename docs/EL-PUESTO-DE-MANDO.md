@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/11/2026, 21:35 de Madrid (rafaga de las 21:15).
+Actualizado: 03/11/2026, 22:30 de Madrid (laboratorio de rivales de la noche).
 
 ## El mandato
 
@@ -351,6 +351,68 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/11 22:30 (laboratorio de rivales de la noche). FUSIONADA, APAGADA:
+  LA ORDEN MANDA EN EL CAMBIO.**
+  **Rivales (10:07-20:07):** dos ventas al Computer, ningun traspaso entre
+  managers y ninguna oferta por los nuestros. Pollo vende a Brugue por
+  5.044.800 (+4,9 %; se lo compro a Luismi por 700.000 el 28/08: +4,34 M
+  en 67 dias, y era suplente) y Luismi a Sannadi por 280.900. Luismi quita
+  de la venta sus 16 (el mie no recibe ofertas); Pollo sube 1 M a
+  Mikautadze, Gabriel Jesus e Ivan Romero. Premio J11: nosotros 73 pts
+  (2.190.000), Pollo 69, Luismi 66; general Pollo 501, **nosotros 495 (a
+  6)**, Luismi 454. Cajas de las 20:07 (cuadran al euro): Alvaro 19,22 M,
+  nosotros +2,03, Luismi -6,55, **Pollo -9,68 M** (le basta vender a
+  Rodri, 17,12 M, suplente y ya en venta). Patrimonio: Pollo 118,19 M,
+  Luismi 101,07, Manzagool 70,86, nosotros 62,29 (a 55,91 M). Pujas
+  maximas: Alvaro 26,95, Pollo 22,29, Luismi 20,36, Manzagool 18,61;
+  nosotros 8,00 (17,09 menos 9,09 ya pujados).
+  **Leccion:** una puja a +1 % por un portero solo gana si nadie lo
+  necesita, y Luismi lo necesita (solo tiene a Fortuno; hoy pujo +5,1 %
+  por Dituro): a Unai Simon (+1,2 %) lo ganamos ~1 de cada 3. Con los que
+  suben, +12 % es lo alto de lo normal, no el techo (Luismi llego a +33 %
+  por Carvajal): Adrian (+12,1 %), riesgo medio.
+  **Nuestras tacticas:** la puja de la mejora por Unai Simon es correcta
+  con esta caja. Con la prima encendida tampoco cabia (la caja quedaba de
+  -0,46 a -0,71 M), y la prima no se paga (+1,04 pts x 27 jornadas, ~0,55
+  M, contra 0,45-0,70 M de prima). No la subo. Correccion a la bitacora:
+  renovar no mato las ofertas (Roberto renovado a las 14:12 y Gulacsi a
+  las 15:10, con su oferta viva). El parte vende, 9 vueltas desde que se
+  encendio: NADA_QUE_HACER, once intacto. La publicacion por liquidez puso
+  a la venta a Ivan Martin, Iglesias, Kike Salas y Dani Lorenzo (todos
+  menos Yamal): el mie reciben ofertas; en el camino normal nada las
+  acepta.
+  **Caja de la J12 (vie 15:00, con la racha):** ganadas las dos, +2,30 a
+  +2,79 M; solo Adrian, +4,17 a +4,66; solo Simon, +0,41; ninguna, +2,28.
+  **Para la supervision del mie 08:22:** (a) Roberto sin oferta nueva de
+  6,2 M o mas en el reset (la de hoy caduca justo a las 07:00); (b) si
+  solo entra Simon, la mejora ve -7 a -36 mil (cuenta a Gulacsi al 95 %
+  de su valor, no por su oferta) y puede ponerse en modo deficit; (c)
+  desde el mie 05:00, una puja nueva de la mejora que pase de lo cobrado
+  hace que el cierre venda a Cardona.
+  **El once si llegan los dos:** 3-4-3 con Unai Simon; Iglesias, Kike
+  Salas, Chust; Olasagasti, Ivan Martin, Dani Lorenzo, Ramon; Yamal, Boye,
+  Adrian (Cardona al banquillo). El monitor lo guarda el mie ~08:07, 60 h
+  antes del cierre de alineaciones. EL_ONCE_QUE_SE_PUEDE_ESCRIBIR no
+  cambia este once: se enciende el mie, sin urgencia.
+  **Fusionada APAGADA: LA ORDEN MANDA EN EL CAMBIO
+  (`BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO`).** Arregla la doble venta del
+  03/11: si la orden ficha al que entra por un cambio de la mejora Y vende
+  a alguien por el (`vender_si_ficha` con ese `si_esta`), la mejora suelta
+  su cambio y su caja no cuenta esa venta. Si la orden ficha sin vender a
+  nadie por el, el cambio sigue siendo de la mejora. Revisiones: encendida
+  FIX_FIRST (la regla era mas ancha que el fallo: `fichar` sin vender a
+  nadie dejaba la J12 en rojo), arreglada; apagada SHIP_OFF. Apagada es
+  main byte a byte (9.720 salidas, 0 diferencias en 3.11 y 3.13). Verja
+  234/234 en 3.11 y 3.13, normal y con `--con`. **Encendido:** nunca
+  jue/vie; un solo commit con la linea del YAML, el arreglo del nombre de
+  prueba UNO_QUE_NO_EXISTE (en test_la_hucha_v1 y test_la_prima_que_gana_v1,
+  ANTES del paso 0; parche en el scratch del lab) y el paso 0 sobre ese
+  arbol. **Regla del gestor, encendido:** soltar no se deshace; mientras
+  la puja por X este viva y hasta que salga el que vende la orden, la
+  orden sigue valida y con su `vender_si_ficha` para X.
+  **21:25:** Roberto publicado (la publicacion pasa el reset: vence el jue
+  ~14:12; oferta 7.474.000): nada que hacer.
 
 - **03/11 21:15 (rafaga de la noche).** Ciclos: verdes (#2692 a #2699).
   **Entro el premio de la J11:** saldo **+2.025.724**. Pero hay **DOS
