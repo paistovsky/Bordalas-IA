@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/11/2026, 12:20 de Madrid (supervision y encendido del parte vende).
+Actualizado: 03/11/2026, 13:30 de Madrid (laboratorio de la manana).
 
 ## El mandato
 
@@ -351,6 +351,53 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/11 13:30 (laboratorio de rivales de la manana). FUSIONADA, APAGADA:
+  LA PRIMA QUE GANA.**
+  **Rivales (reset de las 07:00):** Pollo gana a Dituro (portero del Elche)
+  por 2.607.000 (+8,2 %, subia; Luismi +5,1 %, Manzagool +2,5 %); Luismi
+  gana a Sancet por 3.856.000 (+11,8 %, subia; Manzagool +4,3 %, Pollo
+  +0,8 %) y a Ceballos a lo que pedia + 1 euro (bajaba); sin rival, Mex
+  (Dimitrievski +1,1 %) y Manzagool (Boyomo +1,6 %). A precio de hoy todos
+  pierden. Pollo vende al Computer a Febas, Valentin Gomez e Isaac Romero
+  (5,90 M; tenidos 1-3 dias; -436 mil y ni un punto: ninguno en su once) y
+  anuncia a Rodri a 17,16 M (lo pago 21,0 M ayer). Luismi anuncia 16 a
+  ~+20 %; Manzagool, la plantilla entera a valor. Cajas: Alvaro 17,73 M,
+  Prinzipote 3,33, DiosMande 0,51, Mex 0,03, nosotros -0,16, Manzagool
+  -0,46, Luismi -8,81, **Pollo -16,79 M** (con su premio, ~-14,8 M: tiene
+  que vender eso antes del vie 20:59). J11 final: nosotros 71, Pollo 66,
+  Luismi 66; general Pollo 498, **nosotros 493**, Luismi 454. Patrimonio:
+  Pollo 115,89 M, Luismi 99,10, Manzagool 69,21, nosotros 60,10 (a 55,79 M).
+  Pujas maximas: Alvaro 25,46, Luismi 18,17, Manzagool 16,96, Pollo 16,38,
+  nosotros 14,90.
+  **Leccion:** las dos disputadas se ganaron con +8,2 % y +11,8 % y las
+  segundas pujas se quedaron en +4-5 %: nuestro +12,1 % por Adrian esta en
+  la prima, sin margen. Y quien compra en rojo paga despues malvendiendo.
+  **Nuestras tacticas:** la ronda, en su vida, -28.500 (9 pujas, 1 ganada:
+  Ortiz); la puerta, 0 de 2; la mejora perdio en 30 dias 2 pujas a +1 %
+  (Lemar a Pollo, ~5 pts; Catena a Luismi por 21.100). **Riesgo de hoy:**
+  si se gana a Adrian y Roberto no esta publicado en el reset del mie, el
+  cierre (mie 07:15) ve -2,94 M sin credito y vende a Cardona: comprobacion
+  programada a las 21:25.
+  **Fusionada APAGADA: LA PRIMA QUE GANA (`BORDALAS_LA_PRIMA_QUE_GANA`).**
+  La mejora puja por el que entra del Computer, si sube (o no se sabe),
+  pide de 1 a 8 M, el cambio suma 0,5 pts por jornada o mas y faltan 64 h
+  o mas: en_9900(precio x 1,12), o x 1,18 si suma 1 pt o mas; solo si la
+  caja de la jornada no queda en rojo; nunca por encima de la puja maxima
+  ni de lo libre de la hucha; el dia de Raphinha, ninguna. Manda sobre la
+  puja fuerte donde aplica. De nuestras 6 perdidas de 1-8 M en 30 dias,
+  con +12 % se ganaban 5 y con +18 % las 6. Hoy, con la caja de las 07:15,
+  la prima de Adrian no cabia (-6.676) y con la de las 10:07 si (+93.824):
+  la misma puja que puso la orden. Revisiones: encendida OK_TO_SWITCH_ON,
+  apagada SHIP_OFF (tres medios arreglados: lee los mismos valores que el
+  paso 0, el plan dice por que no actua la prima, y solo para cambios de
+  0,5 pts o mas). Apagada es main byte a byte (7.200 llamadas y 129.081
+  salidas, 0 diferencias en 3.11 y 3.13). Verja 233/233 en 3.11 y 3.13,
+  normal y con `--con`. **Encendido:** despues de la J12, nunca jue/vie,
+  con paso 0 sobre el arbol final (63) y un ensayo a 64 h o mas de la
+  jornada (el de las 05:05 no lo prueba). Pendientes: la doble cuenta si
+  la orden coge un jugador por el que ya puja la mejora (tambien en main:
+  se sigue retirando a mano, como hoy); un margen sobre la caja >= 0.
 
 - **03/11 12:20 (supervision de las 08:22 y encendido de las 10:30).
   ENCENDIDO: EL PARTE VENDE. PUJA POR ADRIAN NINO (sale Roberto si llega).**
