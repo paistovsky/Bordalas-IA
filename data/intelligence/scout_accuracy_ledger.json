@@ -2760527,13 +2760527,13 @@
       "price_at_prediction": 1160000,
       "predicted_at": "2026-10-31T01:10:43.109105+00:00",
       "due_at": "2026-11-03T01:10:43.109105+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 1090000,
+      "actual_direction": "DOWN",
+      "actual_percent": -6.034,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-11-03T01:12:02.196020+00:00"
     },
     "4753|PRENSA_MUNDO_DEPORTIVO|3|2026-10-31": {
       "player_id": "4753",
@@ -2760548,13 +2760548,13 @@
       "price_at_prediction": 2610000,
       "predicted_at": "2026-10-31T01:10:49.296865+00:00",
       "due_at": "2026-11-03T01:10:49.296865+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 2410000,
+      "actual_direction": "DOWN",
+      "actual_percent": -7.663,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-11-03T01:12:02.196020+00:00"
     },
     "19244|PRENSA_MUNDO_DEPORTIVO|3|2026-10-31": {
       "player_id": "19244",
@@ -2760569,13 +2760569,13 @@
       "price_at_prediction": 4580000,
       "predicted_at": "2026-10-31T01:10:54.068052+00:00",
       "due_at": "2026-11-03T01:10:54.068052+00:00",
-      "outcome": "PENDING",
-      "price_at_outcome": null,
-      "actual_direction": null,
-      "actual_percent": null,
-      "direction_hit": null,
+      "outcome": "HIT",
+      "price_at_outcome": 4560000,
+      "actual_direction": "DOWN",
+      "actual_percent": -0.437,
+      "direction_hit": true,
       "magnitude_error_percent": null,
-      "scored_at": null
+      "scored_at": "2026-11-03T01:12:02.196020+00:00"
     },
     "742|FUTBOLFANTASY|1|2026-10-31": {
       "player_id": "742",
