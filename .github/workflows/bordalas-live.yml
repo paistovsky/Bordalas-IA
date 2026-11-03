@@ -354,6 +354,25 @@ jobs:
       #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
       BORDALAS_EL_CIERRE_DE_LA_JORNADA: "1"
 
+      # Encendido 03/11 de Madrid. EL PARTE VENDE (paso 4 del laboratorio,
+      #   17/10; arreglado el 21/10, dos veces, y el 27/10; revision final
+      #   del 27/10: seguro; se espero a pasar la J11). Paso propio DESPUES
+      #   del cierre: al suplente que Biwenger da en duda o lesionado lo
+      #   publica a su valor y acepta la oferta del Computer desde el 95 %.
+      #   Nunca a uno del once escrito (el del panel Y el de Biwenger), ni a
+      #   un sancionado, ni a un fichaje hasta que juega una ronda con
+      #   nosotros (y nunca antes de 7 dias; con el tablon atrasado, a
+      #   nadie), ni a Yamal, ni a proteger/conservar/fichar de la orden, ni
+      #   a lo que vende la orden (vender_si_ficha: Roberto), ni a lo que
+      #   aguanta la cartera, ni con la ronda jugandose. Sin la orden del
+      #   gestor encendida y valida (caduca el 30/11), a nadie. Lo que dice
+      #   queda en data/trading/el_parte_vuelta.txt (artefacto). Dos
+      #   revisiones adversariales del 03/11: OK_TO_SWITCH_ON.
+      #   Verja 232/232 con los de produccion y con el nuevo; paso 0 con 62;
+      #   ensayo #41611727643 verde (NADA_QUE_HACER, once de 11).
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_EL_PARTE_VENDE: "1"
+
       # Encendido 29/09 de Madrid. LA REVISION DE LAS PUJAS VIVAS.
       #
       #   En la ventana del reset retira nuestras pujas por jugadores que
@@ -650,14 +669,17 @@ jobs:
         run: |
           python -m src.actions.el_cierre_de_la_jornada || true
       # EL PARTE VENDE (17/10/2026, paso 4 del laboratorio). DESPUES del
-      #   cierre: vende al suplente en duda, lesionado o sancionado desde el
-      #   95 % de su valor (lo publica si no lo esta); nunca uno del once
-      #   escrito, ni con la ronda jugandose. APAGADO:
-      #   `BORDALAS_EL_PARTE_VENDE`. Nunca rompe la vuelta.
+      #   cierre: vende al suplente en duda o lesionado (al sancionado no,
+      #   desde el 21/10) desde el 95 % de su valor (lo publica si no lo
+      #   esta); nunca uno del once escrito, ni con la ronda jugandose.
+      #   APAGADO: `BORDALAS_EL_PARTE_VENDE`. Nunca rompe la vuelta (el
+      #   `|| true` cubre la tuberia entera: el paso corre con pipefail).
+      #   Lo que dice queda en data/trading/el_parte_vuelta.txt para el
+      #   artefacto, como la rotacion.
       - name: El parte vende
         shell: bash
         run: |
-          python -m src.actions.el_parte_vende || true
+          python -m src.actions.el_parte_vende 2>&1 | tee data/trading/el_parte_vuelta.txt || true
       # LA ROTACION (17/10/2026, laboratorio de la rotacion). DESPUES del
       #   parte: cambia al que lleva 2 dias sin subir por uno de su posicion
       #   que sube y puntua igual o mas (2 por ventana y por semana, con la
@@ -751,6 +773,7 @@ jobs:
             data/trading/la_rotacion_vuelta.txt
             data/trading/la_ronda.json
             data/trading/el_cierre.json
+            data/trading/el_parte_vuelta.txt
             dashboard/data/status.json
           if-no-files-found: ignore
           retention-days: 2
