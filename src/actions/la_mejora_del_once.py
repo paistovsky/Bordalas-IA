@@ -187,12 +187,14 @@ LA PRIMA QUE GANA (03/11/2026, `BORDALAS_LA_PRIMA_QUE_GANA`)
     Computer que ganaron los rivales en 30 dias, el ganador pago +11,5 %
     de mediana sobre lo que pedia (p75 +18,3 %); de nuestras 7 disputadas
     perdidas, con +12 % habriamos ganado 6. Con el interruptor, por el del
-    Computer que SUBE hoy (o del que no se sabe) y pide de 1 a 8 M, a 64 h
-    o mas de la jornada, la mejora puja `en_9900(precio x 1,12)` (x 1,18
-    si el cambio suma 1 punto por jornada o mas), nunca por debajo de la
-    de siempre, y solo si, ganado ese cambio, la caja de la jornada queda
-    >= 0; si no, la de siempre. Manda sobre LA PUJA FUERTE donde toca.
-    Ver el bloque junto a `la_prima_que_gana_activa`. Nace APAGADO.
+    Computer que SUBE hoy (o del que no se sabe) y pide de 1 a 8 M, en un
+    cambio que suma 0,5 puntos por jornada o mas, a 64 h o mas de la
+    jornada, la mejora puja `en_9900(precio x 1,12)` (x 1,18 si el cambio
+    suma 1 punto por jornada o mas), nunca por debajo de la de siempre, y
+    solo si, ganado ese cambio, la caja de la jornada queda >= 0; si no,
+    la de siempre. Donde toca la prima, manda sobre LA PUJA FUERTE; donde
+    no, la puja fuerte sigue como siempre. Ver el bloque junto a
+    `la_prima_que_gana_activa` (tambien COMO SE ENCIENDE). Nace APAGADO.
 
 QUE NO HACE
 
@@ -585,8 +587,12 @@ def con_puja_fuerte(cambio: dict, precio) -> dict:
 # `en_9900(precio x 1,18)` si el cambio suma `PUNTOS_DE_LA_PRIMA_FUERTE`
 # o mas por jornada (`la_puja_de_la_prima`): nunca por debajo de lo que
 # pide ni de la puja de siempre. Solo a `HORAS_DE_LA_PRIMA` o mas de la
-# jornada (dos resets por delante para arreglar lo que salga mal). Por
-# debajo de 1 M, por encima de 8 M, el que no sube, lo que ya es nuestro
+# jornada (dos resets por delante para arreglar lo que salga mal), y solo
+# en un cambio que mejora de verdad: `GANANCIA_MINIMA` (0,5) o mas por
+# jornada. El cambio pequeno que entra para financiar a otro (de -1,5 a
+# 0,5) va por su caja, no por el jugador: con prima daria menos caja a lo
+# que de verdad mejora (revision del 03/11). Por debajo de 1 M, por
+# encima de 8 M, el que no sube, el cambio pequeno, lo que ya es nuestro
 # y a menos de 64 h: lo de siempre.
 #
 # La caja. Cada cambio que puede llevar la prima entra en la combinacion
@@ -603,15 +609,45 @@ def con_puja_fuerte(cambio: dict, precio) -> dict:
 # nunca hace perder un cambio. La puja elegida es la de todo: la `caja`
 # del cambio, la `caja_despues`, el importe del PUJAR y lo que `correr`
 # apunta en el libro. El plan dice a quien se puja con prima
-# (`plan["prima_que_gana"]`: {id: prima}) y a quien no le cupo
-# (`plan["prima_que_no_cabe"]`: ids, solo si hay).
+# (`plan["prima_que_gana"]`: {id: prima}), a quien no le cupo
+# (`plan["prima_que_no_cabe"]`: ids, solo si hay) y, si en esta vuelta
+# la prima no podia pujar, por que (`plan["prima_que_gana_quieta"]`:
+# no se escribe, fuera de la ventana de comprar, a menos de 64 h o el
+# dia del jugador de la hucha). `main` lo dice siempre que esta
+# encendida: un ensayo que no la ve actuar lo dice, no sale verde mudo.
 #
-# Manda sobre LA PUJA FUERTE (que queda como esta para cuando este
-# interruptor esta apagado): donde toca la prima, la prima (nunca por
-# debajo de la fuerte); donde no toca, o no cabe, la fuerte como siempre.
-# Con LA MEJORA A LA SALIDA no se cruza (es para el que no sube). LA
-# HUCHA: el dia de su jugador (`en_juego`), ninguna prima; lo libre y el
+# LA PUJA FUERTE (`BORDALAS_LA_MEJORA_PUJA_FUERTE`, apagada, queda como
+# esta): la prima manda sobre ella SOLO donde toca la prima (nunca por
+# debajo de la fuerte). Donde no toca (el que no sube, menos de 1 M, mas
+# de 8 M, el cambio pequeno, a menos de 64 h) o no cabe, la fuerte puja
+# como siempre (hasta +13 %, a miles) y sigue apagando LA MEJORA A LA
+# SALIDA. Las dos juntas no estan medidas: la fuerte, fuera del YAML. Con
+# LA MEJORA A LA SALIDA no se cruza (es para el que no sube). LA HUCHA:
+# el dia de su jugador (`en_juego`), ninguna prima; lo libre y el
 # deficit, como siempre.
+#
+# EL INTERRUPTOR se lee en UN sitio (`la_prima_que_gana_activa`, desde
+# `correr`) y vale lo mismo que el paso 0, el tablon y el ensayo dan por
+# encendido (`el_paso_0.ENCENDIDO`: "1", "true", "si", "sí", "yes",
+# "on"): lo que el panel dice encendido, la mejora lo corre encendido.
+#
+# COMO SE ENCIENDE (revisiones del 03/11):
+#   1. Un solo commit: `BORDALAS_LA_PRIMA_QUE_GANA: "1"` en el YAML, el
+#      `config/paso_0.json` que deja `python scripts/run_validation_gate.py
+#      --paso-0` sobre ese mismo arbol y la verja normal en 3.11 y 3.13.
+#      Sin el paso 0, `test_el_paso_0_no_se_olvida_v1` pone roja la verja
+#      de la vuelta y no corre nada. Un interruptor cada vez.
+#   2. El ensayo, a 64 h o mas de la jornada y fuera de la zona de
+#      silencio (04:45-07:00 de Madrid): vale solo si la mejora dice "con
+#      la prima que gana" o "sin la prima que gana"; si dice "quieta", no
+#      ha probado nada. Para la J12 (vie 06/11 21:00) la ventana acaba el
+#      mie 04/11 a las 05:00; si no, en el paron (10-17/11).
+#   3. Las pujas de la mejora ya vivas (+1 %) no suben: la mejora no
+#      vuelve a pujar por quien ya tiene puja nuestra. Se dejan o se
+#      retiran a mano para que la vuelta siguiente puje con la prima.
+#   4. La caja >= 0 es la de la mejora (el que sale, al 95 %). Si se
+#      vende peor o tarde, la jornada puede empezar algo en rojo y el
+#      cierre vende; con el premio de la jornada, no.
 #
 # Nace APAGADO. Apagado, `decidir` y `la_mejor_combinacion` son byte a
 # byte los de antes.
@@ -623,12 +659,19 @@ PRIMA_HASTA = 8_000_000
 HORAS_DE_LA_PRIMA = 64
 
 
+# Lo que vale como encendido: lo mismo que `el_paso_0.ENCENDIDO` (el
+# paso 0, el tablon, el panel y el ensayo). Escrito aqui para no importar
+# nada al leerlo; `test_la_prima_que_gana_v1` mira que sean iguales.
+ENCENDIDA = frozenset({"1", "true", "si", "sí", "yes", "on"})
+
+
 def la_prima_que_gana_activa() -> bool:
     """`BORDALAS_LA_PRIMA_QUE_GANA`, leido como `activa` (al llamarse,
-    solo desde `correr`). Nace APAGADO. Nunca lanza."""
+    solo desde `correr`). Encendida con lo que el paso 0 da por
+    encendido (`ENCENDIDA`); cualquier otra cosa, apagada. Nace APAGADO.
+    Nunca lanza."""
     try:
-        return str(os.environ.get(ENV_LA_PRIMA_QUE_GANA, "")).strip().lower() in {
-            "1", "true", "si", "yes"}
+        return str(os.environ.get(ENV_LA_PRIMA_QUE_GANA, "")).strip().lower() in ENCENDIDA
     except Exception:                               # noqa: BLE001
         return False
 
@@ -663,16 +706,23 @@ def la_puja_de_la_prima(precio, puntos, de_siempre=None) -> int | None:
 
 def con_la_prima(cambio, precio, ficha, horas_jornada) -> dict | None:
     """La otra cara de `cambio` con LA PRIMA QUE GANA, o None si no le
-    toca: lo que ya es nuestro, sin puja, el que no sube hoy (`ficha`, la
-    de `todaLaLiga`: `la_subida_de_hoy` sabida y <= 0), lo que pide
-    (`precio`) fuera de 1 a 8 M, a menos de `HORAS_DE_LA_PRIMA` de la
-    jornada o una puja que no pasa de la de siempre. La nueva lleva su
-    `puja`, su `caja` con esa puja, `prima_que_gana` (sobre lo que pide)
-    y `puja_de_siempre`. Pura, nunca lanza."""
+    toca: lo que ya es nuestro, sin puja, un cambio de menos de
+    `GANANCIA_MINIMA` puntos por jornada (el que financia), el que no
+    sube hoy (`ficha`, la de `todaLaLiga`: `la_subida_de_hoy` sabida y
+    <= 0), lo que pide (`precio`) fuera de 1 a 8 M, a menos de
+    `HORAS_DE_LA_PRIMA` de la jornada o una puja que no pasa de la de
+    siempre. La nueva lleva su `puja`, su `caja` con esa puja,
+    `prima_que_gana` (sobre lo que pide) y `puja_de_siempre`. Pura, nunca
+    lanza."""
     try:
         if not isinstance(cambio, dict) or cambio.get("ya_es_nuestro"):
             return None
         if horas_jornada is None or not float(horas_jornada) >= HORAS_DE_LA_PRIMA:
+            return None
+        # Solo en el cambio que mejora de verdad: el que financia va por
+        # su caja (revision del 03/11).
+        puntos = cambio.get("puntos")
+        if isinstance(puntos, bool) or not float(puntos) >= GANANCIA_MINIMA:
             return None
         sube = la_subida_de_hoy(ficha)
         if sube is not None and sube <= 0:
@@ -690,6 +740,38 @@ def con_la_prima(cambio, precio, ficha, horas_jornada) -> dict | None:
         return {**otra, "caja": caja + de_siempre - puja, "puja": puja,
                 "prima_que_gana": round(puja / _int(precio) - 1, 4),
                 "puja_de_siempre": de_siempre}
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def la_prima_quieta(puede_escribir, horas_jornada, hucha=None) -> str | None:
+    """Por que LA PRIMA QUE GANA no puede pujar en esta vuelta, o None si
+    puede: no se escribe (la zona de silencio), sin horas a la jornada,
+    fuera de la ventana de comprar (`HORAS_SIN_COMPRAR`), a menos de
+    `HORAS_DE_LA_PRIMA` o el dia del jugador de la hucha (`hucha` activa
+    y `en_juego`). Solo para decirlo (`plan["prima_que_gana_quieta"]`);
+    no decide nada. Pura, nunca lanza."""
+    try:
+        if not puede_escribir:
+            return "no se escribe en esta vuelta (zona de silencio)"
+        try:
+            horas = float(horas_jornada)
+        except (TypeError, ValueError):
+            horas = None
+        if horas is None or horas != horas:
+            return "sin horas a la jornada"
+        if horas < HORAS_SIN_COMPRAR:
+            return (f"a {horas:.1f} h de la jornada: la mejora ya no compra "
+                    f"(desde {HORAS_SIN_COMPRAR} h)")
+        if horas < HORAS_DE_LA_PRIMA:
+            return (f"a {horas:.1f} h de la jornada: la prima es a "
+                    f"{HORAS_DE_LA_PRIMA} h o mas")
+        if isinstance(hucha, dict) and hucha.get("en_juego"):
+            from src.analysis import la_hucha as _la_hucha
+
+            if _la_hucha.esta_activa(hucha):
+                return "el dia del jugador de la hucha"
+        return None
     except Exception:                               # noqa: BLE001
         return None
 
@@ -1054,15 +1136,20 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
     LA PRIMA QUE GANA (03/11/2026): un cambio con `prima_que_gana` es la
     otra cara de uno de siempre (`con_la_prima`: el mismo `entra` y
     `sale`, mas puja y menos caja). Las listas de candidatos salen de los
-    de siempre, como antes, y a cada uno que esta en ellas se le suma su
-    cara con prima; nunca van las dos juntas. Con prima, ganado ese
-    cambio, la caja tiene que quedar >= 0 con lo peor del resto (los que
-    dan caja, perdidos; lo que ya es nuestro, como es). A igualdad de
-    puntos gana la que lleva mas primas, y despues la que deja mas caja.
+    de siempre, como antes, y a cada una de las mejoras (`GANANCIA_MINIMA`
+    o mas; el que financia, nunca) se le suma su cara con prima; nunca
+    van las dos juntas. Con prima, ganado ese cambio, la caja tiene que
+    quedar >= 0 con lo peor del resto (los que dan caja, perdidos; lo que
+    ya es nuestro, como es). A igualdad de puntos gana la que lleva mas
+    primas, y despues la que deja mas caja. Un iterador (no una lista) no
+    se mira antes: como en main.
     Sin ninguno con `prima_que_gana`: byte a byte lo de antes.
     """
 
-    hay_prima = any(c.get("prima_que_gana") is not None for c in cambios)
+    # Solo una lista (o tupla) se mira antes: un iterador se consumiria y
+    # main lo recorre tal cual.
+    hay_prima = isinstance(cambios, (list, tuple)) and any(
+        isinstance(c, dict) and c.get("prima_que_gana") is not None for c in cambios)
     de_siempre = ([c for c in cambios if c.get("prima_que_gana") is None]
                   if hay_prima else cambios)
     mejoras = sorted((c for c in de_siempre if c["puntos"] >= GANANCIA_MINIMA),
@@ -1072,14 +1159,13 @@ def la_mejor_combinacion(cambios: list, caja: int, minimo_de_caja: int,
                        key=lambda c: -c["caja"])[:CANDIDATOS]
     todos = mejoras + financian
     if hay_prima:
-        # LA PRIMA QUE GANA: la cara con prima de cada candidato, si sigue
-        # siendo candidata (una que financia tiene que seguir dando caja).
-        en_juego = {(c["entra"], c["sale"]) for c in todos}
+        # LA PRIMA QUE GANA: la cara con prima de cada candidato que mejora
+        # de verdad (`GANANCIA_MINIMA` o mas); el que financia, nunca.
+        en_juego = {(c["entra"], c["sale"]) for c in mejoras}
         todos = todos + [
             c for c in cambios
-            if c.get("prima_que_gana") is not None and (c["entra"], c["sale"]) in en_juego
-            and (c["puntos"] >= GANANCIA_MINIMA
-                 or (PEOR_FINANCIACION <= c["puntos"] and c["caja"] > 0))]
+            if isinstance(c, dict) and c.get("prima_que_gana") is not None
+            and (c["entra"], c["sale"]) in en_juego and c["puntos"] >= GANANCIA_MINIMA]
 
     mejor, clave = [], None
     for n in range(1, MAXIMO_POR_VUELTA + 1):
@@ -1229,12 +1315,15 @@ def decidir(
                     (o del que no se sabe) y pide de 1 a 8 M entra
                     tambien con la prima (`con_la_prima`) y la combinacion
                     elige: con prima solo si, ganado, la caja de la
-                    jornada queda >= 0. Manda sobre `puja_fuerte` donde
-                    toca. El dia del jugador de la hucha, ninguna. Va en
-                    `plan["prima_que_gana"]` ({id: prima}) y, si alguno
-                    elegido no la lleva porque no cabe,
-                    `plan["prima_que_no_cabe"]`. False (lo de siempre):
-                    byte a byte lo de antes.
+                    jornada queda >= 0. Solo en cambios de
+                    `GANANCIA_MINIMA` o mas. Manda sobre `puja_fuerte`
+                    solo donde toca la prima. El dia del jugador de la
+                    hucha, ninguna. Va en `plan["prima_que_gana"]` ({id:
+                    prima}); si alguno elegido no la lleva porque no
+                    cabe, `plan["prima_que_no_cabe"]`; si en esta vuelta
+                    no podia pujar, por que
+                    (`plan["prima_que_gana_quieta"]`, `la_prima_quieta`).
+                    False (lo de siempre): byte a byte lo de antes.
     """
 
     acciones, soltar, adoptar, frenadas = [], [], [], []
@@ -1304,6 +1393,11 @@ def decidir(
     if frenadas:
         plan["frenadas"] = frenadas
     if not puede_escribir or horas_jornada is None or horas_jornada < HORAS_SIN_COMPRAR:
+        if prima_que_gana:
+            # LA PRIMA QUE GANA: encendida y sin poder pujar, lo dice.
+            quieta = la_prima_quieta(puede_escribir, horas_jornada)
+            if quieta:
+                plan["prima_que_gana_quieta"] = quieta
         return {"acciones": acciones, "soltar": soltar, "adoptar": adoptar, "plan": plan}
 
     # EL CALENDARIO: con contexto, los puntos de cada lado son el xP por
@@ -1578,6 +1672,10 @@ def decidir(
                    if c.get("prima_que_gana") is None and (c["entra"], c["sale"]) in con_cara]
         if no_cabe:
             plan["prima_que_no_cabe"] = no_cabe
+        quieta = la_prima_quieta(puede_escribir, horas_jornada,
+                                 hucha if con_la_hucha else None)
+        if quieta:
+            plan["prima_que_gana_quieta"] = quieta
     if de_otra:
         plan["de_otra_jornada"] = de_otra
     if de_otra_entran:
@@ -2400,8 +2498,16 @@ def main() -> int:
     if plan.get("prima_que_gana"):
         print(f"  con la prima que gana (sobre lo que piden): {plan['prima_que_gana']}")
     if plan.get("prima_que_no_cabe"):
-        print(f"  sin la prima que gana (la caja de la jornada quedaria en rojo o no "
-              f"cabe en la puja maxima): {plan['prima_que_no_cabe']}")
+        print(f"  sin la prima que gana, no cabe (la caja de la jornada quedaria en rojo, "
+              f"la puja maxima, lo libre de la hucha o el deficit): "
+              f"{plan['prima_que_no_cabe']}")
+    if plan.get("prima_que_gana_quieta"):
+        print(f"  la prima que gana (encendida), quieta en esta vuelta: "
+              f"{plan['prima_que_gana_quieta']}")
+    elif ("prima_que_gana" in plan and not plan["prima_que_gana"]
+          and not plan.get("prima_que_no_cabe")):
+        print("  la prima que gana (encendida): ningun cambio elegido la pide (por uno del "
+              "Computer que sube, de 1 a 8 M y de 0,5 puntos o mas)")
     for o in plan.get("de_otra_jornada") or []:
         print(f"  no sale {o.get('nombre')} ({o.get('id')}): su {o.get('titularidad')} % "
               f"es de una confirmada de FF de otra jornada")

@@ -18,22 +18,26 @@ EL CASO (laboratorio del 02/11 22:30 y la puja por Adrian Nino del 03/11)
 QUE SE COMPRUEBA
 
     1. Nace apagada, se lee en UN sitio (al llamarse), tiene frase en
-       QUE_HACE y no hace nada al importarse.
+       QUE_HACE y no hace nada al importarse. Lo que el paso 0 (y el
+       tablon, el panel y el ensayo) da por encendido en el YAML, la
+       mejora lo lee encendido, y al reves.
     2. Apagada es main byte a byte: la huella de la bateria (la
        combinacion, `decidir` y `correr` con el escritor de mentira, sobre
        estados compactados de los artefactos de hoy, con relojes a mas y
        a menos de 64 h, los que suben y los que no, de menos de 1 M, de
        1 a 3 M, de 3 a 8 M y de mas de 8 M), con el interruptor sin poner,
        "0" y "", con lo minimo de la mejora y con los 26 interruptores del
-       YAML de produccion, es la de main medida ANTES de tocar el codigo,
-       en 3.11 y en 3.13.
+       YAML de produccion del 03/11 12:20 (origin/main 2805e636), es la de
+       main medida sin tocar el codigo, en 3.11 y en 3.13. Un iterador en
+       `la_mejor_combinacion`, como en main.
     3. La puja: `en_9900(precio x 1,12)`, `en_9900(precio x 1,18)` si el
        cambio suma 1 punto por jornada o mas; nunca por debajo de lo que
        pide ni de la puja de siempre; solo de 1 a 8 M (los dos bordes
        dentro).
     4. Solo por el del Computer que SUBE hoy (o del que no se sabe), a 64 h
-       o mas de la jornada. El que no sube, el de menos de 1 M, el de mas
-       de 8 M, lo que ya es nuestro y a menos de 64 h: lo de siempre.
+       o mas de la jornada, en un cambio de 0,5 puntos o mas. El que no
+       sube, el de menos de 1 M, el de mas de 8 M, el cambio que financia,
+       lo que ya es nuestro y a menos de 64 h: lo de siempre.
     5. La caja: la del cambio, la combinacion, la `caja_despues`, el
        importe del PUJAR, el libro y el plan cuentan la puja de verdad.
        Con la prima, ganado el cambio, la caja de la jornada tiene que
@@ -43,6 +47,9 @@ QUE SE COMPRUEBA
        (ya sin las pujas vivas) ni de lo libre de la hucha.
     6. Con LA PUJA FUERTE puesta, manda la prima donde toca; donde no,
        la puja fuerte como siempre.
+    6b. Encendida y sin poder pujar (zona de silencio, fuera de la
+       ventana, a menos de 64 h, el dia de la hucha), el plan y `main` lo
+       dicen: un ensayo que no la ve actuar no sale verde mudo.
     7. LA HUCHA: el dia de su jugador, ni prima. El deficit y el colchon,
        como siempre.
     8. Nunca lanza.
@@ -501,7 +508,9 @@ CAMBIOS = (
 )
 
 # Lo minimo para que la mejora corra (lo que mira de los suyos) y los 26
-# del YAML de produccion del 03/11 (.github/workflows/bordalas-live.yml).
+# que enciende el YAML de produccion del 03/11 12:20 (origin/main
+# 2805e636, .github/workflows/bordalas-live.yml, con EL PARTE VENDE),
+# contados con `el_paso_0.interruptores_encendidos_en`.
 ENTORNO_MINIMO = {
     "BORDALAS_LA_MEJORA_DEL_ONCE": "1",
     "BORDALAS_LA_MEJORA_SOLO_SI_SUBE": "1",
@@ -511,10 +520,10 @@ PRODUCCION = {n: "1" for n in (
     "BORDALAS_COBRA_LA_RACHA", "BORDALAS_COMPRA_SOLO_SI_SUBE",
     "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA", "BORDALAS_EL_CIERRE_DE_LA_JORNADA",
     "BORDALAS_EL_INFORME_DE_LA_MANANA", "BORDALAS_EL_MOTOR_VIEJO_SOLO_SI_SUBE",
-    "BORDALAS_EL_ONCE_UNA_VEZ", "BORDALAS_JORNADAS_POR_SU_FECHA", "BORDALAS_LA_CARTERA",
-    "BORDALAS_LA_JORNADA_DE_CADA_PAGINA", "BORDALAS_LA_MEJORA_DEL_ONCE",
-    "BORDALAS_LA_MEJORA_SOLO_SI_SUBE", "BORDALAS_LA_MONEDA_DE_LA_LIGA",
-    "BORDALAS_LA_ORDEN_DEL_GESTOR", "BORDALAS_LA_PUERTA_A_PRECIO_DE_MERCADO",
+    "BORDALAS_EL_ONCE_UNA_VEZ", "BORDALAS_EL_PARTE_VENDE", "BORDALAS_JORNADAS_POR_SU_FECHA",
+    "BORDALAS_LA_CARTERA", "BORDALAS_LA_JORNADA_DE_CADA_PAGINA",
+    "BORDALAS_LA_MEJORA_DEL_ONCE", "BORDALAS_LA_MEJORA_SOLO_SI_SUBE",
+    "BORDALAS_LA_MONEDA_DE_LA_LIGA", "BORDALAS_LA_ORDEN_DEL_GESTOR",
     "BORDALAS_LA_PUJA_EN_9900", "BORDALAS_LA_RONDA_DE_LA_MANANA", "BORDALAS_LA_ROTACION",
     "BORDALAS_LOS_CHOLLOS", "BORDALAS_REJA_CON_TOLERANCIA", "BORDALAS_REVENTA_SOLO_SI_JUEGA",
     "BORDALAS_REVENTA_SOLO_SI_JUEGA_EN_EL_CARRIL", "BORDALAS_REVISA_LAS_PUJAS_VIVAS",
@@ -611,9 +620,13 @@ def _la_huella(huellas: dict) -> str:
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()
 
 
-# Medidas en main (2e52c95d, antes de tocar el codigo) con
-# `python -m src.analysis.test_la_prima_que_gana_v1 --medir`, una por
-# Python y por entorno (lo minimo de la mejora y los 26 de produccion).
+# Medidas en main sin tocar (copia de origin/main 2805e636 con este
+# fichero dentro) con `python -m src.analysis.test_la_prima_que_gana_v1
+# --medir`, una por Python y por entorno (lo minimo de la mejora y los 26
+# de produccion). La de lo minimo es la misma que se midio en 2e52c95d
+# antes de tocar el codigo. Cualquier cambio querido en la mejora,
+# `leer_la_foto`, `ejecutar`, `en_9900` o la hucha la pone roja: se
+# vuelve a medir en main, a proposito, en las dos versiones.
 HUELLAS_DE_MAIN = {
     (3, 11): {
         "minimo": "5d61cdb27128a5b863181b2d62a53bc65ee907be3c74d35a3f5c70666baeb289",
@@ -693,10 +706,10 @@ def test_nace_apagada_un_lector_y_su_frase():
     from src.telemetry.el_tablon import QUE_HACE
 
     assert mejora.ENV_LA_PRIMA_QUE_GANA == ENV
-    for valor in (None, "0", "", "no", "false", "2"):
+    for valor in (None, "0", "", "no", "false", "2", "off", " 0 "):
         with _Interruptores({ENV: valor}):
             assert mejora.la_prima_que_gana_activa() is False, repr(valor)
-    for valor in ("1", "true", "si", "yes", " SI "):
+    for valor in ("1", "true", "si", "yes", " SI ", "on", "sí", "Sí", " ON "):
         with _Interruptores({ENV: valor}):
             assert mejora.la_prima_que_gana_activa() is True, repr(valor)
 
@@ -732,7 +745,30 @@ def test_nace_apagada_un_lector_y_su_frase():
 
     frase = str(QUE_HACE.get(ENV) or "")
     assert "12 %" in frase and "18 %" in frase and "64 h" in frase, frase
-    assert "positivo" in frase and "puja fuerte" in frase, frase
+    assert "no queda en rojo" in frase and "medio punto" in frase, frase
+    assert "manda la prima donde toca la prima" in frase, frase
+
+
+def test_lo_que_el_paso_0_da_por_encendido():
+    """Revision del 03/11: con "on" o "sí" en el YAML el paso 0, el
+    tablon, el panel y el ensayo la daban por encendida y la mejora la
+    corria apagada. Ahora lee lo mismo que `el_paso_0.ENCENDIDO`: para
+    cada valor del YAML, encendida en el paso 0 si y solo si encendida en
+    la mejora."""
+    from src.actions import la_mejora_del_once as mejora
+    from src.analysis import el_paso_0
+
+    assert mejora.ENCENDIDA == el_paso_0.ENCENDIDO
+    for valor in ('"1"', "1", '"on"', "on", '"sí"', '"Sí"', '"si"', '"true"', "true",
+                  '"yes"', "'1'", '"0"', '""', '"no"', '"off"', '"false"', '"2"',
+                  '"1"   # un motivo'):
+        yaml = f"    env:\n      {ENV}: {valor}\n"
+        en_el_paso_0 = ENV in el_paso_0.interruptores_encendidos_en(yaml)
+        # Lo que llega al entorno: el valor sin comillas ni comentario (y
+        # el true de YAML, como "true").
+        limpio = el_paso_0._limpio(valor)
+        with _Interruptores({ENV: limpio}):
+            assert mejora.la_prima_que_gana_activa() is en_el_paso_0, (valor, limpio)
 
 
 # 2. APAGADA ES MAIN BYTE A BYTE
@@ -973,11 +1009,140 @@ def test_a_menos_de_64_horas_lo_de_siempre():
     paron, con la prima."""
     for horas in (63.9, 50.0, 40.0):
         a, e = _adrian(2_000_000, horas, prima=False), _adrian(2_000_000, horas)
-        assert e["plan"].pop("prima_que_gana") == {} and e == a, horas
+        assert e["plan"].pop("prima_que_gana") == {}, horas
+        assert e["plan"].pop("prima_que_gana_quieta") == (
+            f"a {horas:.1f} h de la jornada: la prima es a 64 h o mas"), horas
+        assert e == a, horas
     for horas in (64.0, 85.75, 227.0):
-        assert _la_puja(_adrian(2_000_000, horas), ADRIAN) == 4_909_900, horas
-    # Fuera de la ventana de comprar ni plan.
-    assert "prima_que_gana" not in _adrian(2_000_000, 30.0)["plan"]
+        d = _adrian(2_000_000, horas)
+        assert _la_puja(d, ADRIAN) == 4_909_900, horas
+        assert "prima_que_gana_quieta" not in d["plan"], horas
+    # Fuera de la ventana de comprar ni plan: solo por que.
+    d = _adrian(2_000_000, 30.0)
+    assert "prima_que_gana" not in d["plan"]
+    assert d["plan"]["prima_que_gana_quieta"] == (
+        "a 30.0 h de la jornada: la mejora ya no compra (desde 40 h)")
+
+
+def test_quieta_lo_dice():
+    """Revision del 03/11 (el ensayo que sale verde sin probar nada): en
+    la zona de silencio, sin horas, fuera de la ventana, a menos de 64 h o
+    el dia del jugador de la hucha, el plan dice por que no puja con
+    prima; `main` lo escribe, y tambien con la prima, sin ella o sin
+    nadie a quien ponersela. Apagada, nada."""
+    import contextlib
+    import io
+
+    from src.actions import la_mejora_del_once as mejora
+
+    q = mejora.la_prima_quieta
+    assert q(False, 85.0) == "no se escribe en esta vuelta (zona de silencio)"
+    for horas in (None, "x", float("nan")):
+        assert q(True, horas) == "sin horas a la jornada", horas
+    assert q(True, 39.9).startswith("a 39.9 h de la jornada: la mejora ya no compra")
+    assert q(True, 63.99) == "a 64.0 h de la jornada: la prima es a 64 h o mas"
+    assert q(True, 64.0) is None and q(True, 227.0) is None
+    en_juego = {"activa": True, "apartado": 0, "libre": 0, "en_juego": True}
+    assert q(True, 85.0, en_juego) == "el dia del jugador de la hucha"
+    assert q(True, 85.0, {**en_juego, "activa": False}) is None
+    assert q(True, 85.0, {"activa": True, "libre": 0}) is None
+
+    # En `decidir`: la zona de silencio (las 05:50 del miercoles).
+    a = _adrian(2_000_000, 85.0, prima=False, puede_escribir=False)
+    e = _adrian(2_000_000, 85.0, puede_escribir=False)
+    assert e["plan"].pop("prima_que_gana_quieta") == (
+        "no se escribe en esta vuelta (zona de silencio)") and e == a
+    assert "prima_que_gana_quieta" not in a["plan"]
+    # El dia de la hucha (el mismo caso que su prueba).
+    kw = dict(caja=-1_200_000, horas=84.0, cambiados=CON_EL_CALENDARIO, mercado=(ADRIAN,),
+              protegidos={BOYE}, **PRODUCCION_DE_LA_MEJORA,
+              hucha={**en_juego, "su_puja_viva": True})
+    assert _decidir_de(E1007, prima_que_gana=True, **kw)["plan"][
+        "prima_que_gana_quieta"] == "el dia del jugador de la hucha"
+
+    # Lo que escribe `main` (con un `correr` de mentira: ni data/ ni red).
+    def _main(plan):
+        de_verdad = mejora.correr
+        mejora.correr = lambda: {"motivo": "NADA_QUE_HACER", "plan": plan}
+        try:
+            salida = io.StringIO()
+            with contextlib.redirect_stdout(salida):
+                mejora.main()
+            return salida.getvalue()
+        finally:
+            mejora.correr = de_verdad
+
+    texto = _main({"caja": 0, "cambios": [],
+                   "prima_que_gana_quieta": "no se escribe en esta vuelta (zona de silencio)"})
+    assert ("la prima que gana (encendida), quieta en esta vuelta: no se escribe en esta "
+            "vuelta (zona de silencio)") in texto, texto
+    texto = _main({"caja": 0, "cambios": [], "prima_que_gana": {}})
+    assert "la prima que gana (encendida): ningun cambio elegido la pide" in texto, texto
+    texto = _main({"caja": 0, "cambios": [], "prima_que_gana": {ADRIAN: 0.121}})
+    assert f"con la prima que gana (sobre lo que piden): {{{ADRIAN}: 0.121}}" in texto, texto
+    assert "quieta" not in texto and "ningun cambio" not in texto, texto
+    texto = _main({"caja": 0, "cambios": [], "prima_que_gana": {},
+                   "prima_que_no_cabe": [ADRIAN]})
+    assert ("sin la prima que gana, no cabe (la caja de la jornada quedaria en rojo, la "
+            "puja maxima, lo libre de la hucha o el deficit): [35706]") in texto, texto
+    assert "ningun cambio" not in texto, texto
+    # Apagada (el plan de siempre), ni una palabra de la prima.
+    assert "prima" not in _main({"caja": 0, "cambios": []})
+
+
+def test_solo_en_el_cambio_que_mejora():
+    """Revision del 03/11: la prima solo en un cambio de `GANANCIA_MINIMA`
+    (0,5) o mas por jornada. El que financia (de -1,5 a 0,5) va por su
+    caja: con prima, 1,19 M de primas por +0,12 pts (la prueba de los
+    revisores, con 600.000 de caja)."""
+    from src.actions import la_mejora_del_once as mejora
+
+    cambio = {"entra": 900002, "sale": 41418, "puntos": 0.5, "caja": -500_000,
+              "puja": 2_929_900, "suelo": 1_809_000, "ya_es_nuestro": False}
+    assert mejora.con_la_prima(cambio, 2_900_000, {}, 85.75)["puja"] == 3_249_900
+    for puntos in (0.49, 0.12, 0.0, -1.0, None, "x", True, float("nan")):
+        assert mejora.con_la_prima({**cambio, "puntos": puntos}, 2_900_000, {}, 85.75) is None, \
+            puntos
+
+    a = {"entra": 1, "sale": 11, "puntos": 0.6, "caja": -500_000, "puja": 2_019_900,
+         "ya_es_nuestro": False, "suelo": 0}
+    f = {"entra": 2, "sale": 12, "puntos": 0.12, "caja": 1_500_000, "puja": 7_989_900,
+         "ya_es_nuestro": False, "suelo": 0}
+    z = {"entra": 3, "sale": 13, "puntos": 0.0, "caja": 900_000, "puja": 3_039_900,
+         "ya_es_nuestro": False, "suelo": 0}
+    caras = [o for o in (mejora.con_la_prima(c, precio, {"price_increment": 50_000}, 80)
+                         for c, precio in ((a, 2_000_000), (f, 7_900_000), (z, 3_000_000)))
+             if o is not None]
+    assert [o["entra"] for o in caras] == [1]
+    for caja in (600_000, 2_000_000):
+        apagada = mejora.la_mejor_combinacion([a, f, z], caja, -1_000_000, 30_000_000)
+        encendida = mejora.la_mejor_combinacion([a, f, z] + caras, caja, -1_000_000,
+                                                30_000_000)
+        assert all(c.get("prima_que_gana") is None for c in encendida
+                   if c["entra"] in (2, 3)), encendida
+        assert ({(c["entra"], c["puja"]) for c in encendida if c["entra"] in (2, 3)}
+                == {(c["entra"], c["puja"]) for c in apagada if c["entra"] in (2, 3)})
+    # Con 600.000 la prima de A no cabe: todo como apagada.
+    assert mejora.la_mejor_combinacion([a, f, z] + caras, 600_000, -1_000_000, 30_000_000) \
+        == mejora.la_mejor_combinacion([a, f, z], 600_000, -1_000_000, 30_000_000)
+    # Aunque alguien le pase una cara con prima de uno que financia, la
+    # combinacion no la mira.
+    f2 = {**f, "puja": 8_849_900, "caja": 640_000, "prima_que_gana": 0.1202,
+          "puja_de_siempre": 7_989_900}
+    assert mejora.la_mejor_combinacion([a, f, z, f2], 600_000, -1_000_000, 30_000_000) \
+        == mejora.la_mejor_combinacion([a, f, z], 600_000, -1_000_000, 30_000_000)
+
+
+def test_un_iterador_como_en_main():
+    """Un iterador (no una lista) en `la_mejor_combinacion`: lo mismo que
+    main, que lo recorre una vez (las mejoras) y no lo mira antes."""
+    from src.actions import la_mejora_del_once as mejora
+
+    c = {"entra": 1, "sale": 2, "puntos": 1.0, "caja": 100, "puja": 1000,
+         "ya_es_nuestro": False}
+    assert mejora.la_mejor_combinacion((x for x in [c]), 0, 0, 10**7) == [c]
+    assert mejora.la_mejor_combinacion(iter([c]), 0, 0, 10**7) == [c]
+    assert mejora.la_mejor_combinacion((c,), 0, 0, 10**7) == [c]
 
 
 # 6. LA PUJA FUERTE
@@ -1076,6 +1241,10 @@ def test_nunca_lanza():
     assert mejora.la_puja_de_la_prima(float("nan"), 1.0) is None
     for precio in (None, "x", -5, 0, True):
         mejora.la_puja_de_la_prima(precio, float("nan"), "x")
+    for basura in (None, "x", 3, [], {"en_juego": True}, {"en_juego": "x", "activa": True}):
+        mejora.la_prima_quieta(True, 85.0, basura)
+        mejora.la_prima_quieta(basura, basura, basura)
+    assert mejora.la_prima_quieta(True, float("inf")) is None
     # `decidir` encendida con precios basura y horas basura.
     rotos = {ADRIAN: {"precio": None}, 38290: {"precio": "x"}, UNAI_SIMON: {"sube": "x"}}
     for horas in (84.0, 227.0):
@@ -1130,7 +1299,9 @@ def test_el_entorno_no_decide_esta_guardia():
 
 TESTS = [
     test_nace_apagada_un_lector_y_su_frase,
+    test_lo_que_el_paso_0_da_por_encendido,
     test_apagada_es_main_byte_a_byte,
+    test_un_iterador_como_en_main,
     test_la_puja_de_la_prima,
     test_solo_el_que_sube_de_1_a_8_m_a_64_h_o_mas,
     test_los_demas_como_siempre,
@@ -1141,6 +1312,8 @@ TESTS = [
     test_la_prima_nunca_hace_perder_un_cambio,
     test_nunca_por_encima_de_la_puja_maxima_ni_de_lo_libre,
     test_a_menos_de_64_horas_lo_de_siempre,
+    test_quieta_lo_dice,
+    test_solo_en_el_cambio_que_mejora,
     test_manda_sobre_la_puja_fuerte,
     test_el_dia_del_jugador_de_la_hucha_ninguna_prima,
     test_correr_puja_y_apunta_la_de_verdad,
