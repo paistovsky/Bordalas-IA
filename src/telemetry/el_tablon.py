@@ -253,10 +253,12 @@ QUE_HACE = {
         "Con la puja fuerte puesta, manda la prima donde toca la prima.",
     "BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO":
         "Cuando la orden del gestor ficha a un jugador por el que la mejora del "
-        "once ya pujaba para un cambio, manda la orden: la mejora suelta su cambio "
-        "(el que iba a salir por él ya no sale por eso; solo se vende a quien diga "
-        "la orden) y su caja cuenta una sola venta por ese fichaje. Así un fichaje "
-        "nunca vende a dos jugadores.",
+        "once ya pujaba para un cambio y además vende a alguien por ese fichaje, "
+        "manda la orden: la mejora suelta su cambio y ya no vende a nadie por ese "
+        "fichaje (el que iba a salir por él ya no sale por eso); solo vende la "
+        "orden, a quien ella diga, y la caja de la mejora no cuenta la venta que ya "
+        "no hace. Si la orden ficha sin vender a nadie por él, el cambio sigue "
+        "siendo de la mejora.",
     "BORDALAS_EL_CIERRE_DE_LA_JORNADA":
         "Desde 64 h antes de cada jornada elige el mejor once con el calendario "
         "y, si la caja no llega a 0, vende a los que sobran (nunca a un titular "

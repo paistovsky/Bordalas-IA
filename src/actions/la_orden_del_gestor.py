@@ -65,6 +65,18 @@ QUE NO HACE
     sale si su relevo cae lesionado.
 
     Nace APAGADA: `BORDALAS_LA_ORDEN_DEL_GESTOR`. Nunca lanza.
+
+CON LA ORDEN MANDA EN EL CAMBIO (03/11/2026, interruptor de la mejora del
+once; nace apagado)
+
+    Si el de `fichar` (X) es el que entra por un cambio de la mejora («X
+    por B») y `vender_si_ficha` vende a alguien con `si_esta` X, el cambio
+    es de la orden: la mejora lo suelta y B ya no sale por X. Sin
+    `vender_si_ficha` para X, el cambio sigue siendo de la mejora (sale
+    B). Soltar es para siempre: mientras la puja por X este viva y hasta
+    que salga el que vende la orden, la orden sigue valida (su `caduca`,
+    por delante) y con su `vender_si_ficha` para X; si no, nadie vende por
+    X (`la_mejora_del_once.la_orden_manda`, NO SE DESHACE).
 """
 
 from __future__ import annotations

@@ -37,15 +37,19 @@ QUE SE COMPRUEBA
        estados compactados de hoy (el libro Adrian->Boye de las 07:15, la
        puja de la orden de las 11:07, el de las 20:07 con Unai Simon, y el
        miercoles con Adrian dentro), con la orden de hoy (fichar Adrian y
-       vender_si_ficha Roberto), sin ella, caducada y sin `fichar`; con el
-       interruptor sin poner, "0" y "", con lo minimo de la mejora y con
-       los 26 interruptores del YAML de produccion (EL PARTE VENDE
-       incluido). La de main, medida antes de tocar el codigo, una por
-       version de Python (3.11 y 3.13).
+       vender_si_ficha Roberto), sin ella, caducada, sin `fichar`, sin
+       `vender_si_ficha`, vendiendo por otro, solo con la red del ultimo
+       recurso y con cada uno su relevo; `correr` con y sin el cobro de
+       Roberto en la v10; con el interruptor sin poner, "0" y "", con lo
+       minimo de la mejora y con los 26 interruptores del YAML de
+       produccion (EL PARTE VENDE incluido). La de main, medida antes de
+       tocar el codigo, una por version de Python (3.11 y 3.13).
     3. `la_orden_manda`: los que entran por un cambio del libro que la
-       orden VIVA (encendida y valida a `ahora`) esta fichando. Apagado,
-       con la orden apagada, caducada, sin `fichar`, sin hora o con
-       basura: nadie.
+       orden VIVA (encendida y valida a `ahora`) esta fichando Y por los
+       que vende a alguien (`vender_si_ficha` con ese relevo, que aun es
+       nuestro y que no es solo el ultimo recurso). Apagado, con la orden
+       apagada, caducada, sin `fichar`, sin vender a nadie por el, sin
+       hora, sin plantilla o con basura: nadie.
     4. EL CASO DE HOY, el miercoles 04/11 a las 07:15, Adrian ganado:
        apagado se venden Roberto (la orden) y Boye (la mejora); encendido
        solo Roberto. La mejora suelta el cambio y lo dice
@@ -67,6 +71,13 @@ QUE SE COMPRUEBA
        por Gulacsi), lo de siempre.
    11. Nunca lanza.
    12. El entorno no la decide (doctrina 104).
+   13. La orden que ficha sin vender a nadie por el (sin
+       `vender_si_ficha`, vendiendo por otro o solo con la red del ultimo
+       recurso) no manda: Boye sale por Adrian y la caja lo cuenta una
+       vez, como en main (revision ON del 03/11: soltarlo dejaba la J12
+       en rojo sin nadie que vender).
+   14. Con la puja perdida, el cambio se suelta como siempre («puja
+       perdida»), sin la linea de LA_ORDEN_MANDA.
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -180,6 +191,7 @@ ROBERTO = 35678
 UNAI_SIMON = 17021
 GULACSI = 38433
 YAMAL = 26271
+HANCKO = 38290
 
 _UTC = timezone.utc
 
@@ -307,10 +319,34 @@ ORDEN_SIN_FICHAR = {k: v for k, v in ORDEN_HOY.items() if k != "fichar"}
 # Caducada (el 02/11).
 ORDEN_CADUCADA = {**ORDEN_HOY, "caduca": "2026-11-02T23:59:00+01:00"}
 # Que ficha a otro (Hancko) y no a Adrian.
-ORDEN_OTRO = {**ORDEN_HOY, "fichar": [{"player_id": 38290, "nombre": "Hancko",
+ORDEN_OTRO = {**ORDEN_HOY, "fichar": [{"player_id": HANCKO, "nombre": "Hancko",
                                         "puja": 4389900}]}
+# Ficha a Adrian sin vender a nadie por el (solo sube o hace suya la puja
+# de la mejora): el cambio sigue siendo de la mejora (revision ON del
+# 03/11).
+ORDEN_SIN_VENDER = {k: v for k, v in ORDEN_HOY.items() if k != "vender_si_ficha"}
+# Ficha a Adrian y a Hancko, y vende a Roberto por Hancko: por Adrian no
+# vende a nadie.
+ORDEN_VENDE_POR_OTRO = {
+    **ORDEN_HOY,
+    "fichar": ORDEN_HOY["fichar"] + [{"player_id": HANCKO, "nombre": "Hancko",
+                                      "puja": 4389900}],
+    "vender_si_ficha": {"si_esta": HANCKO, "jugadores": [
+        {"player_id": ROBERTO, "nombre": "Roberto Fernandez", "si_esta": HANCKO,
+         "suelo": 6200000}]},
+}
+# Por Adrian, solo la red del viernes (el ultimo recurso,
+# `si_saldo_negativo`): no es una venta por el fichaje sino por el rojo.
+ORDEN_SOLO_LA_RED = {**ORDEN_HOY, "vender_si_ficha": {
+    "si_esta": ADRIAN, "jugadores": [ORDEN_HOY["vender_si_ficha"]["jugadores"][1]]}}
+# Sin `si_esta` general, cada uno con el suyo (VARIOS CAMBIOS A LA VEZ):
+# Roberto por Adrian.
+ORDEN_CADA_UNO_EL_SUYO = {**ORDEN_HOY, "vender_si_ficha": {"jugadores": [
+    ORDEN_HOY["vender_si_ficha"]["jugadores"][0]]}}
 ORDENES = (("sin_orden", {}), ("hoy", ORDEN_HOY), ("con_boye", ORDEN_CON_BOYE),
-           ("sin_fichar", ORDEN_SIN_FICHAR), ("caducada", ORDEN_CADUCADA))
+           ("sin_fichar", ORDEN_SIN_FICHAR), ("caducada", ORDEN_CADUCADA),
+           ("sin_vender", ORDEN_SIN_VENDER), ("vende_por_otro", ORDEN_VENDE_POR_OTRO),
+           ("solo_la_red", ORDEN_SOLO_LA_RED), ("cada_uno_el_suyo", ORDEN_CADA_UNO_EL_SUYO))
 
 _EQUIPOS = ("Athletic Club", "FC Barcelona", "Real Madrid", "Villarreal CF", "Celta",
             "Real Betis", "Sevilla FC", "Getafe CF", "Valencia CF", "Elche CF",
@@ -418,7 +454,7 @@ def _normal(x):
     if isinstance(x, datetime):
         return x.isoformat()
     if isinstance(x, float):
-        return round(x, 6)
+        return repr(x)
     return x
 
 
@@ -624,6 +660,21 @@ RELOJES = (
 )
 
 
+def _la_orden_cobro_a_roberto(ahora) -> dict:
+    """La v10 de esta vuelta cuando la orden acaba de cobrar a Roberto (la
+    vuelta en que llega su relevo): lo que `correr` lee como `cobros`."""
+    return {"timestamp": (ahora - timedelta(minutes=5)).isoformat(),
+            "orden_del_gestor": {"hechas": [{
+                "accion": "ACEPTAR_OFERTA_DEL_COMPUTER", "player_id": ROBERTO,
+                "nombre": "Roberto Fernandez", "offer_id": 8001,
+                "importe": 7180000, "exito": True}]}}
+
+
+# Lo que la v10 de esta vuelta ya hizo, para `correr`: nada, o la orden
+# cobro a Roberto.
+V10S = (("sin_v10", lambda ahora: None), ("cobro_roberto", _la_orden_cobro_a_roberto))
+
+
 def _la_bateria(carpeta) -> list:
     """[(nombre, llamada)] de la mejora y de quien lee su libro, con la
     firma de main."""
@@ -660,15 +711,19 @@ def _la_bateria(carpeta) -> list:
                                         puja_fuerte=puja_fuerte)))
 
     # 3. CORRER, con el escritor de mentira, y lo que leen del libro que
-    # deja: cada estado, cada reloj y cada orden.
+    # deja: cada estado, cada reloj, cada orden y cada v10 (nada, o la
+    # orden cobro a Roberto en esta vuelta).
     for e in ESTADOS:
         for ahora, horas in RELOJES:
             for nombre_orden, orden in ORDENES:
-                nombre = f"{e['nombre']}_{ahora.strftime('%d%H%M')}_{nombre_orden}"
-                llamadas.append((
-                    f"correr/{e['nombre']}/{ahora.isoformat()}/{nombre_orden}",
-                    lambda e=e, ahora=ahora, horas=horas, orden=orden, nombre=nombre:
-                    _correr(e, ahora, horas, carpeta, orden=orden, nombre=nombre)))
+                for nombre_v10, v10 in V10S:
+                    nombre = (f"{e['nombre']}_{ahora.strftime('%d%H%M')}_{nombre_orden}"
+                              f"_{nombre_v10}")
+                    llamadas.append((
+                        f"correr/{e['nombre']}/{ahora.isoformat()}/{nombre_orden}/{nombre_v10}",
+                        lambda e=e, ahora=ahora, horas=horas, orden=orden, nombre=nombre,
+                        v10=v10: _correr(e, ahora, horas, carpeta, orden=orden,
+                                         nombre=nombre, v10=v10(ahora))))
     return llamadas
 
 
@@ -695,27 +750,28 @@ def _la_huella(huellas: dict) -> str:
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()
 
 
-# Medidas en main sin tocar (copia de origin/main df2cac90 con este
-# fichero dentro) con `python -m src.analysis.test_la_orden_manda_en_el_cambio_v1
-# --medir`, una por Python y por entorno (lo minimo de la mejora y los 26
-# de produccion). Cualquier cambio querido en la mejora, `leer_la_foto`,
-# `ejecutar`, `en_9900`, el cierre (`la_mejora`), `los_que_otros_venden`
-# o el relevo la pone roja: se vuelve a medir en main, a proposito, en las
-# dos versiones.
+# Medidas en main sin tocar (copia de origin/main e5d52c37, el codigo de
+# df2cac90, con este fichero dentro) con `python -m
+# src.analysis.test_la_orden_manda_en_el_cambio_v1 --medir`, una por Python
+# y por entorno (lo minimo de la mejora y los 26 de produccion); los
+# decimales, con `repr` (sin redondear). Cualquier cambio querido en la
+# mejora, `leer_la_foto`, `ejecutar`, `en_9900`, el cierre (`la_mejora`),
+# `los_que_otros_venden` o el relevo la pone roja: se vuelve a medir en
+# main, a proposito, en las dos versiones.
 HUELLAS_DE_MAIN = {
     (3, 11): {
-        "minimo": "63b48c5bbe16213269f3055451d75c0568a87d5e17048878a9262ed7f09102df",
-        "produccion": "11e35aa0ab94f247214c4eedb0774d1c2a97619974509622215559da662ea5ee",
+        "minimo": "e6d83fb9103b4c456a7b2ba2e52738e9ed076fb79103af30860e85765cd9e22a",
+        "produccion": "0cf0b7ef21c1fe259f51b607714d38e86cac65d33a6c84d0a02551e6fd05886c",
     },
     (3, 13): {
-        "minimo": "63b48c5bbe16213269f3055451d75c0568a87d5e17048878a9262ed7f09102df",
-        "produccion": "11e35aa0ab94f247214c4eedb0774d1c2a97619974509622215559da662ea5ee",
+        "minimo": "e6d83fb9103b4c456a7b2ba2e52738e9ed076fb79103af30860e85765cd9e22a",
+        "produccion": "0cf0b7ef21c1fe259f51b607714d38e86cac65d33a6c84d0a02551e6fd05886c",
     },
 }
 LLAMADAS_DE_LA_BATERIA = (len(ESTADOS) * len(ORDENES) * len(VUELTAS)
                           + len(ESTADOS) * len(HORAS) * len(CAJAS) * len(BANDERAS)
                           * len(PENDIENTES)
-                          + len(ESTADOS) * len(RELOJES) * len(ORDENES))
+                          + len(ESTADOS) * len(RELOJES) * len(ORDENES) * len(V10S))
 
 
 def medir() -> None:
@@ -827,7 +883,8 @@ def test_nace_apagada_un_lector_y_su_frase():
     assert fuente.count("os.environ.get(ENV_LA_ORDEN_MANDA") == 1
     assert (fuente.count("la_orden_manda_activa()")
             - fuente.count("def la_orden_manda_activa()")) == 1     # en `la_orden_manda`
-    assert (fuente.count("la_orden_manda(orden, libro, ahora)")) == 1   # en `correr`
+    assert fuente.count("= la_orden_manda(orden, libro, ahora,") == 1   # en `correr`
+    assert fuente.count("la_orden_manda(") == 2             # su def y `correr`
 
     # Nada al importarse: ninguna sentencia de modulo llama al lector ni
     # mira el entorno.
@@ -850,7 +907,8 @@ def test_nace_apagada_un_lector_y_su_frase():
 
     frase = str(QUE_HACE.get(ENV) or "")
     assert "la orden del gestor" in frase and "la mejora del once" in frase, frase
-    assert "suelta su cambio" in frase and "una sola venta" in frase, frase
+    assert "suelta su cambio" in frase and "vende a alguien por ese fichaje" in frase, frase
+    assert "sigue siendo de la mejora" in frase, frase
 
 
 def test_lo_que_el_paso_0_da_por_encendido():
@@ -893,29 +951,72 @@ def test_apagada_es_main_byte_a_byte():
 
 def test_la_orden_manda_quien():
     """`la_orden_manda`: los que entran por un cambio del libro que la
-    orden VIVA (encendida y valida a `ahora`) esta fichando."""
+    orden VIVA (encendida y valida a `ahora`) esta fichando Y por los que
+    vende a alguien que aun es nuestro (no solo como ultimo recurso)."""
     from src.actions import la_mejora_del_once as mejora
 
     libro = {str(ADRIAN): CAMBIO_ADRIAN, str(UNAI_SIMON): CAMBIO_UNAI}
-    f = mejora.la_orden_manda
+    yo = set(DOCE)
+
+    def f(orden, libro, ahora, plantilla=yo):
+        return mejora.la_orden_manda(orden, libro, ahora, plantilla=plantilla)
+
+    roberto = ORDEN_HOY["vender_si_ficha"]["jugadores"][0]
     with _Interruptores(ENCENDIDO):
         assert f(ORDEN_HOY, libro, MARTES_1107) == frozenset({ADRIAN})
         assert f(ORDEN_CON_BOYE, libro, MIERCOLES) == frozenset({ADRIAN})
-        # La clave del libro como numero, y el id de `fichar` como texto.
+        # La clave del libro como numero, y los ids como texto.
         assert f({**ORDEN_HOY, "fichar": [{"player_id": str(ADRIAN), "puja": 4909900}]},
                  {ADRIAN: CAMBIO_ADRIAN}, MARTES_1107) == frozenset({ADRIAN})
+        assert f(ORDEN_HOY, libro, MARTES_1107, {str(p) for p in DOCE}) == frozenset({ADRIAN})
         # Su propio cambio (Unai Simon) no es de la orden.
         assert f(ORDEN_HOY, {str(UNAI_SIMON): CAMBIO_UNAI}, MARTES_1107) == frozenset()
-        # Sin `fichar`, ficha a otro, caducada, sin hora, sin libro: nadie.
+        # Sin `fichar`, ficha a otro, caducada, sin hora, sin libro, sin
+        # plantilla: nadie.
         assert f(ORDEN_SIN_FICHAR, libro, MARTES_1107) == frozenset()
         assert f(ORDEN_OTRO, libro, MARTES_1107) == frozenset()
         assert f(ORDEN_CADUCADA, libro, MARTES_1107) == frozenset()
         assert f(ORDEN_HOY, libro, None) == frozenset()
         assert f(ORDEN_HOY, {}, MARTES_1107) == frozenset()
         assert f({}, libro, MARTES_1107) == frozenset()
+        assert f(ORDEN_HOY, libro, MARTES_1107, None) == frozenset()
         # Una orden que no vale (un `fichar` sin puja) no manda.
         assert f({**ORDEN_HOY, "fichar": [{"player_id": ADRIAN}]}, libro,
                  MARTES_1107) == frozenset()
+
+        # SOLO SI VENDE A ALGUIEN POR EL (revision ON del 03/11).
+        # Ficha sin vender a nadie, vende por otro (Hancko) o solo con la
+        # red del viernes (`si_saldo_negativo`): el cambio es de la mejora.
+        assert f(ORDEN_SIN_VENDER, libro, MARTES_1107) == frozenset()
+        assert f(ORDEN_VENDE_POR_OTRO, libro, MARTES_1107) == frozenset()
+        assert f(ORDEN_SOLO_LA_RED, libro, MARTES_1107) == frozenset()
+        # ... por Hancko si (si Hancko entrara por un cambio de la mejora).
+        assert f(ORDEN_VENDE_POR_OTRO, {str(HANCKO): {"sale": 1760}},
+                 MARTES_1107) == frozenset({HANCKO})
+        # Sin `si_esta` general, cada uno con el suyo: Roberto por Adrian.
+        assert f(ORDEN_CADA_UNO_EL_SUYO, libro, MARTES_1107) == frozenset({ADRIAN})
+        # Un `si_esta` general 0 es no tenerlo (lo de la orden).
+        cero = {**ORDEN_HOY, "vender_si_ficha": {"si_esta": 0, "jugadores": [roberto]}}
+        assert f(cero, libro, MARTES_1107) == frozenset({ADRIAN})
+        # Sin general y alguno sin el suyo: la orden no vende a nadie.
+        a_medias = {**ORDEN_HOY, "vender_si_ficha": {"jugadores": [
+            roberto, {"player_id": 1760, "nombre": "Chust", "suelo": 2500000}]}}
+        assert f(a_medias, libro, MARTES_1107) == frozenset()
+        # El general es Adrian y el suyo otro: Roberto sale por los dos.
+        los_dos = {**ORDEN_HOY, "vender_si_ficha": {"si_esta": ADRIAN, "jugadores": [
+            {**roberto, "si_esta": HANCKO}]}}
+        assert f(los_dos, libro, MARTES_1107) == frozenset({ADRIAN})
+        # El general es Hancko y el suyo Adrian: tambien.
+        al_reves = {**ORDEN_HOY, "vender_si_ficha": {"si_esta": HANCKO, "jugadores": [
+            roberto]}}
+        assert f(al_reves, libro, MARTES_1107) == frozenset({ADRIAN})
+        # El que vende la orden ya no es nuestro: no vende a nadie por el.
+        assert f(ORDEN_HOY, libro, MARTES_1107, yo - {ROBERTO}) == frozenset()
+        # La orden vende al mismo que la mejora (Boye por Adrian): manda
+        # la orden, y Boye sale una vez.
+        mismo = {**ORDEN_HOY, "vender_si_ficha": {"si_esta": ADRIAN, "jugadores": [
+            {"player_id": BOYE, "nombre": "Boye", "si_esta": ADRIAN, "suelo": 4896000}]}}
+        assert f(mismo, libro, MARTES_1107) == frozenset({ADRIAN})
     # La orden apagada: no ficha a nadie, no manda.
     with _Interruptores({k: v for k, v in ENCENDIDO.items()
                          if k != "BORDALAS_LA_ORDEN_DEL_GESTOR"}):
@@ -959,6 +1060,34 @@ def test_el_caso_de_hoy_el_miercoles():
     # Con Unai Simon tambien ganado, su cambio sigue: Gulacsi se vende.
     los_dos = _el_miercoles(ENCENDIDO, estado=EMIERCOLES_LOS_DOS)
     assert los_dos["vendidos"] == sorted({ROBERTO, GULACSI}), los_dos["vendidos"]
+    # Sin `si_esta` general, Roberto con el suyo (VARIOS CAMBIOS A LA
+    # VEZ): lo mismo.
+    assert _el_miercoles(PRODUCCION, orden=ORDEN_CADA_UNO_EL_SUYO)["vendidos"] == \
+        sorted({ROBERTO, BOYE})
+    assert _el_miercoles(ENCENDIDO, orden=ORDEN_CADA_UNO_EL_SUYO)["vendidos"] == [ROBERTO]
+    # La orden vende al mismo que la mejora (Boye por Adrian): una venta,
+    # la de la orden; la mejora no lo toca.
+    mismo = {**ORDEN_HOY, "vender_si_ficha": {"si_esta": ADRIAN, "jugadores": [
+        {"player_id": BOYE, "nombre": "Boye", "si_esta": ADRIAN, "suelo": 4896000}]}}
+    m = _el_miercoles(ENCENDIDO, orden=mismo)
+    assert m["vendidos"] == [BOYE], m["vendidos"]
+    assert not [a for a in m["mejora"] if a.get("player_id") == BOYE], m["mejora"]
+    assert [a["player_id"] for a in m["orden"]
+            if a["accion"] == "ACEPTAR_OFERTA_DEL_COMPUTER"] == [BOYE], m["orden"]
+    # LA FOTO DE DESPUES: si la foto ya no trae a Roberto (la orden lo
+    # acaba de cobrar en esta vuelta, `cobros` de la v10), Roberto sigue
+    # contando como el que vende la orden por Adrian: Boye no sale.
+    despues = {**EMIERCOLES, "nombre": "mie0715_despues",
+               "plantilla": tuple(p for p in DOCE if p != ROBERTO) + (ADRIAN,)}
+    with tempfile.TemporaryDirectory() as carpeta:
+        for entorno, sale_boye in ((PRODUCCION, True), (ENCENDIDO, False)):
+            with _Interruptores(entorno):
+                r = _correr(despues, MIERCOLES, HORAS_MIERCOLES, carpeta, orden=ORDEN_HOY,
+                            nombre=f"despues_{sale_boye}",
+                            v10=_la_orden_cobro_a_roberto(MIERCOLES))
+            de_boye = [a for a in r["r"]["acciones"] if a.get("player_id") == BOYE]
+            assert bool(de_boye) is sale_boye, (sale_boye, r["r"]["acciones"])
+            assert (str(ADRIAN) in r["libro"]) is sale_boye, r["libro"]
 
 
 # 5. LA CAJA: UNA VENTA POR UN FICHAJE
@@ -1022,7 +1151,8 @@ def test_suelta_el_cambio_con_la_puja_viva():
     # En la vuelta de silencio tambien suelta (soltar no escribe).
     from src.actions import la_mejora_del_once as mejora
     with _Interruptores(ENCENDIDO):
-        manda = mejora.la_orden_manda(ORDEN_HOY, E1107["libro"], MARTES_1107)
+        manda = mejora.la_orden_manda(ORDEN_HOY, E1107["libro"], MARTES_1107,
+                                      plantilla=set(E1107["plantilla"]))
     d = _decidir_de(E1107, caja=-164276, horas=81.9, puede_escribir=False,
                     pendientes={ADRIAN, ROBERTO}, manda_la_orden=manda)
     assert d["soltar"] == [str(ADRIAN)] and d["acciones"] == [], d
@@ -1112,7 +1242,10 @@ def test_sin_orden_que_mande_lo_de_siempre():
                                        ("caducada", ORDEN_CADUCADA, ENCENDIDO),
                                        ("sin_fichar", ORDEN_SIN_FICHAR, ENCENDIDO),
                                        ("otro", ORDEN_OTRO, ENCENDIDO),
-                                       ("sin_orden", {}, ENCENDIDO)):
+                                       ("sin_orden", {}, ENCENDIDO),
+                                       ("sin_vender", ORDEN_SIN_VENDER, ENCENDIDO),
+                                       ("vende_por_otro", ORDEN_VENDE_POR_OTRO, ENCENDIDO),
+                                       ("solo_la_red", ORDEN_SOLO_LA_RED, ENCENDIDO)):
             base = {k: v for k, v in entorno.items() if k != ENV}
             with _Interruptores(base):
                 de_siempre = _correr(E2007, MARTES_2007, 72.8, carpeta, orden=orden,
@@ -1139,11 +1272,21 @@ def test_nunca_lanza():
             for libro in (None, 3, "x", [], {None: None}, {"x": {"sale": "y"}},
                           {str(ADRIAN): None}, {str(ADRIAN): CAMBIO_ADRIAN}):
                 for ahora in (None, "x", 3, MARTES_1107, datetime(2026, 11, 3, 10, 7)):
-                    r = mejora.la_orden_manda(orden, libro, ahora)
-                    assert isinstance(r, frozenset), (orden, libro, ahora, r)
+                    for plantilla in (None, 3, "x", [None, "a", []], set(DOCE)):
+                        r = mejora.la_orden_manda(orden, libro, ahora, plantilla=plantilla)
+                        assert isinstance(r, frozenset), (orden, libro, ahora, r)
+        # Basura en `vender_si_ficha`: no lanza, no manda.
+        for venta in (None, 3, "x", [], {"jugadores": "x"}, {"jugadores": [None, 3]},
+                      {"si_esta": "x", "jugadores": [{"player_id": "y", "si_esta": []}]},
+                      {"si_esta": ADRIAN, "jugadores": {"player_id": ROBERTO}}):
+            r = mejora.la_orden_manda({**ORDEN_HOY, "vender_si_ficha": venta},
+                                      {str(ADRIAN): CAMBIO_ADRIAN}, MARTES_1107,
+                                      plantilla=set(DOCE))
+            assert r == frozenset(), (venta, r)
         # Sin zona horaria: se toma por UTC, como el resto de la mejora.
         assert mejora.la_orden_manda(ORDEN_HOY, {str(ADRIAN): CAMBIO_ADRIAN},
-                                     datetime(2026, 11, 3, 10, 7)) == frozenset({ADRIAN})
+                                     datetime(2026, 11, 3, 10, 7),
+                                     plantilla=set(DOCE)) == frozenset({ADRIAN})
         # `decidir` y la caja con basura en lo que manda la orden.
         for basura in (frozenset({"x"}), {None}, frozenset({ADRIAN, "35706"})):
             _decidir_de(E1107, caja=-164276, horas=81.9, manda_la_orden=basura)
@@ -1202,6 +1345,85 @@ def test_el_entorno_no_decide_esta_guardia():
                 os.environ[k] = v
 
 
+# 13. LA ORDEN QUE FICHA SIN VENDER A NADIE POR EL NO MANDA
+
+def test_ficha_sin_vender_la_mejora_sigue():
+    """Revision ON del 03/11: la orden ficha a Adrian (sube o hace suya la
+    puja de la mejora) pero no vende a nadie por el (sin
+    `vender_si_ficha`, vendiendo a Roberto por Hancko, o solo con la red
+    del viernes). Encendido, el cambio sigue siendo de la mejora, como en
+    main: Boye sale por Adrian y la caja cuenta su venta una vez. (Antes,
+    encendido no vendia a nadie: la J12 en -2,9 M y el cierre sin nadie
+    que vender.)"""
+    from src.actions import la_mejora_del_once as mejora
+
+    for orden in (ORDEN_SIN_VENDER, ORDEN_VENDE_POR_OTRO, ORDEN_SOLO_LA_RED):
+        with _Interruptores(ENCENDIDO):
+            for e, ahora in ((E1107, MARTES_1107), (E2007, MARTES_2007),
+                             (EMIERCOLES, MIERCOLES)):
+                assert mejora.la_orden_manda(orden, e["libro"], ahora,
+                                             plantilla=set(e["plantilla"])) == frozenset()
+        # Las vueltas: martes 11:07 y 20:07, y el miercoles con Adrian dentro.
+        with tempfile.TemporaryDirectory() as carpeta:
+            vueltas = {}
+            for nombre, entorno in (("off", PRODUCCION), ("on", ENCENDIDO)):
+                with _Interruptores(entorno):
+                    uno = _correr(E1107, MARTES_1107, 81.9, carpeta, orden=orden,
+                                  nombre=f"{nombre}_uno")
+                    dos = _correr(E2007, MARTES_2007, 72.8, carpeta, orden=orden,
+                                  nombre=f"{nombre}_dos",
+                                  libro={**uno["libro"], str(UNAI_SIMON): CAMBIO_UNAI})
+                vueltas[nombre] = (uno, dos)
+            for off, on in zip(vueltas["off"], vueltas["on"]):
+                assert _normal(on) == _normal(off), orden
+                assert str(ADRIAN) in on["libro"], on["libro"]
+                assert "la_orden_manda" not in _plan(on), _plan(on)
+                assert BOYE in on["leen"]["cierre"]["vende"], on["leen"]
+            libro = vueltas["on"][1]["libro"]
+        apagado = _el_miercoles(PRODUCCION, orden=orden, libro=libro)
+        encendido = _el_miercoles(ENCENDIDO, orden=orden, libro=libro)
+        assert encendido["vendidos"] == apagado["vendidos"] == [BOYE], \
+            (encendido["vendidos"], apagado["vendidos"])
+        assert [a["player_id"] for a in encendido["mejora"]
+                if a["accion"] == "ACEPTAR_OFERTA_DEL_COMPUTER"] == [BOYE], encendido["mejora"]
+        assert _normal(encendido["r"]) == _normal(apagado["r"]), orden
+
+    # La caja cuenta la venta de Boye UNA vez: lo que cuesta su relevo
+    # (la puja por Adrian, 4.909.900, menos que Boye al 95 %), ni cero ni
+    # dos.
+    for e in (E1107, E2007):
+        con_boye = _la_caja_de(e, ORDEN_SIN_VENDER)
+        sin_boye = _la_caja_de(e, ORDEN_SIN_VENDER, manda_la_orden=frozenset({ADRIAN}))
+        assert con_boye - sin_boye == 4909900, (e["nombre"], con_boye, sin_boye)
+        with tempfile.TemporaryDirectory() as carpeta, _Interruptores(ENCENDIDO):
+            r = _correr(e, MARTES_1107 if e is E1107 else MARTES_2007,
+                        81.9 if e is E1107 else 72.8, carpeta, orden=ORDEN_SIN_VENDER,
+                        nombre="caja")
+        assert _plan(r)["caja"] == con_boye, (e["nombre"], _plan(r)["caja"], con_boye)
+
+
+# 14. CON LA PUJA PERDIDA, LO DE SIEMPRE
+
+def test_puja_perdida_no_es_la_orden():
+    """La puja por Adrian se perdio (ni dentro ni con puja viva) y sigue en
+    `fichar`: el cambio se suelta como siempre («puja perdida»), sin la
+    linea de LA_ORDEN_MANDA. Con la puja viva o Adrian dentro, si."""
+    perdida = {**E1107, "nombre": "perdida", "pujas": {}}
+    for horas, escribe in ((81.9, True), (81.9, False), (13.75, True)):
+        d = _decidir_de(perdida, caja=-164276, horas=horas, puede_escribir=escribe,
+                        pendientes={ADRIAN, ROBERTO}, manda_la_orden=frozenset({ADRIAN}))
+        de_siempre = _decidir_de(perdida, caja=-164276, horas=horas, puede_escribir=escribe,
+                                 pendientes={ADRIAN, ROBERTO})
+        assert d["soltar"] == [str(ADRIAN)], d["soltar"]
+        assert "la_orden_manda" not in d["plan"], d["plan"]
+        assert _normal(d) == _normal(de_siempre), horas
+    for e in (E1107, EMIERCOLES):
+        d = _decidir_de(e, caja=-164276, horas=81.9, pendientes={ADRIAN, ROBERTO},
+                        manda_la_orden=frozenset({ADRIAN}))
+        assert str(ADRIAN) in d["soltar"], d["soltar"]
+        assert [c["entra"] for c in d["plan"]["la_orden_manda"]] == [ADRIAN], d["plan"]
+
+
 TESTS = [
     test_nace_apagada_un_lector_y_su_frase,
     test_lo_que_el_paso_0_da_por_encendido,
@@ -1215,6 +1437,8 @@ TESTS = [
     test_sin_fichar_sin_fantasma,
     test_sin_orden_que_mande_lo_de_siempre,
     test_nunca_lanza,
+    test_ficha_sin_vender_la_mejora_sigue,
+    test_puja_perdida_no_es_la_orden,
     test_el_entorno_no_decide_esta_guardia,
 ]
 
