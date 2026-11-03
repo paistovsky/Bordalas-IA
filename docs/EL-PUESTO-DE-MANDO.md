@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 02/11/2026, 22:30 de Madrid (laboratorio de rivales de la noche).
+Actualizado: 03/11/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **03/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2676 a #2685,
+  la de las 07:15 incluida). **Vendidos Pablo Ibanez y Unai Lopez** (ya no
+  estan en la plantilla). Saldo **-2.137.676** a las 07:20 (+5,36 M desde
+  ayer), 0 comprometido, 14 jugadores. Faltan Gaya y Ortiz (la mejora), el
+  premio de la J11 (hoy por la tarde) y la racha (mie). Para el vie 06/11
+  15:00 va bien encaminado.
 
 - **02/11 22:30 (laboratorio de rivales de la noche). FUSIONADA, APAGADA:
   LA HUCHA. DECIDIDO: A POLLO NO SE LE OFERTA POR BRUGUE.**
