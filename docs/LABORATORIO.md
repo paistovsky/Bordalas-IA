@@ -69,6 +69,40 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E82 · 04/11/2026 17:17 de Madrid · Faltan vueltas: hoy dos, tras cinco semanas casi perfectas
+
+**El caso:** el gestor vio hoy que falto la vuelta de las 12:07 («primera
+vez que lo veo»). ¿Es un hueco suelto o empieza a fallar el disparador
+(cron-job.org)?
+**Datos:** las 1.200 ultimas ejecuciones de `bordalas-live.yml` (API de
+GitHub, desde el 12/09) contra los 23 disparos al dia de
+`config/disparos.json` (gracia de 12 minutos).
+**Codigo:** `lab/infra/latido.py` (E21/E27, sin cambios).
+
+    del 08/10 al 03/11: 621 disparos esperados, falto 1 (0,2 %)
+    desde el 25/09, todos los que faltaron (hora de Madrid):
+       07/10 17:07 · 01/11 09:07 · 04/11 12:07 · 04/11 16:07
+    (del 18 al 24/09 faltaron ~55: la epoca de E21, antes del arreglo)
+
+**Lo que se aprende:**
+- **Hoy han faltado dos, no una:** la de las 12:07 y tambien la de las
+  **16:07** (la de las 15:07 y la de las 17:07 si llegaron). En los
+  ultimos 4 dias faltan 3; en las cinco semanas anteriores, 1. No es
+  todavia un fallo grande (~2 % de las vueltas de esta semana), pero
+  cambia de ritmo.
+- Las de la ventana del reset (04:45, 04:50) y la de las 07:15 no han
+  faltado nunca desde el 25/09. Las que importan de verdad (la ventana,
+  la de las 15:07 del plazo y la de las 20:07 del dia de jornada que
+  congela el once, E27) no han caido.
+
+**Limites:** la API da las 1.200 ultimas ejecuciones; no se ve el lado de
+cron-job.org (si disparo y fallo la llamada o no disparo).
+
+**Veredicto: AVISO para el gestor** (no es regla; el latido no se toca,
+regla del dueño): si mañana falta alguna mas, mirar el historial de
+cron-job.org; y vigilar sobre todo que el vie 06/11 lleguen la de las
+15:07 (plazo de la J12) y la de las 20:07 (once de la J12).
+
 ### E81 · 04/11/2026 11:14 de Madrid · La probabilidad de E80 no esta calibrada: es pesimista
 
 **El caso:** E80 dio a Adrian Nino ~40-50 % a +12,1 %; se perdio (el
