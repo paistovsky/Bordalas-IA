@@ -363,10 +363,12 @@ QUE_HACE = {
         "gestor manda conservar o proteger, Pepe ya no la acepta ni le contesta "
         "con una contraoferta (si el rival acepta la contraoferta, también es "
         "vender): la deja pasar y, si hay otra oferta de un manager que sí se "
-        "puede contestar, contesta a esa. Si aun así una llegara a la escritura, "
-        "se frena antes de enviar nada a Biwenger y la vuelta lo dice "
-        "(«bloqueada por la orden»). Con la orden del gestor apagada o "
-        "caducada, todo como siempre.",
+        "puede contestar, contesta a esa. Vale también para la oferta que pide "
+        "varios jugadores a la vez: si uno de ellos es de la orden, no se "
+        "contesta (aceptarla los vendería a todos). La vuelta lo dice "
+        "(«Bloqueada por la orden», con el jugador y la oferta) y, si aun así "
+        "una llegara a la escritura, se frena antes de enviar nada a Biwenger. "
+        "Con la orden del gestor apagada o caducada, todo como siempre.",
     "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA":
         "La ronda solo puja por un jugador del Computer si pide menos de 1 M, "
         "su precio sube hoy un 2 % o más y faltan 64 h o más para la jornada, "

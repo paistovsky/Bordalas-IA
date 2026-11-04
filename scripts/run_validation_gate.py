@@ -276,9 +276,11 @@ TESTS = [
     # La orden en los managers (el hueco de Competitive V2 visto el 04/11:
     # nadie miraba la orden antes de aceptar o contraofertar la oferta de
     # otro manager): ni se elige ni se escribe la de un jugador que la
-    # orden manda conservar o proteger (Roberto, Boye) y la siguiente se
-    # queda la vuelta. Apagado, la eleccion, la sombra y el ejecutor de
-    # main byte a byte (huella por version de Python).
+    # orden manda conservar o proteger (Roberto, Boye), tampoco en una
+    # oferta que pide a varios a la vez, y la siguiente se queda la
+    # vuelta, que lo imprime. Apagado, la eleccion, la sombra, el ejecutor
+    # y lo que imprime la vuelta de main byte a byte (huella por version
+    # de Python).
     "src.analysis.test_la_orden_en_los_managers_v1",
     # El motor viejo: no puja a los vetados de la orden y, con su
     # interruptor, solo por el que sube. Apagado.

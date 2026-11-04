@@ -29,11 +29,13 @@ QUE SE COMPRUEBA
     2. Apagado es main byte a byte: la huella de la bateria (la eleccion
        del Safety Gate, la sombra V1.9, el ejecutor V2.0 con el escritor
        real sin red y con uno de mentira, y la vuelta entera: eleccion,
-       oferta elegida y escritura, como la junta `autopilot`), con la
+       oferta elegida y escritura, como la junta `autopilot`, y lo que
+       imprime el bloque competitivo de la vuelta), con la
        orden de hoy, la del lunes (Boye fuera de `proteger`), caducada,
        sin orden y una que no se lee; con el interruptor sin poner, "0",
        "", "off" y "2", sin interruptores y con los 27 del YAML de
-       produccion (origin/main 1ac6fd51). La de main, medida antes de
+       produccion (origin/main 4799bdc2, el mismo YAML que 1ac6fd51).
+       La de main, medida antes de
        tocar el codigo, una por version de Python (3.11 y 3.13).
     3. EL CASO, ACEPTAR: un manager ofrece por Roberto (ACCEPT_NOW).
        Encendido: no se elige (BLOCK_LA_ORDEN_DEL_GESTOR), la vuelta no
@@ -56,6 +58,16 @@ QUE SE COMPRUEBA
    11. Hoy (20:07): 0 ofertas de managers. Encendido y apagado, nada.
    12. Nunca lanza; si la pieza no se pudiera importar, lo de siempre.
    13. El entorno no la decide (doctrina 104).
+   14. UNA OFERTA POR VARIOS (revision encendida del 04/11 por la noche):
+       la oferta que pide a Iglesias y a Roberto (o a Boye, o a Yamal)
+       llega como dos entradas con el MISMO `offer_id` (la liquidez de
+       verdad lo hace asi) y aceptarla vende a los dos. Encendido, ni se
+       elige la de Iglesias ni la escribe el ejecutor (mira TODOS los que
+       la oferta pide en la foto fresca). Dos libres juntos: main.
+   15. La vuelta lo dice: «Bloqueada por la orden: ...» en el bloque
+       SAFETY GATE V1.8, con el jugador, la oferta y, en una oferta por
+       varios, a quien pide tambien. Apagado no se imprime nada nuevo
+       (lo que imprime el bloque competitivo esta en la huella).
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -265,6 +277,36 @@ SIN_ID = {**IGLESIAS_ACEPTA, "offer_id": 70014, "player_id": None}
 ID_RARO = {**IGLESIAS_ACEPTA, "offer_id": 70015, "player_id": "no-es-un-id"}
 ID_BOOL = {**IGLESIAS_ACEPTA, "offer_id": 70016, "player_id": True}
 
+# UNA OFERTA POR VARIOS (revision encendida del 04/11 por la noche). Un
+# manager pide dos de los nuestros en UNA oferta (`requestedPlayers`); la
+# liquidez (`liquidity_manager.build_incoming_offer_candidates`) la parte
+# en una entrada por jugador, con el MISMO `offer_id` y el importe entero,
+# el de menos dano primero (el libre). Aceptarla o contraofertarla los
+# vende a los dos.
+LOTE_ROBERTO, LOTE_BOYE, LOTE_YAMAL, LOTE_LIBRE = 70100, 70101, 70102, 70103
+IGLESIAS_CON_ROBERTO = _oferta(IGLESIAS, "Juan Iglesias", "ACCEPT_NOW", 12_500_000,
+                               LOTE_ROBERTO, estrategico=4_300_000)
+ROBERTO_CON_IGLESIAS = _oferta(ROBERTO, "Roberto Fernández", "ACCEPT_NOW", 12_500_000,
+                               LOTE_ROBERTO, estrategico=8_100_000)
+IGLESIAS_CON_BOYE = _oferta(IGLESIAS, "Juan Iglesias", "COUNTER_OFFER", 9_000_000, LOTE_BOYE,
+                            contra=13_000_000, estrategico=4_300_000)
+BOYE_CON_IGLESIAS = _oferta(BOYE, "Boyé", "COUNTER_OFFER", 9_000_000, LOTE_BOYE,
+                            contra=13_000_000, estrategico=6_300_000)
+IGLESIAS_CON_YAMAL = _oferta(IGLESIAS, "Juan Iglesias", "ACCEPT_NOW", 60_000_000, LOTE_YAMAL,
+                             estrategico=4_300_000)
+YAMAL_CON_IGLESIAS = _oferta(YAMAL, "Yamal", "ACCEPT_NOW", 60_000_000, LOTE_YAMAL,
+                             estrategico=36_000_000, proteccion="NEVER_AUTO_SELL")
+# Dos libres en una oferta: nada que frenar.
+IGLESIAS_CON_DANI = _oferta(IGLESIAS, "Juan Iglesias", "ACCEPT_NOW", 7_000_000, LOTE_LIBRE,
+                            estrategico=4_300_000, rival=OTRO_RIVAL)
+DANI_CON_IGLESIAS = _oferta(DANI, "Dani Lorenzo", "ACCEPT_NOW", 7_000_000, LOTE_LIBRE,
+                            estrategico=2_400_000, rival=OTRO_RIVAL)
+
+# Lo que pide cada oferta en Biwenger (la foto fresca, `market.offers`):
+# las que no estan aqui piden solo a su jugador.
+PIDE = {LOTE_ROBERTO: [IGLESIAS, ROBERTO], LOTE_BOYE: [IGLESIAS, BOYE],
+        LOTE_YAMAL: [IGLESIAS, YAMAL], LOTE_LIBRE: [IGLESIAS, DANI]}
+
 LISTAS = (
     ("hoy_ninguna", []),
     ("roberto_acepta", [ROBERTO_ACEPTA]),
@@ -277,6 +319,12 @@ LISTAS = (
     ("mezcla", [CHUST_NUNCA, KIKE_ESPERA, IVAN_LEGACY, DANI_ESPERA_AL_RIVAL, GULACSI_BAJA,
                 ROBERTO_SACRIFICIO, BOYE_CONTRA, IGLESIAS_CONTRA]),
     ("raras", [ROBERTO_TEXTO, ID_BOOL, SIN_ID, ID_RARO]),
+    ("lote_iglesias_roberto", [IGLESIAS_CON_ROBERTO, ROBERTO_CON_IGLESIAS]),
+    ("lote_roberto_primero", [ROBERTO_CON_IGLESIAS, IGLESIAS_CON_ROBERTO]),
+    ("lote_iglesias_boye", [IGLESIAS_CON_BOYE, BOYE_CON_IGLESIAS]),
+    ("lote_iglesias_yamal", [IGLESIAS_CON_YAMAL, YAMAL_CON_IGLESIAS]),
+    ("lote_y_luego_libre", [IGLESIAS_CON_ROBERTO, ROBERTO_CON_IGLESIAS, IGLESIAS_CONTRA]),
+    ("lote_libre", [IGLESIAS_CON_DANI, DANI_CON_IGLESIAS]),
 )
 
 PUERTAS = (
@@ -424,16 +472,33 @@ ESCRITORES = (
 FOTO_FRESCA = "snapshot_fresco_2026-11-04_20-07-00.json"
 
 
-def _el_ejecutor_de_mentira(tablero, fabrica, refresco_falla=False):
-    """La foto fresca (sin red), el tablero de ofertas fresco (sin
-    calcular nada) y el escritor. `find_fresh_manager_decision` es la de
-    verdad."""
+def _crudas(ofertas) -> list:
+    """Las ofertas como las da Biwenger en la foto fresca
+    (`market.offers`): una por `offer_id`, con los jugadores que pide
+    (`PIDE`, o solo el suyo)."""
+    salida, vistas = [], []
+    for o in ofertas or []:
+        if not isinstance(o, dict) or o.get("offer_id") in vistas:
+            continue
+        vistas.append(o.get("offer_id"))
+        salida.append({"id": o.get("offer_id"), "status": "waiting", "type": "purchase",
+                       "amount": o.get("amount"),
+                       "requestedPlayers": [{"id": p} for p in
+                                            PIDE.get(o.get("offer_id"), [o.get("player_id")])]})
+    return salida
+
+
+def _el_ejecutor_de_mentira(tablero, fabrica, refresco_falla=False, crudas=()):
+    """La foto fresca (sin red; con `crudas` en `market.offers`), el
+    tablero de ofertas fresco (sin calcular nada) y el escritor.
+    `find_fresh_manager_decision` es la de verdad."""
     import src.analysis.competitive_live_executor as cle
 
     def _refresca():
         if refresco_falla:
             raise RuntimeError("Biwenger no contesta")
-        return FOTO_FRESCA, {"timestamp": "snapshot_2026-11-04_20-07-00"}
+        return FOTO_FRESCA, {"timestamp": "snapshot_2026-11-04_20-07-00",
+                             "market": {"offers": copy.deepcopy(list(crudas))}}
 
     return [
         (cle, "refresh_snapshot", _refresca),
@@ -471,10 +536,11 @@ def _la_sombra(ofertas, puerta, ruta, entorno) -> dict:
         return {"sombra": sombra, "ejecucion": execute_competitive_shadow(sombra)}
 
 
-def _el_ejecutor(oferta, cambio, escritor, ruta, entorno, execute=True) -> dict:
+def _el_ejecutor(oferta, cambio, escritor, ruta, entorno, execute=True, crudas=None) -> dict:
     """`execute_competitive_live_action` con `oferta` elegida, el tablero
     fresco con `cambio` y el escritor: lo que devuelve y lo que se pidio
-    al escritor."""
+    al escritor. La foto fresca trae la oferta cruda (`crudas`, o la de
+    `oferta`)."""
     import src.analysis.competitive_live_executor as cle
 
     enviados = []
@@ -482,7 +548,9 @@ def _el_ejecutor(oferta, cambio, escritor, ruta, entorno, execute=True) -> dict:
     with _Interruptores(entorno), _Sustituye(
             _la_orden_de_mentira(ruta)
             + _el_ejecutor_de_mentira(tablero, escritor(enviados),
-                                      refresco_falla=(cambio == "refresco_falla"))):
+                                      refresco_falla=(cambio == "refresco_falla"),
+                                      crudas=(_crudas([oferta]) if crudas is None
+                                              else crudas))):
         r = cle.execute_competitive_live_action(
             selected_offer=copy.deepcopy(oferta), rival_intelligence={}, execute=execute)
     return {"r": r, "enviados": enviados}
@@ -498,7 +566,8 @@ def _la_vuelta(ofertas, escritor, ruta, entorno, puerta=PUERTAS[0][1]) -> dict:
     enviados = []
     with _Interruptores(entorno), _Sustituye(
             _la_orden_de_mentira(ruta)
-            + _el_ejecutor_de_mentira(_tablero_fresco(ofertas), escritor(enviados))):
+            + _el_ejecutor_de_mentira(_tablero_fresco(ofertas), escritor(enviados),
+                                      crudas=_crudas(ofertas))):
         manager_offers = copy.deepcopy(ofertas)
         eleccion = select_single_competitive_action(
             offers=manager_offers, temporal_gate=copy.deepcopy(puerta),
@@ -514,12 +583,44 @@ def _la_vuelta(ofertas, escritor, ruta, entorno, puerta=PUERTAS[0][1]) -> dict:
     return {"eleccion": eleccion, "r": r, "enviados": enviados}
 
 
+def _el_tablero(ofertas, puerta, ruta, entorno) -> str:
+    """Lo que imprime la vuelta del bloque competitivo
+    (`autopilot.print_competitive_observer`) con la eleccion y la sombra
+    de estas ofertas."""
+    import contextlib
+    import io
+
+    from src.analysis.competitive_execution_shadow import (
+        build_competitive_shadow_decision,
+        execute_competitive_shadow,
+    )
+    from src.analysis.competitive_safety_gate import select_single_competitive_action
+    from src.autopilot import print_competitive_observer
+
+    salida = io.StringIO()
+    with _Interruptores(entorno), _Sustituye(_la_orden_de_mentira(ruta)):
+        manager_offers = copy.deepcopy(ofertas)
+        eleccion = select_single_competitive_action(
+            offers=manager_offers, temporal_gate=copy.deepcopy(puerta),
+            current_balance=SALDO)
+        sombra = build_competitive_shadow_decision(
+            manager_offers=manager_offers, temporal_gate=copy.deepcopy(puerta),
+            current_balance=SALDO)
+        with contextlib.redirect_stdout(salida):
+            print_competitive_observer({
+                "available": True, "manager_offers": manager_offers,
+                "competitive_safety_gate": eleccion,
+                "competitive_execution_shadow": sombra,
+                "competitive_shadow_execution": execute_competitive_shadow(sombra)})
+    return salida.getvalue()
+
+
 # ============================================================
 # LA BATERIA Y SU HUELLA
 # ============================================================
 
-# Los 27 que enciende el YAML de produccion de origin/main (1ac6fd51,
-# .github/workflows/bordalas-live.yml), contados con
+# Los 27 que enciende el YAML de produccion de origin/main (1ac6fd51 y
+# 4799bdc2, el mismo; .github/workflows/bordalas-live.yml), contados con
 # `el_paso_0.interruptores_encendidos_en`.
 PRODUCCION = {n: "1" for n in (
     "BORDALAS_COBRA_LA_RACHA", "BORDALAS_COMPRA_SOLO_SI_SUBE",
@@ -547,6 +648,8 @@ ELEGIDAS = (
     ("iglesias_contra", IGLESIAS_CONTRA), ("yamal_acepta", YAMAL_ACEPTA),
     ("roberto_texto", ROBERTO_TEXTO), ("ninguna", None), ("kike_espera", KIKE_ESPERA),
     ("sin_offer_id", {**ROBERTO_ACEPTA, "offer_id": None}),
+    ("lote_iglesias_roberto", IGLESIAS_CON_ROBERTO), ("lote_iglesias_boye", IGLESIAS_CON_BOYE),
+    ("lote_iglesias_yamal", IGLESIAS_CON_YAMAL), ("lote_libre", IGLESIAS_CON_DANI),
 )
 CAMBIOS = ("igual", "no_existe", "importe", "decision", "contra_cero", "debajo",
            "otro_jugador", "refresco_falla")
@@ -582,6 +685,10 @@ def _la_bateria(carpeta) -> list:
                     f"sombra/{nombre_lista}/{nombre_puerta}/{nombre_orden}",
                     lambda o=ofertas, p=puerta, r=ruta:
                     lambda entorno: _la_sombra(o, p, r, entorno)))
+                llamadas.append((
+                    f"tablero/{nombre_lista}/{nombre_puerta}/{nombre_orden}",
+                    lambda o=ofertas, p=puerta, r=ruta:
+                    lambda entorno: _el_tablero(o, p, r, entorno)))
             for nombre_escritor, escritor in ESCRITORES:
                 llamadas.append((
                     f"vuelta/{nombre_lista}/{nombre_escritor}/{nombre_orden}",
@@ -603,7 +710,7 @@ def _la_bateria(carpeta) -> list:
 
 
 LLAMADAS_DE_LA_BATERIA = len(ORDENES) * (
-    len(LISTAS) * (2 * len(PUERTAS) + len(ESCRITORES))
+    len(LISTAS) * (3 * len(PUERTAS) + len(ESCRITORES))
     + len(ELEGIDAS) * (1 + len(CAMBIOS) * len(ESCRITORES)))
 
 
@@ -630,22 +737,23 @@ def _la_huella(huellas: dict) -> str:
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()
 
 
-# Medidas en main sin tocar (copia de origin/main 1ac6fd51 por `git
+# Medidas en main sin tocar (copia de origin/main 4799bdc2 por `git
 # archive`, con este fichero dentro) con `python -m
 # src.analysis.test_la_orden_en_los_managers_v1 --medir`, una por Python y
 # por entorno (sin interruptores y los 27 de produccion), con el
 # interruptor sin poner, "0", "", "off" y "2" (las cinco, la misma).
 # Cualquier cambio querido en el Safety Gate, la sombra, el ejecutor
-# competitivo o el escritor la pone roja: se vuelve a medir en main, a
-# proposito, en las dos versiones.
+# competitivo, el escritor o lo que imprime el bloque competitivo de la
+# vuelta la pone roja: se vuelve a medir en main, a proposito, en las dos
+# versiones (3.11 y 3.13; con otra no hay huella y la prueba falla).
 HUELLAS_DE_MAIN = {
     (3, 11): {
-        "produccion": "d9b2b705404a308d44276308fe497a5e09b61126fbea5decafcd73d99dba815d",
-        "sin_interruptores": "d9b2b705404a308d44276308fe497a5e09b61126fbea5decafcd73d99dba815d",
+        "produccion": "eabff22cb31cade9ba923fd399d9285a31ab4f061d37cf00515db6ceef0b7dad",
+        "sin_interruptores": "eabff22cb31cade9ba923fd399d9285a31ab4f061d37cf00515db6ceef0b7dad",
     },
     (3, 13): {
-        "produccion": "d9b2b705404a308d44276308fe497a5e09b61126fbea5decafcd73d99dba815d",
-        "sin_interruptores": "d9b2b705404a308d44276308fe497a5e09b61126fbea5decafcd73d99dba815d",
+        "produccion": "eabff22cb31cade9ba923fd399d9285a31ab4f061d37cf00515db6ceef0b7dad",
+        "sin_interruptores": "eabff22cb31cade9ba923fd399d9285a31ab4f061d37cf00515db6ceef0b7dad",
     },
 }
 
@@ -777,9 +885,22 @@ def test_nace_apagado_un_lector_y_su_frase():
     frase = str(QUE_HACE.get(ENV) or "")
     for trozo in ("otro manager", "conservar o proteger", "ya no la acepta",
                   "contraoferta", "también es vender", "contesta a esa",
-                  "antes de enviar nada a Biwenger", "«bloqueada por la orden»",
+                  "pide varios jugadores a la vez", "los vendería a todos",
+                  "antes de enviar nada a Biwenger", "«Bloqueada por la orden»",
                   "apagada o caducada, todo como siempre"):
         assert trozo in frase, (trozo, frase)
+    # Lo que la frase promete, la vuelta lo imprime.
+    vuelta = (RAIZ / "src" / "autopilot.py").read_text(encoding="utf-8")
+    assert vuelta.count('"  Bloqueada por la orden: "') == 1
+    assert vuelta.count('"no_se_responden"') == 1
+
+    # Las dos pruebas viejas de la eleccion y la sombra lo quitan arriba
+    # (encendido, su eleccion leeria la orden real de `config/`).
+    for nombre in ("test_competitive_safety_gate_v18.py",
+                   "test_competitive_execution_shadow_v19.py"):
+        texto = (RAIZ / "src" / "analysis" / nombre).read_text(encoding="utf-8")
+        quita = texto.index(f'os.environ.pop("{ENV}", None)')
+        assert quita < texto.index("from src."), nombre
 
 
 def test_lo_que_el_paso_0_da_por_encendido():
@@ -938,17 +1059,20 @@ def test_un_jugador_libre_igual_que_main():
     with tempfile.TemporaryDirectory() as carpeta:
         ruta = _la_orden_en(carpeta, "hoy", ORDEN_HOY)
         for ofertas in ([IGLESIAS_ACEPTA], [IGLESIAS_CONTRA],
-                        [IGLESIAS_ACEPTA, IGLESIAS_CONTRA], [SIN_ID, ID_RARO, ID_BOOL]):
+                        [IGLESIAS_ACEPTA, IGLESIAS_CONTRA], [SIN_ID, ID_RARO, ID_BOOL],
+                        _lista("lote_libre")):
             for _, puerta in PUERTAS:
                 on = _la_eleccion(ofertas, puerta, ruta, ENCENDIDO)
                 assert _texto(on) == _texto(_la_eleccion(ofertas, puerta, ruta, PRODUCCION))
                 assert "no_se_responden" not in on
                 assert _texto(_la_sombra(ofertas, puerta, ruta, ENCENDIDO)) == \
                     _texto(_la_sombra(ofertas, puerta, ruta, PRODUCCION))
+                assert _el_tablero(ofertas, puerta, ruta, ENCENDIDO) == \
+                    _el_tablero(ofertas, puerta, ruta, PRODUCCION)
             for _, escritor in ESCRITORES:
                 on = _la_vuelta(ofertas, escritor, ruta, ENCENDIDO)
                 assert _texto(on) == _texto(_la_vuelta(ofertas, escritor, ruta, PRODUCCION))
-        for oferta in (IGLESIAS_ACEPTA, IGLESIAS_CONTRA):
+        for oferta in (IGLESIAS_ACEPTA, IGLESIAS_CONTRA, IGLESIAS_CON_DANI):
             for cambio in CAMBIOS:
                 for _, escritor in ESCRITORES:
                     on = _el_ejecutor(oferta, cambio, escritor, ruta, ENCENDIDO)
@@ -987,8 +1111,10 @@ def test_el_ejecutor_defensa_en_profundidad():
     """Si la oferta de Roberto o de Boye llega igual al ejecutor (otra
     version de la eleccion, una elegida a mano), encendido, despues de
     revalidar y ANTES de crear el escritor: COMPETITIVE_BLOCKED_LA_ORDEN,
-    `success` False, `write_performed` False y la `guardia`. Apagado,
-    main: se escribe."""
+    `success` False, `write_performed` False, la `guardia` y
+    `de_la_orden`. Apagado, main: se escribe."""
+    from src.analysis.la_orden_en_los_managers import MOTIVO as MOTIVO_SUYO
+
     with tempfile.TemporaryDirectory() as carpeta:
         ruta = _la_orden_en(carpeta, "hoy", ORDEN_HOY)
         for oferta in (ROBERTO_ACEPTA, ROBERTO_SACRIFICIO, BOYE_CONTRA, ROBERTO_TEXTO,
@@ -1009,6 +1135,8 @@ def test_el_ejecutor_defensa_en_profundidad():
                 assert r["revalidation_snapshot"] == FOTO_FRESCA, r
                 assert r["http_status"] is None and r["response"] is None, r
                 assert r["reason"].startswith("LA_ORDEN_DEL_GESTOR: "), r
+                assert r["reason"] == MOTIVO_SUYO, r
+                assert r["de_la_orden"] == [int(oferta["player_id"])], r
             # Lo que la revalidacion ya frena antes, sale igual que en
             # main (va primero); lo que frenaria despues (contraoferta
             # sin importe, aceptar por debajo), lo frena la orden antes.
@@ -1186,19 +1314,36 @@ def test_nunca_lanza():
                 assert pieza.la_eleccion(mala) is None, mala
             for ids in ((), (None,), ("x",), (0,), (-ROBERTO,), (True,), (object(),),
                         (float("nan"),), (float("inf"),)):
-                assert pieza.lo_guarda_la_orden(*ids) is False, ids
-            assert pieza.lo_guarda_la_orden(0, ROBERTO) is True
-            assert pieza.lo_guarda_la_orden(str(ROBERTO)) is True
-            assert pieza.lo_guarda_la_orden(IGLESIAS) is False
+                assert pieza.lo_guarda_la_orden(*ids) == frozenset(), ids
+            assert pieza.lo_guarda_la_orden(0, ROBERTO) == frozenset({ROBERTO})
+            assert pieza.lo_guarda_la_orden(str(ROBERTO)) == frozenset({ROBERTO})
+            assert pieza.lo_guarda_la_orden(IGLESIAS) == frozenset()
+            # Fotos y ofertas raras: ni lanza ni inventa.
+            for foto in (None, "x", 7, {}, {"market": "x"}, {"market": {"offers": "x"}},
+                         {"market": {"offers": [None, 7, "x", {"id": LOTE_ROBERTO},
+                                                {"id": LOTE_ROBERTO, "requestedPlayers": "x"},
+                                                {"id": LOTE_ROBERTO, "player": "x"}]}}):
+                for oid in (None, "x", 0, True, LOTE_ROBERTO, str(LOTE_ROBERTO)):
+                    assert pieza.lo_guarda_la_orden(IGLESIAS, foto=foto, offer_id=oid) == \
+                        frozenset(), (foto, oid)
+            rara = {"market": {"offers": [{"id": str(LOTE_ROBERTO), "requestedPlayers": [
+                None, "x", True, {"id": "no"}, {"id": None}, [ROBERTO], IGLESIAS,
+                {"id": str(ROBERTO)}]}]}}
+            assert pieza.lo_guarda_la_orden(IGLESIAS, foto=rara, offer_id=LOTE_ROBERTO) == \
+                frozenset({ROBERTO})
+            assert pieza.lo_guarda_la_orden(foto=rara, offer_id=str(LOTE_ROBERTO)) == \
+                frozenset({ROBERTO})
         with _Interruptores({ENV: None, ENV_ORDEN: "1"}), _Sustituye(_la_orden_de_mentira(ruta)):
             assert pieza.la_eleccion([autorizada]) is None
-            assert pieza.lo_guarda_la_orden(ROBERTO) is False
+            assert pieza.lo_guarda_la_orden(ROBERTO) == frozenset()
+            assert pieza.lo_guarda_la_orden(foto=rara, offer_id=LOTE_ROBERTO) == frozenset()
         # La orden que revienta: vacio, y la eleccion y el ejecutor de main.
         with _Interruptores(ENCENDIDO), _Sustituye(
                 [(orden_mod, n, _revienta) for n in ("conservados", "protegidos")]):
             assert pieza.los_de_la_orden() == frozenset()
             assert pieza.la_eleccion([autorizada]) is None
-            assert pieza.lo_guarda_la_orden(ROBERTO) is False
+            assert pieza.lo_guarda_la_orden(ROBERTO) == frozenset()
+            assert pieza.lo_guarda_la_orden(foto=rara, offer_id=LOTE_ROBERTO) == frozenset()
         revienta = [(orden_mod, n, _revienta) for n in ("conservados", "protegidos")]
         for ofertas in (_lista("roberto_acepta"), _lista("mezcla")):
             off = _la_vuelta(ofertas, _escritor("mentira"), ruta, PRODUCCION)
@@ -1268,6 +1413,213 @@ def test_si_no_se_importa_lo_de_siempre():
     assert ejec["r"]["status"] == "COMPETITIVE_COUNTER_SENT", ejec
 
 
+# 14. UNA OFERTA POR VARIOS
+
+def test_una_oferta_por_varios():
+    """La revision encendida del 04/11 por la noche: un manager pide a
+    Iglesias y a Roberto (o a Boye, o a Yamal) en UNA oferta. La liquidez
+    de verdad la parte en dos entradas con el MISMO `offer_id`, Iglesias
+    primero; el Safety Gate autoriza la de Iglesias, y aceptarla (o
+    contraofertarla) vende a los dos. Apagado: main (se vende). Encendido:
+    ni se elige ni se escribe; la siguiente oferta libre se queda la
+    vuelta; dos libres juntos, main."""
+    import src.analysis.liquidity_manager as liquidez
+
+    # Lo que hace la liquidez de verdad con una oferta por dos.
+    def _roster(pid, nombre, valor, dano, venta):
+        return {"id": pid, "name": nombre, "market_value": valor, "protection": "",
+                "protection_score": dano, "sale_score": venta}
+
+    tablero = {"incoming": [{"offer_id": LOTE_ROBERTO, "status": "waiting",
+                             "amount": 12_500_000, "player_ids": [ROBERTO, IGLESIAS]}]}
+    with _Sustituye([(liquidez, "build_offer_board", lambda snapshot: tablero)]):
+        candidatos = liquidez.build_incoming_offer_candidates(
+            {}, [_roster(ROBERTO, "Roberto Fernández", 6_990_000, 70.0, 30.0),
+                 _roster(IGLESIAS, "Juan Iglesias", 3_800_000, 40.0, 50.0)])
+    assert [(c["offer_id"], c["player_id"], c["amount"]) for c in candidatos] == [
+        (LOTE_ROBERTO, IGLESIAS, 12_500_000), (LOTE_ROBERTO, ROBERTO, 12_500_000)], candidatos
+
+    casos = (
+        # lista, lo que escribe main, lo que escribe encendido
+        ("lote_iglesias_roberto", ("accept_offer", LOTE_ROBERTO), None),
+        ("lote_roberto_primero", ("accept_offer", LOTE_ROBERTO), None),
+        ("lote_iglesias_boye", ("counter_offer", LOTE_BOYE), None),
+        ("lote_iglesias_yamal", ("accept_offer", LOTE_YAMAL), None),
+        ("lote_y_luego_libre", ("accept_offer", LOTE_ROBERTO), ("counter_offer", 70005)),
+    )
+    with tempfile.TemporaryDirectory() as carpeta:
+        ruta = _la_orden_en(carpeta, "hoy", ORDEN_HOY)
+        for nombre_lista, de_main, encendido in casos:
+            ofertas = _lista(nombre_lista)
+            for nombre, escritor in ESCRITORES:
+                off = _la_vuelta(ofertas, escritor, ruta, PRODUCCION)
+                on = _la_vuelta(ofertas, escritor, ruta, ENCENDIDO)
+                assert _escrituras(off["enviados"]) == [de_main], (nombre_lista, off)
+                assert _escrituras(on["enviados"]) == ([encendido] if encendido else []), \
+                    (nombre_lista, nombre, on)
+                if encendido is None:
+                    assert on["enviados"] == [], on            # ni se crea
+                    assert on["eleccion"]["selected"] is None, on["eleccion"]
+                    assert on["r"]["status"] == "NO_COMPETITIVE_ACTION", on["r"]
+                else:
+                    assert on["eleccion"]["selected"]["offer_id"] == 70005, on["eleccion"]
+                if nombre_lista == "lote_iglesias_boye" and nombre == "real_200":
+                    assert off["enviados"][-1]["json"] == {
+                        "type": "counterOffer", "to": LOTE_BOYE, "amount": 13_000_000}
+            # Las dos entradas de la oferta, frenadas; la del de la orden con
+            # su motivo, la del libre con el del lote. Yamal ya salia
+            # BLOCK_PROTECTED_PLAYER: se queda como en main.
+            from src.analysis.la_orden_en_los_managers import MOTIVO, MOTIVO_EN_EL_LOTE
+
+            on = _la_eleccion(ofertas, PUERTAS[0][1], ruta, ENCENDIDO)
+            off = _la_eleccion(ofertas, PUERTAS[0][1], ruta, PRODUCCION)
+            for a, b in zip(off["evaluations"], on["evaluations"]):
+                if a["offer_id"] == 70005 or a["gate"]["status"] != "ALLOW_DRY_RUN":
+                    assert _texto(a) == _texto(b), (a, b)
+                    continue
+                assert b["gate"]["status"] == "BLOCK_LA_ORDEN_DEL_GESTOR", b
+                assert b["gate"]["status_sin_la_orden"] == "ALLOW_DRY_RUN", b
+                suyo = b["player_id"] in (ROBERTO, BOYE, YAMAL)
+                assert b["gate"]["reason"] == (MOTIVO if suyo else MOTIVO_EN_EL_LOTE), b
+            del_lote = {"lote_iglesias_roberto": ["Roberto Fernández"],
+                        "lote_roberto_primero": ["Roberto Fernández"],
+                        "lote_iglesias_boye": ["Boyé"], "lote_iglesias_yamal": ["Yamal"],
+                        "lote_y_luego_libre": ["Roberto Fernández"]}[nombre_lista]
+            frenadas = on["no_se_responden"]
+            assert all(f["por_la_orden"] == del_lote for f in frenadas), frenadas
+            assert IGLESIAS in [f["player_id"] for f in frenadas], frenadas
+            if nombre_lista == "lote_iglesias_yamal":
+                assert dict(_estados(on))[YAMAL] == "BLOCK_PROTECTED_PLAYER"
+                assert [f["player_id"] for f in frenadas] == [IGLESIAS], frenadas
+            # La sombra V1.9 ve lo mismo.
+            sombra = _la_sombra(ofertas, PUERTAS[0][1], ruta, ENCENDIDO)["sombra"]
+            assert (sombra.get("shadow_decision") or {}).get("offer_id") in (
+                None, 70005), sombra
+
+        # Dos libres juntos (Iglesias y Dani): encendido es main.
+        for nombre, escritor in ESCRITORES:
+            on = _la_vuelta(_lista("lote_libre"), escritor, ruta, ENCENDIDO)
+            off = _la_vuelta(_lista("lote_libre"), escritor, ruta, PRODUCCION)
+            assert _texto(on) == _texto(off), (on, off)
+            assert _escrituras(on["enviados"]) == [("accept_offer", LOTE_LIBRE)], on
+
+        # Caducada, sin orden o ilegible: main.
+        for nombre_orden, orden in ORDENES[2:]:
+            otra = _la_orden_en(carpeta, nombre_orden, orden)
+            for nombre_lista, _, _ in casos:
+                on = _la_vuelta(_lista(nombre_lista), _escritor("mentira"), otra, ENCENDIDO)
+                off = _la_vuelta(_lista(nombre_lista), _escritor("mentira"), otra, PRODUCCION)
+                assert _texto(on) == _texto(off), (nombre_orden, nombre_lista)
+
+        # EL EJECUTOR: la de Iglesias de una oferta por varios le llega igual
+        # (otra eleccion, una elegida a mano). Mira TODOS los que la oferta
+        # pide en la foto fresca (`market.offers`).
+        for oferta, de_la_orden in ((IGLESIAS_CON_ROBERTO, [ROBERTO]),
+                                    (IGLESIAS_CON_BOYE, [BOYE]),
+                                    (IGLESIAS_CON_YAMAL, [YAMAL])):
+            for nombre, escritor in ESCRITORES:
+                off = _el_ejecutor(oferta, "igual", escritor, ruta, PRODUCCION)
+                on = _el_ejecutor(oferta, "igual", escritor, ruta, ENCENDIDO)
+                assert len(_escrituras(off["enviados"])) == 1, off
+                assert on["enviados"] == [], on
+                r = on["r"]
+                assert r["status"] == "COMPETITIVE_BLOCKED_LA_ORDEN", r
+                assert r["success"] is False and r["write_performed"] is False, r
+                assert r["guardia"] == "LA_ORDEN_EN_LOS_MANAGERS", r
+                assert r["player_id"] == IGLESIAS and r["offer_id"] == oferta["offer_id"], r
+                assert r["de_la_orden"] == de_la_orden, r
+                assert r["reason"] == MOTIVO_EN_EL_LOTE, r
+            # Lo pida como lo pida Biwenger: un id suelto, un texto, `player`.
+            for pide in ([IGLESIAS, ROBERTO], [{"id": IGLESIAS}, {"id": str(ROBERTO)}],
+                         [None, "x", {"id": "no"}, IGLESIAS, ROBERTO]):
+                cruda = [{"id": oferta["offer_id"], "requestedPlayers": pide}]
+                r = _el_ejecutor(oferta, "igual", _escritor("mentira"), ruta, ENCENDIDO,
+                                 crudas=cruda)
+                assert r["r"]["status"] == "COMPETITIVE_BLOCKED_LA_ORDEN", (pide, r)
+                assert ROBERTO in r["r"]["de_la_orden"], r
+            cruda = [{"id": oferta["offer_id"], "requestedPlayers": [IGLESIAS],
+                      "player": {"id": ROBERTO}}]
+            r = _el_ejecutor(oferta, "igual", _escritor("mentira"), ruta, ENCENDIDO, crudas=cruda)
+            assert r["r"]["de_la_orden"] == [ROBERTO], r
+            # Si la foto no trae la oferta (no pasa: la decision fresca sale
+            # de ella), el ejecutor solo ve al de la oferta: main. La
+            # eleccion ya la habia frenado.
+            for crudas in ([], [{"id": 99999, "requestedPlayers": [ROBERTO]}]):
+                on = _el_ejecutor(oferta, "igual", _escritor("mentira"), ruta, ENCENDIDO,
+                                  crudas=crudas)
+                off = _el_ejecutor(oferta, "igual", _escritor("mentira"), ruta, PRODUCCION,
+                                   crudas=crudas)
+                assert _texto(on) == _texto(off), (crudas, on, off)
+        # Dos libres: el ejecutor, main.
+        for cambio in CAMBIOS:
+            on = _el_ejecutor(IGLESIAS_CON_DANI, cambio, _escritor("mentira"), ruta, ENCENDIDO)
+            off = _el_ejecutor(IGLESIAS_CON_DANI, cambio, _escritor("mentira"), ruta, PRODUCCION)
+            assert _texto(on) == _texto(off), cambio
+        # Apagado, el ejecutor ni mira la foto: con o sin las crudas, igual.
+        for oferta in (IGLESIAS_CON_ROBERTO, IGLESIAS_CON_YAMAL):
+            a = _el_ejecutor(oferta, "igual", _escritor("mentira"), ruta, PRODUCCION)
+            b = _el_ejecutor(oferta, "igual", _escritor("mentira"), ruta, PRODUCCION, crudas=[])
+            assert _texto(a) == _texto(b)
+
+
+# 15. LA VUELTA LO DICE
+
+def test_la_vuelta_lo_dice():
+    """Encendido, el bloque SAFETY GATE V1.8 de la vuelta dice cada oferta
+    frenada: «Bloqueada por la orden: <jugador> (oferta <id> de <rival>)»
+    y, en una oferta por varios, a quien pide tambien. Apagado, ni una
+    linea nueva (la huella lo mide entero)."""
+    from src.autopilot import print_competitive_observer
+
+    with tempfile.TemporaryDirectory() as carpeta:
+        ruta = _la_orden_en(carpeta, "hoy", ORDEN_HOY)
+        puerta = PUERTAS[0][1]
+        casos = (
+            ("roberto_acepta",
+             ["  Bloqueada por la orden: Roberto Fernández (oferta 70001 de Un rival de la liga)"]),
+            ("boye_luego_iglesias",
+             ["  Bloqueada por la orden: Boyé (oferta 70003 de Un rival de la liga)"]),
+            ("lote_iglesias_roberto",
+             ["  Bloqueada por la orden: Juan Iglesias (oferta 70100 de Un rival de la liga; "
+              "pide tambien a Roberto Fernández)",
+              "  Bloqueada por la orden: Roberto Fernández (oferta 70100 de Un rival de la liga)"]),
+            ("lote_iglesias_yamal",
+             ["  Bloqueada por la orden: Juan Iglesias (oferta 70102 de Un rival de la liga; "
+              "pide tambien a Yamal)"]),
+        )
+        for nombre_lista, lineas in casos:
+            on = _el_tablero(_lista(nombre_lista), puerta, ruta, ENCENDIDO)
+            off = _el_tablero(_lista(nombre_lista), puerta, ruta, PRODUCCION)
+            assert "Bloqueada por la orden" not in off, off
+            dichas = [x for x in on.splitlines() if "Bloqueada por la orden" in x]
+            assert dichas == lineas, dichas
+            # Justo despues de las cuentas del Safety Gate.
+            assert on.index("  Seleccionadas max:") < on.index(lineas[0]) < \
+                on.index("  Regla por ciclo:"), on
+            # Y lo de cada oferta: su estado y su motivo.
+            assert "  Safety Gate V1.8:      BLOCK_LA_ORDEN_DEL_GESTOR" in on, on
+            assert "  Gate reason:           LA_ORDEN_DEL_GESTOR: " in on, on
+            # Quitando lo nuevo, el resto es lo que ya imprimia la vuelta
+            # salvo el estado y el motivo de las frenadas.
+            assert len(on.splitlines()) == len(off.splitlines()) + len(lineas)
+        # Sin nadie de la orden: identico.
+        for nombre_lista in ("iglesias", "lote_libre", "hoy_ninguna"):
+            assert _el_tablero(_lista(nombre_lista), puerta, ruta, ENCENDIDO) == \
+                _el_tablero(_lista(nombre_lista), puerta, ruta, PRODUCCION)
+
+    # Un tablero raro no rompe la vuelta.
+    import contextlib
+    import io
+
+    for raras in ([None, "x", 7, {}], [{"player_id": ROBERTO, "por_la_orden": "Roberto"}],
+                  [{"player_name": "X", "por_la_orden": [None, 7, "X"]}], "x", 7):
+        salida = io.StringIO()
+        with contextlib.redirect_stdout(salida):
+            print_competitive_observer({"available": True, "manager_offers": [],
+                                        "competitive_safety_gate": {"no_se_responden": raras}})
+        assert "SAFETY GATE V1.8" in salida.getvalue()
+
+
 # 13. EL ENTORNO NO DECIDE (doctrina 104)
 
 def test_el_entorno_no_decide_esta_guardia():
@@ -1320,6 +1672,8 @@ TESTS = [
     test_hoy_cero_ofertas_de_managers,
     test_nunca_lanza,
     test_si_no_se_importa_lo_de_siempre,
+    test_una_oferta_por_varios,
+    test_la_vuelta_lo_dice,
     test_el_entorno_no_decide_esta_guardia,
 ]
 

@@ -550,26 +550,36 @@ def execute_competitive_live_action(
 
     # LA ORDEN EN LOS MANAGERS (04/11/2026, `la_orden_en_los_managers`):
     # defensa en profundidad. Ni aceptar ni contraofertar la oferta de un
-    # manager por un jugador que la orden del gestor manda conservar o
-    # proteger. La eleccion ya no la elige; si llega igual, se frena aqui,
-    # ANTES de crear el escritor. Apagado, False sin leer la orden: lo de
-    # siempre.
+    # manager que se llevaria a un jugador que la orden del gestor manda
+    # conservar o proteger: el de la oferta o CUALQUIERA que la misma
+    # oferta pida en la foto fresca (una oferta puede pedir varios, y
+    # aceptarla o contraofertarla los vende a todos). La eleccion ya no la
+    # elige; si llega igual, se frena aqui, ANTES de crear el escritor.
+    # Apagado, vacio sin leer la orden ni la foto: lo de siempre.
     try:
         from src.analysis.la_orden_en_los_managers import (
             ESTADO as _ESTADO_DE_LA_ORDEN,
             GUARDIA as _GUARDIA_DE_LA_ORDEN,
             MOTIVO as _MOTIVO_DE_LA_ORDEN,
+            MOTIVO_EN_EL_LOTE as _MOTIVO_DEL_LOTE,
             lo_guarda_la_orden,
         )
 
-        la_orden_lo_guarda = lo_guarda_la_orden(
+        de_la_orden = lo_guarda_la_orden(
             fresh_player_id,
             expected_player_id,
+            foto=fresh_snapshot,
+            offer_id=offer_id,
+        )
+        motivo_de_la_orden = (
+            _MOTIVO_DE_LA_ORDEN
+            if {fresh_player_id, expected_player_id} & set(de_la_orden)
+            else _MOTIVO_DEL_LOTE
         )
     except Exception:                               # noqa: BLE001
-        la_orden_lo_guarda = False
+        de_la_orden = frozenset()
 
-    if la_orden_lo_guarda:
+    if de_la_orden:
 
         return noop(
             action=
@@ -579,7 +589,7 @@ def execute_competitive_live_action(
                 _ESTADO_DE_LA_ORDEN,
 
             reason=
-                _MOTIVO_DE_LA_ORDEN,
+                motivo_de_la_orden,
 
             success=
                 False,
@@ -593,6 +603,9 @@ def execute_competitive_live_action(
 
                 "player_id":
                     fresh_player_id,
+
+                "de_la_orden":
+                    sorted(de_la_orden),
 
                 "guardia":
                     _GUARDIA_DE_LA_ORDEN,

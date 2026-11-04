@@ -2149,6 +2149,47 @@ def print_competitive_observer(
         f"{safety_gate.get('selected_count', 0)}"
     )
 
+    # LA ORDEN EN LOS MANAGERS (04/11/2026, `la_orden_en_los_managers`):
+    # las ofertas que la orden del gestor no deja contestar, con nombre.
+    # `no_se_responden` solo existe encendido y con alguna frenada:
+    # apagado no se imprime nada (lo de siempre).
+    try:
+        for frenada in (
+            safety_gate.get(
+                "no_se_responden"
+            )
+            or []
+        ):
+            if not isinstance(frenada, dict):
+                continue
+
+            de_la_orden = [
+                str(nombre)
+                for nombre in (
+                    frenada.get("por_la_orden")
+                    or []
+                )
+                if str(nombre) != str(
+                    frenada.get("player_name")
+                    or frenada.get("player_id")
+                )
+            ]
+
+            print(
+                f"  Bloqueada por la orden: "
+                f"{frenada.get('player_name') or frenada.get('player_id')}"
+                f" (oferta {frenada.get('offer_id')}"
+                f" de {frenada.get('rival_name') or '?'}"
+                + (
+                    f"; pide tambien a {', '.join(de_la_orden)}"
+                    if de_la_orden
+                    else ""
+                )
+                + ")"
+            )
+    except Exception:                               # noqa: BLE001
+        pass
+
     print(
         "  Regla por ciclo:       MAXIMO 1 ACCION"
     )
