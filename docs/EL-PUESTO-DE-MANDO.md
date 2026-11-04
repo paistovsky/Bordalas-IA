@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 03/11/2026, 22:30 de Madrid (laboratorio de rivales de la noche).
+Actualizado: 04/11/2026, 07:30 de Madrid (rafaga de las 07:15).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2699 a #2708,
+  la de las 07:15 incluida). Reset: **Adrian Nino PERDIDO** (4.909.900
+  contra 5.142.300) y **Unai Simon PERDIDO** (4.179.900 contra 4.333.000).
+  Roberto y Gulacsi se quedan. Saldo **+2.025.724**, 0 comprometido, 12
+  jugadores. **La J12 (vie 06/11 15:00) ya esta en verde** sin vender a
+  nadie mas. Esta noche (21:15) mi control de caja, que ya sale holgado.
 
 - **03/11 22:30 (laboratorio de rivales de la noche). FUSIONADA, APAGADA:
   LA ORDEN MANDA EN EL CAMBIO.**
