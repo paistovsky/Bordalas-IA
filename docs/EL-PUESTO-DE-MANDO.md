@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/11/2026, 12:45 de Madrid (encendido de EL ONCE QUE SE PUEDE ESCRIBIR y laboratorio de rivales de la manana).
+Actualizado: 04/11/2026, 14:30 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/11 14:15 (rafaga de la tarde).** Ciclos: verdes, pero **FALTA LA
+  VUELTA DE LAS 12:07 de Madrid** (11:07 UTC): no hay ninguna run entre
+  la #2712 (11:07 de Madrid) y la #2713 (13:07). No salio roja ni
+  cancelada: el disparo no llego (cron-job.org). Es la primera vez que lo
+  veo; el latido no se toca (regla del dueno). Si se repite, aviso. Saldo
+  +2.025.724, puja viva Loureiro 798.000 (jue 07:00): peor caso +1,23 M
+  para el vie 15:00, en verde. El chat del dueno encendio el once que se
+  puede escribir hoy miercoles (la vuelta de las 13:07, verde, ya lo
+  lleva); lo vigilo en las vueltas de esta tarde.
 
 - **04/11 12:45 (encendido y laboratorio de rivales de la manana).
   ENCENDIDO: EL ONCE QUE SE PUEDE ESCRIBIR (7ff786c7). FUSIONADA, APAGADA:
