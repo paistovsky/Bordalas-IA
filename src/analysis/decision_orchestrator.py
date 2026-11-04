@@ -1681,13 +1681,18 @@ def build_global_decision_uncached(
     # protegidos de la orden (la misma puerta que el escritor) no entran
     # en el plan como renovacion ni como oferta a cobrar: la siguiente se
     # queda la vuelta. Apagado, None y nada cambia. Ver
-    # `src/analysis/el_protegido_no_gasta_la_vuelta.py`.
-    from src.analysis.el_protegido_no_gasta_la_vuelta import (
-        fuera_los_protegidos,
-        los_del_plan,
-    )
+    # `src/analysis/el_protegido_no_gasta_la_vuelta.py`. Si no se pudiera
+    # importar, None: el plan de siempre (y el escritor sigue frenando).
+    try:
+        from src.analysis.el_protegido_no_gasta_la_vuelta import (
+            fuera_los_protegidos,
+            los_del_plan,
+        )
 
-    protegidos_del_plan = los_del_plan()
+        protegidos_del_plan = los_del_plan()
+
+    except Exception:                               # noqa: BLE001
+        protegidos_del_plan = None
 
     no_se_renuevan = []
 

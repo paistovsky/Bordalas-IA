@@ -39,10 +39,10 @@ QUE SE COMPRUEBA
        (07:15, 08:07, 09:07 con Boye en backoff, 10:07 con las dos
        caducadas, Chust primero, solo Boye, sin prisa y sin nada que
        renovar), con la orden de hoy, sin Boye, caducada, sin orden y
-       con Boye y Chust protegidos; con el interruptor sin poner, "0" y
-       "", sin interruptores y con los 26 del YAML de produccion
-       (origin/main e5a51e88). La de main, medida antes de tocar el
-       codigo, una por version de Python (3.11 y 3.13).
+       con Boye y Chust protegidos; con el interruptor sin poner, "0",
+       "", "off" y "2", sin interruptores y con los 27 del YAML de
+       produccion (origin/main 9c8a37b6). La de main, medida antes de
+       tocar el codigo, una por version de Python (3.11 y 3.13).
     3. EL CASO DE HOY, EL PLAN: encendido, Boye protegido y primero en
        la cola, la renovacion que entra es la de Chust (07:15, 08:07,
        09:07 y 10:07). Apagado, Boye (o nada a las 09:07).
@@ -63,7 +63,9 @@ QUE SE COMPRUEBA
        protegidos; la vuelta pasa a la siguiente accion.
     9. La venta del protegido: una oferta aprobada de Boye no es la que
        se cobra; se cobra la siguiente (Iglesias).
-   10. Nunca lanza.
+   10. Nunca lanza (tampoco con una coleccion que no es una lista).
+       Y si la pieza no se pudiera importar, lo de siempre: en el
+       ejecutor se importa ANTES de escribir.
    11. El entorno no la decide (doctrina 104).
 
 DE DONDE SALEN LOS NUMEROS
@@ -600,13 +602,15 @@ def _la_vuelta(decision, fabrica_de_escritor, fresco, ruta, entorno,
 # LA BATERIA Y SU HUELLA
 # ============================================================
 
-# Los 26 que enciende el YAML de produccion de origin/main (e5a51e88,
+# Los 27 que enciende el YAML de produccion de origin/main (9c8a37b6,
 # .github/workflows/bordalas-live.yml), contados con
-# `el_paso_0.interruptores_encendidos_en`.
+# `el_paso_0.interruptores_encendidos_en`: los 26 de e5a51e88 y el once
+# que se puede escribir (encendido en 7ff786c7).
 PRODUCCION = {n: "1" for n in (
     "BORDALAS_COBRA_LA_RACHA", "BORDALAS_COMPRA_SOLO_SI_SUBE",
     "BORDALAS_EL_CALENDARIO_EN_LA_MEJORA", "BORDALAS_EL_CIERRE_DE_LA_JORNADA",
     "BORDALAS_EL_INFORME_DE_LA_MANANA", "BORDALAS_EL_MOTOR_VIEJO_SOLO_SI_SUBE",
+    "BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR",
     "BORDALAS_EL_ONCE_UNA_VEZ", "BORDALAS_EL_PARTE_VENDE", "BORDALAS_JORNADAS_POR_SU_FECHA",
     "BORDALAS_LA_CARTERA", "BORDALAS_LA_JORNADA_DE_CADA_PAGINA",
     "BORDALAS_LA_MEJORA_DEL_ONCE", "BORDALAS_LA_MEJORA_SOLO_SI_SUBE",
@@ -618,7 +622,7 @@ PRODUCCION = {n: "1" for n in (
 )}
 ENTORNOS = (("sin_interruptores", {}), ("produccion", PRODUCCION))
 
-APAGADO = (None, "0", "")
+APAGADO = (None, "0", "", "off", "2")
 ENCENDIDO = {**PRODUCCION, ENV: "1"}
 
 
@@ -690,9 +694,10 @@ def _la_huella(huellas: dict) -> str:
 
 
 # Medidas en main sin tocar (copia de origin/main e5a51e88 con este
-# fichero dentro) con `python -m
+# fichero dentro; otra vez en 9c8a37b6, con los 27 de produccion y el
+# interruptor tambien en "off" y "2": las mismas) con `python -m
 # src.analysis.test_el_protegido_no_gasta_la_vuelta_v1 --medir`, una por
-# Python y por entorno (sin interruptores y los 26 de produccion).
+# Python y por entorno (sin interruptores y los de produccion).
 # Cualquier cambio querido en el orquestador, el ejecutor, el escritor,
 # el backoff, `register_action_outcome` o los consumidores de V10 la pone
 # roja: se vuelve a medir en main, a proposito, en las dos versiones.
@@ -840,9 +845,9 @@ def test_lo_que_el_paso_0_da_por_encendido():
 # 2. APAGADO ES MAIN BYTE A BYTE
 
 def test_apagado_es_main_byte_a_byte():
-    """La bateria, con el interruptor sin poner, "0" y "", sin
-    interruptores y con los 26 de produccion: la huella de main, medida
-    antes de tocar el codigo, en esta version de Python."""
+    """La bateria, con el interruptor sin poner, "0", "", "off" y "2",
+    sin interruptores y con los 27 de produccion: la huella de main,
+    medida antes de tocar el codigo, en esta version de Python."""
     esperadas = HUELLAS_DE_MAIN.get(sys.version_info[:2])
     assert esperadas is not None, f"sin huella medida para Python {sys.version_info[:2]}"
     todas = _huellas(APAGADO)
@@ -1119,6 +1124,31 @@ def test_nunca_lanza():
     assert pieza.fuera_los_protegidos(raros, None)["quedan"] == raros
     assert pieza.fuera_los_protegidos(raros, {"no-es-un-id"})["quedan"] == raros
 
+    # Cualquier coleccion que se recorra (un generador, la vista de un
+    # dict, una tupla): fuera solo los protegidos, nunca todo. Lo que no
+    # es una coleccion de cosas (un dict, un texto, un numero), tal cual:
+    # todo queda.
+    gen = (x for x in [{"player_id": BOYE}, {"player_id": CHUST}])
+    r = pieza.fuera_los_protegidos(gen, frozenset({BOYE}))
+    assert r["quedan"] == [{"player_id": CHUST}], r
+    assert [f["player_id"] for f in r["fuera"]] == [BOYE], r
+    vista = {"a": {"player_id": BOYE}, "b": {"player_id": CHUST}}.values()
+    assert pieza.fuera_los_protegidos(vista, frozenset({BOYE}))["quedan"] == \
+        [{"player_id": CHUST}]
+    assert pieza.fuera_los_protegidos(vista, frozenset())["quedan"] == list(vista)
+    assert pieza.fuera_los_protegidos((x for x in raros), None)["quedan"] == raros
+    assert pieza.fuera_los_protegidos(tuple(raros), frozenset({BOYE}))["quedan"] == \
+        [x for x in raros if x is not raros[5]]
+    for no_es_coleccion in ({"player_id": BOYE}, "texto", b"bytes", 7):
+        r = pieza.fuera_los_protegidos(no_es_coleccion, frozenset({BOYE}))
+        assert r["quedan"] is no_es_coleccion and r["fuera"] == [], r
+
+    def _revienta_a_mitad():
+        yield {"player_id": CHUST}
+        raise RuntimeError("a mitad")
+
+    assert pieza.fuera_los_protegidos(_revienta_a_mitad(), frozenset({BOYE}))["fuera"] == []
+
     for valor in (None, "1"):
         with _Interruptores({ENV: valor, "BORDALAS_LA_ORDEN_DEL_GESTOR": "1"}), \
                 _Sustituye([(orden_mod, "protegidos", _revienta)]):
@@ -1157,6 +1187,61 @@ def test_nunca_lanza():
                     {"timestamp": "snapshot_0807", "my_team": []},
                     failure_backoff=copy.deepcopy(v[5]), acquisition_board=None)
         assert _accion(on) == _accion(off) == ("RENEW_MARKET_LISTING", BOYE)
+
+
+# 10b. SI NO SE PUDIERA IMPORTAR, LO DE SIEMPRE
+
+def test_si_no_se_importa_lo_de_siempre():
+    """En la renovacion del ejecutor la pieza se importa ANTES de
+    escribir, y en los dos enganches dentro de un `try`: nada puede
+    lanzar despues del envio. Si no se pudiera importar, encendido es
+    main: el plan renueva a Boye y la vuelta es la de main."""
+    ejecutor = (RAIZ / "src" / "actions" / "autopilot_executor.py").read_text(
+        encoding="utf-8")
+    rama = ejecutor.index("    if action == RENEW_LISTING_ACTION:")
+    importa = ejecutor.index("from src.analysis.el_protegido_no_gasta_la_vuelta import", rama)
+    escribe = ejecutor.index("writer.list_player_for_sale(", rama)
+    assert rama < importa < escribe, (rama, importa, escribe)
+    assert ejecutor.count("el_protegido_no_gasta_la_vuelta import") == 1
+    assert ejecutor[:importa].rstrip().endswith("try:"), ejecutor[importa - 80:importa]
+    orquestador = (RAIZ / "src" / "analysis" / "decision_orchestrator.py").read_text(
+        encoding="utf-8")
+    importa = orquestador.index("from src.analysis.el_protegido_no_gasta_la_vuelta import")
+    assert orquestador.count("el_protegido_no_gasta_la_vuelta import") == 1
+    assert orquestador[:importa].rstrip().endswith("try:"), orquestador[importa - 80:importa]
+
+    import src.analysis.el_protegido_no_gasta_la_vuelta  # noqa: F401  (ya cargada)
+
+    def _texto(x):
+        return json.dumps(_normal(x), sort_keys=True, ensure_ascii=False, default=str)
+
+    nombre = "src.analysis.el_protegido_no_gasta_la_vuelta"
+    renovar_boye = dict(DECISIONES)["renovar_boye"]
+    with tempfile.TemporaryDirectory() as carpeta:
+        ruta = _la_orden_en(carpeta, "hoy", ORDEN_HOY)
+        v = _vuelta("0807")
+        plan_main = _el_plan(v, OFERTAS_HOY, None, ruta, PRODUCCION)
+        vueltas_main = [_la_vuelta(renovar_boye, escritor, _T0807, ruta, PRODUCCION)
+                        for _, escritor in ESCRITORES[:2]]
+        antes = sys.modules.get(nombre)
+        sys.modules[nombre] = None                  # la importacion falla
+        try:
+            plan = _el_plan(v, OFERTAS_HOY, None, ruta, ENCENDIDO)
+            vueltas = [_la_vuelta(renovar_boye, escritor, _T0807, ruta, ENCENDIDO)
+                       for _, escritor in ESCRITORES[:2]]
+        finally:
+            if antes is None:
+                sys.modules.pop(nombre, None)
+            else:
+                sys.modules[nombre] = antes
+    assert sys.modules.get(nombre) is antes
+    assert _accion(plan) == ("RENEW_MARKET_LISTING", BOYE), _accion(plan)
+    assert "no_se_renuevan" not in plan["state"], sorted(plan["state"])
+    assert _texto(plan) == _texto(plan_main)
+    for vuelta, de_main in zip(vueltas, vueltas_main):
+        assert vuelta["r"]["write_performed"] is True, vuelta["r"]
+        assert "blocked" not in vuelta["r"], vuelta["r"]
+        assert _texto(vuelta) == _texto(de_main)
 
 
 # 11. EL ENTORNO NO DECIDE (doctrina 104)
@@ -1207,6 +1292,7 @@ TESTS = [
     test_ninguna_renovacion_la_siguiente_accion,
     test_la_venta_del_protegido,
     test_nunca_lanza,
+    test_si_no_se_importa_lo_de_siempre,
     test_el_entorno_no_decide_esta_guardia,
 ]
 

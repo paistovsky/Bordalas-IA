@@ -56,12 +56,31 @@ QUE NO HACE
     No toca el tablero de publicaciones (el panel sigue viendo las dos
     caducar), ni las prioridades, ni el orden del resto de la cola, ni
     `conservar` (eso lo frena el ejecutor al cobrar, como siempre), ni la
-    aceptacion por caducidad de un grupo de ofertas (la elige el
-    ejecutor con la foto fresca, sin los de `conservar`), ni la
     renovacion de la ventana ni el escaparate, que no gastan la
     escritura de la vuelta. Un FAILED con la peticion enviada sigue
     siendo escritura y sigue castigandose; el ensayo (`sent: False` sin
     `blocked`) tambien sigue igual.
+
+    Tampoco toca la aceptacion por caducidad de un grupo de ofertas
+    (ACCEPT_CLUSTER_BEFORE_EXPIRY): el plan propone el grupo, no un
+    jugador, y la oferta la elige el ejecutor con la foto fresca
+    (`select_emergency_accept_offer`), que solo salta NEVER_SELL y
+    NEVER_AUTO_SELL. Si elige a uno de `conservar` (o un protegido), el
+    ejecutor rechaza la accion entera DESPUES de elegir
+    (INVALID_SELECTED_OFFER: sin escritura, sin backoff, V10 conserva su
+    turno) y las demas ofertas del grupo no se prueban. Igual encendido
+    que apagado; solo pesa en una crisis de solvencia. Lo mismo que una
+    oferta de `conservar` (no protegida) primera en las cobrables:
+    BLOCKED_PROTECTED_PLAYER con el motivo «NEVER_AUTO_SELL». Para otra
+    pieza: que el selector salte a `conservados()` antes de elegir.
+
+    Ni lo que ya pasaba en main y esto solo deja correr en unas vueltas
+    mas (las que el backoff de Boye se comia): la puja BUY de V10 no
+    resta las pujas vivas de la caja ni descuenta que la oferta de un
+    `conservar` no se cobrara; el competitivo V2 no mira la orden antes
+    de aceptar o contraofertar; la salida de V10
+    (`live_sale_executor`) da `sent: True` aunque el escritor la frene.
+    Cada una, su pieza.
 
 EL INTERRUPTOR
 
@@ -72,6 +91,30 @@ EL INTERRUPTOR
     el backoff y lo que ve V10 son main byte a byte. Nunca lanza: si algo
     falla, lo de siempre (y el escritor sigue frenando). Al importarse no
     hace nada.
+
+AL ENCENDERLO
+
+    1. En UN commit, sobre el ultimo main (no sobre la rama vieja): la
+       linea del interruptor a "1" en el YAML de produccion y
+       `scripts/run_validation_gate.py --paso-0` en ESE arbol, al final.
+       Sin el paso 0 en el arbol final, la guardia del paso 0 se pone
+       roja, la validacion del ciclo falla y la vuelta no corre. Se
+       anaden por nombre el YAML y `config/paso_0.json` (nunca
+       `add -A`, nunca `data/`) y despues la verja normal.
+    2. No armar en el mismo commit los literales del interruptor que no
+       existe de `test_la_hucha_v1` y `test_la_prima_que_gana_v1`: si se
+       arman, el paso 0 va despues, en ese mismo arbol (si no, el
+       registro nombra un interruptor que no existe y la verja para).
+       Un interruptor por commit.
+    3. Los diagnosticos de la maquina del gestor
+       (`scripts/que_ofertas_cobro.py`,
+       `scripts/mirar_accept_before_expiry.py`) leen el entorno de
+       quien los corre: para ver el plan de produccion hay que exportar
+       este interruptor y el de la orden del gestor (los dos a 1). Sin
+       ellos ensenan el plan de main (la renovacion de Boye).
+    4. Encendido, con la oferta aprobada de un protegido primera, se
+       cobra la siguiente aprobada (lo que se quiere: «la siguiente se
+       queda la vuelta»). Apuntarlo en la bitacora al encender.
 """
 
 from __future__ import annotations
@@ -145,15 +188,35 @@ def _pid(item):
         return None
 
 
+def _como_lista(items):
+    """`items` como lista nueva (None, vacia): una lista, una tupla, un
+    generador, la vista de un dict... None si no es una coleccion de
+    cosas (un texto, bytes, un dict, algo que no se recorre)."""
+    if items is None:
+        return []
+    if isinstance(items, (str, bytes, bytearray, dict)):
+        return None
+    try:
+        return list(items)
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def fuera_los_protegidos(items, protegidos) -> dict:
     """
     `{"quedan", "fuera"}`: `items` (renovaciones u ofertas a cobrar, con
-    `player_id`) sin los de `protegidos`, en el mismo orden; los quitados,
-    con su nombre y el motivo de la guarda. Sin protegidos, todo queda.
-    Pura. Nunca lanza: si algo falla, todo queda (lo de siempre).
+    `player_id`; cualquier coleccion que se recorra) sin los de
+    `protegidos`, en el mismo orden y como lista; los quitados, con su
+    nombre y el motivo de la guarda. Sin protegidos, todo queda. Pura.
+    Nunca lanza: si algo falla, o `items` no es una coleccion de cosas,
+    todo queda (lo de siempre): nunca se pierde una renovacion ni una
+    oferta por no entenderla.
     """
-    lista = list(items or []) if isinstance(items, (list, tuple)) else []
+    lista = None
     try:
+        lista = _como_lista(items)
+        if lista is None:
+            return {"quedan": items, "fuera": []}
         vetados = {int(p) for p in (protegidos or ())}
         if not vetados:
             return {"quedan": lista, "fuera": []}
@@ -170,7 +233,7 @@ def fuera_los_protegidos(items, protegidos) -> dict:
                 quedan.append(item)
         return {"quedan": quedan, "fuera": fuera}
     except Exception:                               # noqa: BLE001
-        return {"quedan": lista, "fuera": []}
+        return {"quedan": items if lista is None else lista, "fuera": []}
 
 
 def la_que_frena_el_escritor(salida, respuesta):
