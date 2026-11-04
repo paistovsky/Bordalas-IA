@@ -36,14 +36,31 @@ QUE HACE, ENCENDIDO (solo en el BUY de V10)
             `bid_exposure_engine.build_bid_exposure` (la `exposure` del
             panel), que ya viene en el tablero de especulacion de la
             vuelta (`state.speculation.bid_exposure`); si no viniera, la
-            misma funcion sobre la foto. Si no se sabe cuanto hay pujado,
-            no se puja;
+            misma funcion sobre la foto. Mas las que la cesta del reset
+            acaba de mandar en esta misma vuelta, antes del BUY, y que la
+            foto aun no trae (`lo_de_la_cesta`, desde
+            `run_full_autonomous_cycle`; por jugador, sin contar dos veces
+            la que la foto ya trae). Si no se sabe cuanto hay pujado, no
+            se puja;
          b. el B1 cobrable es el B1 sin las fuentes (ofertas del Computer
             o publicaciones) de los jugadores de
             `la_orden_del_gestor.conservados() | protegidos()` de la orden
             viva y valida (hoy: Boye, Yamal, Chust y los demas de
-            `conservar`). Si no se sabe de quien es el B1 y la orden
-            tiene a alguien, no se cuenta nada;
+            `conservar`) y sin las de los intocables de la casa (Yamal,
+            `la_orden_del_gestor.INTOCABLES`, por su nombre, con orden o
+            sin ella; con la orden valida, los suyos: `_intocables`). Si
+            no se sabe de quien es una fuente, no se cuenta;
+         Que pasa con la orden (`los_que_no_se_cobran`):
+            - encendida, valida: fuera los suyos y los intocables;
+            - apagada (`la_orden_del_gestor.ENV`), sin fichero o
+              caducada: fuera solo los intocables (lo de main, menos
+              Yamal);
+            - encendida, con el fichero y que no se puede leer o no vale
+              (JSON roto, vacio, sin `caduca`, un fichaje mal escrito,
+              nombra a un intocable): no se puja (la caja a cero y la
+              ultima puerta cerrada). Esa orden manda proteger a alguien y
+              no se sabe a quien: contar su oferta como cobrable es lo que
+              esta pieza viene a quitar;
          c. el T-15 de la vuelta (la capacidad, el T-15 de cada compra
             del plan y el T-15 fresco del reprecio) usa (a) y (b):
             saldo - pujas vivas - lo comprado + B1 cobrable - colchon.
@@ -69,35 +86,71 @@ QUE NO HACE
     presupuesto de la via vieja, ni ninguna otra puja (la ronda, los
     chollos, la mejora, el carril y la orden tienen sus cuentas). No
     anade politica del once: el B1 ya es el que deja el once completo
-    con los intocables del guardarrail fuera. Las pujas que la cesta del
-    reset hubiera puesto en esta misma vuelta, antes del BUY, no estan en
-    la foto (hoy la cesta esta cerrada con `BORDALAS_SIN_SUBASTA`).
+    con los intocables del guardarrail fuera.
+
+    No ve una puja puesta entre la foto de `run_cycle` y el BUY por otro
+    (el dueno a mano, otro proceso): el mercado fresco del preflight
+    (`execute_bid`) no trae las pujas, y leerlas seria tocar el escritor
+    de todos o una lectura mas a la API. Son segundos de la misma vuelta.
+
+    Cuando para un BUY que main habria mandado, la vuelta queda sin
+    escribir (`write_used` False) y el paso 5 (contraofertas,
+    publicaciones) puede correr en esa vuelta: es lo mismo que pasa en
+    main en cada vuelta sin candidato (hoy todas, con la especulacion
+    vieja en pausa).
 
 EL INTERRUPTOR
 
     `BORDALAS_V10_CUENTA_LO_PUJADO`. Nace APAGADO. Se lee en UN sitio
-    (`activo`, al llamarse) y vale encendido con lo mismo que el paso 0,
-    el tablon y el panel dan por encendido (`el_paso_0.ENCENDIDO`).
-    Apagado, la caja, el plan, el reprecio, la puerta, el BUY y su log
-    son main byte a byte. Nunca lanza; si algo falla ENCENDIDO, no se
-    puja (la caja a cero y la puerta cerrada): es dinero. Al importarse
+    (`activo`, al llamarse; lo llaman la caja, la cesta, la ultima
+    puerta, lo pujado de la caja y las lineas del log, todas de este
+    modulo) y vale encendido con lo mismo que el paso 0, el tablon y el
+    panel dan por encendido (`el_paso_0.ENCENDIDO`). Apagado, la caja, el
+    plan, el reprecio, la puerta, el BUY y su log son main byte a byte (y
+    la llamada del ciclo al BUY, la de siempre). Nunca lanza; si algo
+    falla ENCENDIDO, no se puja (la caja a cero y la puerta cerrada): es
+    dinero. Si la pieza no se pudiera importar, lo de main. Al importarse
     no hace nada.
 
 AL ENCENDERLO
 
-    1. En UN commit, sobre el ultimo main: la linea del interruptor a "1"
-       en el YAML de produccion y `scripts/run_validation_gate.py
-       --paso-0` en ESE arbol, al final. Se anaden por nombre el YAML y
-       `config/paso_0.json` (nunca `add -A`, nunca `data/`) y despues la
-       verja normal.
+    1. En UN commit, sobre el ultimo main, con el arbol limpio e igual al
+       commit que se sube (`git status` sin nada, ni un `.py` sin seguir
+       en `src/` o `scripts/`: el inventario del paso 0 mira el disco, no
+       git), y con las piezas en paralelo (la orden en los managers) ya
+       en main o fuera del todo: la linea del interruptor a "1" en el
+       YAML de produccion y `scripts/run_validation_gate.py --paso-0` en
+       ESE arbol, al final. Si hay que tocar los literales de
+       `UNO_QUE_NO_EXISTE` (`test_la_hucha_v1`,
+       `test_la_prima_que_gana_v1`), ANTES del paso 0 y en ese commit,
+       nunca despues. Se anaden por nombre el YAML y `config/paso_0.json`
+       (nunca `add -A`, nunca `data/`) y despues la verja normal con 3.11
+       y 3.13.
     2. Con la orden de hoy y la puja por Loureiro viva, el BUY tiene
        727.724 de presupuesto (no 3.193.638). Si Loureiro se pierde (jue
-       07:00), 1.525.724. Apuntarlo en la bitacora al encender.
+       07:00), 1.525.724. Hoy no cambia ninguna decision (la especulacion
+       vieja esta en pausa: «Candidato: NINGUNO»); si cambian cuatro
+       lineas del log y el presupuesto. Apuntarlo en la bitacora.
+    3. La parte de la orden depende del interruptor de la orden
+       (`la_orden_del_gestor.ENV`) y de que la orden viva (caduca el 30/11 23:59). Caducada o apagada, la
+       oferta por Boye vuelve a contar como cobrable (lo de main), sin
+       aviso: renovarla antes si debe seguir sin cobrarse.
+    4. Cuando se levante la pausa de la especulacion vieja, mirar en el
+       primer log «Pujas vivas» y «B1 cobrable».
+    5. La huella de apagado (`HUELLAS_DE_MAIN` de la prueba) cubre el
+       escritor, `execute_bid`, el trader, el reprecio y el log del BUY:
+       si alguien los cambia a proposito, o el YAML cambia de Python, se
+       vuelve a medir en un main sin tocar con
+       `python -m src.analysis.test_v10_cuenta_lo_pujado_v1 --medir`, en
+       3.11 y en 3.13.
 """
 
 from __future__ import annotations
 
 import os
+
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 ENV = "BORDALAS_V10_CUENTA_LO_PUJADO"
@@ -140,17 +193,40 @@ def _euros(valor) -> str:
     return f"{_int(valor):,} EUR"
 
 
+def _ahora() -> datetime:
+    """La hora de ahora, en UTC (la que usan las funciones de la orden
+    sin `ahora`). Aparte, para que las pruebas la fijen."""
+    return datetime.now(timezone.utc)
+
+
+def _nombre(valor) -> str:
+    """Un nombre como lo compara la orden (`validar`): sin espacios a los
+    lados y en minusculas."""
+    return str(valor if valor is not None else "").strip().lower()
+
+
+def _nombres(valor):
+    """Los nombres de una lista, como los compara la orden; None si no es
+    una lista."""
+    if not isinstance(valor, (list, tuple)):
+        return None
+    return {_nombre(n) for n in valor}
+
+
 # ============================================================
 # (a) LO PUJADO
 # ============================================================
 
-def lo_pujado(speculation, snapshot) -> tuple:
+def lo_pujado(speculation, snapshot, de_la_vuelta=None) -> tuple:
     """
     `(pujado, conocido, de_donde)`: lo comprometido en nuestras pujas
     vivas. La cuenta del bot (`build_bid_exposure`, `committed_total`):
     la que ya trae el tablero de especulacion de la vuelta
     (`ESPECULACION`) o, si no la trae, la misma funcion sobre la foto
-    (`FOTO`). `conocido` False si la cuenta no esta disponible. Nunca
+    (`FOTO`). Mas `de_la_vuelta` (las de la cesta del reset de esta
+    vuelta, de `lo_de_la_cesta`): cada una por su jugador, si la cuenta
+    no trae ya una puja por el (`+CESTA`). `conocido` False si la cuenta
+    no esta disponible o una puja de la vuelta no se entiende. Nunca
     lanza (si algo falla, desconocido).
     """
     try:
@@ -164,47 +240,129 @@ def lo_pujado(speculation, snapshot) -> tuple:
             de_donde = "FOTO"
         if not isinstance(exposicion, dict) or not exposicion.get("available"):
             return 0, False, de_donde
-        return max(_int(exposicion.get("committed_total")), 0), True, de_donde
+        pujado = max(_int(exposicion.get("committed_total")), 0)
+        if de_la_vuelta is None:
+            return pujado, True, de_donde
+        if not isinstance(de_la_vuelta, (list, tuple)):
+            return 0, False, de_donde
+        ya = set()
+        for operacion in exposicion.get("operations") or []:
+            if isinstance(operacion, dict):
+                ya |= _jugadores(operacion.get("player_ids")) or set()
+        for puja in de_la_vuelta:
+            if not isinstance(puja, dict):
+                return 0, False, de_donde
+            pid = _int(puja.get("player_id"))
+            importe = puja.get("amount")
+            if pid <= 0 or isinstance(importe, bool) or not isinstance(importe, int) \
+                    or importe < 0:
+                return 0, False, de_donde
+            if pid not in ya:
+                pujado += importe
+                ya.add(pid)
+        return pujado, True, f"{de_donde}+CESTA" if de_la_vuelta else de_donde
     except Exception:                               # noqa: BLE001
         return 0, False, None
+
+
+def lo_de_la_cesta(subasta) -> dict:
+    """
+    Para el BUY de `run_full_autonomous_cycle`: las pujas que la cesta
+    del reset mando en esta vuelta (`subasta["sent"]`, las enviadas),
+    que van antes del BUY y que la foto del disco aun no trae, como
+    argumento de `build_controlled_run` (`pujas_de_la_vuelta`). Apagado,
+    o sin nada enviado: {} (la llamada de siempre). Una que no se
+    entiende va sin jugador: la caja no sabe lo pujado y no puja. Nunca
+    lanza.
+    """
+    try:
+        if not activo():
+            return {}
+    except Exception:                               # noqa: BLE001
+        return {}
+    try:
+        enviadas = subasta.get("sent") if isinstance(subasta, dict) else None
+        if not enviadas:
+            return {}
+        if not isinstance(enviadas, (list, tuple)):
+            return {"pujas_de_la_vuelta": [{"player_id": None, "amount": None}]}
+        pujas = []
+        for e in enviadas:
+            if not isinstance(e, dict):
+                pujas.append({"player_id": None, "amount": None})
+            elif e.get("sent"):
+                pujas.append({"player_id": e.get("id"), "amount": e.get("amount")})
+        return {"pujas_de_la_vuelta": pujas} if pujas else {}
+    except Exception:                               # noqa: BLE001
+        return {"pujas_de_la_vuelta": [{"player_id": None, "amount": None}]}
 
 
 # ============================================================
 # (b) LO COBRABLE
 # ============================================================
 
-def los_que_no_se_cobran():
+def los_que_no_se_cobran() -> tuple:
     """
-    Los jugadores cuya oferta no se cobra: `conservados() | protegidos()`
-    de la orden viva (las funciones de la orden, sin argumentos: la de
-    `config/`, a la hora de ahora). Vacio con la orden apagada, caducada
-    o que no vale. None si no se pudo leer. Nunca lanza.
+    `(ids, nombres, estado)`: de quien no se cobra la oferta.
+
+      - `ids`: `conservados() | protegidos()` de la orden (las funciones
+        de la orden, con la de `config/` y la hora de `_ahora`).
+      - `nombres`: los intocables de la casa, por su nombre:
+        `la_orden_del_gestor.INTOCABLES` (Yamal) con orden o sin ella;
+        con la orden valida, los suyos (`_intocables`: la orden puede
+        soltar a Yamal lesionado).
+      - `estado`: `VALE`, `APAGADA`, `SIN_FICHERO`, `CADUCADA`, o por
+        que no vale (`NO_SE_PUEDE_LEER`, `SIN_ORDEN`, `SIN_CADUCIDAD`,
+        `FICHAJE_MAL_ESCRITO`, `NOMBRA_A_UN_INTOCABLE`, `ERROR`).
+
+    Apagada, sin fichero o caducada: `ids` vacio (lo de main, menos los
+    intocables). Encendida, con el fichero y que no se puede leer o no
+    vale: `ids` None (no se puja): esa orden manda proteger a alguien y
+    no se sabe a quien (`protegidos()` y `conservados()` darian vacio y
+    su oferta contaria como cobrable). Nunca lanza (si algo revienta,
+    `ids` None).
     """
     try:
-        from src.actions.la_orden_del_gestor import conservados, protegidos
+        from src.actions import la_orden_del_gestor as orden_mod
 
+        ahora = _ahora()
+        nombres = frozenset(_nombre(n) for n in orden_mod.INTOCABLES)
+        if not orden_mod.activa():
+            estado = "APAGADA"
+        elif not Path(orden_mod.RUTA).exists():
+            estado = "SIN_FICHERO"
+        else:
+            orden = orden_mod.leer_la_orden()
+            if orden is None:
+                estado = "NO_SE_PUEDE_LEER"
+            else:
+                estado = orden_mod.validar(orden, ahora) or "VALE"
+            if estado == "VALE":
+                nombres = frozenset(_nombre(n) for n in orden_mod._intocables(orden))
+            elif estado != "CADUCADA":
+                return None, nombres, estado
         ids = set()
-        for grupo in (conservados(), protegidos()):
+        for grupo in (orden_mod.conservados(None, ahora), orden_mod.protegidos(None, ahora)):
             for pid in grupo or ():
                 if _int(pid) > 0:
                     ids.add(_int(pid))
-        return frozenset(ids)
+        return frozenset(ids), nombres, estado
     except Exception:                               # noqa: BLE001
-        return None
+        return None, frozenset(), "ERROR"
 
 
 def _la_cartera_b1(portfolio):
-    """(fuentes, jugadores) de la cartera que da el B1 de main:
+    """(fuentes, jugadores, nombres) de la cartera que da el B1 de main:
     `trading_safe` si hay `trading_safe_total`; si no (main cae a
-    `usable_total`), la de Tier B (`selected_*`)."""
+    `usable_total`), la de Tier B (`selected_*`, sin nombres)."""
     if not isinstance(portfolio, dict):
-        return None, None
+        return None, None, None
     if "trading_safe_total" in portfolio:
         cartera = portfolio.get("trading_safe")
         if not isinstance(cartera, dict):
-            return None, None
-        return cartera.get("sources"), cartera.get("player_ids")
-    return portfolio.get("selected_sources"), portfolio.get("selected_player_ids")
+            return None, None, None
+        return cartera.get("sources"), cartera.get("player_ids"), cartera.get("player_names")
+    return portfolio.get("selected_sources"), portfolio.get("selected_player_ids"), None
 
 
 def _jugadores(valor):
@@ -220,13 +378,14 @@ def _jugadores(valor):
     return ids
 
 
-def lo_cobrable(portfolio, b1, fuera) -> tuple:
+def lo_cobrable(portfolio, b1, fuera, intocables=frozenset()) -> tuple:
     """
     `(cobrable, no_se_cobran)`: el B1 (`b1`, el de main) sin las fuentes
-    de los jugadores de `fuera`. Sin nadie fuera, el B1 entero. Una
-    fuente sin jugadores claros, o un B1 sin fuentes con alguien fuera:
-    no cobrable (no se sabe de quien es). Nunca lanza (si algo falla,
-    nada cobrable).
+    de los jugadores de `fuera` (ids) ni las de los `intocables` (por su
+    nombre). Sin nadie fuera, el B1 entero. Una fuente sin jugadores o
+    sin nombres claros, o un B1 sin fuentes con alguien fuera: no
+    cobrable (no se sabe de quien es). Nunca lanza (si algo falla, nada
+    cobrable).
     """
     try:
         total = max(_int(b1), 0)
@@ -234,30 +393,43 @@ def lo_cobrable(portfolio, b1, fuera) -> tuple:
                                                                  tuple)) else None
         if vetados is None:
             return 0, [{"motivo": "NO_SE_SABE_QUIEN_NO_SE_COBRA", "amount": total}]
-        if not vetados or total <= 0:
+        nunca = (_nombres(list(intocables))
+                 if isinstance(intocables, (set, frozenset, list, tuple)) else None)
+        if nunca is None:
+            return 0, [{"motivo": "NO_SE_SABE_QUIEN_NO_SE_COBRA", "amount": total}]
+        if (not vetados and not nunca) or total <= 0:
             return total, []
-        fuentes, jugadores = _la_cartera_b1(portfolio)
+        fuentes, jugadores, nombres = _la_cartera_b1(portfolio)
         if isinstance(fuentes, list) and fuentes:
             quitado, no = 0, []
             for fuente in fuentes:
                 if not isinstance(fuente, dict):
                     return 0, [{"motivo": "FUENTE_QUE_NO_SE_ENTIENDE", "amount": total}]
                 suyos = _jugadores(fuente.get("player_ids"))
-                if not suyos or suyos & vetados:
-                    importe = max(_int(fuente.get("amount")), 0)
-                    quitado += importe
-                    no.append({
-                        "source_id": fuente.get("source_id"),
-                        "kind": fuente.get("kind"),
-                        "player_ids": sorted(suyos or ()),
-                        "player_names": list(fuente.get("player_names") or []),
-                        "amount": importe,
-                        "motivo": ("LA_ORDEN_DEL_GESTOR" if suyos
-                                   else "NO_SE_SABE_DE_QUIEN"),
-                    })
+                sus_nombres = _nombres(fuente.get("player_names"))
+                if suyos and suyos & vetados:
+                    motivo = "LA_ORDEN_DEL_GESTOR"
+                elif suyos and nunca and sus_nombres is not None and sus_nombres & nunca:
+                    motivo = "INTOCABLE"
+                elif not suyos or (nunca and sus_nombres is None):
+                    motivo = "NO_SE_SABE_DE_QUIEN"
+                else:
+                    continue
+                importe = max(_int(fuente.get("amount")), 0)
+                quitado += importe
+                no.append({
+                    "source_id": fuente.get("source_id"),
+                    "kind": fuente.get("kind"),
+                    "player_ids": sorted(suyos or ()),
+                    "player_names": list(fuente.get("player_names") or []),
+                    "amount": importe,
+                    "motivo": motivo,
+                })
             return max(total - quitado, 0), no
         suyos = _jugadores(jugadores)
-        if suyos and not (suyos & vetados):
+        sus_nombres = _nombres(nombres)
+        if (suyos and not (suyos & vetados)
+                and (not nunca or (sus_nombres is not None and not (sus_nombres & nunca)))):
             return total, []
         return 0, [{"motivo": "NO_SE_SABE_DE_QUIEN", "player_ids": sorted(suyos or ()),
                     "amount": total}]
@@ -269,14 +441,16 @@ def lo_cobrable(portfolio, b1, fuera) -> tuple:
 # (a) + (b) + (c): LA CAJA DEL BUY
 # ============================================================
 
-def la_caja_del_buy(capital, *, speculation=None, snapshot=None):
+def la_caja_del_buy(capital, *, speculation=None, snapshot=None, de_la_vuelta=None):
     """
     Para `build_market_trader_shadow(..., para_el_buy=True)`, con la caja
-    de `build_sporting_safe_capital`. Apagado: `capital` tal cual (el
+    de `build_sporting_safe_capital` (y `de_la_vuelta`, las pujas de la
+    cesta de esta vuelta, si las hubo). Apagado: `capital` tal cual (el
     mismo objeto). Encendido: una caja nueva con la caja = saldo - pujas
     vivas, el B1 cobrable y el T-15 con los dos, y el bloque
-    `cuenta_lo_pujado`. Nunca lanza: si algo falla encendido, la caja a
-    cero (no se puja).
+    `cuenta_lo_pujado`. Nunca lanza: si algo falla encendido (o no se
+    sabe lo pujado, o la orden encendida no vale), la caja a cero (no se
+    puja).
     """
     try:
         if not activo():
@@ -291,10 +465,10 @@ def la_caja_del_buy(capital, *, speculation=None, snapshot=None):
         b1 = _int(capital.get("trading_safe_recovery"))
         con_deuda = bool(capital.get("can_use_temporary_debt", False))
 
-        pujado, sabido, de_donde = lo_pujado(speculation, snapshot)
-        fuera = los_que_no_se_cobran()
-        cobrable, no_se_cobran = lo_cobrable(capital.get("portfolio"), b1,
-                                             fuera if fuera is not None else None)
+        pujado, sabido, de_donde = lo_pujado(speculation, snapshot, de_la_vuelta)
+        fuera, intocables, orden = los_que_no_se_cobran()
+        cobrable, no_se_cobran = lo_cobrable(capital.get("portfolio"), b1, fuera,
+                                             intocables)
         conocido = bool(sabido and fuera is not None)
 
         caja = saldo - pujado
@@ -309,7 +483,8 @@ def la_caja_del_buy(capital, *, speculation=None, snapshot=None):
         if not sabido:
             motivo = "No se sabe cuanto hay pujado en vivo: el BUY no puja."
         elif fuera is None:
-            motivo = "No se pudo leer la orden del gestor: el BUY no puja."
+            motivo = (f"La orden del gestor esta encendida y no vale ({orden}): no se "
+                      "sabe a quien protege; el BUY no puja.")
         else:
             motivo = (f"Caja = saldo {saldo:,} - pujas vivas {pujado:,} = {caja:,}; "
                       f"B1 cobrable {cobrable:,} de {b1:,}.")
@@ -329,6 +504,7 @@ def la_caja_del_buy(capital, *, speculation=None, snapshot=None):
                 "b1": b1,
                 "b1_cobrable": cobrable,
                 "no_se_cobran": no_se_cobran,
+                "orden": orden,
                 "motivo": motivo,
                 "de_main": {k: capital.get(k) for k in _LO_QUE_CAMBIA},
             },
@@ -351,9 +527,12 @@ def la_caja_del_buy(capital, *, speculation=None, snapshot=None):
 
 def lo_pujado_de_la_caja(capital) -> int:
     """Lo pujado que la caja ya cuenta (el bloque de `la_caja_del_buy`);
-    0 si la caja no lo trae (apagado, o la caja de los demas). Para el
-    T-15 del plan y del reprecio. Nunca lanza."""
+    0 apagado (traiga lo que traiga la caja) o si la caja no lo trae (la
+    caja de los demas). Para el T-15 del plan y del reprecio. Nunca
+    lanza."""
     try:
+        if not activo():
+            return 0
         if not isinstance(capital, dict):
             return 0
         bloque = capital.get(BLOQUE)
@@ -417,8 +596,10 @@ def la_puja_que_no_cabe(trader, preflight, puja):
 
 def las_lineas(capital) -> list:
     """Las lineas que se anaden al log del BUY (`print_result`) si la
-    caja trae la cuenta; ninguna si no. Nunca lanza."""
+    caja trae la cuenta; ninguna si no, o apagado. Nunca lanza."""
     try:
+        if not activo():
+            return []
         bloque = capital.get(BLOQUE) if isinstance(capital, dict) else None
         if not isinstance(bloque, dict):
             return []

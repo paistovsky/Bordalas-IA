@@ -381,9 +381,10 @@ QUE_HACE = {
         "La compra especulativa de V10 cuenta lo que ya está pujado: su caja es "
         "el saldo menos todas las pujas vivas, y no cuenta como dinero por cobrar "
         "las ofertas por jugadores que la orden del gestor protege o manda "
-        "conservar (hoy, la de Boyé). Y no puja nunca si, ganándolo todo, el "
+        "conservar, ni las de Yamal. Y no puja nunca si, ganándolo todo, el "
         "saldo menos las pujas vivas menos esa puja, más lo que de verdad se "
-        "puede cobrar antes de la jornada, quedaría en negativo.",
+        "puede cobrar antes de la jornada, quedaría en negativo, ni si la orden "
+        "está encendida y no se puede leer.",
     "BORDALAS_LA_HUCHA":
         "Guarda dinero para un fichaje grande (config/la_hucha.json, hoy Raphinha). "
         "Lo apartado es el saldo menos las pujas vivas, hasta el objetivo. Nadie "

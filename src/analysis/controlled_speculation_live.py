@@ -191,6 +191,7 @@ def build_controlled_run(
     refresh: bool = True,
     execute_live: bool = False,
     live_confirmation: str | None = None,
+    pujas_de_la_vuelta: list | None = None,
 ) -> dict:
     """
     V10.4B pipeline:
@@ -208,10 +209,13 @@ def build_controlled_run(
     decision_result = build_global_decision(snapshot)
     # `para_el_buy`: la caja que cuenta lo pujado (V10 CUENTA LO PUJADO,
     # apagada la de siempre). Los demas que llaman al trader no lo piden.
+    # `pujas_de_la_vuelta`: las de la cesta del reset de esta vuelta, que
+    # la foto aun no trae (solo las pasa el ciclo, y solo encendido).
     trader = build_market_trader_shadow(
         snapshot,
         decision_result=decision_result,
         para_el_buy=True,
+        pujas_de_la_vuelta=pujas_de_la_vuelta,
     )
 
     try:

@@ -31,13 +31,15 @@ QUE SE COMPRUEBA
 
     1. Nace apagado, se lee en UN sitio (`activo`, al llamarse, solo
        desde el propio modulo), vale lo mismo que `el_paso_0.ENCENDIDO`,
-       tiene frase en QUE_HACE y no hace nada al importarse.
+       tiene frase en QUE_HACE (sin ejemplos con fecha) y no hace nada
+       al importarse.
     2. Apagado es main byte a byte: la huella de la bateria (la caja,
        el plan del trader, la puerta, el reprecio y el BUY entero con el
        escritor de verdad sin red, y su log), con el interruptor sin
        poner, "0", "", "off" y "2", sin interruptores y con los 27 del
-       YAML de produccion (origin/main 1ac6fd51). La de main, medida
-       antes de tocar el codigo, una por version de Python (3.11, 3.13).
+       YAML de produccion (origin/main 1ac6fd51 y 4799bdc2). La de main,
+       medida antes de tocar el codigo, una por version de Python (3.11,
+       3.13).
     3. EL CASO DE HOY: encendido, con 798.000 pujados y la oferta de
        Boye fuera, el BUY no puja ni 3.000.000 ni el tope por operacion;
        el presupuesto baja a 727.724. Apagado, main: puja y deja
@@ -47,14 +49,22 @@ QUE SE COMPRUEBA
     5. La ultima puerta: con el saldo fresco mas bajo, no se puja; con
        cobrables de verdad (Iglesias), si.
     6. Que es cobrable: fuera los de `conservados()` y `protegidos()` de
-       la orden viva (Boye, Chust publicado, Yamal); con la orden
-       caducada, sin orden o apagada, lo de main.
+       la orden viva (Boye, Chust publicado, Yamal) y Yamal siempre (por
+       su nombre, intocable de la casa); con la orden caducada, sin
+       orden o apagada, lo de main menos Yamal.
     7. Pujas desconocidas: no se puja. Sin bloque de exposicion, la
        misma cuenta (`build_bid_exposure`) desde la foto.
     8. Los demas del trader (V10.6, el cerebro, el libro) no cambian.
     9. Nunca lanza; si algo falla encendido, no se puja. Si la pieza no
        se pudiera importar, lo de siempre.
    10. El entorno no la decide (doctrina 104).
+   11. La orden encendida, en su sitio y que no vale (JSON roto, vacia,
+       sin `caduca`, un fichaje mal escrito, nombra a Yamal): no se puja
+       (revision ON del 04/11: volvia a contar la oferta por Boye).
+   12. Lo que la cesta del reset pujo en esta vuelta (antes del BUY, sin
+       estar en la foto) se resta, por jugador; apagado no se pasa.
+   13. Apagado, lo pujado de la caja y las lineas del log no miran el
+       bloque (revision OFF del 04/11).
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -207,6 +217,33 @@ ORDEN_CADUCADA = {**ORDEN_HOY, "caduca": "2026-11-03T23:59:00+01:00"}
 # `None`: no hay fichero.
 ORDENES = {"hoy": ORDEN_HOY, "sin_boye": ORDEN_SIN_BOYE,
            "caducada": ORDEN_CADUCADA, "sin_orden": None}
+
+# Ordenes que estan en su sitio y no valen (texto tal cual, o la orden), y
+# por que no valen (`la_orden_del_gestor.validar`, o que no se puede leer).
+# Con la orden encendida, `protegidos()` y `conservados()` dan vacio y la
+# oferta por Boye contaria como cobrable: encendido, no se puja.
+ORDENES_QUE_NO_VALEN = {
+    "json_roto": ('{"caduca": "2026-11-30T23:59:00+01:00", "proteger": [',
+                  "NO_SE_PUEDE_LEER"),
+    "vacia": ("", "NO_SE_PUEDE_LEER"),
+    "nula": ("null", "NO_SE_PUEDE_LEER"),
+    "lista": ("[]", "SIN_ORDEN"),
+    "sin_caduca": ({k: v for k, v in ORDEN_HOY.items() if k != "caduca"}, "SIN_CADUCIDAD"),
+    # Un fichaje sin `puja`.
+    "fichaje_mal_escrito": ({**ORDEN_HOY, "fichar": [{"player_id": LOUREIRO,
+                                                      "nombre": "Loureiro"}]},
+                            "FICHAJE_MAL_ESCRITO"),
+    "nombra_a_un_intocable": ({**ORDEN_HOY, "vender_si_ficha": {"jugadores": [
+        {"player_id": YAMAL, "nombre": "Yamal"}]}}, "NOMBRA_A_UN_INTOCABLE"),
+}
+
+# La orden que suelta a Yamal lesionado (`yamal_por_lesion`, 28 dias o
+# mas) y no lo protege: su oferta se cobra.
+ORDEN_YAMAL_LESIONADO = {
+    **ORDEN_HOY,
+    "proteger": [{"player_id": BOYE, "nombre": "Boyé"}],
+    "yamal_por_lesion": {"motivo": "Rotura de prueba.", "baja_estimada_dias": 60},
+}
 
 
 # ============================================================
@@ -452,23 +489,40 @@ def _vendedores(snapshot):
 
 
 def _la_orden_en(carpeta, nombre_orden) -> Path:
-    """La orden escrita en `carpeta` (o una ruta que no existe)."""
-    orden = ORDENES[nombre_orden]
+    """La orden escrita en `carpeta` (o una ruta que no existe). Las de
+    `ORDENES_QUE_NO_VALEN`, con su texto tal cual."""
+    if nombre_orden in ORDENES:
+        orden = ORDENES[nombre_orden]
+    elif nombre_orden == "yamal_lesionado":
+        orden = ORDEN_YAMAL_LESIONADO
+    else:
+        orden = ORDENES_QUE_NO_VALEN[nombre_orden][0]
     ruta = Path(carpeta) / f"orden_{nombre_orden}.json"
     if orden is not None and not ruta.exists():
-        ruta.write_text(json.dumps(orden, ensure_ascii=False), encoding="utf-8")
+        texto = orden if isinstance(orden, str) else json.dumps(orden, ensure_ascii=False)
+        ruta.write_text(texto, encoding="utf-8")
     return ruta
 
 
 def _la_orden_de_mentira(ruta, ahora=AHORA):
     """`protegidos`, `vetados` y `conservados` de la orden real, leyendo
     `ruta` a la hora `ahora` (las funciones de verdad: solo cambia de
-    donde leen y que hora es)."""
+    donde leen y que hora es). Y `RUTA` de la orden y el reloj de la
+    pieza (`_ahora`), para que la pieza mire la misma orden a la misma
+    hora: ni `config/` ni el reloj de verdad. Sin la pieza (main), solo
+    lo de la orden."""
     import src.actions.la_orden_del_gestor as orden_mod
 
     reales = {n: getattr(orden_mod, n) for n in ("protegidos", "vetados", "conservados")}
-    return [(orden_mod, n, (lambda f: (lambda *a, **k: f(ruta, ahora)))(f))
-            for n, f in reales.items()]
+    cambios = [(orden_mod, n, (lambda f: (lambda *a, **k: f(ruta, ahora)))(f))
+               for n, f in reales.items()]
+    cambios.append((orden_mod, "RUTA", Path(ruta)))
+    try:
+        from src.analysis import v10_cuenta_lo_pujado as pieza
+    except ImportError:
+        return cambios
+    cambios.append((pieza, "_ahora", lambda: ahora))
+    return cambios
 
 
 class _Respuesta:
@@ -539,10 +593,13 @@ def _los_del_trader():
 
 
 def _el_buy(escenario, exposicion, orden, presupuesto, lista, entorno, *, ruta,
-            escritor="ok", modo="live", saldo_fresco=None, maximo=None) -> dict:
+            escritor="ok", modo="live", saldo_fresco=None, maximo=None,
+            de_la_vuelta=None) -> dict:
     """El BUY de V10 (`build_controlled_run`, como lo llama V10) con este
     entorno: el resultado, lo que se envio a Biwenger, cuantas lecturas
-    hizo y el log (`print_result`)."""
+    hizo y el log (`print_result`). `de_la_vuelta`: las pujas de la cesta
+    que el ciclo le pasa (`pujas_de_la_vuelta`); None, la llamada de
+    main."""
     import src.actions.live_bid_executor as lbe
     import src.analysis.controlled_speculation_live as cs
 
@@ -574,10 +631,12 @@ def _el_buy(escenario, exposicion, orden, presupuesto, lista, entorno, *, ruta,
             (lbe, "BiwengerWriteClient",
              _escritor_real(mercado, catalogo, escritor, enviados, lecturas)),
         ] + _los_del_trader() + _la_orden_de_mentira(ruta)):
+            extra = {} if de_la_vuelta is None else {"pujas_de_la_vuelta": de_la_vuelta}
             r = cs.build_controlled_run(
                 refresh=False,
                 execute_live=modo != "sombra",
                 live_confirmation=None if modo == "sin_confirmar" else "BORDALAS",
+                **extra,
             )
             with contextlib.redirect_stdout(log):
                 cs.print_result(r)
@@ -748,8 +807,8 @@ def _la_huella(huellas: dict) -> str:
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()
 
 
-# Medidas en main sin tocar (copia de origin/main 1ac6fd51 con este
-# fichero dentro) con `python -m src.analysis.test_v10_cuenta_lo_pujado_v1
+# Medidas en main sin tocar (copias de origin/main 1ac6fd51, con la
+# primera version de este fichero, y 4799bdc2, con esta; la misma) con `python -m src.analysis.test_v10_cuenta_lo_pujado_v1
 # --medir`, una por Python y por entorno (sin interruptores y los 27 de
 # produccion). Cualquier cambio querido en la caja, el trader, la puerta,
 # el reprecio, el BUY, el escritor o el log del BUY la pone roja: se
@@ -857,8 +916,15 @@ def test_nace_apagado_un_lector_y_su_frase():
     fuente = (RAIZ / "src" / "analysis" / "v10_cuenta_lo_pujado.py").read_text(encoding="utf-8")
     assert fuente.count(f'ENV = "{ENV}"') == 1
     assert fuente.count("os.environ.get(ENV") == 1
-    assert fuente.count("activo()") - fuente.count("def activo()") == 2, \
-        "activo() se llama en `la_caja_del_buy` y en `la_puja_que_no_cabe`"
+    llaman = sorted(
+        nodo.name for nodo in ast.walk(ast.parse(fuente))
+        if isinstance(nodo, ast.FunctionDef) and any(
+            isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "activo"
+            for n in ast.walk(nodo)))
+    assert llaman == ["la_caja_del_buy", "la_puja_que_no_cabe", "las_lineas",
+                      "lo_de_la_cesta", "lo_pujado_de_la_caja"], llaman
+    assert fuente.count("activo()") - fuente.count("def activo()") == 5, \
+        "activo() solo en la caja, la cesta, la puerta, lo pujado de la caja y el log"
     for ruta in (RAIZ / "src").rglob("*.py"):
         if ruta.name.startswith("test_") or ruta.name == "v10_cuenta_lo_pujado.py":
             continue
@@ -883,10 +949,12 @@ def test_nace_apagado_un_lector_y_su_frase():
     lee = lectores(RAIZ / "src" / "analysis" / "v10_cuenta_lo_pujado.py")
     assert lee.get(ENV) == "AL_LLAMARSE", lee.get(ENV)
 
+    # La frase dice lo que hace, sin ejemplos con fecha (la orden cambia).
     frase = str(QUE_HACE.get(ENV) or "")
-    for trozo in ("V10", "pujas vivas", "orden del gestor", "Boyé",
+    for trozo in ("V10", "pujas vivas", "orden del gestor", "Yamal",
                   "antes de la jornada", "no puja"):
         assert trozo in frase, (trozo, frase)
+    assert "hoy" not in frase.lower(), frase
 
 
 def test_lo_que_el_paso_0_da_por_encendido():
@@ -1133,9 +1201,12 @@ def test_la_ultima_puerta():
 
 def test_que_es_cobrable():
     """Del B1 no se cobra la oferta (o la publicacion) de quien la orden
-    viva protege o manda conservar: `conservados() | protegidos()`, las
-    funciones de la orden. Con la orden caducada, sin orden o apagada,
-    el B1 de main."""
+    viva protege o manda conservar (`conservados() | protegidos()`, las
+    funciones de la orden) ni la de Yamal (intocable de la casa, por su
+    nombre, con orden o sin ella). Con la orden caducada, sin orden o
+    apagada, el B1 de main menos Yamal. Una fuente sin nombres no se
+    cuenta (no se sabe si es la de Yamal). Con la orden que suelta a
+    Yamal lesionado y no lo protege, su oferta se cobra."""
     from src.analysis import v10_cuenta_lo_pujado as pieza
     from src.analysis.market_trader_shadow import build_sporting_safe_capital
 
@@ -1146,9 +1217,9 @@ def test_que_es_cobrable():
         "iglesias": (OFERTA_IGLESIAS, OFERTA_IGLESIAS),
         "publicado": (OFERTA_DANI, OFERTA_DANI + CHUST_PUBLICADO),
         "vacia": (0, 0),
-        "sin_fuentes": (0, OFERTA_BOYE),       # no se sabe de quien: nada
+        "sin_fuentes": (0, 0),                 # no se sabe de quien: nada
         "usable": (0, OFERTA_BOYE),
-        "yamal": (OFERTA_IGLESIAS, OFERTA_YAMAL + OFERTA_IGLESIAS),
+        "yamal": (OFERTA_IGLESIAS, OFERTA_IGLESIAS),
     }
     with tempfile.TemporaryDirectory() as carpeta:
         for orden in ORDENES:
@@ -1179,10 +1250,41 @@ def test_que_es_cobrable():
                         assert fuera == {BOYE}, fuera
                     if viva and cartera == "publicado":
                         assert fuera == {CHUST}, fuera
-                    if viva and cartera == "yamal":
+                    if cartera == "yamal":
                         assert fuera == {YAMAL}, fuera
-                    if not viva:
+                        motivos = {f["motivo"] for f in caja["cuenta_lo_pujado"]["no_se_cobran"]}
+                        assert motivos == ({"LA_ORDEN_DEL_GESTOR"} if viva else {"INTOCABLE"}), \
+                            motivos
+                    elif not viva:
                         assert fuera == set(), fuera
+                    assert caja["cuenta_lo_pujado"]["conocido"] is True
+                    assert caja["cuenta_lo_pujado"]["orden"] == (
+                        "APAGADA" if nombre_entorno == "sin_la_orden" else
+                        {"hoy": "VALE", "sin_boye": "VALE", "caducada": "CADUCADA",
+                         "sin_orden": "SIN_FICHERO"}[orden]), caja["cuenta_lo_pujado"]
+
+        # La orden que suelta a Yamal lesionado y no lo protege.
+        ruta = _la_orden_en(carpeta, "yamal_lesionado")
+        capital = build_sporting_safe_capital(
+            _solvencia(("x", SALDO_HOY, "yamal", True, "NORMAL")))
+        with _Interruptores(ENCENDIDO), _Sustituye(_la_orden_de_mentira(ruta)):
+            caja = pieza.la_caja_del_buy(capital, speculation={"bid_exposure": _exposicion([])},
+                                         snapshot={})
+        assert caja["trading_safe_recovery"] == OFERTA_YAMAL + OFERTA_IGLESIAS, \
+            caja["cuenta_lo_pujado"]
+        assert caja["cuenta_lo_pujado"]["no_se_cobran"] == []
+
+    # Lo cobrable, solo: Yamal por su nombre, como lo compara la orden.
+    yamal = {"trading_safe_total": OFERTA_YAMAL,
+             "trading_safe": {"sources": [{**F_YAMAL, "player_names": ["  LAMINE Yamal "]}]}}
+    assert pieza.lo_cobrable(yamal, OFERTA_YAMAL, frozenset(), {"lamine yamal"})[0] == 0
+    assert pieza.lo_cobrable(yamal, OFERTA_YAMAL, frozenset(), frozenset())[0] == OFERTA_YAMAL
+    sin_nombres = {"trading_safe_total": OFERTA_DANI,
+                   "trading_safe": {"sources": [{**F_DANI, "player_names": None}]}}
+    assert pieza.lo_cobrable(sin_nombres, OFERTA_DANI, frozenset(), {"yamal"})[0] == 0
+    assert pieza.lo_cobrable(sin_nombres, OFERTA_DANI, frozenset(), frozenset())[0] == \
+        OFERTA_DANI
+    assert pieza.lo_cobrable(CARTERAS["iglesias"], OFERTA_IGLESIAS, frozenset(), None)[0] == 0
 
 
 # 7. PUJAS DESCONOCIDAS, O SIN BLOQUE
@@ -1256,43 +1358,257 @@ def test_nunca_lanza():
 
     raros = (None, "texto", 7, [], {}, {"balance": "x"}, {"portfolio": "x"},
              {"balance": 1, "portfolio": {"trading_safe_total": "x"}},
-             {"cuenta_lo_pujado": "x"}, {"cuenta_lo_pujado": {"pujado": "x"}})
-    for entorno in (PRODUCCION, ENCENDIDO):
-        with _Interruptores(entorno):
-            for raro in raros:
-                for otro in raros:
-                    caja = pieza.la_caja_del_buy(raro, speculation=otro, snapshot=otro)
-                    if entorno is PRODUCCION:
-                        assert caja is raro
-                    pieza.la_puja_que_no_cabe(raro, otro, 1)
-                    pieza.la_puja_que_no_cabe({"capital": raro}, otro, raro)
-                    pieza.lo_pujado(raro, otro)
-                    pieza.lo_cobrable(raro, otro, raro)
-                assert isinstance(pieza.lo_pujado_de_la_caja(raro), int)
-                assert isinstance(pieza.las_lineas(raro), list)
-                pieza.los_que_no_se_cobran()
+             {"cuenta_lo_pujado": "x"}, {"cuenta_lo_pujado": {"pujado": "x"}},
+             [{"player_id": "x", "amount": None}], {"sent": "x"}, {"sent": [None, 3]},
+             {"sent": [{"id": "x", "amount": "y", "sent": True}]})
+    import src.actions.la_orden_del_gestor as orden_mod
+    from src.analysis.market_trader_shadow import build_sporting_safe_capital
+
+    # Con la orden de mentira (ni `config/` ni el reloj), la de hoy y las
+    # que no valen.
+    with tempfile.TemporaryDirectory() as carpeta:
+        for nombre_orden in ("hoy", "json_roto", "sin_caduca"):
+            ruta = _la_orden_en(carpeta, nombre_orden)
+            for entorno in (PRODUCCION, ENCENDIDO):
+                with _Interruptores(entorno), _Sustituye(_la_orden_de_mentira(ruta)):
+                    for raro in raros:
+                        for otro in raros:
+                            caja = pieza.la_caja_del_buy(raro, speculation=otro, snapshot=otro,
+                                                         de_la_vuelta=otro)
+                            if entorno is PRODUCCION:
+                                assert caja is raro
+                            pieza.la_puja_que_no_cabe(raro, otro, 1)
+                            pieza.la_puja_que_no_cabe({"capital": raro}, otro, raro)
+                            pieza.lo_pujado(raro, otro)
+                            pieza.lo_pujado(raro, otro, raro)
+                            pieza.lo_cobrable(raro, otro, raro)
+                            pieza.lo_cobrable(raro, otro, frozenset(), raro)
+                        assert isinstance(pieza.lo_pujado_de_la_caja(raro), int)
+                        assert isinstance(pieza.las_lineas(raro), list)
+                        cesta = pieza.lo_de_la_cesta(raro)
+                        assert isinstance(cesta, dict)
+                        if entorno is PRODUCCION:
+                            assert cesta == {}
+                    ids, nombres, estado = pieza.los_que_no_se_cobran()
+                    assert isinstance(nombres, frozenset) and isinstance(estado, str)
 
     # Encendido, si la orden revienta: no se puja, y nada lanza.
     def revienta(*a, **k):
         raise RuntimeError("la orden revienta")
 
-    import src.actions.la_orden_del_gestor as orden_mod
+    with tempfile.TemporaryDirectory() as carpeta:
+        ruta = _la_orden_en(carpeta, "hoy")
+        for que in (("conservados", "protegidos"), ("leer_la_orden",), ("validar",),
+                    ("activa",)):
+            with _Sustituye([(orden_mod, n, revienta) for n in que]):
+                with _Interruptores(ENCENDIDO), _Sustituye(_la_orden_de_mentira(ruta)):
+                    assert pieza.los_que_no_se_cobran()[0] is None, que
+                    solvencia = _solvencia(_escenario("sin_protegidos"))
+                    caja = pieza.la_caja_del_buy(build_sporting_safe_capital(solvencia),
+                                                 speculation={}, snapshot={})
+                    assert caja["sporting_safe_spend_capacity"] == 0, (que, caja)
+                    assert pieza.la_puja_que_no_cabe({"capital": caja}, {}, 1)
+                buy = _el_buy("sin_protegidos", "ninguna", "hoy", "sin_tope", "setecientos",
+                              ENCENDIDO, ruta=ruta)
+                assert buy["enviados"] == [], (que, buy["enviados"])
+
+
+# 12. LA ORDEN ENCENDIDA QUE NO VALE: NO SE PUJA
+
+def test_la_orden_que_no_vale_no_puja():
+    """Revision ON del 04/11: con la orden encendida y su fichero en su
+    sitio pero roto o que no vale (JSON roto, vacio, `null`, una lista,
+    sin `caduca`, un fichaje sin puja, nombra a Yamal), `protegidos()` y
+    `conservados()` dan vacio y la oferta por Boye volvia a contar como
+    cobrable: presupuesto 3.193.638 y la puja de 3.000.000 salia, como
+    en main. Encendido: no se puja (caja a cero, la ultima puerta
+    cerrada), aunque el B1 no sea de nadie de la orden. Con la orden
+    caducada, sin fichero o apagada, lo de main (menos Yamal)."""
+    from src.analysis import v10_cuenta_lo_pujado as pieza
+
+    sin_la_orden = {k: v for k, v in ENCENDIDO.items() if k != "BORDALAS_LA_ORDEN_DEL_GESTOR"}
+    with tempfile.TemporaryDirectory() as carpeta:
+        for nombre_orden, (_, motivo) in ORDENES_QUE_NO_VALEN.items():
+            ruta = _la_orden_en(carpeta, nombre_orden)
+            with _Interruptores(ENCENDIDO), _Sustituye(_la_orden_de_mentira(ruta)):
+                ids, nombres, estado = pieza.los_que_no_se_cobran()
+            assert ids is None and estado == motivo, (nombre_orden, ids, estado)
+            assert nombres == frozenset({"yamal", "lamine yamal"}), nombres
+
+            # El caso de hoy con la orden rota: main puja 3.000.000.
+            apagado = _el_buy("hoy", "loureiro", nombre_orden, "sin_tope", "tres_millones",
+                              PRODUCCION, ruta=ruta)
+            encendido = _el_buy("hoy", "loureiro", nombre_orden, "sin_tope", "tres_millones",
+                                ENCENDIDO, ruta=ruta)
+            assert _pujas(apagado) == [3_000_000], (nombre_orden, apagado["enviados"])
+            assert encendido["enviados"] == [], (nombre_orden, encendido["enviados"])
+            c = _capital(encendido)
+            assert c["sporting_safe_spend_capacity"] == 0, (nombre_orden, c)
+            cuenta = c["cuenta_lo_pujado"]
+            assert cuenta["conocido"] is False and cuenta["orden"] == motivo, cuenta
+            assert motivo in cuenta["motivo"] and "no puja" in cuenta["motivo"], cuenta
+            assert encendido["r"]["trader"]["trading_budget"]["total_budget"] == 0
+            assert "Pujas vivas:                 NO SE SABE" in encendido["log"], \
+                encendido["log"]
+            # La ultima puerta, sola, tambien cerrada.
+            with _Interruptores(ENCENDIDO):
+                assert pieza.la_puja_que_no_cabe({"capital": c}, {"balance": SALDO_HOY}, 1)
+
+            # Sin nada de la orden en el B1 (Iglesias) y sin pujas: tampoco.
+            encendido = _el_buy("sin_protegidos", "ninguna", nombre_orden, "sin_tope",
+                                "setecientos", ENCENDIDO, ruta=ruta)
+            assert encendido["enviados"] == [], (nombre_orden, encendido["enviados"])
+
+            # Con la orden apagada, su fichero no manda: lo de main con las
+            # pujas vivas restadas (la oferta por Boye cuenta).
+            sin_orden = _el_buy("hoy", "loureiro", nombre_orden, "sin_tope", "tres_millones",
+                                sin_la_orden, ruta=ruta)
+            assert _pujas(sin_orden) == [3_000_000], (nombre_orden, sin_orden["enviados"])
+            cuenta = _capital(sin_orden)["cuenta_lo_pujado"]
+            assert cuenta["orden"] == "APAGADA" and cuenta["b1_cobrable"] == OFERTA_BOYE, cuenta
+
+        # Caducada o sin fichero: se cuenta (lo de main, sin Yamal).
+        for nombre_orden, estado in (("caducada", "CADUCADA"), ("sin_orden", "SIN_FICHERO")):
+            ruta = _la_orden_en(carpeta, nombre_orden)
+            encendido = _el_buy("hoy", "loureiro", nombre_orden, "sin_tope", "tres_millones",
+                                ENCENDIDO, ruta=ruta)
+            cuenta = _capital(encendido)["cuenta_lo_pujado"]
+            assert cuenta["orden"] == estado and cuenta["conocido"] is True, cuenta
+            assert cuenta["b1_cobrable"] == OFERTA_BOYE, cuenta
+            assert _pujas(encendido) == [3_000_000], (nombre_orden, encendido["enviados"])
+
+
+# 13. LO QUE LA CESTA PUJO EN ESTA VUELTA
+
+def test_la_cesta_de_la_vuelta():
+    """La cesta del reset puja antes del BUY y la foto del disco no lo
+    trae. El ciclo le pasa al BUY lo enviado (`lo_de_la_cesta`, solo
+    encendido): la caja lo resta, por jugador (la que la foto ya trae no
+    se cuenta dos veces); si no se entiende, no se puja. Apagado: nada se
+    pasa y, aunque se pasara, el BUY es el de main."""
+    import inspect
+
+    import src.v10_full_autonomous_live as ciclo
+    from src.analysis import v10_cuenta_lo_pujado as pieza
+
+    subasta = {"available": True, "sent": [
+        {"id": TRENT, "name": "Trent", "amount": PUJA_TRENT, "sent": True},
+        {"id": 90009, "name": "Rechazada", "amount": 50_000, "sent": False}]}
+    trent = [{"player_id": TRENT, "amount": PUJA_TRENT}]
+    for valor in APAGADO:
+        with _Interruptores({**PRODUCCION, ENV: valor}):
+            assert pieza.lo_de_la_cesta(subasta) == {}
+            assert ciclo._lo_de_la_cesta_para_el_buy(subasta) == {}
+    with _Interruptores(ENCENDIDO):
+        assert pieza.lo_de_la_cesta(subasta) == {"pujas_de_la_vuelta": trent}
+        assert ciclo._lo_de_la_cesta_para_el_buy(subasta) == {"pujas_de_la_vuelta": trent}
+        for nada in (None, {}, {"sent": []}, {"sent": [{"id": 1, "amount": 2, "sent": False}]},
+                     {"available": False, "sent": None}):
+            assert pieza.lo_de_la_cesta(nada) == {}, nada
+        raro = pieza.lo_de_la_cesta({"sent": [None]})
+        assert raro == {"pujas_de_la_vuelta": [{"player_id": None, "amount": None}]}, raro
+        # Si la pieza no se pudiera importar, la llamada de siempre.
+        nombre = "src.analysis.v10_cuenta_lo_pujado"
+        antes = sys.modules.get(nombre)
+        sys.modules[nombre] = None
+        try:
+            assert ciclo._lo_de_la_cesta_para_el_buy(subasta) == {}
+        finally:
+            if antes is None:
+                sys.modules.pop(nombre, None)
+            else:
+                sys.modules[nombre] = antes
+
+    # El ciclo se lo pasa al BUY.
+    fuente = inspect.getsource(ciclo.run_full_autonomous_cycle)
+    llamada = fuente[fuente.index("buy = build_controlled_run("):]
+    llamada = llamada[:llamada.index("print_controlled_buy(buy)")]
+    assert "**_lo_de_la_cesta_para_el_buy(subasta)" in llamada, llamada
+    assert fuente.index("subasta = _pujar_en_el_reset(cycle)") < fuente.index(
+        "buy = build_controlled_run(")
 
     with tempfile.TemporaryDirectory() as carpeta:
         ruta = _la_orden_en(carpeta, "hoy")
-        with _Sustituye([(orden_mod, "conservados", revienta),
-                         (orden_mod, "protegidos", revienta)]):
-            with _Interruptores(ENCENDIDO):
-                from src.analysis.market_trader_shadow import build_sporting_safe_capital
+        # Sin cesta, los 700.000 caben (527.724 tras las pujas).
+        base = _el_buy("hoy", "loureiro", "hoy", "hoy", "setecientos", ENCENDIDO, ruta=ruta)
+        assert _pujas(base) == [700_000], base["enviados"]
+        # La cesta pujo 1.100.000 por Trent: 2.025.724 - 798.000 -
+        # 1.100.000 = 127.724 de caja; los 700.000 no caben.
+        cesta = _el_buy("hoy", "loureiro", "hoy", "hoy", "setecientos", ENCENDIDO, ruta=ruta,
+                        de_la_vuelta=trent)
+        assert cesta["enviados"] == [], cesta["enviados"]
+        cuenta = _capital(cesta)["cuenta_lo_pujado"]
+        assert cuenta["pujado"] == PUJA_LOUREIRO + PUJA_TRENT, cuenta
+        assert cuenta["caja"] == 127_724 and cuenta["de_donde"] == "ESPECULACION+CESTA", cuenta
+        # La de Loureiro ya esta en la foto: no se cuenta dos veces.
+        repetida = _el_buy("hoy", "loureiro", "hoy", "hoy", "setecientos", ENCENDIDO,
+                           ruta=ruta, de_la_vuelta=[{"player_id": LOUREIRO,
+                                                     "amount": PUJA_LOUREIRO}])
+        assert _pujas(repetida) == [700_000], repetida["enviados"]
+        assert _capital(repetida)["cuenta_lo_pujado"]["pujado"] == PUJA_LOUREIRO
+        # Desde la foto (sin bloque de exposicion), igual.
+        foto = _el_buy("hoy", "sin_bloque", "hoy", "hoy", "setecientos", ENCENDIDO, ruta=ruta,
+                       de_la_vuelta=trent)
+        assert foto["enviados"] == [], foto["enviados"]
+        assert _capital(foto)["cuenta_lo_pujado"]["de_donde"] == "FOTO+CESTA"
+        # Una que no se entiende: no se sabe lo pujado, no se puja.
+        for mala in ([{"player_id": None, "amount": None}], [{"player_id": TRENT}],
+                     [{"player_id": TRENT, "amount": "1"}], "x"):
+            no = _el_buy("sin_protegidos", "ninguna", "hoy", "sin_tope", "setecientos",
+                         ENCENDIDO, ruta=ruta, de_la_vuelta=mala)
+            assert no["enviados"] == [], (mala, no["enviados"])
+            assert _capital(no)["cuenta_lo_pujado"]["conocido"] is False, mala
+        # Apagado, aunque se pasara: el BUY de main.
+        for valor in APAGADO:
+            entorno = {**PRODUCCION, ENV: valor}
+            main = _el_buy("hoy", "loureiro", "hoy", "sin_tope", "tres_millones", entorno,
+                           ruta=ruta)
+            con = _el_buy("hoy", "loureiro", "hoy", "sin_tope", "tres_millones", entorno,
+                          ruta=ruta, de_la_vuelta=trent)
+            assert _texto(con) == _texto(main), valor
+            assert _pujas(con) == [3_000_000]
 
-                solvencia = _solvencia(_escenario("sin_protegidos"))
-                caja = pieza.la_caja_del_buy(build_sporting_safe_capital(solvencia),
-                                             speculation={}, snapshot={})
-                assert caja["sporting_safe_spend_capacity"] == 0, caja
-                assert pieza.la_puja_que_no_cabe({"capital": caja}, {}, 1)
-            buy = _el_buy("sin_protegidos", "ninguna", "hoy", "sin_tope", "setecientos",
-                          ENCENDIDO, ruta=ruta)
-            assert buy["enviados"] == [], buy["enviados"]
+
+# 14. APAGADO, EL BLOQUE NO CUENTA
+
+def test_apagado_el_bloque_no_cuenta():
+    """Revision OFF del 04/11: apagado, lo pujado de la caja y las lineas
+    del log no dependen de que la caja traiga el bloque (lo lee
+    `activo`): 0 y ninguna. El reprecio y el log con una caja que lo
+    trae son los de una caja sin el."""
+    from src.analysis import v10_cuenta_lo_pujado as pieza
+    import src.analysis.controlled_speculation_live as cs
+
+    bloque = {"conocido": True, "saldo": SALDO_HOY, "pujado": PUJA_LOUREIRO,
+              "caja": SALDO_HOY - PUJA_LOUREIRO, "b1": 0, "b1_cobrable": 0,
+              "no_se_cobran": [{"player_names": ["Boyé"], "amount": OFERTA_BOYE}]}
+    for valor in APAGADO:
+        with _Interruptores({**PRODUCCION, ENV: valor}):
+            from src.analysis.controlled_speculation_repricing import build_fresh_bid_reprice
+
+            caja = {"balance": SALDO_HOY, "trading_safe_recovery": 0, "safety_buffer": COLCHON}
+            con = {**caja, "cuenta_lo_pujado": bloque}
+            assert pieza.lo_pujado_de_la_caja(con) == 0
+            assert pieza.las_lineas(con) == []
+            elegido = {"id": 90003, "name": "Setecientos", "price": 680_000,
+                       "recommended_bid": 700_000, "max_rational_bid": 800_000,
+                       "expected_exit_value": 900_000, "bid_authority_premium_percent": 0.0}
+            previo = {"current_price": 700_000, "minimum_bid": 700_000,
+                      "maximum_bid": PUJA_MAXIMA_HOY, "balance": SALDO_HOY}
+            sin = build_fresh_bid_reprice(elegido, previo, caja, min_roi_percent=15.0)
+            assert _texto(build_fresh_bid_reprice(elegido, previo, con, min_roi_percent=15.0)) \
+                == _texto(sin)
+            assert sin["fresh_projected_t15_after_buffer"] == 825_724
+            logs = []
+            for capital in (caja, con):
+                log = io.StringIO()
+                with contextlib.redirect_stdout(log):
+                    cs.print_result({"trader": {"capital": capital}})
+                logs.append(log.getvalue())
+            assert logs[0] == logs[1], logs
+    with _Interruptores(ENCENDIDO):
+        assert pieza.lo_pujado_de_la_caja({"cuenta_lo_pujado": bloque}) == PUJA_LOUREIRO
+        assert pieza.las_lineas({"cuenta_lo_pujado": bloque})
 
 
 # 10. SI NO SE PUEDE IMPORTAR, LO DE SIEMPRE
@@ -1365,6 +1681,9 @@ TESTS = [
     test_pujas_desconocidas_no_se_puja,
     test_los_demas_del_trader_no_cambian,
     test_nunca_lanza,
+    test_la_orden_que_no_vale_no_puja,
+    test_la_cesta_de_la_vuelta,
+    test_apagado_el_bloque_no_cuenta,
     test_si_no_se_importa_lo_de_siempre,
     test_el_entorno_no_decide_esta_guardia,
 ]

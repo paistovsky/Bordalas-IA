@@ -180,7 +180,12 @@ def build_sporting_safe_capital(solvency: dict) -> dict:
     }
 
 
-def _la_caja_del_buy(capital: dict, speculation: dict, snapshot: dict) -> dict:
+def _la_caja_del_buy(
+    capital: dict,
+    speculation: dict,
+    snapshot: dict,
+    pujas_de_la_vuelta: list | None = None,
+) -> dict:
     """V10 CUENTA LO PUJADO (`src/analysis/v10_cuenta_lo_pujado.py`):
     apagado, la misma caja. Si la pieza no se pudiera importar, lo de
     siempre."""
@@ -188,7 +193,12 @@ def _la_caja_del_buy(capital: dict, speculation: dict, snapshot: dict) -> dict:
         from src.analysis.v10_cuenta_lo_pujado import la_caja_del_buy
     except Exception:                               # noqa: BLE001
         return capital
-    return la_caja_del_buy(capital, speculation=speculation, snapshot=snapshot)
+    return la_caja_del_buy(
+        capital,
+        speculation=speculation,
+        snapshot=snapshot,
+        de_la_vuelta=pujas_de_la_vuelta,
+    )
 
 
 def _lo_pujado(capital: dict) -> int:
@@ -292,6 +302,7 @@ def build_market_trader_shadow(
     decision_result: dict,
     intelligent_bids: list[dict] | None = None,
     para_el_buy: bool = False,
+    pujas_de_la_vuelta: list | None = None,
 ) -> dict:
     """
     V10.4E Market Trader - EXACT EURO PRICING.
@@ -316,8 +327,10 @@ def build_market_trader_shadow(
     # solo lo que se puede cobrar (sin las ofertas de los que la orden del
     # gestor protege o conserva). Apagado, o para los demas (V10.6, el
     # cerebro, el libro), la misma caja.
+    # `pujas_de_la_vuelta`: las que la cesta del reset acaba de mandar en
+    # esta vuelta (solo las pasa el ciclo, y solo encendido).
     if para_el_buy:
-        capital = _la_caja_del_buy(capital, speculation, snapshot)
+        capital = _la_caja_del_buy(capital, speculation, snapshot, pujas_de_la_vuelta)
 
     status = (snapshot.get("market", {}) or {}).get("status", {}) or {}
     maximum_bid = _safe_int(status.get("maximumBid"))
