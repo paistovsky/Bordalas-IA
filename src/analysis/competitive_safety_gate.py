@@ -163,6 +163,23 @@ def select_single_competitive_action(
             "gate": result,
         })
 
+    # LA ORDEN EN LOS MANAGERS (04/11/2026, `la_orden_en_los_managers`):
+    # encendido, la oferta de un manager por un jugador que la orden del
+    # gestor manda conservar o proteger no se elige (ni aceptar ni
+    # contraofertar): su evaluacion sale BLOCK_LA_ORDEN_DEL_GESTOR y la
+    # vuelta se la queda la siguiente autorizada. Apagado, None sin leer
+    # la orden: lo de siempre.
+    no_se_responden = None
+    try:
+        from src.analysis.la_orden_en_los_managers import la_eleccion
+
+        frenadas = la_eleccion(evaluations)
+        if frenadas is not None:
+            evaluations, no_se_responden = (
+                frenadas["evaluations"], frenadas["no_se_responden"])
+    except Exception:                               # noqa: BLE001
+        pass
+
     authorized = [
         item for item in evaluations
         if item.get("gate", {}).get("authorized", False)
@@ -170,7 +187,7 @@ def select_single_competitive_action(
 
     selected = authorized[0] if authorized else None
 
-    return {
+    board = {
         "observer_only": True,
         "evaluated_count": len(evaluations),
         "authorized_count": len(authorized),
@@ -180,3 +197,8 @@ def select_single_competitive_action(
         "one_action_per_cycle": True,
         "would_execute": False,
     }
+
+    if no_se_responden:
+        board["no_se_responden"] = no_se_responden
+
+    return board

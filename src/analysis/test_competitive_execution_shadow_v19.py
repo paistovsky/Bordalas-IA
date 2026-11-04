@@ -1,4 +1,12 @@
-from src.analysis.competitive_execution_shadow import (
+import os
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA (doctrina 104). Encendida, la orden en
+# los managers (`la_orden_en_los_managers`) haria que la eleccion leyera la
+# orden real de `config/` con la hora de ahora: se quita aqui arriba,
+# antes de importar nada que la mire. Su prueba la pone y la quita ella.
+os.environ.pop("BORDALAS_LA_ORDEN_EN_LOS_MANAGERS", None)
+
+from src.analysis.competitive_execution_shadow import (  # noqa: E402
     build_competitive_shadow_decision,
     execute_competitive_shadow,
 )

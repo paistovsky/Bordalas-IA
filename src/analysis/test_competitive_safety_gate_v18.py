@@ -1,4 +1,12 @@
-from src.analysis.competitive_safety_gate import select_single_competitive_action
+import os
+
+# EL ENTORNO NO DECIDE ESTA GUARDIA (doctrina 104). Encendida, la orden en
+# los managers (`la_orden_en_los_managers`) haria que la eleccion leyera la
+# orden real de `config/` con la hora de ahora: se quita aqui arriba,
+# antes de importar nada que la mire. Su prueba la pone y la quita ella.
+os.environ.pop("BORDALAS_LA_ORDEN_EN_LOS_MANAGERS", None)
+
+from src.analysis.competitive_safety_gate import select_single_competitive_action  # noqa: E402
 
 
 def offer(player_id, name, action_gate, should_respond):
