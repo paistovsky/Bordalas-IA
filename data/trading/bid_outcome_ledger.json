@@ -2085,6 +2085,28 @@
    "margin": 153100,
    "event_id": "81e41b5f2dd34077cfcbe510",
    "recorded_by": "TABLON"
+  },
+  "41031:2026-11-04T06:20:37+00:00": {
+   "player_id": 41031,
+   "player_name": "Loureiro",
+   "amount": 798000,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 790000,
+   "recommended_bid": null,
+   "intent": null,
+   "target_source": "DESCONOCIDO",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-11-04T06:20:37+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null,
+   "recorded_by": "TABLON"
   }
  }
 }
