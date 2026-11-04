@@ -75,6 +75,28 @@ def _money(value: Any) -> str:
     return f"{_safe_int(value):,} EUR"
 
 
+def _la_puja_que_no_cabe(trader: dict, preflight: dict, puja: int) -> str | None:
+    """V10 CUENTA LO PUJADO (`src/analysis/v10_cuenta_lo_pujado.py`): el
+    motivo si la puja deja saldo - pujas vivas - puja + lo cobrable en
+    negativo; apagado, None. Si la pieza no se pudiera importar, None (lo
+    de siempre)."""
+    try:
+        from src.analysis.v10_cuenta_lo_pujado import la_puja_que_no_cabe
+    except Exception:                               # noqa: BLE001
+        return None
+    return la_puja_que_no_cabe(trader, preflight, puja)
+
+
+def _las_lineas_de_lo_pujado(capital: dict) -> list:
+    """V10 CUENTA LO PUJADO: las lineas que se anaden al log si la caja
+    trae la cuenta; ninguna si no."""
+    try:
+        from src.analysis.v10_cuenta_lo_pujado import las_lineas
+    except Exception:                               # noqa: BLE001
+        return []
+    return las_lineas(capital)
+
+
 def evaluate_controlled_live_gate(
     trader: dict,
     *,
@@ -184,7 +206,13 @@ def build_controlled_run(
     snapshot_file = get_latest_snapshot()
     snapshot = load_snapshot(snapshot_file)
     decision_result = build_global_decision(snapshot)
-    trader = build_market_trader_shadow(snapshot, decision_result=decision_result)
+    # `para_el_buy`: la caja que cuenta lo pujado (V10 CUENTA LO PUJADO,
+    # apagada la de siempre). Los demas que llaman al trader no lo piden.
+    trader = build_market_trader_shadow(
+        snapshot,
+        decision_result=decision_result,
+        para_el_buy=True,
+    )
 
     try:
         ledger_sync = sync_position_ledger_snapshot(
@@ -258,6 +286,19 @@ def build_controlled_run(
         result["reason"] = str(fresh.get("reason"))
         return result
 
+    # V10 CUENTA LO PUJADO (04/11/2026): la ultima puerta, antes de dar la
+    # puja por buena (y de escribir): nunca saldo - pujas vivas - esta puja
+    # + lo cobrable antes de la jornada < 0. Apagada, None.
+    no_cabe = _la_puja_que_no_cabe(
+        trader,
+        preflight,
+        _safe_int(fresh.get("fresh_recommended_bid")),
+    )
+    if no_cabe:
+        result["status"] = "V10_CUENTA_LO_PUJADO_BLOCK"
+        result["reason"] = no_cabe
+        return result
+
     result["ready"] = True
 
     if not execute_live:
@@ -326,6 +367,9 @@ def print_result(result: dict) -> None:
     print(f"B1 trading-safe:             {_money(portfolio.get('trading_safe_total'))}")
     print(f"Capital sporting-safe:       {_money(capital.get('sporting_safe_spend_capacity'))}")
     print(f"Presupuesto trading:         {_money(budget.get('total_budget'))}")
+    # V10 CUENTA LO PUJADO: se anaden (apagada, ninguna).
+    for linea in _las_lineas_de_lo_pujado(capital):
+        print(linea)
     print(f"Fase:                        {capital.get('phase')}")
 
     gate = result.get("gate", {}) or {}

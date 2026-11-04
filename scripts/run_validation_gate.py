@@ -131,6 +131,14 @@ TESTS = [
     "src.analysis.test_jp_profile_scope_v114",
     "src.analysis.test_multisource_starter_v1124",
     "src.analysis.test_v10_full_autonomous_live",
+    # V10 cuenta lo pujado (revision del 04/11: 798.000 pujados por
+    # Loureiro y la oferta de Boye, protegido, como todo el B1): el BUY
+    # especulativo de V10 resta las pujas vivas de su caja, no cuenta como
+    # cobrables las ofertas de la orden del gestor y no puja si saldo -
+    # pujas - esta puja + lo cobrable queda en negativo. Apagado, la caja,
+    # el plan, el reprecio, el BUY y su log de main byte a byte (huella por
+    # version de Python).
+    "src.analysis.test_v10_cuenta_lo_pujado_v1",
     "src.analysis.test_live_solvency_authority_v115",
     "src.telemetry.test_dashboard_execution_v121",
     "src.analysis.test_solvency_deadlock_v1",

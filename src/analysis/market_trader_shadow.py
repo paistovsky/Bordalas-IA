@@ -180,6 +180,27 @@ def build_sporting_safe_capital(solvency: dict) -> dict:
     }
 
 
+def _la_caja_del_buy(capital: dict, speculation: dict, snapshot: dict) -> dict:
+    """V10 CUENTA LO PUJADO (`src/analysis/v10_cuenta_lo_pujado.py`):
+    apagado, la misma caja. Si la pieza no se pudiera importar, lo de
+    siempre."""
+    try:
+        from src.analysis.v10_cuenta_lo_pujado import la_caja_del_buy
+    except Exception:                               # noqa: BLE001
+        return capital
+    return la_caja_del_buy(capital, speculation=speculation, snapshot=snapshot)
+
+
+def _lo_pujado(capital: dict) -> int:
+    """Lo pujado en vivo que la caja ya cuenta (V10 CUENTA LO PUJADO); 0
+    si no lo cuenta (apagado, o la caja de los demas)."""
+    try:
+        from src.analysis.v10_cuenta_lo_pujado import lo_pujado_de_la_caja
+    except Exception:                               # noqa: BLE001
+        return 0
+    return lo_pujado_de_la_caja(capital)
+
+
 def _build_bid_quote(
     *,
     player: dict,
@@ -270,6 +291,7 @@ def build_market_trader_shadow(
     *,
     decision_result: dict,
     intelligent_bids: list[dict] | None = None,
+    para_el_buy: bool = False,
 ) -> dict:
     """
     V10.4E Market Trader - EXACT EURO PRICING.
@@ -287,6 +309,16 @@ def build_market_trader_shadow(
     solvency = state.get("solvency", {}) or {}
 
     capital = build_sporting_safe_capital(solvency)
+
+    # V10 CUENTA LO PUJADO (04/11/2026, `src/analysis/v10_cuenta_lo_pujado.py`):
+    # solo para el BUY de V10 (`para_el_buy`, que pide `build_controlled_run`)
+    # y con su interruptor, la caja es el saldo menos las pujas vivas y el B1
+    # solo lo que se puede cobrar (sin las ofertas de los que la orden del
+    # gestor protege o conserva). Apagado, o para los demas (V10.6, el
+    # cerebro, el libro), la misma caja.
+    if para_el_buy:
+        capital = _la_caja_del_buy(capital, speculation, snapshot)
+
     status = (snapshot.get("market", {}) or {}).get("status", {}) or {}
     maximum_bid = _safe_int(status.get("maximumBid"))
 
@@ -362,6 +394,8 @@ def build_market_trader_shadow(
     balance = _safe_int(capital.get("balance"))
     recovery = _safe_int(capital.get("trading_safe_recovery"))
     buffer = _safe_int(capital.get("safety_buffer"))
+    # Lo pujado en vivo (V10 CUENTA LO PUJADO): 0 si la caja no lo cuenta.
+    pujado = _lo_pujado(capital)
 
     for item in assessed:
         decision = "WATCH"
@@ -370,7 +404,7 @@ def build_market_trader_shadow(
         score = _safe_float(item.get("trading_score"))
         spec_action = str(item.get("speculation_action") or "")
 
-        projected_after = balance - cumulative_spend - bid + recovery - buffer
+        projected_after = balance - pujado - cumulative_spend - bid + recovery - buffer
 
         if spec_action != "BUY_SPECULATION":
             decision = "WATCH"
@@ -403,7 +437,7 @@ def build_market_trader_shadow(
                 "y respaldado por Sporting Safe Debt B1."
             )
             cumulative_spend += bid
-            projected_after = balance - cumulative_spend + recovery - buffer
+            projected_after = balance - pujado - cumulative_spend + recovery - buffer
 
         allocation.append({
             **item,
@@ -435,7 +469,7 @@ def build_market_trader_shadow(
         "planned_spend": cumulative_spend,
         "planned_positions": len(buys),
         "remaining_budget": max(total_budget - cumulative_spend, 0),
-        "projected_t15_after_plan": balance - cumulative_spend + recovery - buffer,
+        "projected_t15_after_plan": balance - pujado - cumulative_spend + recovery - buffer,
         "intelligent_bid_external_checks": False,
         "reason": (
             "V10.3.1 simula compras especulativas con Bid Authority. Puede crear "

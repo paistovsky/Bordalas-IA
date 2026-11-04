@@ -24,6 +24,17 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
+def _lo_pujado(capital: dict) -> int:
+    """Lo pujado en vivo que la caja ya cuenta (V10 CUENTA LO PUJADO,
+    `src/analysis/v10_cuenta_lo_pujado.py`); 0 si no lo cuenta (apagado, o
+    una caja sin la cuenta). Si la pieza no se pudiera importar, 0."""
+    try:
+        from src.analysis.v10_cuenta_lo_pujado import lo_pujado_de_la_caja
+    except Exception:                               # noqa: BLE001
+        return 0
+    return lo_pujado_de_la_caja(capital)
+
+
 def _round_10k(value: float, *, down: bool = False) -> int:
     value = max(float(value or 0.0), 0.0)
     if value <= 0:
@@ -123,7 +134,10 @@ def build_fresh_bid_reprice(
         balance = _safe_int(capital.get("balance"))
         recovery = _safe_int(capital.get("trading_safe_recovery"))
         buffer = _safe_int(capital.get("safety_buffer"))
-        projected_t15 = balance - fresh_bid + recovery - buffer
+        # Lo pujado en vivo (V10 CUENTA LO PUJADO): 0 si la caja no lo
+        # cuenta; con la cuenta, `recovery` ya es solo el B1 cobrable.
+        pujado = _lo_pujado(capital)
+        projected_t15 = balance - pujado - fresh_bid + recovery - buffer
 
         if fresh_bid <= 0:
             blocks.append("fresh_bid_invalid")
