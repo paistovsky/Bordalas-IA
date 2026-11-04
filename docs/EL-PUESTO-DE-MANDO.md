@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/11/2026, 14:30 de Madrid (rafaga de las 14:15).
+Actualizado: 04/11/2026, 21:25 de Madrid (rafaga de las 21:15; control de caja de la J12).
 
 ## El mandato
 
@@ -351,6 +351,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/11 21:15 (rafaga de la noche; mi control de caja de la J12).**
+  Ciclos: verdes, pero **falta otra vuelta: la de las 16:07** (15:07 UTC),
+  ademas de la de las 12:07. Hoy faltan dos; en los ultimos 4 dias, 3
+  (E82 del chat del dueno: no disparo cron-job.org, o disparo y fallo la
+  llamada). **Aviso al dueno:** mirar el historial de cron-job.org (yo no
+  tengo acceso y el latido no se toca). **Caja:** +2.025.724, puja viva
+  Loureiro 798.000 (jue 07:00): peor caso **+1,23 M para el vie 15:00, en
+  verde. No hace falta vender.** **Para el viernes:** lo que mas importa
+  es que lleguen la vuelta de las 15:07 (plazo) y la de las 20:07 (congela
+  el once). En mi turno del vie 12:50 me programo una mirada a las 20:15;
+  si la de las 20:07 no ha llegado, le pido al dueno que la lance a mano
+  desde GitHub (Actions -> Bordalas IA Live -> Run workflow) antes de las
+  20:45.
 
 - **04/11 14:15 (rafaga de la tarde).** Ciclos: verdes, pero **FALTA LA
   VUELTA DE LAS 12:07 de Madrid** (11:07 UTC): no hay ninguna run entre
