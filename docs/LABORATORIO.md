@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E82 · 04/11/2026 17:17 de Madrid · Faltan vueltas: hoy dos, tras cinco semanas casi perfectas
+### E82 · 04/11/2026 17:16 de Madrid · Faltan vueltas: hoy dos, tras cinco semanas casi perfectas
 
 **El caso:** el gestor vio hoy que falto la vuelta de las 12:07 («primera
 vez que lo veo»). ¿Es un hueco suelto o empieza a fallar el disparador
