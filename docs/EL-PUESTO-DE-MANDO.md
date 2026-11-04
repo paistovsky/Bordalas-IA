@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/11/2026, 09:00 de Madrid (supervision de las 08:22).
+Actualizado: 04/11/2026, 12:45 de Madrid (encendido de EL ONCE QUE SE PUEDE ESCRIBIR y laboratorio de rivales de la manana).
 
 ## El mandato
 
@@ -351,6 +351,60 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/11 12:45 (encendido y laboratorio de rivales de la manana).
+  ENCENDIDO: EL ONCE QUE SE PUEDE ESCRIBIR (7ff786c7). FUSIONADA, APAGADA:
+  EL PROTEGIDO NO GASTA LA VUELTA.**
+  **El encendido:** ensayo #41808500855 verde (KEEP_LINEUP, 11/11, el mismo
+  once); replay de 630 casos: 0 guardados con un lesionado o con menos de
+  11. Paso 0 con 64; verja 234/234 en 3.11 y 3.13. **Primera vuelta
+  encendida: #2712 (11:07), verde**: KEEP_LINEUP, XI valido 11/11, sin
+  BLOCKED ni traceback. Lo que cambia: un titular en duda (Kike, Boye o
+  Ramon) se queda en el banquillo si Cardona lo cubre; un Dios en duda
+  (Yamal) juega igual; el panel puede decir «Faltan 1» con un dudoso
+  autorizado (solo texto, no frena el guardado). Marcha atras: quitar la
+  linea del env. **Ojo: la vuelta de las 12:07 no salio** (cron-job.org);
+  si se repite, avisar al dueno (solo el entra en cron-job.org).
+  **Rivales (20:07-10:07):** reset del mie: Manzagool gana a Adrian
+  (5.142.300, +17,4 %) y a Unai Simon (4.333.000, +4,9 %); Luismi a Hancko
+  (5.122.000, +18,0 %) y a Andres Garcia (1.682.000). Al dia siguiente los
+  tres primeros ya pierden 0,17-0,73 M a precio de mercado. Pollo vende a
+  Lemar al Computer (4.964.100; +857.100 en 20 dias). **Cajas: Pollo
+  -4,71 M, Luismi -13,10 M, Manzagool -8,29 M**, nosotros +2,03 M. Entre el
+  jue y el vie Luismi y Manzagool tienen que vender ~21 M; Pollo vuelve a
+  +12 M si vende a Rodri. Patrimonio: Pollo 118,29 M, Luismi 100,83,
+  Manzagool 70,13, nosotros 62,25.
+  **Leccion (80 subastas, 05/10-04/11):** la prima que gana no sube en
+  general; la predice la velocidad: el que sube >=2 %/dia se gana con
+  +11,9 % de mediana (p85 de la puja rival +27,9 %), y el miercoles (primer
+  reset tras el premio) la mediana es +13,6 %. En 3-6 M que suben, x1,18
+  habria ganado las 4 de esta semana, por 7.900 a 27.600 EUR. Nuestro +1 %
+  no ha ganado ninguna subasta disputada en 30 dias (Lemar, Catena, Adrian,
+  Unai). **Para despues de la J12:** prima x1,20 el miercoles y con subidas
+  >=1 %/dia cuando el cambio sume >=1 punto. Loureiro (798.000, +1,0 %):
+  ~1 de 3; perderlo no cuesta nada.
+  **Lo fusionado (c96fd7d7, apagado):** BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA.
+  Hoy Boye (en `proteger`) es el primero de la cola de renovar: el motor
+  viejo gasta en el su unica escritura (3 vueltas hoy, «Biwenger no
+  confirmo», backoff) y la renovacion de Chust no se propone nunca (su
+  publicacion caduco ~10:06; inocuo, su oferta sigue viva). Encendido: el
+  plan no renueva ni cobra a un protegido; si el escritor frena igual, sale
+  BLOCKED sin gastar la escritura. Apagado, main byte a byte (3200 salidas,
+  0 distintas en 3.11 y 3.13); dos revisores, OK_TO_SWITCH_ON. **No se
+  enciende hoy** (un interruptor por rafaga; jue y vie no). Al encenderlo:
+  un commit sobre el main de ese dia con la linea del YAML y `--paso-0` al
+  final; no armar UNO_QUE_NO_EXISTE en el mismo commit; los diagnosticos
+  locales necesitan este interruptor y LA_ORDEN exportados. Encendido, si
+  la oferta de un protegido va primera se cobra la siguiente aprobada (es
+  lo buscado).
+  **Tres agujeros que ya estan en main (piezas aparte, nada pasa hoy):**
+  (1) la compra V10 no resta las pujas vivas de la caja y cuenta como
+  recuperable la oferta de Boye (5.316.300), que no se puede cobrar: podria
+  pujar hasta 3,19 M con saldo - pujas en 1,23 M. Hoy no hay candidato.
+  **Es la siguiente pieza.** (2) Competitive V2 no mira la orden: aceptaria
+  la oferta de un manager por Boye o Roberto (hoy 0 ofertas). (3) La salida
+  V10 marca `sent=True` aunque el escritor frene (Roberto ya esta
+  publicado: no escribe).
 
 - **04/11 09:00 (supervision de las 08:22).** Reset: **Adrian Nino y Unai
   Simon PERDIDOS, los dos con Manzagool**: Adrian por 5.142.300 (+17,4 %;
