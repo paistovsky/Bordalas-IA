@@ -28,7 +28,7 @@ hay caja y habra competencia.
 
 | Objetivo | Puesto | Precio 25/10 | Por quien | Puja | Nota |
 |---|---|---|---|---|---|
-| Adrian Nino (Malaga) | DEL | 2,93 M, +340 k/dia (02/11: 4,21 M, +170 k) | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana. 02/11: 52 pts en 7, 5 goles (un 33 % de acierto que no va a durar); el MEJOR RELEVO si sale en el Computer (J12 en casa contra el Racing, ~6,6 pts) |
+| ~~Adrian Nino (Malaga)~~ **PERDIDO el 04/11: es de Manzagool (5.142.300, +17,4 %)** | DEL | 2,93 M, +340 k/dia (02/11: 4,21 M, +170 k) | Roberto Fernandez | +25-35 % (sube mucho; rivales +7/+41 %), tope 4,8 M | 2 titularidades, 4 goles en 6; el hueco entre los dos baja ~0,4 M al dia: es de esta semana. 02/11: 52 pts en 7, 5 goles (un 33 % de acierto que no va a durar); el MEJOR RELEVO si sale en el Computer (J12 en casa contra el Racing, ~6,6 pts) |
 | Juan Iglesias (Sevilla) | DEF | 3,62 M | Sergi Cardona | +8-10 % | 9 de 9 titular, FF 90. **NUESTRO** desde el 01/11 (3.769.900; entra por Gaya en la mejora) |
 | Ndukwe (Levante) | DEF | 1,07 M | Sergi Cardona | +12 % | gano el puesto a Mandi |
 | Remiro (Real Sociedad) | POR | 3,72 M | Gulacsi | +5-8 % | 6,0 pts/partido, 8 de 9 |
@@ -37,12 +37,59 @@ hay caja y habra competencia.
 | Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90. **NUESTRO** desde el 02/11 (2.779.900; sale Pablo Ibanez) |
 | Zabiri (Racing) | DEL | 7,54 M (02/11: 7,98 M, +20 k) | Roberto Fernandez | +10-20 % | 77 pts en 11 (ult. 5: 0, 11, 3, 9, 2); APERCIBIDO hoy; solo en el parón (09-19/11), si no esta apercibido y la caja lo paga |
 | Fer Nino (Elche) | DEL | 02/11: 6,37 M, +20 k | Roberto Fernandez | +10-15 % | 70 pts en 11 (ult. 5: 3, 7, 3, 2, 17), iguala a Roberto (69) y cuesta ~0,8 M menos; anadido por el dueno el 02/11. Ojeador 02/11: 4,1 pts por jornada J12-J17 (Roberto 4,6): el peor de los tres |
-| Brugue (Levante) | DEL | 02/11: 4,83 M, plano | Roberto Fernandez | tope 4,9 M | 69 pts en 10, pero 52 en 5 en casa y 17 en 5 fuera; no tira penaltis. Lo anuncia **Pollo17** a 5,22 M (hasta el mie 04/11 08:28). 02/11: NO se le oferta a Pollo (ver la bitacora del 02/11 22:30). Se mira en el paron: si sale al Computer, si Roberto pierde el puesto con Sarabia o si puntua fuera |
+| Brugue (Levante) | DEL | 02/11: 4,83 M, plano | Roberto Fernandez | tope 4,9 M | **03/11: Pollo lo vendio al Computer (5.044.800): libre otra vez; puede salir en el mercado.** 69 pts en 10, pero 52 en 5 en casa y 17 en 5 fuera; no tira penaltis. Lo anuncia **Pollo17** a 5,22 M (hasta el mie 04/11 08:28). 02/11: NO se le oferta a Pollo (ver la bitacora del 02/11 22:30). Se mira en el paron: si sale al Computer, si Roberto pierde el puesto con Sarabia o si puntua fuera |
 | **Raphinha (Barcelona)** | DEL | 02/11: 24,72 M | Roberto Fernandez y Boye | ~29 M (+15-20 %) | **OBJETIVO PRINCIPAL: OPERACION RAPHINHA (02/11).** 144 pts en 10. Hucha desde el mar 10/11 (objetivo 16 M). Si sale al mercado del Computer: AVISAR y hacer la cuenta ese mismo dia (ver la bitacora del 02/11 18:05) |
 
 Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
+
+## 04/11/2026, 19:15 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
+
+Plantilla de 12, todos «ok» en Biwenger (vuelta de las 18:07). Saldo
++2.025.724; puja viva de la ronda por **Loureiro** (798.000; hoy vale
+830.000, se resuelve el jue 07:00): caja de la J12 1.227.724 si se gana,
+2.025.724 si no. Once guardado (3-4-3), igual que ayer y el recomendado:
+Gulacsi; Iglesias, Kike Salas, Chust; Olasagasti, Ivan, Dani Lorenzo,
+Ramon; Yamal, Roberto, Boye. Banquillo: Cardona. Desde las 11:07 esta
+encendido EL ONCE QUE SE PUEDE ESCRIBIR.
+
+| Jugador | Veredicto | J12 % | J12 (Madrid) | Fuente | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 90 | Villarreal-Getafe, dom 08/11 18:30 | FF 90 y en su once (04/11 19:10); 90' en el 0-6 con el PSG (mar), FF le apunta un error en el 0-2; Inigo «evita personalizar» | = |
+| Juan Iglesias (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | FF 90, Clave; once de JP; 11 de 11 titular | =; 3 amarillas |
+| Kike Salas (DEF) | TITULAR | 88 | Sevilla-Alaves, vie 06/11 21:00 | FF 04/11 11:06 «retoma el trabajo con el grupo» (el mar fue gestion de cargas); FF 15:12 «recuperado»; FF 90; JP: «entreno con normalidad» | 80 -> 88 |
+| Chust (DEF) | TITULAR | 90 | Elche-Betis, dom 08/11 14:00 | FF 90; presente el mie (FF 11:37); «fisicamente me encuentro bien» (rueda de prensa 04/11) | =; 2 amarillas |
+| Olasagasti (MED) | TITULAR | 80 | Celta-Levante, dom 08/11 18:30 | FF 80; presente el mie; la Copa del jue en Tarancon, aplazada sin fecha | = |
+| Ivan Martin (MED) | TITULAR | 82 | Malaga-Racing, sab 07/11 14:00 | FF 80, Clave, «sin rotaciones»; presente el mie (FF 11:31) | =; 2 amarillas |
+| Dani Lorenzo (MED) | TITULAR | 75 | Malaga-Racing, sab 07/11 14:00 | FF 70, Importante; con el grupo mar y mie; Joaquin Munoz completo la sesion del mie, pero FF no lo mete en el once | = |
+| *Ramon Enriquez (MED)* | DUDA | 55 | Malaga-Racing, sab 07/11 14:00 | FF 60, Revulsivo; **Pablo Martinez (fascitis) hizo parte de la sesion del mie** (FF 14:00) y FF lo da «duda para la J12»; JP: Ramon 60, Rafa Rodriguez 40 | 60 -> 55; si Pablo completa el jue, ~35-40 |
+| Yamal (DEL) | TITULAR | 95 | Atletico-Barcelona, dom 08/11 21:00 | FF 95; 90' y gol con el Aston Villa (mar, 3-0); «Flick no rotara en el Metropolitano» (FF 11:44) | =; 2 amarillas |
+| Roberto Fernandez (DEL) | TITULAR | 88 | Espanyol-Deportivo, sab 07/11 16:15 | FF 90, Clave; sin rival en la punta (Kike Garcia y Jofre de baja); Sarabia presentado el mie, sancionado | = |
+| Boye (DEL) | TITULAR | 88 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; «sin nuevos contratiempos fisicos» (FF 15:40); suele salir hacia el 75'; la Copa pasa al mar 10/11 | = |
+| *Sergi Cardona (DEF, banquillo)* | DUDA | 55 | Villarreal-Getafe, dom 08/11 18:30 | FF 50 (Rotacion), pero FF ya lo mete en su once: «apunta al lateral izquierdo en detrimento de Carlos Romero» (FF 11:13), pendiente de los entrenos; 45' con el PSG | 50 -> 55 |
+| *Loureiro (DEF, puja viva)* | TITULAR | 70 | Espanyol-Deportivo, sab 07/11 16:15 | FF 70, Rotacion; «le calma el pulso a Hidalgo» (FF 12:47); titular por la baja de Bright Ede (confirmada para la J12) | nuevo |
+
+Nadie lesionado, sancionado ni apercibido (FF: «Sin sancionados» en todos
+nuestros equipos). Nadie ha perdido el puesto. **Unico en riesgo: Ramon
+(55)**, cubierto por Cardona en un 4-3-3. **Hecho: nada** (el esceptico,
+tras comprobarlo en FF de 19:08 a 19:14): ni correccion de escalon (Ramon
+es Revulsivo de verdad; Cardona y Loureiro dependen de entrenos y de una
+baja), ni `no_pujar`, ni `fichar` (no hay hueco; en el mercado de hoy no
+hay medio, delantero ni portero al 60 % o mas), ni cambio del once a mano
+(el monitor lo deshace). Pepe solo: el monitor quita a Ramon por Cardona
+si Biwenger lo da en duda o lesionado, si JP lo da fuera con >=85 % o si FF
+lo baja a ~15-17 %; la mejora puja hasta la vuelta del jue 04:50; el
+cierre no vende a nadie (EN_POSITIVO); el parte vende y la rotacion, nada.
+
+**Pendientes del jue 05/11:** 07:00, Loureiro (si se gana, la vuelta de
+las 07:15 deberia pasar a 4-3-3 con Loureiro y Ramon al banquillo; mirar si
+el cierre lo adopta antes del vie 07:00, porque si no, la ronda lo vende el
+vie si ese dia no sube); el entreno del Malaga (si Pablo Martinez completa
+la sesion, Ramon baja); el del Villarreal (Cardona; y el futuro de Inigo
+tras el 0-6); la rueda de prensa de Luis Garcia (Sevilla). **Riesgos que no
+cubre nadie:** un solo portero (Gulacsi) y, con 12, una doble baja. Hoy
+faltaron dos vueltas (12:07 y 16:07, cron-job.org).
 
 ## 03/11/2026, 19:20 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
 
