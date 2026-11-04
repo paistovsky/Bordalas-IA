@@ -265,6 +265,14 @@ TESTS = [
     # no cuenta esa venta y un fichaje no vende a dos. Apagado, la mejora
     # de main byte a byte (huella por version de Python).
     "src.analysis.test_la_orden_manda_en_el_cambio_v1",
+    # El protegido no gasta la vuelta (el 04/11, Boye en `proteger` y
+    # primero en la cola de renovar): el plan del motor viejo no propone
+    # renovar ni cobrar a un protegido de la orden (la misma puerta que el
+    # escritor) y la siguiente se queda la vuelta; si el escritor frena
+    # igual, es BLOCKED, sin escritura gastada ni backoff. Apagado, el
+    # plan, el ejecutor, el backoff y V10 de main byte a byte (huella por
+    # version de Python).
+    "src.analysis.test_el_protegido_no_gasta_la_vuelta_v1",
     # El motor viejo: no puja a los vetados de la orden y, con su
     # interruptor, solo por el que sube. Apagado.
     "src.analysis.test_el_motor_viejo_v1",

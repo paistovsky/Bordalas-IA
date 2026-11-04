@@ -1677,6 +1677,27 @@ def build_global_decision_uncached(
 
     to_list = publicables["to_list"]
 
+    # EL PROTEGIDO NO GASTA LA VUELTA (04/11/2026). Encendido, los
+    # protegidos de la orden (la misma puerta que el escritor) no entran
+    # en el plan como renovacion ni como oferta a cobrar: la siguiente se
+    # queda la vuelta. Apagado, None y nada cambia. Ver
+    # `src/analysis/el_protegido_no_gasta_la_vuelta.py`. Si no se pudiera
+    # importar, None: el plan de siempre (y el escritor sigue frenando).
+    try:
+        from src.analysis.el_protegido_no_gasta_la_vuelta import (
+            fuera_los_protegidos,
+            los_del_plan,
+        )
+
+        protegidos_del_plan = los_del_plan()
+
+    except Exception:                               # noqa: BLE001
+        protegidos_del_plan = None
+
+    no_se_renuevan = []
+
+    no_se_cobran = []
+
     candidates = []
 
     # ========================================================
@@ -2347,6 +2368,18 @@ def build_global_decision_uncached(
             deficit=max(-safe_int(balance), 0),
         )
 
+        # EL PROTEGIDO NO GASTA LA VUELTA (04/11/2026): encendido, la
+        # oferta de un protegido de la orden no es la que se cobra.
+        if protegidos_del_plan is not None:
+            cobrables_sin_protegidos = fuera_los_protegidos(
+                cobrables,
+                protegidos_del_plan,
+            )
+
+            cobrables = cobrables_sin_protegidos["quedan"]
+
+            no_se_cobran = cobrables_sin_protegidos["fuera"]
+
         a_cobrar = cobrables[0] if cobrables else None
 
         candidates.append(
@@ -2706,6 +2739,27 @@ def build_global_decision_uncached(
         )
         or []
     )
+
+    # EL PROTEGIDO NO GASTA LA VUELTA (04/11/2026). El 04/11 Boye estaba
+    # en `proteger`, era el primero de la cola y el escritor frenaba su
+    # renovacion en cada vuelta; la de Chust no se proponia nunca.
+    # Encendido, la renovacion de un protegido no entra en el plan y la
+    # siguiente se queda la vuelta. El tablero de publicaciones (el
+    # panel) no se toca.
+    if protegidos_del_plan is not None:
+        renovables = fuera_los_protegidos(
+            renewal_candidates,
+            protegidos_del_plan,
+        )
+
+        renewal_candidates = renovables["quedan"]
+
+        no_se_renuevan = renovables["fuera"]
+
+        urgent_renewals = fuera_los_protegidos(
+            urgent_renewals,
+            protegidos_del_plan,
+        )["quedan"]
 
     if (
         renewal_candidates
@@ -3653,6 +3707,20 @@ def build_global_decision_uncached(
                     "no_se_publican",
                     [],
                 ),
+
+            # EL PROTEGIDO NO GASTA LA VUELTA (04/11/2026): solo
+            # encendido, a quien no se renueva ni se cobra por la orden.
+            **(
+                {
+                    "no_se_renuevan":
+                        no_se_renuevan,
+
+                    "no_se_cobran":
+                        no_se_cobran,
+                }
+                if protegidos_del_plan is not None
+                else {}
+            ),
 
             "offers":
                 offers,
