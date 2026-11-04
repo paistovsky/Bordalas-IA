@@ -1739,7 +1739,7 @@ def execute_autopilot_decision(
             )
         )
 
-        return {
+        salida = {
             "action":
                 action,
 
@@ -1806,6 +1806,21 @@ def execute_autopilot_decision(
             "listing":
                 fresh_listing,
         }
+
+        # EL PROTEGIDO NO GASTA LA VUELTA (04/11/2026). El 04/11 la
+        # guarda del escritor freno la renovacion de Boye (en `proteger`)
+        # sin enviar nada, y aqui salia «Biwenger no confirmo»,
+        # `write_performed: True` y backoff: la vuelta perdia su unica
+        # escritura. Encendido, lo frenado es BLOCKED, con su `blocked`,
+        # y no es escritura. Apagado (o enviado), `salida` tal cual.
+        from src.analysis.el_protegido_no_gasta_la_vuelta import (
+            la_que_frena_el_escritor,
+        )
+
+        return la_que_frena_el_escritor(
+            salida,
+            result,
+        )
 
     # ========================================================
     # COMPRA ESPECULATIVA - LIVE CONTROLADO

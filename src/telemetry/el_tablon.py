@@ -349,6 +349,15 @@ QUE_HACE = {
         "duda juega igual); si ningún dibujo se llena sin ellos, el que lleva "
         "menos dudosos. Así no se queda puesto el once viejo con un lesionado "
         "dentro.",
+    "BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA":
+        "Cuando un jugador está protegido por la orden del gestor, el autopilot "
+        "viejo ya no propone renovar su publicación ni cobrar su oferta: la "
+        "vuelta se la queda la siguiente (la renovación de otro jugador u otra "
+        "acción). Y si aun así el escritor frena una renovación, la vuelta lo "
+        "dice como es («bloqueada por la orden»): no gasta la escritura de la "
+        "vuelta (pujar y las demás acciones pueden seguir escribiendo) ni la "
+        "castiga como un fallo de Biwenger. Proteger sigue siendo no vender, no "
+        "publicar y no renovar.",
     "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA":
         "La ronda solo puja por un jugador del Computer si pide menos de 1 M, "
         "su precio sube hoy un 2 % o más y faltan 64 h o más para la jornada, "
