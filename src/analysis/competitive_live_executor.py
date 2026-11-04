@@ -548,6 +548,57 @@ def execute_competitive_live_action(
             },
         )
 
+    # LA ORDEN EN LOS MANAGERS (04/11/2026, `la_orden_en_los_managers`):
+    # defensa en profundidad. Ni aceptar ni contraofertar la oferta de un
+    # manager por un jugador que la orden del gestor manda conservar o
+    # proteger. La eleccion ya no la elige; si llega igual, se frena aqui,
+    # ANTES de crear el escritor. Apagado, False sin leer la orden: lo de
+    # siempre.
+    try:
+        from src.analysis.la_orden_en_los_managers import (
+            ESTADO as _ESTADO_DE_LA_ORDEN,
+            GUARDIA as _GUARDIA_DE_LA_ORDEN,
+            MOTIVO as _MOTIVO_DE_LA_ORDEN,
+            lo_guarda_la_orden,
+        )
+
+        la_orden_lo_guarda = lo_guarda_la_orden(
+            fresh_player_id,
+            expected_player_id,
+        )
+    except Exception:                               # noqa: BLE001
+        la_orden_lo_guarda = False
+
+    if la_orden_lo_guarda:
+
+        return noop(
+            action=
+                action,
+
+            status=
+                _ESTADO_DE_LA_ORDEN,
+
+            reason=
+                _MOTIVO_DE_LA_ORDEN,
+
+            success=
+                False,
+
+            extra={
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+
+                "offer_id":
+                    offer_id,
+
+                "player_id":
+                    fresh_player_id,
+
+                "guardia":
+                    _GUARDIA_DE_LA_ORDEN,
+            },
+        )
+
     # =====================================================
     # ESCRITURA UNICA
     # =====================================================

@@ -358,6 +358,15 @@ QUE_HACE = {
         "vuelta (pujar y las demás acciones pueden seguir escribiendo) ni la "
         "castiga como un fallo de Biwenger. Proteger sigue siendo no vender, no "
         "publicar y no renovar.",
+    "BORDALAS_LA_ORDEN_EN_LOS_MANAGERS":
+        "Cuando otro manager hace una oferta por un jugador que la orden del "
+        "gestor manda conservar o proteger, Pepe ya no la acepta ni le contesta "
+        "con una contraoferta (si el rival acepta la contraoferta, también es "
+        "vender): la deja pasar y, si hay otra oferta de un manager que sí se "
+        "puede contestar, contesta a esa. Si aun así una llegara a la escritura, "
+        "se frena antes de enviar nada a Biwenger y la vuelta lo dice "
+        "(«bloqueada por la orden»). Con la orden del gestor apagada o "
+        "caducada, todo como siempre.",
     "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA":
         "La ronda solo puja por un jugador del Computer si pide menos de 1 M, "
         "su precio sube hoy un 2 % o más y faltan 64 h o más para la jornada, "
