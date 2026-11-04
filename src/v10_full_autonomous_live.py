@@ -831,6 +831,21 @@ def _lo_pujado_por_la_cesta(subasta) -> int:
         return 0
 
 
+def _lo_de_la_cesta_para_el_buy(subasta) -> dict:
+    """V10 CUENTA LO PUJADO (`src/analysis/v10_cuenta_lo_pujado.py`): las
+    pujas que la cesta mando en esta vuelta, para la caja del BUY
+    (`pujas_de_la_vuelta`). Apagado, o sin nada enviado, {} (la llamada
+    de siempre). Si la pieza no se pudiera importar, {}. Nunca lanza."""
+
+    try:
+        from src.analysis.v10_cuenta_lo_pujado import lo_de_la_cesta
+
+        salida = lo_de_la_cesta(subasta)
+        return salida if isinstance(salida, dict) else {}
+    except Exception:                               # noqa: BLE001
+        return {}
+
+
 def _el_bloque_de_la_hucha(hucha, cycle) -> dict:
     """`{"hucha": ...}` encendida (con el mercado del Computer de la
     foto, para saber si su jugador esta hoy); apagada, {}. Nunca lanza."""
@@ -1577,6 +1592,9 @@ def run_full_autonomous_cycle() -> dict:
             refresh=False,
             execute_live=True,
             live_confirmation="BORDALAS",
+            # V10 CUENTA LO PUJADO: lo que la cesta acaba de pujar, que
+            # la foto no trae. Apagado, nada (la llamada de siempre).
+            **_lo_de_la_cesta_para_el_buy(subasta),
         )
         print_controlled_buy(buy)
 
