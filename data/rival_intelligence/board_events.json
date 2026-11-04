@@ -236517,5 +236517,55 @@
         "amount": 4964100
       }
     ]
+  },
+  {
+    "event_id": "aea720413259e951e9aac55a",
+    "date": 1793793026,
+    "type": "playerMovements",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "type": "position",
+        "player": 18174,
+        "from": 3,
+        "to": [
+          3,
+          2
+        ]
+      },
+      {
+        "type": "position",
+        "player": 24255,
+        "from": 3,
+        "to": [
+          3,
+          2
+        ]
+      },
+      {
+        "type": "position",
+        "player": 41265,
+        "from": 3,
+        "to": [
+          3,
+          2
+        ]
+      },
+      {
+        "type": "position",
+        "player": 41077,
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          2,
+          3
+        ]
+      }
+    ]
   }
 ]
