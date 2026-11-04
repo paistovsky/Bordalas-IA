@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E81 · 04/11/2026 11:16 de Madrid · La probabilidad de E80 no esta calibrada: es pesimista
+### E81 · 04/11/2026 11:14 de Madrid · La probabilidad de E80 no esta calibrada: es pesimista
 
 **El caso:** E80 dio a Adrian Nino ~40-50 % a +12,1 %; se perdio (el
 ganador pago +17,4 %). Un caso no dice nada: ¿acierta esa forma de
