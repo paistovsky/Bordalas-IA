@@ -439,6 +439,22 @@ jobs:
       #   `0 sin clave` y que el XI impreso no cambie sin motivo.
       BORDALAS_EL_ONCE_UNA_VEZ: "1"
 
+      # Encendido 04/11 de Madrid. EL ONCE QUE SE PUEDE ESCRIBIR
+      #   (construido apagado el 31/10, merge 8d704491; dos revisores
+      #   SHIP_OFF). El motor podia elegir un once con un dudoso que el
+      #   ejecutor rechaza (BLOCKED_INVALID_LINEUP): en Biwenger se quedaba
+      #   el once viejo, con el lesionado dentro si lo habia (Boye en duda
+      #   y Kike Salas lesionado dejaban a Kike en el once de la J12).
+      #   Encendido: con alguien en duda juega el mejor once sin dudosos de
+      #   cualquier dibujo (un Dios en duda juega igual); si ningun dibujo
+      #   se llena sin ellos, el que lleva menos dudosos; el once va con la
+      #   marca `el_once_que_se_puede_escribir` y el ejecutor lo deja pasar.
+      #   Con todos sanos no cambia nada. Ensayo #41808500855 verde
+      #   (KEEP_LINEUP, 11/11, el mismo once); revision adversarial antes de
+      #   encender; paso 0 PASADO con 64; verja en 3.11 y 3.13.
+      #   Si la vuelta siguiente sale roja, se quita esta linea y ya.
+      BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR: "1"
+
       # Encendido 25/09. EL DEFICIT SE MIDE CONTRA EL PLAZO, NO CONTRA HOY.
       #
       #   LO QUE PASABA. Desde el arreglo del 23/09 el ciclo SABE la fecha y
