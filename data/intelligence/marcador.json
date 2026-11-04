@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-11-04T04:55:06.595165",
+  "updated_at": "2026-11-04T07:20:41.069525",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -2629,49 +2629,49 @@
       "clave": "RONDA_DE_BIWENGER",
       "ronda_de_biwenger": 4909,
       "escritura": 2,
-      "visto": "2026-11-04T04:55:06.595165",
-      "datos_de": "2026-11-04T04:54:46.191438+00:00",
-      "escrito_en": "2026-11-04T04:55:06.595165",
+      "visto": "2026-11-04T07:20:41.069525",
+      "datos_de": "2026-11-04T07:20:18.705305+00:00",
+      "escrito_en": "2026-11-04T07:20:41.069525",
       "clasificacion": [
         {
           "user_id": 14145555,
           "name": "Pollo17",
-          "points": 432
+          "points": 501
         },
         {
           "user_id": 14175949,
           "name": "Pepe Bordalás",
-          "points": 422
+          "points": 495
         },
         {
           "user_id": 14156489,
           "name": "Luismi_Haz",
-          "points": 388
+          "points": 454
         },
         {
           "user_id": 14176382,
           "name": "Manzagool",
-          "points": 365
-        },
-        {
-          "user_id": 14151726,
-          "name": "DiosMande a Rodri al Palancas",
-          "points": 340
-        },
-        {
-          "user_id": 14154203,
-          "name": "Prinzipote",
-          "points": 338
+          "points": 420
         },
         {
           "user_id": 14178736,
           "name": "Mex",
-          "points": 324
+          "points": 381
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 375
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 372
         },
         {
           "user_id": 14456960,
           "name": "Alvaro Retamosa Sanguino",
-          "points": 282
+          "points": 315
         }
       ],
       "mi_user_id": 14175949,
@@ -2710,7 +2710,7 @@
           12494
         ],
         "guardado": "2026-11-03T07:11:00+00:00",
-        "visto_en": "2026-11-04T04:54:46.191438+00:00"
+        "visto_en": "2026-11-04T07:20:18.705305+00:00"
       },
       "plantilla": [
         {

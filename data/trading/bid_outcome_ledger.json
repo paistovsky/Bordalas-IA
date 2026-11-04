@@ -2057,11 +2057,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-11-03T06:20:38+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "LOST",
+   "resolved_at": "2026-11-04T06:20:33.098950+00:00",
+   "winning_amount": 5142300,
+   "margin": 712400,
+   "event_id": "81e41b5f2dd34077cfcbe510",
    "recorded_by": "TABLON"
   },
   "17021:2026-11-03T16:13:17+00:00": {
@@ -2079,11 +2079,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-11-03T16:13:17+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "LOST",
+   "resolved_at": "2026-11-04T06:20:33.098950+00:00",
+   "winning_amount": 4333000,
+   "margin": 153100,
+   "event_id": "81e41b5f2dd34077cfcbe510",
    "recorded_by": "TABLON"
   }
  }
