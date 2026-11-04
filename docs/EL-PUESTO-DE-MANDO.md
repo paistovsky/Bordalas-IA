@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/11/2026, 07:30 de Madrid (rafaga de las 07:15).
+Actualizado: 04/11/2026, 09:00 de Madrid (supervision de las 08:22).
 
 ## El mandato
 
@@ -351,6 +351,31 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/11 09:00 (supervision de las 08:22).** Reset: **Adrian Nino y Unai
+  Simon PERDIDOS, los dos con Manzagool**: Adrian por 5.142.300 (+17,4 %;
+  la nuestra, +12,1 %) y Unai Simon por 4.333.000 (+4,9 %; la nuestra,
+  +1,2 %). Luismi gana a Hancko (5.122.000). **Lo que hizo Pepe solo:** la
+  ronda puja por Loureiro (Deportivo, DEF, 798.000; pide 790.000 y sube
+  40.000 al dia; FF 70 %, disponible). Nada mas. Saldo +2.025.724; caja de
+  la J12 1.227.724 (2.025.724 si se pierde Loureiro); el cierre,
+  EN_POSITIVO. **La orden:** fuera `fichar` Adrian y las dos lineas de
+  Roberto en `vender_si_ficha` (cc1f17a3). El esceptico vio que sin esa
+  linea la rotacion podia rotar a Roberto (conservar no la frena y su
+  precio cae): **Roberto a `no_rotar`** (orden del dueno del 02/11). La
+  mejora del once si puede seguir cambiandolo por un delantero con mas
+  puntos. Notas viejas de Boye, Gulacsi e Ivan, corregidas. **Lista de
+  objetivos:** ninguno en el mercado del Computer hoy (Brugue, Fer Nino,
+  Zabiri y Raphinha estan libres, pero no salen). **FF:** Kike Salas no
+  entreno con el grupo el martes (segunda sesion al margen; FF 90 %,
+  tocado); Ramon 60 % por rotacion, no por fisico; Cardona 50 %; Yamal 90'
+  y gol en Champions; Gulacsi 90' (0-6 con el PSG, error en un gol).
+  **Boye:** su publicacion caduca hoy ~09:10 y no se renueva (esta en
+  `proteger`). El autopilot viejo lo intenta en cada vuelta y la guarda lo
+  frena: gasta su escritura de la vuelta, sin coste en Biwenger (arreglo de
+  codigo, despues de la J12). **Pendiente el lun 09/11:** Boye fuera de
+  `proteger`; decidir si Iglesias y Dani Lorenzo van a `conservar` (hoy el
+  motor viejo solo podria venderlos con el saldo en rojo).
 
 - **04/11 07:15 (rafaga de la manana).** Ciclos: verdes (#2699 a #2708,
   la de las 07:15 incluida). Reset: **Adrian Nino PERDIDO** (4.909.900
