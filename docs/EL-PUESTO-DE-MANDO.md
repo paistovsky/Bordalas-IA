@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 04/11/2026, 21:25 de Madrid (rafaga de las 21:15; control de caja de la J12).
+Actualizado: 04/11/2026, 23:30 de Madrid (laboratorio de rivales de la noche: dos piezas fusionadas, apagadas).
 
 ## El mandato
 
@@ -351,6 +351,53 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **04/11 23:30 (laboratorio de rivales de la noche). FUSIONADAS, APAGADAS:
+  LA ORDEN EN LOS MANAGERS y V10 CUENTA LO PUJADO. No se enciende nada
+  (jue y vie no; un interruptor por rafaga).**
+  **Correccion de hora:** la J12 empieza el **vie 06/11 a las 21:00**
+  (Sevilla-Alaves; cierre 20:45), no a las 15:00. La vuelta que importa es
+  la de las **20:07** (la ultima que puede corregir el once).
+  **Rivales (10:07-20:11):** nadie compra, vende ni traspasa; los listados
+  no cambian (Pollo 9, Manzagool 15, Luismi 6). Solo la racha de DiosMande
+  (+250.000). Cajas igual que por la manana: Pollo -4,71 M, Luismi
+  -13,10 M, Manzagool -8,29 M; nosotros +2,03 M (puja maxima 16,28 M, ya
+  sin los 798.000 de Loureiro). Esperan las ofertas del Computer del jue y
+  del vie con casi toda la plantilla a la venta; su costumbre es salir del
+  rojo en el reset o en la ultima hora (Luismi, 7 ventas 12 min antes del
+  saque el 30/10). Ofertas de managers por los nuestros: 0.
+  **Nuestras tacticas:** la renovacion de Boye (frenada por la orden) gasto
+  la escritura en 5 vueltas hoy; el castigo ya esta en 6 h, asi que las
+  vueltas de las 04:45 y 04:50 quedan libres. Loureiro (798.000 sobre
+  790.000) ya vale 830.000: pujamos por debajo del precio nuevo. Es un
+  calco de Nacho Perez el 28/10 (perdido frente a 930.000): ~1 de 3.
+  **Leccion:** en las 18 subastas disputadas de jugadores que suben >=2 %
+  desde el 05/10, la puja ganadora supero SIEMPRE el precio de despues del
+  reset (+1,0 % a +43,6 %, mediana +12,1 %). Nuestra ronda pone su +1 %
+  sobre el precio de salida: eso solo bloquea caja. Para despues de la J12,
+  junto a la prima que gana: pujar sobre el precio nuevo esperado, o no
+  pujar (LA_RONDA_SOLO_LO_QUE_PAGA).
+  **Lo fusionado (las dos apagadas, main byte a byte):**
+  (1) **BORDALAS_LA_ORDEN_EN_LOS_MANAGERS**: Competitive V2 no acepta ni
+  contraoferta una oferta de manager que pida a alguien de `conservar` o
+  `proteger` (Roberto, Boye...), tampoco si va en un lote con otro
+  jugador (el agujero que encontro el revisor). Apagado: 24.700 salidas, 0
+  distintas en 3.11 y 3.13. Test 17/17 (4/17 en main).
+  (2) **BORDALAS_V10_CUENTA_LO_PUJADO**: el BUY de V10 resta todas las
+  pujas vivas (tambien las de la cesta de la misma vuelta), no cuenta como
+  cobrable la oferta de un jugador de la orden ni la de Yamal, y con la
+  orden ilegible no puja. Caso de hoy: main habria podido pujar 3 M con
+  saldo-pujas en -1,77 M; encendido, presupuesto 727.724. Apagado:
+  204.435 llamadas, 0 distintas. Test 15/15 (2/15 en main).
+  **Al encender cualquiera (despues de la J12, uno por rafaga):** el
+  registro del paso 0 (64) no tiene EL_PROTEGIDO, LA_ORDEN_EN_LOS_MANAGERS
+  ni V10_CUENTA_LO_PUJADO: un commit con la linea del YAML y `--paso-0`
+  al final, en un checkout limpio identico a lo que se sube; nunca editar
+  `config/paso_0.json` a mano; no tocar los literales UNO_QUE_NO_EXISTE.
+  Antes de los managers: 0 contraofertas vivas nuestras. Quedan dos
+  agujeros de main fuera de estas piezas: el RAISE_COUNTER de V10 puede
+  subir una contraoferta nuestra ya viva por un jugador de la orden, y con
+  la orden caducada (30/11) Boye vuelve a contar como cobrable.
 
 - **04/11 21:15 (rafaga de la noche; mi control de caja de la J12).**
   Ciclos: verdes, pero **falta otra vuelta: la de las 16:07** (15:07 UTC),
