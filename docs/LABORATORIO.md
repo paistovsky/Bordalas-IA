@@ -69,6 +69,38 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E81 · 04/11/2026 11:16 de Madrid · La probabilidad de E80 no esta calibrada: es pesimista
+
+**El caso:** E80 dio a Adrian Nino ~40-50 % a +12,1 %; se perdio (el
+ganador pago +17,4 %). Un caso no dice nada: ¿acierta esa forma de
+calcular con todas las pujas de Pepe?
+**Datos:** las 15 pujas de Pepe en el tablon desde el 15/10. Para cada
+una, con SOLO las subastas anteriores a ese dia y de la misma clase
+(no sube / sube <2 % / sube >=2 % la vispera): fraccion en que el mejor
+rival pago menos que la prima de Pepe. Contra lo que paso.
+**Codigo:** `lab/subasta/calibrar_la_probabilidad.py`.
+
+    probabilidad media predicha 38 %; ganadas de verdad 9 de 15 (60 %)
+    Brier 0,296 (decir siempre 60 %: 0,240): peor que no predecir nada
+    fallos gordos: Cardona (sube >=2 %, +1 %) daba 4 % y se gano; el del
+    30/10 (sube >=2 %, -0,3 %) daba 0 % y se gano; Nino daba 56 % y se perdio
+
+**Lo que se aprende:**
+- **El calculo de E80 es pesimista ~20 puntos con las pujas de Pepe:**
+  Pepe gana mas de lo que dice. Probablemente porque Pepe puja sobre todo
+  por jugadores que los rivales no quieren (muchas de sus subastas no
+  tienen rival), y el historial mezcla todas.
+- **Con 15 casos no sirve como numero fino.** Vale la conclusion gruesa
+  de E41/E49 (cuanto mas sube, mas pelea y mas cara), no el porcentaje
+  exacto.
+
+**Limites:** n = 15; las clases son gruesas; no mira quien suele pujar
+por cada tipo de jugador (E11).
+
+**Veredicto: CORRIGE E80** (su porcentaje no es fiable). Para «la prima
+que gana» del gestor (apagada): no tomar una probabilidad del historial
+como dato exacto; medirla con sus propias pujas antes de encenderla.
+
 ### E80 · 03/11/2026 17:15 de Madrid · Adrian Nino a +12,1 %: una moneda al aire
 
 **El caso:** la orden puja 4.909.900 (+12,1 % sobre su precio) por Adrian
