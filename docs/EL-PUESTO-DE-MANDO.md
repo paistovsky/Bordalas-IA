@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/11/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 05/11/2026, 23:15 de Madrid (laboratorio de rivales del jue noche: vender al Computer; pieza construida y NO fusionada).
 
 ## El mandato
 
@@ -351,6 +351,51 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/11 23:15 (laboratorio de rivales del jue noche; wf_149e5d25-4b1).
+  Nada fusionado, nada encendido.**
+  **Rivales (10:11-20:13):** ni un movimiento. Pollo (-5,31 M), Luismi
+  (-10,16 M) y Manzagool (-8,29 M) tienen que sacar 23,8 M antes del vie
+  21:00. Por su historia: Luismi vende de madrugada (00-07 h) y remata
+  minutos antes del saque; Pollo y Manzagool, el vie por la manana tras el
+  reset. Lo que vendan no puede salir en nuestro mercado para la J12 (0 de
+  327 vendidos al Computer se compraron en el reset siguiente); para la
+  J13, en el paron, vigilar a Unai Simon y Adrian Nino (de Manzagool),
+  Pape Gueye y Kang-in Lee. Pollo nos saca 6 puntos (501-495).
+  **Lo aprendido (vender al Computer, n=252 ofertas):** cada oferta es un
+  sorteo nuevo e independiente entre 0,95 y 1,05 del valor de esa manana;
+  rechazarla trae otra a la manana siguiente (3 casos); el que baja hoy
+  baja manana el 92 % de las veces. Desde el 30/09 nuestros vendedores
+  cogen la primera que pasa un suelo que casi nunca frena. La mayor parte
+  de lo perdido vino de suelos MANUALES por debajo del valor: Blanco
+  (0,944) e Ibanez (0,916), ~190 k. **REGLA PARA EL GESTOR (sin codigo):
+  en `vender_si_ficha`, con 3 dias o mas hasta el saque, el `suelo` va al
+  valor del dia o por encima; por debajo, solo con la caja apretando.**
+  Los rivales ganan ademas con un banquillo barato que compran cuando
+  sube y AGUANTAN ~11 dias: Pollo +6,25 M (+29,9 %) en 15 cerradas,
+  Luismi +4,94 M (+24,2 %) en 27; nosotros -0,59 M (-2,8 %) en 29, con 3,3
+  dias de mediana. Tema para el laboratorio del paron.
+  **La pieza (BORDALAS_LA_TIRADA_DE_MANANA), construida, revisada y NO
+  fusionada:** rechazar en la orden y la mejora las ofertas por debajo de
+  un liston (valor x tendencia) cuando el relevo nace antes de la ventana
+  del cierre. El revisor encendido encontro un fallo alto (con un jugador
+  en dos lineas, normal y ultimo recurso, el rechazo retrasaba la venta de
+  ultimo recurso) y tres medios; el arreglador los cerro, y con esos
+  frenos la ganancia baja de +335 k a **como mucho +86 k en 5 semanas** (3
+  ventas). Para eso tocaria la orden y la mejora y fijaria 5.152 huellas
+  que cualquier cambio futuro tendria que re-medir. **Decision: no se
+  fusiona**; la regla del suelo de arriba captura casi todo sin codigo.
+  El parche esta en el scratchpad de esta sesion (se pierde con el
+  contenedor): reconstruible desde esta entrada si un dia compensa.
+  **Riesgo para el VIERNES (comprobar a las 08:22 y en el cierre de las
+  12:45):** tras el reset de las 07:00 pueden pujar el motor viejo (dentro
+  del colchon) y el carril (con la caja libre) en la misma vuelta, y el
+  carril no ve la puja nueva del motor viejo: en el peor caso, pujas vivas
+  de ~4,5 M contra un saldo de 2,28 M. Si saldo - pujas vivas < 0, poner
+  al jugador en `no_pujar` (retira la puja) antes de las 20:45. Anomalia
+  vista (sin investigar): el 05/11 07:12 el motor de rerolls rechazo
+  2.091.000 por Gulacsi aunque ya habia rechazado 2.433.400 (compara
+  euros, y su valor bajo un 10 %).
 
 - **05/11 21:15 (rafaga de la noche).** Ciclos: verdes y sin huecos
   (#2735 a #2743). Saldo +2.275.724, 0 comprometido. La J12 se juega pese
