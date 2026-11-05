@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/11/2026, 07:25 de Madrid (rafaga de las 07:15).
+Actualizado: 05/11/2026, 08:45 de Madrid (supervision de las 08:22).
 
 ## El mandato
 
@@ -351,6 +351,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/11 08:45 (supervision de las 08:22; vuelta #2730 de las 08:07).**
+  Desde ayer Pepe no ha comprado ni vendido. Loureiro: lo gana Pollo por
+  847.000 (2 rivales; nuestra puja 798.000 era un 3,9 % menos que su
+  precio nuevo, como avisaba el laboratorio). Racha +250.000 (00:12).
+  Escrituras: renovar a Boye fallo otra vez a las 00:12 (la orden lo
+  frena; castigo de 6 h); a las 07:19 renueva la publicacion de Ramon
+  (430.000 -> 450.000) y a las 08:12 rechaza su oferta del Computer
+  (428.800) para pedir otra: inocuo, Ramon esta en `conservar`.
+  **Caja de la J12:** +2.275.724, 0 pujas vivas, SIN_DEUDA. Plazo de caja
+  vie 14:45; saque vie 21:00 (cierre 20:45). **Once escrito 3-4-3** con
+  Ramon (FF titular 96 %; ya no esta en duda); el cierre: EN_POSITIVO.
+  **La orden:** nada que limpiar (`fichar` y `vender_si_ficha` vacios); no
+  se toca. **Lista de objetivos:** ninguno en el mercado del Computer de
+  hoy (20 jugadores: Cucho, Gerenabarrena, Otorbi...). Raphinha 24,87 M
+  (+90 k), libre pero no a la venta. Adrian Nino (Manzagool) ya vale
+  4,69 M (+180 k). Pasadas las 40 h, la mejora no puja para la J12.
+  Pendiente: el lun 09/11, Boye sale de `proteger`.
 
 - **05/11 07:15 (rafaga de la manana).** Ciclos: verdes y SIN HUECOS
   desde anoche (#2719 a #2729, todas las de la madrugada llegaron).
