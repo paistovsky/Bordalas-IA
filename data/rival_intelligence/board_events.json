@@ -238067,5 +238067,24 @@
         ]
       }
     ]
+  },
+  {
+    "event_id": "2cc2e16c6097f2e7f0d8b157",
+    "date": 1793861702,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
