@@ -290,6 +290,15 @@ TESTS = [
     # y lo que imprime la vuelta de main byte a byte (huella por version
     # de Python).
     "src.analysis.test_la_orden_en_los_managers_v1",
+    # La orden en el escritor (mapa del 05/11: `accept_offer` y
+    # `counter_offer` no miraban la orden y solo ven el `offer_id`): justo
+    # antes de enviar, la oferta fresca entera; ni aceptar ni contraofertar
+    # la que pide a uno de `proteger`, ni contraofertar ni aceptar de un
+    # manager la de uno de `conservar` (la del Computer, si). El motor
+    # viejo y Competitive V2 lo dicen sin escritura gastada. Apagado, el
+    # escritor y sus llamadores de main byte a byte (huella por version de
+    # Python).
+    "src.analysis.test_la_orden_en_el_escritor_v1",
     # El motor viejo: no puja a los vetados de la orden y, con su
     # interruptor, solo por el que sube. Apagado.
     "src.analysis.test_el_motor_viejo_v1",

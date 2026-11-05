@@ -916,6 +916,45 @@ def execute_autopilot_decision(
             )
         )
 
+        # LA ORDEN EN EL ESCRITOR (05/11/2026): el escritor la ha frenado
+        # (la oferta pide a uno de la orden del gestor, aunque no sea el de
+        # esta fila: una oferta por varios llega aqui partida en una fila
+        # por jugador). No ha salido nada: ni escritura gastada ni rastro.
+        # Apagado, el escritor nunca devuelve `blocked`.
+        if isinstance(result, dict) and result.get("blocked"):
+
+            return {
+                "action":
+                    action,
+
+                "status":
+                    "BLOCKED_PROTECTED_PLAYER",
+
+                "reason":
+                    result.get("reason"),
+
+                "write_performed":
+                    False,
+
+                "success":
+                    False,
+
+                "http_status":
+                    None,
+
+                "response":
+                    None,
+
+                "guardia":
+                    result.get("guardia"),
+
+                "de_la_orden":
+                    result.get("de_la_orden"),
+
+                "offer":
+                    offer,
+            }
+
         # CADA ESCRITURA DEJA RASTRO (19/09/2026)
         #
         #     Aceptar ofertas era una de las tres familias que no
@@ -1210,6 +1249,40 @@ def execute_autopilot_decision(
                     True,
             )
         )
+
+        # LA ORDEN EN EL ESCRITOR (05/11/2026): frenada por el escritor (la
+        # oferta pide a uno de la orden del gestor). No ha salido nada.
+        # Apagado, el escritor nunca devuelve `blocked`.
+        if isinstance(result, dict) and result.get("blocked"):
+
+            return {
+                **build_noop_result(
+                    decision=decision,
+                    status="BLOCKED_PROTECTED_PLAYER",
+                    reason=result.get("reason"),
+                    success=False,
+                ),
+
+                "guardia":
+                    result.get("guardia"),
+
+                "de_la_orden":
+                    result.get("de_la_orden"),
+
+                "offer":
+                    selected,
+
+                "player_id":
+                    int(
+                        player_id
+                    ),
+
+                "revalidation_snapshot":
+                    fresh_snapshot_file,
+
+                "selection":
+                    selection,
+            }
 
         success = bool(
             result.get(

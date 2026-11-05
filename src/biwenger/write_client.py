@@ -514,6 +514,36 @@ class BiwengerWriteClient:
             )
         )
 
+        # LA ORDEN EN EL ESCRITOR (05/11/2026): con su interruptor, antes
+        # del ensayo, se lee la oferta fresca y no se contraoferta la que
+        # pide a uno de `proteger`, `fichar` o `conservar` de la orden del
+        # gestor (una contraoferta aceptada por el rival tambien es
+        # vender). Frenada: no sale nada. Sin poder ver la oferta: lo de
+        # siempre, con `guardia_sin_ver`. Apagado, None: lo de siempre.
+        frena = None
+
+        if execute:
+            try:
+                from src.analysis.la_orden_en_el_escritor import guardar
+
+                frena = guardar(self, "COUNTER_OFFER", offer_id)
+            except Exception:                       # noqa: BLE001
+                frena = None
+
+            if isinstance(frena, dict) and frena.get("blocked"):
+                return {
+                    **request,
+                    "sent": False,
+                    "success": False,
+                    **frena,
+                }
+
+        sin_ver = (
+            {"guardia_sin_ver": frena["sin_ver"]}
+            if isinstance(frena, dict) and frena.get("sin_ver")
+            else {}
+        )
+
         if not execute or self._en_ensayo(request):
 
             return {
@@ -524,6 +554,8 @@ class BiwengerWriteClient:
 
                 "success":
                     True,
+
+                **sin_ver,
             }
 
         response = (
@@ -567,6 +599,8 @@ class BiwengerWriteClient:
 
             "success_detail":
                 success_detail,
+
+            **sin_ver,
         }
 
 
@@ -774,6 +808,37 @@ class BiwengerWriteClient:
             )
         )
 
+        # LA ORDEN EN EL ESCRITOR (05/11/2026): con su interruptor, antes
+        # del ensayo, se lee la oferta fresca y no se acepta la que pide a
+        # uno de `proteger` o `fichar` de la orden del gestor, ni la de un
+        # MANAGER por uno de `conservar` (la del Computer si: es como se
+        # vende de verdad). Frenada: no sale nada. Sin poder ver la
+        # oferta: lo de siempre, con `guardia_sin_ver`. Apagado, None: lo
+        # de siempre.
+        frena = None
+
+        if execute:
+            try:
+                from src.analysis.la_orden_en_el_escritor import guardar
+
+                frena = guardar(self, "ACCEPT_OFFER", offer_id)
+            except Exception:                       # noqa: BLE001
+                frena = None
+
+            if isinstance(frena, dict) and frena.get("blocked"):
+                return {
+                    **request,
+                    "sent": False,
+                    "success": False,
+                    **frena,
+                }
+
+        sin_ver = (
+            {"guardia_sin_ver": frena["sin_ver"]}
+            if isinstance(frena, dict) and frena.get("sin_ver")
+            else {}
+        )
+
         if not execute or self._en_ensayo(request):
             return {
                 **request,
@@ -783,6 +848,8 @@ class BiwengerWriteClient:
 
                 "success":
                     True,
+
+                **sin_ver,
             }
 
         response = (
@@ -824,6 +891,8 @@ class BiwengerWriteClient:
 
             "success_detail":
                 success_detail,
+
+            **sin_ver,
         }
 
     # ==================================================

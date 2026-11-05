@@ -369,6 +369,17 @@ QUE_HACE = {
         "(«Bloqueada por la orden», con el jugador y la oferta) y, si aun así "
         "una llegara a la escritura, se frena antes de enviar nada a Biwenger. "
         "Con la orden del gestor apagada o caducada, todo como siempre.",
+    "BORDALAS_LA_ORDEN_EN_EL_ESCRITOR":
+        "Justo antes de enviar a Biwenger aceptar una oferta o contraofertar, "
+        "Pepe vuelve a leer la oferta y mira todos los jugadores que pide: si "
+        "alguno está en proteger de la orden del gestor (o es su fichaje), ni se "
+        "acepta ni se contesta, venga de quien venga; si alguno está en "
+        "conservar, nunca se contraoferta y no se acepta la de otro manager (la "
+        "del Computer sí: es como se venden de verdad los que la orden, la "
+        "mejora, el cierre o la rotación deciden vender). Frenada, no se envía "
+        "nada y no gasta la escritura de la vuelta. Si no puede leer la oferta, "
+        "se envía como siempre. Con la orden del gestor apagada o caducada, todo "
+        "como siempre.",
     "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA":
         "La ronda solo puja por un jugador del Computer si pide menos de 1 M, "
         "su precio sube hoy un 2 % o más y faltan 64 h o más para la jornada, "
