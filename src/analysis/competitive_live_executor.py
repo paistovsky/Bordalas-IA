@@ -79,6 +79,61 @@ def noop(
     }
 
 
+def _frenada_por_el_escritor(
+    result: Any,
+    *,
+    action: str | None,
+    offer_id: int,
+    player_id: int,
+    snapshot_file: Any,
+) -> dict | None:
+    """
+    LA ORDEN EN EL ESCRITOR (05/11/2026): si el escritor ha frenado la
+    escritura (`blocked`: la oferta pide a uno de la orden del gestor), no
+    ha salido nada hacia Biwenger. Noop honesto,
+    COMPETITIVE_BLOCKED_EL_ESCRITOR, `write_performed` False, en vez del
+    FAILED con escritura. None si no la ha frenado (apagado, siempre).
+    """
+
+    if not (
+        isinstance(result, dict)
+        and result.get("blocked")
+    ):
+        return None
+
+    return noop(
+        action=
+            action,
+
+        status=
+            "COMPETITIVE_BLOCKED_EL_ESCRITOR",
+
+        reason=
+            result.get("reason")
+            or "El escritor ha frenado la escritura.",
+
+        success=
+            False,
+
+        extra={
+            "revalidation_snapshot":
+                snapshot_file,
+
+            "offer_id":
+                offer_id,
+
+            "player_id":
+                player_id,
+
+            "de_la_orden":
+                result.get("de_la_orden"),
+
+            "guardia":
+                result.get("guardia"),
+        },
+    )
+
+
 def refresh_snapshot() -> tuple[str, dict]:
     """
     Read-before-write obligatorio.
@@ -657,6 +712,17 @@ def execute_competitive_live_action(
             )
         )
 
+        frenada = _frenada_por_el_escritor(
+            result,
+            action=action,
+            offer_id=offer_id,
+            player_id=fresh_player_id,
+            snapshot_file=fresh_snapshot_file,
+        )
+
+        if frenada is not None:
+            return frenada
+
         success = bool(
             result.get(
                 "success",
@@ -754,6 +820,17 @@ def execute_competitive_live_action(
                 True,
         )
     )
+
+    frenada = _frenada_por_el_escritor(
+        result,
+        action=action,
+        offer_id=offer_id,
+        player_id=fresh_player_id,
+        snapshot_file=fresh_snapshot_file,
+    )
+
+    if frenada is not None:
+        return frenada
 
     success = bool(
         result.get(

@@ -168,6 +168,17 @@ def cobrar(
                 "response": resultado.get("response"),
             }
 
+            # LA ORDEN EN EL ESCRITOR (05/11/2026): el escritor la ha
+            # frenado (la oferta pide a uno de la orden del gestor). No
+            # ha salido nada: el libro y el fallo lo dicen con su
+            # codigo y su motivo. Apagado, el escritor nunca devuelve
+            # `blocked`.
+            frenada = resultado.get("blocked")
+
+            if frenada:
+                anotacion["blocked"] = frenada
+                anotacion["reason"] = resultado.get("reason")
+
             apuntar(anotacion, ruta_del_libro)
 
             # Enviada no es hecha: si Biwenger dice que no, es un
@@ -177,6 +188,10 @@ def cobrar(
                     {
                         "name": fila.get("name"),
                         "error": (
+                            f"Frenada por la orden ({frenada}): "
+                            f"{resultado.get('reason')}"
+                            if frenada
+                            else
                             f"Biwenger contesto "
                             f"{resultado.get('http_status')}"
                         ),

@@ -573,6 +573,39 @@ def evaluate_counteroffer(
         ),
     }
 
+    # LA ORDEN EN EL ESCRITOR (05/11/2026): con su interruptor, nuestra
+    # contraoferta viva que vende a uno de la orden del gestor
+    # (`proteger`, `fichar` o `conservar`) se retira: si el rival la
+    # acepta, es vender, y el escritor ya no deja subirla. Va antes que
+    # todo lo demas: retirarla no vende a nadie. Apagado, None: lo de
+    # siempre.
+    try:
+        from src.analysis.la_orden_en_el_escritor import (
+            retirar_la_contraoferta,
+        )
+
+        retirar = retirar_la_contraoferta(
+            counter,
+            incoming_offer,
+        )
+    except Exception:                               # noqa: BLE001
+        retirar = None
+
+    if isinstance(retirar, dict) and retirar.get("blocked"):
+        return {
+            **base,
+            "action": "CANCEL_COUNTER",
+            "priority": ACTION_PRIORITY["CANCEL_COUNTER"],
+            "fresh_minimum": None,
+            "raise_by": 0,
+            "stale_counteroffer": True,
+            "reason": retirar.get("reason"),
+            "components": {},
+            "guardia": retirar.get("guardia"),
+            "por_la_orden": retirar.get("blocked"),
+            "de_la_orden": retirar.get("de_la_orden"),
+        }
+
     if market_value <= 0:
         return {
             **base,
