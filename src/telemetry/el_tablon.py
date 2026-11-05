@@ -377,9 +377,11 @@ QUE_HACE = {
         "conservar, nunca se contraoferta y no se acepta la de otro manager (la "
         "del Computer sí: es como se venden de verdad los que la orden, la "
         "mejora, el cierre o la rotación deciden vender). Frenada, no se envía "
-        "nada y no gasta la escritura de la vuelta. Si no puede leer la oferta, "
-        "se envía como siempre. Con la orden del gestor apagada o caducada, todo "
-        "como siempre.",
+        "nada: el motor viejo y Competitive no la cuentan como escritura, pero "
+        "la vuelven a intentar la vuelta siguiente. Y una contraoferta viva de "
+        "Pepe por uno de la orden se retira en vez de subirla (si el rival la "
+        "acepta, es vender). Si no puede leer la oferta, se envía como siempre. "
+        "Con la orden del gestor apagada o caducada, todo como siempre.",
     "BORDALAS_LA_RONDA_SOLO_LO_QUE_PAGA":
         "La ronda solo puja por un jugador del Computer si pide menos de 1 M, "
         "su precio sube hoy un 2 % o más y faltan 64 h o más para la jornada, "

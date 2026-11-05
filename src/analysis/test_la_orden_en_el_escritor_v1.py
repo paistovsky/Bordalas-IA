@@ -21,10 +21,11 @@ QUE SE COMPRUEBA
        real sin red, aceptar y contraofertar, en seco y de verdad, con y
        sin ensayo, doce ofertas, dos respuestas de Biwenger, el mercado que
        se lee y el que revienta, siete ordenes; y los llamadores: el motor
-       viejo, su cluster, Competitive V2 y la orden), con el interruptor
-       sin poner, "0", "", "no" y "off", sin interruptores y con los 27 de
-       produccion. Medida en main antes de tocar el codigo, una por
-       version de Python (3.11 y 3.13).
+       viejo, su cluster, Competitive V2, la orden, el tablero de V10 con
+       nuestras contraofertas vivas y lo que V10 hace con el, y los
+       viajes), con el interruptor sin poner, "0", "", "no" y "off", sin
+       interruptores y con los 27 de produccion. Medida en main sin tocar
+       (0af0d7c9), una por version de Python (3.11 y 3.13).
     3. Apagado, ni red ni orden: una PUT o POST, cero GET, cero lecturas
        de `protegidos()`/`conservados()`, con la orden encendida y Boye en
        `proteger` (caracterizacion: pasa en main).
@@ -46,9 +47,18 @@ QUE SE COMPRUEBA
        rastro; Competitive V2, COMPETITIVE_BLOCKED_EL_ESCRITOR; V10,
        `write_used` False; la orden, `enviada` False y sus mismas claves.
    10. Las fuentes: la guarda va antes del ensayo, el resto del escritor y
-       `la_orden_del_gestor.ejecutar` son los de main.
+       `la_orden_del_gestor.ejecutar` son los de main; la del tablero de
+       V10 va antes de todo; V10 retira antes de subir.
    11. Nunca lanza; si la pieza no se pudiera importar, lo de siempre; el
        entorno no la decide (doctrina 104).
+   12. Nuestra contraoferta viva por uno de la orden: el tablero de V10 da
+       CANCEL_COUNTER y V10 la retira (`cancel_bid`, DELETE de NUESTRA
+       contraoferta), en vez de dejarla viva y mas barata con la subida
+       frenada. Un jugador libre, como main.
+   13. Los viajes: la frenada se apunta con su codigo y su motivo.
+   14. El GET lleva plazo (15 s); un 429 que no cede o un HTTP que no es
+       200 se escriben como siempre. `requestedPlayers` suelto (un id o un
+       `{"id"}`) tambien se lee.
 
 DE DONDE SALEN LOS NUMEROS
 
@@ -93,6 +103,7 @@ ENV = "BORDALAS_LA_ORDEN_EN_EL_ESCRITOR"
 # Los de la orden y el ensayo, de sus modulos (sin escribir su nombre aqui).
 from src.actions.la_orden_del_gestor import ENV as ENV_ORDEN  # noqa: E402
 from src.biwenger.write_client import ENSAYO_ENV  # noqa: E402
+from src.biwenger.peticiones import LimiteDePeticiones  # noqa: E402
 
 # Los `BORDALAS_*` que no son del bot sino de la verja (el vigilante del
 # directorio de estado): no se tocan.
@@ -243,10 +254,17 @@ def _importe(nombre) -> int:
 
 
 class _Revienta:
-    """El mercado que no se puede leer: `get_market` lanza esto."""
+    """El mercado que no se puede leer: el GET lanza esto."""
 
     def __init__(self, error):
         self.error = error
+
+
+class _Contesta:
+    """El mercado que contesta con un HTTP que no es 200."""
+
+    def __init__(self, status):
+        self.status = status
 
 
 MERCADOS = (("normal", MERCADO), ("revienta", _Revienta(RuntimeError("Biwenger no contesta"))))
@@ -288,8 +306,12 @@ def _fabrica(red, respuesta=RESPUESTAS[0], mercado=MERCADO):
             red.append({"metodo": "DELETE", "url": url, "timeout": timeout})
             return _Respuesta(status, cuerpo)
 
-        def get(self, url, *a, **k):
-            red.append({"metodo": "GET_DE_LA_SESION", "url": url})
+        def get(self, url, timeout=None):
+            red.append({"metodo": "GET", "url": url, "timeout": timeout})
+            if isinstance(mercado, _Revienta):
+                raise mercado.error
+            if isinstance(mercado, _Contesta):
+                return _Respuesta(mercado.status, {"status": mercado.status})
             return _Respuesta(200, {"status": 200, "data": copy.deepcopy(mercado)})
 
     class _Cliente:
@@ -299,7 +321,9 @@ def _fabrica(red, respuesta=RESPUESTAS[0], mercado=MERCADO):
             self.session = _Sesion()
 
         def get_market(self):
-            red.append({"metodo": "GET", "url": f"{self.BASE_URL}/market"})
+            # La guarda ya no lo usa (no lleva `timeout`): si alguien lo
+            # llama, se ve en la red.
+            red.append({"metodo": "GET_DEL_CLIENTE", "url": f"{self.BASE_URL}/market"})
             if isinstance(mercado, _Revienta):
                 raise mercado.error
             return copy.deepcopy(mercado)
@@ -513,6 +537,158 @@ def _la_orden_ejecuta(nombres):
     return hacer
 
 
+# NUESTRAS CONTRAOFERTAS VIVAS (el tablero de V10 y lo que V10 hace con el)
+
+RIVAL2, RIVAL3 = 13000003, 13000004
+AHORA = 1_793_900_000                              # fijo: nada del reloj
+
+
+def _recibida(oid, pedidos, importe, rival):
+    """La oferta de compra de un manager, como la da la foto."""
+    return {"id": oid, "type": "purchase", "status": "waiting", "amount": importe,
+            "from": {"id": rival, "name": "Un rival de la liga"},
+            "to": {"id": YO, "name": "Pepe Bordalás"}, "requestedPlayers": pedidos,
+            "created": AHORA - 7200, "until": AHORA + 86_400}
+
+
+def _nuestra(oid, pedidos, importe, rival):
+    """NUESTRA contraoferta viva a ese manager."""
+    return {"id": oid, "type": "counterOffer", "status": "waiting", "amount": importe,
+            "from": {"id": YO, "name": "Pepe Bordalás"},
+            "to": {"id": rival, "name": "Un rival de la liga"}, "requestedPlayers": pedidos,
+            "created": AHORA - 3600, "until": AHORA + 86_400}
+
+
+# nombre: (la oferta del rival, nuestra contraoferta, el rival). La de
+# Roberto es la de la revision del 05/11 (5000/5001 alli).
+CONTRAOFERTAS_VIVAS = {
+    "roberto": (_recibida(92000, [ROBERTO], 7_100_000, RIVAL),
+                _nuestra(92001, [ROBERTO], 7_500_000, RIVAL), RIVAL),
+    "boye": (_recibida(92010, [BOYE], 5_200_000, RIVAL),
+             _nuestra(92011, [BOYE], 5_600_000, RIVAL), RIVAL),
+    "iglesias": (_recibida(92020, [IGLESIAS], 3_700_000, RIVAL),
+                 _nuestra(92021, [IGLESIAS], 4_000_000, RIVAL), RIVAL),
+    "lote_iglesias_ivan": (_recibida(92030, [{"id": IGLESIAS}, {"id": IVAN}], 7_000_000, RIVAL2),
+                           _nuestra(92031, [{"id": IGLESIAS}, {"id": IVAN}], 8_000_000, RIVAL2),
+                           RIVAL2),
+    # `requestedPlayers` suelto, como lo lee el tablero.
+    "yamal_suelto": (_recibida(92040, YAMAL, 38_000_000, RIVAL3),
+                     _nuestra(92041, YAMAL, 45_000_000, RIVAL3), RIVAL3),
+}
+VIVAS = (("roberto", ("roberto",)), ("boye", ("boye",)), ("iglesias", ("iglesias",)),
+         ("lote", ("lote_iglesias_ivan",)), ("yamal_suelto", ("yamal_suelto",)),
+         ("todas", tuple(CONTRAOFERTAS_VIVAS)))
+DECISIONES_V10 = ("COUNTER_OFFER", "ACCEPT_NOW", "NEVER_SELL", None)
+PRECIOS = {ROBERTO: 7_000_000, BOYE: 5_000_000, IGLESIAS: 3_800_000, IVAN: 4_200_000,
+           YAMAL: 40_000_000}
+
+
+def _las_vivas(nombres) -> list:
+    return [o for n in nombres for o in CONTRAOFERTAS_VIVAS[n][:2]]
+
+
+def _mercado_de(nombres) -> dict:
+    """Lo que el GET de la guarda lee: las ofertas y nuestras contraofertas."""
+    return {"status": {"balance": 2_275_724}, "sales": [],
+            "offers": copy.deepcopy(_las_vivas(nombres))}
+
+
+def _el_tablero(nombres, decision) -> dict:
+    """`build_repricing_board` (el de V10) con la foto de esas
+    contraoferta vivas y la decision de Competitive de cada una (None: sin
+    decision)."""
+    from src.analysis.dynamic_counteroffer_repricing_v107 import build_repricing_board
+
+    foto = {"league": {"user": {"id": YO}},
+            "market": {"offers": copy.deepcopy(_las_vivas(nombres))},
+            "catalog": {"data": {"players": {str(pid): {"id": pid, "name": f"Jugador {pid}",
+                                                        "price": precio}
+                                             for pid, precio in PRECIOS.items()}}}}
+    decisiones = []
+    if decision is not None:
+        for n in nombres:
+            recibida, _, rival = CONTRAOFERTAS_VIVAS[n]
+            pedidos = recibida["requestedPlayers"]
+            for x in (pedidos if isinstance(pedidos, list) else [pedidos]):
+                pid = x["id"] if isinstance(x, dict) else x
+                decisiones.append({
+                    "counterparty_type": "MANAGER", "player_id": pid, "counterparty_id": rival,
+                    "player_name": f"Jugador {pid}", "authoritative_decision": decision,
+                    "competitive_observer": {
+                        "decision": decision, "our_sale_cost_score": 20.0,
+                        "competitive_premium_percent": 10.0, "temporal_premium_percent": 0.0,
+                        "sporting_premium_percent": 5.0, "solvency_discount_percent": 0.0}})
+    tablero = {"decisions": decisiones,
+               "speculation": {"owned": [{"id": pid, "price_increment": 100_000}
+                                         for pid in PRECIOS]}}
+    return build_repricing_board(foto, offer_decision_board=tablero, hours_to_deadline=30.0,
+                                 now_epoch=AHORA)
+
+
+def _v10(nombres, decision):
+    """El tablero y lo que V10 hace con el (paso 5 de su vuelta, sin
+    escritura previa ni bloqueo de fase): CANCEL_COUNTER antes que
+    RAISE_COUNTER, con sus `_best_cancel` y `_best_raise` y el escritor."""
+    def hacer(fabrica):
+        import src.v10_full_autonomous_live as v10
+
+        tablero = _el_tablero(nombres, decision)
+        retira, sube = v10._best_cancel(tablero), v10._best_raise(tablero)
+        accion = resultado = None
+        if retira:
+            accion = "CANCEL_COUNTER"
+            resultado = fabrica().cancel_bid(offer_id=int(retira["counter_offer_id"]),
+                                             execute=True)
+        elif sube:
+            accion = "RAISE_COUNTER"
+            resultado = fabrica().counter_offer(offer_id=int(sube["incoming_offer_id"]),
+                                                amount=int(sube["recommended_counter"]),
+                                                execute=True)
+        return {"tablero": tablero, "accion": accion, "resultado": resultado,
+                "write_used": bool((resultado or {}).get("success"))}
+    return hacer
+
+
+# LOS VIAJES (`salida_executor.cobrar`)
+
+VIAJES = (
+    {"offer_id": 91001, "player_id": BOYE, "name": "Boyé", "cost": 4_000_000,
+     "amount": 5_316_300, "profit": 1_316_300, "yield_percent": 32.9, "loss_cut": False},
+    {"offer_id": 91004, "player_id": ROBERTO, "name": "Roberto Fernández", "cost": 6_500_000,
+     "amount": 7_001_600, "profit": 501_600, "yield_percent": 7.7, "loss_cut": False},
+    {"offer_id": 91003, "player_id": ROBERTO, "name": "Roberto Fernández", "cost": 6_500_000,
+     "amount": 8_400_000, "profit": 1_900_000, "yield_percent": 29.2, "loss_cut": False},
+    {"offer_id": 91008, "player_id": IGLESIAS, "name": "Juan Iglesias", "cost": 3_000_000,
+     "amount": 12_500_000, "profit": 9_500_000, "yield_percent": 316.7, "loss_cut": False},
+    {"offer_id": 91007, "player_id": IGLESIAS, "name": "Juan Iglesias", "cost": 3_000_000,
+     "amount": 3_823_100, "profit": 823_100, "yield_percent": 27.4, "loss_cut": False},
+    {"offer_id": 0, "player_id": DANI, "name": "Dani Lorenzo"},
+)
+
+
+def _los_viajes(carpeta, en_vivo=True, filas=VIAJES):
+    """`cobrar` con el escritor de la prueba y su libro en `carpeta` (sin la
+    hora)."""
+    def hacer(fabrica):
+        from src.actions.salida_executor import cobrar
+
+        libro = Path(carpeta) / "libro_de_los_viajes.jsonl"
+        if libro.exists():
+            libro.unlink()
+        r = cobrar(copy.deepcopy(list(filas)), escritor=fabrica(), en_vivo=en_vivo, tope=10,
+                   ruta_del_libro=libro)
+        lineas = []
+        if libro.exists():
+            for linea in libro.read_text(encoding="utf-8").splitlines():
+                fila = json.loads(linea)
+                fila.pop("at", None)
+                lineas.append(fila)
+        for vendida in r.get("sold") or []:
+            vendida.pop("at", None)
+        return {"r": r, "libro": lineas}
+    return hacer
+
+
 # ============================================================
 # LA BATERIA Y SU HUELLA
 # ============================================================
@@ -574,6 +750,14 @@ def _la_bateria(carpeta) -> list:
                 for nombre_acciones, nombres in ACCIONES_DE_LA_ORDEN:
                     llamadas.append((f"la_orden/{nombre_acciones}/{sufijo}", {
                         **comun, "hacer": _la_orden_ejecuta(nombres)}))
+                for nombre_vivas, nombres in VIVAS:
+                    for decision in DECISIONES_V10:
+                        llamadas.append((f"v10/{nombre_vivas}/{decision}/{sufijo}", {
+                            **comun, "mercado": _mercado_de(nombres),
+                            "hacer": _v10(nombres, decision)}))
+                for en_vivo in (True, False):
+                    llamadas.append((f"viajes/{en_vivo}/{sufijo}", {
+                        **comun, "hacer": _los_viajes(carpeta, en_vivo)}))
     return llamadas
 
 
@@ -581,7 +765,9 @@ LLAMADAS_DE_LA_BATERIA = len(ORDENES) * 2 * len(RESPUESTAS) * (
     len(MERCADOS) * len(ESCRITURAS) * 2 * 2
     + len(FILAS_DEL_MOTOR_VIEJO) * 3
     + len(OFERTAS_DE_MANAGERS) * 2
-    + len(ACCIONES_DE_LA_ORDEN))
+    + len(ACCIONES_DE_LA_ORDEN)
+    + len(VIVAS) * len(DECISIONES_V10)
+    + 2)
 
 
 def _normal(x):
@@ -627,22 +813,28 @@ def _la_huella(huellas: dict) -> str:
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()
 
 
-# Medidas en main sin tocar (copia de origin/main b3286e86 por `git
+# Medidas en main sin tocar (copia de origin/main 0af0d7c9 por `git
 # archive`, con este fichero dentro) con `python -m
 # src.analysis.test_la_orden_en_el_escritor_v1 --medir`, una por Python y
 # por entorno (sin interruptores y los 27 de produccion), con el
 # interruptor sin poner, "0", "", "no" y "off" (las cinco, la misma).
-# Cualquier cambio querido en el escritor, el motor viejo, Competitive V2 o
-# la orden la pone roja: se vuelve a medir en main, a proposito, en las dos
-# versiones (3.11 y 3.13; con otra no hay huella y la prueba falla).
+#
+# LA REGLA (revision del 05/11). Esta huella fija lo que devuelven,
+# apagado, el escritor, el motor viejo y su cluster, Competitive V2, la
+# orden (`ejecutar`), el tablero de V10 (`dynamic_counteroffer_repricing_v107`)
+# y su eleccion, y los viajes (`salida_executor.cobrar`). Quien cambie a
+# proposito algo de eso vuelve a medir con `--medir` en 3.11 Y en 3.13, en
+# el MISMO commit, y pone las dos aqui; si no, la verja se pone roja y el
+# ciclo horario se para. Con un Python que no sea 3.11 ni 3.13 no hay
+# huella y la prueba falla: se mide antes de cambiar la version del YAML.
 HUELLAS_DE_MAIN = {
     (3, 11): {
-        "produccion": "da3c48932de56c95986296ff6188d68e30c50ba615654771c97a1b11c807699d",
-        "sin_interruptores": "da3c48932de56c95986296ff6188d68e30c50ba615654771c97a1b11c807699d",
+        "produccion": "39c435064c9dcd2cda0a25b07d1fbf3b36d69ab29f7896972e5c8ab3cc455d18",
+        "sin_interruptores": "39c435064c9dcd2cda0a25b07d1fbf3b36d69ab29f7896972e5c8ab3cc455d18",
     },
     (3, 13): {
-        "produccion": "da3c48932de56c95986296ff6188d68e30c50ba615654771c97a1b11c807699d",
-        "sin_interruptores": "da3c48932de56c95986296ff6188d68e30c50ba615654771c97a1b11c807699d",
+        "produccion": "39c435064c9dcd2cda0a25b07d1fbf3b36d69ab29f7896972e5c8ab3cc455d18",
+        "sin_interruptores": "39c435064c9dcd2cda0a25b07d1fbf3b36d69ab29f7896972e5c8ab3cc455d18",
     },
 }
 
@@ -687,10 +879,12 @@ def _huella_de(fuentes: dict) -> str:
     return hashlib.sha256(json.dumps(fuentes, sort_keys=True).encode("utf-8")).hexdigest()
 
 
-# Medida en main (b3286e86) con `--medir`: las demas funciones del
-# escritor (publicar, retirar, rechazar, pujar, el once, la racha, los
-# `build_*`, el ensayo...), las de modulo de `write_client` y
+# Medida en main (b3286e86, igual en 0af0d7c9) con `--medir`: las demas
+# funciones del escritor (publicar, retirar, rechazar, pujar, el once, la
+# racha, los `build_*`, el ensayo...), las de modulo de `write_client` y
 # `la_orden_del_gestor.ejecutar`. El texto, igual en todas las versiones.
+# La misma regla: quien cambie una de ellas a proposito la vuelve a medir
+# con `--medir` en el mismo commit.
 FUENTES_DE_MAIN = "ee8208bf444de8208a8a294830f802eb6a25853e0424f304b143aeb907c33757"
 
 
@@ -802,7 +996,9 @@ def test_nace_apagado_un_lector_y_su_frase():
     assert fuente.count(f'ENV = "{ENV}"') == 1
     assert fuente.count("os.environ.get(ENV") == 1
     assert fuente.count("activo()") - fuente.count("def activo()") == 1, \
-        "activo() se llama solo en `guardar`"
+        "activo() se llama solo en `_la_orden_activa`"
+    assert fuente.count("_la_orden_activa()") - fuente.count("def _la_orden_activa()") == 2, \
+        "`_la_orden_activa` la llaman `guardar` y `retirar_la_contraoferta`"
     for ruta in (RAIZ / "src").rglob("*.py"):
         if ruta.name.startswith("test_") or ruta.name == "la_orden_en_el_escritor.py":
             continue
@@ -845,8 +1041,9 @@ def test_nace_apagado_un_lector_y_su_frase():
                   "todos los jugadores que pide", "proteger", "ni se acepta ni se contesta",
                   "conservar", "nunca se contraoferta", "otro manager",
                   "la del Computer sí", "no se envía nada",
-                  "no puede leer la oferta", "no gasta la escritura de la vuelta",
-                  "apagada o caducada, todo como siempre"):
+                  "no la cuentan como escritura", "la vuelven a intentar la vuelta siguiente",
+                  "contraoferta viva", "se retira en vez de subirla",
+                  "no puede leer la oferta", "apagada o caducada, todo como siempre"):
         assert trozo in frase, (trozo, frase)
 
 
@@ -1029,6 +1226,11 @@ def test_lo_que_lee_de_la_oferta():
         {"id": None, "from": None, "requestedPlayers": [BOYE]},
         {"id": 8, "from": None, "requestedPlayers": [BOYE]},
         {"id": 8, "from": {"id": RIVAL}, "requestedPlayers": [IVAN]},
+        # `requestedPlayers` suelto, como lo lee el tablero de V10.
+        {"id": 9, "from": {"id": RIVAL}, "requestedPlayers": ROBERTO},
+        {"id": 10, "from": None, "requestedPlayers": {"id": IVAN}},
+        {"id": 11, "from": None, "requestedPlayers": str(BOYE)},
+        {"id": 12, "from": None, "requestedPlayers": True},
     ]}
     assert pieza.la_oferta(mercado, 1) == {"pedidos": {BOYE, ROBERTO}, "de_un_manager": False}
     # El id de la oferta, como numero: "2" es la 2. Ids como texto, tambien.
@@ -1040,6 +1242,17 @@ def test_lo_que_lee_de_la_oferta():
     assert pieza.la_oferta(mercado, 5) == {"pedidos": set(), "de_un_manager": False}
     # Dos con el mismo id: se juntan.
     assert pieza.la_oferta(mercado, 8) == {"pedidos": {BOYE, IVAN}, "de_un_manager": True}
+    # Uno suelto: un id, un `{"id"}` o un texto con un id. Un bool, no.
+    assert pieza.la_oferta(mercado, 9) == {"pedidos": {ROBERTO}, "de_un_manager": True}
+    assert pieza.la_oferta(mercado, 10) == {"pedidos": {IVAN}, "de_un_manager": False}
+    assert pieza.la_oferta(mercado, 11) == {"pedidos": {BOYE}, "de_un_manager": False}
+    assert pieza.la_oferta(mercado, 12) == {"pedidos": set(), "de_un_manager": False}
+    # Y con el escritor: la oferta de un manager por Roberto suelto se frena.
+    with tempfile.TemporaryDirectory() as carpeta:
+        suelta = {"offers": [{**OFERTAS["roberto_de_un_manager"], "requestedPlayers": ROBERTO}]}
+        for hacer in (_acepta, _contraoferta):
+            h = _con(carpeta, valor="1", mercado=suelta, hacer=hacer("roberto_de_un_manager"))
+            _frenada(h, CONSERVADO, [ROBERTO], [ROBERTO], True)
     # Ids de oferta que no son un id: no estan.
     for oid in (-6, 6, 0, None, True, False, "siete", "x", 1.5j, 99999, [1], {"id": 1}):
         assert pieza.la_oferta(mercado, oid) is None, oid
@@ -1095,6 +1308,13 @@ def test_sin_ver_la_oferta_se_escribe():
         ({"offers": [OFERTAS["iglesias_del_computer"]]}, "LA_OFERTA_NO_ESTA_EN_EL_MERCADO"),
         ({"offers": [{"id": 91001, "from": None, "requestedPlayers": [None, "x"]}]},
          "LA_OFERTA_SIN_JUGADORES"),
+        # Un HTTP que no es 200, el 429 que no cede (la sesion ya lo
+        # reintento) y el plazo que se acaba.
+        (_Contesta(500), "SIN_LEER_EL_MERCADO: HTTP 500"),
+        (_Contesta(401), "SIN_LEER_EL_MERCADO: HTTP 401"),
+        (_Contesta(200), "SIN_LEER_EL_MERCADO: KeyError"),
+        (_Revienta(LimiteDePeticiones("429")), "SIN_LEER_EL_MERCADO: LimiteDePeticiones"),
+        (_Revienta(TimeoutError("15 s")), "SIN_LEER_EL_MERCADO: TimeoutError"),
     )
     with tempfile.TemporaryDirectory() as carpeta:
         for mercado, motivo in casos:
@@ -1183,7 +1403,10 @@ def test_una_peticion_mas():
         assert _escrituras(h["red"]) == [("GET", f"{URL}/market"),
                                          ("PUT", f"{URL}/offers/91007")], h["red"]
         assert h["cuentas"] == {"protegidos": 1, "conservados": 1}, h["cuentas"]
-        assert not any(e["metodo"] == "GET_DE_LA_SESION" for e in h["red"])
+        # Con la sesion y su plazo (15 s), no con `get_market`, que no lo
+        # lleva.
+        assert [e.get("timeout") for e in h["red"] if e["metodo"] == "GET"] == [15], h["red"]
+        assert not any(e["metodo"] == "GET_DEL_CLIENTE" for e in h["red"])
         h = _con(carpeta, valor="1", hacer=_contraoferta("iglesias_de_un_manager"))
         assert _escrituras(h["red"]) == [("GET", f"{URL}/market"),
                                          ("POST", f"{URL}/offers")], h["red"]
@@ -1281,6 +1504,185 @@ def test_v10_y_la_orden():
         assert all(set(x) == claves for x in hechas), hechas
 
 
+# 12-bis. NUESTRA CONTRAOFERTA VIVA SE RETIRA (revision encendida del 05/11)
+
+def _retirada(h, oid, codigo, de_la_orden):
+    """V10 la ha retirado: el tablero da CANCEL_COUNTER a todas sus filas, con
+    la guardia, y V10 la borra (DELETE de NUESTRA contraoferta) y nada mas."""
+    r = h["r"]
+    assert r["accion"] == "CANCEL_COUNTER" and r["write_used"] is True, r
+    assert _escrituras(h["red"]) == [("DELETE", f"{URL}/offers/{oid}")], h["red"]
+    filas = [f for f in r["tablero"]["actions"] if f["counter_offer_id"] == oid]
+    assert filas, r["tablero"]
+    for f in filas:
+        assert f["action"] == "CANCEL_COUNTER" and f["priority"] == 100, f
+        assert f["guardia"] == "LA_ORDEN_EN_EL_ESCRITOR", f
+        assert f["por_la_orden"] == codigo and f["de_la_orden"] == de_la_orden, f
+        assert "LA_ORDEN_EN_EL_ESCRITOR" in f["reason"], f
+        assert f["raise_by"] == 0 and f["fresh_minimum"] is None, f
+        assert "recommended_counter" not in f, f
+    assert h["ensayo"] == [], h["ensayo"]
+
+
+def test_nuestra_contraoferta_viva_se_retira():
+    """La de la revision: nuestra contraoferta viva por Roberto (7.500.000) y
+    la oferta del rival a la que contesta. Apagado, V10 la sube a 8.774.500
+    (RAISE_COUNTER, main). Encendido, el escritor frena la subida y la
+    vieja, mas barata, seguiria viva: por eso el tablero da CANCEL_COUNTER y
+    V10 la retira (DELETE de 92001, NUESTRA contraoferta), con cualquier
+    decision de Competitive y sin ella. Igual Boye (proteger), Ivan en el
+    lote con Iglesias (conservar; apagado KEEP_COUNTER, viva) y Yamal pedido
+    suelto. Iglesias solo, como main. Sin orden que mirar, como main."""
+    vivas = dict(VIVAS)
+    with tempfile.TemporaryDirectory() as carpeta:
+        # Apagado: main, la sube.
+        for valor in (None, "0", "off"):
+            h = _con(carpeta, valor=valor, mercado=_mercado_de(vivas["roberto"]),
+                     hacer=_v10(vivas["roberto"], "COUNTER_OFFER"))
+            assert h["r"]["accion"] == "RAISE_COUNTER" and h["r"]["write_used"] is True, h["r"]
+            assert [(f["action"], f["recommended_counter"])
+                    for f in h["r"]["tablero"]["actions"]] == [("RAISE_COUNTER", 8_774_500)]
+            assert _escrituras(h["red"]) == [("POST", f"{URL}/offers")], h["red"]
+            assert h["red"][-1]["json"] == {"type": "counterOffer", "to": 92000,
+                                            "amount": 8_774_500}, h["red"]
+            assert h["cuentas"] == {}, h["cuentas"]
+        # Encendido: la retira.
+        for nombre, oid, codigo, de_la_orden in (
+                ("roberto", 92001, CONSERVADO, [ROBERTO]), ("boye", 92011, PROTEGIDO, [BOYE]),
+                ("lote", 92031, CONSERVADO, [IVAN]), ("yamal_suelto", 92041, PROTEGIDO, [YAMAL])):
+            for decision in DECISIONES_V10:
+                h = _con(carpeta, valor="1", mercado=_mercado_de(vivas[nombre]),
+                         hacer=_v10(vivas[nombre], decision))
+                _retirada(h, oid, codigo, de_la_orden)
+                assert h["r"]["tablero"]["raise_counter"] == [], h["r"]["tablero"]
+                assert h["r"]["tablero"]["top_action"]["action"] == "CANCEL_COUNTER"
+        # Todas a la vez: se retiran las de la orden (una por vuelta, la
+        # primera del tablero) y ninguna se sube; la de Iglesias, como main.
+        h = _con(carpeta, valor="1", mercado=_mercado_de(vivas["todas"]),
+                 hacer=_v10(vivas["todas"], "COUNTER_OFFER"))
+        assert {(f["counter_offer_id"], f["player_id"]): f["action"]
+                for f in h["r"]["tablero"]["actions"]} == {
+            (92001, ROBERTO): "CANCEL_COUNTER", (92011, BOYE): "CANCEL_COUNTER",
+            (92021, IGLESIAS): "RAISE_COUNTER", (92031, IGLESIAS): "CANCEL_COUNTER",
+            (92031, IVAN): "CANCEL_COUNTER", (92041, YAMAL): "CANCEL_COUNTER"}
+        _retirada(h, 92001, CONSERVADO, [ROBERTO])
+        # Iglesias solo: como main (encendido, el GET de la guarda antes de
+        # la POST de la subida).
+        for decision in DECISIONES_V10:
+            apagado = _con(carpeta, mercado=_mercado_de(vivas["iglesias"]),
+                           hacer=_v10(vivas["iglesias"], decision))
+            encendido = _con(carpeta, valor="1", mercado=_mercado_de(vivas["iglesias"]),
+                             hacer=_v10(vivas["iglesias"], decision))
+            assert encendido["r"] == apagado["r"], (encendido["r"], apagado["r"])
+            esperadas = _escrituras(apagado["red"])
+            if apagado["r"]["accion"] == "RAISE_COUNTER":
+                esperadas = [("GET", f"{URL}/market")] + esperadas
+            assert _escrituras(encendido["red"]) == esperadas, encendido["red"]
+        # Sin orden que mirar: como main, tablero, accion y red.
+        for nombre_orden in ("apagada", "caducada", "rota", "sin_orden"):
+            for nombre, nombres in VIVAS:
+                for decision in ("COUNTER_OFFER", None):
+                    apagado = _con(carpeta, nombre_orden, mercado=_mercado_de(nombres),
+                                   hacer=_v10(nombres, decision))
+                    encendido = _con(carpeta, nombre_orden, valor="1",
+                                     mercado=_mercado_de(nombres), hacer=_v10(nombres, decision))
+                    assert encendido["r"] == apagado["r"], (nombre_orden, nombre, decision)
+                    assert encendido["red"] == apagado["red"], (nombre_orden, nombre, decision)
+        # El lunes, Boye solo en `conservar`: se retira igual (CONSERVADO).
+        h = _con(carpeta, "lunes", valor="1", mercado=_mercado_de(vivas["boye"]),
+                 hacer=_v10(vivas["boye"], "COUNTER_OFFER"))
+        _retirada(h, 92011, CONSERVADO, [BOYE])
+        # Yamal con su llave (fuera de `proteger`): como main, y la subida
+        # pasa la guarda del escritor.
+        apagado = _con(carpeta, "yamal_por_lesion", mercado=_mercado_de(vivas["yamal_suelto"]),
+                       hacer=_v10(vivas["yamal_suelto"], "COUNTER_OFFER"))
+        encendido = _con(carpeta, "yamal_por_lesion", valor="1",
+                         mercado=_mercado_de(vivas["yamal_suelto"]),
+                         hacer=_v10(vivas["yamal_suelto"], "COUNTER_OFFER"))
+        assert encendido["r"] == apagado["r"] and apagado["r"]["accion"] == "RAISE_COUNTER"
+        assert _escrituras(encendido["red"]) == [("GET", f"{URL}/market"),
+                                                 ("POST", f"{URL}/offers")], encendido["red"]
+
+
+def test_retirar_la_contraoferta():
+    """La funcion, sola: lee la orden solo encendida; los de la fila, los de
+    la contraoferta cruda y los de la oferta del rival."""
+    from src.analysis import la_orden_en_el_escritor as pieza
+
+    with tempfile.TemporaryDirectory() as carpeta:
+        ruta = _la_orden_en(carpeta, "hoy", ORDEN_HOY)
+        cuentas = {}
+        with _Interruptores({ENV_ORDEN: "1"}), _Sustituye(_la_orden(ruta, cuentas)):
+            # Apagado: None, sin leer la orden.
+            assert pieza.retirar_la_contraoferta({"player_id": BOYE}) is None
+            assert cuentas == {}, cuentas
+        with _Interruptores({ENV: "1", ENV_ORDEN: "1"}), _Sustituye(_la_orden(ruta, cuentas)):
+            r = pieza.retirar_la_contraoferta({"player_id": IGLESIAS, "raw_offer": {
+                "requestedPlayers": [{"id": IGLESIAS}, {"id": IVAN}]}})
+            assert r == {"guardia": "LA_ORDEN_EN_EL_ESCRITOR", "blocked": CONSERVADO,
+                         "de_la_orden": [IVAN], "pedidos": sorted([IGLESIAS, IVAN]),
+                         "reason": pieza.MOTIVO_RETIRAR}, r
+            r = pieza.retirar_la_contraoferta({"player_id": IGLESIAS},
+                                              {"requestedPlayers": YAMAL})
+            assert r["blocked"] == PROTEGIDO and r["de_la_orden"] == [YAMAL], r
+            r = pieza.retirar_la_contraoferta({"player_id": str(BOYE)})
+            assert r["blocked"] == PROTEGIDO and r["de_la_orden"] == [BOYE], r
+            for libre in (({"player_id": IGLESIAS}, None), ({"player_id": DANI},
+                                                             {"player": {"id": IGLESIAS}}),
+                          (None, None), ("x", 7), ({"raw_offer": "x"}, []),
+                          ({"player_id": True, "raw_offer": {"requestedPlayers": [None]}}, "x")):
+                assert pieza.retirar_la_contraoferta(*libre) is None, libre
+
+
+# 12-ter. LOS VIAJES DICEN LA FRENADA
+
+def test_los_viajes_dicen_la_frenada():
+    """`salida_executor.cobrar` (los viajes), encendido: Boye (proteger), la
+    de un manager por Roberto y el lote de Iglesias con Roberto se frenan, y
+    el fallo y el libro lo dicen con su codigo y su motivo (no «Biwenger
+    contesto None»); Roberto e Iglesias del Computer se venden. Apagado,
+    main."""
+    from src.analysis import la_orden_en_el_escritor as pieza
+
+    with tempfile.TemporaryDirectory() as carpeta:
+        h = _con(carpeta, valor="1", hacer=_los_viajes(carpeta))
+        r, libro = h["r"]["r"], h["r"]["libro"]
+        assert [v["offer_id"] for v in r["sold"]] == [91004, 91007], r
+        assert r["failed"] == [
+            {"name": "Boyé",
+             "error": f"Frenada por la orden ({PROTEGIDO}): {pieza.MOTIVO_PROTEGIDO}"},
+            {"name": "Roberto Fernández",
+             "error": f"Frenada por la orden ({CONSERVADO}): {pieza.MOTIVO_CONSERVADO}"},
+            {"name": "Juan Iglesias",
+             "error": f"Frenada por la orden ({CONSERVADO}): {pieza.MOTIVO_CONSERVADO}"},
+            {"name": "Dani Lorenzo", "error": "Sin offer_id no se cobra nada."}], r["failed"]
+        assert [e for e in _escrituras(h["red"]) if e[0] == "PUT"] == [
+            ("PUT", f"{URL}/offers/91004"), ("PUT", f"{URL}/offers/91007")], h["red"]
+        assert [(x["offer_id"], x["sent"], x["success"], x.get("blocked")) for x in libro] == [
+            (91001, False, False, PROTEGIDO), (91004, True, True, None),
+            (91003, False, False, CONSERVADO), (91008, False, False, CONSERVADO),
+            (91007, True, True, None)], libro
+        assert all(x["http_status"] is None and x["reason"].startswith("LA_ORDEN_EN_EL_ESCRITOR")
+                   for x in libro if x.get("blocked")), libro
+        assert all("reason" not in x for x in libro if not x.get("blocked")), libro
+        assert r["reason"] == "2 viaje(s) CERRADOS, 4 fallidos.", r["reason"]
+        # Apagado: main, todas enviadas y el libro sin `blocked`.
+        for respuesta in RESPUESTAS:
+            h = _con(carpeta, respuesta=respuesta, hacer=_los_viajes(carpeta))
+            r, libro = h["r"]["r"], h["r"]["libro"]
+            assert len([e for e in h["red"] if e["metodo"] == "PUT"]) == 5, h["red"]
+            assert all("blocked" not in x and "reason" not in x for x in libro), libro
+            if respuesta[1] == 200:
+                assert [v["offer_id"] for v in r["sold"]] == [91001, 91004, 91003, 91008, 91007]
+            else:
+                assert r["sold"] == [] and [f["error"] for f in r["failed"]][:5] == [
+                    "Biwenger contesto 400"] * 5, r["failed"]
+        # En seco (`en_vivo` False), encendido: ni se mira ni falla.
+        h = _con(carpeta, valor="1", hacer=_los_viajes(carpeta, en_vivo=False))
+        assert not any(e["metodo"] in ("GET", "PUT") for e in h["red"]), h["red"]
+        assert [f["name"] for f in h["r"]["r"]["failed"]] == ["Dani Lorenzo"]
+
+
 # 13. LAS FUENTES
 
 def test_las_fuentes():
@@ -1321,6 +1723,39 @@ def test_las_fuentes():
     acepta = cle.index("writer.accept_offer(")
     assert contra < cle.index("_frenada_por_el_escritor(", contra) < acepta
     assert acepta < cle.index("_frenada_por_el_escritor(", acepta)
+    # El tablero de V10: la guarda, en `evaluate_counteroffer`, despues de
+    # `base` y antes de todo lo demas (REVIEW_BLOCK y NEVER_SELL).
+    v107_texto = (RAIZ / "src" / "analysis" / "dynamic_counteroffer_repricing_v107.py").read_text(
+        encoding="utf-8")
+    nodo = next(n for n in ast.parse(v107_texto).body if isinstance(n, ast.FunctionDef)
+                and n.name == "evaluate_counteroffer")
+    cuerpo = ast.get_source_segment(v107_texto, nodo)
+    base = cuerpo.index("base = {")
+    importa = cuerpo.index("from src.analysis.la_orden_en_el_escritor import")
+    revisa = cuerpo.index("if market_value <= 0:")
+    nunca = cuerpo.index('"NEVER_SELL"')
+    assert base < importa < cuerpo.index("retirar_la_contraoferta(", importa) < revisa < nunca
+    assert cuerpo[:importa].rstrip().endswith("try:")
+    assert v107_texto.count("from src.analysis.la_orden_en_el_escritor import") == 1
+    # Quien importa la pieza: el escritor (dos) y el tablero (uno).
+    importan = sorted(
+        ruta.relative_to(RAIZ).as_posix() for ruta in (RAIZ / "src").rglob("*.py")
+        if not ruta.name.startswith("test_") and ruta.name != "la_orden_en_el_escritor.py"
+        and "la_orden_en_el_escritor import" in ruta.read_text(encoding="utf-8"))
+    assert importan == ["src/analysis/dynamic_counteroffer_repricing_v107.py",
+                        "src/biwenger/write_client.py"], importan
+    # V10: retira (CANCEL_COUNTER, NUESTRA contraoferta) antes de subir y de
+    # la salida.
+    v10 = (RAIZ / "src" / "v10_full_autonomous_live.py").read_text(encoding="utf-8")
+    retira = v10.index("if cancel_candidate:")
+    assert retira < v10.index("writer.cancel_bid(", retira) < v10.index(
+        "elif counter_candidate:", retira) < v10.index("elif exit_candidate:", retira)
+    assert 'cancel_candidate["counter_offer_id"]' in v10[retira:v10.index(
+        "elif counter_candidate:", retira)]
+    # Los viajes: miran `blocked` antes de apuntar.
+    sx = (RAIZ / "src" / "actions" / "salida_executor.py").read_text(encoding="utf-8")
+    assert sx.count('resultado.get("blocked")') == 1
+    assert sx.index('resultado.get("blocked")') < sx.index("apuntar(anotacion, ruta_del_libro)")
 
 
 # 14. NUNCA LANZA; SI NO SE IMPORTA, LO DE SIEMPRE
@@ -1352,6 +1787,7 @@ def test_nunca_lanza():
         with _Interruptores({ENV: "1", ENV_ORDEN: "1"}), _Sustituye(
                 [(orden_mod, n, _revienta) for n in ("conservados", "protegidos")]):
             assert pieza.guardar(_SinCliente(), "ACCEPT_OFFER", 91001) is None
+            assert pieza.retirar_la_contraoferta({"player_id": BOYE}) is None
             red = []
             r = _fabrica(red)().accept_offer(offer_id=91001, execute=True)
             assert r == _la_de_main("acepta", "boye_del_computer"), r
@@ -1378,6 +1814,30 @@ def test_si_no_se_importa_lo_de_siempre():
     assert sys.modules.get(nombre) is antes
     for hecho, operacion in zip(hechos, ("acepta", "contra")):
         assert hecho["r"] == _la_de_main(operacion, "boye_del_computer"), hecho["r"]
+    # Y el tablero de V10: si la pieza no se importa, o su funcion revienta,
+    # el de main (la sube, sin GET).
+    from src.analysis import la_orden_en_el_escritor as pieza
+
+    def _revienta(*a, **k):
+        raise RuntimeError("revienta")
+
+    nombres = ("roberto",)
+    with tempfile.TemporaryDirectory() as carpeta:
+        de_main = _con(carpeta, mercado=_mercado_de(nombres), hacer=_v10(nombres, "COUNTER_OFFER"))
+        antes = sys.modules.get(nombre)
+        sys.modules[nombre] = None
+        try:
+            sin_pieza = _con(carpeta, valor="1", mercado=_mercado_de(nombres),
+                             hacer=_v10(nombres, "COUNTER_OFFER"))
+        finally:
+            sys.modules[nombre] = antes
+        with _Sustituye([(pieza, "retirar_la_contraoferta", _revienta)]):
+            revienta = _con(carpeta, valor="1", mercado=_mercado_de(nombres),
+                            hacer=_v10(nombres, "COUNTER_OFFER"))
+    assert de_main["r"]["accion"] == "RAISE_COUNTER", de_main["r"]
+    assert sin_pieza["r"] == de_main["r"] and sin_pieza["red"] == de_main["red"]
+    assert revienta["r"]["tablero"] == de_main["r"]["tablero"], revienta["r"]
+    assert sys.modules.get(nombre) is antes
 
 
 # 15. EL ENTORNO NO DECIDE (doctrina 104)
@@ -1432,6 +1892,9 @@ TESTS = [
     test_el_motor_viejo_y_su_cluster,
     test_competitive_v2,
     test_v10_y_la_orden,
+    test_nuestra_contraoferta_viva_se_retira,
+    test_retirar_la_contraoferta,
+    test_los_viajes_dicen_la_frenada,
     test_las_fuentes,
     test_nunca_lanza,
     test_si_no_se_importa_lo_de_siempre,

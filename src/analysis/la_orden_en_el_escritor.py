@@ -16,7 +16,10 @@ EL HUECO (mapa del 05/11 por la manana)
       OTROS MANAGERS con COUNTER u ACCEPT sin mirar la orden (lo cierra en
       la eleccion la pieza de los managers, que nace apagada).
     - V10 RAISE_COUNTER (`v10_full_autonomous_live`) sube una contraoferta
-      viva sin mirar la orden (CANCEL_COUNTER solo salta con NEVER_SELL).
+      viva sin mirar la orden, y nadie la RETIRA: el tablero
+      (`dynamic_counteroffer_repricing_v107.evaluate_counteroffer`) solo
+      da CANCEL_COUNTER con NEVER_SELL, y los de `conservar` no lo son. Si
+      el rival acepta nuestra contraoferta viva, el jugador se va.
     - El motor viejo parte una oferta por varios jugadores en una fila por
       jugador con el MISMO `offer_id` (`liquidity_manager`), y su ejecutor
       (`autopilot_executor`) solo mira el jugador de la fila: aceptar la
@@ -61,11 +64,30 @@ QUE HACE, ENCENDIDO
     orden (`la_orden_del_gestor.ejecutar`) ya da `enviada` False y `exito`
     False, y no se toca.
 
-    Sin poder ver la oferta (el GET falla, el mercado no se lee, la oferta
+    Sin poder ver la oferta (el GET falla, no contesta en
+    `TIEMPO_DEL_GET` segundos, no da 200, el mercado no se lee, la oferta
     no esta, o no pide a nadie que se sepa leer): la escritura sigue como
     siempre y lleva `guardia_sin_ver` con el motivo. Las guardias de cada
     llamador siguen ahi, y una venta justo antes del cierre no se pierde
     por un fallo de red.
+
+    NUESTRA CONTRAOFERTA VIVA (revision encendida del 05/11). Frenar la
+    subida no basta: la contraoferta vieja, mas barata, seguiria viva y el
+    rival la podria aceptar (apagado, V10 la habria subido antes). Asi que
+    el tablero de V10 (`evaluate_counteroffer`, por
+    `retirar_la_contraoferta`) da CANCEL_COUNTER, lo primero de todo, a
+    toda contraoferta NUESTRA viva que venda a uno de `proteger`, `fichar`
+    o `conservar` (los de la fila, los de la contraoferta y los de la
+    oferta del rival a la que contesta: una contraoferta es siempre para
+    un manager). V10 ya ejecuta CANCEL_COUNTER antes que RAISE_COUNTER
+    (`cancel_bid` sobre `counter_offer_id`, NUESTRA contraoferta), y con
+    eso tampoco queda una subida frenada que le quite la salida
+    (EXIT_LISTING) vuelta tras vuelta. Retirar no vende a nadie. Se lee la
+    orden (sin red) una vez por contraoferta viva; hoy hay 0.
+
+    Los viajes (`salida_executor.cobrar`): una aceptacion frenada se
+    apunta en su libro con `blocked` y `reason`, y el fallo dice «Frenada
+    por la orden», no «Biwenger contesto None».
 
     DE QUIEN VIENE (corrige la especificacion del 05/11). La especificacion
     decia «de un manager: `from` con id». Aqui cuenta como «no es el
@@ -79,10 +101,18 @@ QUE NO HACE
 
     No toca publicar (`list_player_for_sale`, que ya tiene su guarda), ni
     rechazar (`reject_offer`), ni retirar (`cancel_bid`: el CANCEL_COUNTER
-    de V10 es lo seguro), ni pujar, ni el once, ni la racha. No decide ni
-    elige otra oferta: Competitive V2 volveria a elegir la misma la vuelta
-    siguiente (la pieza de los managers la aparta en la eleccion). No
-    rechaza ni contesta la oferta frenada: se queda ahi. No mira
+    de V10 es lo seguro, y aqui solo se le dan mas filas), ni pujar, ni el
+    once, ni la racha. No decide ni elige otra oferta: Competitive V2
+    volveria a elegir la misma la vuelta siguiente (la pieza de los
+    managers la aparta en la eleccion), y el motor viejo vuelve a proponer
+    cada vuelta la misma fila frenada de una oferta por varios (sin
+    escritura gastada, asi que no hay castigo y tampoco pasa a la
+    siguiente oferta; en main ya le pasa con las filas de un conservado).
+    Cada vuelta asi cuesta un login del escritor y un GET. Que pasen a la
+    siguiente, otra pieza. No rechaza ni contesta la oferta frenada: se
+    queda ahi. V10 no ejecuta CANCEL_COUNTER si en esa vuelta ya escribio
+    otro o estan cerradas las escrituras (`temporal_block`): como con
+    NEVER_SELL en main, la retira la vuelta siguiente. No mira
     `no_rotar`, `no_pujar` ni a Yamal por su nombre: solo `proteger`,
     `fichar` y `conservar` de la orden. Con `execute=False` no corre (ni GET
     ni lectura de la orden): la vuelta en seco es main.
@@ -100,9 +130,17 @@ QUE NO HACE
     Yamal: lo guarda su id en `proteger`. Con la llave `yamal_por_lesion` el
     gestor lo quita de `proteger`, y entonces aqui ya no se frena.
 
-    Una GET sin respuesta: `client.get_market()` no lleva `timeout` (como en
-    los demas que lo llaman antes de escribir: la venta, la puja, retirar).
-    Si Biwenger se cuelga, se cuelga igual que ellos.
+    El GET: con la sesion del escritor y `timeout` `TIEMPO_DEL_GET` (15 s;
+    `client.get_market()` no lleva). Un 429 lo reintenta la sesion como
+    cualquier peticion (`peticiones.envolver`, unos 15 s); si no cede, se
+    escribe como siempre (`guardia_sin_ver`) y la escritura se lleva su
+    propio 429.
+
+    Los llamadores fuera de la vuelta: `live_solvency_recovery` (a mano)
+    imprime «HTTP: None» sin el motivo de una frenada (esta en `reason`
+    de lo que devuelve el escritor); `write_transport_validation_v109` es
+    una validacion. La orden (`ejecutar`) apunta `enviada` False y `exito`
+    False sin motivo, como con la guarda de publicar.
 
 EL INTERRUPTOR
 
@@ -115,27 +153,46 @@ EL INTERRUPTOR
 
 AL ENCENDERLO
 
-    1. Antes, o a la vez, la pieza de los managers
-       (`la_orden_en_los_managers`; su interruptor esta en su modulo).
-       Sola, esta deja que Competitive V2 elija cada vuelta la misma oferta
-       de la orden y se la frene aqui: Competitive pierde su turno. La de
-       los managers pasa la vuelta a la siguiente oferta.
-    2. En UN commit, sobre el ultimo main: la linea del interruptor a "1" en
-       el YAML de produccion y `python scripts/run_validation_gate.py
-       --paso-0` en ESE arbol limpio, lo ultimo. Se anaden por nombre el
-       YAML y `config/paso_0.json` (nunca `add -A`, nunca `data/`).
-       `config/paso_0.json` NUNCA a mano, y no se tocan los literales del
-       interruptor que no existe de las pruebas. Un conflicto en ese
-       fichero se resuelve corriendo `--paso-0` otra vez en el arbol final.
-    3. Ensayar con la foto real. Hoy (05/11, vuelta de las 11:07) se esperan
-       0 frenadas: 9 ofertas recibidas, todas del Computer, ninguna de un
-       manager ni contraofertas nuestras vivas, y las guardias de cada
-       llamador ya paran a Boye y a Yamal. Esto es defensa en profundidad.
+    1. ANTES, en un commit anterior (un interruptor por commit), la pieza
+       de los managers (`la_orden_en_los_managers`; su interruptor esta en
+       su modulo). Sola, esta deja que Competitive V2 elija cada vuelta la
+       misma oferta de la orden y se la frene aqui: Competitive pierde su
+       turno. La de los managers pasa la vuelta a la siguiente oferta. Un
+       solo `--paso-0` con las dos piezas en el arbol ya prueba las dos.
+    2. En UN commit, sobre el ultimo main DE GITHUB (traido a una ref
+       privada; el main del checkout local se queda atras): la linea del
+       interruptor a "1" en el YAML de produccion y `python
+       scripts/run_validation_gate.py --paso-0` en ESE arbol limpio, lo
+       ultimo. Se anaden por nombre el YAML y `config/paso_0.json` (nunca
+       `add -A`, nunca `data/`). `config/paso_0.json` NUNCA a mano, y no
+       se tocan los literales del interruptor que no existe de las
+       pruebas. Un conflicto en ese fichero se resuelve corriendo
+       `--paso-0` otra vez en el arbol final. OJO: el registro del 04/11
+       09:44 tiene 64 probados y le faltan 4 (las tres piezas del 04/11 y
+       esta): sin `--paso-0` en ese commit, la verja del ciclo se pone
+       roja y la vuelta horaria se para.
+    3. Ensayar con la foto real. Hoy (05/11, vuelta de las 11:07) se espera
+       1 frenada, la oferta del Computer por Boye (5.316.300; `proteger`),
+       que la guardia de cada llamador ya para; las otras 9 ofertas, todas
+       del Computer, pasan. 0 contraofertas nuestras vivas: encender no
+       retira ninguna. Si al encender hubiera alguna viva por uno de la
+       orden, la primera vuelta la retira (CANCEL_COUNTER de V10).
     4. Comprobar que la orden vale (si no, esto no frena a nadie): con el
        interruptor de la orden puesto, `python -c "from
        src.actions.la_orden_del_gestor import protegidos, conservados;
        print(sorted(protegidos()), sorted(conservados()))"`. Hoy, proteger
        Yamal 26271 y Boye 12494; conservar, los nueve.
+
+    LAS HUELLAS DE LA PRUEBA (`test_la_orden_en_el_escritor_v1`). Fijan main:
+    `HUELLAS_DE_MAIN` (lo que devuelven, apagado, el escritor, el motor
+    viejo y su cluster, Competitive V2, la orden, el tablero de V10 y su
+    eleccion, y los viajes) y `FUENTES_DE_MAIN` (el texto del resto del
+    escritor y de `la_orden_del_gestor.ejecutar`). Quien cambie a
+    proposito algo de eso vuelve a medir, en el MISMO commit, con `python
+    -m src.analysis.test_la_orden_en_el_escritor_v1 --medir` en 3.11 Y en
+    3.13 sobre su arbol, y pone las dos. Si no, la verja se pone roja y el
+    ciclo horario se para. Con un Python que no sea 3.11 ni 3.13 no hay
+    huella: se mide antes de cambiar de version en el YAML.
 """
 
 from __future__ import annotations
@@ -177,6 +234,16 @@ MOTIVO_CONSERVADO = (
 )
 
 SIN_LEER_EL_MERCADO = "SIN_LEER_EL_MERCADO"
+
+# Segundos que se espera la respuesta del GET de `/market` (la escritura
+# lleva 30).
+TIEMPO_DEL_GET = 15
+
+MOTIVO_RETIRAR = (
+    "LA_ORDEN_EN_EL_ESCRITOR: nuestra contraoferta viva vende a un jugador "
+    "que la orden del gestor guarda (`proteger`, `fichar` o `conservar`); si "
+    "el rival la acepta, es vender. Se retira y no se sube."
+)
 NO_ESTA = "LA_OFERTA_NO_ESTA_EN_EL_MERCADO"
 SIN_JUGADORES = "LA_OFERTA_SIN_JUGADORES"
 
@@ -205,12 +272,15 @@ def _pid(valor):
 
 def _los_pedidos(oferta) -> set:
     """Los jugadores que pide una oferta cruda de Biwenger: los de
-    `requestedPlayers` (un id o `{"id"}`) y `player` (un id o `{"id"}`).
-    Uno a uno: el que no es un id se salta y los demas cuentan. Nunca
-    lanza."""
+    `requestedPlayers` (una lista, o uno suelto como lo lee el tablero de
+    V10, `_requested_player_ids`; cada uno un id o `{"id"}`) y `player` (un
+    id o `{"id"}`). Uno a uno: el que no es un id se salta y los demas
+    cuentan. Nunca lanza."""
     ids = set()
     try:
         pedidos = oferta.get("requestedPlayers")
+        if isinstance(pedidos, (int, str, dict)) and not isinstance(pedidos, bool):
+            pedidos = [pedidos]
         for x in (list(pedidos) if isinstance(pedidos, list) else []) + [oferta.get("player")]:
             p = _pid(x.get("id") if isinstance(x, dict) else x)
             if p is not None:
@@ -256,6 +326,30 @@ def _de_la_orden():
         return {p for p in (_pid(x) for x in (xs or ())) if p is not None}
 
     return _ids(protegidos()), _ids(conservados())
+
+
+def _la_orden_activa():
+    """(`protegidos`, `conservados`) con el interruptor encendido (el UNICO
+    sitio que lo mira); None apagado, sin leer la orden."""
+    if not activo():
+        return None
+    return _de_la_orden()
+
+
+def _el_mercado(escritor):
+    """(mercado, None) o (None, motivo): `/market` fresco, con la sesion del
+    escritor (la de `client.get_market`, que reintenta el 429) y un plazo,
+    `TIEMPO_DEL_GET`. Nunca lanza."""
+    try:
+        cliente = escritor.client
+        respuesta = cliente.session.get(f"{cliente.BASE_URL}/market",
+                                        timeout=TIEMPO_DEL_GET)
+        status = getattr(respuesta, "status_code", None)
+        if status != 200:
+            return None, f"{SIN_LEER_EL_MERCADO}: HTTP {status}"
+        return respuesta.json()["data"], None
+    except Exception as error:                      # noqa: BLE001
+        return None, f"{SIN_LEER_EL_MERCADO}: {type(error).__name__}"
 
 
 def lo_que_frena(operacion, oferta, protegidos=None, conservados=None) -> dict | None:
@@ -309,15 +403,15 @@ def guardar(escritor, operacion, offer_id) -> dict | None:
     Nunca lanza: si algo falla, None (lo de siempre).
     """
     try:
-        if not activo():
+        orden = _la_orden_activa()
+        if orden is None:
             return None
-        protegidos, conservados = _de_la_orden()
+        protegidos, conservados = orden
         if not protegidos and not conservados:
             return None
-        try:
-            mercado = escritor.client.get_market()
-        except Exception as error:                  # noqa: BLE001
-            return {"sin_ver": f"{SIN_LEER_EL_MERCADO}: {type(error).__name__}"}
+        mercado, sin_ver = _el_mercado(escritor)
+        if sin_ver:
+            return {"sin_ver": sin_ver}
         oferta = la_oferta(mercado, offer_id)
         if oferta is None:
             return {"sin_ver": NO_ESTA}
@@ -336,6 +430,50 @@ def guardar(escritor, operacion, offer_id) -> dict | None:
             **frena,
             "pedidos": sorted(oferta["pedidos"]),
             "de_un_manager": bool(oferta["de_un_manager"]),
+        }
+    except Exception:                               # noqa: BLE001
+        return None
+
+
+def retirar_la_contraoferta(contraoferta, recibida=None) -> dict | None:
+    """
+    Para `dynamic_counteroffer_repricing_v107.evaluate_counteroffer`, antes
+    de todo: ¿se retira esta contraoferta NUESTRA viva?
+
+    `contraoferta` es la fila del tablero (`player_id` y `raw_offer`, la
+    contraoferta cruda) y `recibida` la oferta del rival a la que contesta
+    (o None). Si alguno de todos esos jugadores esta en `proteger`/`fichar`
+    (PROTEGIDO) o en `conservar` (CONSERVADO; una contraoferta siempre es
+    para un manager): `{"guardia", "blocked", "de_la_orden", "pedidos",
+    "reason"}` y el tablero da CANCEL_COUNTER. None apagado (sin leer la
+    orden), con la orden vacia o si no vende a nadie de la orden. Sin red.
+    Nunca lanza: si algo falla, None (lo de siempre).
+    """
+    try:
+        orden = _la_orden_activa()
+        if orden is None:
+            return None
+        protegidos, conservados = orden
+        if not protegidos and not conservados:
+            return None
+        pedidos = set()
+        if isinstance(contraoferta, dict):
+            pid = _pid(contraoferta.get("player_id"))
+            if pid is not None:
+                pedidos.add(pid)
+            if isinstance(contraoferta.get("raw_offer"), dict):
+                pedidos |= _los_pedidos(contraoferta["raw_offer"])
+        if isinstance(recibida, dict):
+            pedidos |= _los_pedidos(recibida)
+        frena = lo_que_frena(CONTRAOFERTAR, {"pedidos": pedidos, "de_un_manager": True},
+                             protegidos, conservados)
+        if not frena:
+            return None
+        return {
+            "guardia": GUARDIA,
+            **frena,
+            "pedidos": sorted(pedidos),
+            "reason": MOTIVO_RETIRAR,
         }
     except Exception:                               # noqa: BLE001
         return None
