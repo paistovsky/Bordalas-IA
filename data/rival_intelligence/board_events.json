@@ -238095,5 +238095,31 @@
     "title": "¡Gana unas zapatillas Munich!",
     "author": null,
     "content": "<p><a href=\"https://x.com/biwenger/status/2118307026887381357?a=VAUEtJ7LekvUQPwrIHc&amp;s=19\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/sorteo-atm-fcb-26-27/tablon.jpg\" alt=\"\" /></a></p>\r\n<p>[followButtons instagram=\"https://www.instagram.com/p/DfW82ZHOOk-/?obrf=MXZ4YnRtcWxpdmplMw==\" facebook=\"https://www.facebook.com/share/p/1PpDaqeBJc/\" twitter=\"https://x.com/biwenger/status/2118307026887381357?a=VAUEtJ7LekvUQPwrIHc&amp;s=19\" tiktok=\"\" telegram=\"\"]</p>"
+  },
+  {
+    "event_id": "eb1117b760bdf0c2be6d7da9",
+    "date": 1793908978,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 42557,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 9227700
+      },
+      {
+        "player": 41264,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 667200
+      }
+    ]
   }
 ]
