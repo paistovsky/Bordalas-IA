@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/11/2026, 19:15 de Madrid (parte de la plantilla; la J12 se juega pese a la peticion de la AFE).
+Actualizado: 05/11/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/11 21:15 (rafaga de la noche).** Ciclos: verdes y sin huecos
+  (#2735 a #2743). Saldo +2.275.724, 0 comprometido. La J12 se juega pese
+  a la AFE (chat del dueno). Manana: turno del cierre a las 12:50 (tras el
+  del chat del dueno de las 12:45) y mirada de las 20:15 para la vuelta de
+  las 20:07.
 
 - **05/11 19:15 (parte de la plantilla).** Sin acciones: todos «ok»; unico
   en riesgo Ramon (50; Pablo Martinez completo el entreno del jue, pero FF
