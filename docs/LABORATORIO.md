@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E84 · 05/11/2026 17:16 de Madrid · Los rivales en rojo la vispera casi siempre llegan: no contar con su cero
+### E84 · 05/11/2026 17:15 de Madrid · Los rivales en rojo la vispera casi siempre llegan: no contar con su cero
 
 **El caso:** vispera de la J12 con tres rivales en rojo (Pollo -5,31 M,
 Luismi -10,16 M, Manzagool -8,29 M; 23,8 M que vender antes del vie
