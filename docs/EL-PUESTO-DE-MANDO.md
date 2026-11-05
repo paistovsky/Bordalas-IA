@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/11/2026, 08:45 de Madrid (supervision de las 08:22).
+Actualizado: 05/11/2026, 13:15 de Madrid (laboratorio de rivales de la manana: LA ORDEN EN EL ESCRITOR fusionada, apagada).
 
 ## El mandato
 
@@ -351,6 +351,60 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/11 13:15 (laboratorio de rivales de la manana; wf_3637a15a-b95).
+  FUSIONADA, APAGADA: LA ORDEN EN EL ESCRITOR. No se enciende nada (jueves).**
+  **Rivales (04/11 20:11 a 05/11 10:11):** sin traspasos entre managers.
+  Pollo gana a Loureiro (847.000, +2,0 % sobre el precio nuevo; Luismi
+  pujo 796.000 y nosotros 798.000: un solo rival, no dos). Luismi vende a
+  Kounde al Computer de noche (2.942.200, +2,2 %, antes de otra bajada) y
+  pasa de 6 a 10 publicados. Cajas: Pollo -5,31 M, Luismi -10,16 M,
+  Manzagool -8,29 M (y 0 publicados): entre los tres, 23,8 M que vender
+  antes del vie 21:00. Lo probable: Pollo, Gabriel Jesus o Rodri
+  (lesionado); Luismi, Kang-in Lee y Soler; Manzagool, Adeyemi o Pape
+  Gueye. Solo lo que se venda antes del vie 07:00 puede salir en el
+  mercado del vie, y la historia da ~3 % por jugador: no se guarda caja
+  esperandolos. Patrimonio: Pollo 118,82 M, Luismi 101,67, Manzagool
+  70,68, nosotros 62,63. Puntos: Pollo 501, nosotros 495, Luismi 454.
+  **Lo que les funciona y nos falta:** venden al Computer mejor que
+  nosotros (mediana 1,019-1,045 sobre su valor frente a nuestro 1,007; el
+  que baja, de noche, antes de la siguiente bajada) y pujan sobre el
+  precio de despues del reset y la re-pujan cada dia.
+  **Nuestras tacticas:** la ronda desde el 12/10: 1 ganada de 6 pujas al
+  Computer (Ortiz, -28.500); las de +1 %: 0 de 4 con rival. La cartera no
+  tiene nada. La puerta: 2 ofertas en su vida, 0 aceptadas (apagada).
+  **SOLO_LO_QUE_PAGA, re-medido:** sobre nuestras pujas no habria costado
+  nada (las 4 que quita se perdieron o se retiraron) y quita el riesgo del
+  28/10 (caja libre -1,27 M con Fortuno y Nacho vivas). **Se enciende el
+  PRIMERO de la cola tras la J12** (lun 09/11 por la manana): en el paron
+  casi todas las horas estan a 64 h o mas de la J13, justo donde la
+  cartera pujaria +4 % por los de 1-3 M (los dos que se ganaron asi
+  perdieron valor). Re-medir hacia el 16/11.
+  **Lo fusionado (apagado, main byte a byte):** BORDALAS_LA_ORDEN_EN_EL_ESCRITOR.
+  El mapa de vendedores: TODA venta pasa por `accept_offer` y
+  `counter_offer` del escritor, que no miraban la orden ni que jugadores
+  pide la oferta (solo el `offer_id`). Encendido: lee la oferta fresca de
+  `/market` (1 GET por aceptar/contraofertar) y no acepta ni contraoferta
+  nada que pida a uno de `proteger`/`fichar`; a los de `conservar`, ni
+  contraoferta ni oferta de un manager (la del Computer si: asi venden la
+  mejora, vender_si_ficha, el cierre y la rotacion). Cierra el lote de
+  varios jugadores en el motor viejo y Competitive, y V10 retira nuestra
+  contraoferta viva por uno de la orden. Apagado: 42.280 llamadas por
+  Python, 0 distintas en 3.11 y 3.13; test 22/22 (2/22 en main); verjas
+  238/238. Hoy, encendido, frenaria solo la oferta del Computer por Boye.
+  **Comprobado:** los tests de las piezas nuevas no dependen de la fecha
+  (con el reloj movido al 02/12 siguen en verde; su orden de mentira
+  caduca el 30/11 pero fijan la hora).
+  **Cola de encendidos tras la J12 (uno por rafaga):** SOLO_LO_QUE_PAGA,
+  colchon, hucha, prima que gana, LA_ORDEN_MANDA, EL_PROTEGIDO,
+  LA_ORDEN_EN_LOS_MANAGERS, y despues LA_ORDEN_EN_EL_ESCRITOR (nunca antes
+  que la de los managers; antes de encenderla, revision adversarial
+  ENCENDIDA de la retirada de contraofertas de V10, que el arreglador
+  anadio y nadie ha revisado encendida). Paso 0: el registro tiene 64 y
+  le faltan 4 (las cuatro apagadas nuevas); `--paso-0` al final, en el
+  main mas nuevo de GitHub. El test nuevo fija huellas de todo
+  write_client.py, el motor viejo y Competitive: quien los toque re-mide
+  con `--medir` en 3.11 y 3.13 en el mismo commit.
 
 - **05/11 08:45 (supervision de las 08:22; vuelta #2730 de las 08:07).**
   Desde ayer Pepe no ha comprado ni vendido. Loureiro: lo gana Pollo por
