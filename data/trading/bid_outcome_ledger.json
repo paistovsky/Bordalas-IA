@@ -2101,11 +2101,11 @@
    "trend_days": null,
    "seller_user_id": null,
    "placed_at": "2026-11-04T06:20:37+00:00",
-   "outcome": "PENDING",
-   "resolved_at": null,
-   "winning_amount": null,
-   "margin": null,
-   "event_id": null,
+   "outcome": "LOST",
+   "resolved_at": "2026-11-05T06:19:29.158472+00:00",
+   "winning_amount": 847000,
+   "margin": 49000,
+   "event_id": "b3547126af7117abbdb9d4e0",
    "recorded_by": "TABLON"
   }
  }
