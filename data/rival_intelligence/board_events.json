@@ -236384,6 +236384,114 @@
     }
   },
   {
+    "event_id": "64af8a1f844d9bfe937d8533",
+    "date": 1793721791,
+    "type": "roundFinished",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "round": {
+        "id": 4909,
+        "name": "Jornada 11"
+      },
+      "scoreID": 5,
+      "results": [
+        {
+          "user": {
+            "id": 14175949,
+            "name": "Pepe Bordalás",
+            "icon": "i/u/14175949.png"
+          },
+          "points": 73,
+          "bonus": 2190000
+        },
+        {
+          "user": {
+            "id": 14145555,
+            "name": "Pollo17",
+            "icon": "icons/13.png"
+          },
+          "points": 69,
+          "bonus": 2070000
+        },
+        {
+          "user": {
+            "id": 14156489,
+            "name": "Luismi_Haz",
+            "icon": "icons/11.png"
+          },
+          "points": 66,
+          "bonus": 1980000
+        },
+        {
+          "user": {
+            "id": 14178736,
+            "name": "Mex"
+          },
+          "points": 57,
+          "bonus": 1710000
+        },
+        {
+          "user": {
+            "id": 14176382,
+            "name": "Manzagool"
+          },
+          "points": 55,
+          "bonus": 1650000
+        },
+        {
+          "user": {
+            "id": 14151726,
+            "name": "DiosMande a Rodri al Palancas",
+            "icon": "i/u/14151726.png"
+          },
+          "points": 35,
+          "bonus": 1150000,
+          "reason": {
+            "bonusPoint": 1050000,
+            "bonusRoundPosition": 100000
+          }
+        },
+        {
+          "user": {
+            "id": 14154203,
+            "name": "Prinzipote"
+          },
+          "points": 34,
+          "bonus": 1270000,
+          "reason": {
+            "bonusPoint": 1020000,
+            "bonusRoundPosition": 250000
+          }
+        },
+        {
+          "user": {
+            "id": 14456960,
+            "name": "Alvaro Retamosa Sanguino",
+            "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+          },
+          "points": 33,
+          "bonus": 1490000,
+          "reason": {
+            "bonusPoint": 990000,
+            "bonusRoundPosition": 500000
+          }
+        }
+      ],
+      "article": {
+        "id": 730148,
+        "source": "blog",
+        "title": "Lamine Yamal solo sabe hacer dobletes",
+        "url": "https://biwenger.as.com/blog/lamine-yamal-solo-sabe-hacer-dobletes/",
+        "date": 1793715848,
+        "photo": "https://cdn.biwenger.com/wp/2023/09/yamal.jpg",
+        "video": "",
+        "comments": 1
+      }
+    }
+  },
+  {
     "event_id": "4b0b445463d4700f8474087c",
     "date": 1793767634,
     "type": "bonus",
