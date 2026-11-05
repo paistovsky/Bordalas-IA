@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/11/2026, 13:15 de Madrid (laboratorio de rivales de la manana: LA ORDEN EN EL ESCRITOR fusionada, apagada).
+Actualizado: 05/11/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/11 14:15 (rafaga de la tarde).** Ciclos: verdes y sin huecos
+  (#2729 a #2736). Saldo +2.275.724, 0 comprometido. Sin movimientos.
+  J12 manana 21:00, plazo 15:00: en verde.
 
 - **05/11 13:15 (laboratorio de rivales de la manana; wf_3637a15a-b95).
   FUSIONADA, APAGADA: LA ORDEN EN EL ESCRITOR. No se enciende nada (jueves).**
