@@ -69,6 +69,36 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E83 · 05/11/2026 11:17 de Madrid · Una puja por debajo del precio nuevo SI puede ganar
+
+**El caso:** Loureiro se perdio hoy; la nota de la supervision dice que la
+puja de Pepe (798.000) «quedo por debajo de su precio nuevo» (el de tras
+el reset). ¿Hay una regla de Biwenger por la que una puja bajo el precio
+nuevo no gana?
+**Datos:** las 208 subastas del Computer del tablon con precio de la
+vispera y del dia (127 en las que el precio subio en ese reset), y las 61
+pujas de Pepe.
+**Codigo:** `lab/subasta/bajo_el_precio_nuevo.py`.
+
+    ganadoras por debajo del precio nuevo: 27 de 208 (todas en las que subia),
+    la mas baja a -5,9 %
+    pujas de Pepe por debajo del precio nuevo: 16; ganadas 6
+    (p.ej. el 30/10 gano a -5,4 % del precio nuevo; el 17/10 a -0,1 %)
+
+**Lo que se aprende:** **no hay tal regla:** la subasta se decide por las
+pujas, no contra el precio de despues del reset. Pepe ha ganado 6 pujas
+que quedaron por debajo del precio nuevo. Loureiro se perdio porque Pollo
+pujo mas (847.000 con otros 2 rivales), no por el precio. Lo que si pasa
+es lo de E41: en los que suben hay pelea, y la puja a precio + 1 % suele
+quedarse corta.
+
+**Limites:** el precio del dia es el de la foto tras el reset; no se ve la
+puja minima que Biwenger acepta al pujar (siempre >= precio del momento).
+
+**Veredicto: NO HAY REGLA NUEVA.** Aclara una explicacion equivocada:
+perder por «quedar bajo el precio nuevo» no ocurre; se pierde contra un
+rival que puja mas.
+
 ### E82 · 04/11/2026 17:16 de Madrid · Faltan vueltas: hoy dos, tras cinco semanas casi perfectas
 
 **El caso:** el gestor vio hoy que falto la vuelta de las 12:07 («primera
