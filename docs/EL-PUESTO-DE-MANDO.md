@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/11/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 05/11/2026, 19:15 de Madrid (parte de la plantilla; la J12 se juega pese a la peticion de la AFE).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **05/11 19:15 (parte de la plantilla).** Sin acciones: todos «ok»; unico
+  en riesgo Ramon (50; Pablo Martinez completo el entreno del jue, pero FF
+  y JP aun no lo sacan), cubierto por Cardona en un 4-3-3. **Ojo: la AFE
+  pidio suspender la J12** (muerte de Jesus de Miguel, del Tenerife);
+  LaLiga confirmo a las 17:50 que se juega. Mirarlo el vie temprano: si se
+  suspendiera, cambian el plazo de caja y el cierre del once. Detalle en
+  docs/EL-PARTE-DE-LA-PLANTILLA.md.
 
 - **05/11 14:15 (rafaga de la tarde).** Ciclos: verdes y sin huecos
   (#2729 a #2736). Saldo +2.275.724, 0 comprometido. Sin movimientos.

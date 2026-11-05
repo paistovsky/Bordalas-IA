@@ -44,6 +44,59 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 05/11/2026, 19:15 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
+
+Plantilla de 12, todos «ok» en Biwenger (vuelta de las 18:07). Saldo
++2.275.724, 0 pujas vivas (Loureiro perdido hoy 07:00: Pollo, 847.000):
+caja de la J12 +2.275.724, en verde; el cierre EN_POSITIVO, no vende a
+nadie. Once guardado (3-4-3), igual que ayer: Gulacsi; Iglesias, Kike
+Salas, Chust; Olasagasti, Ivan, Dani Lorenzo, Ramon; Yamal, Roberto,
+Boye. Banquillo: Cardona. **La J12 se juega:** la AFE pidio suspenderla
+(FF 14:11, por la muerte de Jesus de Miguel, del Tenerife) y LaLiga
+confirmo a las 17:50 que se juega, con homenaje; solo se aplazan cuatro
+partidos de otras categorias, ninguno nuestro. Volver a mirarlo el vie.
+
+| Jugador | Veredicto | J12 % | J12 (Madrid) | Fuente | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 90 | Villarreal-Getafe, dom 08/11 18:30 | FF 90, Importante; titular J5-J11; JP en el once (04/11); los cambios que FF preve no tocan la porteria | =; Inigo en la cuerda floja |
+| Juan Iglesias (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | Convocado (FF 05/11 18:40); con el grupo el jue (FF 11:33); FF 90 Clave; JP Titular (18:13) | =; 3 amarillas (sancion con 5) |
+| Kike Salas (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | Con el grupo mie y jue (FF 11:33); convocado (18:40); Luis Garcia: «creciendo a niveles exponenciales» (13:03); JP Titular | 88 -> 90 |
+| Chust (DEF) | TITULAR | 90 | Elche-Betis, dom 08/11 14:00 | FF 90 Clave; previa de FF (05/11 04:24) en la linea de cuatro; «fisicamente me encuentro bien» | =; 2 amarillas |
+| Olasagasti (MED) | TITULAR | 80 | Celta-Levante, dom 08/11 18:30 | FF 80 Clave; presente el mie; del jue no consta; la Copa del jue, aplazada | = |
+| Ivan Martin (MED) | TITULAR | 82 | Malaga-Racing, sab 07/11 14:00 | FF 80 Clave; presente el jue (FF 11:38); previa de FF: doble pivote con Prati; JP en el once | =; 2 amarillas |
+| Dani Lorenzo (MED) | TITULAR | 75 | Malaga-Racing, sab 07/11 14:00 | FF 70 Importante; con el grupo mar, mie y jue; 90' en J10 y J11; JP Titular | = |
+| *Ramon Enriquez (MED)* | DUDA | 50 | Malaga-Racing, sab 07/11 14:00 | **Pablo Martinez COMPLETO el entreno del jue** (FF 14:27, aun con molestias); pero FF sigue en 60 (Revulsivo) y Pablo 30 («tocado»); JP: Ramon Titular, Pablo Suplente | 55 -> 50 |
+| Yamal (DEL) | TITULAR | 95 | Atletico-Barcelona, dom 08/11 21:00 | FF 95; previa de FF: «mantener a Lamine Yamal por la derecha»; Flick sin rotaciones | =; 2 amarillas |
+| Roberto Fernandez (DEL) | TITULAR | 88 | Espanyol-Deportivo, sab 07/11 16:15 | FF 90 Clave, «Apuesta segura»; sin rival en la punta (Kike Garcia y Jofre de baja); JP Titular; primer partido de Sarabia | = |
+| Boye (DEL) | TITULAR | 88 | Sevilla-Alaves, vie 06/11 21:00 | FF 90 Clave; presente el jue (FF 15:33); Quique: solo faltan Mikel Rodriguez y Garces; JP Titular; convocatoria del Alaves aun no consta | = |
+| *Sergi Cardona (DEF, banquillo)* | DUDA | 55 | Villarreal-Getafe, dom 08/11 18:30 | FF 50 Rotacion; FF 04/11: «apunta al lateral izquierdo en detrimento de Carlos Romero»; JP 60 en el once; sin entreno desde el PSG | = |
+
+Nadie lesionado, sancionado ni apercibido. Nadie ha perdido el puesto.
+**Unico en riesgo: Ramon (50)**, cubierto por Cardona en un 4-3-3. La
+regla de ayer («35-40 si Pablo completa el jue») no se cumple: Pablo
+completo la sesion, pero ninguna fuente ha sacado a Ramon del once.
+**Hecho: nada** (el esceptico, comprobado en FF y JP hacia las 19:00): ni
+correccion de escalon, ni `no_pujar` (no hay pujas vivas), ni `fichar` (no
+hace falta recambio y en el mercado no hay medio ni portero al 60 % o mas
+que pague la caja entera), ni cambio del once a mano (el monitor lo
+deshace). **Pepe solo:** el monitor pasa al 4-3-3 con Cardona si Ramon
+sale en «doubt»/lesionado en Biwenger, JP lo da «No convocado» (>=85) o
+FF lo baja a ~16 % o menos con Cardona al 50 % (con Cardona a 60, a ~29 %);
+si FF solo lo baja a 30-40 o lo pasa a Rotacion, el bot lo mantiene. La
+mejora ya no puja para la J12 (ventana cerrada el jue 05:00); los chollos
+solo en la vuelta del vie 04:50 con caja propia; el cierre, el parte vende
+y la rotacion no venden a nadie del once.
+
+**Pendientes del vie 06/11 (antes de la vuelta de las 20:07):** el entreno
+del Malaga y la rueda de prensa de Funes (Pablo Martinez); el del
+Villarreal (Cardona, Gulacsi); la convocatoria del Alaves (Boye) y las
+ultimas del Sevilla-Alaves; que la AFE no reabra la suspension; y que la
+vuelta de las 20:07 llegue (si no, dispararla a mano entre las 20:08 y las
+~20:30). **Riesgos que no cubre nadie:** un solo portero, un solo relevo
+(una segunda baja deja 10), el once congelado desde el vie 20:45 para los
+partidos del sab y dom, y las ofertas de managers por los de `conservar`
+(las dos piezas que lo cierran estan apagadas; hoy hay 0 ofertas).
+
 ## 04/11/2026, 19:15 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
 
 Plantilla de 12, todos «ok» en Biwenger (vuelta de las 18:07). Saldo
