@@ -69,6 +69,35 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E84 · 05/11/2026 17:16 de Madrid · Los rivales en rojo la vispera casi siempre llegan: no contar con su cero
+
+**El caso:** vispera de la J12 con tres rivales en rojo (Pollo -5,31 M,
+Luismi -10,16 M, Manzagool -8,29 M; 23,8 M que vender antes del vie
+21:00). Pollo va 6 puntos por delante (501 a 495). ¿Cuantas veces un
+rival se ha quedado sin jornada por empezarla en rojo?
+**Datos:** los 12 «roundFinished» del tablon (quien no tiene premio la
+empezo en rojo, E29/E52), mas lo que el laboratorio y el gestor vieron en
+las visperas (E29, E31, E55).
+**Codigo:** `lab/carrera/quien_se_queda_a_cero.py`.
+
+**Lo que se aprende:**
+- **En 12 rondas pagadas, solo una vez:** Luismi, la J6 aplazada (64
+  puntos, 0 euros; sale dos veces porque la parte 3 repite los totales,
+  E56). Ademas, Luismi empezo la J8 en rojo por 57.812 (E31), y la J8 aun
+  no se ha pagado (espera al Rayo-Athletic, E43).
+- **Las visperas en rojo han sido muchas** (Pollo -8,8 M y DiosMande
+  -9,8 M el 07/10, E29; Pollo -2,86 M el 21/10, E55; Luismi casi cada
+  semana) **y casi siempre salen a tiempo**, vendiendo de noche (E68:
+  Luismi vende a las 05:xx, antes del reset).
+- Solo Luismi ha fallado, y siempre por poco o en una ronda rara.
+
+**Limites:** las visperas en rojo no estan todas registradas (solo las que
+vio alguien); n pequeño.
+
+**Veredicto: AVISO para la carrera:** no contar con que Pollo o Manzagool
+pierdan la J12; Luismi es el unico con historial de fallar. Para Pepe nada
+cambia (en verde, +2,28 M).
+
 ### E83 · 05/11/2026 11:15 de Madrid · Una puja por debajo del precio nuevo SI puede ganar
 
 **El caso:** Loureiro se perdio hoy; la nota de la supervision dice que la
