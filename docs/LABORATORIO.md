@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E83 · 05/11/2026 11:17 de Madrid · Una puja por debajo del precio nuevo SI puede ganar
+### E83 · 05/11/2026 11:15 de Madrid · Una puja por debajo del precio nuevo SI puede ganar
 
 **El caso:** Loureiro se perdio hoy; la nota de la supervision dice que la
 puja de Pepe (798.000) «quedo por debajo de su precio nuevo» (el de tras
