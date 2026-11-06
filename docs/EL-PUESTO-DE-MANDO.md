@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 12:55 de Madrid (segunda mirada del cierre de la J12).
+Actualizado: 06/11/2026, 14:25 de Madrid (rafaga de las 14:15).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 14:15 (rafaga de la tarde).** Ciclos: verdes (#2756 a #2759).
+  Saldo +2.275.724 a las 14:13, 0 comprometido: el plazo de las 15:00 de
+  la J12 se pasa en verde. Mirada de las 20:15 programada.
 
 - **06/11 12:50 (segunda mirada del gestor al cierre de la J12).** El turno
   de las 12:45 del chat del dueno aun no estaba escrito; hago la mirada
