@@ -44,6 +44,39 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 06/11/2026, 19:00 de Madrid (J12: HOY 21:00; cierre 20:45)
+
+Plantilla de 12, todos «ok» en Biwenger (vuelta de las 18:07). Saldo
++2.275.724, 0 pujas vivas: la J12 empieza en verde. Once guardado (3-4-3),
+igual que ayer: Gulacsi; Iglesias, Kike Salas, Chust; Olasagasti, Ivan,
+Dani Lorenzo, Ramon; Yamal, Roberto, Boye. Banquillo: Cardona. La J12 se
+juega (nada nuevo de la AFE en FF).
+
+| Jugador | Veredicto | J12 % | J12 (Madrid) | Fuente | Cambio |
+|---|---|---|---|---|---|
+| Gulacsi (POR) | TITULAR | 90 | Villarreal-Getafe, dom 08/11 18:30 | FF 90; con el grupo el vie (FF 13:49); previa de FF: «sin indicios de un relevo»; JP titular | = |
+| Juan Iglesias (DEF) | TITULAR | 90 | Sevilla-Alaves, HOY 21:00 | Convocado (FF 05/11 18:40, ficha del partido 18:50); en los 7 onces de prensa (JP); FF 90 | =; 3 amarillas, no apercibido |
+| Kike Salas (DEF) | TITULAR | 90 | Sevilla-Alaves, HOY 21:00 | Convocado; en los 7 onces de prensa; FF 90 (el icono de «sancion» es la roja de la J1, ya cumplida) | = |
+| Chust (DEF) | TITULAR | 90 | Elche-Betis, dom 08/11 14:00 | FF 90 Clave; Anselmi (13:18): bajas Lemar y Aguado; JP titular | = |
+| Olasagasti (MED) | TITULAR | 82 | Celta-Levante, dom 08/11 18:30 | FF 80 Clave; con el grupo el vie (FF 12:10); previa de FF: «parten con ventaja» con Requena | 80 -> 82 |
+| Ivan Martin (MED) | TITULAR | 82 | Malaga-Racing, sab 07/11 14:00 | Convocado (Racing, FF 11:57; bajas Mantilla y Andres Martin); FF 80; JP titular | = |
+| Dani Lorenzo (MED) | TITULAR | 72 | Malaga-Racing, sab 07/11 14:00 | FF 70; en el entreno del vie; Funes (14:01) abre la puerta a rotar con Cajuste (FF 20) | 75 -> 72 |
+| *Ramon Enriquez (MED)* | DUDA | 58 | Malaga-Racing, sab 07/11 14:00 | FF 70 (subio de 60 tras Funes), JP 60 (Pablo Martinez 40); sus 2 titularidades fueron con Pablo lesionado; Pablo «Disponible» pero FF 30; Funes: «No puedo concretar si van a estar todos» | 50 -> 58 |
+| Yamal (DEL) | TITULAR | 95 | Atletico-Barcelona, dom 08/11 21:00 | FF 95; con el grupo el vie; JP titular | = |
+| Roberto Fernandez (DEL) | TITULAR | 90 | Espanyol-Deportivo, sab 07/11 16:15 | FF 90 Clave; La Grada (17:11) en su once; la sancion es de Sarabia (entrenador), no suya | 88 -> 90 |
+| Boye (DEL) | TITULAR | 90 | Sevilla-Alaves, HOY 21:00 | Convocado (FF 13:55, «Quique convoca a los disponibles»); en los 7 onces de prensa; FF 90 | 88 -> 90 |
+| *Sergi Cardona (DEF, banquillo)* | DUDA | 58 | Villarreal-Getafe, dom 08/11 18:30 | FF 50, JP 60; con el grupo el vie; previa de FF: «ligera ventaja» sobre Carlos Romero | 55 -> 58 |
+
+**Hecho: nada; el once NO se toca** (el esceptico, comprobado en FF y JP
+de 18:50 a 18:53). El bot no cambiara en la vuelta de las 20:07 (Ramon
+«ok», FF 70, lejos del ~16 %), y Ramon (57-60) contra Cardona (55-60) es
+un empate, no una mejora. **Solo cambio a mano entre las 20:15 y las
+20:45 si:** el once oficial del Sevilla-Alaves (hacia las 20:00) deja
+fuera a Iglesias o Kike Salas (entra Cardona, sigue el 3-4-3) o a Boye
+(entra Cardona, 4-4-2); o la convocatoria del Malaga sale antes de las
+20:45 sin Ramon (entra Cardona, 4-3-3). Que Pablo Martinez vaya
+convocado NO es motivo de cambio. Lo mira la segunda mirada de las 20:15.
+
 ## 05/11/2026, 19:15 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
 
 Plantilla de 12, todos «ok» en Biwenger (vuelta de las 18:07). Saldo
