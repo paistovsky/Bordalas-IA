@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 21:20 de Madrid (rafaga de las 21:15).
+Actualizado: 06/11/2026, 22:00 de Madrid (laboratorio del vie noche: la doctrina del saldo negativo, medida; PLAN DE ENCENDIDOS DEL PARON).
 
 ## El mandato
 
@@ -351,6 +351,70 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 22:00 (laboratorio del vie noche; wf_2bf38821-49b). Nada
+  construido ni encendido.**
+  **Rivales al saque de la J12:** Pollo vende a Gabriel Jesus (6.201.800,
+  10:57) y Luismi a Ceballos y Andres Garcia (17:45): al 21:00, Pollo
+  +890.451 y Luismi +850.980 (reconstruido); todos en positivo. Se sabra
+  si puntuan con el pago de la J12 (mar 10/11 ~17:05).
+  **LA DOCTRINA DEL SALDO NEGATIVO (§24), medida en 14 inicios y 76
+  arranques de manager:** Biwenger mira el saldo UNA vez, en el saque del
+  primer partido que cuenta de la jornada; quien esta en negativo pierde
+  la jornada ENTERA (ni puntos ni dinero; caso real: Luismi en la J6, -3,12
+  M a las 19:00, vendio a las 19:42 y perdio 64 puntos). Los 69 positivos
+  cobraron. Seis negativos pequenos (-5.316 a -56.906) cobraron: o nuestra
+  reconstruccion se queda corta con ellos (mas probable) o hay tolerancia;
+  no se sabe. Las pujas vivas al saque: n=0, sin datos. **Veredicto: la
+  regla de la casa (saldo - pujas vivas >= 0 al empezar) se queda tal cual;
+  nada se relaja. Y todo inicio de ronda cuenta como control de caja,
+  tambien la de un aplazado** (el Rayo-Athletic de la J8, sin fecha;
+  vigilar: si recibe fecha antes del 20/11, el plazo de caja se mueve).
+  **Que nos tumbaria esto:** si el mar 10/11 ~17:05 NUESTRA fila de la J12
+  sale sin premio (bonus null) con +2.275.724 y 0 pujas: congelar todos
+  los encendidos y volver a pensar.
+  **PLAN DE ENCENDIDOS DEL PARON (corregido por el esceptico; 5 + 1
+  opcional; receta de siempre: «1» literal, main nuevo de GitHub,
+  `--paso-0` al final, verja 3.11 y 3.13, uno por rafaga, la primera
+  vuelta del anterior en verde antes del siguiente):**
+  - **Sab 07 / dom 08 (dias de J12, sin encendidos), revisiones en este
+    orden:** R1 la hucha, re-revision OFF y ON sobre el main de hoy con las
+    6 piezas posteriores (frontera de `desde`, venta del cambio que falla);
+    R3a los managers ronda 2 (82dcc937) encendida; P0 un `--paso-0` de
+    prueba en una copia (el ultimo es del 04/11 09:44, antes de 6 fusiones:
+    si sale rojo, ninguna receta pasa); R3b LA_ORDEN_MANDA ronda 2 encendida.
+  - **Dom 08 21:15:** decidir Iglesias y Dani Lorenzo en `conservar`.
+  - **Lun 09 07:15:** Boye sale de `proteger` (sigue en `conservar`).
+  - **Lun 09 10:47: S1 = LA_ORDEN_EN_LOS_MANAGERS** (tapa un agujero abierto
+    hoy: Competitive V2 puede aceptar o contraofertar a un manager por los
+    de `conservar`; Alvaro tiene 19,2 M). Requisitos: R3a OK, 0
+    contraofertas vivas. Este commit lleva el primer paso 0 (68).
+  - **Lun 09 21:15: S2 = LA_HUCHA** (`desde` sin tocar; la primera vuelta
+    activa es la del mar 00:07; si no, mar 07:15).
+  - **Mar 10:** sin encendidos (primer dia de hucha y pago de la J12):
+    07:15 comprobar la hucha (apartado = saldo - pujas, libre = 0, nada
+    vendido ni publicado por ella); ~17:05 el pago: NUESTRA fila primero.
+  - **Mie 11 10:47: S3 = LA_ORDEN_MANDA_EN_EL_CAMBIO** (antes de cualquier
+    orden con `fichar` + `vender_si_ficha`, incluida la de Raphinha).
+  - **Jue 12 / vie 13:** sin encendidos. R4: revision ENCENDIDA de la
+    retirada de contraofertas de V10 del escritor (0be04fee) con los
+    managers encendidos; cerrar las 3 condiciones de EL_RELEVO.
+  - **Sab 14 10:47: S4 = LA_ORDEN_EN_EL_ESCRITOR.**
+  - **Dom 15 10:47: S5 = EL_PROTEGIDO_NO_GASTA_LA_VUELTA.**
+  - **Lun 16 (opcional): V10_CUENTA_LO_PUJADO** (dormido: el BUY de V10
+    esta en pausa y la hucha lo frena); si no, tras la J13.
+  - **Mar 17:** reserva; EL_RELEVO solo si sus 3 condiciones estan
+    cerradas; si no, se vigila a mano (el que sale de cada cambio vivo de
+    la mejora, vendido antes del jue 19).
+  - **Mie 18 - vie 20:** solo marcha atras. Jue 19 y vie 20 07:15: saldo -
+    pujas vivas >= 0. J13: plazo de caja vie 15:00, once 20:45, saque 21:00.
+  - **Fuera del paron:** SOLO_LO_QUE_PAGA (con la hucha la ronda no gasta:
+    casi no haria nada; necesita revision encendida) y LA_PRIMA_QUE_GANA (sus
+    3 arreglos sin re-revisar) pasan a despues de la J13. Siguen apagados:
+    el colchon con CESTA_SOLO_EL_SUELO (no tocar SIN_SUBASTA «1»),
+    EL_ONCE_SIN_LOS_QUE_SE_VAN, LA_MEJORA_A_LA_SALIDA; tras la J13, lista
+    de borrado de los apagados que no se van a encender. La orden caduca el
+    30/11 (renovar 24-26/11); la hucha, el 31/12.
 
 - **06/11 21:15 (rafaga de la noche; la J12 ya ha empezado).** Ciclos:
   verdes (#2764 a #2766, la de las 21:07 incluida). Saldo +2.275.724 al
