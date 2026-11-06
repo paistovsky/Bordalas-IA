@@ -357,10 +357,9 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   entera. (1) Saldo **+2.275.724** a las 12:12, 0 pujas: verde para las
   15:00. (2) Once (artefacto de la vuelta de las 12:07): **3-4-3, 11
   jugables, todos «ok»**; lo flojo, Ramon (60 %), con Cardona (50 %) en el
-  banquillo. (3) Ciclos: verdes y sin huecos (#2751 a #2757). (4) La
-  mirada de las 20:15 la tiene programada el chat del dueno (sus turnos
-  de cierre la incluyen); si a las 21:15 veo que la de las 20:07 no llego,
-  lo apunto. (5) **Turno de la J13 creado para esta sesion:** vie 20/11
+  banquillo. (3) Ciclos: verdes y sin huecos (#2751 a #2757). (4) Mirada
+  de las 20:15 programada tambien por mi (por si falta la vuelta de las
+  20:07: entonces pido al dueno que la lance a mano antes de las 20:45). (5) **Turno de la J13 creado para esta sesion:** vie 20/11
   12:50 (trig_013vaUPVLu5fxoGnXAQ65QxX). La fecha la saque de
   `data/calendar/calendar_changes.jsonl` (Athletic-Espanyol, vie 20/11
   21:00) porque `laliga_calendar.json` ya no esta; el turno empieza
