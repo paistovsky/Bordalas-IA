@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E86 · 06/11/2026 17:18 de Madrid · Prediccion con fecha para la J12 (se juzga cuando se pague)
+
+**Para que:** E65/E66/E79 midieron la vara jugador a jugador. Falta ver
+como acierta con el ONCE de cada manager, apuntado antes de la jornada y
+juzgado despues (la J8, E23, sigue sin pagarse). Apunto hoy, a las 17:11,
+casi 4 horas antes del primer partido de la J12 (21:00).
+**Datos:** foto del ciclo de las 17:11 (plantillas, titularidad FF).
+**Codigo:** `lab/predicciones/jornada.py` (`--apuntar N status.json`,
+`--juzgar N`); queda en `lab/predicciones/j12.json`.
+
+    mejor once de cada manager   vara (pts/p x FF)   calibrada (E79)
+    Luismi_Haz                        59,5               80,1
+    Pollo17                           55,5               73,6
+    Pepe                              52,0               65,8
+    Manzagool                         47,6               65,8
+    Mex                               40,2               55,3
+    Prinzipote                        30,6               44,2
+    Alvaro R.                         24,0               36,3
+    DiosMande                      (sin once valido en la foto)
+
+**Lo que espero (hipotesis, para juzgar):** la vara se quedara corta y la
+calibrada se pasara: los factores de E79 se midieron con jugadores de
+todo tipo y el mejor once escoge a los de mas puntos por partido, que
+vuelven hacia la media. Lo real deberia caer entre las dos. Y el orden
+(Luismi, Pollo, Pepe) es la apuesta de verdad.
+
+**Limites:** los rivales pueden cambiar el once antes de las 21:00 (tres
+estan en rojo y tienen que vender, E84); el once que cuento es el mejor
+posible, no el que pusieron.
+
+**Veredicto: PENDIENTE.** Se juzga con `--juzgar 12` cuando Biwenger
+pague la J12 (martes 10/11 por la tarde, si no hay aplazados: E43).
+
 ### E85 · 06/11/2026 11:15 de Madrid · Que hace el mercado en un paron: baja algo mas deprisa, y el que sube sigue subiendo
 
 **El caso:** tras la J12 (06-09/11) viene un paron: la J13 es el 20/11.
