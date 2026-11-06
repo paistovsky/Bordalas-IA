@@ -69,6 +69,39 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E85 · 06/11/2026 11:17 de Madrid · Que hace el mercado en un paron: baja algo mas deprisa, y el que sube sigue subiendo
+
+**El caso:** tras la J12 (06-09/11) viene un paron: la J13 es el 20/11.
+¿Cambia el mercado sin jornadas? El anterior fue del 21/09 al 08/10
+(entre la J7 y la J8).
+**Datos:** `price_history.json`, cada jugador y dia con precio del dia
+anterior; paron (17 dias) contra dos tramos con jornada (22/08-20/09 y
+09/10-05/11).
+**Codigo:** `lab/precio/en_el_paron.py`.
+
+    tramo                       dias   suben al dia   cambio medio   inercia   valor de la liga
+    paron 22/09-08/10            17        20 %        -0,32 %/dia     94 %       -4,1 % (-0,24 %/dia)
+    con jornada 22/08-20/09      12        26 %        -0,22 %/dia     90 %       -3,2 %
+    con jornada 09/10-05/11      28        22 %        -0,25 %/dia     92 %       -3,1 % (-0,11 %/dia)
+
+**Lo que se aprende:**
+- **En el paron el mercado baja algo mas deprisa:** menos jugadores suben
+  (20 % al dia) y el valor de la liga cae ~el doble por dia que en
+  octubre. Sin puntos nuevos, el precio no tiene de que tirar.
+- **La inercia es aun mas fuerte (94 %):** el que sube sigue subiendo y el
+  que baja sigue bajando. Las reglas de siempre (comprar al que sube,
+  vender el primer dia que no sube: E1/E3/E51) valen igual o mas.
+- Para Pepe: en el paron, guardar a un jugador que baja cuesta un poco mas
+  que en semana de jornada; vender al que cae (la rotacion, el parte
+  vende) rinde algo mas. Comprar para el once puede esperar al final del
+  paron (los que no suben bajan ~0,3 % al dia).
+
+**Limites:** un solo paron; dias con hueco en el historial se saltan.
+
+**Veredicto: AVISO PEQUEÑO** (no es regla nueva): en el paron 07-19/11
+las mismas reglas, y sin prisa por fichar para el once hasta la semana de
+la J13.
+
 ### E84 · 05/11/2026 17:15 de Madrid · Los rivales en rojo la vispera casi siempre llegan: no contar con su cero
 
 **El caso:** vispera de la J12 con tres rivales en rojo (Pollo -5,31 M,
