@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 20:25 de Madrid (segunda mirada del cierre de la J12: todo en verde, once oficial confirmado).
+Actualizado: 06/11/2026, 21:20 de Madrid (rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 21:15 (rafaga de la noche; la J12 ya ha empezado).** Ciclos:
+  verdes (#2764 a #2766, la de las 21:07 incluida). Saldo +2.275.724 al
+  empezar la J12: puntua. 0 pujas vivas. Desde el 09/11 empieza el paron
+  (hasta el 19/11) y la hucha de la operacion Raphinha (desde el premio de
+  la J12, ~mar 10/11). Turno de la J13 creado (vie 20/11 12:50).
 
 - **06/11 20:25 (segunda mirada del cierre de la J12).** La vuelta de las
   20:07 (#2765) llego y salio verde: once guardado 3-4-3 = recomendado
