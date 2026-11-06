@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-11-06T20:12:56.960673",
+  "updated_at": "2026-11-06T21:12:32.727283",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -2870,6 +2870,252 @@
             26271,
             35678,
             12494
+          ]
+        }
+      }
+    },
+    "4910": {
+      "round_id": 4910,
+      "clave": "RONDA_EN_JUEGO",
+      "ronda_de_biwenger": 4909,
+      "escritura": 2,
+      "visto": "2026-11-06T21:12:32.727283",
+      "datos_de": "2026-11-06T21:11:34.934907+00:00",
+      "escrito_en": "2026-11-06T21:12:32.727283",
+      "clasificacion": [
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 501
+        },
+        {
+          "user_id": 14175949,
+          "name": "Pepe Bordalás",
+          "points": 495
+        },
+        {
+          "user_id": 14156489,
+          "name": "Luismi_Haz",
+          "points": 454
+        },
+        {
+          "user_id": 14176382,
+          "name": "Manzagool",
+          "points": 420
+        },
+        {
+          "user_id": 14178736,
+          "name": "Mex",
+          "points": 381
+        },
+        {
+          "user_id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "points": 375
+        },
+        {
+          "user_id": 14154203,
+          "name": "Prinzipote",
+          "points": 372
+        },
+        {
+          "user_id": 14456960,
+          "name": "Alvaro Retamosa Sanguino",
+          "points": 315
+        }
+      ],
+      "mi_user_id": 14175949,
+      "mi_once": {
+        "formation": "3-4-3",
+        "players": [
+          38433,
+          23840,
+          28115,
+          1760,
+          29661,
+          12403,
+          41418,
+          41411,
+          26271,
+          35678,
+          12494
+        ],
+        "guardado": "2026-11-03T07:11:00+00:00",
+        "regla": "PRIMERA_VISTA",
+        "visto_en": "2026-11-06T21:11:34.934907+00:00"
+      },
+      "once_editable": {
+        "formation": "3-4-3",
+        "players": [
+          38433,
+          23840,
+          28115,
+          1760,
+          29661,
+          12403,
+          41418,
+          41411,
+          26271,
+          35678,
+          12494
+        ],
+        "guardado": "2026-11-03T07:11:00+00:00",
+        "visto_en": "2026-11-06T21:11:34.934907+00:00"
+      },
+      "plantilla": [
+        {
+          "id": 1760,
+          "name": "Chust",
+          "position": 2
+        },
+        {
+          "id": 12403,
+          "name": "Iván Martín",
+          "position": 3
+        },
+        {
+          "id": 12494,
+          "name": "Boyé",
+          "position": 4
+        },
+        {
+          "id": 23840,
+          "name": "Juan Iglesias",
+          "position": 2
+        },
+        {
+          "id": 26271,
+          "name": "Yamal",
+          "position": 4
+        },
+        {
+          "id": 28115,
+          "name": "Kike Salas",
+          "position": 2
+        },
+        {
+          "id": 29661,
+          "name": "Olasagasti",
+          "position": 3
+        },
+        {
+          "id": 30493,
+          "name": "Sergi Cardona",
+          "position": 2
+        },
+        {
+          "id": 35678,
+          "name": "Roberto Fernández",
+          "position": 4
+        },
+        {
+          "id": 38433,
+          "name": "Gulácsi",
+          "position": 1
+        },
+        {
+          "id": 41411,
+          "name": "Ramón Enríquez",
+          "position": 3
+        },
+        {
+          "id": 41418,
+          "name": "Dani Lorenzo",
+          "position": 3
+        }
+      ],
+      "totales": {
+        "1760": 48,
+        "12403": 42,
+        "12494": 63,
+        "23840": 56,
+        "26271": 131,
+        "28115": 47,
+        "29661": 54,
+        "30493": 25,
+        "35678": 69,
+        "38433": 31,
+        "41411": 25,
+        "41418": 39
+      },
+      "once_alternativo": {
+        "formation": "3-4-3",
+        "players": [
+          38433,
+          23840,
+          28115,
+          1760,
+          12403,
+          29661,
+          41418,
+          41411,
+          26271,
+          12494,
+          35678
+        ],
+        "vara": "base"
+      },
+      "nombres": {
+        "1760": "Chust",
+        "12403": "Iván Martín",
+        "12494": "Boyé",
+        "23840": "Juan Iglesias",
+        "26271": "Yamal",
+        "28115": "Kike Salas",
+        "29661": "Olasagasti",
+        "30493": "Sergi Cardona",
+        "35678": "Roberto Fernández",
+        "38433": "Gulácsi",
+        "41411": "Ramón Enríquez",
+        "41418": "Dani Lorenzo"
+      },
+      "onces_por_vara": {
+        "base": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            23840,
+            28115,
+            1760,
+            12403,
+            29661,
+            41418,
+            41411,
+            26271,
+            12494,
+            35678
+          ]
+        },
+        "factores": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            23840,
+            28115,
+            1760,
+            12403,
+            29661,
+            41418,
+            41411,
+            26271,
+            12494,
+            35678
+          ]
+        },
+        "actual": {
+          "formation": "3-4-3",
+          "players": [
+            38433,
+            23840,
+            28115,
+            1760,
+            29661,
+            12403,
+            41418,
+            41411,
+            26271,
+            12494,
+            35678
           ]
         }
       }
