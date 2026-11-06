@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 20:20 de Madrid (mirada de las 20:15, J12).
+Actualizado: 06/11/2026, 20:25 de Madrid (segunda mirada del cierre de la J12: todo en verde, once oficial confirmado).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 20:25 (segunda mirada del cierre de la J12).** La vuelta de las
+  20:07 (#2765) llego y salio verde: once guardado 3-4-3 = recomendado
+  (11/11, KEEP_LINEUP), saldo +2.275.724, 0 pujas vivas. Once oficial del
+  Sevilla-Alaves (FF 19:59, grafico de los 22 titulares): **Iglesias, Kike
+  Salas y Boye, titulares** (el panel ya los daba al 100 %). Convocatoria
+  del Malaga aun sin publicar; Ramon al 70 % en FF. Sin cambios a mano.
 
 - **06/11 20:15 (mirada de las 20:15, cierre de la J12).** Llegaron y
   salieron verdes la vuelta de las 15:07 (#2761) y la de las 20:07
