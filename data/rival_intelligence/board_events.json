@@ -238295,5 +238295,33 @@
         "amount": 6201800
       }
     ]
+  },
+  {
+    "event_id": "4acb7f3c6ca90fdb0a0d2879",
+    "date": 1793983549,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 2044,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 2926700
+      },
+      {
+        "player": 26131,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1747500
+      }
+    ]
   }
 ]
