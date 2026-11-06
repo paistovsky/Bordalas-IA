@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 12:55 de Madrid (cierre de la J12: todo en verde; turno del cierre de la J13 creado).
+Actualizado: 06/11/2026, 12:55 de Madrid (segunda mirada del cierre de la J12).
 
 ## El mandato
 
@@ -351,6 +351,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 12:50 (segunda mirada del gestor al cierre de la J12).** El turno
+  de las 12:45 del chat del dueno aun no estaba escrito; hago la mirada
+  entera. (1) Saldo **+2.275.724** a las 12:12, 0 pujas: verde para las
+  15:00. (2) Once (artefacto de la vuelta de las 12:07): **3-4-3, 11
+  jugables, todos «ok»**; lo flojo, Ramon (60 %), con Cardona (50 %) en el
+  banquillo. (3) Ciclos: verdes y sin huecos (#2751 a #2757). (4) La
+  mirada de las 20:15 la tiene programada el chat del dueno (sus turnos
+  de cierre la incluyen); si a las 21:15 veo que la de las 20:07 no llego,
+  lo apunto. (5) **Turno de la J13 creado para esta sesion:** vie 20/11
+  12:50 (trig_013vaUPVLu5fxoGnXAQ65QxX). La fecha la saque de
+  `data/calendar/calendar_changes.jsonl` (Athletic-Espanyol, vie 20/11
+  21:00) porque `laliga_calendar.json` ya no esta; el turno empieza
+  confirmando la fecha con lo que lee Pepe de Biwenger.
 
 - **06/11 12:55 (EL CIERRE DE LA J12, chat del dueno).** Todo en verde.
   **Solvencia:** saldo **+2.275.724** y 0 pujas vivas en todas las
