@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 14:25 de Madrid (rafaga de las 14:15).
+Actualizado: 06/11/2026, 20:20 de Madrid (mirada de las 20:15, J12).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 20:15 (mirada de las 20:15, cierre de la J12).** Llegaron y
+  salieron verdes la vuelta de las 15:07 (#2761) y la de las 20:07
+  (#2765): sin huecos hoy. Saldo +2.275.724, 0 pujas. Once (artefacto de
+  #2765): 3-4-3, 11 jugables, todos «ok»; Iglesias, Kike y Boye al 100 %,
+  Ramon al 70 %. Nada que hacer a mano antes de las 20:45.
 
 - **06/11 14:15 (rafaga de la tarde).** Ciclos: verdes (#2756 a #2759).
   Saldo +2.275.724 a las 14:13, 0 comprometido: el plazo de las 15:00 de
