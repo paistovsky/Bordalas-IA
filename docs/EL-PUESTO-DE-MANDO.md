@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 07:30 de Madrid (rafaga de las 07:15, dia de la J12).
+Actualizado: 06/11/2026, 12:15 de Madrid (laboratorio de rivales del vie manana: el banquillo de los rivales, medido y descartado).
 
 ## El mandato
 
@@ -351,6 +351,42 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 12:15 (laboratorio de rivales del vie manana; wf_6deab92e-824).
+  Nada construido, nada encendido (viernes, dia de la J12).**
+  **Rivales (jue 20:13 a vie 10:12):** Manzagool vende a Adeyemi
+  (9.227.700, -16,7 % sobre lo que pago) y a Mantilla el jue 21:02 y queda
+  en +1,61 M. Luismi vende a Soler (+10,9 %) y a Thiago Fernandez (+68,7 %
+  en 13 dias) a las 04:49 y compra a Boselli (402.000); sigue en -3,82 M.
+  Pollo, a -5,31 M y sin vender a las 10:50 (en 11 de 11 jornadas llego
+  a tiempo; suele vender la manana del partido). Nosotros: saldo
+  2.275.724, 0 pujas vivas, XI 11/11 (3-4-3 con Ramon, 60 %; el bot no lo
+  cambia por Cardona, 50 %). Pollo nos saca 6 puntos; puntos por millon:
+  nosotros 8,19, Pollo 4,04.
+  **Lo medido (el banquillo barato de Pollo y Luismi):** lo que les separa
+  es QUE compran: el que subio en el ultimo reset sigue subiendo (2 % o mas
+  ayer: +21,9 % de mediana a 7 dias, 86 % al alza, n=1.438; igual en las
+  dos mitades y en el paron anterior). Nuestras compras antiguas (antes
+  del 12/10, el motor viejo) eran de los que bajaban. Ellos se llevan ~90 %
+  de esos subidores con primas de +11 % de mediana. Sus salidas no son
+  mejores que la regla de la cartera. Un banquillo NO da poder de puja
+  (cada euro en banquillo suma 0,25 a maximumBid; en caja, 1,00).
+  **El diseno (BORDALAS_EL_BANQUILLO_QUE_SUBE) y el esceptico: RECHAZADO.**
+  (1) Con la hucha de Raphinha (se enciende el mar 10/11, objetivo 16 M)
+  la ronda no puede gastar nada en todo el paron: el interruptor estaria
+  muerto. (2) Su ventaja era un solo jugador (Mayol, +2,54 M); sin el, las
+  operaciones cerradas dan -0,04 M (n=8), y la prima 2 x subida esta
+  ajustada a ese caso. (3) Sin Cardona (que ya compramos), peor que la
+  cartera de hoy en 20 de 35 ventanas. (4) Ganariamos justo los que a los
+  rivales les importan menos. **Se guarda para despues** (pieza pequena,
+  sin prisa: el libro de la ronda esta vacio): la cartera vende desde 1,00
+  del valor y no 0,97 (mejor en los tres managers, intervalo por encima de
+  cero), y nunca acepta oferta por uno de su libro que este en el XI
+  guardado. Volver a mirar el banquillo solo cuando la hucha se complete o
+  se deje, con >= 10 operaciones cerradas positivas quitando la mejor.
+  **Vigilar hoy:** el tablero de compras marca a Ryan (POR) como
+  «EJECUTA» a 3.259.148 con 2.275.724 de saldo; solo lo frena que baja de
+  precio. Una puja de hoy se resuelve el sab 07:00, con la J12 empezada.
 
 - **06/11 07:15 (rafaga de la manana, DIA DEL CIERRE DE LA J12).** Ciclos:
   verdes y sin huecos (#2742 a #2752, la de las 07:15 incluida). Saldo
