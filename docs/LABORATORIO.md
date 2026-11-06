@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E86 · 06/11/2026 17:18 de Madrid · Prediccion con fecha para la J12 (se juzga cuando se pague)
+### E86 · 06/11/2026 17:16 de Madrid · Prediccion con fecha para la J12 (se juzga cuando se pague)
 
 **Para que:** E65/E66/E79 midieron la vara jugador a jugador. Falta ver
 como acierta con el ONCE de cada manager, apuntado antes de la jornada y
