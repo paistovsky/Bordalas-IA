@@ -69,7 +69,7 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
-### E85 · 06/11/2026 11:17 de Madrid · Que hace el mercado en un paron: baja algo mas deprisa, y el que sube sigue subiendo
+### E85 · 06/11/2026 11:15 de Madrid · Que hace el mercado en un paron: baja algo mas deprisa, y el que sube sigue subiendo
 
 **El caso:** tras la J12 (06-09/11) viene un paron: la J13 es el 20/11.
 ¿Cambia el mercado sin jornadas? El anterior fue del 21/09 al 08/10
