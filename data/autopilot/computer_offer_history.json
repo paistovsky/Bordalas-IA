@@ -297,12 +297,12 @@
       "last_rerolled_at": "2026-10-26T15:11:19.980566+00:00"
     },
     "41411": {
-      "reroll_count": 2,
+      "reroll_count": 3,
       "best_offer_seen": 0,
       "offers": [],
-      "best_offer_rejected": 428800,
-      "last_rerolled_offer_id": 3878000754,
-      "last_rerolled_at": "2026-11-05T10:10:56.281586+00:00"
+      "best_offer_rejected": 448700,
+      "last_rerolled_offer_id": 225740177,
+      "last_rerolled_at": "2026-11-06T22:13:16.893521+00:00"
     }
   }
 }
