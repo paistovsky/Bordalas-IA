@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 05/11/2026, 23:15 de Madrid (laboratorio de rivales del jue noche: vender al Computer; pieza construida y NO fusionada).
+Actualizado: 06/11/2026, 07:30 de Madrid (rafaga de las 07:15, dia de la J12).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 07:15 (rafaga de la manana, DIA DEL CIERRE DE LA J12).** Ciclos:
+  verdes y sin huecos (#2742 a #2752, la de las 07:15 incluida). Saldo
+  **+2.275.724** a las 07:22, 0 comprometido: el plazo de las 15:00 en
+  verde. Leido el riesgo que apunta el chat del dueno (motor viejo y carril
+  pujando a la vez tras el reset): hoy no hay pujas vivas, y una puja
+  puesta hoy se resuelve el sab 07:00, con la J12 ya empezada, asi que no
+  toca la caja del inicio; lo miro igual en mi turno de las 12:50. Tomo
+  la regla del suelo para `vender_si_ficha` (con 3 dias o mas, suelo al
+  valor del dia o por encima). Viernes: no se enciende nada.
 
 - **05/11 23:15 (laboratorio de rivales del jue noche; wf_149e5d25-4b1).
   Nada fusionado, nada encendido.**
