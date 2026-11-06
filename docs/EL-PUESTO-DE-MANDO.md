@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 12:15 de Madrid (laboratorio de rivales del vie manana: el banquillo de los rivales, medido y descartado).
+Actualizado: 06/11/2026, 12:55 de Madrid (cierre de la J12: todo en verde; turno del cierre de la J13 creado).
 
 ## El mandato
 
@@ -351,6 +351,25 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **06/11 12:55 (EL CIERRE DE LA J12, chat del dueno).** Todo en verde.
+  **Solvencia:** saldo **+2.275.724** y 0 pujas vivas en todas las
+  lecturas de hoy (la ultima, 12:12); el plazo de las 15:00, cumplido.
+  **Once:** 11/11 «ok» en Biwenger, 3-4-3 guardado igual que el
+  recomendado (Gulacsi; Iglesias, Kike Salas, Chust; Olasagasti, Ivan,
+  Dani Lorenzo, Ramon; Yamal, Roberto, Boye); Cardona en el banquillo.
+  Unica duda, Ramon (FF 60); el bot no lo cambia mientras Cardona este en
+  50. **Ciclos:** verdes y sin huecos desde el jue 21:07 hasta las 12:07.
+  **Calendario:** Sevilla-Alaves hoy a las 21:00 (LALIGA_OFFICIAL); la J12
+  acaba el dom 08/11 (Atletico-Barca 21:00); sin aplazados con fecha.
+  **Ryan (3.259.148 «EJECUTA»):** no puede salir: el motor viejo exige
+  que quepa en el colchon (2,28 M) con UN_SOLO_COLCHON
+  (autopilot_executor.py:2644), y ademas baja de precio. **Turnos:**
+  segunda mirada hoy a las 20:15 (trig_01StWAGbQW3UYd6F9knfMygY: si la
+  vuelta de las 20:07 no llega, se lanza a mano); **cierre de la J13 el
+  vie 20/11 12:45** (trig_01HX4Ezk7A3uq5SAH1sKPE3m; primer partido
+  Athletic-Espanyol 21:00 segun MARCA, pendiente de LaLiga: el turno lo
+  comprueba primero).
 
 - **06/11 12:15 (laboratorio de rivales del vie manana; wf_6deab92e-824).
   Nada construido, nada encendido (viernes, dia de la J12).**
