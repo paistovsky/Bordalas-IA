@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/11/2026, 08:40 de Madrid (supervision; MODO AHORRO por orden del dueno).
+Actualizado: 07/11/2026, 11:45 de Madrid (laboratorio corto del sab; P0 en verde).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/11 11:45 (laboratorio corto del sab, modo ahorro).** Rivales: en
+  el reset de las 07:00 Pollo ficha a Ratiu (3.507.000, +9,6 % sobre lo que
+  pedia, sube 4,8 %/dia) y a Marc Bernal (2.807.000, nos gana); vuelve a
+  ~-5,4 M (tiene hasta el 20/11). Luismi y Manzagool, quietos. **P0 hecho:
+  `--paso-0` de prueba en una copia de main 7ce77c74 (3.13): PASADO, 68
+  interruptores** (los 64 + los 4 apagados del 04-05/11). No se ha
+  commiteado: el registro bueno se genera en el commit del encendido del
+  lunes. Quedan R3a (managers) y R1 (hucha), un revisor cada una.
 
 - **07/11 08:40 (supervision). MODO AHORRO: el dueno, 07/11: «estas
   acercandote mucho al weekly limit, baja un poco».** Hasta nuevo aviso,
