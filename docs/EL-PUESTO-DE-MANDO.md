@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/11/2026, 14:20 de Madrid (rafaga de la tarde del sab, corta por el modo ahorro).
+Actualizado: 07/11/2026, 21:20 de Madrid (rafaga de la noche del sab, corta: modo ahorro).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#2783 a #2789). Saldo +2.275.724; sigue viva solo la puja por
+  Tchouameni (5.379.900, se resuelve el dom 07:00). Nada nuevo de Pepe.
+  J12: 14 puntos con 4 jugados (parte de las 18:45). Turno de la J13 en
+  pie. Dom 07:15: resultado de Tchouameni y venta de Ivan.
 
 - **07/11 14:20 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#2776 a #2782). Saldo +2.275.724, comprometido 5.379.900
