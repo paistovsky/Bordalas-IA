@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/11/2026, 07:25 de Madrid (rafaga de la manana del sab: puja de Marc Bernal perdida, todo verde).
+Actualizado: 07/11/2026, 08:40 de Madrid (supervision; MODO AHORRO por orden del dueno).
 
 ## El mandato
 
@@ -351,6 +351,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/11 08:40 (supervision). MODO AHORRO: el dueno, 07/11: «estas
+  acercandote mucho al weekly limit, baja un poco».** Hasta nuevo aviso,
+  todas las sesiones: nada de workflows ni varios agentes para lo
+  rutinario (supervision, parte, jornada en vivo, laboratorio); un solo
+  agente como mucho y solo si hace falta de verdad; los laboratorios, cortos
+  y sin construir piezas nuevas; las revisiones del fin de semana (R1-R3b),
+  con un solo revisor cada una y solo las que bloquean un encendido del
+  lunes (R3a managers, P0 paso 0 de prueba, R1 hucha).
+  **Pepe solo desde ayer:** la mejora del once pujo a las 07:19 por
+  **Tchouameni** (Real Madrid, MED, 5,32 M y sube; FF 99 %, recuperado y
+  convocado el 06/11) **5.379.900, para que salga Ivan Martin** (+1,64
+  puntos por jornada; coste neto ~2,84 M). Se resuelve el dom 07:00. Caja
+  de la J13 segun la mejora: -567.676 (dentro de su minimo de -1 M); la
+  arreglan la venta de Ivan (tras la J12) y el premio de la J12 (mar).
+  Anoche (21:12) otra puja de 2.739.900 por Marc Bernal, perdida ante
+  Pollo. Pollo gana a Ratiu (3.507.000) y a Bernal (2.807.000). Sin
+  objetivos de la lista en el mercado. La orden no se toca.
 
 - **07/11 07:25 (rafaga de la manana; J12 en juego, sin encendidos).**
   Ciclos: verdes (#2767 a #2775, la de las 07:15 incluida). **Pepe pujo
