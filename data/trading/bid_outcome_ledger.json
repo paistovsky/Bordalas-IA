@@ -2129,6 +2129,28 @@
    "margin": 67100,
    "event_id": "94e3b02115a0802069af8005",
    "recorded_by": "TABLON"
+  },
+  "26048:2026-11-07T06:19:40+00:00": {
+   "player_id": 26048,
+   "player_name": "Tchouameni",
+   "amount": 5379900,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 5320000,
+   "recommended_bid": null,
+   "intent": null,
+   "target_source": "DESCONOCIDO",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-11-07T06:19:40+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null,
+   "recorded_by": "TABLON"
   }
  }
 }
