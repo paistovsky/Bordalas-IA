@@ -240957,5 +240957,43 @@
         "name": "Jornada 12"
       }
     }
+  },
+  {
+    "event_id": "94e3b02115a0802069af8005",
+    "date": 1794031590,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 26276,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 3507000
+      },
+      {
+        "player": 34077,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2807000,
+        "bids": [
+          {
+            "user": {
+              "id": 14175949,
+              "name": "Pepe Bordalás",
+              "icon": "i/u/14175949.png"
+            },
+            "amount": 2739900
+          }
+        ]
+      }
+    ]
   }
 ]
