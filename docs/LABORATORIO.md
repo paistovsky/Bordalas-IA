@@ -69,6 +69,24 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E87 · 07/11/2026 11:15 de Madrid · Tchouameni a +1,1 % (laboratorio corto, modo ahorro)
+
+**El caso:** la mejora puja 5.379.900 por Tchouameni (+1,1 % sobre 5,32 M;
+sube). Turno corto por orden del dueño (modo ahorro): solo el script de
+E80, sin piezas nuevas.
+**Codigo:** `lab/subasta/probabilidad_de_ganar.py` (E80).
+
+    subastas de jugadores que suben (cualquier subida)   n=126   P(ganar a +1,1 %) 24 %
+       de 2 a 8 M                                        n= 66                     32 %
+    si sube un 2 % o mas                                 n= 48                      8 %
+
+**Lo que se aprende:** a +1,1 % por uno que sube, lo normal es perderlo
+(1 de cada 4; 1 de cada 12 si sube un 2 % o mas). E81 avisa de que esta
+cuenta es pesimista con las pujas de Pepe (~20 puntos), asi que la
+probabilidad real puede rondar el 40 %. Nada nuevo: es E41 otra vez.
+
+**Veredicto: NADA NUEVO.** Dato para la supervision de mañana.
+
 ### E86 · 06/11/2026 17:16 de Madrid · Prediccion con fecha para la J12 (se juzga cuando se pague)
 
 **Para que:** E65/E66/E79 midieron la vara jugador a jugador. Falta ver
