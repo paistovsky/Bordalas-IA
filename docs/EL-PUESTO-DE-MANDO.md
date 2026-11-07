@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/11/2026, 11:45 de Madrid (laboratorio corto del sab; P0 en verde).
+Actualizado: 07/11/2026, 14:20 de Madrid (rafaga de la tarde del sab, corta por el modo ahorro).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/11 14:20 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#2776 a #2782). Saldo +2.275.724, comprometido 5.379.900
+  (Tchouameni, se resuelve el dom 07:00). **Debate para el dueno:** si la
+  ganamos, el saldo cae a ~-3,1 M justo cuando empieza la hucha de
+  Raphinha (lun 21:15): son ~5,4 M que no iran a Raphinha por +1,64
+  puntos por jornada. No es un peligro de caja (el control es el 20/11 y
+  la venta de Ivan + el premio de la J12 lo tapan), pero retrasa la
+  operacion grande. No la retiro: es la regla de los puntos y la mejora
+  esta dentro de su limite. Dom 07:15: mirar si se gano y si Ivan sale
+  a la venta. Turno de la J13 en pie.
 
 - **07/11 11:45 (laboratorio corto del sab, modo ahorro).** Rivales: en
   el reset de las 07:00 Pollo ficha a Ratiu (3.507.000, +9,6 % sobre lo que
