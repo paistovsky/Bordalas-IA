@@ -69,6 +69,12 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E88 · 07/11/2026 17:14 de Madrid · Sin experimento (modo ahorro)
+
+Turno minimo por el modo ahorro del dueño (07/11). La J12 aun no esta
+pagada (E86 se juzga el martes con `lab/predicciones/jornada.py --juzgar
+12`). No he aprendido nada nuevo.
+
 ### E87 · 07/11/2026 11:15 de Madrid · Tchouameni a +1,1 % (laboratorio corto, modo ahorro)
 
 **El caso:** la mejora puja 5.379.900 por Tchouameni (+1,1 % sobre 5,32 M;
