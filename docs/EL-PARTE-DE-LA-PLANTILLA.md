@@ -44,6 +44,18 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 07/11/2026, 18:45 de Madrid (J12 en juego; J13: vie 20/11 21:00)
+
+Modo ahorro (orden del dueno, 07/11): parte solo con los datos de Pepe
+(vuelta de las 18:07), sin leer noticias, porque no hay nada que decidir
+hasta la J13. Los 12, «ok» en Biwenger. J12: 14 puntos con 4 jugados
+(Iglesias 6, Kike Salas 6, Boye 2); del Malaga-Racing (Ivan, Dani
+Lorenzo, Ramon) aun no constan puntos; Roberto, jugado o jugandose.
+Quedan el dom: Chust 14:00, Gulacsi y Olasagasti 18:30, Yamal 21:00.
+Saldo +2.275.724 y puja viva de la mejora por Tchouameni (5.379.900, sale
+Ivan; se resuelve el dom 07:00). **Hecho: nada.** El parte completo vuelve
+la semana de la J13.
+
 ## 06/11/2026, 19:00 de Madrid (J12: HOY 21:00; cierre 20:45)
 
 Plantilla de 12, todos «ok» en Biwenger (vuelta de las 18:07). Saldo
