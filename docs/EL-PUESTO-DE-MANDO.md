@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 06/11/2026, 22:00 de Madrid (laboratorio del vie noche: la doctrina del saldo negativo, medida; PLAN DE ENCENDIDOS DEL PARON).
+Actualizado: 07/11/2026, 07:25 de Madrid (rafaga de la manana del sab: puja de Marc Bernal perdida, todo verde).
 
 ## El mandato
 
@@ -351,6 +351,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **07/11 07:25 (rafaga de la manana; J12 en juego, sin encendidos).**
+  Ciclos: verdes (#2767 a #2775, la de las 07:15 incluida). **Pepe pujo
+  por Marc Bernal 2.739.900 el vie a las 21:12** (despues del saque de la
+  J12, asi que no ponia la J12 en riesgo; mi rafaga de las 21:15 leyo el
+  saldo antes y dijo «0 pujas»: error de lectura, corregido aqui). La
+  perdio (2.807.000 se la llevo otro). Si la hubiera ganado, el saldo
+  habria quedado en -464.176 con la hucha a punto de empezar: no rompia
+  nada hoy (el control de caja es solo al saque de la J13, 20/11), pero
+  es justo lo que la hucha (S2, lun 09 21:15) tiene que frenar. Saldo a
+  las 07:19: +2.275.724, 0 comprometido. Turno de la J13 sigue en pie
+  (trig_013vaUPVLu5fxoGnXAQ65QxX, vie 20/11 12:50). Las revisiones del
+  sab/dom (R1, R3a, P0, R3b) son trabajo de laboratorio del chat del
+  dueno: no las toco para no ser dos manos.
 
 - **06/11 22:00 (laboratorio del vie noche; wf_2bf38821-49b). Nada
   construido ni encendido.**
