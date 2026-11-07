@@ -2955,3 +2955,4 @@
 {"dia":"2026-11-07","id":42395,"name":"Bright Ede","value":0,"price":380000,"bid":0,"live_bid":0,"decision":"NO_DISPONIBLE","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-07","id":42119,"name":"Drkusic","value":0,"price":1490000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-07","id":1721,"name":"Manu Sánchez","value":0,"price":1360000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-07","id":37739,"name":"De la Fuente","value":5095295,"price":5010000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
