@@ -116,8 +116,12 @@ def save_ledger(ledger: dict, path: Path | None = None) -> None:
 
     ruta.parent.mkdir(parents=True, exist_ok=True)
 
+    # Compacto, sin sangria: el 08/11/2026 el libro paso de los
+    # 100 MiB que GitHub admite por fichero (147.664 pronosticos;
+    # con `indent=2` la mitad del peso eran espacios) y los libros
+    # dejaron de guardarse en git. Sin sangria ocupa ~80 MB.
     ruta.write_text(
-        json.dumps(ledger, ensure_ascii=False, indent=2),
+        json.dumps(ledger, ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8",
     )
 
