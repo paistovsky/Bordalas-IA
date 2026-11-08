@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 08/11/2026, 08:25 de Madrid (rafaga del dom: los libros no se guardaban en git; arreglado en cee9f519).
+Actualizado: 08/11/2026, 14:20 de Madrid (rafaga de la tarde del dom: todo verde, libros guardandose).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **08/11 14:20 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#2799 a #2805) y, esta vez mirado, commits «libros:» cada hora
+  desde las 08:10. El libro de aciertos mide 81.161.561 B: en 6 horas ha
+  crecido solo ~3 KB, asi que el margen hasta 100 MiB es bastante mayor
+  que los ~20 dias que estime esta manana (la poda sigue en la lista,
+  sin urgencia; revisar el tamano el 15/11). Saldo +2.275.724, 0 pujas.
+  Turno de la J13 en pie.
 
 - **08/11 08:25 (rafaga de la manana del dom; incidente arreglado).**
   **Los libros no se guardaban en git desde la vuelta de las 04:45**
