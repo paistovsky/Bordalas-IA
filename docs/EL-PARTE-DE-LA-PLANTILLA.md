@@ -44,6 +44,14 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 08/11/2026, 18:45 de Madrid (J12 en juego; J13: vie 20/11 21:00)
+
+Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok». J12:
+26 puntos (Iglesias 6, Kike 6, Boye 2, Dani Lorenzo 4, Roberto 4, Ramon 3,
+Ivan 1; Chust jugado, sin puntos aun); jugandose Gulacsi y Olasagasti;
+falta Yamal (21:00). Saldo +2.275.724, 0 pujas vivas (Tchouameni perdido
+ante Luismi, 6.621.000). **Hecho: nada.**
+
 ## 07/11/2026, 18:45 de Madrid (J12 en juego; J13: vie 20/11 21:00)
 
 Modo ahorro (orden del dueno, 07/11): parte solo con los datos de Pepe
