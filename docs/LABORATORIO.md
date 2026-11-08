@@ -69,6 +69,13 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E89 · 08/11/2026 11:14 de Madrid · Sin experimento (modo ahorro); E87 se cumplio
+
+Turno minimo por el modo ahorro del dueño. Solo un apunte: **Tchouameni se
+perdio** (otro pago 6.621.000, ~+24 % sobre 5,32 M, contra nuestro +1,1 %),
+como esperaba E87 (por uno que sube, a +1,1 % se pierde casi siempre). La
+J12 aun no esta pagada (E86 se juzga el martes). No he aprendido nada nuevo.
+
 ### E88 · 07/11/2026 17:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo por el modo ahorro del dueño (07/11). La J12 aun no esta
