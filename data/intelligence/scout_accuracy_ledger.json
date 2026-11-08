@@ -3100902,6 +3100902,48 @@
       "direction_hit": null,
       "magnitude_error_percent": null,
       "scored_at": null
+    },
+    "27996|PRENSA_MUNDO_DEPORTIVO|3|2026-11-08": {
+      "player_id": "27996",
+      "player_name": "Paredes",
+      "source": "PRENSA_MUNDO_DEPORTIVO",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 2860000,
+      "predicted_at": "2026-11-08T00:11:32.877643+00:00",
+      "due_at": "2026-11-11T00:11:32.877643+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
+    },
+    "41157|PRENSA_MARCA|3|2026-11-08": {
+      "player_id": "41157",
+      "player_name": "Diatta",
+      "source": "PRENSA_MARCA",
+      "direction": "DOWN",
+      "magnitude_percent": null,
+      "magnitude_eur": null,
+      "horizon_days": 3,
+      "confidence": null,
+      "observed_signal": false,
+      "price_at_prediction": 190000,
+      "predicted_at": "2026-11-08T00:11:27.113718+00:00",
+      "due_at": "2026-11-11T00:11:27.113718+00:00",
+      "outcome": "PENDING",
+      "price_at_outcome": null,
+      "actual_direction": null,
+      "actual_percent": null,
+      "direction_hit": null,
+      "magnitude_error_percent": null,
+      "scored_at": null
     }
   }
 }
