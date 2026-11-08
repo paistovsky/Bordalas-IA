@@ -69,6 +69,11 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E90 · 08/11/2026 17:14 de Madrid · Sin experimento (modo ahorro)
+
+Turno minimo: el modo ahorro del dueño sigue en vigor. La J12 aun no esta
+pagada (E86 se juzga el martes). No he aprendido nada nuevo.
+
 ### E89 · 08/11/2026 11:14 de Madrid · Sin experimento (modo ahorro); E87 se cumplio
 
 Turno minimo por el modo ahorro del dueño. Solo un apunte: **Tchouameni se
