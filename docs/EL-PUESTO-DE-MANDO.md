@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 07/11/2026, 21:20 de Madrid (rafaga de la noche del sab, corta: modo ahorro).
+Actualizado: 08/11/2026, 08:25 de Madrid (rafaga del dom: los libros no se guardaban en git; arreglado en cee9f519).
 
 ## El mandato
 
@@ -351,6 +351,26 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **08/11 08:25 (rafaga de la manana del dom; incidente arreglado).**
+  **Los libros no se guardaban en git desde la vuelta de las 04:45**
+  (ultimo commit «libros:» a las 02:12): los ciclos salian VERDES pero el
+  empujon era rechazado: `scout_accuracy_ledger.json` llego a 100,62 MiB
+  y GitHub no admite ficheros de mas de 100 MiB (147.664 pronosticos
+  guardados con `indent=2`). Los libros siguieron vivos en la cache, nada
+  perdido. **Arreglo (cee9f519):** `save_ledger` de
+  `src/intelligence/scout/accuracy.py` escribe compacto, sin sangria.
+  Verja 3.13: 238 en verde. La vuelta de las 08:07 (#2799, sobre
+  cee9f519) salio verde y empujo los libros (98073d4e); el libro mide
+  ahora 81,2 MB. **Queda pendiente, con fecha:** sigue creciendo (~1 MB
+  al dia); hay ~20 dias de margen. Antes del ~25/11 hay que podar los
+  pronosticos ya puntuados y viejos (cuidando el resumen de aciertos que
+  usa la estimacion) o sacar el libro de git. **Leccion:** «ciclo verde»
+  no significa «libros guardados»: el paso «Guardar los libros» sale en
+  verde aunque el empujon falle. Mirar tambien que haya commit «libros:»
+  reciente. **Tchouameni: PERDIDA** (otro pago 6.621.000). Saldo a las
+  08:10: +2.275.724, 0 comprometido. Ivan Martin se queda. Ciclos verdes
+  (#2790 a #2799). Turno de la J13 en pie.
 
 - **07/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
   verdes (#2783 a #2789). Saldo +2.275.724; sigue viva solo la puja por
