@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 08/11/2026, 14:20 de Madrid (rafaga de la tarde del dom: todo verde, libros guardandose).
+Actualizado: 08/11/2026, 21:30 de Madrid (rafaga de la noche del dom: Iglesias y Dani Lorenzo a conservar).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **08/11 21:30 (rafaga de la noche del dom).** Ciclos: verdes (#2806 a
+  #2812), libros guardandose cada hora (ultimo 21:13). Saldo +2.275.724,
+  0 pujas. J12: 26 puntos (parte de las 18:45). **Hecho el paso del plan
+  «Dom 08 21:15»: Juan Iglesias (23840) y Dani Lorenzo (41418) entran en
+  `conservar`** (los dos titulares del once; ya eran los dos unicos
+  titulares fuera de la lista). Efecto: los vendedores de liquidez no los
+  venden ni se acepta su oferta; la mejora del once y `vender_si_ficha`
+  (Raphinha) siguen pudiendo cambiarlos. Verja 3.13: 238 en verde. Sin
+  interruptores tocados. **Manana lun 09:** 07:15 Boye sale de
+  `proteger`; 10:47 S1 = LA_ORDEN_EN_LOS_MANAGERS (si R3a esta OK);
+  21:15 S2 = LA_HUCHA.
 
 - **08/11 14:20 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#2799 a #2805) y, esta vez mirado, commits «libros:» cada hora
