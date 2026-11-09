@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/11/2026, 21:05 de Madrid (ENCENDIDA: LA_HUCHA, S2; la hace el chat del dueno, no la rafaga de las 21:15).
+Actualizado: 09/11/2026, 21:35 de Madrid (rafaga de la noche del lun: dos vueltas rojas explicadas; reintento de lecturas).
 
 ## El mandato
 
@@ -351,6 +351,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/11 21:35 (rafaga de la noche del lun).** La hucha ya la encendio
+  el chat del dueno a las 21:05 (fcb692ae): no la repito. J12 cobrada:
+  saldo +3.745.724, 0 pujas. **Dos vueltas ROJAS hoy:** #2831 (17:07):
+  Biwenger no contesto en 30 s a `/user/{id}/finances`
+  (`ReadTimeout`) y la vuelta entera se cayo; #2833 (19:07): sin ningun
+  trabajo arrancado (fallo de GitHub al lanzarla; las de las 20:07 y
+  21:07 salieron verdes). **Arreglo de la #2831 (este commit):**
+  `src/biwenger/peticiones.py` repite UNA vez un GET que se cuelga o
+  pierde la conexion (5 s de espera); POST/PUT/DELETE no se repiten nunca
+  (podrian pujar o vender dos veces). Probado a mano (GET que falla una
+  vez pasa; POST no se repite; GET que falla dos veces sigue cayendo) y
+  verja 3.11 y 3.13: 238 en verde. Sin interruptores tocados. **Vigilar
+  manana:** mar 00:07 primera vuelta con la hucha activa; 07:15 apartado =
+  saldo - pujas, libre = 0, nada vendido ni publicado por ella; ~17:05
+  nada (la J12 ya se cobro hoy).
 
 - **09/11 21:05 (chat del dueno, laboratorio de las 20:47). ENCENDIDA:
   BORDALAS_LA_HUCHA (fcb692ae), S2 del plan. YA ESTA HECHO: la rafaga de

@@ -254,7 +254,9 @@ def _con_reintento(original, metodo: str, contador: Contador):
 
             contador.anota(metodo, url)
 
-            respuesta = original(url, *args, **kwargs)
+            respuesta = _una_lectura(
+                original, metodo, url, args, kwargs
+            )
 
             if getattr(respuesta, "status_code", None) != (
                 DEMASIADAS
@@ -289,6 +291,37 @@ def _con_reintento(original, metodo: str, contador: Contador):
         return respuesta
 
     return llamada
+
+
+# Un GET que se queda colgado (Biwenger no contesta en 30 s) se
+# repite UNA vez. El 09/11/2026 a las 17:07 un solo timeout en
+# /user/{id}/finances tumbo la vuelta entera (#2831). Solo GET: leer
+# dos veces no cambia nada en Biwenger; un POST/PUT/DELETE repetido
+# podria pujar o vender dos veces, asi que esos NO se repiten.
+REINTENTOS_LECTURA = 1
+ESPERA_LECTURA = 5.0
+
+
+def _una_lectura(original, metodo, url, args, kwargs):
+
+    if metodo != "get":
+        return original(url, *args, **kwargs)
+
+    try:
+        from requests.exceptions import (
+            ConnectionError as _Conexion,
+            Timeout as _Tiempo,
+        )
+    except ImportError:  # pragma: no cover
+        return original(url, *args, **kwargs)
+
+    for intento in range(REINTENTOS_LECTURA + 1):
+        try:
+            return original(url, *args, **kwargs)
+        except (_Tiempo, _Conexion):
+            if intento >= REINTENTOS_LECTURA:
+                raise
+            time.sleep(ESPERA_LECTURA)
 
 
 def _retry_after(respuesta):
