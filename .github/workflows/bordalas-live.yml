@@ -567,6 +567,19 @@ jobs:
       #   Historia: estuvo puesto del 21/09 al 22/09 como apagado provisional.
       BORDALAS_SIN_SUBASTA: "1"
 
+      # ENCENDIDO 09/11 — BORDALAS_LA_ORDEN_EN_LOS_MANAGERS (chat del dueno,
+      # laboratorio de las 10:47; plan de encendidos del paron, S1)
+      #
+      #   Competitive V2 no acepta ni contraoferta la oferta de un manager que
+      #   pida a alguien de `conservar` o `proteger` de la orden del gestor
+      #   (tampoco en lotes de varios jugadores); la vuelta se la queda la
+      #   siguiente autorizada. src/analysis/la_orden_en_los_managers.py.
+      #   Fusionado apagado el 04/11 (ee4a94e4), revisado encendido y apagado,
+      #   ronda 2 (82dcc937); ensayo del 09/11 verde; paso 0 con 68.
+      #   Vigilar: «Bloqueada por la orden» solo aparece si llega una oferta de
+      #   un manager. Marcha atras: quitar esta linea.
+      BORDALAS_LA_ORDEN_EN_LOS_MANAGERS: "1"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
