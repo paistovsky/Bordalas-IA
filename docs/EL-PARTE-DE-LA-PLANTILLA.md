@@ -44,6 +44,16 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 09/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
+
+Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok». J12
+cerrada con 47 puntos; el saldo ya sube a +3.745.724 (+1.470.000: premio
+de la J12 cobrado, asi que puntuamos). Panel: Gulacsi 90, Iglesias 95,
+Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70, **Ramon 50**,
+Yamal 95, Roberto 80, Boye 90, **Cardona 30**. A vigilar para la J13:
+Ramon (vuelve Pablo Martinez) y que Cardona ya no es buen relevo. Sin
+pujas vivas. **Hecho: nada** (queda la semana del paron para decidir).
+
 ## 08/11/2026, 18:45 de Madrid (J12 en juego; J13: vie 20/11 21:00)
 
 Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok». J12:
