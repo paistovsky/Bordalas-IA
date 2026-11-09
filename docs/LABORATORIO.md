@@ -69,6 +69,20 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E92 · 09/11/2026 17:17 de Madrid · Juicio de E86: ¿acertamos los puntos de la J12?
+
+Turno corto (sigue el modo ahorro): solo juzgar lo apuntado el 06/11 con `python3 lab/predicciones/jornada.py --juzgar 12`. La J12 ya esta pagada.
+
+- n = 7 managers. DiosMande queda fuera porque no tenia once valido al apuntar y luego hizo 71.
+- **Vara de Pepe:** error medio de 11,1 puntos por manager. Se queda corta: predijo el 85 % de lo real (309 contra 365).
+- **Calibrada (E79):** error medio de 14,6 puntos. Se pasa: predijo el 115 % de lo real (421 contra 365).
+- **Orden:** flojo, Spearman ~0,29. Acerto que Luismi quedaba arriba (62, segundo) y Alvaro ultimo (40). Fallo con Mex, que hizo 67 y fue el primero de los siete cuando lo daba quinto, y con Pollo, que hizo 48 y fue quinto cuando lo daba segundo.
+- **Pepe:** 49 puntos, contra 52 con la vara y 65,8 con la calibrada.
+- **Pepe contra Pollo:** 49 a 48. La vara los daba casi empatados y acerto.
+- **Veredicto:** con una sola jornada no gana ninguna de las dos. La vara acierta mejor el nivel de cada manager. La calibrada falla menos en el total de la liga, pero aqui se paso al reves que en E79.
+- Lo que se apunta tres dias antes no ve los cambios de once de los rivales, y eso pesa mas que la vara.
+- Nada para «Listo para el plan». Hay que repetirlo en la J13.
+
 ### E91 · 09/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo: el modo ahorro del dueño sigue en vigor. La J12 aun no esta pagada en el tablon (`--juzgar 12` lo dice); E86 se juzga cuando se pague. No he aprendido nada nuevo.
