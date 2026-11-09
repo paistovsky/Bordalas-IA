@@ -3004,3 +3004,5 @@
 {"dia":"2026-11-08","id":42260,"name":"Gamón","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-08","id":42395,"name":"Bright Ede","value":0,"price":380000,"bid":0,"live_bid":0,"decision":"NO_DISPONIBLE","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-08","id":33694,"name":"Boyomo","value":0,"price":1530000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-08","id":19441,"name":"Pedri","value":15189871,"price":14940000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-08","id":42757,"name":"Ndukwe","value":1731897,"price":1670000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
