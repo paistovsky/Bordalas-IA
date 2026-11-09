@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 08/11/2026, 21:30 de Madrid (rafaga de la noche del dom: Iglesias y Dani Lorenzo a conservar).
+Actualizado: 09/11/2026, 07:35 de Madrid (rafaga del lun: Boye sale de proteger).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/11 07:35 (rafaga de la manana del lun; empieza el paron).**
+  Ciclos: verdes (#2813 a #2820; la vuelta de las 22:07 con Iglesias y
+  Dani Lorenzo en `conservar`, verde). Libros guardandose. Saldo
+  +2.275.724, 0 pujas, nada comprado ni vendido. **Hecho el paso del plan
+  «Lun 09 07:15»: Boye (12494) sale de `proteger`** (sigue en
+  `conservar`): vuelve a poder publicarse con oferta para la operacion
+  Raphinha; el motor viejo no la acepta por estar en conservar. En
+  `proteger` solo queda Yamal. Verja 3.13: 238 en verde. Hoy: 10:47 S1 =
+  LA_ORDEN_EN_LOS_MANAGERS (del chat del dueno, si R3a esta OK); 21:15 S2
+  = LA_HUCHA (mi rafaga, si S1 dio una vuelta verde). Turno de la J13 en
+  pie.
 
 - **08/11 21:30 (rafaga de la noche del dom).** Ciclos: verdes (#2806 a
   #2812), libros guardandose cada hora (ultimo 21:13). Saldo +2.275.724,
