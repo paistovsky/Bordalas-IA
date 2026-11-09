@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/11/2026, 11:25 de Madrid (ENCENDIDO: LA_ORDEN_EN_LOS_MANAGERS, S1 del plan del paron).
+Actualizado: 09/11/2026, 14:30 de Madrid (rafaga de la tarde del lun: verde con LA_ORDEN_EN_LOS_MANAGERS encendido).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/11 14:30 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#2822 a #2828), cuatro de ellas con LA_ORDEN_EN_LOS_MANAGERS
+  encendido; libros guardandose (14:13). Saldo +2.275.724, 0 pujas, nada
+  comprado ni vendido. **S2 = LA_HUCHA a las 21:15 la hago yo** (mi
+  rafaga), salvo que al empezar vea un commit de encendido del chat del
+  dueno: entonces solo compruebo. Receta: R1 revisada, «1» literal, paso 0
+  al final, verja 3.11 y 3.13, una vuelta verde. Turno de la J13 en pie.
 
 - **09/11 11:25 (chat del dueno, laboratorio de las 10:47). ENCENDIDO:
   BORDALAS_LA_ORDEN_EN_LOS_MANAGERS (4d770f4e), S1 del plan del paron.**
