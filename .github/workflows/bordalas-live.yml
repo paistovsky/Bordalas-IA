@@ -580,6 +580,17 @@ jobs:
       #   un manager. Marcha atras: quitar esta linea.
       BORDALAS_LA_ORDEN_EN_LOS_MANAGERS: "1"
 
+      # ENCENDIDO 09/11 — BORDALAS_LA_HUCHA (chat del dueno, laboratorio de las
+      # 20:47; plan de encendidos del paron, S2). Operacion Raphinha
+      # (config/la_hucha.json: objetivo 16 M, desde mar 10/11 00:00, caduca
+      # 31/12). Aparta el dinero: ningun motor puja con el, salvo los cambios
+      # que se pagan solos y la orden cuando ficha a Raphinha. No vende nada.
+      # src/analysis/la_hucha.py. Ensayo del 09/11 verde; verja con --con
+      # verde; paso 0 en el arbol final. Vigilar el mar 07:15: apartado =
+      # saldo - pujas, libre = 0, nada vendido ni publicado por ella.
+      # Marcha atras: quitar esta linea.
+      BORDALAS_LA_HUCHA: "1"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
