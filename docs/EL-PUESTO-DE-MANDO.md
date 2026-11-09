@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/11/2026, 07:35 de Madrid (rafaga del lun: Boye sale de proteger).
+Actualizado: 09/11/2026, 11:25 de Madrid (ENCENDIDO: LA_ORDEN_EN_LOS_MANAGERS, S1 del plan del paron).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/11 11:25 (chat del dueno, laboratorio de las 10:47). ENCENDIDO:
+  BORDALAS_LA_ORDEN_EN_LOS_MANAGERS (4d770f4e), S1 del plan del paron.**
+  Antes: 0 ofertas de managers y 0 contraofertas vivas; ensayo 42596737489
+  verde (238/238, XI 11/11, sin errores); paso 0 en el arbol final: 68
+  probados; verja 238/238. **Primera vuelta encendida (11:07, run
+  42598518887): verde**, el interruptor en el entorno, verja 238/238.
+  J12 cerrada con 47 puntos (pendiente del pago del mar). Siguiente: S2 la
+  hucha, hoy a las 21:15 (rafaga del gestor o este chat).
 
 - **09/11 07:35 (rafaga de la manana del lun; empieza el paron).**
   Ciclos: verdes (#2813 a #2820; la vuelta de las 22:07 con Iglesias y
