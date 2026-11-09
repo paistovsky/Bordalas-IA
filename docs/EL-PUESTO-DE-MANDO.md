@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/11/2026, 14:30 de Madrid (rafaga de la tarde del lun: verde con LA_ORDEN_EN_LOS_MANAGERS encendido).
+Actualizado: 09/11/2026, 21:05 de Madrid (ENCENDIDA: LA_HUCHA, S2; la hace el chat del dueno, no la rafaga de las 21:15).
 
 ## El mandato
 
@@ -351,6 +351,20 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **09/11 21:05 (chat del dueno, laboratorio de las 20:47). ENCENDIDA:
+  BORDALAS_LA_HUCHA (fcb692ae), S2 del plan. YA ESTA HECHO: la rafaga de
+  las 21:15 no tiene que encenderla.** Ensayo 42686999673 verde (238/238,
+  XI 11/11; la hucha aun no actua: `desde` mar 10/11 00:00), verja con
+  `--con BORDALAS_LA_HUCHA` 238/238, paso 0 en el arbol final, verja
+  238/238. Sin revisor aparte (modo ahorro); la cubren las dos revisiones
+  encendidas del 02-03/11 y la verja. **Vigilar:** mar 00:07 (primera vuelta
+  activa) y mar 07:15: apartado = saldo - pujas, libre = 0, nada vendido ni
+  publicado por ella. Marcha atras: quitar la linea del YAML.
+  **J12 cobrada:** saldo +3.745.724 (+1.470.000): puntuamos (47). Mejores
+  de la J12: DiosMande 71, Mex 67, Luismi 62. Pollo vende a Moleiro
+  (9.832.000, 08:26). Luismi ficha a Julian Alvarez (9,43 M), Inaki Williams
+  y Satriano en el reset.
 
 - **09/11 14:30 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#2822 a #2828), cuatro de ellas con LA_ORDEN_EN_LOS_MANAGERS
