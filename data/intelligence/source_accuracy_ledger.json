@@ -4274,7 +4274,7 @@
         "17482": {
           "player_name": "Dituro",
           "team": "Elche",
-          "appearances_at_prediction": 11,
+          "appearances_at_prediction": 12,
           "sources": {},
           "consensus": "UNCERTAIN",
           "consensus_probability": 50.0
@@ -4292,7 +4292,7 @@
         "26271": {
           "player_name": "Yamal",
           "team": "Barcelona",
-          "appearances_at_prediction": 11,
+          "appearances_at_prediction": 12,
           "sources": {
             "FUTBOLFANTASY": 60.0,
             "ANALITICA_FANTASY": 70.0
@@ -4303,7 +4303,7 @@
         "29661": {
           "player_name": "Olasagasti",
           "team": "Levante",
-          "appearances_at_prediction": 11,
+          "appearances_at_prediction": 12,
           "sources": {
             "ANALITICA_FANTASY": 70.0
           },
@@ -4384,7 +4384,7 @@
         "41606": {
           "player_name": "Mangala",
           "team": "Getafe",
-          "appearances_at_prediction": 8,
+          "appearances_at_prediction": 9,
           "sources": {
             "ANALITICA_FANTASY": 70.0
           },
