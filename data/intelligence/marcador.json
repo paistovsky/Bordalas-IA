@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-11-10T04:56:37.964007",
+  "updated_at": "2026-11-10T07:21:22.315100",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -2879,49 +2879,49 @@
       "clave": "RONDA_DE_BIWENGER",
       "ronda_de_biwenger": 4910,
       "escritura": 2,
-      "visto": "2026-11-10T04:56:37.964007",
-      "datos_de": "2026-11-10T04:56:13.282958+00:00",
-      "escrito_en": "2026-11-10T04:56:37.964007",
+      "visto": "2026-11-10T07:21:22.315100",
+      "datos_de": "2026-11-10T07:21:13.987761+00:00",
+      "escrito_en": "2026-11-10T07:21:22.315100",
       "clasificacion": [
         {
           "user_id": 14145555,
           "name": "Pollo17",
-          "points": 501
+          "points": 549
         },
         {
           "user_id": 14175949,
           "name": "Pepe Bordalás",
-          "points": 495
+          "points": 544
         },
         {
           "user_id": 14156489,
           "name": "Luismi_Haz",
-          "points": 454
+          "points": 516
         },
         {
           "user_id": 14176382,
           "name": "Manzagool",
-          "points": 420
+          "points": 467
         },
         {
           "user_id": 14178736,
           "name": "Mex",
-          "points": 381
+          "points": 448
         },
         {
           "user_id": 14151726,
           "name": "DiosMande a Rodri al Palancas",
-          "points": 375
+          "points": 446
         },
         {
           "user_id": 14154203,
           "name": "Prinzipote",
-          "points": 372
+          "points": 424
         },
         {
           "user_id": 14456960,
           "name": "Alvaro Retamosa Sanguino",
-          "points": 315
+          "points": 355
         }
       ],
       "mi_user_id": 14175949,
@@ -2960,7 +2960,7 @@
           12494
         ],
         "guardado": "2026-11-03T07:11:00+00:00",
-        "visto_en": "2026-11-10T04:56:13.282958+00:00"
+        "visto_en": "2026-11-10T07:21:13.987761+00:00"
       },
       "plantilla": [
         {
