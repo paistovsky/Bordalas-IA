@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/11/2026, 20:50 de Madrid (lab de la noche: sin movimientos; Aubameyang pendiente del dueno).
+Actualizado: 10/11/2026, 21:30 de Madrid (rafaga de la noche del mar: los numeros de Raphinha).
 
 ## El mandato
 
@@ -351,6 +351,25 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **10/11 21:30 (rafaga de la noche del mar).** Ciclos: verdes (#2851
+  a #2858); libros 21:11. Saldo +3.995.724, 0 pujas desde el 07/11. La
+  pregunta del dueno por Aubameyang la lleva su chat (no la toco: dos
+  manos). **LOS NUMEROS DE RAPHINHA (prometidos a las 14:15):** nuestra
+  puja maxima hoy es 19.030.724 = saldo 3,99 M + el 25 % del valor de la
+  plantilla (60,14 M). Raphinha pide 25,19 M: **HOY NO PODRIAMOS NI
+  PUJAR POR EL.** Para pujar ~29 M hace falta un saldo de ~14 M (o
+  vender antes, que baja tambien el 25 %). Vendiendo Roberto (~7 M) y
+  Boye (~6 M) el mismo dia: saldo ~17 M, puja maxima ~28,8 M, justo; si
+  se gana, el saldo queda en ~-12 M y hay que vender otros ~12 M antes
+  de la jornada siguiente. La hucha llega a 16 M a ritmo de premios
+  (~1,5 M por jornada + racha) en 6-8 semanas. **Veredicto del CEO:** no
+  vendo titulares ahora por un jugador que no esta en el mercado (cuesta
+  puntos seguros por uno posible). Se sigue con la hucha; el dia que
+  Raphinha salga, la decision es: vender Roberto + Boye + uno mas y pujar
+  ~29 M, o dejarlo. Revisar el 30/11 (al renovar la orden): si en 3
+  semanas no ha salido y Pollo/Alvaro siguen con >20 M, la operacion se
+  replantea (otro objetivo mas barato o apagar la hucha).
 
 - **10/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
   movimientos de los rivales desde las 09:31 (Pollo 21,9 M en caja,
