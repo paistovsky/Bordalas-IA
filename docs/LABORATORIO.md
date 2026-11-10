@@ -69,6 +69,10 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E93 · 10/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
+
+Turno minimo: el modo ahorro del dueño sigue en vigor. E86 ya esta juzgado (E92). La J8 sigue sin cerrar en los libros: falta el Rayo-Athletic aplazado, asi que `lab/predicciones/j8.py --juzgar` aun no se puede correr. No he aprendido nada nuevo.
+
 ### E92 · 09/11/2026 17:17 de Madrid · Juicio de E86: ¿acertamos los puntos de la J12?
 
 Turno corto (sigue el modo ahorro): solo juzgar lo apuntado el 06/11 con `python3 lab/predicciones/jornada.py --juzgar 12`. La J12 ya esta pagada.
