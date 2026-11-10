@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/11/2026, 07:40 de Madrid (rafaga del mar: primera manana con la hucha, sin pujas).
+Actualizado: 10/11/2026, 10:55 de Madrid (lab de rivales: Pollo junta 21,9 M; Raphinha libre, no en mercado).
 
 ## El mandato
 
@@ -352,6 +352,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **10/11 10:55 (lab de rivales de la manana, modo ahorro).** Pollo17
+  vendio hoy Fofana (7,30 M) y De la Fuente (5,19 M): con Moleiro e Ivan
+  Romero de la semana pasada ya tiene **21,9 M en caja** (lider, 549 por
+  544 nuestros). Alvaro Retamosa guarda otros 20,9 M. Luismi esta en
+  **-18,9 M** tras Julian Alvarez, Williams, Satriano y Tchouameni: si no
+  lo arregla antes del vie 20/11 15:00 pierde la J13 entera (doctrina
+  §24). **Raphinha sigue libre (25,19 M, +70k) y hoy no esta en el
+  mercado.** Leccion: Pollo y Alvaro tienen caja para pujarle el dia que
+  salga; la hucha (4,0 M de 16 M) sola no basta, el plan de ventas para
+  completarla tiene que estar escrito antes de que aparezca. No se ha
+  aplicado nada nuevo (modo ahorro). Mie 11 10:47: S3 sigue en pie.
 - **10/11 07:40 (rafaga de la manana del mar; primer dia de hucha).**
   Ciclos: verdes (#2834 a #2844; desde la #2836 con el reintento de GET,
   desde la #2839 (00:07) con la hucha activa). Saldo **+3.995.724**
