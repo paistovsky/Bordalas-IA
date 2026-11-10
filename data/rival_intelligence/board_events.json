@@ -251456,5 +251456,24 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "ec958e752a3fcf2b51169c26",
+    "date": 1794280548,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 42119,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1519900
+      }
+    ]
   }
 ]

@@ -3063,3 +3063,8 @@
 {"dia":"2026-11-09","id":4753,"name":"Andrés Martín","value":0,"price":1830000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-09","id":17442,"name":"Rioja","value":0,"price":1620000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-09","id":41420,"name":"Chupe","value":0,"price":1790000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-09","id":34557,"name":"Julián Alvarez","value":9663348,"price":9510000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-09","id":26048,"name":"Tchouameni","value":5569593,"price":5460000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-09","id":33447,"name":"Jon Martín","value":4023855,"price":3960000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-09","id":1995,"name":"Iñaki Williams","value":3712642,"price":3580000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-09","id":39792,"name":"Satriano","value":3546395,"price":3480000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
