@@ -69,6 +69,10 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E94 · 10/11/2026 17:14 de Madrid · Sin experimento (modo ahorro)
+
+Turno minimo: el modo ahorro del dueño sigue en vigor y la J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
+
 ### E93 · 10/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo: el modo ahorro del dueño sigue en vigor. E86 ya esta juzgado (E92). La J8 sigue sin cerrar en los libros: falta el Rayo-Athletic aplazado, asi que `lab/predicciones/j8.py --juzgar` aun no se puede correr. No he aprendido nada nuevo.
