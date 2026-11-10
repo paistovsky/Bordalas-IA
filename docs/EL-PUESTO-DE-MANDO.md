@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/11/2026, 14:25 de Madrid (rafaga de la tarde del mar: verde, sin movimientos).
+Actualizado: 10/11/2026, 20:50 de Madrid (lab de la noche: sin movimientos; Aubameyang pendiente del dueno).
 
 ## El mandato
 
@@ -352,6 +352,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **10/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
+  movimientos de los rivales desde las 09:31 (Pollo 21,9 M en caja,
+  Alvaro 20,9 M, Luismi -18,9 M). Nosotros: saldo 3.995.724, 0 pujas,
+  hucha intacta. **El dueno pregunto (18:50) por Roberto -> Aubameyang**
+  (Deportivo, 9,12 M, +220 k/dia, en el mercado del Computer hasta el
+  reset del mie 07:00). Respuesta del CEO: no esta claro (37 anos, vuelve
+  del menisco, dos suplencias, FF 50 % para la J13; ganarlo a Pollo y
+  Alvaro pide 10,5-11 M y se come la hucha entera). Opcion ofrecida: puja
+  de ~9,6 M con `vender_si_ficha` Roberto, SOLO si el dueno dice que si
+  antes de medianoche (la hucha hay que abrirla a mano: un cambio que no
+  se paga solo no pasa). Sin respuesta, no se hace nada.
 - **10/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#2845 a #2851); libros guardandose (14:13). Saldo +3.995.724, 0
   pujas, nada vendido: la hucha sigue quieta como debe. **Debate abierto
