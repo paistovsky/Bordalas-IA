@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 09/11/2026, 21:35 de Madrid (rafaga de la noche del lun: dos vueltas rojas explicadas; reintento de lecturas).
+Actualizado: 10/11/2026, 07:40 de Madrid (rafaga del mar: primera manana con la hucha, sin pujas).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **10/11 07:40 (rafaga de la manana del mar; primer dia de hucha).**
+  Ciclos: verdes (#2834 a #2844; desde la #2836 con el reintento de GET,
+  desde la #2839 (00:07) con la hucha activa). Saldo **+3.995.724**
+  (+250.000 de la racha), 0 comprometido. **La hucha se porta como debe:**
+  ninguna puja desde el 07/11 (ni en el reset de las 07:00), nada
+  vendido; las 11 publicaciones de liquidez son las de siempre (no las
+  pone la hucha). Apartado = 3.995.724 de 16 M (25 %); libre para pujar
+  = 0. Ojo: con la hucha la mejora del once solo hace cambios que se
+  pagan solos; si Ramon (50 %) o Cardona (30 %) no llegan a la J13, el
+  hueco se cubre vendiendo, no con caja. Hoy no se enciende nada. Mie 11
+  10:47: S3 = LA_ORDEN_MANDA_EN_EL_CAMBIO. Turno de la J13 en pie.
 
 - **09/11 21:35 (rafaga de la noche del lun).** La hucha ya la encendio
   el chat del dueno a las 21:05 (fcb692ae): no la repito. J12 cobrada:
