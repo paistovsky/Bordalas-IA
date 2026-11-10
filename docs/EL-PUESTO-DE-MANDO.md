@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/11/2026, 10:55 de Madrid (lab de rivales: Pollo junta 21,9 M; Raphinha libre, no en mercado).
+Actualizado: 10/11/2026, 14:25 de Madrid (rafaga de la tarde del mar: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **10/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#2845 a #2851); libros guardandose (14:13). Saldo +3.995.724, 0
+  pujas, nada vendido: la hucha sigue quieta como debe. **Debate abierto
+  (del lab de las 10:55):** Pollo (21,9 M) y Alvaro (20,9 M) tienen caja
+  para pujarle a Raphinha el dia que salga; con 4 M en la hucha + Roberto
+  y Boye no llegamos a ~29 M. Hay que decidir ANTES de que salga que mas
+  se vende (y si compensa) o aceptar que esta operacion puede perderse;
+  lo llevo a la rafaga de las 21:15 con numeros. Mie 11 10:47: S3.
 
 - **10/11 10:55 (lab de rivales de la manana, modo ahorro).** Pollo17
   vendio hoy Fofana (7,30 M) y De la Fuente (5,19 M): con Moleiro e Ivan
