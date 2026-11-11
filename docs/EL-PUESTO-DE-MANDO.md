@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 10/11/2026, 21:30 de Madrid (rafaga de la noche del mar: los numeros de Raphinha).
+Actualizado: 11/11/2026, 07:25 de Madrid (rafaga del mie: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **11/11 07:25 (rafaga de la manana, corta: modo ahorro).** Ciclos:
+  verdes (#2858 a #2867, la de las 07:15 incluida); libros 07:20. Saldo
+  +3.995.724, 0 pujas, nada vendido en el reset: la hucha quieta. Sin
+  Aubameyang (el dueno no dijo que si). Hoy 10:47: S3 =
+  LA_ORDEN_MANDA_EN_EL_CAMBIO (del laboratorio; si no lo hace, lo miro a
+  las 14:15). Turno de la J13 en pie.
 
 - **10/11 21:30 (rafaga de la noche del mar).** Ciclos: verdes (#2851
   a #2858); libros 21:11. Saldo +3.995.724, 0 pujas desde el 07/11. La
