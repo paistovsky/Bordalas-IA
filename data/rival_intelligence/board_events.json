@@ -251676,5 +251676,24 @@
         "amount": 1397300
       }
     ]
+  },
+  {
+    "event_id": "8c28a4962e1868b05e94ef7c",
+    "date": 1794386345,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
