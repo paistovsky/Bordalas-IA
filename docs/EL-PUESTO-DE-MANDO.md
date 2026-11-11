@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/11/2026, 07:25 de Madrid (rafaga del mie: verde, sin movimientos).
+Actualizado: 11/11/2026, 11:10 de Madrid (S3 LA_ORDEN_MANDA_EN_EL_CAMBIO encendida; Pollo se lleva a Aubameyang por 11,7 M).
 
 ## El mandato
 
@@ -352,6 +352,28 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **11/11 11:10 (laboratorio de las 10:47). ENCENDIDA: S3 =
+  BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO (commit de encendido de hoy, el
+  siguiente a este).** Ensayo 42999222068 verde (238/238, XI 11/11; la
+  unica escritura no enviada, renovar el listado de Gulacsi a 2.980.000,
+  es la de siempre del motor viejo, no del interruptor). Verja con `--con`
+  verde en 3.11 y 3.13 (238/238); paso 0 en el arbol final; verja normal.
+  Sin revisor aparte (modo ahorro; la cubren las revisiones R3b y la
+  verja). **REGLA DEL GESTOR (escrita tambien en la orden,
+  `vender_si_ficha.por_que`): SOLTAR NO SE DESHACE.** Si la orden ficha a X
+  y vende a alguien por el, la mejora suelta su cambio por X; mientras la
+  puja por X este viva y hasta que salga el que vende la orden, la orden
+  sigue valida y con su `vender_si_ficha` para X: no se borra la linea ni
+  se cambia su `si_esta` hasta que X sea nuestro (y el otro vendido) o se
+  pierda la puja. Hoy no hay `fichar` en la orden: el interruptor aun no
+  actua. **Rivales desde las 07:05:** Pollo ficha a Aubameyang por
+  11.707.000 (+28,4 % sobre 9,12 M, ganando a 2), Pepelu 3.777.000 y
+  Pedrosa 2.827.000; Manzagool, Eric Garcia 6.010.000 (gana a 2) y
+  Tsitaishvili 1.800.000, y vende a Boyomo; Luismi vende a Kang-in Lee
+  (7.983.300; sigue en rojo, ~-10,7 M). Leccion: en los delanteros de >9 M
+  que suben, Pollo paga +28 %; la puja de 9,6 M que le ofreci al dueno
+  habria perdido. Para Raphinha (25,2 M) eso son ~32 M. Marcha atras: quitar
+  la linea del YAML.
 - **11/11 07:25 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#2858 a #2867, la de las 07:15 incluida); libros 07:20. Saldo
   +3.995.724, 0 pujas, nada vendido en el reset: la hucha quieta. Sin

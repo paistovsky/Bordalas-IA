@@ -19,7 +19,7 @@
     }
   ],
   "vender_si_ficha": {
-    "por_que": "04/11, el gestor: Adrián Niño perdido en el reset del mié 04/11 07:00 (Manzagool, 5.142.300); Roberto ya no sale por él y sigue en conservar. Lista vacía.",
+    "por_que": "04/11, el gestor: Adrián Niño perdido en el reset del mié 04/11 07:00 (Manzagool, 5.142.300); Roberto ya no sale por él y sigue en conservar. Lista vacía. 11/11, el gestor (encendido de LA_ORDEN_MANDA_EN_EL_CAMBIO): SOLTAR NO SE DESHACE. Si la orden ficha a X y vende a alguien por el, la mejora suelta su cambio por X. Mientras la puja por X este viva y hasta que salga el que vende la orden, esta orden sigue valida y con su vender_si_ficha para X: no se borra la linea ni se cambia su si_esta hasta que X sea nuestro (y el otro vendido) o la puja se pierda.",
     "jugadores": []
   },
   "proteger": [
