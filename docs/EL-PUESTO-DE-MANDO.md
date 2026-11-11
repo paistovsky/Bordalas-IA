@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/11/2026, 11:10 de Madrid (S3 LA_ORDEN_MANDA_EN_EL_CAMBIO encendida; Pollo se lleva a Aubameyang por 11,7 M).
+Actualizado: 11/11/2026, 14:25 de Madrid (rafaga del mie: verde con S3 encendida).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **11/11 14:25 (rafaga de la tarde, corta: modo ahorro).** S3 la
+  encendio el laboratorio a las 11:10 (b18015fd); desde entonces cuatro
+  vueltas verdes (#2871 a #2874); libros 14:12. Saldo +3.995.724, 0
+  pujas, nada vendido. Pollo se llevo a Aubameyang (11,7 M): baja su
+  caja a ~10 M, lo que le quita fuerza para pujar por Raphinha (bien para
+  la hucha). Jue 12 / vie 13: sin encendidos (R4 y EL_RELEVO). Sab 14
+  10:47: S4. Turno de la J13 en pie.
 
 - **11/11 11:10 (laboratorio de las 10:47). ENCENDIDA: S3 =
   BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO (commit de encendido de hoy, el
