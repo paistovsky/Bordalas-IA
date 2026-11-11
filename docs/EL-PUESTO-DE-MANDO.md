@@ -374,6 +374,9 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   que suben, Pollo paga +28 %; la puja de 9,6 M que le ofreci al dueno
   habria perdido. Para Raphinha (25,2 M) eso son ~32 M. Marcha atras: quitar
   la linea del YAML.
+  **12:20: primera vuelta encendida verde** (#2872, 12:07, commit
+  8a7af289): 30 interruptores, el nuevo a 1; verja 238/238, XI 11/11, saldo
+  3.995.724, sin pujas; solo la renovacion de siempre de un listado.
 - **11/11 07:25 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#2858 a #2867, la de las 07:15 incluida); libros 07:20. Saldo
   +3.995.724, 0 pujas, nada vendido en el reset: la hucha quieta. Sin
