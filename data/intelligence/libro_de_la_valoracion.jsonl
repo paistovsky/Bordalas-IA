@@ -3184,3 +3184,5 @@
 {"dia":"2026-11-11","id":33,"name":"Álvaro García","value":0,"price":2970000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-11","id":39357,"name":"Maciá","value":0,"price":760000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-11","id":39901,"name":"Freeman","value":0,"price":4030000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-11","id":20,"name":"Eric García","value":5369760,"price":5120000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
+{"dia":"2026-11-11","id":41940,"name":"Tsitaishvili","value":1280317,"price":1260000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
