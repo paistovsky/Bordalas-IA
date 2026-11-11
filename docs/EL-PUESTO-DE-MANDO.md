@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/11/2026, 20:50 de Madrid (lab de la noche: Pollo gasta su caja; Alvaro 20,9 M).
+Actualizado: 11/11/2026, 21:25 de Madrid (rafaga de la noche del mie: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **11/11 21:25 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#2874 a #2881); libros 21:10. Saldo +3.995.724, 0 pujas, nada
+  vendido. Jue 12 y vie 13 sin encendidos. Turno de la J13 en pie.
 
 - **11/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
   movimientos desde las 07:17. Cajas: **Pollo bajo de 21,9 M a 3,8 M**
