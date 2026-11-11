@@ -44,6 +44,17 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 11/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
+
+Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
+lesiones ni sanciones en Biwenger. Panel igual que ayer: Gulacsi 90,
+Iglesias 95, Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70,
+**Ramon 50** (revulsivo), Yamal 95, Roberto 80, Boye 90, **Cardona 30**
+(fuera del once). Precios: suben Kike +80 k, Yamal +40 k, Chust +40 k,
+Iglesias +30 k; bajan Cardona -110 k, Boye -60 k, Roberto -40 k, Ivan
+-40 k. Selecciones: no consta nada. Sin pujas vivas (hucha). **Hecho:
+nada.**
+
 ## 10/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
 
 Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
@@ -453,72 +464,3 @@ el cambio se hace a mano, Cardona por Ramon, antes de las 20:59.
 recomendado. **Hecho:** nada; no hay riesgo nuevo. Cardona sigue
 siendo una moneda al aire. Esta manana se decidio no fichar suplente (ver
 la bitacora de las 12:40). El vie por la tarde no hay nada que tocar a mano.
-
-## 28/10/2026, 19:15 de Madrid (J11: vie 30/10 21:00; cierre 20:45)
-
-(La Copa no puntua para nosotros. Hoy el RFEF aplazo los 24 partidos de
-Copa del miercoles por el accidente de tren de Toledo: Alaves pasa al mar
-03/11, Levante al jue 05/11 y Valencia al mar 10/11. Los del jueves siguen.)
-
-| Jugador | Veredicto | J11 % | J11 (Madrid) | Copa (pista) | Fuente | Cambio |
-|---|---|---|---|---|---|---|
-| Gulacsi (POR) | TITULAR | 90 | Villarreal-Espanyol, vie 21:00 | descanso (Luiz Junior en Manacor) | FF 90; JP primer portero | 88 -> 90 |
-| Kike Salas (DEF) | TITULAR | 88 | Getafe-Sevilla, dom 14:00 | fuera de la lista del jue 29 («decision tecnica») | FF 90; convocatoria del Sevilla | 86 -> 88 |
-| Chust (DEF) | TITULAR | 92 | Elche-Valencia, dom 18:30 | descanso en Pinatar | FF 90 | = |
-| Gaya (DEF) | TITULAR | 84 | Elche-Valencia, dom 18:30 | aplazada al 10/11 | FF 80; recuperado de la nariz | 82 -> 84 |
-| **Sergi Cardona (DEF)** | **DUDA** | **50** | Villarreal-Espanyol, vie 21:00 | titular en Manacor, gol, 57' | FF 50 (Romero 50, entrena sin alta; Freeman puede ir a la izquierda); JP «Cardona y Freeman»; Comuniate 60 | 35-40 -> 50 |
-| Olasagasti (MED) | TITULAR | 85 | Levante-Atletico, sab 14:00 | fuera de la lista; aplazada | FF 80 | = |
-| Pablo Ibanez (MED) | TITULAR | 84 | Barcelona-Alaves, sab 21:00 | aplazada al 03/11 | FF 80 | = |
-| Unai Lopez (MED) | TITULAR | 82 | Rayo-Celta, sab 16:15 | 0' en Huelva (suplente sin entrar) | FF 70; FF: «plaza reservada»; Ciss sancionado | = |
-| Yamal (DEL) | TITULAR | 95 | Barcelona-Alaves, sab 21:00 | exento | FF 95 | = |
-| Roberto Fernandez (DEL) | TITULAR | 85 | Villarreal-Espanyol, vie 21:00 | entro en el 45' en Sestao (~76') | FF 90; Espanyol echa a Manolo Gonzalez, interino Sergio Garcia | 89 -> 85 |
-| Boye (DEL) | TITULAR | 88 | Barcelona-Alaves, sab 21:00 | aplazada | FF 90; el golpe, leve | 87 -> 88 |
-
-Puja viva: **Nacho Perez** (DEF, Levante, 838.000 de la ronda): DUDA 55
-(FF y JP 60; Comuniate da a Toljan). Se turna con Toljan partido a partido.
-
-**Caja J11:** +580.975 si se gana a Nacho, +1.418.975 si se pierde. El cierre
-esta EN_POSITIVO. El once guardado tiene 11 y coincide con el recomendado.
-
-**Recambio de Cardona:** ningun defensa del mercado de hoy pasa el liston.
-Lejeune tiene FF 95 pero 2,0 pts/partido, y la caja quedaria en rojo. Nacho
-tiene FF 60; De Haas y Sadick, 70; Zubeldia, Abqar y Sazonov, 30, y Abqar
-y Sazonov ademas juegan Copa el jue. **Hecho:** nada. Los vetos de De Haas,
-Sadick y Lejeune siguen hasta el jue 08:22. Simulado: sin ellos, la mejora
-compraria a De Haas si Cardona bajara a 45; con ellos, nada. A las 23:30 se
-vuelve a mirar FF.
-
-**A vigilar:** si se gana a Nacho, el once duda entre Cardona y Nacho (casi
-empate: si FF sube a Nacho a 62 o baja a Cardona a 49, entra Nacho, y el
-once sigue con 11). La rotacion puede cambiar el jue a Roberto, Gulacsi u
-Olasagasti si encuentra algo mejor (`conservar` no la frena): pagando solo
-con caja, sin riesgo de saldo.
-
-## 28/10/2026, 08:45 de Madrid (supervision; el parte completo, a las 18:37)
-
-**Cardona tras Manacor (0-5):** titular, cambiado en el 57' (le dosifican).
-FF J11 (pagina «Posible alineacion J11», leida a las 08:26): **Cardona 50**,
-Carlos Romero 50 (en duda), Mourino 40, Freeman 70, Foyth 70, Veiga 80.
-Gulacsi 90 (Luiz Junior jugo la Copa). Sigue en DUDA, sin bajar de 50.
-
-**Defensas del mercado de hoy (Computer):** ninguno pasa el liston.
-
-| Defensa | Precio | Tendencia | FF J11 | Pts/partido | Por que no |
-|---|---|---|---|---|---|
-| Nacho Perez (Levante, en Atletico) | 830.000 | +5,1 % | 60 | 4,0 | FF < 80. La ronda ya puja (838.000) |
-| Lejeune | 2.880.000 | baja | 95 | 2,0 | no suma sobre Cardona y no cabe en la caja |
-| De Haas | 1.520.000 | baja | 70 | 3,7 | FF < 80 |
-| Zubeldia | 1.000.000 | baja | 30 | 2,7 | suplente |
-| Sadick | 860.000 | baja | 70 | 2,8 | FF < 80 y suma menos |
-
-**Decision de la manana:** Cardona se queda por ahora. A las 18:37 se
-vuelve a mirar FF (actualiza la J11 tras la Copa). Si baja a <= 40 y aparece
-un defensa que pase el liston, se escribe con la prima de la regla del
-laboratorio y comprobando antes que Cardona tiene oferta viva del Computer
-para venderlo en cuanto llegue el relevo.
-
-**La caja de la J11:** la ronda pujo a las 07:19 por Fortuno (1.848.000) y
-Nacho Perez (838.000). Si ganaba las dos, la J11 empezaba en -1.267.025 y
-dependia de la oferta del Computer por Fortuno del vie 07:00. **Puja por
-Fortuno retirada** (`no_pujar`). Con la de Nacho sola, en el peor caso
-+580.975. Lista de objetivos: ninguno en el mercado hoy.
