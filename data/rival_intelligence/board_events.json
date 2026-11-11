@@ -251695,5 +251695,47 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "75456fc409b2bc45fa555da6",
+    "date": 1794399448,
+    "type": "playerMovements",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "type": "position",
+        "player": 38308,
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 43458,
+        "from": 4,
+        "to": [
+          4,
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 34557,
+        "from": 4,
+        "to": [
+          4,
+          3
+        ]
+      }
+    ]
   }
 ]
