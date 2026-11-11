@@ -591,6 +591,16 @@ jobs:
       # Marcha atras: quitar esta linea.
       BORDALAS_LA_HUCHA: "1"
 
+      # ENCENDIDO 11/11 — BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO (laboratorio de
+      # las 10:47; plan de encendidos del paron, S3). Arregla la doble venta
+      # del 03/11: si la orden ficha al que entra por un cambio de la mejora Y
+      # vende a alguien por el (`vender_si_ficha` con ese `si_esta`), la mejora
+      # suelta su cambio y su caja no cuenta esa venta. Regla del gestor:
+      # soltar no se deshace (la orden sigue valida mientras la puja viva).
+      # Ensayo del 11/11 verde; verja con --con verde en 3.11 y 3.13; paso 0
+      # en el arbol final. Marcha atras: quitar esta linea.
+      BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO: "1"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4

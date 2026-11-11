@@ -1,7 +1,7 @@
 {
  "version": 1,
- "cuando": "2026-11-09T19:59:08+00:00",
- "segundos": 241.9,
+ "cuando": "2026-11-11T10:11:22+00:00",
+ "segundos": 289.3,
  "maquina": "Linux x86_64",
  "probados": [
   "BORDALAS_BID_SALT",
@@ -73,5 +73,5 @@
   "BORDALAS_VARA_PLANA",
   "BORDALAS_VIGILA_DATA"
  ],
- "huella": "ec88ba7b8aa74a4c8157b2d82f7f183fcea09e6dcdd2cea393af6993187c2b05"
+ "huella": "33aaad3a8e8087c90746193cef71c4db5923f5ef1e797de73c0ccb753be54b02"
 }
