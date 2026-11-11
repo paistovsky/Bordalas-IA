@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/11/2026, 14:25 de Madrid (rafaga del mie: verde con S3 encendida).
+Actualizado: 11/11/2026, 20:50 de Madrid (lab de la noche: Pollo gasta su caja; Alvaro 20,9 M).
 
 ## El mandato
 
@@ -352,6 +352,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **11/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
+  movimientos desde las 07:17. Cajas: **Pollo bajo de 21,9 M a 3,8 M**
+  (gasto 18,3 M en el reset en Aubameyang, Pepelu y Pedrosa); Alvaro sigue
+  con 20,9 M (el unico con caja para Raphinha hoy); Manzagool -2,9 M;
+  Luismi -10,7 M. Leccion: Pollo hace hucha a su manera (vende 4 en 5
+  dias, ~28 M) y la gasta de golpe en los que suben, no la guarda. La
+  nuestra sigue en 3.995.724, sin pujas. S3 encendida y verde todo el dia.
+  Nada aplicado (modo ahorro). Jue 12 y vie 13: sin encendidos (R4 ligera).
 - **11/11 14:25 (rafaga de la tarde, corta: modo ahorro).** S3 la
   encendio el laboratorio a las 11:10 (b18015fd); desde entonces cuatro
   vueltas verdes (#2871 a #2874); libros 14:12. Saldo +3.995.724, 0
