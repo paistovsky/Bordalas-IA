@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 12/11/2026, 07:30 de Madrid (rafaga del jue: verde, sin movimientos).
+Actualizado: 12/11/2026, 10:55 de Madrid (lab: las primas de los rivales, bajo el agua).
 
 ## El mandato
 
@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **12/11 10:55 (lab de rivales de la manana, modo ahorro; jueves: sin
+  encendidos).** Reset de hoy: Pollo ficha a Gordon (11.070.000) y queda en
+  -7,2 M; Manzagool, Nico Williams (9.877.000) y Luka Sucic (6.540.000),
+  vende a Manu Sanchez, y queda en -18,1 M; DiosMande, Fran Garcia
+  (3.700.000). **Medido: las primas grandes de los rivales estan bajo el
+  agua** (valor de hoy contra lo pagado): Aubameyang -18,7 % (-2,2 M),
+  Sucic -15,7 %, Eric Garcia -13,6 %, Nico Williams -11,9 %; Gordon,
+  Pepelu y Pedrosa ~-1,5 %; solo Julian Alvarez +3,3 %. Con subidas de
+  +50/+170 k al dia no recuperan la prima antes de la J13, y Pollo,
+  Manzagool y Luismi tienen que vender antes del vie 20/11 15:00. Leccion:
+  pagan puntos, no beneficio; no se copia. Confirma la hucha y la regla de
+  no pujar fuerte por los que suben. Nada aplicado. Caja nuestra 3.995.724,
+  0 pujas.
 - **12/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#2881 a #2890, la de las 07:15 incluida). Saldo +3.995.724, 0
   pujas, nada vendido en el reset. Jueves: sin encendidos. Turno de la
