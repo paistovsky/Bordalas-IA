@@ -3240,3 +3240,6 @@
 {"dia":"2026-11-12","id":42747,"name":"Abdelkarim","value":0,"price":330000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-12","id":38962,"name":"Mikautadze","value":0,"price":7210000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-12","id":39901,"name":"Freeman","value":0,"price":3910000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-12","id":26276,"name":"Ratiu","value":4420575,"price":3400000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
+{"dia":"2026-11-12","id":37897,"name":"Gorrotxategi","value":1572287,"price":1540000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
+{"dia":"2026-11-12","id":20969,"name":"Germán Valera","value":4348080,"price":6140000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
