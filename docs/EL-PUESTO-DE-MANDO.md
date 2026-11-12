@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 12/11/2026, 10:55 de Madrid (lab: las primas de los rivales, bajo el agua).
+Actualizado: 12/11/2026, 14:25 de Madrid (rafaga de la tarde del jue: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **12/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#2890 a #2897); libros 14:12. Saldo +3.995.724, 0 pujas, nada
+  vendido. Jueves: sin encendidos. Turno de la J13 en pie.
 
 - **12/11 10:55 (lab de rivales de la manana, modo ahorro; jueves: sin
   encendidos).** Reset de hoy: Pollo ficha a Gordon (11.070.000) y queda en
