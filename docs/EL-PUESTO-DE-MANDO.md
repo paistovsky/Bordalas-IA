@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 12/11/2026, 20:50 de Madrid (lab de la noche: Pollo vende a Mikautadze y sale del rojo).
+Actualizado: 12/11/2026, 21:20 de Madrid (rafaga de la noche del jue: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **12/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#2897 a #2904); libros 21:12. Saldo +3.995.724, 0 pujas, nada
+  vendido. Viernes 13: sin encendidos. Turno de la J13 en pie.
 
 - **12/11 20:50 (lab de rivales de la noche, modo ahorro).** Pollo vende
   a Mikautadze (7.471.700, 10:56) y vuelve a positivo (+0,23 M): cambia un
