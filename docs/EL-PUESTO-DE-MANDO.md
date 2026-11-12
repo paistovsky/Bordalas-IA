@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 11/11/2026, 21:25 de Madrid (rafaga de la noche del mie: verde, sin movimientos).
+Actualizado: 12/11/2026, 07:30 de Madrid (rafaga del jue: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **12/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
+  verdes (#2881 a #2890, la de las 07:15 incluida). Saldo +3.995.724, 0
+  pujas, nada vendido en el reset. Jueves: sin encendidos. Turno de la
+  J13 en pie (vie 20/11 12:50).
 
 - **11/11 21:25 (rafaga de la noche, corta: modo ahorro).** Ciclos:
   verdes (#2874 a #2881); libros 21:10. Saldo +3.995.724, 0 pujas, nada
