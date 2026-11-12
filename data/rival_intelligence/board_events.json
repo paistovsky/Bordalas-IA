@@ -251817,5 +251817,23 @@
         "amount": 3700000
       }
     ]
+  },
+  {
+    "event_id": "332b448625dbbb606fe3de33",
+    "date": 1794465318,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 1721,
+        "from": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 1203500
+      }
+    ]
   }
 ]
