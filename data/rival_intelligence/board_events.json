@@ -251439,6 +251439,114 @@
     }
   },
   {
+    "event_id": "35b4d3736e8c65ffb2170d68",
+    "date": 1794240351,
+    "type": "roundFinished",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "round": {
+        "id": 4910,
+        "name": "Jornada 12"
+      },
+      "scoreID": 5,
+      "results": [
+        {
+          "user": {
+            "id": 14151726,
+            "name": "DiosMande a Rodri al Palancas",
+            "icon": "i/u/14151726.png"
+          },
+          "points": 71,
+          "bonus": 2130000
+        },
+        {
+          "user": {
+            "id": 14178736,
+            "name": "Mex"
+          },
+          "points": 67,
+          "bonus": 2010000
+        },
+        {
+          "user": {
+            "id": 14156489,
+            "name": "Luismi_Haz",
+            "icon": "icons/11.png"
+          },
+          "points": 62,
+          "bonus": 1860000
+        },
+        {
+          "user": {
+            "id": 14154203,
+            "name": "Prinzipote"
+          },
+          "points": 52,
+          "bonus": 1560000
+        },
+        {
+          "user": {
+            "id": 14175949,
+            "name": "Pepe Bordalás",
+            "icon": "i/u/14175949.png"
+          },
+          "points": 49,
+          "bonus": 1470000
+        },
+        {
+          "user": {
+            "id": 14145555,
+            "name": "Pollo17",
+            "icon": "icons/13.png"
+          },
+          "points": 48,
+          "bonus": 1540000,
+          "reason": {
+            "bonusPoint": 1440000,
+            "bonusRoundPosition": 100000
+          }
+        },
+        {
+          "user": {
+            "id": 14176382,
+            "name": "Manzagool"
+          },
+          "points": 47,
+          "bonus": 1660000,
+          "reason": {
+            "bonusPoint": 1410000,
+            "bonusRoundPosition": 250000
+          }
+        },
+        {
+          "user": {
+            "id": 14456960,
+            "name": "Alvaro Retamosa Sanguino",
+            "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+          },
+          "points": 40,
+          "bonus": 1700000,
+          "reason": {
+            "bonusPoint": 1200000,
+            "bonusRoundPosition": 500000
+          }
+        }
+      ],
+      "article": {
+        "id": 730644,
+        "source": "blog",
+        "title": "Biwenger Fantasy es más fácil con Fermín en tu equipo",
+        "url": "https://biwenger.as.com/blog/biwenger-fantasy-es-mas-facil-con-fermin-en-tu-equipo/",
+        "date": 1794233108,
+        "photo": "https://cdn.biwenger.com/wp/2025/01/408f7940-c8fa-4b26-a151-809e791e4303_alta-libre-aspect-ratio_default_0.jpg",
+        "video": "",
+        "comments": 2
+      }
+    }
+  },
+  {
     "event_id": "a900235226b9e6ad9b1986a5",
     "date": 1794265965,
     "type": "bonus",
