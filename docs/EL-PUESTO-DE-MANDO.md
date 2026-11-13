@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/11/2026, 07:30 de Madrid (rafaga del vie: verde, sin movimientos).
+Actualizado: 13/11/2026, 10:55 de Madrid (lab: Luismi -22,6 M; la rotacion puja por Zubeldia por Cardona).
 
 ## El mandato
 
@@ -352,6 +352,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **13/11 10:55 (lab de rivales de la manana, modo ahorro; viernes: sin
+  encendidos).** Reset de hoy: Luismi ficha a Cucurella (8.164.000) y De
+  Frutos (3.752.000) y baja a **-22,6 M**; Pollo, Marcos Alonso
+  (2.247.000), -2,0 M; Manzagool sigue en -18,1 M. Las primas grandes
+  siguen bajo el agua (Aubameyang -17 %, Sucic -14 %, Eric Garcia -12 %,
+  Nico Williams -11 %). **Nuestro:** la rotacion pujo a las 07:21 969.900
+  por Zubeldia (RSO, 860.000; FF 60 % J13, sano, convocado con Euskadi el
+  sab 14) para que salga Sergi Cardona (1,70 M, 30 %): cambio que se paga
+  solo (la hucha lo deja pasar). Ganada o perdida, la caja de la J13 queda
+  >= 3,03 M. Nada aplicado.
 - **13/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#2904 a #2913, la de las 07:15 incluida). Saldo +3.995.724, 0
   pujas, nada vendido en el reset. Viernes: sin encendidos. Sab 14 10:47:
