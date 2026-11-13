@@ -251962,5 +251962,62 @@
         "amount": 7471700
       }
     ]
+  },
+  {
+    "event_id": "9783a97996340b97728f29e5",
+    "date": 1794549866,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 18397,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3752000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 3707000
+          }
+        ]
+      },
+      {
+        "player": 15410,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 8164000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 6547000
+          }
+        ]
+      },
+      {
+        "player": 28087,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2247000
+      }
+    ]
   }
 ]
