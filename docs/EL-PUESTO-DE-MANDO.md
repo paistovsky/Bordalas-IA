@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/11/2026, 10:55 de Madrid (lab: Luismi -22,6 M; la rotacion puja por Zubeldia por Cardona).
+Actualizado: 13/11/2026, 15:25 de Madrid (rafaga de la tarde del vie: verde; puja viva por Zubeldia).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **13/11 15:25 (rafaga de la tarde, corta; tarde por el disparo).**
+  Ciclos: verdes (#2913 a #2921); libros 15:13. Saldo +3.995.724,
+  **comprometido 969.900: la rotacion pujo a las 07:21 por Zubeldia**
+  para que salga Cardona (cambio que se paga solo; la hucha lo deja
+  pasar). Correccion: mi rafaga de las 07:30 dijo «0 pujas»: leyo el
+  libro antes de que la vuelta lo guardara (otra vez la misma trampa del
+  06/11; leccion: tras el reset, leer las pujas del saldo `committed`,
+  no solo del libro). Saldo - pujas = +3.025.824: la J13 sigue en verde.
+  Se resuelve el sab 07:00. Turno de la J13 en pie.
 
 - **13/11 10:55 (lab de rivales de la manana, modo ahorro; viernes: sin
   encendidos).** Reset de hoy: Luismi ficha a Cucurella (8.164.000) y De
