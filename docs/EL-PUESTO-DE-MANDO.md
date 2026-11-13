@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/11/2026, 15:25 de Madrid (rafaga de la tarde del vie: verde; puja viva por Zubeldia).
+Actualizado: 13/11/2026, 20:50 de Madrid (lab de la noche: Pollo vende a Farinas; sab 10:47 S4).
 
 ## El mandato
 
@@ -352,6 +352,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **13/11 20:50 (lab de rivales de la noche, modo ahorro).** Pollo vende
+  a Farinas (1.225.900, 15:44) y queda en -0,79 M: cambia Marcos Alonso por
+  Farinas (otro cambio que casi se paga solo). Luismi -22,6 M y Manzagool
+  -18,1 M siguen sin vender. Nosotros 3.995.724, puja viva de la rotacion
+  por Zubeldia (969.900; se resuelve el sab 07:00). Sab 14 10:47: S4 =
+  LA_ORDEN_EN_EL_ESCRITOR (R4 sin hacer: el escritor solo actua con
+  `fichar`/`proteger` y hoy solo hay Yamal en `proteger`; ensayo + `--con`
+  bastan en modo ahorro).
 - **13/11 15:25 (rafaga de la tarde, corta; tarde por el disparo).**
   Ciclos: verdes (#2913 a #2921); libros 15:13. Saldo +3.995.724,
   **comprometido 969.900: la rotacion pujo a las 07:21 por Zubeldia**
