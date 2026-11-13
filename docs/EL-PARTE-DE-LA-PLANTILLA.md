@@ -44,6 +44,18 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 13/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
+
+Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
+lesiones ni sanciones en Biwenger. Panel igual: Gulacsi 90, Iglesias 95,
+Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70, **Ramon 50**
+(sube de revulsivo a rotacion), Yamal 95, Roberto 80, Boye 90, **Cardona
+30** (fuera del once). **Puja viva de la rotacion:** Zubeldia (Real
+Sociedad, 860.000, «ok»; FF 60 % J13 contra el Racing; convocado con
+Euskadi el sab 14) por 969.900 para que salga Cardona (1,70 M, -50 k).
+Precios: Kike +80 k (4,12 M), Yamal +50 k, Iglesias +40 k; bajan Cardona
+-50 k, Boye -40 k. **Hecho: nada** (la puja es de Pepe y se paga sola).
+
 ## 12/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
 
 Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
@@ -429,27 +441,3 @@ riesgo; nadie ha perdido el puesto; la puja por Juan Iglesias sigue (sano y
 fijo). Falta mirar: hoy 21:00 Barcelona-Alaves (Yamal, Boye, Ibanez) y el
 dom Getafe-Sevilla (Kike, Iglesias) y Elche-Valencia (Chust, Gaya):
 minutos, golpes y tarjetas. Ninguno esta cerca de la 5.a amarilla.
-
-## 30/10/2026, 18:50 de Madrid (J11: hoy 21:00; cierre 20:45)
-
-Once escrito (3-4-3). Cardona, en el banquillo.
-
-| Jugador | Veredicto | J11 % | J11 (Madrid) | Fuente | Cambio |
-|---|---|---|---|---|---|
-| Gulacsi (POR) | TITULAR | 92 | Villarreal-Espanyol, vie 21:00 | FF 90; 7 de 7 onces de prensa | 90 -> 92 |
-| Kike Salas (DEF) | TITULAR | 88 | Getafe-Sevilla, dom 14:00 | FF 90; descanso en la Copa (Sevilla 0-3) | = |
-| Chust (DEF) | TITULAR | 92 | Elche-Valencia, dom 18:30 | FF 90; Anselmi: «no hay una baja» | = |
-| Gaya (DEF) | TITULAR | 84 | Elche-Valencia, dom 18:30 | FF 80; entreno el vie | = |
-| Olasagasti (MED) | TITULAR | 83 | Levante-Atletico, sab 14:00 | FF 80; Castro: «no va a ser el mismo once» y una molestia sin nombre | 85 -> 83 |
-| Pablo Ibanez (MED) | TITULAR | 85 | Barcelona-Alaves, sab 21:00 | FF 80; Quique: «todo bien»; 4-4-2 | 84 -> 85 |
-| Unai Lopez (MED) | TITULAR | 82 | Rayo-Celta, sab 16:15 | FF 70; fijo con Ciss sancionado | = |
-| Ramon Enriquez (MED) | TITULAR | 72 | Betis-Malaga, sab 18:30 | FF 70; FF: «muchas opciones de continuar de mediocentro» | nuevo |
-| Yamal (DEL) | TITULAR | 95 | Barcelona-Alaves, sab 21:00 | FF 95; Flick sin rotaciones | = |
-| Roberto Fernandez (DEL) | TITULAR | 88 | Villarreal-Espanyol, vie 21:00 | FF 90; convocado; 6 de 6 onces de prensa | 87 -> 88 |
-| Boye (DEL) | TITULAR | 89 | Barcelona-Alaves, sab 21:00 | FF 90; entreno el vie, el golpe ya no cuenta | 88 -> 89 |
-| *Sergi Cardona (DEF, banquillo)* | DUDA | 65 | Villarreal-Espanyol, vie 21:00 | FF 50/50 con Romero (alta el 29/10), pero 7 de 7 onces de prensa y Radio Vila-Real lo ponen titular | 50 -> 65 |
-
-**Hecho:** nada; nadie obliga a cambiar antes de las 20:45. A las 20:15 se
-mira el once oficial del Villarreal: si Cardona es titular, Pepe deberia
-meterlo en la vuelta de las 20:07 (4-3-3, sale Ramon). Si FF llega tarde,
-el cambio se hace a mano, Cardona por Ramon, antes de las 20:59.
