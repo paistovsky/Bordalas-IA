@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/11/2026, 20:50 de Madrid (lab de la noche: Pollo vende a Farinas; sab 10:47 S4).
+Actualizado: 13/11/2026, 21:20 de Madrid (rafaga de la noche del vie: verde; Zubeldia se resuelve el sab 07:00).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **13/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#2920 a #2927); libros 21:13. Saldo +3.995.724, comprometido
+  969.900 (Zubeldia, se resuelve el sab 07:00); saldo - pujas +3.025.824.
+  Nada mas. Sab 07:15: resultado de Zubeldia y si Cardona sale a la venta.
+  Turno de la J13 en pie.
 
 - **13/11 20:50 (lab de rivales de la noche, modo ahorro).** Pollo vende
   a Farinas (1.225.900, 15:44) y queda en -0,79 M: cambia Marcos Alonso por
