@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 13/11/2026, 21:20 de Madrid (rafaga de la noche del vie: verde; Zubeldia se resuelve el sab 07:00).
+Actualizado: 14/11/2026, 07:30 de Madrid (rafaga del sab: Zubeldia GANADO; verde).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **14/11 07:30 (rafaga de la manana del sab).** Ciclos: verdes (#2927
+  a #2936, la de las 07:15 incluida); libros 07:20. **Zubeldia GANADO**
+  (969.900, sin rival) por la rotacion, para que salga Sergi Cardona.
+  Saldo **+3.025.824**, 0 comprometido: la J13 sigue en verde aunque
+  Cardona tarde en venderse. La hucha baja a 3,03 M (el cambio se paga
+  cuando salga Cardona, ~1,7 M). Mirar a las 14:15 que Cardona este
+  publicado. Hoy 10:47: S4 = LA_ORDEN_EN_EL_ESCRITOR (laboratorio). Turno
+  de la J13 en pie.
 
 - **13/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
   verdes (#2920 a #2927); libros 21:13. Saldo +3.995.724, comprometido
