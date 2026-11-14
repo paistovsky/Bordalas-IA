@@ -370,6 +370,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   pierde ~30 k esperando. Luismi vende a Camello (11.435.300) y ficha a
   Requena (3.131.000): -14,3 M. Saldo nuestro 3.025.824, 0 pujas. Marcha
   atras: quitar la linea del YAML.
+  **12:25: primera vuelta encendida verde** (#2941, 12:07, 781c1c7e): 31
+  interruptores, el nuevo a 1; verja 238/238, XI 11/11, saldo 3.025.824;
+  ninguna escritura frenada. **Ojo al subir:** la comprobacion del pull se
+  hace con `B=$(git rev-parse HEAD)` ANTES del pull y `git diff $B HEAD`
+  (con `HEAD@{1}` y el pull sin cambios compara tus propios commits y da
+  un falso «codigo cambiado»).
 - **14/11 07:30 (rafaga de la manana del sab).** Ciclos: verdes (#2927
   a #2936, la de las 07:15 incluida); libros 07:20. **Zubeldia GANADO**
   (969.900, sin rival) por la rotacion, para que salga Sergi Cardona.
