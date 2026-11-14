@@ -601,6 +601,18 @@ jobs:
       # en el arbol final. Marcha atras: quitar esta linea.
       BORDALAS_LA_ORDEN_MANDA_EN_EL_CAMBIO: "1"
 
+      # ENCENDIDO 14/11 — BORDALAS_LA_ORDEN_EN_EL_ESCRITOR (laboratorio de las
+      # 10:47; plan de encendidos del paron, S4). `accept_offer` y
+      # `counter_offer` miran la orden antes de escribir: no se acepta ni se
+      # contraoferta una oferta que se lleve a uno de `proteger`/`fichar`, ni
+      # a uno de `conservar` si viene de un manager; la del Computer por uno
+      # de `conservar` si se acepta (asi venden la mejora, la orden, el
+      # cierre y la rotacion). V10 retira nuestra contraoferta viva por uno
+      # de ellos. src/analysis/la_orden_en_el_escritor.py. Ensayo del 14/11
+      # verde; verja con --con verde en 3.11 y 3.13; paso 0 en el arbol
+      # final. Marcha atras: quitar esta linea.
+      BORDALAS_LA_ORDEN_EN_EL_ESCRITOR: "1"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
