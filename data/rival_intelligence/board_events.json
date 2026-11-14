@@ -252057,5 +252057,62 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "51677ba6c3533d7db2e82935",
+    "date": 1794634231,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 17756,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 11435300
+      }
+    ]
+  },
+  {
+    "event_id": "9dcb89422e22e32d13770acb",
+    "date": 1794636353,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 8376,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 969900,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 865000
+          }
+        ]
+      },
+      {
+        "player": 37488,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3131000
+      }
+    ]
   }
 ]
