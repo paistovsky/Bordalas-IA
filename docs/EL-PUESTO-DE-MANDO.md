@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/11/2026, 07:30 de Madrid (rafaga del sab: Zubeldia GANADO; verde).
+Actualizado: 14/11/2026, 11:05 de Madrid (S4 LA_ORDEN_EN_EL_ESCRITOR encendida; Zubeldia ganado).
 
 ## El mandato
 
@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **14/11 11:05 (laboratorio de las 10:47). ENCENDIDA: S4 =
+  BORDALAS_LA_ORDEN_EN_EL_ESCRITOR (commit de encendido de hoy, el
+  siguiente a este).** Ensayo 43582331308 verde (238/238, XI 11/11,
+  ninguna escritura no enviada). Verja con `--con` verde en 3.11 y 3.13
+  (238/238); paso 0 en el arbol final; verja normal. R4 (revision
+  encendida de CANCEL_COUNTER) sustituida por ensayo + `--con` (modo
+  ahorro): hoy no hay contraofertas vivas nuestras. Que cambia: aceptar o
+  contraofertar no sale hacia Biwenger si la oferta se lleva a alguien de
+  `proteger`/`fichar` (Yamal), ni a uno de `conservar` si la oferta es de
+  un MANAGER; la oferta del Computer por uno de `conservar` SI se acepta
+  (asi vende la rotacion a Sergi Cardona). **Reset de hoy:** Pepe gana
+  Zubeldia (969.900, a 1 rival; pareja de la rotacion GANADA); Cardona
+  publicado (2.180.000) y la oferta del Computer (1.648.900) no llega al
+  suelo de la rotacion (1.653.300, 99 %): espera otra. Idea pequena para
+  despues de la J13: con el que sale bajando (-50 k/dia), el suelo del 99 %
+  pierde ~30 k esperando. Luismi vende a Camello (11.435.300) y ficha a
+  Requena (3.131.000): -14,3 M. Saldo nuestro 3.025.824, 0 pujas. Marcha
+  atras: quitar la linea del YAML.
 - **14/11 07:30 (rafaga de la manana del sab).** Ciclos: verdes (#2927
   a #2936, la de las 07:15 incluida); libros 07:20. **Zubeldia GANADO**
   (969.900, sin rival) por la rotacion, para que salga Sergi Cardona.
