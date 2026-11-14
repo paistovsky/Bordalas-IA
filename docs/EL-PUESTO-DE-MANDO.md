@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/11/2026, 14:25 de Madrid (rafaga de la tarde del sab: verde con S4; Cardona publicado).
+Actualizado: 14/11/2026, 20:50 de Madrid (lab de la noche: sin movimientos; dom 10:47 S5).
 
 ## El mandato
 
@@ -352,6 +352,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **14/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
+  movimientos desde las 07:38. Pollo -0,79 M, Luismi -14,3 M, Manzagool
+  -17,9 M, DiosMande -0,36 M (quedan 6 dias al plazo de la J13); Alvaro
+  20,9 M. Nosotros 3.025.824, 0 pujas, S4 verde todo el dia. Dom 15 10:47:
+  S5 = EL_PROTEGIDO_NO_GASTA_LA_VUELTA (ensayo + `--con` + paso 0).
 - **14/11 14:25 (rafaga de la tarde, corta: modo ahorro).** S4 la
   encendio el laboratorio (dda3d19a, 11:02); desde entonces vueltas
   verdes (#2940 a #2943); libros 14:11. Saldo +3.025.824, 0 pujas.
