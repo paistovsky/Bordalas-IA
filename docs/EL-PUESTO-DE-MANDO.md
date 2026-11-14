@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/11/2026, 20:50 de Madrid (lab de la noche: sin movimientos; dom 10:47 S5).
+Actualizado: 14/11/2026, 21:20 de Madrid (rafaga de la noche del sab: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **14/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#2943 a #2950); libros 21:13. Saldo +3.025.824, 0 pujas.
+  Cardona sigue publicado (sin vender). Dom 15 10:47: S5. Turno de la
+  J13 en pie. **CORRECCION del 08/11 14:20: el libro de aciertos SI crece
+  ~1 MB al dia** (81,2 MB el 08/11 -> 86,9 MB hoy). Llega a 100 MiB hacia
+  el **~02/12**: la poda (o sacarlo de git) tiene que estar hecha y verde
+  antes del **jue 26/11**. Es trabajo de codigo: despues de la J13 (lun
+  23 o mar 24), no en la semana del cierre.
 
 - **14/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
   movimientos desde las 07:38. Pollo -0,79 M, Luismi -14,3 M, Manzagool
