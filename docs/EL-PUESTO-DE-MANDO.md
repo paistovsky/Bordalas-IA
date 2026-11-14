@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/11/2026, 11:05 de Madrid (S4 LA_ORDEN_EN_EL_ESCRITOR encendida; Zubeldia ganado).
+Actualizado: 14/11/2026, 14:25 de Madrid (rafaga de la tarde del sab: verde con S4; Cardona publicado).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **14/11 14:25 (rafaga de la tarde, corta: modo ahorro).** S4 la
+  encendio el laboratorio (dda3d19a, 11:02); desde entonces vueltas
+  verdes (#2940 a #2943); libros 14:11. Saldo +3.025.824, 0 pujas.
+  Cardona publicado (2.180.000); la oferta del Computer (1.648.900) aun no
+  llega a lo que pide: se vende en un reset de los proximos dias, antes
+  del jue 19 deberia estar fuera. Si no sale, no rompe la J13 (saldo en
+  verde). Dom 15 10:47: S5. Turno de la J13 en pie.
 
 - **14/11 11:05 (laboratorio de las 10:47). ENCENDIDA: S4 =
   BORDALAS_LA_ORDEN_EN_EL_ESCRITOR (commit de encendido de hoy, el
