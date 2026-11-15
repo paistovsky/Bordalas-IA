@@ -3440,3 +3440,5 @@
 {"dia":"2026-11-15","id":4753,"name":"Andrés Martín","value":0,"price":1700000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-15","id":38493,"name":"Veiga","value":0,"price":3830000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-15","id":39901,"name":"Freeman","value":0,"price":3580000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-15","id":28087,"name":"Marcos Alonso","value":2799900,"price":2330000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
+{"dia":"2026-11-15","id":19614,"name":"Natan","value":5984534,"price":5890000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
