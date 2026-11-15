@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 14/11/2026, 21:20 de Madrid (rafaga de la noche del sab: verde, sin movimientos).
+Actualizado: 15/11/2026, 07:30 de Madrid (rafaga del dom: verde; racha cobrada).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **15/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
+  verdes (#2950 a #2959, la de las 07:15 incluida); libros 07:22. Saldo
+  **+3.275.824** (+250.000 de la racha), 0 comprometido (leido del saldo,
+  no solo del libro). Nada vendido: Cardona sigue en la plantilla (13
+  jugadores). Hoy 10:47: S5 = EL_PROTEGIDO_NO_GASTA_LA_VUELTA
+  (laboratorio). Turno de la J13 en pie.
 
 - **14/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
   verdes (#2943 a #2950); libros 21:13. Saldo +3.025.824, 0 pujas.
