@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 15/11/2026, 11:05 de Madrid (S5 EL_PROTEGIDO_NO_GASTA_LA_VUELTA encendida; Cardona vendido).
+Actualizado: 15/11/2026, 14:25 de Madrid (rafaga de la tarde del dom: verde con S5; Cardona vendido).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **15/11 14:25 (rafaga de la tarde, corta: modo ahorro).** S5 la
+  encendio el laboratorio (7b393770); vueltas verdes (#2960 a #2966);
+  libros 14:12. **Cardona SI se vendio** al Computer en el reset
+  (1.682.700): mi rafaga de las 07:30 dijo que no, porque mire la
+  plantilla del marcador (escrito antes del reset), no el saldo. Leccion,
+  otra vez: tras el reset, la verdad es `bitacora_del_saldo` (saldo,
+  comprometido, valor de plantilla). Cambio de la rotacion cerrado:
+  Zubeldia 969.900 entra, Cardona 1.682.700 sale (+712.800). Saldo
+  **+4.958.524**, 0 pujas, 12 jugadores. Los cinco encendidos del paron
+  hechos (S1-S5). Turno de la J13 en pie.
 
 - **15/11 11:05 (laboratorio de las 10:47). ENCENDIDA: S5 =
   BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA (commit de encendido de hoy,
