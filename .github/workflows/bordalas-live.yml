@@ -613,6 +613,14 @@ jobs:
       # final. Marcha atras: quitar esta linea.
       BORDALAS_LA_ORDEN_EN_EL_ESCRITOR: "1"
 
+      # ENCENDIDO 15/11 — BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA (laboratorio
+      # de las 10:47; plan de encendidos del paron, S5). El motor viejo no
+      # planea renovar ni cobrar a uno de `proteger`; si el escritor lo frena
+      # igual, sale BLOCKED sin gastar la unica escritura de la vuelta.
+      # Ensayo del 15/11 verde; verja con --con verde en 3.11 y 3.13; paso 0
+      # en el arbol final. Marcha atras: quitar esta linea.
+      BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA: "1"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
