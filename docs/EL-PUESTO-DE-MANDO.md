@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 15/11/2026, 14:25 de Madrid (rafaga de la tarde del dom: verde con S5; Cardona vendido).
+Actualizado: 15/11/2026, 20:50 de Madrid (lab de la noche: sin movimientos; plan del paron encendido).
 
 ## El mandato
 
@@ -352,6 +352,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **15/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
+  movimientos desde las 07:22. En rojo a 5 dias del plazo de la J13 (vie
+  20/11 15:00): Manzagool -17,9 M, Luismi -14,3 M, Pollo -5,0 M, DiosMande
+  -0,36 M. Alvaro 20,9 M. Nosotros 4.958.524, 0 pujas; S1-S5 encendidos y
+  verdes. Lun 16: V10_CUENTA_LO_PUJADO solo si sobra (el BUY de V10 esta en
+  pausa y la hucha lo frena: no corre prisa, mejor tras la J13).
 - **15/11 14:25 (rafaga de la tarde, corta: modo ahorro).** S5 la
   encendio el laboratorio (7b393770); vueltas verdes (#2960 a #2966);
   libros 14:12. **Cardona SI se vendio** al Computer en el reset
