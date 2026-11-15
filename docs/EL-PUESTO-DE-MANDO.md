@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 15/11/2026, 07:30 de Madrid (rafaga del dom: verde; racha cobrada).
+Actualizado: 15/11/2026, 11:05 de Madrid (S5 EL_PROTEGIDO_NO_GASTA_LA_VUELTA encendida; Cardona vendido).
 
 ## El mandato
 
@@ -352,6 +352,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **15/11 11:05 (laboratorio de las 10:47). ENCENDIDA: S5 =
+  BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA (commit de encendido de hoy,
+  el siguiente a este).** Ensayo 43701032506 verde (238/238, XI 11/11; la
+  unica escritura no enviada, renovar el listado de Chust a 3.380.000, es
+  la de siempre: Chust no esta en `proteger`). Verja con `--con` verde en
+  3.11 y 3.13 (238/238); paso 0 en el arbol final; verja normal. Que
+  cambia: el motor viejo ya no planea renovar ni cobrar a uno de
+  `proteger` (Yamal), y si el escritor lo frena sale BLOCKED sin gastar la
+  unica escritura de la vuelta. **Reset de hoy:** la rotacion vendio a
+  Sergi Cardona (1.682.700, 07:22: la oferta del Computer por uno de
+  `conservar` se acepto con el escritor encendido, como debia); racha
+  +250.000 (00:10); saldo **4.958.524**, 0 pujas; Cardona sale de
+  `conservar` (commit del gestor de las 08:22). Pollo ficha a Cucho
+  (4.247.000) y queda en -5,0 M. Con S5 se acaba el plan del paron (S1-S5);
+  lun 16 V10_CUENTA_LO_PUJADO solo si sobra (opcional), y desde el mie 18
+  solo marcha atras. Marcha atras: quitar la linea del YAML.
 - **15/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#2950 a #2959, la de las 07:15 incluida); libros 07:22. Saldo
   **+3.275.824** (+250.000 de la racha), 0 comprometido (leido del saldo,
