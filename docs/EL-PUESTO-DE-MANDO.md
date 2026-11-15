@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 15/11/2026, 20:50 de Madrid (lab de la noche: sin movimientos; plan del paron encendido).
+Actualizado: 15/11/2026, 21:20 de Madrid (rafaga de la noche del dom: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **15/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#2966 a #2973); libros 21:12. Saldo +4.958.524, 0 comprometido.
+  Lun 16: V10_CUENTA_LO_PUJADO opcional (laboratorio). Turno de la J13 en
+  pie.
 
 - **15/11 20:50 (lab de rivales de la noche, modo ahorro).** Sin
   movimientos desde las 07:22. En rojo a 5 dias del plazo de la J13 (vie
