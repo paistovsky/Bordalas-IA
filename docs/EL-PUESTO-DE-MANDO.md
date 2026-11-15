@@ -368,6 +368,9 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   (4.247.000) y queda en -5,0 M. Con S5 se acaba el plan del paron (S1-S5);
   lun 16 V10_CUENTA_LO_PUJADO solo si sobra (opcional), y desde el mie 18
   solo marcha atras. Marcha atras: quitar la linea del YAML.
+  **12:25: primeras vueltas encendidas verdes** (#2963, 11:07, ya con
+  7b393770, y #2964, 12:07): 32 interruptores, el nuevo a 1; verja
+  238/238, XI 11/11, saldo 4.958.524; solo la renovacion de siempre.
 - **15/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#2950 a #2959, la de las 07:15 incluida); libros 07:22. Saldo
   **+3.275.824** (+250.000 de la racha), 0 comprometido (leido del saldo,
