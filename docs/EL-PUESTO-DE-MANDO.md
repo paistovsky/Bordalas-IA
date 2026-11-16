@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/11/2026, 10:55 de Madrid (lab: cuatro rivales en rojo a 4 dias de la J13).
+Actualizado: 16/11/2026, 14:25 de Madrid (rafaga de la tarde del lun: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **16/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#2982 a #2989); libros 14:12. Saldo +4.958.524, 0 comprometido.
+  Cuatro rivales en rojo a 4 dias de la J13 (lab de las 10:55). Turno de
+  la J13 en pie.
 
 - **16/11 10:55 (lab de rivales de la manana, modo ahorro).** Reset de
   hoy: Luismi ficha a Konate (6.661.000, a 2) y baja a -21,0 M; Manzagool,
