@@ -384,6 +384,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   ya no hay apartado; si sale, el gestor escribe `fichar` a mano.
   config/la_hucha.json se queda. Siguiente, tras la J13: medir lo que gana
   la ronda y, si gana, hacerla mas agresiva (tope por viaje, filtros).
+  **19:25: primera vuelta sin la hucha verde** (#2994, 19:07, 10f4547d): 31
+  interruptores, verja 238/238, XI 11/11. La ronda pujo por **Logan Costa**
+  (439.900; enviada, 200) para el reset del mar 17 07:00; saldo 4.958.524,
+  con la puja quedaria en 4,52 M: la J13 no peligra.
 - **16/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#2982 a #2989); libros 14:12. Saldo +4.958.524, 0 comprometido.
   Cuatro rivales en rojo a 4 dias de la J13 (lab de las 10:55). Turno de
