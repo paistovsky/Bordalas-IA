@@ -252199,5 +252199,96 @@
         "amount": 1682700
       }
     ]
+  },
+  {
+    "event_id": "a132501fd30b1b7e13ac5e0e",
+    "date": 1794809141,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 1125,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 4689532,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 4207000
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 4156000
+          }
+        ]
+      },
+      {
+        "player": 41087,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 6661000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 6007700
+          },
+          {
+            "user": {
+              "id": 14151726,
+              "name": "DiosMande a Rodri al Palancas",
+              "icon": "i/u/14151726.png"
+            },
+            "amount": 5751010
+          }
+        ]
+      },
+      {
+        "player": 24474,
+        "to": {
+          "id": 14151726,
+          "name": "DiosMande a Rodri al Palancas",
+          "icon": "i/u/14151726.png"
+        },
+        "amount": 5060000
+      }
+    ]
+  },
+  {
+    "event_id": "17ca4ce5e5f888d7f5ac2b79",
+    "date": 1794809870,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
