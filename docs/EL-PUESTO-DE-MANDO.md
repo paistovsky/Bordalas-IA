@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/11/2026, 18:30 de Madrid (hucha APAGADA por orden del dueno: a hacer caja como los rivales).
+Actualizado: 16/11/2026, 19:00 de Madrid (plan del dinero: tras la J13, la prima que gana y cambiar los que bajan).
 
 ## El mandato
 
@@ -352,6 +352,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/11 ~19:00 (chat del dueno). PLAN DEL DINERO tras la hucha.** El
+  dueno: «compran, revalorizan y pujan por encima en los buenos porque son
+  disputadas». De acuerdo, con datos: los rivales pagan +11,5 % de mediana
+  (p75 +18 %) en las disputadas, pierden 10-14 % los primeros dias y lo
+  recuperan subiendo 1-2 %/dia (Aubameyang, -1,6 M hoy, +200 k/dia: ~8
+  dias); y cuadran la caja vendiendo otro (Pollo: entra Gordon, sale
+  Mikautadze). Nuestro problema: 6 titulares bajan cada dia (Roberto y Boye
+  -40 k, Ivan -30 k, Gulacsi, Olasagasti y Dani Lorenzo -20 k: ~-170 k/dia)
+  y solo suben Yamal y Kike; la ronda puja +1 % y pierde las disputadas
+  (nos ganan por 190 k de mediana). **Decision:** esta semana nada de
+  primas (lo comprado tendria que venderse antes del vie 15:00 y la prima
+  se perderia). Tras la J13 (acaba lun 23/11; la J14 empieza vie 27/11
+  21:00): encender LA_PRIMA_QUE_GANA (ya hecha: x1,12, x1,18 si el cambio
+  suma 1 pt; ensayo a >= 64 h de la jornada, o sea pujas antes del mar 24
+  05:00; paso 0) y usar la mejora y la rotacion para cambiar titulares que
+  bajan por otros que suben del mismo puesto, aguantandolos como hacen los
+  rivales.
 - **16/11 ~18:30 (chat del dueno). APAGADA: BORDALAS_LA_HUCHA (el commit
   siguiente a este).** El dueno: «pero tienes que hacer pasta como hacen
   los rivales, ya lo sabes». Medido: en 6 dias de hucha la caja paso de
