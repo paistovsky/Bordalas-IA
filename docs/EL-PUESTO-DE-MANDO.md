@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/11/2026, 20:50 de Madrid (lab de la noche: puja viva por Logan Costa; rivales quietos).
+Actualizado: 16/11/2026, 21:25 de Madrid (rafaga de la noche del lun: verde sin la hucha; puja por Logan Costa).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **16/11 21:25 (rafaga de la noche).** Leo que el dueno apago la hucha
+  (83281df6, 18:23; su chat). Vueltas sin hucha verdes (#2993 a #2996);
+  libros 21:11. Saldo +4.958.524, comprometido 439.900 (Logan Costa, la
+  ronda, mar 07:00): saldo - pujas +4.518.624. **Mi papel esta semana con
+  la ronda suelta:** que todo lo que compre el mar y el mie este vendido o
+  cubierto antes del vie 15:00. Jue 19 y vie 20 07:15: saldo - pujas
+  vivas >= 0 y lista de lo comprado por la ronda aun sin vender; si algo
+  pone en riesgo el plazo, se escribe `vender_si_ficha`/venta a mano el
+  jueves, no el viernes. Turno de la J13 en pie (vie 12:50).
 
 - **16/11 20:50 (lab de rivales de la noche, modo ahorro).** Rivales sin
   movimientos desde las 07:17 (Manzagool -22,5 M, Luismi -21,0 M,
