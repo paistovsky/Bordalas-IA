@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/11/2026, 14:25 de Madrid (rafaga de la tarde del lun: verde, sin movimientos).
+Actualizado: 16/11/2026, 18:30 de Madrid (hucha APAGADA por orden del dueno: a hacer caja como los rivales).
 
 ## El mandato
 
@@ -352,6 +352,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/11 ~18:30 (chat del dueno). APAGADA: BORDALAS_LA_HUCHA (el commit
+  siguiente a este).** El dueno: «pero tienes que hacer pasta como hacen
+  los rivales, ya lo sabes». Medido: en 6 dias de hucha la caja paso de
+  3.995.724 a 4.958.524 (+0,96 M: el cambio Cardona -> Zubeldia y una
+  racha) y el patrimonio quedo plano (64,1 -> 64,2 M) mientras Pollo y
+  Luismi, con deuda, tienen 124 M y 107 M. La hucha frenaba justo la
+  tactica de los rivales (la ronda, los chollos y la mejora con deuda).
+  Ensayo 43915439946 sin la hucha: verde (238/238, XI 11/11); hoy la ronda
+  solo pujaria por Logan Costa (439.900; 390.000, +20 k/dia): el mercado de
+  hoy trae pocos que suban y puntuen. Ventanas para la J13: la ronda compra
+  en los resets del mar 17 y mie 18 (>= 40 h antes del vie 21:00) y liquida
+  antes del vie; el cierre y la solvencia guardan el vie 15:00. Raphinha:
+  ya no hay apartado; si sale, el gestor escribe `fichar` a mano.
+  config/la_hucha.json se queda. Siguiente, tras la J13: medir lo que gana
+  la ronda y, si gana, hacerla mas agresiva (tope por viaje, filtros).
 - **16/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#2982 a #2989); libros 14:12. Saldo +4.958.524, 0 comprometido.
   Cuatro rivales en rojo a 4 dias de la J13 (lab de las 10:55). Turno de
