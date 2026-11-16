@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/11/2026, 07:30 de Madrid (rafaga del lun: verde, sin movimientos).
+Actualizado: 16/11/2026, 10:55 de Madrid (lab: cuatro rivales en rojo a 4 dias de la J13).
 
 ## El mandato
 
@@ -352,6 +352,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/11 10:55 (lab de rivales de la manana, modo ahorro).** Reset de
+  hoy: Luismi ficha a Konate (6.661.000, a 2) y baja a -21,0 M; Manzagool,
+  Bartra (4.689.532, a 2), -22,5 M; DiosMande, Robert Navarro (5.060.000),
+  -5,4 M; Pollo -4,8 M. Cuatro rivales en rojo a 4 dias del plazo de la
+  J13. Leccion: no hay rebajas que cazar; el que vende con prisa le vende
+  al Computer al valor al instante (como Pollo con Moleiro o Luismi con
+  Camello), asi que una oferta nuestra por debajo del valor no la acepta
+  nadie. Lo que si cuenta: el que llegue en rojo al vie 15:00 pierde la J13
+  entera (doctrina §24). Nosotros 4.958.524, 0 pujas. Nada aplicado.
 - **16/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#2973 a #2982, la de las 07:15 incluida); libros 07:22. Saldo
   +4.958.524, 0 comprometido (leido del saldo tras el reset), valor de
