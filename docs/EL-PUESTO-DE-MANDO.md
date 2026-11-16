@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/11/2026, 19:00 de Madrid (plan del dinero: tras la J13, la prima que gana y cambiar los que bajan).
+Actualizado: 16/11/2026, 20:50 de Madrid (lab de la noche: puja viva por Logan Costa; rivales quietos).
 
 ## El mandato
 
@@ -352,6 +352,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **16/11 20:50 (lab de rivales de la noche, modo ahorro).** Rivales sin
+  movimientos desde las 07:17 (Manzagool -22,5 M, Luismi -21,0 M,
+  DiosMande -5,4 M, Pollo -4,8 M; Alvaro 20,9 M). Nosotros: saldo
+  4.958.524 y una puja viva de la ronda, Logan Costa 439.900 (mar 07:00);
+  la ronda no encontro mas que suban y puntuen. Mar 17 y mie 18: ultimas
+  dos ventanas de compra de la ronda antes de la J13.
 - **16/11 ~19:00 (chat del dueno). PLAN DEL DINERO tras la hucha.** El
   dueno: «compran, revalorizan y pujan por encima en los buenos porque son
   disputadas». De acuerdo, con datos: los rivales pagan +11,5 % de mediana
