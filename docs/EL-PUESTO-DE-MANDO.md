@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 16/11/2026, 21:25 de Madrid (rafaga de la noche del lun: verde sin la hucha; puja por Logan Costa).
+Actualizado: 17/11/2026, 07:30 de Madrid (rafaga del mar: Logan Costa GANADO por la ronda; verde).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **17/11 07:30 (rafaga de la manana del mar).** Ciclos: verdes (#2996
+  a #3005, la de las 07:15 incluida); libros 07:22. **Logan Costa GANADO**
+  por la ronda (439.900, sin rival). Saldo **+4.518.624**, 0 comprometido.
+  Para la J13: la ronda tiene que revenderlo antes del vie 15:00, pero
+  aunque no lo venda el saldo sigue en verde (+4,5 M): no hay riesgo de
+  caja. Lo que si se mira: si lo vende con beneficio (la prueba de que la
+  ronda gana algo). Mie 18: ultima ventana de compra. Turno de la J13 en
+  pie.
 
 - **16/11 21:25 (rafaga de la noche).** Leo que el dueno apago la hucha
   (83281df6, 18:23; su chat). Vueltas sin hucha verdes (#2993 a #2996);
