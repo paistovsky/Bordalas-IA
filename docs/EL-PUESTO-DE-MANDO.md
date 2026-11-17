@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/11/2026, 14:25 de Madrid (rafaga de la tarde del mar: verde, sin movimientos).
+Actualizado: 17/11/2026, 20:50 de Madrid (lab de la noche: Pollo vende a Catena; nosotros sin pujas).
 
 ## El mandato
 
@@ -352,6 +352,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **17/11 20:50 (lab de rivales de la noche, modo ahorro).** Pollo vende a
+  Catena (2.511.400, 18:16) y sube a -4,0 M: va vendiendo uno al dia para
+  llegar al vie. Luismi -13,1 M, Manzagool -22,5 M (sin moverse desde el
+  lun), DiosMande -5,4 M. Nosotros 4.518.624, sin pujas; la ronda no ve
+  nada para el reset del mie (ultimo antes de la J13; ya sin prima: faltan
+  menos de 64 h). Logan Costa en la cartera (410.000, +20 k/dia).
 - **17/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#3005 a #3012); libros 14:11. Saldo +4.518.624, 0 comprometido;
   Logan Costa en la plantilla. Turno de la J13 en pie.
