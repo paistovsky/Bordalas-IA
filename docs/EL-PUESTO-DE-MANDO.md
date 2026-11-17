@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/11/2026, 10:55 de Madrid (lab: Logan Costa ganado; Pollo gana +7 % con Pedrosa).
+Actualizado: 17/11/2026, 14:25 de Madrid (rafaga de la tarde del mar: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **17/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#3005 a #3012); libros 14:11. Saldo +4.518.624, 0 comprometido;
+  Logan Costa en la plantilla. Turno de la J13 en pie.
 
 - **17/11 10:55 (lab de rivales de la manana, modo ahorro).** Reset: Pepe
   gana **Logan Costa** (439.900, la ronda con LA_CARTERA: +12 % por ser de
