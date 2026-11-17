@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/11/2026, 20:50 de Madrid (lab de la noche: Pollo vende a Catena; nosotros sin pujas).
+Actualizado: 17/11/2026, 21:20 de Madrid (rafaga de la noche del mar: verde, sin pujas).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **17/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#3012 a #3019); libros 21:12. Saldo +4.518.624, 0 comprometido:
+  la ronda no ha pujado para el reset del mie (ultima ventana antes de la
+  J13). 13 jugadores con Logan Costa. Turno de la J13 en pie.
 
 - **17/11 20:50 (lab de rivales de la noche, modo ahorro).** Pollo vende a
   Catena (2.511.400, 18:16) y sube a -4,0 M: va vendiendo uno al dia para
