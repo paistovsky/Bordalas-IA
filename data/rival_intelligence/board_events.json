@@ -252375,5 +252375,24 @@
         "amount": 3033300
       }
     ]
+  },
+  {
+    "event_id": "2a237eaa4c5e381bb42a9a94",
+    "date": 1794935809,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 17731,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2511400
+      }
+    ]
   }
 ]
