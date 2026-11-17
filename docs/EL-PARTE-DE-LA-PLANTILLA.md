@@ -44,6 +44,19 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 17/11/2026, 18:45 de Madrid (J13: vie 20/11 21:00; caja vie 15:00)
+
+Datos de Pepe (vuelta de las 18:07) y la lista de lesionados de FF de hoy.
+Somos 13: entra **Logan Costa** (439.900, la ronda/cartera; 50 %,
+reserva; se revende). Ninguno de los nuestros en la lista de lesionados de
+FF salvo **Ramon: «trabajo al margen» desde el 10/11, FF lo da disponible
+para la J13 (50 %)**. Panel: Gulacsi 90, Iglesias 95, Kike 95, Chust 90,
+Olasagasti 80, Ivan 70, Dani Lorenzo 70, Ramon 50, Yamal 95, Roberto 80,
+Boye 90, **Zubeldia 70 (sube: titular en el panel)**, Logan 50. Precios:
+Kike +60 k (4,37 M), Yamal +60 k; bajan Roberto y Boye -40 k. Saldo
+4.518.624, sin pujas. **Hecho: nada** (Ramon: si el jueves sigue al
+margen, el cierre del vie pone a otro medio).
+
 ## 16/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
 
 Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
@@ -284,48 +297,3 @@ la sesion, Ramon baja); el del Villarreal (Cardona; y el futuro de Inigo
 tras el 0-6); la rueda de prensa de Luis Garcia (Sevilla). **Riesgos que no
 cubre nadie:** un solo portero (Gulacsi) y, con 12, una doble baja. Hoy
 faltaron dos vueltas (12:07 y 16:07, cron-job.org).
-
-## 03/11/2026, 19:20 de Madrid (J12: vie 06/11 21:00; cierre 20:45)
-
-Vendidos hoy Pablo, Unai, Gaya y Ortiz; plantilla de 12. Premio de la J11
-cobrado: saldo +2.025.724. Pujas vivas (se resuelven el mie 07:00):
-**Adrian Nino** 4.909.900 (la orden; si llega, sale Roberto) y **Unai
-Simon** 4.179.900 (la mejora, a las 17:13; si llega, sale Gulacsi). Once
-guardado (3-4-3): Gulacsi; Iglesias, Kike Salas, Chust; Olasagasti, Ivan,
-Dani Lorenzo, Ramon; Yamal, Roberto, Boye. Banquillo: Cardona.
-
-| Jugador | Veredicto | J12 % | J12 (Madrid) | Fuente | Cambio |
-|---|---|---|---|---|---|
-| Gulacsi (POR) | TITULAR | 90 | Villarreal-Getafe, dom 08/11 18:30 | FF 90 (03/11); titular en el once FF de Champions (Villarreal-PSG, hoy 21:00) | = |
-| Juan Iglesias (DEF) | TITULAR | 90 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; entreno el mar; 11 de 11 titular | =; 3 amarillas |
-| **Kike Salas (DEF)** | TITULAR | 80 | Sevilla-Alaves, vie 06/11 21:00 | **AL MARGEN en el entreno del mar** (FF 11:48, sin lesion concretada); FF 90 y «disponible para la J12»; el panel lo da TOCADO | 90 -> 80; si repite el mie, DUDA ~60 |
-| Chust (DEF) | TITULAR | 90 | Elche-Betis, dom 08/11 14:00 | FF 90; 11 de 11 | = |
-| Olasagasti (MED) | TITULAR | 80 | Celta-Levante, dom 08/11 18:30 | FF 80; la Copa del jue (Tarancon) se aplaza por luto: sin rotacion | = |
-| Ivan Martin (MED) | TITULAR | 82 | Malaga-Racing, sab 07/11 14:00 | FF 80, «sin rotaciones»; Andres Martin de baja varias semanas | =; 2 amarillas |
-| *Ramon Enriquez (MED)* | DUDA | 60 | Malaga-Racing, sab 07/11 14:00 | FF 60, Revulsivo, en el once FF (doble pivote con Dotor); Pablo Martinez (fascitis) sigue sin entrenar con el grupo | 55 -> 60; 3 amarillas |
-| Dani Lorenzo (MED) | TITULAR | 75 | Malaga-Racing, sab 07/11 14:00 | FF 70; once de JP | 76 -> 75 |
-| Yamal (DEL) | TITULAR | 95 | Atletico-Barcelona, dom 08/11 21:00 | FF 95; convocado para el Barcelona-Aston Villa de hoy 21:00, sin golpes | =; 2 amarillas |
-| Roberto Fernandez (DEL) | TITULAR | 88 | Espanyol-Deportivo, sab 07/11 16:15 | FF 90; sin rival en la punta (Kike Garcia y Jofre lesionados); Sarabia cumple su sancion | = |
-| Boye (DEL) | TITULAR | 88 | Sevilla-Alaves, vie 06/11 21:00 | FF 90; la Copa del mar se aplaza | = |
-| *Sergi Cardona (DEF, banquillo)* | DUDA | 50 | Villarreal-Getafe, dom 08/11 18:30 | FF 50, Rotacion; el once FF de Champions de hoy pone a Carlos Romero | = |
-| *Adrian Nino (DEL, puja viva)* | TITULAR | 80 | Malaga-Racing, sab 07/11 14:00 | FF 80, unico punta; 4 jornadas seguidas marcando; Chupete en el banquillo | nuevo |
-| *Unai Simon (POR, puja viva)* | TITULAR | 95 | Osasuna-Athletic, sab 07/11 18:30 | FF 95, Clave; 11 de 11 | nuevo |
-
-Nadie lesionado, sancionado ni apercibido (listas de FF del 03/11); nadie
-ha perdido el puesto. **Unico en riesgo: Ramon (60)**, cubierto por
-Cardona en un 4-3-3. **Hecho: nada.** El esceptico rechaza todo:
-- ningun fichaje (Gonzalo Villar, 2,5 M y 4 amarillas, dejaria en rojo la
-  J12 si solo se gana a Unai Simon);
-- **ningun cambio a mano el viernes**: el vigilante del once lo deshace en
-  la vuelta siguiente (lineup_monitor.py:1176-1183); Pepe pasa solo al
-  4-3-3 con Cardona si Biwenger da a Ramon lesionado o sancionado, o si FF
-  lo baja a ~17 % (como Revulsivo); la regla del 02/11 queda ANULADA;
-- ninguna correccion de jerarquia (su papel real es Revulsivo).
-
-**Pendientes:** mie a mediodia, el entreno de Kike Salas (si repite al
-margen, Cardona es el unico relevo de Kike y de Ramon a la vez); el
-Villarreal-PSG y el Barcelona-Aston Villa de esta noche (Gulacsi, Cardona,
-Yamal); mie 07:00, las dos pujas; mie 10:31,
-`BORDALAS_EL_ONCE_QUE_SE_PUEDE_ESCRIBIR` (sin el, si Ramon pasa a «doubt»
-en Biwenger y hay que reescribir el once por Adrian, el guardado se bloquea
-y queda el viejo).
