@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/11/2026, 07:30 de Madrid (rafaga del mar: Logan Costa GANADO por la ronda; verde).
+Actualizado: 17/11/2026, 10:55 de Madrid (lab: Logan Costa ganado; Pollo gana +7 % con Pedrosa).
 
 ## El mandato
 
@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **17/11 10:55 (lab de rivales de la manana, modo ahorro).** Reset: Pepe
+  gana **Logan Costa** (439.900, la ronda con LA_CARTERA: +12 % por ser de
+  menos de 1 M, la prima medida que se recupera a 7 dias, +6,3 %); vale
+  410.000 (+20 k/dia), publicado; la cartera lo aguanta mientras suba y lo
+  vende el primer dia que no suba desde el 97 %; el cierre cuadra la J13.
+  Rivales: Pollo ficha a Lemar (4.777.000) y **vende a Pedrosa a
+  3.033.300, comprado el 11/11 a 2.827.000: +7,3 % en 6 dias** (asi gana
+  dinero: viajes cortos al alza, venta al Computer en un dia bueno);
+  Luismi vende a Vivian (4.078.600) y Satriano (3.738.300): -13,1 M.
+  Pollo -6,5 M, Manzagool -22,5 M. Leccion: lo que mide la cartera (prima
+  por tramo: <1 M +12 %, 1-3 M +4 %, >3 M +1 %) es lo que hace Pollo en los
+  baratos; en los caros (>3 M) la prima no se recupera en 7 dias: alli se
+  paga por puntos (la mejora), no por dinero. Saldo 4.518.624, 0 pujas.
 - **17/11 07:30 (rafaga de la manana del mar).** Ciclos: verdes (#2996
   a #3005, la de las 07:15 incluida); libros 07:22. **Logan Costa GANADO**
   por la ronda (439.900, sin rival). Saldo **+4.518.624**, 0 comprometido.
