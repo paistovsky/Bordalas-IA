@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/11/2026, 20:50 de Madrid (lab: Pollo sale del rojo; Manzagool y Luismi siguen).
+Actualizado: 18/11/2026, 21:20 de Madrid (rafaga de la noche del mie: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **18/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#3036 a #3043); libros 21:12. Saldo +4.518.624, 0 comprometido.
+  13 jugadores, ninguno lesionado; Ramon sigue al 50 % (ya no sale en la
+  lista de FF): el once de la J13 lo decide el motor el vie y yo lo miro a
+  las 12:50. Jue 19 07:15: control de caja del jueves. Turno de la J13 en
+  pie.
 
 - **18/11 20:50 (lab de rivales de la noche, modo ahorro).** Pollo vende a
   Marc Bernal (3.041.200) y Gorrotxategi (1.454.200) a las 19:02 y sale del
