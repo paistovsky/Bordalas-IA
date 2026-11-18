@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/11/2026, 21:20 de Madrid (rafaga de la noche del mie: verde, sin movimientos).
+Actualizado: 18/11/2026, 21:30 de Madrid (objetivo del dueno: subir el net worth; plan tras la J13).
 
 ## El mandato
 
@@ -352,6 +352,32 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **18/11 ~21:30 (chat del dueno). OBJETIVO NUEVO: SUBIR EL NET WORTH.**
+  El dueno: «Eso es, tenemos que subir el net worth». Medido (10/11 -> 18/11,
+  sin premios por medio): Pollo +2,8 M, Luismi +3,4 M, nosotros +0,04 M.
+  Compraventa del paron: Pollo +3,7 M (vendido +4,7; abierto -1,0), Luismi
+  +8,5 M (+10,2; -1,8), nosotros +0,7 M (Cardona). Lo gordo de los rivales
+  sale de BARATOS QUE SUBEN AGUANTADOS SEMANAS (Camello 5,66 -> 11,44 desde
+  el 08/09; Vivian 1,51 -> 4,08 desde el 27/10; Fofana +1,6 M desde el
+  01/10), no de viajes de 3 dias ni de primas (sus caros de esta semana:
+  -0,4 a -1,2 M). **PLAN (tras la J13; mie-vie solo marcha atras):**
+  1. La caja parada (4,5 M) a trabajar: los rivales tienen ~0 de caja y
+     todo en jugadores que suben. Objetivo: empezar cada jornada con un
+     colchon pequeno (0,5-1 M), el resto en baratos al alza.
+  2. Ensanchar la cartera: con sus filtros (sube su tramo, >=3 partidos,
+     >=3 pts/partido, tope 3 M) solo encontro a Logan Costa en 3 dias. Sab
+     21 (lab): medir con price_history que filtro habria dejado fuera a
+     Camello, Vivian, Fofana, De la Fuente y Farinas cuando los compraron,
+     y aflojar SOLO lo medido (pieza apagada, protocolo de siempre).
+  3. Aguantar semanas mientras suban (la cartera ya lo hace); en la jornada
+     el cierre vende lo que menos rinde, no lo que sube.
+  4. Cambiar titulares que bajan por otros que suben (la rotacion y la
+     mejora; LA_PRIMA_QUE_GANA solo para mejoras del once).
+  5. Indicador: el net worth nuestro frente a Pollo y Luismi, cada dia en
+     el parte y en el lab.
+  Encendidos: uno por rafaga desde el mar 24 (la J14 empieza el vie 27
+  21:00; la prima de la cartera pide >= 64 h: pujas antes del mar 05:00).
+  La operacion Raphinha queda aparcada (sin hucha).
 - **18/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
   verdes (#3036 a #3043); libros 21:12. Saldo +4.518.624, 0 comprometido.
   13 jugadores, ninguno lesionado; Ramon sigue al 50 % (ya no sale en la
