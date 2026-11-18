@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/11/2026, 10:55 de Madrid (lab: viajes cortos de los rivales medidos; solo marcha atras hasta la J13).
+Actualizado: 18/11/2026, 14:25 de Madrid (rafaga de la tarde del mie: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **18/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#3028 a #3036; el numero #3029 no aparece en la lista: no hay
+  hueco horario, la de las 07:07 es la #3030, asi que no falta ninguna
+  vuelta). Libros 14:13. Saldo +4.518.624, 0 comprometido. Fer Nino
+  salio al mercado y no se puja (no mejora a Roberto; nota del chat del
+  dueno, 07:24). Desde hoy hasta la J13, solo marcha atras. Turno de la
+  J13 en pie.
 
 - **18/11 10:55 (lab de rivales de la manana, modo ahorro).** Sin
   movimientos desde las 06:37. Viajes cortos medidos de los rivales esta
