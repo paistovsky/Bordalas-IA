@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/11/2026, 14:25 de Madrid (rafaga de la tarde del mie: verde, sin movimientos).
+Actualizado: 18/11/2026, 20:50 de Madrid (lab: Pollo sale del rojo; Manzagool y Luismi siguen).
 
 ## El mandato
 
@@ -352,6 +352,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **18/11 20:50 (lab de rivales de la noche, modo ahorro).** Pollo vende a
+  Marc Bernal (3.041.200) y Gorrotxategi (1.454.200) a las 19:02 y sale del
+  rojo (+0,48 M): llega a la J13 en positivo. Siguen en rojo a 1 dia y
+  medio del plazo (vie 15:00): Manzagool -22,5 M (no vende desde el lun),
+  Luismi -11,3 M, DiosMande -0,14 M. Nosotros 4.518.624, 0 pujas.
 - **18/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#3028 a #3036; el numero #3029 no aparece en la lista: no hay
   hueco horario, la de las 07:07 es la #3030, asi que no falta ninguna
