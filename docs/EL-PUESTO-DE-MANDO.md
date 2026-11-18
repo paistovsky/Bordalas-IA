@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 17/11/2026, 21:20 de Madrid (rafaga de la noche del mar: verde, sin pujas).
+Actualizado: 18/11/2026, 07:30 de Madrid (rafaga del mie: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **18/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
+  verdes (#3019 a #3028, la de las 07:15 incluida); libros 07:21. Saldo
+  +4.518.624, 0 comprometido, valor de plantilla casi igual: nada comprado
+  ni vendido en el reset. Logan Costa sigue sin vender; da igual para la
+  caja de la J13 (+4,5 M). Jue 19 07:15: control de caja del jueves.
+  Turno de la J13 en pie (vie 12:50).
 
 - **17/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
   verdes (#3012 a #3019); libros 21:12. Saldo +4.518.624, 0 comprometido:
