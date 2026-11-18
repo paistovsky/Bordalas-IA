@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/11/2026, 07:30 de Madrid (rafaga del mie: verde, sin movimientos).
+Actualizado: 18/11/2026, 08:35 de Madrid (Fer Nino en el mercado: no compensa; J13 en positivo).
 
 ## El mandato
 
@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **18/11 08:35 (supervision de las 08:22). FER NINO EN EL MERCADO: NO SE
+  PUJA.** Esta en la lista de objetivos (el dueno: Roberto sale cuando entre
+  Fer Nino, Zabiri u otro delantero titular que puntue). Comparado: Fer
+  Nino 72 pts en 12 (6,0 por partido), FF 60 % (dudoso) para la J13, 5,27 M
+  y cae -70 k/dia (6,37 M el 02/11); Roberto 73 en 12 (6,08), 80 %, 6,28 M,
+  -40 k/dia; el horizonte de Pepe dice NO_COMPENSA. No mejora al once y el
+  cambio, a 60 h de la J13, obligaria a vender a Roberto antes del vie
+  15:00 (riesgo de empezar en rojo). Orden sin tocar. Rivales: DiosMande
+  vende a Robert Navarro (5.280.400; comprado el lun a 5.060.000: +4,3 % en
+  dia y medio) y queda en -0,14 M; Luismi vende a Ndukwe (1.792.300),
+  -11,3 M; Pollo -4,0 M; Manzagool -22,5 M. Logan Costa: 430.000, oferta del
+  Computer 441.000 (pagamos 439.900): la cartera lo aguanta mientras suba.
+  Saldo 4.518.624, 0 pujas: la J13 en positivo.
 - **18/11 07:30 (rafaga de la manana, corta: modo ahorro).** Ciclos:
   verdes (#3019 a #3028, la de las 07:15 incluida); libros 07:21. Saldo
   +4.518.624, 0 comprometido, valor de plantilla casi igual: nada comprado
