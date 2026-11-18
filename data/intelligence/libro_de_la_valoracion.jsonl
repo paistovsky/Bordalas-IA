@@ -3664,3 +3664,5 @@
 {"dia":"2026-11-18","id":41605,"name":"Bayindir","value":0,"price":330000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-18","id":32440,"name":"Cubarsí","value":0,"price":8270000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-18","id":15828,"name":"Cristian Romero","value":0,"price":6610000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-18","id":1462,"name":"Moi Gómez","value":2477317,"price":2460000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
+{"dia":"2026-11-18","id":10276,"name":"Cucho","value":4438087,"price":4350000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
