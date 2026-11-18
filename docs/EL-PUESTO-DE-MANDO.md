@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/11/2026, 08:35 de Madrid (Fer Nino en el mercado: no compensa; J13 en positivo).
+Actualizado: 18/11/2026, 10:55 de Madrid (lab: viajes cortos de los rivales medidos; solo marcha atras hasta la J13).
 
 ## El mandato
 
@@ -352,6 +352,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **18/11 10:55 (lab de rivales de la manana, modo ahorro).** Sin
+  movimientos desde las 06:37. Viajes cortos medidos de los rivales esta
+  semana: Pollo con Pedrosa +7,3 % en 6 dias, DiosMande con Robert Navarro
+  +4,3 % en dia y medio (los dos comprados al Computer en el reset y
+  vendidos al Computer). Es lo que hace nuestra cartera (Logan Costa hoy
+  430.000 sobre 439.900 pagados). Quedan en rojo a 2 dias del plazo:
+  Manzagool -22,5 M, Luismi -11,3 M, Pollo -4,0 M. Nosotros 4.518.624, 0
+  pujas. Nada aplicado (desde hoy, solo marcha atras hasta la J13).
 - **18/11 08:35 (supervision de las 08:22). FER NINO EN EL MERCADO: NO SE
   PUJA.** Esta en la lista de objetivos (el dueno: Roberto sale cuando entre
   Fer Nino, Zabiri u otro delantero titular que puntue). Comparado: Fer
