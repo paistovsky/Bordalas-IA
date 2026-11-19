@@ -254108,5 +254108,14 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "6bde8a245240b2a88fec148d",
+    "date": 1795090680,
+    "type": "adminText",
+    "fixed": true,
+    "title": "¡Tu campo, tu decisión!",
+    "author": null,
+    "content": "<p><a href=\"https://biwenger.as.com/settings/ui\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/campos-personalizados/tablon.jpg\" alt=\"\" /></a></p>\r\n<p style=\"text-align: center;\">[button url=\"https://biwenger.as.com/settings/ui\"]&iexcl;Elige tu campo![/button]</p>"
   }
 ]
