@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 18/11/2026, 21:30 de Madrid (objetivo del dueno: subir el net worth; plan tras la J13).
+Actualizado: 19/11/2026, 07:30 de Madrid (rafaga del jue: control de caja de la J13 en verde).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **19/11 07:30 (rafaga del jue; control de caja de la J13).** Ciclos:
+  verdes (#3043 a #3052, la de las 07:15 incluida); libros 07:22.
+  **Saldo +4.518.624, 0 pujas vivas** tras el reset: saldo - pujas >= 0
+  con 4,5 M de margen; nada que vender para el plazo del vie 15:00.
+  Turno de la J13 comprobado (trig_013vaUPVLu5fxoGnXAQ65QxX, vie 20/11
+  11:50 UTC = 12:50 Madrid, activo). Jueves: sin encendidos.
 
 - **18/11 ~21:30 (chat del dueno). OBJETIVO NUEVO: SUBIR EL NET WORTH.**
   El dueno: «Eso es, tenemos que subir el net worth». Medido (10/11 -> 18/11,
