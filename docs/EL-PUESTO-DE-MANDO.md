@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 19/11/2026, 14:25 de Madrid (rafaga de la tarde del jue: verde, caja de la J13 en verde).
+Actualizado: 19/11/2026, 20:50 de Madrid (lab: Manzagool sale del rojo; solo Luismi sigue).
 
 ## El mandato
 
@@ -352,6 +352,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **19/11 20:50 (lab de rivales de la noche, modo ahorro).** Manzagool sale
+  del rojo de golpe a las 14:59: vende a Baena (13.961.300), Unai Simon
+  (4.224.700) y Felix Correia (4.854.900) y queda en +0,49 M. DiosMande
+  +0,11 M con la racha. **Solo Luismi sigue en rojo (-11,3 M)** a menos de
+  20 h del plazo (vie 15:00): si no vende, pierde la J13 entera. Net worth:
+  Pollo 125,9 M, Luismi 109,0 M, Manzagool 75,2 M, nosotros 64,2 M.
+  Nosotros 4.518.624, 0 pujas.
 - **19/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
   verdes (#3052 a #3059); libros 14:13. Saldo +4.518.624, 0 pujas: caja
   de la J13 en verde. Manana: turno de la J13 a las 12:50.
