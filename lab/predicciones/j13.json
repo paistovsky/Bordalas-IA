@@ -1,0 +1,38 @@
+{
+ "jornada": 13,
+ "foto": "2026-11-19T17:13:30",
+ "pred": {
+  "Pollo17": {
+   "vara": 46.59,
+   "calibrada": 66.95
+  },
+  "Pepe Bordalás": {
+   "vara": 51.39,
+   "calibrada": 66.85
+  },
+  "Luismi_Haz": {
+   "vara": 48.94,
+   "calibrada": 68.87
+  },
+  "Manzagool": {
+   "vara": 51.41,
+   "calibrada": 71.78
+  },
+  "Mex": {
+   "vara": 40.77,
+   "calibrada": 57.21
+  },
+  "DiosMande a Rodri al Palancas": {
+   "vara": 0,
+   "calibrada": 0
+  },
+  "Prinzipote": {
+   "vara": 33.02,
+   "calibrada": 45.57
+  },
+  "Alvaro Retamosa Sanguino": {
+   "vara": 26.95,
+   "calibrada": 39.08
+  }
+ }
+}

@@ -69,6 +69,27 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E112 · 19/11/2026 17:15 de Madrid · Prediccion con fecha para la J13 (se juzga cuando se pague)
+
+Turno corto, en modo ahorro. Repito E86 en la J13, apuntando un dia antes en vez de tres dias antes, por la leccion de E92.
+
+**Datos:** la foto del ciclo de las 17:13 de hoy (artefacto 14551610359: plantillas y titularidad FF).
+**Codigo:** el mismo `lab/predicciones/jornada.py --apuntar 13`. Queda en `lab/predicciones/j13.json`.
+
+    mejor once de cada manager   vara (pts/p x FF)   calibrada (E79)
+    Manzagool                         51,4               71,8
+    Pepe                              51,4               66,8
+    Luismi_Haz                        48,9               68,9
+    Pollo17                           46,6               67,0
+    Mex                               40,8               57,2
+    Prinzipote                        33,0               45,6
+    Alvaro R.                         26,9               39,1
+    DiosMande                      (otra vez sin once valido en la foto)
+
+**Lo que espero:** como en la J12, la vara se quedara corta (~85 %) y la calibrada se pasara (~115 %). Por eso la media de las dos deberia acercarse a lo real.
+Pepe sale por delante de Pollo por 4,8 con la vara. Si el orden real entre ellos sale como el previsto, la vara vale para la carrera; si no, la vara no vale para eso.
+Se juzga con `--juzgar 13` cuando se pague la J13.
+
 ### E111 · 19/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo: el modo ahorro del dueño sigue en vigor y la J8 sigue sin cerrar en los libros. La prediccion de la J13 se apunta esta tarde a las 17:13 (E108). No he aprendido nada nuevo.
