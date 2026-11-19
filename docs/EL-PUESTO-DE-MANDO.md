@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 19/11/2026, 11:10 de Madrid (lab: la cartera filtra bien y puja poco; primas a 21 dias para el mar 24).
+Actualizado: 19/11/2026, 14:25 de Madrid (rafaga de la tarde del jue: verde, caja de la J13 en verde).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **19/11 14:25 (rafaga de la tarde, corta: modo ahorro).** Ciclos:
+  verdes (#3052 a #3059); libros 14:13. Saldo +4.518.624, 0 pujas: caja
+  de la J13 en verde. Manana: turno de la J13 a las 12:50.
 
 - **19/11 11:10 (lab de la manana; jueves: sin encendidos). MEDIDO: LA
   CARTERA FILTRA BIEN, PUJA DEMASIADO POCO.** 96 compras rivales al
