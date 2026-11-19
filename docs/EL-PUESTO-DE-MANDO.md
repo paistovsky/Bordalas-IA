@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 19/11/2026, 07:30 de Madrid (rafaga del jue: control de caja de la J13 en verde).
+Actualizado: 19/11/2026, 11:10 de Madrid (lab: la cartera filtra bien y puja poco; primas a 21 dias para el mar 24).
 
 ## El mandato
 
@@ -352,6 +352,25 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **19/11 11:10 (lab de la manana; jueves: sin encendidos). MEDIDO: LA
+  CARTERA FILTRA BIEN, PUJA DEMASIADO POCO.** 96 compras rivales al
+  Computer desde el 24/09 con 21 dias medidos (board_events +
+  price_history; la subida que se conocia al pujar = la del reset
+  anterior). 30 subieron >= 20 % en 21 dias. Nuestro filtro de subida
+  (TRAMOS_DE_SUBIDA) deja pasar 21 de las 30 y separa bien: las que pasan,
+  +5,1 % sobre lo pagado a 21 dias (mediana); las que no, -9,1 %. El de
+  >= 3 pts/partido deja pasar 29 de 30. **Por tramo, a 21 dias:** <1 M
+  +27,7 % sobre su precio; 1-3 M +4,8 %; >= 3 M +1,6 % (sobre lo pagado
+  -7,9 %). Las que pasan los filtros, sobre lo pagado: <1 M ganan con
+  primas del 5 al 25 % (+18 a +42 %); 1-3 M ganan hasta con +25-30 %
+  (De Jong +32 % -> +124 %, Fortuno +23 % -> +110 %, Revivo, Freeman); >=
+  3 M, planas o en perdidas con cualquier prima. Nuestras primas (<1 M +12
+  %, 1-3 M +4 %) se midieron a 7 dias y pierden las disputadas: hoy la
+  cartera aguanta mientras sube (semanas), asi que hay que medirlas a 21.
+  **Pieza para el plan del net worth (se construye apagada el sab/dom; se
+  enciende el mar 24):** primas de la cartera a 21 dias: <1 M ~+15 %, 1-3 M
+  ~+10-12 %, >= 3 M +1 % (no se persiguen). Muestras pequenas (2-5 por
+  casilla): validar con un escéptico antes. Rivales hoy: sin movimientos.
 - **19/11 07:30 (rafaga del jue; control de caja de la J13).** Ciclos:
   verdes (#3043 a #3052, la de las 07:15 incluida); libros 07:22.
   **Saldo +4.518.624, 0 pujas vivas** tras el reset: saldo - pujas >= 0
