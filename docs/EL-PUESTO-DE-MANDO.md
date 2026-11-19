@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 19/11/2026, 20:50 de Madrid (lab: Manzagool sale del rojo; solo Luismi sigue).
+Actualizado: 19/11/2026, 21:20 de Madrid (rafaga de la noche del jue: verde; manana la J13).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **19/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#3059 a #3066); libros 21:13. Saldo +4.518.624, 0 pujas. Ivan
+  y Ramon en duda (parte de las 18:39): el once se decide manana y lo
+  miro en el turno de las 12:50. Turno de la J13 en pie.
 
 - **19/11 20:50 (lab de rivales de la noche, modo ahorro).** Manzagool sale
   del rojo de golpe a las 14:59: vende a Baena (13.961.300), Unai Simon
