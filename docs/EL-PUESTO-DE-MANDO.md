@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 14:25 de Madrid (rafaga de la tarde del vie: caja de la J13 en verde a 35 min del plazo).
+Actualizado: 20/11/2026, 20:15 de Madrid (J13: once 11/11, Roberto titular; caja positiva).
 
 ## El mandato
 
@@ -352,6 +352,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/11 20:15 (segunda mirada del cierre de la J13).** Vuelta de las
+  20:07 (#3088) verde. Once guardado 3-4-3, 11 de 11 «ok». Once oficial del
+  Athletic-Espanyol (FF 19:54): **Roberto titular (100 %)**. Saldo
+  4.768.624, puja viva Remiro 3.579.900 (sab 07:00): 1.188.724 >= 0. Sin
+  cambios a mano.
 - **20/11 14:25 (rafaga de la tarde; J13 hoy).** Ciclos verdes (#3080
   a #3082, la de las 14:07 incluida); libros 14:12. Saldo 4.768.624,
   comprometido 3.579.900 (Remiro): saldo - pujas = +1.188.724 a 35 min
