@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 10:55 de Madrid (puja por Remiro viva; J13 esta noche en positivo).
+Actualizado: 20/11/2026, 12:50 de Madrid (cierre de la J13: caja +1,19 M con Remiro; once 11/11; ciclos verdes).
 
 ## El mandato
 
@@ -352,6 +352,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/11 12:50 (chat del dueno, turno del cierre de la J13). TODO EN
+  ORDEN; NADA QUE HACER A MANO.** Primer partido confirmado: hoy 21:00,
+  Athletic-Espanyol (first_kickoff de Pepe y calendario LALIGA_OFFICIAL).
+  (1) Caja: saldo 4.768.624; puja viva Remiro 3.579.900 (se resuelve el sab
+  07:00); saldo - pujas = 1.188.724 >= 0; reloj SIN_DEUDA; plazo de Pepe
+  14:45. (2) Once 3-4-3, 11 de 11 «ok»: Gulacsi; Iglesias, Kike, Chust;
+  Olasagasti, Ivan (60 %), Dani Lorenzo, Ramon (50 %); Yamal, Boye, Roberto
+  (70 %; juega el primer partido: once oficial ~20:00). (3) Ciclos verdes
+  (#3075 a #3080). (4) Sin otras pujas. (5) Segunda mirada a las 20:15
+  programada. (6) Turno del cierre de la J14 creado para esta sesion (vie
+  27/11 12:45; J14 aun de MARCA: Levante-Racing vie 27/11 21:00; verificar
+  la oficial). El aplazado Rayo-Athletic (J8) sigue sin fecha nueva.
+  **Gestor de las 12:50: no repitas esto.**
 - **20/11 10:55 (lab de la manana; viernes, J13 esta noche: sin
   encendidos).** Puja por Remiro puesta (3.579.900, vuelta de las 09:07,
   enviada, 200). Caja 4.768.624 - 3.579.900 = 1.188.724 >= 0. Rivales: solo
