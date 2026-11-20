@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 07:30 de Madrid (rafaga del vie, dia de la J13: caja en verde).
+Actualizado: 20/11/2026, 08:45 de Madrid (J13 hoy; fichar Remiro 3.579.900; caja en positivo).
 
 ## El mandato
 
@@ -352,6 +352,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/11 08:45 (supervision de las 08:22; dia de la J13). ORDEN: `fichar`
+  REMIRO 3.579.900.** Remiro (lista de objetivos) en el mercado a 3.190.000:
+  60 pts en 11, FF 95 %; Gulacsi 35 en 8: ~+1,2 pts/jornada; horizonte de
+  Pepe BID/XI_UPGRADE. Puja +12 % (LA_PRIMA_QUE_GANA para mejoras del once).
+  Sin `vender_si_ficha` (la paga la caja: el reloj no la frena); se resuelve
+  el sab 07:00 con la J13 en juego: juega desde la J14. **Pendiente mar 24
+  (supervision):** si se gano, Remiro a `conservar`, sale de `fichar`, y
+  vender a Gulacsi (ya jugada la J13); si se perdio, sale de `fichar`.
+  Caja de la J13: 4.768.624 (+250.000 de la racha), 0 pujas hasta ahora; con
+  la de Remiro, 1.188.724 >= 0. Once de Pepe 3-4-3 (Ivan 60 %, Ramon 50 %,
+  Roberto 70 %). Luismi vende a Jon Martin (4.195.900) y De Frutos
+  (4.042.600): -2,86 M a 7 h del plazo. Logan Costa 480.000 (+30 k).
 - **20/11 07:30 (rafaga del vie, dia del cierre de la J13).** Ciclos:
   verdes (#3066 a #3075, la de las 07:15 incluida); libros 07:20. Saldo
   **+4.768.624** (+250.000 de la racha), 0 pujas vivas: la J13 pasa el
