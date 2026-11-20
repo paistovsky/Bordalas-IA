@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 20:50 de Madrid (todos los rivales llegan en positivo a la J13).
+Actualizado: 20/11/2026, 21:20 de Madrid (rafaga de la noche: la J13 empezo en verde).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/11 21:20 (rafaga de la noche; la J13 ya ha empezado).** Confirmo
+  la mirada de las 20:15 del chat del dueno: once 11/11, Roberto titular.
+  Ciclos verdes (#3082 a #3089, la de las 21:07 incluida); libros 21:13.
+  Saldo 4.768.624 con Remiro (3.579.900) vivo: al saque, saldo - pujas =
+  +1.188.724, la J13 puntua. Remiro se resuelve el sab 07:00. Pendiente
+  tras la J13 (lun 23 / mar 24): la poda del libro de aciertos (antes del
+  jue 26/11). Turno del gestor de la J14 en pie (vie 27/11 12:52).
 
 - **20/11 20:50 (lab de rivales de la noche; la J13 empieza a las 21:00).**
   Todos llegan en positivo: Luismi vende a Sancet (3.762.300, 13:45) y queda
