@@ -257628,5 +257628,23 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "b75ec97e199c6d39aee4547a",
+    "date": 1795165348,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14178736,
+          "name": "Mex"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
