@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 08:45 de Madrid (J13 hoy; fichar Remiro 3.579.900; caja en positivo).
+Actualizado: 20/11/2026, 10:55 de Madrid (puja por Remiro viva; J13 esta noche en positivo).
 
 ## El mandato
 
@@ -352,6 +352,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/11 10:55 (lab de la manana; viernes, J13 esta noche: sin
+  encendidos).** Puja por Remiro puesta (3.579.900, vuelta de las 09:07,
+  enviada, 200). Caja 4.768.624 - 3.579.900 = 1.188.724 >= 0. Rivales: solo
+  Luismi sigue en rojo (-2,86 M) a 4 h del plazo (vie 15:00); Prinzipote
+  ficha a Javi Hernandez (2.810.040). Net worth: Pollo 126,3 M, Luismi
+  109,6 M, Manzagool 75,8 M, nosotros 64,5 M. Nada aplicado.
 - **20/11 08:45 (supervision de las 08:22; dia de la J13). ORDEN: `fichar`
   REMIRO 3.579.900.** Remiro (lista de objetivos) en el mercado a 3.190.000:
   60 pts en 11, FF 95 %; Gulacsi 35 en 8: ~+1,2 pts/jornada; horizonte de
