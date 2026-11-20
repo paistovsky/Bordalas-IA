@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 20:15 de Madrid (J13: once 11/11, Roberto titular; caja positiva).
+Actualizado: 20/11/2026, 20:50 de Madrid (todos los rivales llegan en positivo a la J13).
 
 ## El mandato
 
@@ -352,6 +352,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **20/11 20:50 (lab de rivales de la noche; la J13 empieza a las 21:00).**
+  Todos llegan en positivo: Luismi vende a Sancet (3.762.300, 13:45) y queda
+  en +0,90 M; Pollo +0,48 M, Manzagool +0,74 M, DiosMande +0,11 M. Nadie
+  pierde la J13 por la caja. Leccion: los rivales se endeudan durante el
+  paron y venden lo justo la vispera (Luismi vendio 5 jugadores en 4 dias,
+  Manzagool 3 de golpe el jueves). Net worth al empezar la J13: Pollo 126,3
+  M, Luismi 109,5 M, Manzagool 75,8 M, nosotros 64,5 M (Remiro aparte).
 - **20/11 20:15 (segunda mirada del cierre de la J13).** Vuelta de las
   20:07 (#3088) verde. Once guardado 3-4-3, 11 de 11 «ok». Once oficial del
   Athletic-Espanyol (FF 19:54): **Roberto titular (100 %)**. Saldo
