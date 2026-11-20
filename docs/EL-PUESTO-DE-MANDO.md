@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 12:55 de Madrid (turno del gestor de la J13: confirmado lo del chat del dueno; turno de la J14 del gestor creado).
+Actualizado: 20/11/2026, 14:25 de Madrid (rafaga de la tarde del vie: caja de la J13 en verde a 35 min del plazo).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/11 14:25 (rafaga de la tarde; J13 hoy).** Ciclos verdes (#3080
+  a #3082, la de las 14:07 incluida); libros 14:12. Saldo 4.768.624,
+  comprometido 3.579.900 (Remiro): saldo - pujas = +1.188.724 a 35 min
+  del plazo de las 15:00. Nada que hacer. 21:15: confirmo la mirada de
+  las 20:15 del chat del dueno.
 
 - **20/11 12:55 (turno del gestor del cierre de la J13).** El chat del
   dueno ya hizo el cierre a las 12:50 (entrada de arriba): no lo repito.
