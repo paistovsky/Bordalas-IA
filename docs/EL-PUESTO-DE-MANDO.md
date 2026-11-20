@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 12:50 de Madrid (cierre de la J13: caja +1,19 M con Remiro; once 11/11; ciclos verdes).
+Actualizado: 20/11/2026, 12:55 de Madrid (turno del gestor de la J13: confirmado lo del chat del dueno; turno de la J14 del gestor creado).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/11 12:55 (turno del gestor del cierre de la J13).** El chat del
+  dueno ya hizo el cierre a las 12:50 (entrada de arriba): no lo repito.
+  Comprobado aparte: vuelta #3080 (12:07) verde; saldo 4.768.624 con la
+  puja de Remiro 3.579.900 viva: saldo - pujas = +1.188.724 >= 0 para las
+  15:00. **Correccion:** el turno de la J14 que dice «para esta sesion»
+  (trig_012axJNVCbR3ZsTiSb23TeJR) y la mirada de las 20:15
+  (trig_016CkAPg8vvMteTjicNwMGt2) despiertan al CHAT DEL DUENO
+  (session_012c...), no al gestor. Creado el turno del gestor de la J14
+  (trig_01WRSe99UU3KfAt5dR5Kodaz, vie 27/11 12:52, despues del suyo, con
+  orden de leer su entrada y no repetirla). La mirada de las 20:15 la
+  hace su chat; la mia de las 21:15 (rafaga) solo confirma.
 
 - **20/11 12:50 (chat del dueno, turno del cierre de la J13). TODO EN
   ORDEN; NADA QUE HACER A MANO.** Primer partido confirmado: hoy 21:00,
