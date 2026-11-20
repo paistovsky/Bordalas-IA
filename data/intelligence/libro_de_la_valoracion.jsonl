@@ -3784,3 +3784,5 @@
 {"dia":"2026-11-20","id":37525,"name":"Yusi","value":0,"price":560000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-20","id":39673,"name":"Julio Díaz","value":0,"price":300000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-20","id":41095,"name":"Jauregi","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-20","id":20969,"name":"Germán Valera","value":4273965,"price":5770000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-20","id":12221,"name":"Pepelu","value":2803342,"price":3740000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
