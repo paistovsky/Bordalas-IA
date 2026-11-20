@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 19/11/2026, 21:20 de Madrid (rafaga de la noche del jue: verde; manana la J13).
+Actualizado: 20/11/2026, 07:30 de Madrid (rafaga del vie, dia de la J13: caja en verde).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **20/11 07:30 (rafaga del vie, dia del cierre de la J13).** Ciclos:
+  verdes (#3066 a #3075, la de las 07:15 incluida); libros 07:20. Saldo
+  **+4.768.624** (+250.000 de la racha), 0 pujas vivas: la J13 pasa el
+  plazo de las 15:00 en verde sin vender nada. Viernes: nada se enciende.
+  A las 12:50, el turno de la J13 (fecha, once, ciclos, mirada de las
+  20:15 y turno de la J14).
 
 - **19/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
   verdes (#3059 a #3066); libros 21:13. Saldo +4.518.624, 0 pujas. Ivan
