@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 20/11/2026, 21:20 de Madrid (rafaga de la noche: la J13 empezo en verde).
+Actualizado: 21/11/2026, 07:30 de Madrid (rafaga del sab: Remiro GANADO; saldo +1,19 M).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/11 07:30 (rafaga de la manana del sab; J13 en juego).** Ciclos:
+  verdes (#3089 a #3098, la de las 07:15 incluida); libros 07:20.
+  **Remiro GANADO** (3.579.900, sin rival). Saldo **+1.188.724**, 0
+  comprometido, valor de plantilla 63,0 M. Remiro llega tras el saque de la
+  J13: juega desde la J14 (Gulacsi es el portero de la J13). Queda en la
+  orden su linea `fichar` ya cumplida: la limpia quien la escribio (chat
+  del dueno) o yo el lun 23 si sigue; no corre prisa (ya es nuestro). Lo
+  que hay que decidir tras la J13: vender a Gulacsi (2 porteros, solo
+  juega uno) para recuperar caja. Turno del gestor de la J14 en pie.
 
 - **20/11 21:20 (rafaga de la noche; la J13 ya ha empezado).** Confirmo
   la mirada de las 20:15 del chat del dueno: once 11/11, Roberto titular.
