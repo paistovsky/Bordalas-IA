@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/11/2026, 08:35 de Madrid (Remiro ganado y ya en el once; Gulacsi a vender tras la J13; fallo del monitor del once a revisar).
+Actualizado: 21/11/2026, 11:30 de Madrid (fallo del monitor del once arreglado: EL_ONCE_NO_SE_TOCA_EN_JUEGO encendido; Gulacsi a vender tras la J13).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/11 11:30 (lab, sigue): ENCIENDO `BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO`.**
+  Codigo apagado subido (48b3d30f; verja con --con verde en 3.11 y 3.13,
+  verja normal verde). Ensayo #47 verde con el interruptor (el monitor dijo
+  KEEP_LINEUP, sin errores). Por que en sabado y con la J13 en juego: es una
+  pieza que SOLO quita escrituras del once mientras se juega (la regla de la
+  casa); el riesgo que corrige esta vivo hasta el lun 23 ~24:00. Sin
+  calendario no bloquea nada. Marcha atras: quitar la linea del YAML.
+  Primera vuelta a revisar: que siga verde y que, si el monitor quiere
+  guardar, salga «EL_ONCE_NO_SE_TOCA_EN_JUEGO» y no SAVE_LINEUP.
 
 - **21/11 11:30 (lab de rivales del sab; J13 en juego).** **El fallo del
   monitor del once, explicado y arreglado (apagado).** Causa: el calendario
