@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/11/2026, 20:50 de Madrid (EL_ONCE_NO_SE_TOCA_EN_JUEGO encendido y verde; regla nueva de primas para la orden; Gulacsi a vender tras la J13).
+Actualizado: 21/11/2026, 21:20 de Madrid (rafaga de la noche del sab: verde).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/11 21:20 (rafaga de la noche, corta: modo ahorro).** Ciclos:
+  verdes (#3107 a #3114); libros 21:12. Saldo +1.188.724, 0 pujas.
+  Correccion a mi rafaga de las 07:30: segun el parte de las 18:45 Remiro
+  SI esta en el once de la J13 (la Real juega despues; el once solo se
+  congela por partido). Turno del gestor de la J14 en pie.
 
 - **21/11 20:50 (lab de rivales de la noche; J13 en juego).** Ciclos verdes
   desde el segundo encendido (#3105 a mano, #3106-#3113); el monitor dice
