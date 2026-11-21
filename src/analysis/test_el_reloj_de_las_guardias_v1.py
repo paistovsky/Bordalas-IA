@@ -132,6 +132,14 @@ PUEDEN_MIRAR_EL_RELOJ = {
         "una palabra ni una fecha. La hora del informe se le pasa "
         "siempre (`AHORA`)."
     ),
+    "test_el_once_no_se_toca_en_juego_v1.py": (
+        "los enganches del plan y del ejecutor no reciben la hora "
+        "(miran el reloj de verdad), asi que el calendario de "
+        "prueba se fabrica alrededor de `now`: una ronda de hace "
+        "20 h a dentro de 30 h (en juego) o una de dentro de 4 a 6 "
+        "dias (sin ronda). Afirma sobre esa diferencia, nunca sobre "
+        "un dia; el caso de hoy y los bordes llevan su hora fija."
+    ),
 }
 
 
