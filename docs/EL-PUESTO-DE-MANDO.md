@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/11/2026, 11:30 de Madrid (fallo del monitor del once arreglado: EL_ONCE_NO_SE_TOCA_EN_JUEGO encendido; Gulacsi a vender tras la J13).
+Actualizado: 21/11/2026, 14:25 de Madrid (rafaga de la tarde del sab: una roja a las 12:07, ya arreglada por el chat del dueno).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/11 14:25 (rafaga de la tarde; J13 en juego).** Una vuelta ROJA:
+  #3103 (12:07), la primera con EL_ONCE_NO_SE_TOCA_EN_JUEGO encendido (chat
+  del dueno, 1c6e1b25): la verja cayo por un test viejo del once que no
+  limpiaba el interruptor. El propio chat hizo marcha atras (8095ea95),
+  arreglo el test (c1f17409) y lo volvio a encender (d041ca30); desde
+  entonces verdes (#3104 a #3107). No lo toco (dos manos). Libros 14:13.
+  Saldo +1.188.724, 0 pujas. Turno del gestor de la J14 en pie.
 
 - **21/11 12:35: MARCHA ATRAS Y SEGUNDO ENCENDIDO de
   `EL_ONCE_NO_SE_TOCA_EN_JUEGO`.** La primera vuelta con el interruptor
