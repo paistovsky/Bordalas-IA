@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **21/11 12:35: MARCHA ATRAS Y SEGUNDO ENCENDIDO de
+  `EL_ONCE_NO_SE_TOCA_EN_JUEGO`.** La primera vuelta con el interruptor
+  (#3103, 12:07) cayo en la verja: `test_el_once_que_se_puede_escribir_v1`
+  prueba que el ejecutor ESCRIBE el once y no limpiaba el interruptor nuevo;
+  con el calendario real y la J13 en juego vio el bloqueo (9 de 15 rojos).
+  Se perdio UNA vuelta (la de las 12:07). Marcha atras 8095ea95 a las 12:16
+  y vuelta a mano #3104 verde. **Por que no lo vi antes (leccion):** (1) corri
+  `--con` SIN nombrar el interruptor (`--con` a secas no suma nada: la
+  cabecera dice «CON X ADEMAS» solo si se nombra); (2) aqui no hay
+  `data/calendar/laliga_calendar.json` (se baja en CI) y la pieza, sin
+  calendario, no bloquea; el paso 0 si la encendio, pero sin calendario.
+  **Regla nueva:** `--con BORDALAS_X` siempre con el nombre y mirando la
+  cabecera; y si la pieza lee el calendario, copiar antes el de CI
+  (artefacto de la ultima vuelta) a `data/calendar/`. Arreglo: el test viejo
+  limpia el interruptor (como hace con los demas del once). Verja con
+  `--con BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO` Y calendario real: 239 verdes
+  en 3.13 y en 3.11. El codigo del ciclo no cambia (el ensayo #47 vale).
+
 - **21/11 11:30 (lab, sigue): ENCIENDO `BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO`.**
   Codigo apagado subido (48b3d30f; verja con --con verde en 3.11 y 3.13,
   verja normal verde). Ensayo #47 verde con el interruptor (el monitor dijo

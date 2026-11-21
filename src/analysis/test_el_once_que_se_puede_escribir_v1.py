@@ -74,6 +74,9 @@ for _nombre in (
     ENV, ENV_UNA_VEZ, ENV_SIN_ELLOS,
     "BORDALAS_EL_CALENDARIO_EN_EL_ONCE", "BORDALAS_CALIDAD_ETIQUETA",
     "BORDALAS_VARA_PLANA", "PENALTY_INTELLIGENCE_ENABLED",
+    # El once no se toca en juego (21/11): con el calendario real y una
+    # ronda en juego bloquea el SAVE_LINEUP que aqui se prueba.
+    "BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO",
 ):
     os.environ.pop(_nombre, None)
 
