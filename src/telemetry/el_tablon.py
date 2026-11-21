@@ -358,6 +358,12 @@ QUE_HACE = {
         "vuelta (pujar y las demás acciones pueden seguir escribiendo) ni la "
         "castiga como un fallo de Biwenger. Proteger sigue siendo no vender, no "
         "publicar y no renovar.",
+    "BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO":
+        "Con una jornada en juego (del primer partido a 3 horas después del "
+        "último) el monitor del once ya no guarda la alineación: lo que se "
+        "guarda a mitad de jornada vale para los partidos que quedan de esa "
+        "jornada, no para la siguiente. Se guarda al terminar. Si no se sabe el "
+        "calendario, todo sigue como antes.",
     "BORDALAS_LA_ORDEN_EN_LOS_MANAGERS":
         "Cuando otro manager hace una oferta por un jugador que la orden del "
         "gestor manda conservar o proteger, Pepe ya no la acepta ni le contesta "

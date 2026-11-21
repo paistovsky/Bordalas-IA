@@ -578,6 +578,24 @@ def _el_once_se_puede_escribir(lineup) -> bool:
         return False
 
 
+def _el_once_no_se_toca():
+    """
+    EL ONCE NO SE TOCA EN JUEGO (21/11/2026): el motivo si el once no se
+    puede guardar ahora (interruptor encendido y ronda en juego), None
+    si se puede o no se sabe. Nunca lanza.
+    """
+
+    try:
+        from src.analysis.el_once_no_se_toca_en_juego import (
+            por_que_no_se_guarda,
+        )
+
+        return por_que_no_se_guarda()
+
+    except Exception:                               # noqa: BLE001
+        return None
+
+
 def execute_autopilot_decision(
     decision: dict,
     execute: bool = False,
@@ -2888,6 +2906,30 @@ def execute_autopilot_decision(
     # ========================================================
 
     if action == "SAVE_LINEUP":
+
+        # EL ONCE NO SE TOCA EN JUEGO (21/11/2026)
+        #
+        #     Con el interruptor encendido y una ronda en juego, el once
+        #     no se guarda: valdria para los partidos que quedan de esa
+        #     ronda. Sin escritura y sin castigo; el plan ya no deberia
+        #     proponerlo (`el_once_no_se_toca_en_juego`).
+        no_se_toca = _el_once_no_se_toca()
+
+        if no_se_toca:
+
+            return build_noop_result(
+                decision=
+                    decision,
+
+                status=
+                    "ROUND_IN_PROGRESS",
+
+                reason=
+                    no_se_toca,
+
+                success=
+                    True,
+            )
 
         monitor = (
             (

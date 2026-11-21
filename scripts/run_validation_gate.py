@@ -677,6 +677,11 @@ TESTS = [
     # perfil cacheado, y el valor es la plantilla sumada. Solo vista:
     # el libro de rivales que leen los motores no se toca.
     "src.telemetry.test_la_clasificacion_de_biwenger_v1",
+
+    # El once no se toca en juego (21/11/2026): con una ronda en juego
+    # (del primer partido a 3 h despues del ultimo) el monitor viejo no
+    # propone ni guarda el once; sin calendario, lo de siempre. Apagado.
+    "src.analysis.test_el_once_no_se_toca_en_juego_v1",
 ]
 
 

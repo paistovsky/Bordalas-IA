@@ -352,6 +352,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **21/11 11:30 (lab de rivales del sab; J13 en juego).** **El fallo del
+  monitor del once, explicado y arreglado (apagado).** Causa: el calendario
+  (`calendar_state`) desbloquea la J+1 dos horas despues del primer partido;
+  desde ahi la fase es la de la J14 (NORMAL, `operations_locked` False) y el
+  orquestador proponia SAVE_LINEUP «para la J14», pero el once guardado a
+  mitad de ronda vale para lo que queda de la J13. La rotacion, la mejora y
+  el parte ya miraban `jornada_en_curso`; el monitor viejo no. Pieza nueva
+  **`BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO`** (nace APAGADA,
+  `src/analysis/el_once_no_se_toca_en_juego.py`): con una ronda en juego
+  (primer partido a 3 h tras el ultimo, rondas a lo Biwenger) el plan no
+  propone SAVE_LINEUP y el ejecutor, si le llega, no escribe
+  (ROUND_IN_PROGRESS, sin escritura ni castigo). Sin calendario, lo de
+  siempre. Test 7/7 en 3.11 y 3.13. Rivales: Luismi vuelve a -4,92 M
+  (compro tras el control del saque: la tactica de siempre). Puntos: Pollo
+  549, nosotros 544, Luismi 516. Net worth: Pollo 127,1 M, Luismi 109,7 M,
+  nosotros 64,2 M. Semana (desde lun 16): Luismi +4,35 M, Pollo +0,86 M,
+  nosotros -0,36 M.
+
 - **21/11 08:35 (supervision de las 08:22; J13 en juego).** **Remiro
   GANADO** (3.579.900, sin rival: la prima del 12 % sobro). Saldo
   1.188.724, 0 pujas. Orden: Remiro sale de `fichar` y entra en `conservar`;

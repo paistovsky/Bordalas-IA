@@ -1010,6 +1010,24 @@ def calculate_lineup_priority(
     )
 
 
+def _el_once_no_se_toca() -> bool:
+    """
+    EL ONCE NO SE TOCA EN JUEGO (21/11/2026): True si el interruptor
+    esta encendido y hay una ronda en juego. Apagado o sin saberlo,
+    False (lo de siempre). Nunca lanza.
+    """
+
+    try:
+        from src.analysis.el_once_no_se_toca_en_juego import (
+            por_que_no_se_guarda,
+        )
+
+        return bool(por_que_no_se_guarda())
+
+    except Exception:                               # noqa: BLE001
+        return False
+
+
 def calculate_lineup_update_priority(
     phase: str,
     seconds_to_deadline: int | None,
@@ -2022,6 +2040,9 @@ def build_global_decision_uncached(
             "complete",
             False,
         )
+        # EL ONCE NO SE TOCA EN JUEGO (21/11/2026): con una ronda en
+        # juego el once no se propone (`el_once_no_se_toca_en_juego`).
+        and not _el_once_no_se_toca()
     ):
 
         lineup_update_priority = (
