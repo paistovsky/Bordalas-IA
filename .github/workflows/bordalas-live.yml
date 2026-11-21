@@ -616,12 +616,15 @@ jobs:
       # en el arbol final. Marcha atras: quitar esta linea.
       BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA: "1"
 
-      # APAGADA 21/11 12:15 — BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO (encendida a
-      # las 11:30). La primera vuelta (#3103) cayo en la verja: con el
-      # calendario real y la J13 en juego, test_el_once_que_se_puede_escribir
-      # (que espera escribir el once) vio el bloqueo. Fallo de los tests, no
-      # de la pieza: se vuelve a encender cuando los tests limpien el
-      # interruptor y la verja pase CON el calendario de produccion.
+      # ENCENDIDO 21/11 12:40 (segundo intento) — BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO.
+      # La vuelta de las 07:15 guardo el once «para la J14» y Biwenger lo
+      # aplico a la J13 en curso. Con una ronda en juego (primer partido a 3 h
+      # tras el ultimo) el plan no propone SAVE_LINEUP y el ejecutor no lo
+      # escribe. Sin calendario, lo de siempre. El primer intento (11:30) tumbo
+      # la verja de #3103: un test viejo no limpiaba el interruptor; arreglado.
+      # Ensayo #47 verde; verja con --con NOMBRADO y calendario real verde en
+      # 3.11 y 3.13; paso 0 en el arbol final. Marcha atras: quitar esta linea.
+      BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO: "1"
 
     steps:
       - name: Checkout
