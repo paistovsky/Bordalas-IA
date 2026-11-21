@@ -616,6 +616,15 @@ jobs:
       # en el arbol final. Marcha atras: quitar esta linea.
       BORDALAS_EL_PROTEGIDO_NO_GASTA_LA_VUELTA: "1"
 
+      # ENCENDIDO 21/11 — BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO (laboratorio de
+      # las 10:47, con la J13 en juego). La vuelta de las 07:15 guardo el once
+      # «para la J14» y Biwenger lo aplico a la J13 en curso. Con una ronda en
+      # juego (primer partido a 3 h tras el ultimo) el plan no propone
+      # SAVE_LINEUP y el ejecutor no lo escribe. Sin calendario, lo de siempre.
+      # Ensayo #47 verde; verja con --con verde en 3.11 y 3.13; paso 0 en el
+      # arbol final. Marcha atras: quitar esta linea.
+      BORDALAS_EL_ONCE_NO_SE_TOCA_EN_JUEGO: "1"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
