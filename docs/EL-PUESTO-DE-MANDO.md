@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/11/2026, 14:25 de Madrid (rafaga de la tarde del sab: una roja a las 12:07, ya arreglada por el chat del dueno).
+Actualizado: 21/11/2026, 20:50 de Madrid (EL_ONCE_NO_SE_TOCA_EN_JUEGO encendido y verde; regla nueva de primas para la orden; Gulacsi a vender tras la J13).
 
 ## El mandato
 
@@ -351,6 +351,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **21/11 20:50 (lab de rivales de la noche; J13 en juego).** Ciclos verdes
+  desde el segundo encendido (#3105 a mano, #3106-#3113); el monitor dice
+  KEEP_LINEUP y el once vivo sigue con Remiro. Rivales hoy: **Luismi** compro
+  a Amatucci (3.432.000, +0,1 % sobre su precio) y Ejuke (2.393.000, +0,5 %):
+  sin rival en el Computer, pujando al precio; sigue en -4,92 M en plena
+  jornada (vende la vispera de la siguiente). **Pollo** vende a Pepelu al
+  Computer (3.830.000, 20:05; lo pago 3.777.000 el 11/11: +53 k en 10 dias) y
+  sube a +4,56 M de caja: prepara la siguiente compra. **Leccion:** nuestra
+  prima del 12 % por Remiro (3.579.900, valia 3,16 M) fue dinero tirado
+  (-0,42 M): en el Computer, en los de 3 M o mas, casi nadie compite; Luismi
+  gana al precio. Coincide con el lab del 19/11 (>=3 M: +1 %). Regla para la
+  orden: `fichar` de 3 M o mas, puja = precio +1-3 %; la prima alta solo en
+  los baratos que suben (la pieza de las primas por tramo, el mar 24).
+  Cartera: Logan Costa (439.900) vale 0,50 M, +20 k/dia (+14 %), se aguanta.
+  Puntos: aun sin publicar los de la J13 (Pollo 549, nosotros 544, Luismi
+  516). Net worth: Pollo 127,2 M, Luismi 109,7 M, nosotros 64,2 M.
 
 - **21/11 14:25 (rafaga de la tarde; J13 en juego).** Una vuelta ROJA:
   #3103 (12:07), la primera con EL_ONCE_NO_SE_TOCA_EN_JUEGO encendido (chat
