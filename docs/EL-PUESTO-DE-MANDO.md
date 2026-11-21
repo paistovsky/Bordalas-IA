@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 21/11/2026, 07:30 de Madrid (rafaga del sab: Remiro GANADO; saldo +1,19 M).
+Actualizado: 21/11/2026, 08:35 de Madrid (Remiro ganado y ya en el once; Gulacsi a vender tras la J13; fallo del monitor del once a revisar).
 
 ## El mandato
 
@@ -352,6 +352,21 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
 
 ## Bitacora de despertares
 
+- **21/11 08:35 (supervision de las 08:22; J13 en juego).** **Remiro
+  GANADO** (3.579.900, sin rival: la prima del 12 % sobro). Saldo
+  1.188.724, 0 pujas. Orden: Remiro sale de `fichar` y entra en `conservar`;
+  Gulacsi sale de `conservar` y va a `vender_si_ficha` (si_esta Remiro,
+  suelo 1.750.000; la orden no vende con la jornada jugandose: sera tras la
+  J13). **OJO, FALLO A REVISAR (no hoy):** la vuelta de las 07:15 (#3098)
+  hizo SAVE_LINEUP creyendo guardar el once de la J14 («Lineup Monitor ha
+  detectado un cambio relevante en el XI recomendado para la Jornada 14») y
+  Biwenger lo aplico a la J13 en curso: el once vivo ya lleva a Remiro (dom
+  16:15, en Santander) por Gulacsi (dom 14:00, Camp Nou). Esta vez sale bien
+  (ninguno habia jugado y Remiro es mejor), pero con la jornada empezada el
+  monitor no deberia escribir: si quita a uno que ya jugo, podriamos perder
+  sus puntos. Mirarlo tras la J13. Rivales: Luismi ficha a Amatucci
+  (3.432.000) y Ejuke (2.393.000), -4,9 M. Net worth: Pollo 126,8 M, Luismi
+  109,7 M, nosotros 64,2 M (prima de Remiro: -0,42 M en papel).
 - **21/11 07:30 (rafaga de la manana del sab; J13 en juego).** Ciclos:
   verdes (#3089 a #3098, la de las 07:15 incluida); libros 07:20.
   **Remiro GANADO** (3.579.900, sin rival). Saldo **+1.188.724**, 0
