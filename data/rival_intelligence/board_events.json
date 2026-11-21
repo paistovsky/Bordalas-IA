@@ -260661,5 +260661,23 @@
         "amount": 3832300
       }
     ]
+  },
+  {
+    "event_id": "5ca2d0da6ba42c0badac1ff9",
+    "date": 1795302031,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 2602,
+        "from": {
+          "id": 14154203,
+          "name": "Prinzipote"
+        },
+        "amount": 1950100
+      }
+    ]
   }
 ]
