@@ -258300,5 +258300,42 @@
         "name": "Jornada 13"
       }
     }
+  },
+  {
+    "event_id": "988d70749f9378669f48d7f2",
+    "date": 1795241142,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 42425,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3432000
+      },
+      {
+        "player": 7003,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 3579900
+      },
+      {
+        "player": 33531,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 2393000
+      }
+    ]
   }
 ]
