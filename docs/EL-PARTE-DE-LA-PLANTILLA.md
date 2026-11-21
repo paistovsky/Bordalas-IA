@@ -44,6 +44,30 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 21/11/2026, 18:45 de Madrid (J13 en juego hasta el lun 23/11 ~24:00)
+
+Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). Ninguno
+de los 14 en la lista de lesionados ni sancionados. **El once vivo lleva a
+Remiro** (lo guardo la vuelta de las 07:15 con la J13 empezada; Gulacsi al
+banquillo). Biwenger aun no da los puntos de la J13 (clasificacion quieta:
+Pollo 549, nosotros 544).
+- POR Remiro 95, TITULAR (dom 16:15, en Santander; FF 95 %).
+- DEF Iglesias 95, Kike 95: jugando ahora el derbi (sab 18:30, Sevilla-Betis;
+  convocados). Chust 90, TITULAR (lun 21:00, en Levante).
+- MED Olasagasti 80 (lun 21:00); **Ivan 60, DUDA** (dom 16:15, Racing-Real;
+  10 de 12, FF 60 % igual que ayer); Dani Lorenzo 70 (dom 18:30, en
+  Osasuna); **Ramon 50, DUDA** (dom 18:30; 11 de 12; FF 50 % por tercer dia).
+- DEL Roberto JUGADO (vie, Athletic 0-1 Espanyol; puntos aun sin publicar);
+  Boye JUGADO (sab 14:00, Alaves 3-1 Deportivo; FF 90 % para la J14); Yamal
+  95 (dom 14:00, Barca-Villarreal).
+Banquillo: Gulacsi 90 (dom 14:00, en el Camp Nou; a vender tras la J13,
+suelo 1,75 M), Zubeldia 70 (dom 16:15), Logan Costa 50 (dom 14:00).
+Riesgo: Ramon (50 %) e Ivan (60 %); el recambio seria Zubeldia en un 4-3-3,
+pero **la regla de la casa: el once no se toca con la jornada empezada**
+(y desde hoy lo impide tambien EL_ONCE_NO_SE_TOCA_EN_JUEGO). **Hecho: nada.**
+Para la J14 (vie 27/11): el medio es el punto flojo (Ramon 50, Ivan 60,
+Dani 70, todos bajando); mirar recambio en el mercado el mar 24.
+
 ## 20/11/2026, 18:45 de Madrid (J13: HOY 21:00; cierre 20:45)
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy).
@@ -194,14 +218,3 @@ Ivan 1; Chust jugado, sin puntos aun); jugandose Gulacsi y Olasagasti;
 falta Yamal (21:00). Saldo +2.275.724, 0 pujas vivas (Tchouameni perdido
 ante Luismi, 6.621.000). **Hecho: nada.**
 
-## 07/11/2026, 18:45 de Madrid (J12 en juego; J13: vie 20/11 21:00)
-
-Modo ahorro (orden del dueno, 07/11): parte solo con los datos de Pepe
-(vuelta de las 18:07), sin leer noticias, porque no hay nada que decidir
-hasta la J13. Los 12, «ok» en Biwenger. J12: 14 puntos con 4 jugados
-(Iglesias 6, Kike Salas 6, Boye 2); del Malaga-Racing (Ivan, Dani
-Lorenzo, Ramon) aun no constan puntos; Roberto, jugado o jugandose.
-Quedan el dom: Chust 14:00, Gulacsi y Olasagasti 18:30, Yamal 21:00.
-Saldo +2.275.724 y puja viva de la mejora por Tchouameni (5.379.900, sale
-Ivan; se resuelve el dom 07:00). **Hecho: nada.** El parte completo vuelve
-la semana de la J13.
