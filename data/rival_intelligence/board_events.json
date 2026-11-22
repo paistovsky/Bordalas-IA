@@ -260679,5 +260679,32 @@
         "amount": 1950100
       }
     ]
+  },
+  {
+    "event_id": "bc6ea06163fe894d24bf5f2d",
+    "date": 1795327523,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 32338,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 4077000
+      },
+      {
+        "player": 40911,
+        "to": {
+          "id": 14154203,
+          "name": "Prinzipote"
+        },
+        "amount": 4410000
+      }
+    ]
   }
 ]
