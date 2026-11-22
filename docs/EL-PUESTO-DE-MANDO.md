@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/11/2026, 14:25 de Madrid (rafaga del dom: puja viva por Cabrera; caja de la J14 depende de vender Chust y Gulacsi).
+Actualizado: 22/11/2026, 20:50 de Madrid (J13 en juego; puja por Cabrera; el medio, riesgo de la J14).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/11 20:50 (lab de rivales del dom; J13 en juego).** Domingo quieto:
+  ningun movimiento de mercado desde las 07:05 (Agoume a Pollo, Nsongo a
+  Prinzipote). Puntos de la J13 aun sin publicar (Pollo 549, nosotros 544,
+  Luismi 516). Net worth: Pollo 127,9 M, Luismi 110,1 M (caja -4,92 M),
+  nosotros 64,4 M. Nuestro: Dani Lorenzo y Ramon suplentes en Osasuna (el
+  medio, riesgo de la J14); puja de la mejora por Cabrera viva (lun 07:00).
+  Plan del martes 24: medio titular que suba (mercado tras el reset), la pieza
+  de primas por tramo (apagada, con esceptico) y la venta de Gulacsi y Chust.
 
 - **22/11 14:25 (rafaga de la tarde).** Ciclos: verdes (#3123 a #3130);
   libros 14:11. **Puja viva por Cabrera 4.469.900** (la mejora, 07:21, por

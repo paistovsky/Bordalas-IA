@@ -48,8 +48,8 @@ lo que pague la caja entera.
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). Ninguno
 lesionado. Puntos de la J13 aun sin publicar (Pollo 549, nosotros 544).
-- POR Remiro JUGADO (Racing 3-2 Real, titular confirmado; J14 en casa con
-  el Racing... de nuevo RAC en el calendario de Pepe).
+- POR Remiro JUGADO (Racing 3-2 Real, titular confirmado; J14 Sevilla-Real
+  Sociedad, segun FF; el `next_match` de Pepe aun dice RAC, sin actualizar).
 - DEF Iglesias JUGADO (sab) y **APERCIBIDO** en Biwenger (una amarilla mas
   y cumple un partido; J14 Sevilla-Real Sociedad, FF 95 %); Kike JUGADO,
   95 % y +110 k/dia; Chust 90 (lun 21:00, en Levante; luego se vende si
