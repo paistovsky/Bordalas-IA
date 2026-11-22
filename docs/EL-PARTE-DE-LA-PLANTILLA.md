@@ -33,7 +33,7 @@ hay caja y habra competencia.
 | Ndukwe (Levante) | DEF | 1,07 M | Sergi Cardona | +12 % | gano el puesto a Mandi |
 | Remiro (Real Sociedad) | POR | 3,72 M | Gulacsi | +5-8 % | 6,0 pts/partido, 8 de 9 |
 | Exposito (Espanyol) | MED | 4,47 M | el peor medio | +5-8 % | lo vendimos el 23/10 por Boye |
-| Agoume (Sevilla) | MED | 3,36 M | el peor medio | +5-8 % | 9 de 9 titular |
+| ~~Agoume (Sevilla)~~ **PERDIDO el 22/11: es de Pollo17 (4.080.000, +0,2 %). Estuvo en el Computer todo el sab 21/11 a 4,06 M y no lo vi en la supervision; la mejora lo freno por «no sube» (+10 k) y por la confirmada de la J13** | MED | 3,36 M | el peor medio | +5-8 % | 9 de 9 titular |
 | Ivan Martin (Racing) | MED | 2,76 M | el peor medio | +5-8 % | FF 90. **NUESTRO** desde el 02/11 (2.779.900; sale Pablo Ibanez) |
 | Zabiri (Racing) | DEL | 7,54 M (02/11: 7,98 M, +20 k) | Roberto Fernandez | +10-20 % | 77 pts en 11 (ult. 5: 0, 11, 3, 9, 2); APERCIBIDO hoy; solo en el parón (09-19/11), si no esta apercibido y la caja lo paga |
 | Fer Nino (Elche) | DEL | 02/11: 6,37 M, +20 k | Roberto Fernandez | +10-15 % | 70 pts en 11 (ult. 5: 3, 7, 3, 2, 17), iguala a Roberto (69) y cuesta ~0,8 M menos; anadido por el dueno el 02/11. Ojeador 02/11: 4,1 pts por jornada J12-J17 (Roberto 4,6): el peor de los tres |

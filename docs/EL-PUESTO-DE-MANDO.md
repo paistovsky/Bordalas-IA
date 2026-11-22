@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/11/2026, 07:30 de Madrid (rafaga del dom: verde, sin movimientos).
+Actualizado: 22/11/2026, 10:50 de Madrid (Agoume perdido ante Pollo; puja por Cabrera viva; lista de objetivos en todas las supervisiones).
 
 ## El mandato
 
@@ -351,6 +351,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/11 10:50 (lab de rivales del dom; J13 en juego).** **Perdimos a
+  Agoume** (de LA LISTA DE OBJETIVOS, el medio que nos falta): estuvo en el
+  Computer todo el sabado a 4,06 M (+10 k/dia, 61 pts) y **Pollo** se lo
+  llevo hoy a las 07:05 a 4.080.000 (+0,2 %, sin rival). Fallo mio: en la
+  supervision del sabado no mire la lista (me comio el fallo del monitor). Y
+  la mejora no lo cogio: el sab a las 10:07 lo freno «solo si sube» (+10 k no
+  cuenta como subida) y por la noche su 100 % era de la confirmada de la J13.
+  **Regla:** la mirada a la lista de objetivos va en TODAS las supervisiones,
+  tambien en jornada y en fin de semana, antes que nada. Pollo vendio a
+  Pepelu (3,83 M) y compro a Agoume: cambia un medio por otro mejor sin
+  gastar. Prinzipote: vende a Barrenetxea (lesionado, 1,95 M) y compra a
+  Nsongo (4,41 M, +2,8 %). Nuestro: la mejora pujo hoy 07:21 por Cabrera
+  (4.469.900, +1,1 %; entra por Chust, +1,15 pts/jornada; Chust no se vende
+  hasta jugar el lun 21:00). Net worth: Pollo 127,9 M, Luismi 110,1 M,
+  nosotros 64,4 M.
 
 - **22/11 07:30 (rafaga de la manana, corta: modo ahorro; J13 en juego).**
   Ciclos: verdes (#3114 a #3123, la de las 07:15 incluida); libros 07:22.
