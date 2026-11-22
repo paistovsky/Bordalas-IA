@@ -44,6 +44,32 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 22/11/2026, 18:45 de Madrid (J13 en juego; J14: vie 27/11 21:00)
+
+Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). Ninguno
+lesionado. Puntos de la J13 aun sin publicar (Pollo 549, nosotros 544).
+- POR Remiro JUGADO (Racing 3-2 Real, titular confirmado; J14 en casa con
+  el Racing... de nuevo RAC en el calendario de Pepe).
+- DEF Iglesias JUGADO (sab) y **APERCIBIDO** en Biwenger (una amarilla mas
+  y cumple un partido; J14 Sevilla-Real Sociedad, FF 95 %); Kike JUGADO,
+  95 % y +110 k/dia; Chust 90 (lun 21:00, en Levante; luego se vende si
+  ganamos a Cabrera).
+- MED Ivan JUGADO (titular confirmado, FF 100 %); Olasagasti 80 (lun 21:00);
+  **Dani Lorenzo y Ramon: SUPLENTES hoy** (FF 0 % en el once confirmado del
+  Osasuna-Malaga de las 18:30; ayer 70 y 50). Primera suplencia de Dani en
+  la temporada (11 de 12 antes); Ramon llevaba tres dias al 50 %.
+- DEL Roberto, Boye, Yamal JUGADOS. **Yamal** recibio tratamiento en el pie
+  derecho en el calentamiento y jugo (Barca 3-2 Villarreal): vigilar el
+  parte del lunes/martes.
+Banquillo: Zubeldia TITULAR hoy con la Real (FF 100 %), Gulacsi 90, Logan
+Costa 80. Puja viva de la mejora: Cabrera 4.469.900 (lun 07:00).
+**Riesgo J14: el medio.** Dani y Ramon suplentes hoy; si repiten, perdieron
+el puesto (dos suplencias). Recambio en casa: Zubeldia (titular hoy) en
+un 4-3-3 o 5-3-2 con Cabrera; el once de la J14 lo elige Pepe. En el
+mercado del Computer de hoy no hay un medio titular que suba. **Hecho: nada**
+(jornada empezada; el martes, con la J13 cerrada y Cabrera resuelto, se
+busca un medio).
+
 ## 21/11/2026, 18:45 de Madrid (J13 en juego hasta el lun 23/11 ~24:00)
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). Ninguno
@@ -209,12 +235,4 @@ Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70, **Ramon 50**,
 Yamal 95, Roberto 80, Boye 90, **Cardona 30**. A vigilar para la J13:
 Ramon (vuelve Pablo Martinez) y que Cardona ya no es buen relevo. Sin
 pujas vivas. **Hecho: nada** (queda la semana del paron para decidir).
-
-## 08/11/2026, 18:45 de Madrid (J12 en juego; J13: vie 20/11 21:00)
-
-Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok». J12:
-26 puntos (Iglesias 6, Kike 6, Boye 2, Dani Lorenzo 4, Roberto 4, Ramon 3,
-Ivan 1; Chust jugado, sin puntos aun); jugandose Gulacsi y Olasagasti;
-falta Yamal (21:00). Saldo +2.275.724, 0 pujas vivas (Tchouameni perdido
-ante Luismi, 6.621.000). **Hecho: nada.**
 
