@@ -257760,6 +257760,213 @@
     }
   },
   {
+    "event_id": "6883323d8e12edfe705e8d44",
+    "date": 1795024826,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 643279,
+        "until": 1795204800,
+        "expired": true,
+        "mode": "1x2",
+        "games": [
+          {
+            "id": 50830,
+            "date": 1795204800,
+            "status": "finished",
+            "home": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": 0
+            },
+            "away": {
+              "id": 7,
+              "name": "Espanyol",
+              "slug": "espanyol",
+              "score": 1
+            }
+          },
+          {
+            "id": 50829,
+            "date": 1795266000,
+            "status": "finished",
+            "home": {
+              "id": 91,
+              "name": "Alavés",
+              "slug": "alaves",
+              "score": 3
+            },
+            "away": {
+              "id": 6,
+              "name": "Deportivo",
+              "slug": "deportivo",
+              "score": 1
+            }
+          },
+          {
+            "id": 50836,
+            "date": 1795274100,
+            "status": "finished",
+            "home": {
+              "id": 70,
+              "name": "Rayo Vallecano",
+              "slug": "rayo-vallecano",
+              "score": 0
+            },
+            "away": {
+              "id": 18,
+              "name": "Valencia",
+              "slug": "valencia",
+              "score": 1
+            }
+          },
+          {
+            "id": 50838,
+            "date": 1795282200,
+            "status": "finished",
+            "home": {
+              "id": 17,
+              "name": "Sevilla",
+              "slug": "sevilla",
+              "score": 1
+            },
+            "away": {
+              "id": 87,
+              "name": "Betis",
+              "slug": "betis",
+              "score": 1
+            }
+          },
+          {
+            "id": 50837,
+            "date": 1795291200,
+            "status": "finished",
+            "home": {
+              "id": 15,
+              "name": "Real Madrid",
+              "slug": "real-madrid",
+              "score": 2
+            },
+            "away": {
+              "id": 5,
+              "name": "Celta",
+              "slug": "celta",
+              "score": 1
+            }
+          },
+          {
+            "id": 50831,
+            "date": 1795352400,
+            "status": "finished",
+            "home": {
+              "id": 3,
+              "name": "Barcelona",
+              "slug": "barcelona",
+              "score": 3
+            },
+            "away": {
+              "id": 19,
+              "name": "Villarreal",
+              "slug": "villarreal",
+              "score": 2
+            }
+          },
+          {
+            "id": 50835,
+            "date": 1795360500,
+            "status": "finished",
+            "home": {
+              "id": 812,
+              "name": "Racing",
+              "slug": "racing",
+              "score": 3
+            },
+            "away": {
+              "id": 13,
+              "name": "Real Sociedad",
+              "slug": "real-sociedad",
+              "score": 2
+            }
+          },
+          {
+            "id": 50834,
+            "date": 1795368600,
+            "status": "finished",
+            "home": {
+              "id": 93,
+              "name": "Osasuna",
+              "slug": "osasuna",
+              "score": 1
+            },
+            "away": {
+              "id": 65,
+              "name": "Málaga",
+              "slug": "malaga",
+              "score": 0
+            }
+          },
+          {
+            "id": 50832,
+            "date": 1795377600,
+            "status": "finished",
+            "home": {
+              "id": 8,
+              "name": "Getafe",
+              "slug": "getafe",
+              "score": 0
+            },
+            "away": {
+              "id": 2,
+              "name": "Atlético",
+              "slug": "atletico",
+              "score": 3
+            }
+          },
+          {
+            "id": 50833,
+            "date": 1795464000,
+            "status": "preview",
+            "home": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": null
+            },
+            "away": {
+              "id": 75,
+              "name": "Elche",
+              "slug": "elche",
+              "score": null
+            }
+          }
+        ],
+        "prizes": [],
+        "competition": "la-liga",
+        "round": {
+          "id": 4911,
+          "name": "Jornada 13",
+          "short": "J13",
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "global": true,
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
+        "responses": []
+      }
+    }
+  },
+  {
     "event_id": "6bce4ff58a5b8010307c388b",
     "date": 1795024826,
     "type": "bettingPool",
@@ -262441,6 +262648,15 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "331a20120864e545482884cc",
+    "date": 1795090680,
+    "type": "adminText",
+    "fixed": false,
+    "title": "¡Tu campo, tu decisión!",
+    "author": null,
+    "content": "<p><a href=\"https://biwenger.as.com/settings/ui#fields\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/campos-personalizados/tablon.jpg\" alt=\"\" /></a></p>\r\n<p style=\"text-align: center;\">[button url=\"https://biwenger.as.com/settings/ui#fields\"]&iexcl;Elige tu campo![/button]</p>"
   },
   {
     "event_id": "6bde8a245240b2a88fec148d",
