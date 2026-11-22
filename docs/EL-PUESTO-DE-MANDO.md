@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/11/2026, 10:50 de Madrid (Agoume perdido ante Pollo; puja por Cabrera viva; lista de objetivos en todas las supervisiones).
+Actualizado: 22/11/2026, 14:25 de Madrid (rafaga del dom: puja viva por Cabrera; caja de la J14 depende de vender Chust y Gulacsi).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/11 14:25 (rafaga de la tarde).** Ciclos: verdes (#3123 a #3130);
+  libros 14:11. **Puja viva por Cabrera 4.469.900** (la mejora, 07:21, por
+  Chust). Otra vez no la vi a las 07:30: la linea del saldo de las 07:21 se
+  escribio ANTES de la puja de esa misma vuelta. Leccion corregida: tras
+  el reset, leer el saldo de la vuelta SIGUIENTE (08:07), no la de las
+  07:15. **Caja de la J14 (vie 27/11 15:00):** si se gana Cabrera (lun
+  07:00), saldo ~-3,28 M; lo tapan la venta de Chust (tras jugar el lun
+  21:00) y la de Gulacsi (orden, suelo 1,75 M). Si el mie 25 por la noche
+  no se ha vendido alguno de los dos, el jue 26 07:15 escribo la venta a
+  mano. Turno del gestor de la J14 en pie.
 
 - **22/11 10:50 (lab de rivales del dom; J13 en juego).** **Perdimos a
   Agoume** (de LA LISTA DE OBJETIVOS, el medio que nos falta): estuvo en el
