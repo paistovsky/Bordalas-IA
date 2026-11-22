@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/11/2026, 20:50 de Madrid (J13 en juego; puja por Cabrera; el medio, riesgo de la J14).
+Actualizado: 22/11/2026, 21:20 de Madrid (rafaga de la noche del dom: verde; Cabrera se resuelve el lun 07:00).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **22/11 21:20 (rafaga de la noche, corta).** Ciclos: verdes (#3130 a
+  #3137); libros 21:13. Saldo 1.188.724, comprometido 4.469.900 (Cabrera,
+  lun 07:00). Parte de las 18:45: Dani Lorenzo y Ramon suplentes en
+  Osasuna; Yamal tratado en el pie (vigilar para la J14). Lun 23 08:15
+  (tras la vuelta de las 08:07): resultado de Cabrera y plan de caja de la
+  J14. Turno del gestor de la J14 en pie.
 
 - **22/11 20:50 (lab de rivales del dom; J13 en juego).** Domingo quieto:
   ningun movimiento de mercado desde las 07:05 (Agoume a Pollo, Nsongo a
