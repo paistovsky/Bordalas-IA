@@ -3893,3 +3893,6 @@
 {"dia":"2026-11-22","id":42396,"name":"Dieng","value":0,"price":370000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-22","id":39357,"name":"Maciá","value":0,"price":880000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-22","id":39901,"name":"Freeman","value":0,"price":3350000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-22","id":42425,"name":"Amatucci","value":2290035,"price":3430000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-22","id":37488,"name":"Requena","value":2171070,"price":3170000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-22","id":33531,"name":"Ejuke","value":0,"price":2380000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
