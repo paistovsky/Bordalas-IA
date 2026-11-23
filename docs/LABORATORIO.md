@@ -69,6 +69,10 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E120 · 23/11/2026 17:14 de Madrid · Sin experimento (modo ahorro)
+
+Turno minimo: el modo ahorro del dueño sigue en vigor. La J13 acaba esta noche y E112 se juzga cuando se pague. La J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
+
 ### E119 · 23/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo: el modo ahorro del dueño sigue en vigor. La J13 acaba hoy a las 21:00 y aun no esta pagada; E112 se juzga con `--juzgar 13` cuando se pague (previsto el mar 24 por la tarde, E43). La J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
