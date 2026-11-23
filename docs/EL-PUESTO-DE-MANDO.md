@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/11/2026, 14:30 de Madrid (rafaga del lun: el libro de aciertos a 95,8 MB; la poda, manana).
+Actualizado: 23/11/2026, 19:45 de Madrid (J13: 71 pts con 9; PRIMEROS en la general, 615; correccion del 21/11 sobre el once).
 
 ## El mandato
 
@@ -351,6 +351,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/11 19:45 (el dueno: «jornadon»; captura de Biwenger).** J13 con 9
+  jugados: **71 puntos** (Kike 18, Boye 13, Roberto 10, Yamal 10, Gulacsi 7,
+  Iglesias 5, Ivan 4, Dani 3, Ramon 1); faltan Chust y Olasagasti (hoy 21:00).
+  **General: PRIMEROS, 615** (Pollo 604, Luismi 595, Mex 516). En la jornada,
+  Luismi 79 va por delante (nos faltan 9 para pasarle).
+  **CORRECCION de lo que escribi el 21/11:** el SAVE_LINEUP de la vuelta de
+  las 07:15 del sab NO se aplico a la J13: la J13 la juega Gulacsi (7 pts),
+  no Remiro. En esta liga Biwenger congela el once ENTERO al empezar la
+  ronda; lo que el monitor guarda con la ronda en juego es el once de la
+  siguiente. EL_ONCE_NO_SE_TOCA_EN_JUEGO partio de una lectura equivocada:
+  no protege de nada, solo retrasa el guardado del once de la J+1 hasta 3 h
+  despues del ultimo partido (inocuo con dias de margen). Se queda
+  encendido; si un dia una ronda empieza a menos de ~6 h del final de la
+  anterior, se apaga (quitar su linea del YAML). Leccion: antes de construir
+  sobre un «Biwenger hizo X», comprobarlo en Biwenger (la captura del dueno
+  lo resolvio en un segundo).
 
 - **23/11 14:30 (rafaga de la tarde; ultimo dia de la J13).** Ciclos:
   verdes (#3147 a #3153); libros 14:12. Saldo -3.281.176, 0 pujas (plan de
