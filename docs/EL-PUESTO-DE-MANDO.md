@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/11/2026, 20:50 de Madrid (la venta de la cartera gana a aguantar; plan: prima 1-3 M a +9 %).
+Actualizado: 23/11/2026, 21:25 de Madrid (rafaga de la noche del lun: PRIMEROS en la general; la poda manana).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/11 21:25 (rafaga de la noche; ultimo partido de la J13 en juego).**
+  Ciclos: verdes (#3153 a #3160); libros 21:12. **J13: 71 puntos con 9 y
+  PRIMEROS en la general (615; Pollo 604, Luismi 595).** Saldo -3.281.176,
+  0 pujas: el plan de la J14 sigue (Chust tras jugar esta noche, Gulacsi
+  por la orden; jue 26 07:15 a mano si hace falta). Mi «correccion» del
+  21/11 21:20 sobre Remiro era la equivocada: la J13 la jugo Gulacsi (la
+  de las 07:30 del sab acertaba). Manana mar 24: la poda del libro de
+  aciertos (plan en la entrada de las 14:30).
 
 - **23/11 20:50 (lab de rivales del lun).** Medido (95 compras de rivales
   al Computer con 14-21 dias de precio despues; scratchpad lab2311n/
