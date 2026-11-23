@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/11/2026, 10:50 de Madrid (Cabrera ganado; caja -3,28 M con Chust y Gulacsi a vender tras la J13).
+Actualizado: 23/11/2026, 14:30 de Madrid (rafaga del lun: el libro de aciertos a 95,8 MB; la poda, manana).
 
 ## El mandato
 
@@ -351,6 +351,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/11 14:30 (rafaga de la tarde; ultimo dia de la J13).** Ciclos:
+  verdes (#3147 a #3153); libros 14:12. Saldo -3.281.176, 0 pujas (plan de
+  la J14 en la entrada de las 08:20). **URGENTE CON FECHA: el libro de
+  aciertos (`data/intelligence/scout_accuracy_ledger.json`) mide 95,8 MB**
+  (crece ~1 MB/dia; GitHub corta en 104,86 MB): ~9 dias, hacia el **02/12**.
+  Si llega, los libros dejan de guardarse en git sin que ningun ciclo salga
+  rojo (como el 08/11). **Plan para el mar 24 (la J13 acaba hoy a las
+  23:00), lo hago yo en la rafaga de las 07:15 o 14:15:** podar SIN
+  cambiar lo que mide: el resumen por fuente (`summary`) usa de cada
+  pronostico cerrado solo `source`, `outcome`, `magnitude_error_percent`,
+  `actual_percent`, `horizon_days` y `confidence`; a los cerrados de mas de
+  30 dias se les quitan los demas campos (nombre, precios, fechas...).
+  Antes, comprobar que ningun otro lector (la_vuelta_se_apunta,
+  la_regla_tres, el_ojeador_conectado, la_divergencia_acierta, los_libros)
+  usa esos campos de los viejos; prueba: el `summary` igual antes y
+  despues; verja 3.11 y 3.13; ver el tamano tras la primera vuelta. Si el
+  chat del dueno lo coge antes, que lo apunte aqui.
 
 - **23/11 10:50 (lab de rivales del lun; J13 acaba hoy 21:00).** Rivales
   quietos desde el dom 07:05: nadie compra con la jornada a medias. El unico
