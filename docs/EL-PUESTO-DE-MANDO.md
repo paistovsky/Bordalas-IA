@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/11/2026, 19:45 de Madrid (J13: 71 pts con 9; PRIMEROS en la general, 615; correccion del 21/11 sobre el once).
+Actualizado: 23/11/2026, 20:50 de Madrid (la venta de la cartera gana a aguantar; plan: prima 1-3 M a +9 %).
 
 ## El mandato
 
@@ -351,6 +351,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/11 20:50 (lab de rivales del lun).** Medido (95 compras de rivales
+  al Computer con 14-21 dias de precio despues; scratchpad lab2311n/
+  aguantar.py): **nuestra regla de venta GANA a aguantar.** En los que
+  subian al comprarse, vender el primer dia que no suben deja, sobre su
+  precio: <1 M +33 % (mediana, ~9 dias), 1-3 M +19 %, >=3 M +8 %; aguantar
+  14 dias: +25 %, +11 %, +6 %; 21 dias: +28 %, +11 %, +2 %. Aguantar solo es
+  mejor en 6/13, 3/29 y 3/31. **No se toca la venta** (lo que le dije al
+  dueno a las 19:45 queda descartado con datos). El filtro de puntos (>=3
+  por partido) tampoco frena: pasan 12/13, 25/29 y 30/31. Volumen al
+  Computer desde el 09/11: Luismi 9, Pollo 8, Manzagool 5, nosotros 4.
+  **Lo que si frena: la prima de 1-3 M.** Los rivales ganan esos al +6,7 %
+  (mediana) y la cartera puja +4 %: los disputados se los llevan ellos. Con
+  +19 % de mediana a la venta, pujar ~+9 % deja ~+10 %. En <1 M los rivales
+  pagan +8,1 % y nosotros +12 % (bien); en >=3 M, +1 % (bien: casi no hay
+  rival y la ganancia es pequena). **Plan del mar 24:** pieza apagada que
+  sube SOLO el tramo 1-3 M de la cartera a +9 % (con su test), verja con
+  --con NOMBRADO, ensayo y encendido el mie 25 (nunca jue/vie).
 
 - **23/11 19:45 (el dueno: «jornadon»; captura de Biwenger).** J13 con 9
   jugados: **71 puntos** (Kike 18, Boye 13, Roberto 10, Yamal 10, Gulacsi 7,
