@@ -263632,5 +263632,43 @@
         "amount": 4469900
       }
     ]
+  },
+  {
+    "event_id": "d51d7c7a38040f30509fb288",
+    "date": 1795473647,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 42425,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 3479800
+      }
+    ]
+  },
+  {
+    "event_id": "de29fbfa21740f106a49a4a7",
+    "date": 1795475549,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 38433,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 1822300
+      }
+    ]
   }
 ]
