@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/11/2026, 08:20 de Madrid (rafaga del lun: Cabrera GANADO; saldo -3,28 M a tapar antes del vie 15:00).
+Actualizado: 23/11/2026, 10:50 de Madrid (Cabrera ganado; caja -3,28 M con Chust y Gulacsi a vender tras la J13).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/11 10:50 (lab de rivales del lun; J13 acaba hoy 21:00).** Rivales
+  quietos desde el dom 07:05: nadie compra con la jornada a medias. El unico
+  movimiento es nuestro: Cabrera (4.469.900, +0,4 % sobre su precio de hoy,
+  sin rival; la regla de los de 3 M o mas funciono). Net worth: Pollo 128,5 M,
+  Luismi 110,7 M (caja -4,92 M), nosotros 64,6 M (plantilla 67,9 M, caja
+  -3,28 M). Puntos de la J13 aun sin publicar. Nota tecnica: el contenedor se
+  reinicio esta noche y dejo la copia en una rama vieja
+  (claude/ecstatic-turing-j6tgw6, del 22/10, poco profunda); vuelta a main
+  por fast-forward, nada perdido en GitHub. Las herramientas del scratchpad
+  (venv de 3.13, el runner de la jornada en vivo) se rehacen cuando hagan
+  falta.
 
 - **23/11 08:20 (rafaga del lun, leida tras la vuelta de las 08:07).**
   Ciclos: verdes (#3137 a #3147). **Cabrera GANADO** (4.469.900, sin
