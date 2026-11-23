@@ -44,6 +44,31 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 23/11/2026, 18:45 de Madrid (J13 acaba hoy 21:00; J14: vie 27/11 21:00)
+
+Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 15 en
+plantilla (entra Cabrera). El once que Pepe recomienda para la J14 es un
+4-3-3 con Gulacsi, Cabrera y sin Ramon.
+- POR **Remiro 80** (FF; Marrero 20; «Remiro toca fondo con los guantes»
+  tras el 3-2 en Santander; J14 en Sevilla). **Gulacsi 90** (Villarreal-Celta):
+  hoy Pepe lo prefiere para la J14, pero la orden lo vende tras la J13 (suelo
+  1,75 M). Se mantiene la venta: la diferencia entre los dos es de decimas
+  (Remiro 5 pts/partido al 80 %, Gulacsi 4,4 al 90 %) y la caja la necesita.
+- DEF Cabrera 90 (nuevo; Espanyol-Getafe lun 30/11 21:00); Iglesias 95,
+  **APERCIBIDO** (Sevilla-Real); Kike 95 y +110 k/dia; Chust 90 (HOY 21:00,
+  en Levante; luego se vende); Zubeldia 50; Logan Costa 80 (Villarreal).
+- MED Ivan 80 (Racing-Levante); Olasagasti 80 (HOY 21:00; J14 en Elche...
+  segun el calendario de Pepe, ELC); **Dani Lorenzo 50, DUDA** (suplente el
+  dom en Osasuna; J14 Malaga-Athletic); **Ramon 50, SUPLENTE** (fuera del once
+  recomendado).
+- DEL Boye 90 (Alaves-Real Madrid); Roberto 90 (Espanyol-Getafe); **Yamal 90,
+  TOCADO** (molestias en el tobillo; baja en Champions el mie; FF: disponible
+  para la J14, Barca-Deportivo).
+Caja: -3,28 M; Chust (~3,48 M) y Gulacsi (~1,82 M) la ponen en ~+2,0 M.
+**Riesgo J14:** el tercer medio (Dani 50 %). En casa no hay otro medio; el
+mar 24 se mira el mercado tras el reset (un medio titular que suba, <= 2,5 M).
+**Hecho: nada.**
+
 ## 22/11/2026, 18:45 de Madrid (J13 en juego; J14: vie 27/11 21:00)
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). Ninguno
@@ -225,14 +250,4 @@ bajan un poco (Cardona -150 k, Boye -90 k, Roberto -80 k); suben Kike
 +70 k, Yamal +50 k, Iglesias +40 k, Chust +40 k. Riesgo del paron: las
 selecciones (Yamal con Espana); no consta nada hoy. Sin pujas vivas
 (hucha). **Hecho: nada.**
-
-## 09/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
-
-Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok». J12
-cerrada con 47 puntos; el saldo ya sube a +3.745.724 (+1.470.000: premio
-de la J12 cobrado, asi que puntuamos). Panel: Gulacsi 90, Iglesias 95,
-Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70, **Ramon 50**,
-Yamal 95, Roberto 80, Boye 90, **Cardona 30**. A vigilar para la J13:
-Ramon (vuelve Pablo Martinez) y que Cardona ya no es buen relevo. Sin
-pujas vivas. **Hecho: nada** (queda la semana del paron para decidir).
 
