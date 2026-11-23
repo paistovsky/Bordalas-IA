@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 22/11/2026, 21:20 de Madrid (rafaga de la noche del dom: verde; Cabrera se resuelve el lun 07:00).
+Actualizado: 23/11/2026, 08:20 de Madrid (rafaga del lun: Cabrera GANADO; saldo -3,28 M a tapar antes del vie 15:00).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **23/11 08:20 (rafaga del lun, leida tras la vuelta de las 08:07).**
+  Ciclos: verdes (#3137 a #3147). **Cabrera GANADO** (4.469.900, sin
+  rival) por la mejora, para que salga Chust. **Saldo -3.281.176**, 0
+  pujas; plantilla 67,9 M. No rompe la J13 (ya en juego; el control fue al
+  saque del vie). **Para la J14 (plazo vie 27/11 15:00) faltan 3,28 M:**
+  Chust (~3,38 M publicado; sale por la mejora tras jugar hoy, conservar
+  no frena la mejora) + Gulacsi (orden, suelo 1,75 M) = ~5,1 M; Logan
+  Costa (ronda) como colchon. Las ofertas del Computer llegan en los
+  resets del mar 24 y mie 25. **Mie 25 21:15: si el saldo sigue en rojo,
+  el jue 26 07:15 escribo la venta a mano** (Logan Costa primero, luego
+  quien no sume al once; nunca Yamal). Turno del gestor de la J14 en pie.
 
 - **22/11 21:20 (rafaga de la noche, corta).** Ciclos: verdes (#3130 a
   #3137); libros 21:13. Saldo 1.188.724, comprometido 4.469.900 (Cabrera,
