@@ -3946,3 +3946,4 @@
 {"dia":"2026-11-23","id":38960,"name":"Livakovic","value":0,"price":400000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-23","id":40948,"name":"Noé Carrillo","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-23","id":39901,"name":"Freeman","value":0,"price":3330000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-23","id":32338,"name":"Agoumé","value":4138986,"price":4070000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
