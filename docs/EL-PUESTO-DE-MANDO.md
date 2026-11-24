@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 23/11/2026, 21:25 de Madrid (rafaga de la noche del lun: PRIMEROS en la general; la poda manana).
+Actualizado: 24/11/2026, 07:50 de Madrid (rafaga del mar: la poda del libro de aciertos subida; caja de la J14 en verde).
 
 ## El mandato
 
@@ -351,6 +351,23 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/11 07:50 (rafaga del mar).** Ciclos: verdes (#3160 a #3169).
+  **Saldo +2.070.324** (Chust y/o Gulacsi vendidos y el premio de la J13
+  entre el lun 21:00 y las 03:12): la J14 ya esta en verde. La ronda pujo
+  por Leo Roman 2.539.000 y lo PERDIO por 8.000 (2.547.000). **LA PODA
+  (este commit):** `save_ledger` de `src/intelligence/scout/accuracy.py`
+  deja a los pronosticos puntuados hace mas de 30 dias solo los 8 campos
+  que lee `summary` (`_podar`, `PODA_DIAS = 30`). Probado sobre el libro
+  de hoy (96,7 MB): **60,5 MB**, 116.544 podados, `summary` IDENTICO antes
+  y despues, mismas claves (record_report no los re-apunta), segunda poda
+  = 0, settle y record_report funcionan sobre el podado. Verja 3.11 y
+  3.13: 239 en verde. Lo que se pierde de los viejos (nombre, precios,
+  fechas) solo lo leian `scripts/la_regla_tres.py` y
+  `scripts/la_divergencia_acierta.py` (laboratorio; leen la historia de
+  git con --rev). Margen nuevo: ~40 MB, mas de un mes, y la poda sigue
+  cada dia. Vigilo la vuelta de las 08:07: verde, commit «libros:» y el
+  tamano del libro.
 
 - **23/11 21:25 (rafaga de la noche; ultimo partido de la J13 en juego).**
   Ciclos: verdes (#3153 a #3160); libros 21:12. **J13: 71 puntos con 9 y

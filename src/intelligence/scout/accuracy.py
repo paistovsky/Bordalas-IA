@@ -110,9 +110,70 @@ def load_ledger(path: Path | None = None) -> dict:
     return datos
 
 
+# LA PODA (24/11/2026). El libro crecia ~1 MB al dia y iba a pasar de
+# los 100 MiB que GitHub admite por fichero hacia el 02/12 (el 08/11
+# ya paso una vez y los libros dejaron de guardarse sin ningun ciclo
+# rojo). A un pronostico ya puntuado hace mas de PODA_DIAS solo se le
+# dejan los campos que lee `summary` (y `scored_at`, para saber su
+# edad): el resumen por fuente sale IDENTICO. La clave del pronostico
+# se queda, asi `record_report` no lo vuelve a apuntar. Lo que se
+# pierde de los viejos (nombre, precios, fechas) solo lo leian los
+# scripts de laboratorio, que pueden leer la historia de git con --rev.
+PODA_DIAS = 30
+
+CAMPOS_QUE_SE_QUEDAN = (
+    "source",
+    "outcome",
+    "magnitude_error_percent",
+    "actual_percent",
+    "horizon_days",
+    "direction_hit",
+    "confidence",
+    "scored_at",
+)
+
+
+def _podar(ledger: dict, ahora: datetime | None = None) -> int:
+
+    limite = (ahora or datetime.now(timezone.utc)) - timedelta(
+        days=PODA_DIAS
+    )
+
+    podados = 0
+
+    predicciones = ledger.get("predictions") or {}
+
+    for clave, entrada in predicciones.items():
+
+        if not isinstance(entrada, dict):
+            continue
+
+        if entrada.get("outcome") in (None, "PENDING"):
+            continue
+
+        if set(entrada) <= set(CAMPOS_QUE_SE_QUEDAN):
+            continue
+
+        puntuado = _parse(entrada.get("scored_at"))
+
+        if puntuado is None or puntuado >= limite:
+            continue
+
+        predicciones[clave] = {
+            campo: entrada.get(campo)
+            for campo in CAMPOS_QUE_SE_QUEDAN
+        }
+
+        podados += 1
+
+    return podados
+
+
 def save_ledger(ledger: dict, path: Path | None = None) -> None:
 
     ruta = path or LEDGER_PATH
+
+    _podar(ledger)
 
     ruta.parent.mkdir(parents=True, exist_ok=True)
 
