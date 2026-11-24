@@ -44,6 +44,28 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 24/11/2026, 18:45 de Madrid (J14: vie 27/11 21:00; caja: vie 15:00)
+
+Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 12 en
+plantilla (vendidos Chust, Gulacsi y Logan Costa; entro Cabrera); puja viva
+de la cartera por Espi (1.669.900; FF: disponible, titular 15 %, revulsivo;
+es para revender). Saldo 5.071.000 (con el premio de la J13); con Espi,
+3,40 M. Once vivo 3-4-3 = el recomendado.
+- POR **Remiro 80** (Marrero 20; J14 en Sevilla). **Unico portero**: sin
+  recambio en casa.
+- DEF Cabrera 90 (Espanyol-Getafe lun 30/11); Iglesias 95, **APERCIBIDO**
+  (Sevilla-Real); Kike 95 (+140 k/dia); Zubeldia 50 (banquillo).
+- MED Olasagasti 90 (Levante-Racing, vie 21:00: abre la jornada); Ivan 80
+  (Racing); **Dani Lorenzo 50 y Ramon 50, los dos en el once** (Malaga-
+  Athletic; suplentes el dom; FF sin cambios hoy).
+- DEL Roberto 90 (Getafe); Boye 90 (Real Madrid); **Yamal 90, TOCADO**
+  (fuera en Champions; FF 24/11: «no peligra su presencia en Riazor»).
+**Riesgo J14:** el medio (dos al 50 %) y la porteria sin recambio. Lo
+que paga la caja (~3,4 M): un medio titular que suba (<= 2,5 M) y, si sale
+barato, un portero titular de recambio. En el Computer de hoy no hay
+ninguno; el mie 25 a las 08:22 se mira el mercado nuevo, y la mejora busca
+sola (solo si sube). **Hecho: nada.**
+
 ## 23/11/2026, 18:45 de Madrid (J13 acaba hoy 21:00; J14: vie 27/11 21:00)
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 15 en
@@ -238,16 +260,4 @@ Iglesias 95, Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70,
 Iglesias +30 k; bajan Cardona -110 k, Boye -60 k, Roberto -40 k, Ivan
 -40 k. Selecciones: no consta nada. Sin pujas vivas (hucha). **Hecho:
 nada.**
-
-## 10/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
-
-Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
-lesiones ni sanciones en Biwenger. Panel igual que ayer: Gulacsi 90,
-Iglesias 95, Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70,
-**Ramon 50** (revulsivo; vuelve Pablo Martinez), Yamal 95, Roberto 80,
-Boye 90, **Cardona 30** (fuera del once). Precios del paron: casi todos
-bajan un poco (Cardona -150 k, Boye -90 k, Roberto -80 k); suben Kike
-+70 k, Yamal +50 k, Iglesias +40 k, Chust +40 k. Riesgo del paron: las
-selecciones (Yamal con Espana); no consta nada hoy. Sin pujas vivas
-(hucha). **Hecho: nada.**
 
