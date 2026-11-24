@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/11/2026, 07:50 de Madrid (rafaga del mar: la poda del libro de aciertos subida; caja de la J14 en verde).
+Actualizado: 24/11/2026, 08:20 de Madrid (la poda, comprobada en la vuelta de las 08:07: libro 60,5 MB).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/11 08:20 (mirada tras la vuelta de las 08:07).** #3170 (sobre
+  15c6733a, la poda) VERDE; commit «libros:» 2db59827 (08:11); el libro de
+  aciertos mide **60.473.625 B** en git. La poda funciona en produccion.
+  Saldo 2.576.324, comprometido 1.669.900 (puja nueva de esta manana):
+  saldo - pujas = +906.424, la J14 sigue en verde.
 
 - **24/11 07:50 (rafaga del mar).** Ciclos: verdes (#3160 a #3169).
   **Saldo +2.070.324** (Chust y/o Gulacsi vendidos y el premio de la J13
