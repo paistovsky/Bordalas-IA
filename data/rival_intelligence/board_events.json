@@ -264103,5 +264103,24 @@
         "comments": 0
       }
     }
+  },
+  {
+    "event_id": "ee0097009367e1c54702b464",
+    "date": 1795561978,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
   }
 ]
