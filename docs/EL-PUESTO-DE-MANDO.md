@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/11/2026, 14:25 de Madrid (rafaga de la tarde del mar: verde; orden renovada hasta el 21/12).
+Actualizado: 24/11/2026, 20:50 de Madrid (J13: 83 pts, primeros en la general con 627; premio 30.000/punto).
 
 ## El mandato
 
@@ -351,6 +351,19 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/11 20:50 (lab del mar).** **J13 cerrada (roundFinished 17:04):
+  Luismi 93, NOSOTROS 83, Mex 68, Pollo 59.** General (cuenta propia, la
+  clasificacion de Pepe aun no se ha refrescado): **nosotros 627, Luismi 609,
+  Pollo 608**: primeros con 18 de ventaja. **El premio es 30.000 por punto**
+  (83 -> 2.490.000; Luismi 2.790.000): cada punto del once es dinero, asi
+  que mejorar el once tambien sube el patrimonio. Rivales: Luismi vende a
+  Amatucci al Computer (3,48 M; lo compro el sab a 3,43 M: +48 k en 3 dias);
+  Pollo compra a Leo Roman (2,55 M, nos gano por 8.000) y Otorbi (1,28 M), los
+  dos al precio. Net worth: Pollo 131,0 M, Luismi 114,4 M, nosotros 67,4 M
+  (caja 5,07 M con el premio). Mie 25: encendido de LAS_PRIMAS_MEDIDAS
+  (ensayo #48 verde) y, en la supervision, un medio titular y un portero de
+  recambio si salen.
 
 - **24/11 14:25 (rafaga de la tarde, corta).** Ciclos: verdes (#3170 a
   #3176); libros 14:12. Saldo 2.576.324, comprometido 1.669.900: +906.424
