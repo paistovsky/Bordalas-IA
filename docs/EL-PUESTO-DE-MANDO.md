@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/11/2026, 11:40 de Madrid (LAS_PRIMAS_MEDIDAS construida apagada; encendido el mie 25).
+Actualizado: 24/11/2026, 14:25 de Madrid (rafaga de la tarde del mar: verde; orden renovada hasta el 21/12).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/11 14:25 (rafaga de la tarde, corta).** Ciclos: verdes (#3170 a
+  #3176); libros 14:12. Saldo 2.576.324, comprometido 1.669.900: +906.424
+  para la J14. El chat del dueno limpio la orden (Gulacsi vendido
+  1.822.300, Chust 3.529.200; Cabrera a conservar) y la renovo hasta el
+  21/12: la renovacion del 24-26/11 ya esta hecha. Turno del gestor de la
+  J14 en pie (vie 27/11 12:52).
 
 - **24/11 11:40 (lab del mar): LAS PRIMAS MEDIDAS, construida APAGADA.**
   El esceptico tumbo mi propuesta de anoche (+9 % en 1-3 M): el propio
