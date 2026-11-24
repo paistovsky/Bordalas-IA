@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/11/2026, 20:50 de Madrid (J13: 83 pts, primeros en la general con 627; premio 30.000/punto).
+Actualizado: 24/11/2026, 21:20 de Madrid (rafaga de la noche del mar: J13 cobrada, 83 pts y primeros).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/11 21:20 (rafaga de la noche, corta).** Ciclos: verdes (#3176 a
+  #3183); libros 21:11. **J13 cerrada: 83 puntos, PRIMEROS con 627**
+  (entrada del lab de las 20:48). Premio cobrado: saldo **5.066.324**,
+  comprometido 1.669.900: +3.396.424 para la J14. Parte: un solo portero
+  (Remiro), dos medios al 50 %. Turno del gestor de la J14 en pie.
 
 - **24/11 20:50 (lab del mar).** **J13 cerrada (roundFinished 17:04):
   Luismi 93, NOSOTROS 83, Mex 68, Pollo 59.** General (cuenta propia, la
