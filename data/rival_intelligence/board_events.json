@@ -263224,6 +263224,238 @@
     }
   },
   {
+    "event_id": "fa9db0d530265c0584156632",
+    "date": 1795024826,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 643279,
+        "until": 1795204800,
+        "expired": true,
+        "mode": "1x2",
+        "games": [
+          {
+            "id": 50830,
+            "date": 1795204800,
+            "status": "finished",
+            "home": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": 0
+            },
+            "away": {
+              "id": 7,
+              "name": "Espanyol",
+              "slug": "espanyol",
+              "score": 1
+            }
+          },
+          {
+            "id": 50829,
+            "date": 1795266000,
+            "status": "finished",
+            "home": {
+              "id": 91,
+              "name": "Alavés",
+              "slug": "alaves",
+              "score": 3
+            },
+            "away": {
+              "id": 6,
+              "name": "Deportivo",
+              "slug": "deportivo",
+              "score": 1
+            }
+          },
+          {
+            "id": 50836,
+            "date": 1795274100,
+            "status": "finished",
+            "home": {
+              "id": 70,
+              "name": "Rayo Vallecano",
+              "slug": "rayo-vallecano",
+              "score": 0
+            },
+            "away": {
+              "id": 18,
+              "name": "Valencia",
+              "slug": "valencia",
+              "score": 1
+            }
+          },
+          {
+            "id": 50838,
+            "date": 1795282200,
+            "status": "finished",
+            "home": {
+              "id": 17,
+              "name": "Sevilla",
+              "slug": "sevilla",
+              "score": 1
+            },
+            "away": {
+              "id": 87,
+              "name": "Betis",
+              "slug": "betis",
+              "score": 1
+            }
+          },
+          {
+            "id": 50837,
+            "date": 1795291200,
+            "status": "finished",
+            "home": {
+              "id": 15,
+              "name": "Real Madrid",
+              "slug": "real-madrid",
+              "score": 2
+            },
+            "away": {
+              "id": 5,
+              "name": "Celta",
+              "slug": "celta",
+              "score": 1
+            }
+          },
+          {
+            "id": 50831,
+            "date": 1795352400,
+            "status": "finished",
+            "home": {
+              "id": 3,
+              "name": "Barcelona",
+              "slug": "barcelona",
+              "score": 3
+            },
+            "away": {
+              "id": 19,
+              "name": "Villarreal",
+              "slug": "villarreal",
+              "score": 2
+            }
+          },
+          {
+            "id": 50835,
+            "date": 1795360500,
+            "status": "finished",
+            "home": {
+              "id": 812,
+              "name": "Racing",
+              "slug": "racing",
+              "score": 3
+            },
+            "away": {
+              "id": 13,
+              "name": "Real Sociedad",
+              "slug": "real-sociedad",
+              "score": 2
+            }
+          },
+          {
+            "id": 50834,
+            "date": 1795368600,
+            "status": "finished",
+            "home": {
+              "id": 93,
+              "name": "Osasuna",
+              "slug": "osasuna",
+              "score": 1
+            },
+            "away": {
+              "id": 65,
+              "name": "Málaga",
+              "slug": "malaga",
+              "score": 0
+            }
+          },
+          {
+            "id": 50832,
+            "date": 1795377600,
+            "status": "finished",
+            "home": {
+              "id": 8,
+              "name": "Getafe",
+              "slug": "getafe",
+              "score": 0
+            },
+            "away": {
+              "id": 2,
+              "name": "Atlético",
+              "slug": "atletico",
+              "score": 3
+            }
+          },
+          {
+            "id": 50833,
+            "date": 1795464000,
+            "status": "finished",
+            "home": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": 1
+            },
+            "away": {
+              "id": 75,
+              "name": "Elche",
+              "slug": "elche",
+              "score": 1
+            }
+          }
+        ],
+        "prizes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
+          13,
+          22,
+          0
+        ],
+        "competition": "la-liga",
+        "round": {
+          "id": 4911,
+          "name": "Jornada 13",
+          "short": "J13",
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "global": true,
+        "winners": [
+          "-",
+          53,
+          336,
+          1392,
+          3161,
+          3861,
+          2116,
+          623,
+          87,
+          8,
+          0
+        ],
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
+        "responses": []
+      }
+    }
+  },
+  {
     "event_id": "f77088fa4d5fd4270dbf8ebc",
     "date": 1795024921,
     "type": "transfer",
@@ -263763,5 +263995,113 @@
         "amount": 506000
       }
     ]
+  },
+  {
+    "event_id": "14e2bfc1542db99cb8dbcce9",
+    "date": 1795536257,
+    "type": "roundFinished",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "round": {
+        "id": 4911,
+        "name": "Jornada 13"
+      },
+      "scoreID": 5,
+      "results": [
+        {
+          "user": {
+            "id": 14156489,
+            "name": "Luismi_Haz",
+            "icon": "icons/11.png"
+          },
+          "points": 93,
+          "bonus": 2790000
+        },
+        {
+          "user": {
+            "id": 14175949,
+            "name": "Pepe Bordalás",
+            "icon": "i/u/14175949.png"
+          },
+          "points": 83,
+          "bonus": 2490000
+        },
+        {
+          "user": {
+            "id": 14178736,
+            "name": "Mex"
+          },
+          "points": 68,
+          "bonus": 2040000
+        },
+        {
+          "user": {
+            "id": 14145555,
+            "name": "Pollo17",
+            "icon": "icons/13.png"
+          },
+          "points": 59,
+          "bonus": 1770000
+        },
+        {
+          "user": {
+            "id": 14176382,
+            "name": "Manzagool"
+          },
+          "points": 51,
+          "bonus": 1530000
+        },
+        {
+          "user": {
+            "id": 14456960,
+            "name": "Alvaro Retamosa Sanguino",
+            "icon": "https://lh3.googleusercontent.com/a/ACg8ocJutcVZTZp4dm7Uti1m5xSJqEZHjAEPBg5ADAYZh1MnVhK1IFqC=s300-c"
+          },
+          "points": 47,
+          "bonus": 1510000,
+          "reason": {
+            "bonusPoint": 1410000,
+            "bonusRoundPosition": 100000
+          }
+        },
+        {
+          "user": {
+            "id": 14154203,
+            "name": "Prinzipote"
+          },
+          "points": 44,
+          "bonus": 1570000,
+          "reason": {
+            "bonusPoint": 1320000,
+            "bonusRoundPosition": 250000
+          }
+        },
+        {
+          "user": {
+            "id": 14151726,
+            "name": "DiosMande a Rodri al Palancas",
+            "icon": "i/u/14151726.png"
+          },
+          "points": 34,
+          "bonus": 1520000,
+          "reason": {
+            "bonusPoint": 1020000,
+            "bonusRoundPosition": 500000
+          }
+        }
+      ],
+      "article": {
+        "id": 731557,
+        "source": "blog",
+        "title": "Zabiri y 10 más para mi equipo fantasy",
+        "url": "https://biwenger.as.com/blog/zabiri-y-10-mas-para-mi-equipo-fantasy/",
+        "date": 1795534850,
+        "photo": "https://cdn.biwenger.com/wp/2026/09/adb3e4e2-245f-49fd-8186-fdc4170e9191-697.jpg",
+        "video": "",
+        "comments": 0
+      }
+    }
   }
 ]
