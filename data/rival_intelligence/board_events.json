@@ -263698,5 +263698,70 @@
         "amount": 3529200
       }
     ]
+  },
+  {
+    "event_id": "8377e532086889e4a6b6c44d",
+    "date": 1795500389,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 14630,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 2547000,
+        "bids": [
+          {
+            "user": {
+              "id": 14175949,
+              "name": "Pepe Bordalás",
+              "icon": "i/u/14175949.png"
+            },
+            "amount": 2539000
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 2530002
+          }
+        ]
+      },
+      {
+        "player": 34599,
+        "to": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 1280007
+      }
+    ]
+  },
+  {
+    "event_id": "132276200df9dc91061f99f3",
+    "date": 1795501230,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 34717,
+        "from": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 506000
+      }
+    ]
   }
 ]
