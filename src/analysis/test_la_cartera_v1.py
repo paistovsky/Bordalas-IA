@@ -13,6 +13,10 @@ LA CARTERA (16/10/2026). Guardias de `BORDALAS_LA_CARTERA` en
 from __future__ import annotations
 
 import os
+
+# Las primas medidas (24/11/2026) cambian la puja de la cartera; aqui se
+# prueba la de siempre: el entorno no decide esta guardia.
+os.environ.pop("BORDALAS_LAS_PRIMAS_MEDIDAS", None)
 import sys
 
 from pathlib import Path

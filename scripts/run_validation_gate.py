@@ -682,6 +682,10 @@ TESTS = [
     # (del primer partido a 3 h despues del ultimo) el monitor viejo no
     # propone ni guarda el once; sin calendario, lo de siempre. Apagado.
     "src.analysis.test_el_once_no_se_toca_en_juego_v1",
+
+    # Las primas medidas (24/11/2026): la cartera puja +6 % por debajo de
+    # 1 M y +1 % en el resto (repeticion de 123 subastas). Apagado.
+    "src.analysis.test_las_primas_medidas_v1",
 ]
 
 

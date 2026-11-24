@@ -39,6 +39,10 @@ from __future__ import annotations
 import builtins
 import json
 import os
+
+# Las primas medidas (24/11/2026) cambian la puja de la cartera; aqui se
+# prueba la de siempre: el entorno no decide esta guardia.
+os.environ.pop("BORDALAS_LAS_PRIMAS_MEDIDAS", None)
 import sys
 import tempfile
 import time

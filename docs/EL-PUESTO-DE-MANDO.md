@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/11/2026, 08:20 de Madrid (la poda, comprobada en la vuelta de las 08:07: libro 60,5 MB).
+Actualizado: 24/11/2026, 11:40 de Madrid (LAS_PRIMAS_MEDIDAS construida apagada; encendido el mie 25).
 
 ## El mandato
 
@@ -351,6 +351,24 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **24/11 11:40 (lab del mar): LAS PRIMAS MEDIDAS, construida APAGADA.**
+  El esceptico tumbo mi propuesta de anoche (+9 % en 1-3 M): el propio
+  codigo traia una medida vieja (n=108) en contra, y la repeticion de las
+  123 subastas del Computer de jugadores que subian (69 dias de mercado;
+  ganamos solo si nuestra puja supera la del rival que se lo llevo; venta
+  con la regla de la cartera) dice lo contrario: beneficio total <1 M:
+  +1 % 2,93 M, +4 % 4,00, **+6 % 4,48**, +9 % 4,28, +12 % (hoy) 3,89; 1-3 M:
+  **+1 % 2,57 M**, +4 % (hoy) 1,11, +6 % 0,17, +9 % -0,53; >=3 M: +1 % (hoy)
+  2,44, +4 % 0,84, +9 % -4,66. Los disputados no compensan. Pieza
+  **`BORDALAS_LAS_PRIMAS_MEDIDAS`** (`la_ronda_de_la_manana.las_primas`):
+  +6 % por debajo de 1 M y +1 % en el resto (vale tambien para la
+  rotacion). Test 5/5 en 3.11 y 3.13; cuatro tests viejos que miran la puja
+  de siempre limpian el interruptor arriba (cartera, ronda solo lo que
+  paga, rotacion, informe). Verja con `--con BORDALAS_LAS_PRIMAS_MEDIDAS`
+  NOMBRADO y calendario de CI: 240 verdes en 3.13 y 3.11. Ensayo y
+  encendido: mie 25 (nunca jue/vie). ~+2 M en dos meses si la muestra
+  aguanta (26 y 43 subastas: poca muestra, el sentido es claro).
 
 - **24/11 08:20 (mirada tras la vuelta de las 08:07).** #3170 (sobre
   15c6733a, la poda) VERDE; commit «libros:» 2db59827 (08:11); el libro de

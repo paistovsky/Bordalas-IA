@@ -240,6 +240,49 @@ PRIMAS_DE_LA_CARTERA = (
     (None, 0.01),
 )
 
+# LAS PRIMAS MEDIDAS (24/11/2026, laboratorio del martes)
+#
+#     Repeticion de las 123 subastas del Computer de jugadores que SUBIAN
+#     (69 dias de mercado, 17/09-21/11; el escaparate de cada dia, el
+#     libro de lo nuevo de cada reset, board_events y price_history), con la
+#     venta de la cartera (aguanta mientras sube, vende el primer dia que
+#     no sube) y ganando solo si la puja supera a la del rival que se lo
+#     llevo. Beneficio total por tramo y prima:
+#
+#         <1 M  (26):  +1 % 2,93 M | +4 % 4,00 | +6 % 4,48 | +9 % 4,28 | +12 % 3,89
+#         1-3 M (43):  +1 % 2,57 M | +4 % 1,11 | +6 % 0,17 | +9 % -0,53 | +12 % 0,04
+#         >=3 M (54):  +1 % 2,44 M | +4 % 0,84 | +6 % -2,02 | +9 % -4,66
+#
+#     Los disputados no compensan: quien paga mas por ellos pierde. Con
+#     `ENV_PRIMAS_MEDIDAS` la cartera (y la rotacion, que usa la misma
+#     funcion) puja +6 % por debajo de 1 M y +1 % en el resto, en vez de
+#     +12 % / +4 % / +1 %. Todo lo demas igual (la prima solo a
+#     `HORAS_PRIMA` o mas de la jornada, en 9.900, tope por viaje).
+#     Nace APAGADA.
+ENV_PRIMAS_MEDIDAS = "BORDALAS_LAS_PRIMAS_MEDIDAS"
+PRIMAS_MEDIDAS = (
+    (1_000_000, 0.06),
+    (3_000_000, 0.01),
+    (None, 0.01),
+)
+
+
+def las_primas_medidas_activas() -> bool:
+    try:
+        return str(os.environ.get(ENV_PRIMAS_MEDIDAS, "")).strip().lower() in {
+            "1", "true", "si", "sí", "yes", "on"}
+    except Exception:                               # noqa: BLE001
+        return False
+
+
+def las_primas():
+    """La tabla de primas por tramo de precio: la medida con
+    `ENV_PRIMAS_MEDIDAS`, la de siempre sin el. Nunca lanza."""
+    try:
+        return PRIMAS_MEDIDAS if las_primas_medidas_activas() else PRIMAS_DE_LA_CARTERA
+    except Exception:                               # noqa: BLE001
+        return PRIMAS_DE_LA_CARTERA
+
 
 def la_cartera_activa() -> bool:
     try:
@@ -274,8 +317,9 @@ def la_puja_de_la_cartera(precio, sube=None) -> int:
         precio = _int(precio, 0) or 0
         if precio <= 0:
             return la_puja(precio)
-        prima = PRIMAS_DE_LA_CARTERA[-1][1]
-        for hasta, p in PRIMAS_DE_LA_CARTERA:
+        tabla = las_primas()
+        prima = tabla[-1][1]
+        for hasta, p in tabla:
             if hasta is None or precio < hasta:
                 prima = p
                 break

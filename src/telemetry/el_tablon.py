@@ -364,6 +364,12 @@ QUE_HACE = {
         "guarda a mitad de jornada vale para los partidos que quedan de esa "
         "jornada, no para la siguiente. Se guarda al terminar. Si no se sabe el "
         "calendario, todo sigue como antes.",
+    "BORDALAS_LAS_PRIMAS_MEDIDAS":
+        "La cartera puja menos por encima del precio en el mercado del Computer: "
+        "+6 % por los de menos de 1 M y +1 % por el resto (antes +12 % y +4 %). "
+        "Repetidas las 123 subastas de jugadores que subian desde septiembre, "
+        "pagar de mas por los disputados hace perder: con estas primas la "
+        "cartera habria ganado unos 2 M mas en dos meses.",
     "BORDALAS_LA_ORDEN_EN_LOS_MANAGERS":
         "Cuando otro manager hace una oferta por un jugador que la orden del "
         "gestor manda conservar o proteger, Pepe ya no la acepta ni le contesta "
