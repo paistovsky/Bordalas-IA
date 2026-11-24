@@ -3984,3 +3984,4 @@
 {"dia":"2026-11-24","id":41091,"name":"Carlos López","value":0,"price":150000,"bid":0,"live_bid":0,"decision":"SIN_VALOR","intent":null,"seller":"COMPUTER"}
 {"dia":"2026-11-24","id":11196,"name":"Lemar","value":4647804,"price":4570000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
 {"dia":"2026-11-24","id":41031,"name":"Loureiro","value":1291512,"price":1830000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
+{"dia":"2026-11-24","id":34599,"name":"David Otorbi","value":1333200,"price":1300000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
