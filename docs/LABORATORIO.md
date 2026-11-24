@@ -69,6 +69,25 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E122 · 24/11/2026 17:14 de Madrid · Juicio de E112: ¿acertamos los puntos de la J13?
+
+Turno corto, en modo ahorro: solo juzgo lo apuntado el 19/11 a las 17:13 con `python3 lab/predicciones/jornada.py --juzgar 13`.
+
+- n = 7 managers. DiosMande queda fuera otra vez: no tenia once valido al apuntar y luego hizo 34.
+- **Real:** Luismi 93, Pepe 83, Mex 68, Pollo 59, Manzagool 51, Alvaro 47 y Prinzipote 44 (suma 445).
+- **Vara de Pepe:** error medio de 21,0 puntos por manager. Se quedo muy corta: el 67 % de lo real (299 contra 445).
+- **Calibrada (E79):** error medio de 12,8 puntos. Quedo en el 94 % de lo real (416).
+- **Hipotesis fallada:** esperaba que lo real cayera entre la vara y la calibrada, y quedo por encima de las dos. Fue una jornada alta: Pepe y Luismi hicieron 83 y 93.
+- **Orden:** con la vara, Spearman ~0,60; con la calibrada, ~0,50. Las dos fallaron con Manzagool, que daban arriba y quedo quinto con 51.
+- **Pepe contra Pollo:** la vara daba a Pepe 4,8 puntos por delante y la calibrada los empataba. Lo real fue Pepe 83 y Pollo 59: la vara acerto el sentido.
+- **J12 y J13 juntas (n = 14 casos de un manager en una jornada):**
+  - error medio: calibrada 13,7 puntos y vara 16,0;
+  - total predicho: calibrada ~104 % de lo real y vara ~76 %.
+- **Veredicto:** la calibrada acierta mejor el nivel de puntos y la vara ordena un poco mejor.
+  - Esto confirma lo que ya esta en «Listo para el plan» (E65 corregida con E79): usar los factores de E79 para el nivel y no para ordenar.
+  - Con dos jornadas no hay nada nuevo para el plan.
+- Repetir en la J14.
+
 ### E121 · 24/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo: el modo ahorro del dueño sigue en vigor. La J13 acabo anoche pero aun no esta pagada (se paga 13-18 h despues, E43); E112 se juzga esta tarde si ya esta pagada. La J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
