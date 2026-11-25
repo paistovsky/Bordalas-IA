@@ -264189,5 +264189,98 @@
         ]
       }
     ]
+  },
+  {
+    "event_id": "e522f5e628be03a7cb6dae5a",
+    "date": 1795603567,
+    "type": "playerMovements",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "type": "position",
+        "player": 14466,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 28103,
+        "from": 2,
+        "to": [
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 41940,
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 897,
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          2,
+          3
+        ]
+      },
+      {
+        "type": "position",
+        "player": 8747,
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          3,
+          4
+        ]
+      },
+      {
+        "type": "position",
+        "player": 19693,
+        "from": [
+          3,
+          2
+        ],
+        "to": 3
+      },
+      {
+        "type": "position",
+        "player": 33971,
+        "from": [
+          2,
+          3
+        ],
+        "to": 2
+      },
+      {
+        "type": "position",
+        "player": 5678,
+        "from": [
+          2,
+          3
+        ],
+        "to": 2
+      }
+    ]
   }
 ]
