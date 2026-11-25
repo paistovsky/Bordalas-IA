@@ -69,6 +69,10 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E124 · 25/11/2026 17:14 de Madrid · Sin experimento (modo ahorro)
+
+Turno minimo: el modo ahorro del dueño sigue en vigor. La J14 empieza el vie 27/11, asi que su prediccion se apunta mañana jue 26 a las 17:13, la vispera, como en E112. La J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
+
 ### E123 · 25/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo: el modo ahorro del dueño sigue en vigor. Pepe va primero tras la J13 (627, contra 609 de Luismi y 608 de Pollo). La prediccion de la J14 se apunta la vispera de su primer partido, como en E112. La J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
