@@ -44,6 +44,23 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 25/11/2026, 18:45 de Madrid (J14: vie 27/11 21:00; caja: vie 15:00)
+
+Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 13 en
+plantilla (entra Espi: Real Madrid, revulsivo, 15 %; para revender). Saldo
+3.646.424, 0 pujas: la J14 empieza en verde. Once 3-4-3 = el recomendado.
+Sin cambios respecto a ayer:
+- POR Remiro 80 (Marrero 20; unico portero). DEF Cabrera 90, Iglesias 95
+  (apercibido), Kike 95 (+120 k/dia); Zubeldia 50 (banquillo).
+- MED Olasagasti 90 (vie 21:00 con el Racing, abre la J14); Ivan 80; Dani
+  Lorenzo 50 y Ramon 50 (Malaga-Athletic; el Malaga echa a su director
+  deportivo y Funes sigue «una jornada mas»).
+- DEL Roberto 90, Boye 90 (Alaves-Real Madrid), Yamal 90 (TOCADO en Biwenger;
+  FF: disponible para Riazor).
+**Riesgo J14:** los dos medios del Malaga al 50 % y un solo portero. En el
+Computer de hoy ningun medio mejora (Turrientes 40, Kochorashvili 30).
+**Hecho: nada** (mie-vie: sin encendidos).
+
 ## 24/11/2026, 18:45 de Madrid (J14: vie 27/11 21:00; caja: vie 15:00)
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 12 en
@@ -249,15 +266,4 @@ Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70, **Ramon 50**
 once). Precios: Kike +50 k (ya 4,04 M), Yamal +30 k; bajan Cardona -70 k,
 Boye -60 k, Roberto -50 k. Selecciones: no consta nada. Sin pujas vivas
 (hucha). **Hecho: nada.**
-
-## 11/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
-
-Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
-lesiones ni sanciones en Biwenger. Panel igual que ayer: Gulacsi 90,
-Iglesias 95, Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70,
-**Ramon 50** (revulsivo), Yamal 95, Roberto 80, Boye 90, **Cardona 30**
-(fuera del once). Precios: suben Kike +80 k, Yamal +40 k, Chust +40 k,
-Iglesias +30 k; bajan Cardona -110 k, Boye -60 k, Roberto -40 k, Ivan
--40 k. Selecciones: no consta nada. Sin pujas vivas (hucha). **Hecho:
-nada.**
 
