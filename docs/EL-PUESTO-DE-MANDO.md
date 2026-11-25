@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 19:40 de Madrid (Espi vuelve a la cartera; caja J14 +3,65 M).
+Actualizado: 25/11/2026, 20:50 de Madrid (Pollo vende tres para la J14; idea: vender con oferta >= valor).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 20:50 (lab del mie).** **Pollo vende tres a las 20:00** al
+  Computer y pasa de -5,88 M a +4,02 M: Dituro 3,97 M (+4,7 % sobre su
+  valor), **Agoume 4,10 M** (+1,4 %; lo compro el dom a 4,08 M: era un viaje
+  de 3 dias, no una pieza del once; perderlo no nos costo un medio de Pollo),
+  Loureiro 1,84 M (+2,7 %). Patron: vende la vispera del control y elige
+  ofertas del Computer POR ENCIMA del valor (+1 a +5 %). Nuestra cartera
+  vende desde el 97 % del valor el primer dia que no sube: mirar en el lab
+  del mar 01/12 si esperar a ofertas >= 100 % del valor saca mas (sin
+  pasarse del dia de bajada). Clasificacion: nosotros 627, Luismi 609, Pollo
+  608. Caja J14: nosotros +3,65 M; todos en verde salvo nadie.
 
 - **25/11 19:40: deshecho lo de Espi.** El dueno: «No hagas esto. Sigue con
   tus instrucciones, eres el CEO, tu decides. Solo era una idea». Espi sale
