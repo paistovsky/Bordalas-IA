@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 08:30 de Madrid (Espi ganado; caja J14 +3,65 M; LAS_PRIMAS_MEDIDAS se enciende el mar 01/12).
+Actualizado: 25/11/2026, 10:50 de Madrid (primeros con 627; Pollo en -5,88 M antes de la J14).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 10:50 (lab del mie).** La clasificacion de Biwenger ya cuadra:
+  **nosotros 627, Luismi 609, Pollo 608.** Rivales: **Pollo** compra a De
+  Frutos (4,31 M, +2,8 % sobre su precio de hoy) y se queda en **-5,88 M** a
+  dos dias del control del vie 15:00 (su tactica: deuda y vender la
+  vispera); Luismi vende a Boselli al Computer a 0,74 M, +10,3 % sobre su
+  valor (las ofertas del Computer a veces pasan del valor). Nuestro: Espi
+  (cartera, +3,1 %). Net worth: Pollo 131,1 M, Luismi 115,3 M, nosotros
+  67,8 M (caja +3,65 M). Nada que construir hoy (mie: solo marcha atras).
 
 - **25/11 08:30 (supervision del mie).** **Espi GANADO** (1.669.900, la
   cartera). Saldo 3.646.424, 0 pujas: caja de la J14 en verde. Lista de
