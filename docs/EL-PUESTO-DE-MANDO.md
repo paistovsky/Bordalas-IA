@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 24/11/2026, 21:20 de Madrid (rafaga de la noche del mar: J13 cobrada, 83 pts y primeros).
+Actualizado: 25/11/2026, 08:20 de Madrid (rafaga del mie: Espi GANADO; caja de la J14 en verde).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 08:20 (rafaga del mie, leida tras la vuelta de las 08:07).**
+  Ciclos: verdes (#3183 a #3193). **Espi GANADO** (1.669.900, sin rival).
+  Saldo **+3.646.424** (con la racha), 0 pujas vivas (confirmado en la
+  vuelta de las 08:07). La J14 (vie 27/11 15:00) en verde con 3,6 M de
+  margen. Jue 26 07:15: control de caja del jueves. Turno del gestor de
+  la J14 en pie.
 
 - **24/11 21:20 (rafaga de la noche, corta).** Ciclos: verdes (#3176 a
   #3183); libros 21:11. **J13 cerrada: 83 puntos, PRIMEROS con 627**
