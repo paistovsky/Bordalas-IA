@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 20:50 de Madrid (Pollo vende tres para la J14; idea: vender con oferta >= valor).
+Actualizado: 25/11/2026, 21:20 de Madrid (rafaga de la noche del mie: verde; falto la vuelta de las 17:07).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 21:20 (rafaga de la noche, corta).** Ciclos verdes (#3199 a
+  #3205) pero **FALTO la vuelta de las 17:07** (de #3201 a las 16:07 se
+  salta a #3202 a las 18:07; no hay roja, no se disparo). Primer hueco
+  desde el 04/11; si se repite, pedir al dueno que mire el historial de
+  cron-job.org. Libros 21:13. Saldo +3.646.424, 0 pujas. Espi entro y
+  salio de `proteger` (el dueno, 18:46 y 18:50). Jue 26 07:15: control de
+  caja del jueves.
 
 - **25/11 20:50 (lab del mie).** **Pollo vende tres a las 20:00** al
   Computer y pasa de -5,88 M a +4,02 M: Dituro 3,97 M (+4,7 % sobre su
