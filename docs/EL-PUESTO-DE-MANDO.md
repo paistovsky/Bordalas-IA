@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 14:25 de Madrid (rafaga de la tarde del mie: verde, sin movimientos).
+Actualizado: 25/11/2026, 19:30 de Madrid (Espi protegido por orden del dueno; caja J14 +3,65 M).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 19:30 (el dueno: «ojito a Espi, si se lesiona Mbappe puede ser
+  titular y en el Madrid se hincha a puntos, buen fichaje»).** Espi (Real
+  Madrid, revulsivo, 1.669.900 de la cartera) pasa a `proteger` en la orden:
+  la ronda lo venderia el primer dia que no suba; asi se queda (la ronda
+  salta a los protegidos al vender, linea 665, y el escritor frena cualquier
+  aceptacion). Se quita si el dueno lo pide o si cae por debajo de 1,4 M.
+  `validar` None.
 
 - **25/11 14:25 (rafaga de la tarde, corta).** Ciclos: verdes (#3193 a
   #3199); libros 14:13. Saldo +3.646.424, 0 pujas. Pollo en -5,88 M (lab).
