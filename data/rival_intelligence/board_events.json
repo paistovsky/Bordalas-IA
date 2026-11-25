@@ -264489,5 +264489,60 @@
         "responses": []
       }
     }
+  },
+  {
+    "event_id": "7ef921e5949a92c95e707846",
+    "date": 1795631109,
+    "type": "bonus",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "user": {
+          "id": 14178736,
+          "name": "Mex"
+        },
+        "amount": 250000,
+        "reason": "dailyStreak"
+      }
+    ]
+  },
+  {
+    "event_id": "c01cc5cfab064465ccb04d83",
+    "date": 1795633218,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 17482,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 3967100
+      },
+      {
+        "player": 32338,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 4095400
+      },
+      {
+        "player": 41031,
+        "from": {
+          "id": 14145555,
+          "name": "Pollo17",
+          "icon": "icons/13.png"
+        },
+        "amount": 1838900
+      }
+    ]
   }
 ]
