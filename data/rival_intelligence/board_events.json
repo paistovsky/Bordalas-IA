@@ -264122,5 +264122,24 @@
         "reason": "dailyStreak"
       }
     ]
+  },
+  {
+    "event_id": "66b77eb88fe9d8eef730634d",
+    "date": 1795564331,
+    "type": "transfer",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 39801,
+        "from": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 739100
+      }
+    ]
   }
 ]
