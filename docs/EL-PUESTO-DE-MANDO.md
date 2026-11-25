@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 19:30 de Madrid (Espi protegido por orden del dueno; caja J14 +3,65 M).
+Actualizado: 25/11/2026, 19:40 de Madrid (Espi vuelve a la cartera; caja J14 +3,65 M).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 19:40: deshecho lo de Espi.** El dueno: «No hagas esto. Sigue con
+  tus instrucciones, eres el CEO, tu decides. Solo era una idea». Espi sale
+  de `proteger`; lo lleva la cartera con su regla (aguanta mientras sube,
+  vende el primer dia que no sube: medido el 23/11, gana a aguantar). Si
+  Mbappe cae y Espi pasa a titular, subira y la cartera lo aguantara sola;
+  la mejora lo puede meter en el once si suma. Leccion: una idea del dueno
+  no es una orden; preguntar o decidir con datos antes de tocar la orden.
 
 - **25/11 19:30 (el dueno: «ojito a Espi, si se lesiona Mbappe puede ser
   titular y en el Madrid se hincha a puntos, buen fichaje»).** Espi (Real
