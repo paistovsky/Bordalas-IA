@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 08:20 de Madrid (rafaga del mie: Espi GANADO; caja de la J14 en verde).
+Actualizado: 25/11/2026, 08:30 de Madrid (Espi ganado; caja J14 +3,65 M; LAS_PRIMAS_MEDIDAS se enciende el mar 01/12).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 08:30 (supervision del mie).** **Espi GANADO** (1.669.900, la
+  cartera). Saldo 3.646.424, 0 pujas: caja de la J14 en verde. Lista de
+  objetivos: ninguno hoy en el Computer. Medios del Computer: Turrientes
+  (FF 40 %), Kochorashvili (30 %), Mangala: ninguno mejora a Dani/Ramon
+  (50 %). Portero de recambio: no hay uno titular barato (Unai Simon 4,05 M y
+  bajando). **El encendido de LAS_PRIMAS_MEDIDAS se aplaza al mar 01/12**: la
+  regla de la casa es mie-vie antes de una jornada, solo marcha atras (la J14
+  empieza el vie 27/11). Lo que dije ayer («el mie») iba contra la regla.
 
 - **25/11 08:20 (rafaga del mie, leida tras la vuelta de las 08:07).**
   Ciclos: verdes (#3183 a #3193). **Espi GANADO** (1.669.900, sin rival).
