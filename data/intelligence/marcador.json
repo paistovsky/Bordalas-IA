@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-11-25T04:55:16.580856",
+  "updated_at": "2026-11-25T07:20:40.916344",
   "jornadas": {
     "4899": {
       "round_id": 4899,
@@ -3133,49 +3133,49 @@
       "clave": "RONDA_DE_BIWENGER",
       "ronda_de_biwenger": 4911,
       "escritura": 2,
-      "visto": "2026-11-25T04:55:16.580856",
-      "datos_de": "2026-11-25T04:55:01.305933+00:00",
-      "escrito_en": "2026-11-25T04:55:16.580856",
+      "visto": "2026-11-25T07:20:40.916344",
+      "datos_de": "2026-11-25T07:20:33.600657+00:00",
+      "escrito_en": "2026-11-25T07:20:40.916344",
       "clasificacion": [
-        {
-          "user_id": 14145555,
-          "name": "Pollo17",
-          "points": 549
-        },
         {
           "user_id": 14175949,
           "name": "Pepe Bordalás",
-          "points": 544
+          "points": 627
         },
         {
           "user_id": 14156489,
           "name": "Luismi_Haz",
-          "points": 516
+          "points": 609
+        },
+        {
+          "user_id": 14145555,
+          "name": "Pollo17",
+          "points": 608
         },
         {
           "user_id": 14176382,
           "name": "Manzagool",
-          "points": 467
+          "points": 518
         },
         {
           "user_id": 14178736,
           "name": "Mex",
-          "points": 448
+          "points": 516
         },
         {
           "user_id": 14151726,
           "name": "DiosMande a Rodri al Palancas",
-          "points": 446
+          "points": 480
         },
         {
           "user_id": 14154203,
           "name": "Prinzipote",
-          "points": 424
+          "points": 468
         },
         {
           "user_id": 14456960,
           "name": "Alvaro Retamosa Sanguino",
-          "points": 355
+          "points": 402
         }
       ],
       "mi_user_id": 14175949,
@@ -3214,7 +3214,7 @@
           12494
         ],
         "guardado": "2026-11-24T00:10:31+00:00",
-        "visto_en": "2026-11-25T04:55:01.305933+00:00"
+        "visto_en": "2026-11-25T07:20:33.600657+00:00"
       },
       "plantilla": [
         {
@@ -3268,6 +3268,11 @@
           "position": 4
         },
         {
+          "id": 37711,
+          "name": "Espí",
+          "position": 4
+        },
+        {
           "id": 41411,
           "name": "Ramón Enríquez",
           "position": 3
@@ -3289,6 +3294,7 @@
         "28115": 70,
         "29661": 64,
         "35678": 83,
+        "37711": 37,
         "41411": 29,
         "41418": 46
       },
@@ -3324,7 +3330,8 @@
         "41411": "Ramón Enríquez",
         "41418": "Dani Lorenzo",
         "7003": "Remiro",
-        "11800": "Cabrera"
+        "11800": "Cabrera",
+        "37711": "Espí"
       },
       "onces_por_vara": {
         "base": {
