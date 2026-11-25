@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 10:50 de Madrid (primeros con 627; Pollo en -5,88 M antes de la J14).
+Actualizado: 25/11/2026, 14:25 de Madrid (rafaga de la tarde del mie: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **25/11 14:25 (rafaga de la tarde, corta).** Ciclos: verdes (#3193 a
+  #3199); libros 14:13. Saldo +3.646.424, 0 pujas. Pollo en -5,88 M (lab).
+  Turno del gestor de la J14 en pie.
 
 - **25/11 10:50 (lab del mie).** La clasificacion de Biwenger ya cuadra:
   **nosotros 627, Luismi 609, Pollo 608.** Rivales: **Pollo** compra a De
