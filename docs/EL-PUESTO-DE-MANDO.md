@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/11/2026, 14:25 de Madrid (rafaga de la tarde del jue: verde, sin movimientos).
+Actualizado: 26/11/2026, 18:50 de Madrid (J14 manana 21:00 con caja +3,65 M).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **26/11 18:50 (jue: supervision, lab y parte).** Dia quieto: sin
+  compras ni ventas nuestras; Luismi compra a Sorloth (1,78 M). Caja de la
+  J14: nosotros +3,65 M, Pollo +4,02 M, Luismi +0,31 M: todos puntuan. Once
+  3-4-3 recomendado y puesto. Manana: cierre de la J14 a las 12:45.
 
 - **26/11 14:25 (rafaga de la tarde, corta).** Ciclos: verdes (#3215 a
   #3221); libros 14:11. Saldo +3.646.424, 0 pujas. Turno del gestor de la

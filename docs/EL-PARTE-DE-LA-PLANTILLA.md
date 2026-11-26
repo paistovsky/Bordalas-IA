@@ -44,6 +44,23 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 26/11/2026, 18:45 de Madrid (J14 MANANA vie 27/11 21:00; caja 15:00)
+
+Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 13 en
+plantilla, saldo 3.646.424 sin pujas: la J14 puntua. Once 3-4-3 = el
+recomendado. Sin cambios de porcentajes desde el martes:
+- POR Remiro 80 (la Real juega hoy en Londres, Conference; el dom en Sevilla).
+- DEF Cabrera 90, Iglesias 95 (apercibido), Kike 95 (+110 k/dia); Zubeldia 50.
+- MED Olasagasti 80 (vie 21:00 con el Racing, abre la J14; Ratkov con
+  molestias en el Levante, no nos afecta); Ivan 80 (Sainz-Maza y Guliashvili
+  vuelven a la lista del Racing); **Dani 50 y Ramon 50** (Malaga-Athletic;
+  Murillo vuelve a entrenar entero).
+- DEL Roberto 90, Boye 90 (en el Bernabeu), Yamal 90 (TOCADO en Biwenger; el
+  Barca descansa y Balde es baja, no Yamal).
+Banquillo: Zubeldia 50, Espi 15 (revulsivo). **Hecho: nada** (jue: sin
+encendidos; la mejora no ficha a menos de 40 h). Ultima mirada al once: el
+turno del cierre de la J14, vie 12:45.
+
 ## 25/11/2026, 18:45 de Madrid (J14: vie 27/11 21:00; caja: vie 15:00)
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 13 en
@@ -256,14 +273,4 @@ Sociedad, 860.000, «ok»; FF 60 % J13 contra el Racing; convocado con
 Euskadi el sab 14) por 969.900 para que salga Cardona (1,70 M, -50 k).
 Precios: Kike +80 k (4,12 M), Yamal +50 k, Iglesias +40 k; bajan Cardona
 -50 k, Boye -40 k. **Hecho: nada** (la puja es de Pepe y se paga sola).
-
-## 12/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
-
-Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
-lesiones ni sanciones en Biwenger. Panel igual: Gulacsi 90, Iglesias 95,
-Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70, **Ramon 50**
-(revulsivo), Yamal 95, Roberto 80, Boye 90, **Cardona 30** (fuera del
-once). Precios: Kike +50 k (ya 4,04 M), Yamal +30 k; bajan Cardona -70 k,
-Boye -60 k, Roberto -50 k. Selecciones: no consta nada. Sin pujas vivas
-(hucha). **Hecho: nada.**
 
