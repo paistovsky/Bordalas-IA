@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 25/11/2026, 21:20 de Madrid (rafaga de la noche del mie: verde; falto la vuelta de las 17:07).
+Actualizado: 26/11/2026, 08:20 de Madrid (rafaga del jue: control de caja de la J14 en verde).
 
 ## El mandato
 
@@ -351,6 +351,13 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **26/11 08:20 (rafaga del jue; control de caja de la J14).** Ciclos:
+  verdes (#3203 a #3215, sin huecos desde las 18:07 de ayer). Leido tras
+  la vuelta de las 08:07: **saldo +3.646.424, 0 pujas vivas**, nada
+  comprado ni vendido en el reset. La J14 (vie 27/11 15:00) en verde con
+  3,6 M de margen; nada que vender. Jueves: sin encendidos. Turno del
+  gestor de la J14 en pie (vie 12:52).
 
 - **25/11 21:20 (rafaga de la noche, corta).** Ciclos verdes (#3199 a
   #3205) pero **FALTO la vuelta de las 17:07** (de #3201 a las 16:07 se
