@@ -4082,3 +4082,5 @@
 {"dia":"2026-11-26","id":11196,"name":"Lemar","value":0,"price":4090000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-26","id":39901,"name":"Freeman","value":0,"price":3230000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-26","id":41940,"name":"Tsitaishvili","value":0,"price":1460000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-26","id":14630,"name":"Leo Román","value":3881925,"price":2600000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
+{"dia":"2026-11-26","id":18397,"name":"De Frutos","value":4918950,"price":4230000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"XI_UPGRADE","seller":"MANAGER"}
