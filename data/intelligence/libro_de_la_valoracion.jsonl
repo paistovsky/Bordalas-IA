@@ -4034,3 +4034,4 @@
 {"dia":"2026-11-25","id":39357,"name":"Maciá","value":0,"price":830000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-25","id":39901,"name":"Freeman","value":0,"price":3250000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
 {"dia":"2026-11-25","id":41940,"name":"Tsitaishvili","value":0,"price":1480000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":null,"seller":"MANAGER"}
+{"dia":"2026-11-25","id":26048,"name":"Tchouameni","value":5846168,"price":5750000,"bid":0,"live_bid":0,"decision":"MERCADO_DE_RIVAL","intent":"SPECULATION","seller":"MANAGER"}
