@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/11/2026, 08:20 de Madrid (rafaga del jue: control de caja de la J14 en verde).
+Actualizado: 26/11/2026, 14:25 de Madrid (rafaga de la tarde del jue: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,10 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **26/11 14:25 (rafaga de la tarde, corta).** Ciclos: verdes (#3215 a
+  #3221); libros 14:11. Saldo +3.646.424, 0 pujas. Turno del gestor de la
+  J14 en pie (vie 12:52).
 
 - **26/11 08:20 (rafaga del jue; control de caja de la J14).** Ciclos:
   verdes (#3203 a #3215, sin huecos desde las 18:07 de ayer). Leido tras
