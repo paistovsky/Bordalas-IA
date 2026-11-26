@@ -69,6 +69,28 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E126 · 26/11/2026 17:14 de Madrid · Prediccion con fecha para la J14 (se juzga cuando se pague)
+
+Turno corto, en modo ahorro. Tercera vez del mismo ensayo (E86 en la J12 y E112 en la J13), apuntado la vispera del primer partido de la J14 (vie 27/11).
+
+**Datos:** la foto del ciclo de las 17:11 de hoy (artefacto 15135722674).
+**Codigo:** `lab/predicciones/jornada.py --apuntar 14`. Queda en `lab/predicciones/j14.json`.
+
+    mejor once de cada manager   vara (pts/p x FF)   calibrada (E79)
+    Luismi_Haz                        51,6               74,1
+    Pollo17                           51,4               68,8
+    Manzagool                         49,5               71,7
+    Pepe                              48,5               62,8
+    Mex                               38,8               56,7
+    Prinzipote                        35,4               49,5
+    Alvaro R.                         27,8               41,0
+    DiosMande                      (sin once valido en la foto, la tercera vez)
+
+**Lo que espero:**
+- Despues de E122, la calibrada caera mas cerca del total real que la vara: entre el 90 y el 110 % de lo real, contra un 65-85 % de la vara.
+- Ojo: por primera vez las dos cuentas ponen a Pepe por detras de Pollo, por 2,9 con la vara y por 6,0 con la calibrada.
+- Se juzga con `--juzgar 14` cuando se pague la J14.
+
 ### E125 · 26/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
 
 Turno minimo: el modo ahorro del dueño sigue en vigor. La prediccion de la J14 se apunta esta tarde a las 17:13, la vispera de su primer partido (vie 27/11). La J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
