@@ -69,6 +69,10 @@ bot completo, siempre que lo DEMUESTRE con datos.
 (el laboratorio los apunta aqui, el mas reciente arriba: fecha, hipotesis,
 datos y n, resultado, veredicto)
 
+### E127 · 27/11/2026 11:14 de Madrid · Sin experimento (modo ahorro)
+
+Turno minimo: el modo ahorro del dueño sigue en vigor. La J14 empieza hoy y su prediccion ya esta apuntada (E126), asi que se juzgara cuando se pague. La J8 sigue sin cerrar en los libros. No he aprendido nada nuevo.
+
 ### E126 · 26/11/2026 17:14 de Madrid · Prediccion con fecha para la J14 (se juzga cuando se pague)
 
 Turno corto, en modo ahorro. Tercera vez del mismo ensayo (E86 en la J12 y E112 en la J13), apuntado la vispera del primer partido de la J14 (vie 27/11).
