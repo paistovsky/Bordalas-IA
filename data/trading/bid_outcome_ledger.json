@@ -2283,6 +2283,48 @@
    "margin": 0,
    "event_id": "77aa078c101989490d978065",
    "recorded_by": "TABLON"
+  },
+  "33970:2026-11-27T06:20:18.313625+00:00": {
+   "player_id": 33970,
+   "player_name": "Rosier",
+   "amount": 1844118,
+   "our_value": 2683800,
+   "win_probability": 0.9189,
+   "market_price": 1660000,
+   "recommended_bid": 1839873,
+   "intent": "XI_UPGRADE",
+   "target_source": "ACQUISITION_BOARD",
+   "market_rate_percent_per_day": 4.403,
+   "market_gate": "RITMO_OBSERVADO",
+   "trend_days": 4,
+   "seller_user_id": null,
+   "placed_at": "2026-11-27T06:20:18.313625+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null
+  },
+  "33839:2026-11-27T06:20:31.129500+00:00": {
+   "player_id": 33839,
+   "player_name": "Javi Rodríguez",
+   "amount": 2369475,
+   "our_value": null,
+   "win_probability": null,
+   "market_price": 2360000,
+   "recommended_bid": 2360708,
+   "intent": "REVENDER",
+   "target_source": "RENDIJA",
+   "market_rate_percent_per_day": null,
+   "market_gate": null,
+   "trend_days": null,
+   "seller_user_id": null,
+   "placed_at": "2026-11-27T06:20:31.129500+00:00",
+   "outcome": "PENDING",
+   "resolved_at": null,
+   "winning_amount": null,
+   "margin": null,
+   "event_id": null
   }
  }
 }
