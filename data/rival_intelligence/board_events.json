@@ -265115,5 +265115,14 @@
         "amount": 2528000
       }
     ]
+  },
+  {
+    "event_id": "76b4a226ee54ee72d1888f18",
+    "date": 1795779720,
+    "type": "adminText",
+    "fixed": true,
+    "title": "¡Este Black Friday di adiós a la publicidad!",
+    "author": null,
+    "content": "<p><a href=\"https://biwenger.as.com/credits\"><img src=\"https://cdn.biwenger.com/cdn-cgi/image/f=avif/campaigns/2026/football/black-friday-26-27/tablon.jpg\" alt=\"\" /></a></p>\r\n<p style=\"text-align: center;\">[button url=\"https://biwenger.as.com/credits\"]Quitar publicidad [/button]</p>"
   }
 ]
