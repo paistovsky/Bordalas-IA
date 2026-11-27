@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 26/11/2026, 21:20 de Madrid (rafaga de la noche del jue: verde; manana la J14).
+Actualizado: 27/11/2026, 08:20 de Madrid (rafaga del vie, dia de la J14: saldo - pujas +1,13 M).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/11 08:20 (rafaga del vie, dia del cierre de la J14; leida tras la
+  vuelta de las 08:07).** Ciclos: verdes (#3226 a #3238). Saldo
+  **5.347.624** (una venta en el reset, la plantilla baja de 64,7 a 63,1
+  M), **comprometido 4.213.593**: dos pujas nuevas para el sab 07:00,
+  Rosier 1.844.118 y Javi Rodriguez 2.369.475. **Saldo - pujas =
+  +1.134.031 >= 0**: la J14 pasa el plazo de las 15:00 en verde aunque
+  se ganen las dos. Que no entre ninguna puja mas hoy antes de las 21:00
+  (lo miro a las 12:52). Viernes: nada se enciende.
 
 - **26/11 21:20 (rafaga de la noche, corta).** Ciclos: verdes (#3221 a
   #3228); libros 21:12. Saldo +3.646.424, 0 pujas. Manana vie 27: J14
