@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/11/2026, 14:20 de Madrid (rafaga de la tarde del vie: caja de la J14 en verde a 40 min del plazo).
+Actualizado: 27/11/2026, 20:50 de Madrid (J14 en marcha; Pollo salio del rojo vendiendo 4 por la manana).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/11 20:50 (lab del vie; J14 a las 21:00).** **Pollo salio del -14,91 M
+  vendiendo 4 al Computer a las 11:12-11:14** (15,1 M): De Frutos 4,38 M (lo
+  compro el mie a 4,31 M: +70 k en 2 dias), Leo Roman 2,65 M (el mar a 2,55 M:
+  +100 k en 3 dias), German Valera 5,55 M (+1,6 % sobre su valor), Marcos
+  Alonso 2,53 M (-3,9 %). Con Agoume (+20 k en 3 dias) es su patron: compra el
+  lunes-miercoles lo que sube, lo vende el viernes por la manana al Computer
+  con oferta >= valor y mete el dinero en dos caros que se queda (Baena 14,7 M,
+  Cancelo 4,2 M). Es lo mismo que nuestra cartera, pero con 131 M de
+  plantilla. Todos puntuan la J14: nosotros +1,13 M neto, Pollo +0,19 M,
+  Luismi +0,31 M. Martes 01/12: encender LAS_PRIMAS_MEDIDAS y medir si vender
+  con oferta >= valor (lo que hace Pollo) mejora la venta de la cartera.
 
 - **27/11 14:20 (rafaga de la tarde; J14 hoy).** Ciclos verdes (#3242 a
   #3244, la de las 14:07 incluida). Saldo 5.347.624 - pujas 4.213.593 =
