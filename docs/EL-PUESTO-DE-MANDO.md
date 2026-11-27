@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/11/2026, 12:55 de Madrid (turno del gestor de la J14: todo en orden; turnos del gestor de la J23 adelantada y la J15).
+Actualizado: 27/11/2026, 14:20 de Madrid (rafaga de la tarde del vie: caja de la J14 en verde a 40 min del plazo).
 
 ## El mandato
 
@@ -351,6 +351,11 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/11 14:20 (rafaga de la tarde; J14 hoy).** Ciclos verdes (#3242 a
+  #3244, la de las 14:07 incluida). Saldo 5.347.624 - pujas 4.213.593 =
+  +1.134.031 a 40 min del plazo de las 15:00: nada nuevo. Mirada de las
+  20:15 del chat del dueno; mi rafaga de las 21:15 confirma.
 
 - **27/11 12:55 (turno del gestor del cierre de la J14).** El chat del
   dueno ya hizo el cierre a las 12:50 (entrada de arriba): no lo repito.
