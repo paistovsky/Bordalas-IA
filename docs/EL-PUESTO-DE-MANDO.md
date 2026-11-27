@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/11/2026, 20:50 de Madrid (J14 en marcha; Pollo salio del rojo vendiendo 4 por la manana).
+Actualizado: 27/11/2026, 21:20 de Madrid (rafaga de la noche del vie: la J14 empezo en verde).
 
 ## El mandato
 
@@ -351,6 +351,14 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/11 21:20 (rafaga de la noche; la J14 ya ha empezado).** Ciclos
+  verdes (#3244 a #3251, la de las 21:07 incluida). Al saque: saldo
+  5.347.624 - pujas 4.213.593 = +1.134.031: la J14 puntua. Rosier y Javi
+  Rodriguez se resuelven el sab 07:00. La mirada de las 20:15 del chat
+  del dueno no ha dejado entrada en la bitacora (el parte de las 18:45
+  daba el once 11/11). Turno del gestor de la J23 adelantada (mie 02/12
+  10:52) en pie.
 
 - **27/11 20:50 (lab del vie; J14 a las 21:00).** **Pollo salio del -14,91 M
   vendiendo 4 al Computer a las 11:12-11:14** (15,1 M): De Frutos 4,38 M (lo
