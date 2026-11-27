@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/11/2026, 12:50 de Madrid (cierre J14: caja +1,13 M neto, once 11/11; turnos J23 adelantada, J15 y J8 aplazada creados).
+Actualizado: 27/11/2026, 12:55 de Madrid (turno del gestor de la J14: todo en orden; turnos del gestor de la J23 adelantada y la J15).
 
 ## El mandato
 
@@ -351,6 +351,17 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/11 12:55 (turno del gestor del cierre de la J14).** El chat del
+  dueno ya hizo el cierre a las 12:50 (entrada de arriba): no lo repito.
+  Comprobado: vuelta de las 12:07 (#3242) verde; saldo 5.347.624 -
+  pujas 4.213.593 = **+1.134.031**: la J14 puntua. Los turnos que ese chat
+  llama «de esta sesion» despiertan al chat del dueno (session_012c...),
+  no al gestor: creados los del gestor, unos minutos despues de los suyos
+  y con orden de no repetirlos: **J23 adelantada mie 02/12 10:52**
+  (trig_01XbAiWTcxbg9oy6kx4vb618; control de caja al saque de las 19:00) y
+  **J15 vie 04/12 12:52** (trig_0138qQcxd7LqtJcuyuDhHW4J; ese turno crea el
+  del aplazado del 09/12 y la J16).
 
 - **27/11 12:50 (turno del CIERRE DE LA J14, chat del dueno).** Fecha
   confirmada: **Levante-Racing hoy 21:00 (LALIGA_OFFICIAL)**. Ciclos de hoy
