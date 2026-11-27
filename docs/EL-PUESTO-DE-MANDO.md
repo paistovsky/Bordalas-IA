@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/11/2026, 08:20 de Madrid (rafaga del vie, dia de la J14: saldo - pujas +1,13 M).
+Actualizado: 27/11/2026, 10:50 de Madrid (J14 hoy; nosotros +1,13 M neto; Pollo en -14,91 M).
 
 ## El mandato
 
@@ -351,6 +351,15 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/11 10:50 (lab del vie; J14 hoy 21:00).** **Pollo en -14,91 M** el
+  dia de la jornada: hoy compro a Baena (14.717.000) y Cancelo (4.217.000).
+  Si no vende ~15 M antes del saque, hace 0 en la J14 (doctrina §24). A las
+  10:07 aun no ha vendido nada. Nuestro: Espi vendido por la cartera
+  (1.701.200; +31.300); el motor viejo puja por Rosier (1.844.118, FF 60 %) y
+  Javi Rodriguez (2.369.475, FF 70 %), defensas para el once; saldo 5,35 M -
+  pujas 4,21 M = +1,13 M: la J14 puntua. Luismi +0,31 M. Clasificacion:
+  nosotros 627, Luismi 609, Pollo 608.
 
 - **27/11 08:20 (rafaga del vie, dia del cierre de la J14; leida tras la
   vuelta de las 08:07).** Ciclos: verdes (#3226 a #3238). Saldo
