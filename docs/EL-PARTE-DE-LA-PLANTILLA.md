@@ -44,6 +44,21 @@ Ventanas de la J12 (vie 06/11 21:00): la mejora y la orden con venta
 emparejada pujan hasta la vuelta del jue 05/11 04:50 (40 h). Despues, solo
 lo que pague la caja entera.
 
+## 27/11/2026, 18:45 de Madrid (J14 HOY 21:00, Levante-Racing)
+
+Datos de Pepe (vuelta de las 18:07) y FF (paginas de hoy). 12 en plantilla
+(Espi vendido hoy por la cartera, +31.300). Saldo 5.347.624; pujas vivas del
+motor viejo por Rosier (1.844.118, FF 60 %) y Javi Rodriguez (2.369.475, FF
+70 %): +1,13 M neto, la J14 puntua. Once 3-4-3 = el recomendado, 11/11 «ok»:
+- POR Remiro 80 (dom en casa con el Sevilla).
+- DEF Kike 95 (+130 k/dia), Cabrera 90, Iglesias 95 (apercibido).
+- MED Olasagasti 80 (HOY 21:00), Ivan 80 (HOY 21:00, en Valencia); **Dani 50
+  y Ramon 50** (Malaga-Athletic; el Malaga va con 26 y tres bajas, ninguna
+  nuestra).
+- DEL Yamal 90 (vuelve al grupo el 27/11; ya sin «tocado»), Roberto 90,
+  Boye 90 (en el Bernabeu).
+Banquillo: Zubeldia 50. **Hecho: nada** (vie; el once se congela a las 21:00).
+
 ## 26/11/2026, 18:45 de Madrid (J14 MANANA vie 27/11 21:00; caja 15:00)
 
 Datos de Pepe (vuelta de las 18:07) y FF (paginas de equipo de hoy). 13 en
@@ -261,16 +276,4 @@ Yamal 95, Roberto 80, Boye 90, Zubeldia 60, **Cardona 30** (sale: esta
 publicado y la rotacion espera una oferta del Computer >= 99 % de su
 valor). Precios: Yamal +90 k (26,0 M), Kike +60 k; bajan Cardona,
 Gulacsi, Ivan, Roberto y Boye -30 k. Sin pujas. **Hecho: nada.**
-
-## 13/11/2026, 18:45 de Madrid (paron; J13: vie 20/11 21:00)
-
-Modo ahorro: solo datos de Pepe (vuelta de las 18:07). Los 12, «ok», sin
-lesiones ni sanciones en Biwenger. Panel igual: Gulacsi 90, Iglesias 95,
-Kike 95, Chust 90, Olasagasti 80, Ivan 70, Dani Lorenzo 70, **Ramon 50**
-(sube de revulsivo a rotacion), Yamal 95, Roberto 80, Boye 90, **Cardona
-30** (fuera del once). **Puja viva de la rotacion:** Zubeldia (Real
-Sociedad, 860.000, «ok»; FF 60 % J13 contra el Racing; convocado con
-Euskadi el sab 14) por 969.900 para que salga Cardona (1,70 M, -50 k).
-Precios: Kike +80 k (4,12 M), Yamal +50 k, Iglesias +40 k; bajan Cardona
--50 k, Boye -40 k. **Hecho: nada** (la puja es de Pepe y se paga sola).
 
