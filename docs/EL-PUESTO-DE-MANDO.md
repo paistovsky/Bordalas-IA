@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/11/2026, 10:50 de Madrid (J14 hoy; nosotros +1,13 M neto; Pollo en -14,91 M).
+Actualizado: 27/11/2026, 12:50 de Madrid (cierre J14: caja +1,13 M neto, once 11/11; turnos J23 adelantada, J15 y J8 aplazada creados).
 
 ## El mandato
 
@@ -351,6 +351,22 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **27/11 12:50 (turno del CIERRE DE LA J14, chat del dueno).** Fecha
+  confirmada: **Levante-Racing hoy 21:00 (LALIGA_OFFICIAL)**. Ciclos de hoy
+  verdes (#3235 a #3242). **Caja: saldo 5.347.624 - pujas vivas 4.213.593
+  (Rosier 1.844.118 y Javi Rodriguez 2.369.475, motor viejo, XI_UPGRADE; se
+  resuelven el sab 07:00) = +1.134.031**: la J14 puntua. **Once 11/11** 3-4-3
+  = el recomendado: Remiro; Kike, Cabrera, Iglesias (apercibido); Olasagasti,
+  Ivan, Dani 50, Ramon 50; Yamal (ya «ok», sin «tocado»), Roberto, Boye.
+  Banquillo: Zubeldia. Turnos creados (esta sesion): segunda mirada hoy
+  20:15; **J23 ADELANTADA mie 02/12** (Real Sociedad-Real Madrid 19:00 y
+  Barca-Atletico 21:30: juegan Remiro, Zubeldia y Yamal; Biwenger la trata
+  como ronda propia, con su control de caja a las 19:00) turno 10:45; **J15
+  vie 04/12** (Alaves-Espanyol 21:00, MARCA) turno 12:45; **aplazado J8
+  Rayo-Athletic mie 09/12 20:00** (ya tiene fecha) turno 12:45. Nada de
+  construir. El encendido de LAS_PRIMAS_MEDIDAS sigue el mar 01/12 (antes del
+  adelantado del mie, por la manana). Pollo: -14,91 M a las 10:07.
 
 - **27/11 10:50 (lab del vie; J14 hoy 21:00).** **Pollo en -14,91 M** el
   dia de la jornada: hoy compro a Baena (14.717.000) y Cancelo (4.217.000).
