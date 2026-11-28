@@ -120,10 +120,10 @@
 {"player_id": 11800, "player_name": "Cabrera", "first_listed_at": "2026-11-25T07:10:34.146100+00:00", "last_seen": "2026-11-25T15:12:32.397297+00:00", "price_at_listing": 4540000, "listed_price": 5340000}
 {"player_id": 29661, "player_name": "Olasagasti", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T22:12:11.262313+00:00", "price_at_listing": 2700000, "listed_price": 3470000}
 {"player_id": 35678, "player_name": "Roberto Fernández", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 6590000, "listed_price": 10200000}
-{"player_id": 12403, "player_name": "Iván Martín", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 2040000, "listed_price": 3280000}
-{"player_id": 23840, "player_name": "Juan Iglesias", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 4210000, "listed_price": 4550000}
-{"player_id": 28115, "player_name": "Kike Salas", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 5380000, "listed_price": 5140000}
-{"player_id": 41418, "player_name": "Dani Lorenzo", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 1710000, "listed_price": 2420000}
-{"player_id": 12494, "player_name": "Boyé", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 4720000, "listed_price": 6100000}
-{"player_id": 7003, "player_name": "Remiro", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 2930000, "listed_price": 3800000}
-{"player_id": 11800, "player_name": "Cabrera", "first_listed_at": "2026-11-27T23:11:43.326199+00:00", "last_seen": "2026-11-27T23:11:43.326199+00:00", "price_at_listing": 4630000, "listed_price": 5340000}
+{"player_id": 12403, "player_name": "Iván Martín", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-28T00:11:00.449920+00:00", "price_at_listing": 2040000, "listed_price": 3280000}
+{"player_id": 23840, "player_name": "Juan Iglesias", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-28T00:11:00.449920+00:00", "price_at_listing": 4210000, "listed_price": 4550000}
+{"player_id": 28115, "player_name": "Kike Salas", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-28T00:11:00.449920+00:00", "price_at_listing": 5380000, "listed_price": 5140000}
+{"player_id": 41418, "player_name": "Dani Lorenzo", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-28T00:11:00.449920+00:00", "price_at_listing": 1710000, "listed_price": 2420000}
+{"player_id": 12494, "player_name": "Boyé", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-28T00:11:00.449920+00:00", "price_at_listing": 4720000, "listed_price": 6100000}
+{"player_id": 7003, "player_name": "Remiro", "first_listed_at": "2026-11-27T22:12:11.262313+00:00", "last_seen": "2026-11-28T00:11:00.449920+00:00", "price_at_listing": 2930000, "listed_price": 3800000}
+{"player_id": 11800, "player_name": "Cabrera", "first_listed_at": "2026-11-27T23:11:43.326199+00:00", "last_seen": "2026-11-28T00:11:00.449920+00:00", "price_at_listing": 4630000, "listed_price": 5340000}
