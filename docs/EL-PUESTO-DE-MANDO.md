@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 27/11/2026, 21:20 de Madrid (rafaga de la noche del vie: la J14 empezo en verde).
+Actualizado: 28/11/2026, 08:20 de Madrid (rafaga del sab: Javi Rodriguez GANADO, Rosier perdido; puja por Mamadou Sarr).
 
 ## El mandato
 
@@ -351,6 +351,16 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/11 08:20 (rafaga del sab, leida tras la vuelta de las 08:07; J14
+  en juego).** Ciclos: verdes (#3251 a #3261). **Javi Rodriguez GANADO**
+  (2.369.475); **Rosier PERDIDO** (1.960.000 se lo llevo otro). Saldo
+  **2.978.149**; puja nueva de esta manana por **Mamadou Sarr** (libro
+  2.421.168; el saldo marca 2.519.900 comprometido): saldo - pujas =
+  **+458.249**. Proximo control de caja: **J23 adelantada, mie 02/12 al
+  saque de las 19:00**; si Sarr se gana (dom 07:00) y la cartera compra
+  mas, el lun 30 / mar 01 vigilo que vuelva a cubrirse. Turno del gestor
+  de la J23 adelantada en pie (mie 10:52).
 
 - **27/11 21:20 (rafaga de la noche; la J14 ya ha empezado).** Ciclos
   verdes (#3244 a #3251, la de las 21:07 incluida). Al saque: saldo
