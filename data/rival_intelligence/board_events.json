@@ -265526,6 +265526,213 @@
     }
   },
   {
+    "event_id": "b8fe0abba80f1653b60be086",
+    "date": 1795629622,
+    "type": "bettingPool",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": {
+      "pool": {
+        "id": 644367,
+        "until": 1795809600,
+        "expired": true,
+        "mode": "1x2",
+        "games": [
+          {
+            "id": 50844,
+            "date": 1795809600,
+            "status": "finished",
+            "home": {
+              "id": 10,
+              "name": "Levante",
+              "slug": "levante",
+              "score": 1
+            },
+            "away": {
+              "id": 812,
+              "name": "Racing",
+              "slug": "racing",
+              "score": 3
+            }
+          },
+          {
+            "id": 50839,
+            "date": 1795870800,
+            "status": "finished",
+            "home": {
+              "id": 87,
+              "name": "Betis",
+              "slug": "betis",
+              "score": 0
+            },
+            "away": {
+              "id": 70,
+              "name": "Rayo Vallecano",
+              "slug": "rayo-vallecano",
+              "score": 1
+            }
+          },
+          {
+            "id": 50845,
+            "date": 1795878900,
+            "status": "preview",
+            "home": {
+              "id": 65,
+              "name": "Málaga",
+              "slug": "malaga",
+              "score": null
+            },
+            "away": {
+              "id": 1,
+              "name": "Athletic",
+              "slug": "athletic",
+              "score": null
+            }
+          },
+          {
+            "id": 50842,
+            "date": 1795887000,
+            "status": "preview",
+            "home": {
+              "id": 75,
+              "name": "Elche",
+              "slug": "elche",
+              "score": null
+            },
+            "away": {
+              "id": 2,
+              "name": "Atlético",
+              "slug": "atletico",
+              "score": null
+            }
+          },
+          {
+            "id": 50846,
+            "date": 1795896000,
+            "status": "preview",
+            "home": {
+              "id": 15,
+              "name": "Real Madrid",
+              "slug": "real-madrid",
+              "score": null
+            },
+            "away": {
+              "id": 91,
+              "name": "Alavés",
+              "slug": "alaves",
+              "score": null
+            }
+          },
+          {
+            "id": 50848,
+            "date": 1795957200,
+            "status": "preview",
+            "home": {
+              "id": 18,
+              "name": "Valencia",
+              "slug": "valencia",
+              "score": null
+            },
+            "away": {
+              "id": 93,
+              "name": "Osasuna",
+              "slug": "osasuna",
+              "score": null
+            }
+          },
+          {
+            "id": 50841,
+            "date": 1795965300,
+            "status": "preview",
+            "home": {
+              "id": 6,
+              "name": "Deportivo",
+              "slug": "deportivo",
+              "score": null
+            },
+            "away": {
+              "id": 3,
+              "name": "Barcelona",
+              "slug": "barcelona",
+              "score": null
+            }
+          },
+          {
+            "id": 50840,
+            "date": 1795973400,
+            "status": "preview",
+            "home": {
+              "id": 5,
+              "name": "Celta",
+              "slug": "celta",
+              "score": null
+            },
+            "away": {
+              "id": 19,
+              "name": "Villarreal",
+              "slug": "villarreal",
+              "score": null
+            }
+          },
+          {
+            "id": 50847,
+            "date": 1795982400,
+            "status": "preview",
+            "home": {
+              "id": 13,
+              "name": "Real Sociedad",
+              "slug": "real-sociedad",
+              "score": null
+            },
+            "away": {
+              "id": 17,
+              "name": "Sevilla",
+              "slug": "sevilla",
+              "score": null
+            }
+          },
+          {
+            "id": 50843,
+            "date": 1796068800,
+            "status": "preview",
+            "home": {
+              "id": 7,
+              "name": "Espanyol",
+              "slug": "espanyol",
+              "score": null
+            },
+            "away": {
+              "id": 8,
+              "name": "Getafe",
+              "slug": "getafe",
+              "score": null
+            }
+          }
+        ],
+        "prizes": [],
+        "competition": "la-liga",
+        "round": {
+          "id": 4912,
+          "name": "Jornada 14",
+          "short": "J14",
+          "season": {
+            "id": "2027",
+            "name": "Temporada 2026/2027",
+            "slug": "2026-2027"
+          }
+        },
+        "global": true,
+        "credits": {
+          "required": 1,
+          "prizes": true
+        },
+        "description": "<p style='text-align: center'>Envíanos tu <strong>pronóstico</strong> para los partidos de la jornada y podrás <strong>ganar créditos</strong></p>",
+        "responses": []
+      }
+    }
+  },
+  {
     "event_id": "be05727647b2fb780b8283dd",
     "date": 1795629622,
     "type": "bettingPool",
