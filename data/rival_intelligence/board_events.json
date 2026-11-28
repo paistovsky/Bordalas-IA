@@ -265759,5 +265759,96 @@
         "name": "Jornada 14"
       }
     }
+  },
+  {
+    "event_id": "a14f6a97b7ae871952b2f6aa",
+    "date": 1795845984,
+    "type": "market",
+    "fixed": false,
+    "title": "",
+    "author": null,
+    "content": [
+      {
+        "player": 33970,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 1960000,
+        "bids": [
+          {
+            "user": {
+              "id": 14175949,
+              "name": "Pepe Bordalás",
+              "icon": "i/u/14175949.png"
+            },
+            "amount": 1844118
+          },
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 1766000
+          }
+        ]
+      },
+      {
+        "player": 38422,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 1581000,
+        "bids": [
+          {
+            "user": {
+              "id": 14145555,
+              "name": "Pollo17",
+              "icon": "icons/13.png"
+            },
+            "amount": 1577000
+          }
+        ]
+      },
+      {
+        "player": 33839,
+        "to": {
+          "id": 14175949,
+          "name": "Pepe Bordalás",
+          "icon": "i/u/14175949.png"
+        },
+        "amount": 2369475,
+        "bids": [
+          {
+            "user": {
+              "id": 14156489,
+              "name": "Luismi_Haz",
+              "icon": "icons/11.png"
+            },
+            "amount": 2362000
+          }
+        ]
+      },
+      {
+        "player": 25398,
+        "to": {
+          "id": 14156489,
+          "name": "Luismi_Haz",
+          "icon": "icons/11.png"
+        },
+        "amount": 4521000
+      },
+      {
+        "player": 38194,
+        "to": {
+          "id": 14176382,
+          "name": "Manzagool"
+        },
+        "amount": 3400000
+      }
+    ]
   }
 ]
