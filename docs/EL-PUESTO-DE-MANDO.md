@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/11/2026, 10:50 de Madrid (Javi Rodriguez ganado; puja por Sarr; caja +0,56 M para el adelantado del mie).
+Actualizado: 28/11/2026, 14:20 de Madrid (rafaga de la tarde del sab: verde, sin movimientos).
 
 ## El mandato
 
@@ -351,6 +351,12 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/11 14:20 (rafaga de la tarde, corta; J14 en juego).** Ciclos:
+  verdes (#3261 a #3267). Saldo 2.978.149, comprometido 2.519.900 (Sarr,
+  dom 07:00): +458.249. El lab de las 10:48 apunta que sobran defensas y
+  falta un medio (lo lleva su chat). Turno del gestor de la J23
+  adelantada en pie.
 
 - **28/11 10:50 (supervision y lab del sab; J14 en juego).** Reset de las
   07:00: **Javi Rodriguez GANADO** (2.369.475, motor viejo); Rosier perdido
