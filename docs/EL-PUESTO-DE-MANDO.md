@@ -2,7 +2,7 @@
 
 **Si eres el Claude que acaba de despertarse: lee solo esto.**
 
-Actualizado: 28/11/2026, 08:20 de Madrid (rafaga del sab: Javi Rodriguez GANADO, Rosier perdido; puja por Mamadou Sarr).
+Actualizado: 28/11/2026, 10:50 de Madrid (Javi Rodriguez ganado; puja por Sarr; caja +0,56 M para el adelantado del mie).
 
 ## El mandato
 
@@ -351,6 +351,18 @@ anadir nada, preguntate si estas construyendo comportamiento o una pantalla mas.
   Bordalas-IA-clean; no es lo mismo).
 
 ## Bitacora de despertares
+
+- **28/11 10:50 (supervision y lab del sab; J14 en juego).** Reset de las
+  07:00: **Javi Rodriguez GANADO** (2.369.475, motor viejo); Rosier perdido
+  (Manzagool, 1.960.000, +115.882 sobre nuestra puja). Puja nueva de la
+  rendija por **Mamadou Sarr** (Real Sociedad, DEF, 2.421.168 al precio; +110
+  k/dia, 37 pts en 7, FF 60 %; se resuelve el dom 07:00). Saldo 2.978.149;
+  con Sarr +0,56 M: el adelantado del mie 02/12 (Real-Madrid y Barca-Atletico,
+  control de caja a las 19:00) empieza en verde. Rivales: Luismi compra a
+  Pubill (4,52 M) y Redondo (1,58 M); Manzagool a Suazo (3,40 M) y Rosier.
+  OJO: la plantilla se llena de defensas (Kike, Cabrera, Iglesias, Javi
+  Rodriguez, Zubeldia y quiza Sarr) y el medio sigue flojo (Dani 50, Ramon
+  50): la semana que viene, un medio. J14: Ivan 6 y Olasagasti 9 (el dueno).
 
 - **28/11 08:20 (rafaga del sab, leida tras la vuelta de las 08:07; J14
   en juego).** Ciclos: verdes (#3251 a #3261). **Javi Rodriguez GANADO**
